@@ -24,14 +24,15 @@
   
   //data-base settings
   $this->db_database = $this->db_name; // lucky@npj: из фронтенда
+  $this->db_server = $this->db_host; // lucky@npj: из фронтенда
 
   
   if ($_GET['en']==1)
     $this->project_name.= "_eng";
   
-  $this->project_title = "CMS: Красная Армия";
+  $this->project_title = "CMS: ".$this->project_title;
   
-  $this->principal_cookie_domain = "dev.jetstyle.ru";
+  $this->principal_cookie_domain = "dev.jetstyle.ru"; // FIXME: lucky@npj должен ставится не тут
   $this->pincipal_class = "PrincipalHash";
   $this->render_toolbar = true;
   $this->show_logs = false;
