@@ -1,0 +1,38 @@
+{{TPL:head}}<script language='javascript' src='{{/}}js/form_loader.js'></script>{{/TPL:head}}
+
+<iframe id='{{__form_name}}_iframe' name='{{__form_name}}_iframe' style='display:none;' onload='OSFormRecieve()'></iframe>
+<form action='{{/}}index.php' method='post' name='{{__form_name}}' id='{{__form_name}}' enctype="multipart/form-data">
+<input type="hidden" name="MAX_FILE_SIZE" value="{{__max_file_size}}">
+<input type="hidden" name="{{prefix}}update" value="1">
+<input type="hidden" name="no_response" value="0">
+{{POST_STATE}}
+
+<table cellpadding="0" cellspacing="0" style="width: 100%"><tr><td class="cms-form-block">
+{{!!form_simple}}
+{{___form}}
+{{/!!form_simple}}
+
+<!--img class="block" src="{{images}}z.gif" width="1" height="5" align="top" alt="" /-->
+<div class="cms-form-buttons">
+{{TPL:save_button_norefresh}}
+<input id="update_1" name="update_1" class="cms-save-but hand" type="button" value="сохранить без перезагрузки" onclick="OSFormSend('{{__form_name}}');"> 
+{{/TPL:save_button_norefresh}}
+{{TPL:save_button}}
+<input id="update_1" name="update_1" type="hidden">
+<!--input id="update_1" name="update_1" class="cms-save-but hand" type="button" value="сохранить без перезагрузки" onclick="OSFormSend('{{__form_name}}');"--> 
+<input id="update_2" name="update_2" class="cms-save-but hand" type="submit" value="сохранить/обновить"> 
+{{/TPL:save_button}}
+{{_save_button}}
+{{TPL:delete_button}}<input type="submit" class="cms-delete-but hand" name="{{prefix}}delete" value="{{__delete_title}}" onclick="return confirm('{{__delete_title}}?');">{{/TPL:delete_button}}
+{{_delete_button}}
+</form>
+</div>
+</td></tr></table>
+
+{{TPL:parent_reload}}
+<script language="javascript">
+<!--keep
+window.opener.location.reload();
+//-->
+</script>
+{{/TPL:parent_reload}}

@@ -1,0 +1,73 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+	"http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+
+<html>
+<head>
+<title>XLoadTree Demo (WebFX)</title>
+<meta http-equiv="Content-Type" content="text/html; charset=cp1251" />
+<script type="text/javascript" src="js/xtree.js"></script>
+<script type="text/javascript" src="js/xmlextras.js"></script>
+<script type="text/javascript" src="js/xloadtree.js"></script>
+<script type="text/javascript" src="js/tree_control.js"></script>
+<link type="text/css" rel="stylesheet" href="css/xtree.css" />
+
+<style type="text/css">
+
+body {
+	background:	white;
+	color:		black;
+}
+
+</style>
+</head>
+<body>
+
+<p><button onclick="rti.reload()">Reload Item</button></p>
+<p><button onclick="Walk(tree)">Walk (deep search)</button></p>
+
+<script type="text/javascript">
+
+/// XP Look
+webFXTreeConfig.rootIcon		= "images/xloadtree/xp/folder.png";
+webFXTreeConfig.openRootIcon	= "images/xloadtree/xp/openfolder.png";
+webFXTreeConfig.folderIcon		= "images/xloadtree/xp/folder.png";
+webFXTreeConfig.openFolderIcon	= "images/xloadtree/xp/openfolder.png";
+webFXTreeConfig.fileIcon		= "images/xloadtree/xp/file.png";
+webFXTreeConfig.lMinusIcon		= "images/xloadtree/xp/Lminus.png";
+webFXTreeConfig.lPlusIcon		= "images/xloadtree/xp/Lplus.png";
+webFXTreeConfig.tMinusIcon		= "images/xloadtree/xp/Tminus.png";
+webFXTreeConfig.tPlusIcon		= "images/xloadtree/xp/Tplus.png";
+webFXTreeConfig.iIcon			= "images/xloadtree/xp/I.png";
+webFXTreeConfig.lIcon			= "images/xloadtree/xp/L.png";
+webFXTreeConfig.tIcon			= "images/xloadtree/xp/T.png";
+webFXTreeConfig.Control1Icon		= "images/xloadtree/xp/Tplus.png";
+webFXTreeConfig.Control2Icon		= "images/xloadtree/xp/Tplus.png";
+webFXTreeConfig.Control3Icon		= "images/xloadtree/xp/Tplus.png";
+
+//var tree = new WebFXLoadTree("WebFXLoadTree", "tree1.xml");
+//tree.setBehavior("classic");
+
+var rti;
+var tree = new WebFXTree("Root");
+tree.setBehavior("explorer");
+tree.add(new WebFXTreeItem("виндовая  1"));
+tree.add(new WebFXLoadTreeItem("Tree Item 2", "tree.xml"));
+tree.add(rti = new WebFXLoadTreeItem("Tree Item 3 (Reload)", "date.xml.pl"));
+tree.add(new WebFXTreeItem("Tree Item 4"));
+
+var tree_control = new OSTreeControl (tree);
+
+document.write(tree);
+
+function Walk(node){
+	var i;
+	alert(node.text);
+	for(i=0;i<node.childNodes.length;i++)
+		Walk(node.childNodes[i]);
+}
+
+</script>
+
+
+</body>
+</html>

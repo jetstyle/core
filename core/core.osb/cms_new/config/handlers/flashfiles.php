@@ -1,0 +1,86 @@
+<?
+	$rh->HeadersNoCache();
+	
+	$mode = $path->path_trail=='list' ? 1 : 0;
+	if($mode==1)
+		$suffix = '_lists';
+	
+	$rh->UseClass('Upload');
+	$upload =& new Upload($rh,'files/');
+	
+	$table_topics = $rh->project_name.'_picfiles'.$suffix.'_topics';
+	$table_picts = $rh->project_name.'_picfiles'.$suffix;
+	
+	$rh->UseClass('DBDataView');
+	
+	//load topics, render topics select
+	$topics = new DBDataView( $rh, $table_topics, array('id','title'), '_state=0', 'title ASC');
+    $topics->result_mode = 1;
+	$topics->Load();
+    //var_dump($topics->ITEMS);
+	$nt = count($topics->ITEMS);
+//	for($i=0;$i<$nt;$i++)
+//		$topics_options .= "<option value='".$topics->ITEMS[$i]['id']."'>".$topics->ITEMS[$i]['title']."\n";
+	
+	//грузим картинки, раскладываем по ID и topic_id
+	$picts = new DBDataView( $rh, $table_picts, array('id','title','descr','topic_id'), 'topic_id>0 AND _state=0', 'topic_id ASC, title ASC');
+	$picts->Load();
+	$n = count($picts->ITEMS);
+	for($i=0;$i<$n;$i++)
+    {
+		$r = (object)$picts->ITEMS[$i];
+		$_fname = 'picfile'.$suffix.'_'.$r->id;
+        $file_small = $upload->GetFile($_fname);
+        //echo '<br>'.$file_small->ext;
+        if( ($file_small->ext=='swf') )
+        {
+			//заполняем списки для разделов
+			$src_small = $rh->path_rel.'pic_file/picfiles'.( $mode ? '_lists' : '' ).'/'.$r->id;
+			$BY_TOPICS[$r->topic_id][] = array( $r->id, htmlspecialchars($r->title) );
+			$_array = "['".$src_small."','".str_replace("'","\'",$r->title)."','".$file_small->size."kb, ".$file_small->format."','".str_replace("'","\'",$r->descr)."']";
+			$rv_str .= "arrrv[".$r->id."] = ".$_array.";\n";
+			$BY_TOPICS_1[$r->topic_id][] = $_array;
+            $topics_options .= "<option value='".$topics->ITEMS[$r->topic_id]['id']."'>".$topics->ITEMS[$r->topic_id]['title']."\n";
+		}
+	}
+	//рендерим js-масивы по разделам
+///	for($i=0;$i<$nt;$i++)
+    
+   
+    foreach ($BY_TOPICS as $i=>$A)
+    {
+        $r=array();
+        $r['id']=$i;
+//		$r = (object)$topics->ITEMS[$i];
+		$arrv = $arrt = "";
+//		$A =& $BY_TOPICS[ $r['id'] ];
+        $n = count ($A);
+        if ($n>0)
+        {
+        for($j=0;$j<$n;$j++){
+			$arrt .= ( $j ? ', ' : '' ).'"'.$A[$j][1].'"';
+			$arrv .= ( $j ? ', ' : '' ).'"'.$A[$j][0].'"';
+		}
+        
+		$titles_str .= "arrt[".$r['id']."] = new Array(".$arrt.");\n";
+		$values_str .= "arrv[".$r['id']."] = new Array(".$arrv.");\n";
+		$topics_rv_str .= "arrrvt[".$r['id']."] = [\n   ".( is_array($BY_TOPICS_1[ $r['id'] ]) ? implode(",\n   ",$BY_TOPICS_1[ $r['id'] ]) : '')."\n];\n";
+        }
+	}
+	//вставляем в шаблон
+	$tpl->Assign( 'TOPICS', $topics_options );
+	$tpl->Assign( 'TITLES', $titles_str );
+	$tpl->Assign( 'VALUES', $values_str );
+	$tpl->Assign( 'RETURN_VALUES', $rv_str );
+	$tpl->Assign( 'TOPICS_RETURN_VALUES', $topics_rv_str );
+	
+	$template = 'htmlarea/insert_flash.html';
+	//рендерим обработчик кнопки ОК
+	$tpl->Parse( $template.($mode == 1 ? ':onOk_2' : ':onOk_1' ) , 'onOk' );
+	
+	$tpl->Assign( 'Page_TITLE', $mode == 1 ? 'Вставить Список Файлов' : 'Вставить Файл' );
+	
+	//возврашаем шаблон
+	echo $tpl->parse($template);
+	
+?>

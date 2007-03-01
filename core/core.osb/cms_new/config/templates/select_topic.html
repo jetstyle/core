@@ -1,0 +1,11 @@
+<style type="text/css">
+.select-topic- { margin: 0px 10px 10px 2em; font-size: 12px; line-height: 2em; text-indent: -1em; }
+.select-topic- select { font-size: 12px; }
+</style>
+<form action="" method="get" class="select-topic-">
+  Раздел: 
+  <select name="topic_id" onchange="this.form.submit();" > <!-- -->
+    <option value="0">Выберите</option>
+    {{__options}}
+  </select>
+</form>

@@ -1,0 +1,589 @@
+<?php
+/*
+
+  Форм-процессор:
+  * генерация, обработка и валидация простых и сложных форм
+  * сохранение в БД и чтение оттуда
+  * see http://in.jetstyle.ru/rocket/rocketforms
+
+  Управляющий класс.
+
+  Form( &$rh )
+      - $rh              -- ссылка на RH, как обычно
+
+  -------------------
+
+  // Конструирование формы
+
+  * &AddField( $field_name, $config ) - Привязать поле в форму. Делает весь handshaking с созданием поля
+      - $field_name -- что за поле
+      - $config     -- конфигурация, ага.
+  * &_AddField( &$field_object ) - Привязать поле, существующее как объект
+
+  * &AddButton( $button_config ) - зарегистрировать кнопку
+      - $button_config -- массив-конфиг кнопки
+
+  * _RegisterField( &$field ) - записывает в $form->hash[$field->name] ссылку на это поле.
+                                НЕ ДЛЯ ВНЕШНЕГО ИСПОЛЬЗОВАНИЯ
+
+  // Процессинг формы !! Самое главное
+
+  * Handle( $ignore_post=false, $ignore_load=false, $ignore_validator=false, $ignore_session=false ) 
+      - $ignore_* -- игнорировать те или иные этапы сценария процессинга
+      - false, если результат -- не отпарсенная форма (иными словами, если нет редиректа, но событие произошло
+
+  * _ExecEventHandler($event,$event_handler) - выполняет хэндлер в отдельно зоне видимости
+      - $event -- текущее событие
+      - $event_handler -- полный путь до файла хэндлера
+
+  // Настройка формы
+
+  - AssignId( $data_id ) - ставит форме в соответствие строку в БД
+
+  * Load( $data_id=NULL ) - загружает форму из БД
+      - $data_id -- если NULL, то берёт this->data_id
+
+  * LoadFromArray( $a ) - загружает форму из массива
+      - $a -- массив, из которого загружать
+
+  * Reset() - Сбрасывает форму в "незаполненное" состояние
+
+  // Изменение в БД
+
+  - DbDelete( $data_id=NULL ) -- удаляет соотв. строку из БД,
+      - true, if success
+      - прежде удаления строки должно вызвать DbDelete всех полей
+  - DbInsert()                -- вставляет текущее состояние формы в БД, возвращает $data_id
+  - DbUpdate( $data_id=NULL ) -- исправляет строку в БД, возвращает $data_id
+  - _DbUpdate( &$fields, &$values ) -- формирует sql-запрос и отправляет его в БД
+  - _DbAuto( &$fields, &$values ) -- добавляет в $fields, $values автоматически сгенерированные поля
+
+  // Парсинг, иногда можно отдельно пользовать
+
+  * Parse()
+  * ParsePreview()
+
+  // Вспомогательные методы
+
+  * StaticDefaults( $default_config, &$supplied_config ) - статичный метод, модифицирует 
+                                                            supplied_config по дефолтному 
+                                                            (выставляя все поля, которые 
+                                                            отсутствуют в супплиеде
+  * _ParseWrapper( $content )
+  * _ParseButtons()
+
+
+================================================================== v.0 (kuso@npj)
+*/
+define( "FORM_EVENT_OK",     "ok");     // ничего не делаем, переход по "success_url", if redirect  
+define( "FORM_EVENT_CANCEL", "cancel"); // отмена, переход по "cancel_url", if redirect  
+define( "FORM_EVENT_RESET",  "reset");  // сброс состояния формы к стартовому  
+define( "FORM_EVENT_INSERT", "insert"); // вставка в БД, переход по "success_url", if redirect  
+define( "FORM_EVENT_UPDATE", "update"); // правка в БД, переход по "success_url", if redirect  
+define( "FORM_EVENT_DELETE", "delete"); // удалить всё из БД, переход по "success_url", if redirect  
+define( "FORM_EVENT_AUTO",   "auto");   // insert/update based on $data_id  
+
+class Form
+{
+   var $form_present_var = "__form_present";
+   var $data_id_var = "__form_data_id";
+   var $data_id=0;      // строка, ассоциированная с формой. 0 -- значит нет такой
+   var $hash=array();   // очень удобный способ доступа к полям
+   var $fields=array(); // очень неудобный способ доступа к полям
+   var $buttons=array();// хранилище "кнопок"
+   var $action; // куда уходить по посту формы
+
+   var $valid = true; // флаг валидности формы
+
+   var $default_config = array(
+           "template_prefix"           =>"forms/",
+           "template_prefix_button"    =>"forms/buttons.html:",
+           "template_prefix_views"     =>"forms/views.html:",
+           "template_prefix_wrappers"  =>"forms/",
+           "template_prefix_interface" =>"forms/",
+           "template_prefix_group"     =>"forms/",
+           "template_form"                  =>"form.html:Form",
+           "template_buttonlist"            =>"form.html:Buttons",
+           "multipart"    =>  1,
+           "auto_datetime"=>  1,  
+           "auto_user_id" =>  1,  
+           "id_field"     =>  "id",
+           "active_field" =>  "active",
+           "event_handlers_type" => "handlers/formevents", //IVAN
+           "default_event" => FORM_EVENT_AUTO,
+           "db_ignore" => false,
+           "db_table"  => false,
+           "fieldname_created_user_id"  => "_created_user_id",
+           "fieldname_edited_user_id"   => "_edited_user_id",
+           "fieldname_created_datetime" => "_created_datetime",
+           "fieldname_edited_datetime"  => "_edited_datetime",
+           // [optional] "success_url" => 
+           // [optional] "cancel_url" =>
+                              );
+
+   function Form( &$rh, $form_config=NULL )
+   {
+     $this->rh  = &$rh;
+     $this->tpl = &$rh->tpl; // чтобы потом можно было отстроиться от "текущего" шаблонного движка.
+                             // очень полезная фича
+     $this->rh->UseClass("FormField"); // он нам стопудово понадобится
+     
+     $this->action = $rh->ri->url;
+                            
+     if (!$form_config) $form_config = $this->default_config;
+     else               Form::StaticDefaults($this->default_config, $form_config);
+
+     $this->config = $form_config;
+
+     // eventhandl.
+     $a = array( "on_before_event", "on_after_event" );
+     foreach($a as $v)
+       if (isset($form_config[$v]) && !is_array($form_config[$v]))
+       {
+         $this->config[$v] = array();
+         $this->config[$v][] = &$form_config[$v];
+       }
+   }
+
+   // автоматизатор "конфигов по-умолчанию"
+   function StaticDefaults( $default_config, &$supplied_config )
+   {
+     foreach( $default_config as $k=>$v )
+       if (!isset($supplied_config[$k])) $supplied_config[$k] = $v;
+   }
+
+   // Добавить поле
+   function &AddField( $field_name = NULL, $config )
+   {
+     $f = &new FormField( $this, $field_name, $config );
+     return $this->_AddField($f);
+   }
+   function &_AddField( &$field_object )
+   {
+     $this->fields[] = &$field_object;
+     $field_object->_LinkToForm( $this );
+     return $field_object;
+   }
+
+   // Добавить кнопку
+   function &AddButton( $button_config )
+   {
+     $this->buttons[$button_config["title"]] = $button_config;
+     return $this->buttons[$button_config["title"]];
+   }
+
+   // САМАЯ СТРАШНАЯ ПРОЦЕДУРА --------------------------------------------------------
+   //zharik: ну, теперь она не такая уж и страшная 8))
+   function Handle( $ignore_post     =false,  $ignore_load   =false, 
+                    $ignore_validator=false,  $ignore_session=false )
+   {
+     $processed = false;
+
+     //инициализация значений полей    
+     if ($this->data_id && !$ignore_load) $this->Load();  // пробуем загрузить
+     if (!$this->data_id || $ignore_load) $this->Reset(); // устанавливаем default-значения
+     if (!$ignore_session) $this->FromSession();
+
+     //пробуем обработать пост
+     if (isset($_POST[$this->form_present_var]) && $_POST[$this->form_present_var] && !$ignore_post)
+     {
+       $this->LoadFromPost( $_POST );
+
+       // get event
+       $event_name = $_POST["_event"];
+       if ($_POST["_event2"])
+         $event_name = $_POST["_event2"];
+       $event = $this->buttons[$event_name];
+
+       if (!$event) $event = $this->config["default_event"];
+
+       if ($ignore_validator 
+           || ($event["event"] == FORM_EVENT_CANCEL)
+           || ($event["event"] == FORM_EVENT_RESET)
+           || ($event["event"] == FORM_EVENT_DELETE)
+           || $this->Validate()
+          )
+       { 
+         $processed = 1;
+         if (!$ignore_session) $this->ToSession();
+
+         // before
+         $this->_ChooseEventHandler( "on_before_event", "OnBeforeEventForm" );
+
+         // event
+         $this->HandleEvent( $event );
+
+         // after
+         $this->_ChooseEventHandler( "on_after_event", "OnAfterEventForm" );
+         
+         // redirect
+         // cancel
+         if ($this->processed && !$this->success && isset($this->config["cancel_url"])) 
+            $this->rh->Redirect( $this->config["cancel_url"] );
+         // success
+         if ($this->processed && $this->success && isset($this->config["success_url"])) 
+            $this->rh->Redirect( $this->config["success_url"] );
+
+     }
+     }
+
+     if (!$processed)
+       $result = $this->Parse();
+     else $result = false;
+          return $result;
+   }
+
+   //выбираем, какой обработчик события запускать
+   function _ChooseEventHandler( $handler, $default_method )
+   {
+      if (isset($this->config[$handler])){
+        foreach($this->config[$handler] as $k=>$v){
+          //это может быть отдельная функиця
+          //или это может быть объект с явно заданным методом
+          if (is_callable($this->config[$handler][$k])){
+            call_user_func($this->config[$handler][$k], $event, $this);
+          }else
+          //это может быть объект с методом по умолчанию
+          if ( is_callable( array($this->config[$handler][$k],$default_method) ) ){
+            $this->config[$handler][$k]->$default_method( $event, $this );
+          }else
+          //это может быть отдельный хэндлер
+          {
+            $this->_ExecEventHandler( $event, $this->rh->FindScript_($this->config["event_handlers_type"], $v) );
+          }
+        }
+      }
+   }
+   
+   //выполнить хэндлер в отдельно области видимости
+   function _ExecEventHandler( $event, $event_handler )
+   {
+    if ($event_handler !== false){
+      
+      //создаём алиасы для обработчика
+      $rh =& $this->rh;
+      include( $this->rh->FindScript("handlers","_enviroment") );
+      $form =& $this;
+      
+      //вызываем обработчик
+      include($event_handler);
+    }
+   }
+
+   // сбросить все поля формы в начальное состояние
+   function Reset()       
+   {
+     foreach($this->fields as $field) 
+       $field->model->Model_SetDefault();
+   }
+
+   // парсинг формы в своём обычном состоянии
+   function Parse()
+   {
+     $result = "";
+     foreach($this->fields as $field) 
+       $result .= $field->Parse();
+     return $this->_ParseWrapper( $result );
+   }
+
+   // парсинг формы "только для чтения", без кнопок
+   function ParsePreview()
+   {
+     $result = "";
+     foreach($this->fields as $field) 
+       $result .= $field->Parse( "readonly" );
+     return $result;
+   }
+
+   // парсить всякое окружение: кнопки там, прочее
+   function _ParseWrapper( $content )
+   {
+     // todo: add "multipart"
+
+     $form_name = isset($this->config["form_name"]) ? $this->config["form_name"] : 'form_'.$this->config["db_table"];
+     $this->tpl->Set( "form", 
+      $this->rh->ri->Form( 
+        $this->action, METHOD_POST, ' id="'.$form_name.'" name="'.$form_name.'" enctype="multipart/form-data" '    //IVAN
+      )
+     );
+     $this->tpl->Set( "form_name", 'form_'.$this->config["db_table"] );
+     $this->tpl->Set( "form_present", $this->form_present_var );
+     $this->tpl->Set( "form_data_id", $this->data_id_var );
+     $this->tpl->Set( "form_data_id_value", $this->data_id );
+     $this->tpl->Set( "content", $content );
+     $this->tpl->Set( "data_id", $this->data_id );
+     $this->tpl->Set( "buttons", $this->_ParseButtons() );
+
+     return $this->tpl->Parse( $this->config["template_prefix"].$this->config["template_form"]);
+   }
+
+   // парсинг кнопок
+   function _ParseButtons()
+   {
+     $result = array();
+     foreach( $this->buttons as $button )
+     {
+       $this->tpl->SetRef( "*", $button );
+       $result[]["BUTTON"] = $this->tpl->Parse( $this->config["template_prefix_button"].$button["template"] );
+     }
+
+     return $this->tpl->Loop( $result, $this->config["template_prefix"].$this->config["template_buttonlist"] );
+   }
+
+   // загрузка из формы
+   function LoadFromPost( $post_data )           
+   { 
+     $this->AssignId( @$post_data[ $this->data_id_var ] ); //IVAN
+
+     foreach($this->fields as $k=>$field) 
+       $this->fields[$k]->LoadFromPost( $post_data );
+   }
+
+   // валидация всех полей формы
+   function Validate()    
+   { 
+     $this->valid = true;
+     foreach($this->fields as $k=>$field) 
+       $this->valid = $this->fields[$k]->Validate() && $this->valid; // важно, что именно в таком порядке
+     return $this->valid;
+   }
+
+   // ДАМП ФОРМЫ
+   function _Dump( $is_error=1 )
+   {
+     $dump_hash = array();
+     foreach( $this->fields as $k=>$field )
+      $dump_hash[ $field->name ] = $field->_Dump();
+
+     if ($is_error) $this->rh->debug->Error_R( $dump_hash );
+     else           $this->rh->debug->Trace_R( $dump_hash );
+   }
+
+   // работа в сессии
+   function FromSession() 
+   { 
+     $key = "form_".$this->config["db_table"];
+     $session_storage = isset($_SESSION[$key]) ? $_SESSION[$key] : "";
+     if (!is_array($session_storage)) return; // no session -- no restore
+     foreach( $this->fields as $k=>$field )
+      $this->fields[$k]->FromSession( $session_storage );
+   }
+   function ToSession()   
+   {
+     $session_storage = array();
+     foreach( $this->fields as $k=>$field )
+      $this->fields[$k]->ToSession( $session_storage );
+     $_SESSION[ "form_".$this->config["db_table"] ] = $session_storage;
+   }
+   function ResetSession()
+   { 
+     $_SESSION[ "form_".$this->config["db_table"] ] = "";
+   }
+
+   // обработка события, ага (вставка/редактирование)
+   function HandleEvent( $event = FORM_EVENT_AUTO ) 
+   {
+     if (is_array($event)) $_event = $event["event"];
+     else                  $_event = $event;
+
+     if ($_event == FORM_EVENT_AUTO)
+     {
+       if ($this->data_id) $_event = FORM_EVENT_UPDATE;
+       else                $_event = FORM_EVENT_INSERT;
+     }
+
+     switch( $_event )
+     {
+       case FORM_EVENT_INSERT:
+                              $this->DbInsert();
+                              $this->success   = true;
+                              $this->processed = true;
+                              break;
+       case FORM_EVENT_UPDATE:
+                              $this->DbUpdate();
+                              $this->success   = true;
+                              $this->processed = true;
+                              break;
+       case FORM_EVENT_DELETE:
+                              $this->DbDelete();
+                              $this->success   = true;
+                              $this->processed = true;
+                              break;
+
+       case FORM_EVENT_RESET:
+                              $this->ResetSession();
+                              $this->Reset();
+                              $this->ToSession();
+                              $this->success   = false;
+                              $this->processed = false; // returning to form again
+                              break;
+
+
+       case FORM_EVENT_CANCEL:
+                              $this->success   = false;
+                              $this->processed = true;
+                              break;
+
+       case FORM_EVENT_OK:
+       default:               $this->success   = true;
+                              $this->processed = true;
+     } 
+     $this->processed_event = $event;
+
+     if (!$this->processed)
+      $this->rh->Redirect( $this->rh->ri->Href($this->rh->ri->url) );
+     else
+     {
+       $this->ResetSession(); // если успешно обработана, то сессию выкидываем
+     }
+   }
+
+   // вставка в БД
+   function DbInsert()
+   {
+      if (!$this->config["db_table"]) 
+        if ($this->config["db_ignore"]) return;
+        else $this->rh->debug->Error("[Form]: *db_table* form config option is not set.");
+
+      $fields = array();
+      $values = array();
+      foreach($this->fields as $k=>$v)
+        $this->fields[$k]->DbInsert( $fields, $values );
+
+      $this->_DbAuto( $fields, $values, true );
+
+      foreach($values as $k=>$v)
+        $values[$k] = $this->rh->db->Quote($values[$k]);
+
+      $sql = "insert into ".$this->config["db_table"];
+      if (sizeof($fields) > 0) 
+        $sql.=" (".implode(",",$fields).") VALUES (".implode(",",$values).")";
+        
+      //$this->rh->debug->Error( $sql );
+      $this->data_id = $this->rh->db->Insert($sql);
+
+      foreach($this->fields as $k=>$v)
+        $this->fields[$k]->DbAfterInsert( $this->data_id );
+   }
+   function DbUpdate( $data_id = NULL )
+   {
+      if (!$this->config["db_table"]) 
+        if ($this->config["db_ignore"]) return;
+        else $this->rh->debug->Error("[Form]: *db_table* form config option is not set.");
+
+      if ($data_id == NULL) $data_id = $this->data_id;
+
+      $fields = array(); 
+      $values = array();
+      foreach($this->fields as $k=>$v)
+        $this->fields[$k]->DbUpdate( $data_id, $fields, $values );
+
+      $this->_DbAuto( $fields, $values );
+
+      $this->_DbUpdate( $fields, $values );
+
+      foreach($this->fields as $k=>$v)
+        $this->fields[$k]->DbAfterUpdate( $data_id );
+   }
+   function _DbUpdate ( &$fields, &$values )
+   {
+      $fields_values = array();
+      foreach($fields as $k=>$v)
+        $fields_values[] = $v." = ".$this->rh->db->Quote($values[$k]);
+
+      $sql = "update ".$this->config["db_table"].
+             " set ".implode(",",$fields_values)." where ".
+             $this->config["id_field"]."=".$this->rh->db->Quote($this->data_id);
+      //$this->rh->debug->Error( $sql );
+      if (sizeof($fields) == 0) return false;
+      $this->rh->db->Query($sql);
+
+   }
+   function _DbAuto( &$fields, &$values, $is_insert=false )
+   {
+      $user = $this->rh->principal->data["user_id"];
+      $dt = date("Y-m-d H:i:s");
+      if ($this->config["auto_user_id"])
+      {
+        if ($is_insert)
+        {
+          $fields[] = $this->config["fieldname_created_user_id"];//"_created_user_id";
+          $values[] = $user;
+        }
+        $fields[] = $this->config["fieldname_edited_user_id"];//"_edited_user_id";
+        $values[] = $user;
+      }
+      if ($this->config["auto_datetime"])
+      {
+        if ($is_insert)
+        {
+          $fields[] = $this->config["fieldname_created_datetime"];//"_created_datetime";
+          $values[] = $dt;
+        }
+        $fields[] = $this->config["fieldname_edited_datetime"];//"_edited_datetime";
+        $values[] = $dt;
+      }
+   }
+
+   // загрузка из БД
+   function Load( $data_id = NULL )  
+   {
+     if (!$this->config["db_table"])
+       if ($this->config["db_ignore"]) return;
+       else $this->rh->debug->Error("[Form]: *db_table* form config option is not set.");
+
+     if ($data_id == NULL) $data_id = $this->data_id;
+     $sql = "select * from ".$this->config["db_table"]." where ".
+             $this->config["id_field"]."=".$this->rh->db->Quote($data_id);
+     $data = $this->rh->db->QueryOne( $sql );
+     if ($data == false) 
+     {
+       $this->data_id = 0;
+       return;
+     }
+     foreach($this->fields as $k=>$v)
+       $this->fields[$k]->DbLoad( $data );
+   }
+
+   // удаление из БД
+   function DbDelete( $data_id = NULL )
+   {
+     if (!$this->config["db_table"]) 
+       if ($this->config["db_ignore"]) return;
+       else $this->rh->debug->Error("[Form]: *db_table* form config option is not set.");
+
+     if ($data_id == NULL) $data_id = $this->data_id;
+     foreach($this->fields as $k=>$v)
+       $this->fields[$k]->DbDelete( $data_id );
+
+     $sql = "delete from ".$this->config["db_table"]." where ".
+             $this->config["id_field"]."=".$this->rh->db->Quote($data_id);
+     $this->rh->db->Query( $sql );
+   }
+
+   // загрузка из массива
+   function LoadFromArray( $data )
+   {
+     foreach($this->fields as $k=>$v)
+       $this->fields[$k]->LoadFromArray( $data );
+   }
+
+   // ставим форме в соответствие строку в БД
+   function AssignId( $data_id )
+   {
+     $this->data_id = $data_id;
+   }
+
+
+   var $_inner_name_counter = 0;
+   function _NextInnerName()
+   {
+     $this->_inner_name_counter++;
+     return "__inner_".$this->_inner_name_counter;
+   }
+
+// EOC{ Form }
+}
+
+
+?>
