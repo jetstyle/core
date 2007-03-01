@@ -147,6 +147,10 @@ class DBAL
     return $this->lowlevel->InsertId();
   }
 
+  function AffectedRows()	{
+    return $this->lowlevel->AffectedRows();
+  }
+
   // Возврат кол-ва записей в запросе
   function RecordCount( $sql ) 
   {
