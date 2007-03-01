@@ -22,8 +22,6 @@ class MenuView  extends View
 
 		$level_1 = array();
 		$level_2 = array();
-		#$sel = $this->rh->getSubId();
-		#if ($sel < 0) $sel = NULL;
 		// FIXME: lucky@npj - optimize it! 
 		$segs = explode('/', $this->rh->data['_path']);
 		$sel = $segs[0];
@@ -80,7 +78,6 @@ class MenuView  extends View
 		$sel = (empty($path) ? '' : (strpos($this->rh->url, $path) === 0 ? '_Sel' : ''));
 		if ($sel) $this->rh->tpl->set('_menu_level1_sel', $list->loop_index);
 		return $sel;
-		#return ($this->rh->getSubId()==$list->ITEMS[$list->loop_index]['id'] ? '_Sel' : '');
 	}
 
 }
