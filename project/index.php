@@ -11,12 +11,11 @@
   
   ob_start("ob_gzhandler");
 
-  require_once('libs/core.nop/classes/ConfigProcessor.php');
   require_once('libs/core.nop/classes/RequestHandler.php');
-  require_once('web/classes/controllers/RedarmyRequestHandler.php');
+  require_once('web/classes/controllers/WebRequestHandler.php');
 
   //site controller, builds site environment
-  $rh =& new RedarmyRequestHandler('libs/core.nop/config.php');
+  $rh =& new WebRequestHandler('libs/core.nop/config.php');
 
   //handles the request
   echo $rh->Handle();
