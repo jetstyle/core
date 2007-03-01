@@ -5,13 +5,14 @@ PROJECT_SVN='svn://nescafe/project/trunk'
 
 
 SELF=`basename "$0"`
-_BASEDIR=`basename "$SELF"`
+_BASEDIR=`dirname "$0"`
+_BASEDIR=`dirname "$_BASEDIR"`
 
 if [ -z "$1" ]
 then
     echo Usage: $SELF '<-c|-i>'
-    echo	-c  clean
-    echo	-i  import to repositary and init
+    echo	-c  clean and import to svn project
+    echo	-i  init
     exit
 fi
 
@@ -21,6 +22,7 @@ then
     (
     cd $_BASEDIR
     find -type d -name '.svn' -exec rm -rf {} \;
+    svn import -m'Initial import' "$PROJECT_SVN" .
     )
     exit
 fi
@@ -30,11 +32,10 @@ if [ "$1" == '-i' ]
 then
     (
     cd $_BASEDIR
-    svn import -m'Initial import' "$PROJECT_SVN" .
-    svn propset 'svn:externals' '\
-    core.osb svn://nescafe.corp.jetstyle.ru/core.redarmy/trunk/core/core.osb
-    core.nop svn://nescafe.corp.jetstyle.ru/core.redarmy/trunk/core/core.nop
-    ' libs
+    svn propset 'svn:externals' \
+'core.osb svn://nescafe.corp.jetstyle.ru/core.redarmy/trunk/core/core.osb
+core.nop svn://nescafe.corp.jetstyle.ru/core.redarmy/trunk/core/core.nop
+' libs
     svn propset 'svn:ignore' '*' files
     svn propset 'svn:ignore' '*' files/zcache
     svn propset 'svn:ignore' '*' files/zcache/cms
