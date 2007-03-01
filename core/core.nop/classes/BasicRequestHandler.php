@@ -343,7 +343,8 @@ class BasicRequestHandler extends ConfigProcessor {
 	}
 
 	//Запуск выбранного обработчика на исполнение.
-	function Execute( $handler='' )
+
+	function Execute( $handler='', $type="handlers" )
 	{
 		//так какой же обработчик брать?
 		if( $handler ){
@@ -353,7 +354,7 @@ class BasicRequestHandler extends ConfigProcessor {
 		}
 		if( !$this->handler_full )
 			//обработчик могли взять из класс-мапа
-			$this->handler_full = $this->FindScript_('handlers',$this->handler);
+			$this->handler_full = $this->FindScript_($type,$this->handler);
 
 		//создаём алиасы для обработчика
 		$rh =& $this;
@@ -369,7 +370,6 @@ class BasicRequestHandler extends ConfigProcessor {
 
 		return $result;
 	}
-
 	//Пост-обработка результатов работы.
 	function PrepareResult( $after_execute )
 	{
