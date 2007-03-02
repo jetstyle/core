@@ -46,14 +46,14 @@ class Pager extends Controller
 	function getNextPage()
 	{
 		$p = $this->getPage();
-		return (($p + 1) * $this->getLimit() > $this->getCount())
+		return (($p + 1) > $this->getPagesCount())
 			? NULL
 			: $p + 1;
 	}
 	function getPrevPage()
 	{
 		$p = $this->getPage();
-		return (($p - 1) * $this->getLimit() <= 0)
+		return (($p - 1) <= 0)
 			? NULL
 			: $p - 1;
 	}
