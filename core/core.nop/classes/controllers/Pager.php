@@ -67,6 +67,8 @@ class Pager extends Controller
 		if (!$this->initialized) return NULL;
 
 		$s = array();
+		if (isset($this->config['url'])) 
+			$s['url'] = $this->config['url'];
 		$s['req_page'] = $this->config['req_page'];
 		$s['req_page_size'] = $this->config['req_limit'];
 		$s['req_offset'] = $this->config['req_offset'];

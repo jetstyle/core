@@ -16,6 +16,11 @@ class BasicNews extends DBModel
 	var $where = '_state=0';
 	var $order = 'inserted DESC';
 
+	function loadYearsRange($where=NULL, $limit=NULL, $offset=NULL)
+	{
+		$this->fields = array("DISTINCT DATE_FORMAT(inserted, '%Y') as `year`");
+		$this->load($where, $limit, $offset);
+	}
 	function loadLast()
 	{
 		$this->limit = 6;
