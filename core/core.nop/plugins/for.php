@@ -31,12 +31,12 @@ elseif ($key[0] == '#') // lucky@npj #object.attr
 }
 else
 {
+	// lucky@npj: разыменовываем object.attr.attr
 	$keys = explode('.', $key);
-	$c = $keys;
 	$v =& $rh->tpl_data;
-	while ($key = array_shift($keys))
+	while ($k = array_shift($keys))
 	{
-		if (isset($v[$key])) $v =& $v[$key];
+		if (isset($v[$k])) $v =& $v[$k];
 		else { unset ($v); break; }
 	}
 	$val_arr =& $v;
@@ -44,7 +44,15 @@ else
 
 	if (!$val_arr){
 		// пошли за фикстурами
-		$val_arr = include $rh->FindScript( 'fixtures', $key );
+		$v = include $rh->FindScript( 'fixtures', $key );
+		// lucky@npj: copy&paste выше
+		while ($k = array_shift($keys))
+		{
+			if (isset($v[$k])) $v =& $v[$k];
+			else { unset ($v); break; }
+		}
+		$val_arr =& $v;
+		unset($v);
 	}
 
 }
