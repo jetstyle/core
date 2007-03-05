@@ -32,10 +32,18 @@ class Pager extends Controller
 	{
 		$this->rh =& $rh;
 		$this->config = $config;
+		$this->initialized = False;
 	}
 
+	function initialize()
+	{
+		$this->initialized = isset($this->model);
+		return $this->initialized;
+	}
 	function handle()
 	{
+		if (!$this->initialize()) return False;
+
 		$this->limit = $this->getLimit();
 		$this->offset = $this->getOffset();
 
@@ -59,8 +67,9 @@ class Pager extends Controller
 	}
 	function getInfo()
 	{
-		$s = array();
+		if (!$this->initialized) return NULL;
 
+		$s = array();
 		$s['req_page'] = $this->config['req_page'];
 		$s['req_page_size'] = $this->config['req_limit'];
 		$s['req_offset'] = $this->config['req_offset'];
@@ -84,12 +93,14 @@ class Pager extends Controller
 
 	function getPagesCount()
 	{
+		if (!$this->initialized) return False;
 		$count = $this->getCount() / $this->getLimit();
 		return (integer)ceil($count);
 	}
 
 	function getCount()
 	{
+		if (!isset($this->model)) return NULL;
 		if (!isset($this->count))
 		{
 			$this->count = $this->model->count();
@@ -184,6 +195,14 @@ class MonthPager extends Pager
 
 	function initialize()
 	{
+		$this->initialized = 
+			parent::initialize()
+			&& $this->initialize_where();
+		return $this->initialized;
+	}
+
+	function initialize_where()
+	{
 		$pagesize = $this->config['page_size'];
 		if (isset($this->config['page'])) 
 			$yearmonth = $this->config['page'];
@@ -205,12 +224,13 @@ class MonthPager extends Pager
 		$this->page = $yearmonth;
 		$this->page_size = $pagesize;
 		$this->where = $where;
+		return True;
 	}
 
 	function handle()
 	{
-		$this->initialize();
-		$this->model->load($this->where);
+		if ($this->initialize())
+			$this->model->load($this->where);
 	}
 
 	function getDateRange($yearmonth, $pagesize, $offset=0)
