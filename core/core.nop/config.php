@@ -56,7 +56,7 @@ $this->shortcuts = array(
 $this->msg_default = "ru"; 
 
 // прочие настройки
-$this->cache_dir              = $_basedir."files/zcache/"; // (+) or "../project.zcache/" -- куда сложен кэш
+$this->cache_dir              = $_basedir."cache/web/"; // (+) or "../project.zcache/" -- куда сложен кэш
 
 // для сторонних библиотек: размещение их
 $this->lib_href_part          = "libs"; // как правило не меняется. БЕЗ СЛЭША!
