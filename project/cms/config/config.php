@@ -51,6 +51,6 @@
   $this->pictures->strict = false;
 
   //template engine
-  $this->templates_cache_dir = $this->front_end->file_dir."zcache/cms/";
+  $this->templates_cache_dir = $_basedir."cache/cms/";
 
 ?>
