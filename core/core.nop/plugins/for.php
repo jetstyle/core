@@ -1,6 +1,7 @@
 <?php
 
 /*		{{!for each=news do=test.html:news}}	     */
+/* если массива news нету в шаблонном дамайне, то возьмём из фикстур :P */
 
 $key = $params['each']?$params['each']:$params[0]; // ключ
 //можно без each= а сразу, {{!for news do=test.html:news}}	     
@@ -20,6 +21,12 @@ if ( $key[0]=='*' ){
   $val_arr = $ref[$key];
 }else{
   $val_arr = $rh->tpl_data[$key];
+  
+  if (!$val_arr){
+    // пошли за фикстурами
+    $val_arr = include $rh->FindScript( 'fixtures', $key );
+  }
+  
 }
 
 if(is_array($val_arr) && !empty($val_arr))
