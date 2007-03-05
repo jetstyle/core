@@ -28,7 +28,7 @@ class Pager extends Controller
 	 */
 	var $config = array();
 
-	function Pager(&$rh, $config)
+	function Pager(&$rh, $config=NULL)
 	{
 		$this->rh =& $rh;
 		$this->config = $config;
@@ -43,9 +43,6 @@ class Pager extends Controller
 	function handle()
 	{
 		if (!$this->initialize()) return False;
-
-		$this->limit = $this->getLimit();
-		$this->offset = $this->getOffset();
 
 		$this->model->limit = $this->getLimit();
 		$this->model->offset = $this->getOffset();
