@@ -116,8 +116,9 @@ class MenuListView extends View
 		$item =& $list->ITEMS[$list->loop_index];
 		$item['href'] = $this->rh->base_url.$item['_path'];
 		//TODO: optimize it
-		$path = implode('/',array_slice(explode('/',$item['_path']), 0, $item['_level']));
-		return (strpos($this->rh->url, $path) === 0 ? 'Sel' : '');
+		$path = array_slice(explode('/',$item['_path']), 0, $item['_level']);
+		$url_path = array_slice(explode('/',$this->rh->url), 0, $item['_level']);
+		return ($url_path === $path) ? 'Sel' : '';
 	}
 }
 class MenuTreeView extends View
