@@ -9,7 +9,6 @@ $key = $params['each']?$params['each']:$params[0]; // ключ
 $template_name = $params['do']?$params['do']:$params['use']; // ключ
 //можно {{!for news use=test.html:news}}	     
 
-
 $caller = $params['_caller'];
 if ($template_name[0]==':')
 	$template_name = $caller.'.html'.$template_name;   
@@ -27,6 +26,7 @@ if ( $key[0]=='*' )
 	{
 		$item = $ref[$key];
 	}
+	$val_arr = $item;
 }
 elseif ($key[0] == '#') // lucky@npj #object.attr
 {
