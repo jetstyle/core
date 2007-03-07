@@ -81,6 +81,9 @@ if(is_array($val_arr) && !empty($val_arr))
 	// надо чтобы его могло и не быть
 
 	$content = '';
+
+  $old_ref = $rh->tpl->Get('*');
+  
 	foreach($val_arr AS $r)
 	{
 		if (is_array($r))
@@ -92,6 +95,7 @@ if(is_array($val_arr) && !empty($val_arr))
 
 	echo $content;
 	$content = '';
+  $rh->tpl->SetRef('*', $old_ref );
 }
 
 ?>
