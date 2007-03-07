@@ -193,10 +193,10 @@ class HanlderDomain extends BasicPageDomain
 				/*
 				 * Проверка наличия контроллера на диске
 				 */
-				if ($this->FindScript("handlers", $_handler ))
+				if ($this->rh->FindScript("handlers", $_handler ))
 				{
 					$page_cls = 'HandlerPage';
-					if ($this->FindScript("classes/controllers", $page_cls))
+					if ($this->rh->FindScript("classes/controllers", $page_cls))
 					{
 						$config = array (
 							'class' => $page_cls,
@@ -206,12 +206,51 @@ class HanlderDomain extends BasicPageDomain
 							'path' => $data['_path'],
 							'url' => $url,
 						);
-						$this->UseClass("controllers/".$page_cls);
+						$this->rh->UseClass("controllers/".$page_cls);
 						if ($this->handler = &$this->buildPage($config))
 						{
 							return True;
 						}
 					}
+				}
+			}
+		}
+		return False;
+	}
+
+}
+
+/**
+ * Класс HanlderDomain -- старинцы среди хендлеров
+ */
+class SitemapDomain extends BasicPageDomain
+{
+
+	function &find($criteria)
+	{
+		if (empty($criteria)) return False;
+
+		if (isset($criteria['url'])) 
+			$url = rtrim($criteria['url'], '/');
+
+		/*
+		 * Проверка наличия контроллера на диске
+		 */
+		if (isset($this->rh->site_map[$url]))
+		{
+			$page_cls = 'SiteMapPage';
+			if ($this->rh->FindScript("classes/controllers", $page_cls))
+			{
+				$config = array (
+					'class' => $page_cls,
+					'config' => array (),
+					'path' => '',
+					'url' => '/'.$url,
+				);
+				$this->rh->UseClass("controllers/".$page_cls);
+				if ($this->handler = &$this->buildPage($config))
+				{
+					return True;
 				}
 			}
 		}
@@ -319,7 +358,9 @@ class RequestHandler extends BasicRequestHandler
 {
 
 	function _onCreatePage(&$page)
-	{ }
+	{ 
+	}
+
 	function getPageDomains()
 	{
 		if (!isset($this->page_domains))

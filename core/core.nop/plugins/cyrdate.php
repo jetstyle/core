@@ -44,6 +44,9 @@ $ofmt = $params['oformat'];
 
 $rh->useClass('CyrDate');
 $d = CyrDate::newFromStr($ifmt, $date);
-echo $d->format($ofmt);
+if (isset($d))
+	echo $d->format($ofmt);
+else
+	echo $date;
 
 ?>

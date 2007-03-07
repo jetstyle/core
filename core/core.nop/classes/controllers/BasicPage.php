@@ -230,6 +230,10 @@ class BasicPage extends Controller
 		$this->notifyOnRend();
 	}
 
+	function url_to($cls=NULL, $item=NULL)
+	{
+		if (empty($cls)) return $this->path;
+	}
 }
 
 ?>
