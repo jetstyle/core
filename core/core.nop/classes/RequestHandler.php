@@ -410,6 +410,7 @@ class RequestHandler extends BasicRequestHandler
 			if (True === $page_domain->find($criteria))
 			{
 				$page =& $page_domain->handler;
+				break;
 			}
 		}
 		return $page;
