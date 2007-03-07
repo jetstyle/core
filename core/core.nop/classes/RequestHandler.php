@@ -6,72 +6,169 @@
  * TODO:
  * lucky@npj: merge с BasicRequestHandler ибо нефик
  *
-  Основной обработчик запроса. 
-  Здесь перегрузим разбор урла.
+ Основной обработчик запроса. 
+ Здесь перегрузим разбор урла.
 
-  ===================
+ ===================
 
-  !!!!!! редокументировать
+ !!!!!! редокументировать
 
-  * MapHandler( $url ) -- Выбор обработчика на основе строки запроса и карты обработчиков.
-								  Поиск в контент-таблице реализовывать в наследниках.
-	 ВХОД:
-		$url -- строка адресу внутри сайта: catalogue/trees/pice/qa
-	 ВЫХОД:
-		$this->context_type    = "site" or "page"
-		$this->context_address = "about/news"
-		$this->context -- instance класса PetardePage или ссылка на RH
-		$this->handler -- имя файла обработчика. Возможно, пустое, если не нашли обработчика.
-		$this->params_string -- строка, остаток строки адреса
-		$this->params -- массив, остаток строки адреса, разбитый по слешам
+ * MapHandler( $url ) -- Выбор обработчика на основе строки запроса и карты обработчиков.
+ Поиск в контент-таблице реализовывать в наследниках.
+ ВХОД:
+ $url -- строка адресу внутри сайта: catalogue/trees/pice/qa
+ ВЫХОД:
+ $this->context_type    = "site" or "page"
+ $this->context_address = "about/news"
+ $this->context -- instance класса PetardePage или ссылка на RH
+ $this->handler -- имя файла обработчика. Возможно, пустое, если не нашли обработчика.
+ $this->params_string -- строка, остаток строки адреса
+ $this->params -- массив, остаток строки адреса, разбитый по слешам
 
 
-=======================================================================      
+ =======================================================================      
  */
 
-require_once dirname(__FILE__).'/ConfigProcessor.php';
-require_once dirname(__FILE__).'/BasicRequestHandler.php';
-class RequestHandler extends BasicRequestHandler 
+
+/**
+ * Коллекция страниц сайта
+ */
+class BasicPageDomain
 {
-	/*
-	 * Получение пути по моду узла
-	 *
-	 * lucky@npj: несильно полезная функция. DONT USE. :/
-	 */
-	function getPathByMode($mode)
+	var $possible_paths = NULL;
+	var $handler = NULL;
+	var $path = NULL;
+	var $url = NULL;
+
+	function BasicPageDomain(&$rh) { $this->rh =& $rh; }
+
+	function &find($criteria=NULL) { return False; }
+
+	function getPossiblePaths($url)
 	{
-		$node = NULL;
-		$db =& $this->db;
-
-		if (!isset($this->mode_map[$mode])) 
+		if (!isset($this->possible_paths)) 
 		{
-			$sql = "SELECT id, _path, mode  FROM ".$this->db_prefix."content "
-				." WHERE _state=0 AND mode = ".$db->quote($mode); 
-			$data = $this->db->queryOne($sql);
-			$this->mode_map[$data['mode']] = $data;
+			$this->possible_paths =& $this->buildPossiblePaths($url);
 		}
-
-		return $this->mode_map[$mode]['_path'];
+		return $this->possible_paths;
 	}
 
-	function MapHandler($url)
+	function &buildPossiblePaths($url)
 	{
+		return $this->buildMaxPaths($url);
+	}
 
-		if ($url=="")
-		{
-			$this->handler = $this->handlers_map['/'];
-
-			return true;
-		}
-		$this->debug->MileStone();
+	function buildMaxPaths($url)
+	{
 		$url_parts = explode("/", rtrim($url, "/"));
+		$max_path = array();
+		do 
+			$max_path[] = implode ("/", $url_parts);
+		while (array_pop($url_parts) && $url_parts);
+		return $max_path;
+	}
 
-		$m = count ($url_parts);
+	function getParams($url, $path)
+	{
+		return explode("/", trim(substr($url, strlen($path)+1)) );
+	}
 
-		for ($i=$m; $i>0; $i--)
+	function &buildPage($config)
+	{
+		$page = NULL;
+
+		$page_cls = $config['class'];
+		if (class_exists($page_cls))
 		{
-			$up = implode ("/", $url_parts);
+			$page =& new $page_cls($this->rh);
+			$page->config = $config['config'];
+			$page->domain =& $this;
+			$page->url = $config['url'];
+			$page->path = $config['path'];
+			$page->params = $this->getParams($page->url, $page->path);
+		}
 
+		return $page;
+	}
+
+}
+
+
+/**
+ * Класс ContentPageDomain -- страницы в дереве контента
+ */
+class ContentPageDomain extends BasicPageDomain
+{
+
+	function getPageClassByMode($mode)
+	{
+		return ($mode ? ucfirst($mode) : "Content" ) .  "Page";
+	}
+
+	function &find($criteria=NULL)
+	{
+		if (empty($criteria)) return False; // FIXME: lucky@npj -- вернуть все страницы?
+
+		$this->rh->useClass('models/Content');
+		$content =& new Content($this->rh);
+
+		$where = '';
+		if (isset($criteria['url']))
+		{
+			$url = $criteria['url'];
+			$possible_paths = $this->getPossiblePaths($url);
+			$where .= ' AND _path IN ('.$content->buildValues($possible_paths). ')';
+		}
+		if (isset($criteria['class']))
+		{
+			$where .= ' AND mode='.$content->quote($criteria['class']);
+		}
+
+		$content->load($where);
+		$data = $content->data[0];
+
+		if (!empty($data))
+		{
+			$page_cls = $this->getPageClassByMode($data['mode']);
+			$config = array (
+				'class' => $page_cls,
+				'config' => $data,
+				'path' => $data['_path'],
+				'url' => $url,
+			);
+			if ($this->rh->FindScript("classes/controllers", $page_cls))
+			{
+				$this->rh->UseClass("controllers/".$page_cls);
+				if ($this->handler = &$this->buildPage($config))
+				{
+					return True;
+				}
+			}
+		}
+		return False;
+	}
+
+
+}
+
+
+/**
+ * Класс HanlderDomain -- старинцы среди хендлеров
+ */
+class HanlderDomain extends BasicPageDomain
+{
+
+	function &find($criteria)
+	{
+		if (empty($criteria)) return False;
+
+		if (isset($criteria['url'])) 
+			$url = $criteria['url'];
+
+		$possible_paths = $this->getPossiblePaths($url);
+
+		foreach ($possible_paths as $up)
+		{
 			if (isset($this->handlers_map[$up]) || isset($this->handlers_map[$up."/"]))
 			{
 				//если найдено точно соответсвие 
@@ -93,81 +190,191 @@ class RequestHandler extends BasicRequestHandler
 				/*
 				 * Проверка наличия контроллера на диске
 				 */
-				if ($this->FindScript("classes/controllers", $_handler ))
+				if ($this->FindScript("handlers", $_handler ))
 				{
-					$this->params = explode("/", trim(substr($url, strlen($up)+1)) );
-					$this->handler = $_handler;
-					return $this->handler;
+					$page_cls = 'HandlerPage';
+					if ($this->FindScript("classes/controllers", $page_cls))
+					{
+						$config = array (
+							'class' => $page_cls,
+							'config' => array (
+								'handler'=>$_handler,
+							),
+							'path' => $data['_path'],
+							'url' => $url,
+						);
+						$this->UseClass("controllers/".$page_cls);
+						if ($this->handler = &$this->buildPage($config))
+						{
+							return True;
+						}
+					}
 				}
 			}
-			$max_path[] = $up;
-			unset ($url_parts[count($url_parts)-1]);
 		}
+		return False;
+	}
+
+}
+
+
+/**
+ * Класс HanlderPageDomain -- старинцы среди классов страниц
+ */
+class HanlderPageDomain extends BasicPageDomain
+{
+
+	function findByUrl($url)
+	{
+		$possible_paths = $this->getPossiblePaths($url);
+
+		foreach ($possible_paths as $up)
+		{
+			if (isset($this->handlers_map[$up]) || isset($this->handlers_map[$up."/"]))
+			{
+				//если найдено точно соответсвие 
+				if (isset($this->handlers_map[$up]))
+				{
+					$_handler = $this->handlers_map[$up];
+				}
+				//если мап многие ко многим
+				else if ($this->handlers_map[$up."/"][strlen($this->handlers_map[$up."/"])-1]=="*")
+				{
+					$_handler = $url;
+				}
+				//каталог мапится на один хендлер (многие к одному)
+				elseif ($this->handlers_map[$up."/"])
+				{
+					$_handler = $this->handlers_map[$up."/"];
+				}
+
+				/*
+				 * Проверка наличия контроллера на диске
+				 */
+				if (!empty($_handler))
+				{
+					$page_cls = $_handler;
+					$config = array (
+						'class' => $page_cls,
+						'config' => array (),
+						'path' => $up,
+						'url' => $url,
+					);
+					if ($this->rh->FindScript("classes/controllers", $page_cls))
+					{
+						$this->rh->UseClass("controllers/".$page_cls);
+						if ($this->handler = &$this->buildPage($config))
+						{
+							return True;
+						}
+					}
+				}
+			}
+		}
+		return False;
+	}
+
+	function findByClass($page_cls)
+	{
+		/*
+		 * Проверка наличия контроллера на диске
+		 */
+		if (!empty($page_cls))
+		{
+			$config = array (
+				'class' => $page_cls,
+				'config' => array (),
+				'path' => $this->rh->url,
+				'url' => $this->rh->url,
+			);
+			if ($this->rh->FindScript("classes/controllers", $page_cls))
+			{
+				$this->rh->UseClass("controllers/".$page_cls);
+				if ($this->handler = &$this->buildPage($config))
+				{
+					return True;
+				}
+			}
+		}
+		return False;
+	}
+
+	function &find($criteria)
+	{
+		if (empty($criteria)) return False;
+
+		if (isset($criteria['url'])) return $this->findByUrl($criteria['url']);
+		if (isset($criteria['class'])) return $this->findByClass($criteria['class']);
+		return False;
+	}
+
+}
+
+require_once dirname(__FILE__).'/ConfigProcessor.php';
+require_once dirname(__FILE__).'/BasicRequestHandler.php';
+class RequestHandler extends BasicRequestHandler 
+{
+
+	function MapHandler($url)
+	{
+		$this->debug->MileStone();
+
+		$this->page_domains = array();
+		/*
+		 * Пытаемся найти узел в хендлерах
+		 */
+		$hpc =& new HanlderPageDomain($this);
+		$hpc->handlers_map =& $this->handlers_map;
+		$this->page_domains[] =& $hpc;
 
 		/*
 		 * Пытаемся найти узел в таблице контент
 		 */
-		if (!$this->handler)
+		$cpc =& new ContentPageDomain($this);
+		$this->page_domains[] =& $cpc;
+
+		if ($page = &$this->findPage(array('url'=>$url)))
 		{
-			$this->useClass('models/Content');
-
-			$content =& new Content($this);
-			$where = ' AND _path IN ('.$content->buildValues($max_path). ')';
-			$content->load($where);
-			$this->data = $content->data[0];
-			if (!empty($this->data))
-			{
-				//lucky@npj
-				//
-				$this->tpl->set('./', $this->tpl->get('/') . $data['_path']);
-				$this->handler = $this->getPageClassByMode($this->data['mode']);
-				$this->content_path = $data['_path'];
-				$this->params = explode("/", trim(substr($url, strlen($this->data['_path'])+1)) );
-				return $this->handler;
-			}
+			$this->page = $page;
+			$this->data = $page->config;
+			$this->params = $page->params;
+			$this->path = $page->path;
 		}
-
-		//всё же не нашли обработчик? Запускаем 404.
-		//Должен быть такой системынй обработчик
-		$this->handler = '_404';
+		else
+		{
+			$this->page = &$this->findPage(array('class'=>'_404'));
+		}
 		return true;
 
+	}
+
+	function &findPage($criteria, $page_domains=NULL)
+	{
+		$page = NULL;
+		if (!isset($page_domains)) $page_domains =& $this->page_domains;
+		foreach ($page_domains as $page_domain)
+		{
+			if (True === $page_domain->find($criteria))
+			{
+				$page =& $page_domain->handler;
+			}
+		}
+		return $page;
 	}
 
 	/** вернуть страницу по классу контента */
 	function &getPageByContentType($cls)
 	{
 		$page = NULL;
-		$this->useClass('models/Content');
-
+		$cls = strtolower($cls);
 		if (isset($this->cls2page[$cls])) return $this->cls2page[$cls];
 
-		$mode = strtolower($cls);
-		$content =& new Content($this);
-		$where = ' AND mode = '.$content->quote($mode);
-		$content->load($where);
-		$node = $content->data[0];
-
-		if (!empty($node))
+		if ($page =& $this->findPage(array('class'=>$cls)))
 		{
-			$page_cls = $this->getPageClassByMode($node['mode']);
-			$page =& $this->buildPageByClass($page_cls);
-			$page->config =& $node;
 			$page->initialize();
 		}
 
 		$this->cls2page[$cls] =& $page;
-		return $page;
-	}
-
-	function getPageClassByMode($mode)
-	{
-		return ($mode ? ucfirst($mode) : "Content" ) .  "Page";
-	}
-	function &buildPageByClass($page_cls)
-	{
-		$this->UseClass("controllers/".$page_cls);
-		$page =& new $page_cls($this);
 		return $page;
 	}
 
@@ -180,21 +387,23 @@ class RequestHandler extends BasicRequestHandler
 		$this->UseClass("Upload");
 		$this->upload=&new Upload($this, "files/");
 
-		$this->UseClass("controllers/".$this->handler);
-		$this->controller =& new $this->handler($this);
-		$this->controller->config = $this->data;
-
 		//до хандла чтобы в вью была нода
 		$this->tpl->setRef("node", $this->data);
 
-		$this->controller->initialize();
-		$this->controller->handle();
+		$this->page->initialize();
+		$this->page->handle();
 		$this->showSiteMap();
 		//$type_handler = $this->CheckAccess( $type, $handler );
 
 		//return RequestHandler::Execute( $type_handler );
 	}
 
+	// lucky@npj: для выполнения старых хендлеров из HandlerPage
+	// в контексте rh
+	function executeHandler($handler)
+	{
+		return BasicRequestHandler::Execute($handler);
+	}
 	/*
 	 * Отработать по ключу сайтмапа
 	 * TODO: А не дело ли это View ??
