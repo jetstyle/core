@@ -210,7 +210,7 @@ class BasicPage extends Controller
 	function &getAspect($name)
 	{
 		$o =& $this->o_aspects[$name];
-		if (!$o->initialized) $o->initialize();
+		if (isset($o) && !$o->initialized) $o->initialize();
 		return $o;
 	}
 

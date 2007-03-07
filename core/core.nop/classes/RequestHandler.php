@@ -86,6 +86,7 @@ class BasicPageDomain
 			$page->url = $config['url'];
 			$page->path = $config['path'];
 			$page->params = $this->getParams($page->url, $page->path);
+			$this->rh->_onCreatePage($page,$config);
 		}
 
 		return $page;
@@ -102,7 +103,9 @@ class ContentPageDomain extends BasicPageDomain
 
 	function getPageClassByMode($mode)
 	{
-		return ($mode ? ucfirst($mode) : "Content" ) .  "Page";
+		return isset($this->rh->mode_map[$mode]) 
+			? $this->rh->mode_map[$mode]
+			: (($mode ? ucfirst($mode) : "Content" ) .  "Page");
 	}
 
 	function &find($criteria=NULL)
@@ -315,6 +318,8 @@ require_once dirname(__FILE__).'/BasicRequestHandler.php';
 class RequestHandler extends BasicRequestHandler 
 {
 
+	function _onCreatePage(&$page)
+	{ }
 	function getPageDomains()
 	{
 		if (!isset($this->page_domains))
