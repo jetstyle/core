@@ -315,34 +315,41 @@ require_once dirname(__FILE__).'/BasicRequestHandler.php';
 class RequestHandler extends BasicRequestHandler 
 {
 
+	function getPageDomains()
+	{
+		if (!isset($this->page_domains))
+		{
+			$this->page_domains = array();
+			/*
+			 * ѕытаемс€ найти узел в хендлерах
+			 */
+			$hpc =& new HanlderPageDomain($this);
+			$hpc->handlers_map =& $this->handlers_map;
+			$this->page_domains[] =& $hpc;
+
+			/*
+			 * ѕытаемс€ найти узел в таблице контент
+			 */
+			$cpc =& new ContentPageDomain($this);
+			$this->page_domains[] =& $cpc;
+		}
+		return $this->page_domains;
+	}
+
 	function MapHandler($url)
 	{
 		$this->debug->MileStone();
 
-		$this->page_domains = array();
-		/*
-		 * ѕытаемс€ найти узел в хендлерах
-		 */
-		$hpc =& new HanlderPageDomain($this);
-		$hpc->handlers_map =& $this->handlers_map;
-		$this->page_domains[] =& $hpc;
-
-		/*
-		 * ѕытаемс€ найти узел в таблице контент
-		 */
-		$cpc =& new ContentPageDomain($this);
-		$this->page_domains[] =& $cpc;
-
 		if ($page = &$this->findPage(array('url'=>$url)))
 		{
-			$this->page = $page;
+			$this->page =& $page;
 			$this->data = $page->config;
 			$this->params = $page->params;
 			$this->path = $page->path;
 		}
 		else
 		{
-			$this->page = &$this->findPage(array('class'=>'_404'));
+			$this->page =& $this->findPage(array('class'=>'_404'));
 		}
 		return true;
 
@@ -351,7 +358,7 @@ class RequestHandler extends BasicRequestHandler
 	function &findPage($criteria, $page_domains=NULL)
 	{
 		$page = NULL;
-		if (!isset($page_domains)) $page_domains =& $this->page_domains;
+		if (!isset($page_domains)) $page_domains =& $this->getPageDomains();
 		foreach ($page_domains as $page_domain)
 		{
 			if (True === $page_domain->find($criteria))
