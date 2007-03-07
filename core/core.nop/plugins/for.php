@@ -19,7 +19,14 @@ if ( $key[0]=='*' )
 {
 	$key = substr($key, 1,strlen($key));
 	$ref = $rh->tpl->Get("*");
-	$val_arr = $ref[$key];
+	if (empty($key)) // просто '*'
+	{
+		$item = $ref;
+	}
+	else
+	{
+		$item = $ref[$key];
+	}
 }
 elseif ($key[0] == '#') // lucky@npj #object.attr
 {
