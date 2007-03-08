@@ -38,6 +38,15 @@ $this->tpl_construct_object   = "#.";   // {{#obj.property}}
 $this->tpl_construct_tplt     = "TPL:"; // {{TPL:Name}}...{{/TPL:Name}}
 $this->tpl_construct_tplt2    = ":"; // {{:Name}}...{{/:Name}}   -- ru@jetstyle бесят буквы TPL в капсе
 $this->tpl_construct_comment  = "#";    // <!-- # persistent comment -->
+// lucky: 
+$this->tpl_construct_standard_camelCase  = True;    
+																  // True, значит считаем, что кодим в стандарте CamelCase
+																  // т.е. методы объектов имеют вид
+																  // $o->SomeValue(), 
+																  // иначе будем считать, что обкурились ruby 
+																  // $o->some_value()
+																  // (на случай, если ru станет заведовать разработкой)
+$this->tpl_construct_standard_getter_prefix  = 'get';    // lucky: префиксы для getter'ов 
 
 $this->tpl_instant_plugins = array( "dummy" ); // plugins that are ALWAYS instant
 

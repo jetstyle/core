@@ -165,6 +165,8 @@ class HanlderDomain extends BasicPageDomain
 	{
 		if (empty($criteria)) return False;
 
+		if (!isset($criteria['url'])) return False;
+
 		if (isset($criteria['url'])) 
 			$url = $criteria['url'];
 

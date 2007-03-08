@@ -25,7 +25,7 @@
   * _CheckWritable( $file_to ) -- проверяет права на запись в файл $file_to,
                     если прав нет, то проверяет права на запись в содержащую директорию.
                     трэйсит в debug
-  * _ConctructGetValue($field_name) -- конструирует обращение к объекту $_ внутри компилята.
+  * _ConstructGetValue($field_name) -- конструирует обращение к объекту $_ внутри компилята.
                     Обращение как к автомассиву, хэшу или объекту.
 
   // Работа с Actions
@@ -53,6 +53,9 @@
   $rh->tpl_construct_comment  = "#";    // <!-- # persistent comment -->
 
   $rh->tpl_instant_plugins = array( "dummy" );
+  // lucky:
+  $rh->tpl_construct_standard_camelCase   = True;   // $o->SomeValue(), иначе $o->some_value()
+  $rh->tpl_construct_standard_getter_prefix   = 'get';   // $o->getSomeValue(), иначе $o->SomeValue()
 
   $rh->shortcuts = array(
       "=>" => array("=", " typografica=1"),
@@ -202,15 +205,19 @@ class TemplateEngineCompiler
     $stackname = array( "@" );
     $stackpos = 0;
 
+	 // lucky: aka итребитель копипастов
+	 /* ru@jetstyle скопипастил чтобы шаблоны можно было метить облегчённо */
+	 $tpl_construct_tplt_re = '('.$this->rh->tpl_construct_tplt.'|'.$this->rh->tpl_construct_tplt2.')';
     //разрезаем на подшаблоны
     while ($stackpos < sizeof($stack) )
     { 
       $data = $stack[$stackpos];
       $c =preg_match_all( "/".$this->rh->tpl_prefix.
-                          $this->rh->tpl_construct_tplt."([A-Za-z0-9_]+)".
+                          /*$this->rh->tpl_construct_tplt*/
+                          $tpl_construct_tplt_re."([A-Za-z0-9_]+)".
                           $this->rh->tpl_postfix."(.*?)".
                           $this->rh->tpl_prefix."\/".
-                          $this->rh->tpl_construct_tplt."\\1".
+                          /*$this->rh->tpl_construct_tplt*/"\\1\\2".
                           $this->rh->tpl_postfix."/si",                     
                           $data, $matches, PREG_SET_ORDER  );
       foreach( $matches as $match )
@@ -219,26 +226,9 @@ class TemplateEngineCompiler
         //$data = str_replace( $match[0], $include_prefix.$sub.$this->rh->tpl_postfix, $data );
         $data = str_replace( $match[0], '', $data ); // ru@jetstyle
 
-        $stack[] = $match[2];
-        $stackname[] = $match[1];
+        $stack[] = $match[3];
+        $stackname[] = $match[2];
       }
-
-      /* ru@jetstyle скопипастил чтобы шаблоны можно было метить облегчённо */
-      $c =preg_match_all( "/".$this->rh->tpl_prefix.
-                          $this->rh->tpl_construct_tplt2."([A-Za-z0-9_]+)".
-                          $this->rh->tpl_postfix."(.*?)".
-                          $this->rh->tpl_prefix."\/".
-                          $this->rh->tpl_construct_tplt2."\\1".
-                          $this->rh->tpl_postfix."/si",                     
-                          $data, $matches, PREG_SET_ORDER  );
-      foreach( $matches as $match )
-      {
-        $sub = $tpl_name.".html:".$match[1];
-        $data = str_replace( $match[0], '', $data ); 
-        $stack[] = $match[2];
-        $stackname[] = $match[1];
-      }
-      /* ru@jetstyle скопипастил досюда */
 
       $stack[$stackpos] = $data;
       $stackpos++;
@@ -383,10 +373,46 @@ class TemplateEngineCompiler
 
   //нужно уметь обращаться к автомассиву
   function _ConstructGetValue( $f ){
-    if( preg_match("/[\d]+/",$f) )
-      return '$_['.$f.']';
-    else
-      return 'is_array($_)?$_["'.$f.'"]:$_->'.$f.'';
+	 /* lucky: refactor
+	  if( preg_match("/[\d]+/",$f) )
+		return '$_['.$f.']';
+	 else
+		return 'is_array($_)?$_["'.$f.'"]:$_->'.$f.'';
+	  */
+
+	  /* lucky: если объект, можем вызвать геттер
+		* можем сослаться на структуру внутри структуры struct.substruct.substruct
+		* или так struct.getter().substruct
+		*/
+	  if (empty($f)) return '$_';
+	  elseif( preg_match("/[\d]+/",$f) ) return '$_['.$f.']';
+	  else
+	  {
+		  $parts = explode($this->rh->tpl_construct_object{1},$f);
+		  $k = array_shift($parts);
+		  /* lucky:
+			* если $_ массив: возвращаем значение по ключу $_[$k]
+			* если $_ объект:
+			*			если есть метод $_->$method() вернем результат вызова метода
+			*			иначе возвращаем $_->$k
+			*/
+		  $method = (!empty($this->rh->tpl_construct_standard_getter_prefix)
+			  ? $this->rh->tpl_construct_standard_getter_prefix .'_'.$k // get_$k
+			  : $k);
+		  if ($this->rh->tpl_construct_standard_camelCase)
+			  $method = implode('', array_map('ucfirst', explode('_', $method))); // GetSomeValue
+		  $res = '(is_array($_)?$_["'.$k.'"]:'
+				  .'(method_exists($_,"'.$method.'")?$_->'.$method.'():$_->'.$k.'))';
+		  return (empty($parts)
+			  ? $res 
+			  /* lucky: я обожаю этот язык Ж), но тут требуют lvalue 
+				* ((($result = new_value()) || True) ? $result : 'никогда не вернем');
+				*/
+			  : '((($_='.$res.')||True)?'
+												  .$this->_ConstructGetValue(
+													  implode($this->rh->tpl_construct_object{1}, $parts))
+									     .':NULL)');
+	  }
   }
 
   function _ParseActionParams( $content )
