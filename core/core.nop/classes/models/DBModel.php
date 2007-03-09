@@ -75,6 +75,16 @@ class DBModel extends Model
 	}
 	function update(&$row, $where=NULL)
 	{
+		if (is_array($where)) 
+		{
+			$_where = array();
+			foreach($where as $field)
+			{
+				$_where[] = $this->quoteField($field) .'='.$this->quote($row[$field]);
+			}
+			$where = implode(' AND ', $_where);
+			unset($_where);
+		}
 		if (in_array('_updated', $this->fields) && !array_key_exists('_updated', $row))
 			$row['_updated'] = date('Y-m-d H:i:s');
 		$this->buildFieldsValuesSet($row, $fields_sql);
