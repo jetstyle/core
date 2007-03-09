@@ -54,7 +54,6 @@ class DBModel extends Model
 			;
 		// сохраним sql1 для будщих поколений ;)
 		// count() например
-		//if ($_GET['lucky']) var_dump($sql);
 		return array($sql, $sql1);
 	}
 	function select($where=NULL, $limit=NULL, $offset=NULL, $is_load=false)
