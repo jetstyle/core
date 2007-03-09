@@ -1,52 +1,55 @@
-<?php
+	<?php
 
-/*		{{!for each=news do=test.html:news}}	     */
-/* если массива news нету в шаблонном дамайне, то возьмЄм из фикстур :P */
+	/*		{{!for each=news do=test.html:news}}	     */
+	/* если массива news нету в шаблонном дамайне, то возьмЄм из фикстур :P */
 
-$key = $params['each']?$params['each']:$params[0]; // ключ
-//можно без each= а сразу, {{!for news do=test.html:news}}	     
+	$key = $params['each']?$params['each']:$params[0]; // ключ
+	//можно без each= а сразу, {{!for news do=test.html:news}}	     
 
-$alias = $params['as']?$params['as']:NULL; // алиас
-//можно {{!for news as news_item do=test.html:news}}	     
+	$alias = $params['as']?$params['as']:NULL; // алиас
+	//можно {{!for news as news_item do=test.html:news}}	     
 
-$template_name = $params['do']?$params['do']:$params['use']; // ключ
-//можно {{!for news use=test.html:news}}	     
+	$template_name = $params['do']?$params['do']:$params['use']; // ключ
+	//можно {{!for news use=test.html:news}}	     
 
-$caller = $params['_caller'];
-if ($template_name[0]==':')
-	$template_name = $caller.'.html'.$template_name;   
+	$caller = $params['_caller'];
+	if ($template_name[0]==':')
+		$template_name = $caller.'.html'.$template_name;   
 
-if (isset($alias)) $item_store_to = $alias;
-else $item_store_to = '*';
+	if (isset($alias)) $item_store_to = $alias;
+	else $item_store_to = '*';
 
-$data_sources = array(); // тут будем искать данные дл€ each
+	$data_sources = array(); // тут будем искать данные дл€ each
 
-if ($key{0} == '*')
-{ // шаблонна€ переменна€ *var
-	$data_sources[] = '$tpl->Get("*")';
-	$key = substr($key, 1);
-}
-elseif ($key{0} == '#')
-{  // шаблонна€ переменна€ #obj
-	$data_sources[] = '$tpl->domain';
-	$key = substr($key, 1);
-}
-else
-{ // данные из среды выполнени€
-	// lucky: пока не пон€тно: 
-	//		как они туда попадут? 
-	//		и нафиг вообще нужны?
-	$data_sources[] = '$rh->tpl_data';
-}
-// пошли за фикстурами
-// lucky: тут $key уже без префиксов
-$data_sources[] = '(($s = $rh->FindScript( "fixtures", "'.$key.'" )) ? include $s:NULL)';
+	if ($key{0} == '*')
+	{ // шаблонна€ переменна€ *var
+		$data_sources[] = '$tpl->Get("*")';
+		$key = substr($key, 1);
+	}
+	elseif ($key{0} == '#')
+	{  // шаблонна€ переменна€ #obj
+		$data_sources[] = '$tpl->domain';
+		$key = substr($key, 1);
+	}
+	else
+	{ // данные из среды выполнени€
+		// lucky: пока не пон€тно: 
+		//		как они туда попадут? 
+		//		и нафиг вообще нужны?
+		$data_sources[] = '$rh->tpl_data';
+	}
+	// пошли за фикстурами
+	// lucky: тут $key уже без префиксов
+	$data_sources[] = '((($_t=array_shift(explode(".","'.$key.'"))) && ($s = $rh->FindScript( "fixtures", $_t))) ? array($_t=>include $s):NULL)';
 
-$tpl->_SpawnCompiler(); // убедимс€ что компил€тор инициализирован
-$value = $tpl->compiler->_ConstructGetValue($key);
-foreach ($data_sources as $source)
-	if ($source && ($val_arr = eval('$_ = '.$source.'; return '.$value.';')))
+	$tpl->_SpawnCompiler(); // убедимс€ что компил€тор инициализирован
+	$value = $tpl->compiler->_ConstructGetValue($key);
+	foreach ($data_sources as $source)
+{
+	$expr = '$_ = '.$source.'; return '.$value.';';
+	if (($val_arr = eval($expr)))
 		break;
+}
 
 /*
  * lucky:
