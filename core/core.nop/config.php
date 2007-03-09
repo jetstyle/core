@@ -4,7 +4,7 @@
 // (+) -- меняется почти всегда, by-default выставлено в production single-site version
 // (!) -- обязательно менять!
 
-$_basedir = realpath(dirname(__FILE__).'../../../').'/';
+$_basedir = realpath(dirname(__FILE__).'/../../').'/';
 
 include( $_basedir."config/config.php" ); // подцепляем конфиг
 include( $_basedir."config/config_db.php" ); // подцепляем конфиг БД
