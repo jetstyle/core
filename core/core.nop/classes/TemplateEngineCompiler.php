@@ -101,7 +101,7 @@ class TemplateEngineCompiler
               "(\\1)?".$this->rh->tpl_postfix."$/si";
     // single regexps
     $this->object_regexp = 
-         "/^".$this->rh->tpl_construct_object{0}."(.+)".
+         "/^".$this->rh->tpl_construct_object{0}."([^".$this->rh->tpl_construct_object{1}."]+)".
           "[".$this->rh->tpl_construct_object{1}."](.+)$/i";
     $this->action_regexp = 
          "/^".$this->rh->tpl_construct_action."(.+)$/i";
