@@ -12,9 +12,14 @@ class Controller
 		$this->rh =& $rh;
 	}
 
+	function initialize()
+	{
+		return True;
+	}
+
 	function handle() 
 	{
-		$this->_handle();
+		$this->initialize();
 	}
 	
 }	

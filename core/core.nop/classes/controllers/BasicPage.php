@@ -139,19 +139,6 @@ class BasicPage extends Controller
 		return False;
 	}
 
-	function _handle()
-	{
-		if (is_array($this->params_map)) foreach ($this->params_map as $v)
-		{
-			list($action, $pattern) = $v;
-			if (True === $this->_match_url($this->rh->params, $pattern, &$matches))
-			{
-				return call_user_func_array(array(&$this, 'handle_'.$action), array($matches));
-			}
-		}
-		return NULL;
-	}
-
 	function registerObserver($event, $observer)
 	{
 		$this->observers[$event][] = $observer;
@@ -176,8 +163,18 @@ class BasicPage extends Controller
 	function handle()
 	{
 		//foreach (get_object_vars($this->rh) as $k=>$v) if (is_scalar($v)) echo "$k = $v<br>\n";
-		$this->initializePlugins();
 		parent::handle();
+		$this->initializePlugins();
+
+		if (is_array($this->params_map)) foreach ($this->params_map as $v)
+		{
+			list($action, $pattern) = $v;
+			if (True === $this->_match_url($this->rh->params, $pattern, &$matches))
+			{
+				return call_user_func_array(array(&$this, 'handle_'.$action), array($matches));
+			}
+		}
+
 		$this->rend();
 	}
 
@@ -232,7 +229,7 @@ class BasicPage extends Controller
 
 	function url_to($cls=NULL, $item=NULL)
 	{
-		if (empty($cls)) return $this->path;
+		if (empty($cls)) return rtrim($this->path, '/');
 	}
 }
 

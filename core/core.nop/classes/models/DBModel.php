@@ -71,7 +71,7 @@ class DBModel extends Model
 				.'('.$fields_sql.')'
 				.' VALUES ('.$values_sql.')';
 		$row['id'] = $this->rh->db->insert($sql);
-		return $id;
+		return $row['id'];
 	}
 	function update(&$row, $where=NULL)
 	{

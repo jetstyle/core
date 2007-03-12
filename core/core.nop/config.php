@@ -109,7 +109,7 @@ $this->tpl_root_href     = $this->base_url."web/skins/"; // or "/"         -- ка
 
 $this->tpl_root_dir  = $_basedir.$this->tpl_root_href_part;
 
-$this->admin_email = "nop@jetstyle.ru";
+if (!isset($this->admin_email)) $this->admin_email = "nop@jetstyle.ru";
 $this->message_set = "";
 $this->cookie_prefix = $this->project_name.'_';
 
