@@ -24,7 +24,7 @@ class ListSimple extends DBDataEdit  {
 //		$config->Read("list");
 		$config->SELECT_FIELDS[] = ($config->state_field) ? $config->state_field . " as '_state'" : '_state';
 //	    	$where = $config->where.( $config->rh->GetVar('_show_trash') ? '' : ($config->where ? ' AND ' : '') . ( $config->state_field ? $config->state_field : "_state" ) . /*_state*/'<>2' );
-	    	$where = ( $config->rh->GetVar('_show_trash') ? '' : ( $config->state_field ? $config->state_field : "_state" ) . '<>2' ) . ($config->where ? ' AND ' . $config->where : '') ;
+	    	$where = ( $config->rh->GetVar('_show_trash') ? '_state>=0' : ( $config->state_field ? $config->state_field : "_state" ) . '<>2' ) . ($config->where ? ' AND ' . $config->where : '') ;
 
 		DBDataEdit::DBDataEdit( $config->rh, $config->table_name, $config->SELECT_FIELDS, $where, $config->order_by, $config->limit );
 		//for ListObject
