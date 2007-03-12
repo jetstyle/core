@@ -105,7 +105,12 @@ class ContentPageDomain extends BasicPageDomain
 	{
 		return isset($this->rh->mode_map[$mode]) 
 			? $this->rh->mode_map[$mode]
-			: (($mode ? ucfirst($mode) : "Content" ) .  "Page");
+			: (($mode ? implode('', array_map(ucfirst, explode('_', $mode))) : "Content" ) .  "Page");
+	}
+	function getModeByPageClass($cls)
+	{
+		$res = strtolower(trim(preg_replace('#([A-Z])#', '_\\1', $cls), '_'));
+		return $res;
 	}
 
 	function &find($criteria=NULL)
@@ -124,7 +129,7 @@ class ContentPageDomain extends BasicPageDomain
 		}
 		if (isset($criteria['class']))
 		{
-			$where .= ' AND mode='.$content->quote($criteria['class']);
+			$where .= ' AND mode='.$content->quote($this->getModeByPageClass($criteria['class']));
 		}
 
 		$content->load($where);
@@ -232,6 +237,7 @@ class SitemapDomain extends BasicPageDomain
 	{
 		if (empty($criteria)) return False;
 
+		if (!isset($criteria['url'])) return False;
 		if (isset($criteria['url'])) 
 			$url = rtrim($criteria['url'], '/');
 
@@ -422,7 +428,6 @@ class RequestHandler extends BasicRequestHandler
 	function &getPageByContentType($cls)
 	{
 		$page = NULL;
-		$cls = strtolower($cls);
 		if (isset($this->cls2page[$cls])) return $this->cls2page[$cls];
 
 		if ($page =& $this->findPage(array('class'=>$cls)))
