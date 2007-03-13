@@ -169,6 +169,10 @@ class DBModel extends Model
 		$values_sql = implode(',', array_map(array(&$this, 'quoteValue'), $values));
 		return $values_sql;
 	}
+	function quoteValues($values)
+	{
+		return $this->buildValues($values);
+	}
 	function buildTableName($table)
 	{
 		$table_name_sql = $this->quoteName($this->rh->db_prefix.$table);
