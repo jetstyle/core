@@ -424,12 +424,26 @@ class RequestHandler extends BasicRequestHandler
 	function &findPage($criteria, $page_domains=NULL)
 	{
 		$page = NULL;
+		$cls = strtolower($criteria['class']);
+		$url = $criteria['url'];
+
+		if (isset($url) && isset($this->url2page[$url]))
+			return $this->url2page[$url];
+
+		if (isset($cls) && isset($this->cls2page[$cls]))
+		{
+			return $this->cls2page[$cls];
+		}
+
 		if (!isset($page_domains)) $page_domains = $this->getPageDomains();
 		foreach ($page_domains as $page_domain)
 		{
 			if (True === $page_domain->find($criteria))
 			{
 				$page =& $page_domain->handler;
+				$cls = substr(get_class($page), 0, -strlen('Page'));
+				$this->cls2page[$cls] =& $page;
+				$this->url2page[$page->url] =& $page;
 				break;
 			}
 		}
@@ -439,13 +453,7 @@ class RequestHandler extends BasicRequestHandler
 	/** вернуть страницу по классу контента */
 	function &getPageByContentType($cls)
 	{
-		$page = NULL;
-		if (isset($this->cls2page[$cls])) return $this->cls2page[$cls];
-
-		if ($page =& $this->findPage(array('class'=>$cls)))
-
-		$this->cls2page[$cls] =& $page;
-		return $page;
+		return $this->findPage(array('class'=>$cls));
 	}
 
 	/* перегружаем Execute
