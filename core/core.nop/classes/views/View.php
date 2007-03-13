@@ -8,9 +8,16 @@ class View
 
 	var $models = array();
 
-	function View(&$rh)
+	function View()
 	{
-		$this->rh =& $rh;
+	}
+
+	function initialize(&$ctx, $config=NULL) 
+	{ 
+		$this->rh =& $ctx; 
+		if (isset($config)) 
+			$this->config = array_merge($this->config, $config);
+		return True;
 	}
 
 	function handle()

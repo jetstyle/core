@@ -6,11 +6,8 @@ class Plugin
 	var $config_vars = array();
 	var $inialized = False;
 
-	function Plugin(&$factory, $config)
+	function Plugin()
 	{
-		$this->rh =& $factory->rh;
-		$this->factory =& $factory;
-		$this->setConfig($config);
 	}
 
 	/** 
@@ -36,9 +33,15 @@ class Plugin
 			elseif (!isset($this->$v)) $this->$v = NULL;
 	}
 
-	function initialize() 
-	{
-		$this->initialized = True;
+	function initialize(&$ctx, $config=NULL) 
+	{ 
+		$this->rh =& $ctx; 
+
+		if (isset($config['factory'])) $this->factory =& $config['factory'];
+
+		$this->setConfig($config);
+		$this->initialized = isset($this->factory);
+		return $this->initialized;
 	}
 
 }
@@ -54,10 +57,11 @@ class RenderablePlugin extends Plugin
 		'store_to',
 	);
 
-	function initialize() 
+	function initialize(&$ctx, $config) 
 	{
+		$parent_status = parent::initialize($ctx, $config);
 		$this->factory->registerObserver('on_rend', array(&$this, 'rend'));
-		parent::initialize();
+		return $parent_status;
 	}
 
 	function rend(&$ctx)

@@ -6,20 +6,22 @@ class BreadPlugin extends RenderablePlugin
 {
 	var $config_vars = array('store_to', 'template');
 
-	function initialize()
+	function initialize(&$ctx, $config)
 	{
 		if ($this->initialized) return;
+
+		parent::initialize(&$ctx, $config);
+
 		/*
 		 * загрузим модель меню
 		 * с условием на where
 		 */
 		$this->rh->UseClass("models/Bread");
-		$model =& new Bread($this->rh);
+		$model =& new Bread();
+		$model->initialize($this->rh);
 		$model->load();
 
 		$this->models['bread'] =& $model;
-
-		parent::initialize();
 	}
 
 	function addItem($path, $title)
@@ -41,7 +43,8 @@ class BreadPlugin extends RenderablePlugin
 			$data[$k]['link'] = $this->url_to($v);
 		}
 		$this->rh->UseClass("plugins/BreadPlugin/BreadView");
-		$v =& new BreadView($this->rh);
+		$v =& new BreadView();
+		$v->initialize($this->rh);
 		$v->addModel($data, 'bread');
 		$v->store_to = $this->store_to;
 		$v->template = $this->template;

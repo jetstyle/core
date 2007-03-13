@@ -12,7 +12,7 @@ class MenuPlugin extends RenderablePlugin
 
 	function getParentNodeByLevel($level)
 	{
-		$data = $this->rh->data;
+		$data = $this->rh->page->config;
 		$sql = 'SELECT _path, _level, _left, _right FROM '. $this->rh->db_prefix .'content 
 				WHERE _level = ' .$level 
 				. ' AND ( '
@@ -22,15 +22,16 @@ class MenuPlugin extends RenderablePlugin
 		$rs = $this->rh->db->queryOne($sql);
 		return $rs;
 	}
-	function initialize()
+
+	function handle()
 	{
-		if ($this->initialized) return;
 		/*
 		 * загрузим модель меню
 		 * с условием на where
 		 */
 		$this->rh->UseClass("models/Menu");
-		$menu =& new Menu($this->rh);
+		$menu =& new Menu();
+		$menu->initialize($this->rh);
 		switch($this->mode)
 		{
 		case 'submenu':
@@ -49,9 +50,8 @@ class MenuPlugin extends RenderablePlugin
 		}
 
 		$this->models['menu'] =& $menu;
-
-		parent::initialize();
 	}
+
 	function addItem($item)
 	{
 		$this->models['menu']->data[] = $item;
@@ -59,20 +59,24 @@ class MenuPlugin extends RenderablePlugin
 
 	function rend(&$ctx)
 	{
+		$this->handle();
 		//вывод блока меню
 		switch($this->view)
 		{
 		case 'tree':
 			$this->rh->UseClass("plugins/MenuPlugin/MenuView");
-			$v =& new MenuTreeView($this->rh);
+			$v =& new MenuTreeView();
+			$v->initialize($this->rh);
 			break;
 		case 'list':
 			$this->rh->UseClass("plugins/MenuPlugin/MenuView");
-			$v =& new MenuListView($this->rh);
+			$v =& new MenuListView();
+			$v->initialize($this->rh);
 			break;
 		default:
 			$this->rh->UseClass("plugins/MenuPlugin/MenuView");
-			$v =& new MenuView($this->rh);
+			$v =& new MenuView();
+			$v->initialize($this->rh);
 		}
 		$v->store_to = $this->store_to;
 		$v->template = $this->template;

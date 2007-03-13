@@ -70,12 +70,18 @@ class Model
 	var $observers = array();
 	var $config = array();
 
-	function Model(&$rh)
+	function Model()
 	{
-		$this->rh =& $rh;   
 	}
 
-	function initialize() { }
+	function initialize(&$ctx, $config=NULL) 
+	{ 
+		$this->rh =& $ctx; 
+		if (isset($config)) 
+			$this->config = array_merge($this->config, $config);
+		return True;
+	}
+
 	function finalize() { }
 
 	function registerObservers($event, $actions)

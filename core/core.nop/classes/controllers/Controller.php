@@ -7,19 +7,20 @@ class Controller
 {
 	var $rh;
 	
-	function Controller(&$rh)
+	function Controller()
 	{
-		$this->rh =& $rh;
 	}
 
-	function initialize()
-	{
+	function initialize(&$ctx, $config=NULL) 
+	{ 
+		$this->rh =& $ctx; 
+		if (isset($config)) 
+			$this->config = array_merge($this->config, $config);
 		return True;
 	}
 
 	function handle() 
 	{
-		$this->initialize();
 	}
 	
 }	

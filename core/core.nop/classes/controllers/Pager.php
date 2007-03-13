@@ -28,22 +28,21 @@ class Pager extends Controller
 	 */
 	var $config = array();
 
-	function Pager(&$rh, $config=NULL)
+	function Pager()
 	{
-		$this->rh =& $rh;
-		$this->config = $config;
 		$this->initialized = False;
 	}
 
-	function initialize()
+	function initialize(&$ctx, $config=NULL)
 	{
-		$this->initialized = isset($this->model);
+		$parent_status = parent::initialize($ctx, $config);
+		if (isset($this->config['model'])) $this->model =& $this->config['model'];
+
+		$this->initialized = isset($this->model) && $parent_status;
 		return $this->initialized;
 	}
 	function handle()
 	{
-		if (!$this->initialize()) return False;
-
 		$this->model->limit = $this->getLimit();
 		$this->model->offset = $this->getOffset();
 	}

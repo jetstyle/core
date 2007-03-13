@@ -87,7 +87,6 @@ class MenuListView extends View
 
 	function handle()
 	{
-
 		//if (!isset($_GET['lucky'])) return;
 		$this->rh->UseClass("ListObject");
 		$list =& new ListObject($this->rh, $this->models['menu']);

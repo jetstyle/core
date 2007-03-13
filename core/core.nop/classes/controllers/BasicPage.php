@@ -154,28 +154,36 @@ class BasicPage extends Controller
 		}
 	}
 
-	function initialize()
+	function initialize(&$ctx, $config=NULL)
 	{
+		$parent_status = parent::initialize($ctx, $config);
+
+		if (isset($config['plugins'])) 
+			$this->plugins = $config['plugins'];
 		$this->path = $this->config['_path'] .'/';
-		$this->loadPlugins();
+
+		return $parent_status && True;
 	}
 
 	function handle()
 	{
-		//foreach (get_object_vars($this->rh) as $k=>$v) if (is_scalar($v)) echo "$k = $v<br>\n";
-		parent::handle();
-		$this->initializePlugins();
+		$status = True;
+
+		$this->loadPlugins();
 
 		if (is_array($this->params_map)) foreach ($this->params_map as $v)
 		{
 			list($action, $pattern) = $v;
 			if (True === $this->_match_url($this->rh->params, $pattern, &$matches))
 			{
-				return call_user_func_array(array(&$this, 'handle_'.$action), array($matches));
+				$status = call_user_func_array(
+					array(&$this, 'handle_'.$action), 
+					array($matches));
+				break;
 			}
 		}
 
-		$this->rend();
+		return $status;
 	}
 
 	function loadPlugins()
@@ -198,7 +206,9 @@ class BasicPage extends Controller
 			}
 
 			$this->rh->useClass('plugins/'.$name.'/'.$name);
-			$o =& new $name($this, $config);
+			$o =& new $name();
+			$config['factory'] =& $this;
+			$o->initialize($this->rh, $config);
 			$this->o_plugins[] =& $o;
 			if ($aspect) $this->o_aspects[$aspect] =& $o;
 		}
@@ -207,14 +217,7 @@ class BasicPage extends Controller
 	function &getAspect($name)
 	{
 		$o =& $this->o_aspects[$name];
-		if (isset($o) && !$o->initialized) $o->initialize();
 		return $o;
-	}
-
-	function initializePlugins()
-	{
-		foreach ($this->o_plugins as $k=>$v)
-			$this->o_plugins[$k]->initialize();
 	}
 
 	function rend()

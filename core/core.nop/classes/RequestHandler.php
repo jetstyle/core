@@ -39,8 +39,17 @@ class BasicPageDomain
 	var $handler = NULL;
 	var $path = NULL;
 	var $url = NULL;
+	var $config = array();
 
-	function BasicPageDomain(&$rh) { $this->rh =& $rh; }
+	function BasicPageDomain() 
+	{ 
+	}
+
+	function initialize(&$ctx, $config=NULL) 
+	{ 
+		$this->rh =& $ctx; 
+		if (isset($config)) $this->config = array_merge($this->config, $config);
+	}
 
 	function &find($criteria=NULL) { return False; }
 
@@ -80,13 +89,13 @@ class BasicPageDomain
 		$page_cls = $config['class'];
 		if (class_exists($page_cls))
 		{
-			$page =& new $page_cls($this->rh);
-			$page->config = $config['config'];
+			$page =& new $page_cls();
 			$page->domain =& $this;
 			$page->url = $config['url'];
 			$page->path = $config['path'];
 			$page->params = $this->getParams($page->url, $page->path);
 			$this->rh->_onCreatePage($page,$config);
+			$page->initialize($this->rh, $config['config']);
 		}
 
 		return $page;
@@ -118,7 +127,8 @@ class ContentPageDomain extends BasicPageDomain
 		if (empty($criteria)) return False; // FIXME: lucky@npj -- вернуть все страницы?
 
 		$this->rh->useClass('models/Content');
-		$content =& new Content($this->rh);
+		$content =& new Content();
+		$content->initialize($this->rh);
 
 		$where = '';
 		if (isset($criteria['url']))
@@ -369,7 +379,7 @@ class RequestHandler extends BasicRequestHandler
 	{ 
 	}
 
-	function getPageDomains()
+	function &getPageDomains()
 	{
 		if (!isset($this->page_domains))
 		{
@@ -377,14 +387,16 @@ class RequestHandler extends BasicRequestHandler
 			/*
 			 * ѕытаемс€ найти узел в хендлерах
 			 */
-			$hpc =& new HanlderPageDomain($this);
+			$hpc =& new HanlderPageDomain();
+			$hpc->initialize($this);
 			$hpc->handlers_map =& $this->handlers_map;
 			$this->page_domains[] =& $hpc;
 
 			/*
 			 * ѕытаемс€ найти узел в таблице контент
 			 */
-			$cpc =& new ContentPageDomain($this);
+			$cpc =& new ContentPageDomain();
+			$cpc->initialize($this);
 			$this->page_domains[] =& $cpc;
 		}
 		return $this->page_domains;
@@ -412,7 +424,7 @@ class RequestHandler extends BasicRequestHandler
 	function &findPage($criteria, $page_domains=NULL)
 	{
 		$page = NULL;
-		if (!isset($page_domains)) $page_domains =& $this->getPageDomains();
+		if (!isset($page_domains)) $page_domains = $this->getPageDomains();
 		foreach ($page_domains as $page_domain)
 		{
 			if (True === $page_domain->find($criteria))
@@ -431,9 +443,6 @@ class RequestHandler extends BasicRequestHandler
 		if (isset($this->cls2page[$cls])) return $this->cls2page[$cls];
 
 		if ($page =& $this->findPage(array('class'=>$cls)))
-		{
-			$page->initialize();
-		}
 
 		$this->cls2page[$cls] =& $page;
 		return $page;
@@ -451,8 +460,8 @@ class RequestHandler extends BasicRequestHandler
 		//до хандла чтобы в вью была нода
 		$this->tpl->setRef("node", $this->data);
 
-		$this->page->initialize();
 		$this->page->handle();
+		$this->page->rend();
 		$this->showSiteMap();
 		//$type_handler = $this->CheckAccess( $type, $handler );
 

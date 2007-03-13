@@ -24,8 +24,10 @@ class DBModel extends Model
 	 * который использовался для загрузки (load()) данных */
 	var $sql = NULL;
 
-	function initialize()
+	function initialize(&$ctx, $config=NULL)
 	{
+		$parent_status = parent::initialize($ctx, $config);
+
 		foreach (array('before_load') as $v)
 		{
 			$this->registerObserver($v, $this->config[$v]);
@@ -34,7 +36,7 @@ class DBModel extends Model
 		{
 			if (isset($this->config[$v])) $this->$v = $this->config[$v];
 		}
-		return True;
+		return $parent_status && True;
 	}
 	function load($where=NULL, $limit=NULL, $offset=NULL)
 	{
