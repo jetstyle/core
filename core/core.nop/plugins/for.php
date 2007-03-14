@@ -1,4 +1,4 @@
-	<?php
+<?php
 
 	/*		{{!for each=news do=test.html:news}}	     */
 	/* если массива news нету в шаблонном дамайне, то возьмём из фикстур :P */
@@ -45,11 +45,11 @@
 	$tpl->_SpawnCompiler(); // убедимся что компилятор инициализирован
 	$value = $tpl->compiler->_ConstructGetValue($key);
 	foreach ($data_sources as $source)
-{
-	$expr = '$_ = '.$source.'; return '.$value.';';
-	if (($val_arr = eval($expr)))
-		break;
-}
+	{
+		$expr = '$_ = '.$source.'; return '.$value.';';
+		$val_arr = eval($expr);
+		if (isset($val_arr)) break;
+	}
 
 /*
  * lucky:
@@ -80,11 +80,11 @@
  * сейчас, плагины, от кеширования почти не выигрывают, потому что практически ничего не кешируют
  * 
  * /
- 
-if ( $key[0]=='*' ) // *attr.attr
-{
-	$key = substr($key, 1);
-	$val_arr =& $rh->tpl->Get("*");
+
+ if ( $key[0]=='*' ) // *attr.attr
+ {
+	 $key = substr($key, 1);
+	 $val_arr =& $rh->tpl->Get("*");
 }
 elseif ($key[0] == '#') // lucky@npj #object.attr
 {
