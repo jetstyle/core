@@ -114,6 +114,7 @@ $this->message_set = "";
 $this->cookie_prefix = $this->project_name.'_';
 
 $this->timezone = 0; // GMT+5
+$this->output_encoding = 'windows-1251';
 
 
 include( $this->tpl_root_dir.$this->tpl_skin."/site_map.php" );
