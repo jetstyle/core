@@ -6,6 +6,7 @@
 class Controller 
 {
 	var $rh;
+	var $config = array();
 	
 	function Controller()
 	{
