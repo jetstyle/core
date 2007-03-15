@@ -234,16 +234,15 @@ class BasicRequestHandler extends ConfigProcessor {
 	//основна€ функци€ обработки запроса
 	function Handle( $ri=false )
 	{
-		// kuso@npj: ѕравка1.
+		if($ri)
+			$this->ri =& $ri;
+
 		if (!isset($this->ri))
-			if($ri)
-				$this->ri =& $ri;
-			else
-			{
-				//инициализаци€ $ri по умолчанию
-				$this->UseScript('classes','RequestInfo');
-				$this->ri =& new RequestInfo($this); // kuso@npj: default RI должен быть с одним параметром имхо
-			}
+		{
+			//инициализаци€ $ri по умолчанию
+			$this->UseScript('classes','RequestInfo');
+			$this->ri =& new RequestInfo($this); // kuso@npj: default RI должен быть с одним параметром имхо
+		}
 
 		//$ri возвращает информацию о строке запроса "внутри сайта"
 		//иде€ така€: http://www.mysite.ru/[$this->url]
