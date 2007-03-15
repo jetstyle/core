@@ -267,7 +267,7 @@ class DBModel extends Model
 		else
 			$orderby_sql = ' ORDER BY '. (
 				is_array($fields)
-				? implode(',',array_map(array(&$this, 'quoteName'), $fields))
+				? implode(',',array_map(array(&$this, 'quoteOrderField'), $fields))
 				:	$fields)
 				;
 		return $orderby_sql;
@@ -297,6 +297,15 @@ class DBModel extends Model
 		if (!isset($info)) return NULL;
 
 		return $info['source'];
+	}
+	function quoteOrderField($name)
+	{
+		$info =& $this->_fields_info[$name];
+		if (!isset($info)) return NULL;
+
+		return $info['source'].(isset($info['order']) 
+			? ' '.$info['order'] 
+			: '');
 	}
 	function quoteFieldAlias($name)
 	{
