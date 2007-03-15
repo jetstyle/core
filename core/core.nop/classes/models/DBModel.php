@@ -13,6 +13,8 @@ class DBModel extends Model
 	var $table=NULL;
 	/** список полей таблицы */
 	var $fields = array();
+	var $fields_info= array();
+	//var $lang_fields = array();
 	/** условие where запроса */
 	var $where = NULL;
 	/** параметры ORDER BY запроса */
@@ -30,12 +32,64 @@ class DBModel extends Model
 
 		foreach (array('before_load') as $v)
 		{
-			$this->registerObserver($v, $this->config[$v]);
+			if (isset($config[$v])) $this->registerObserver($v, $this->config[$v]);
 		}
 		foreach (array('fields', 'where', 'order', 'limit', 'offset') as $v)
 		{
 			if (isset($this->config[$v])) $this->$v = $this->config[$v];
 		}
+
+		// строим поля
+		// на выходе:
+		// feilds_info 
+		// array(
+		//		array('name', 'source', alias'),
+		//		);
+
+		$fields_info = array();
+		if (isset($this->fields_info))
+		{
+			$field_names   = array();
+			$field_sources = array();
+			foreach ($this->fields_info as $v)
+			{
+				$field_name = $v['name']; // с точки зрения программы, в запросе это м.б. алиас
+				$field_source = isset($v['source'])
+					? $v['source'] 
+					: $field_name;
+				// грузим языкозависимые поля?
+				if (array_key_exists('lang', $v) && $v['lang'] !== $ctx->lang)
+				{
+					continue; // не добавляем иностранные тексты
+				}
+				$field_alias = (isset($v['alias']) 
+					? $v['alias']
+					: (
+						($field_source === $field_name) 
+						? NULL
+						: $field_name
+					)
+				);
+				$v['name'] = $field_name;
+				$v['source'] = $this->_quoteField($field_source);
+				$v['alias'] = $this->_quoteField($field_alias);
+				$fields_info[$field_name] = $v;
+			}
+		}
+		foreach ($this->fields as $field_name)
+		{
+			if (!array_key_exists($field_name, $fields_info))
+			{
+				$info = array(
+					'name' => $field_name,
+					'source' => $this->_quoteField($field_name),
+					'alias' => NULL,
+				);
+				$fields_info[$field_name] = $info;
+			}
+		}
+		$this->_fields_info = $fields_info;
+
 		return $parent_status && True;
 	}
 	function load($where=NULL, $limit=NULL, $offset=NULL)
@@ -47,13 +101,13 @@ class DBModel extends Model
 
 	function getSelectSql($where=NULL, $limit=NULL, $offset=NULL)
 	{
-		$sql1 =  ' SELECT ' . $this->buildFields($this->fields)
-				. ' FROM '   . $this->buildTableName($this->table)
-				. $this->buildWhere($where);
+		$sql1 =  ' SELECT ' . $this->buildFieldAliases($this->fields)
+			. ' FROM '   . $this->buildTableName($this->table)
+			. $this->buildWhere($where);
 		$sql = $sql1
-				. $this->buildOrderBy($this->order)
-				. $this->buildLimit($limit, $offset);
-			;
+			. $this->buildOrderBy($this->order)
+			. $this->buildLimit($limit, $offset);
+		;
 		// сохраним sql1 для будщих поколений ;)
 		// count() например
 		return array($sql, $sql1);
@@ -64,14 +118,19 @@ class DBModel extends Model
 		if ($is_load) $this->sql = $sql1;
 		return $this->rh->db->query($sql);
 	}
+	function onBeforeInsert(&$row)
+	{
+		if (array_key_exists('_created', $this->fields_sources) 
+			&& !array_key_exists('_created', $row))
+				$row['_created'] = date('Y-m-d H:i:s');
+	}
 	function insert(&$row)
 	{
-		if (in_array('_created', $this->fields) && !array_key_exists('_created', $row))
-			$row['_created'] = date('Y-m-d H:i:s');
+		$this->onBeforeInsert($row);
 		$this->buildFieldsValues($row, $fields_sql, $values_sql);
 		$sql = ' INSERT INTO '.$this->buildTableName($this->table)
-				.'('.$fields_sql.')'
-				.' VALUES ('.$values_sql.')';
+			.'('.$fields_sql.')'
+			.' VALUES ('.$values_sql.')';
 		$row['id'] = $this->rh->db->insert($sql);
 		return $row['id'];
 	}
@@ -91,8 +150,8 @@ class DBModel extends Model
 			$row['_updated'] = date('Y-m-d H:i:s');
 		$this->buildFieldsValuesSet($row, $fields_sql);
 		$sql = ' UPDATE '.$this->buildTableName($this->table)
-				.' SET '.$fields_sql
-				.' WHERE '.$where;
+			.' SET '.$fields_sql
+			.' WHERE '.$where;
 		return $this->rh->db->query($sql);
 	}
 	function delete($row)
@@ -159,6 +218,11 @@ class DBModel extends Model
 		$set_sql = implode(',', $set);
 	}
 
+	function buildFieldAliases($fields)
+	{
+		$fields_sql = implode(',', array_map(array(&$this, 'quoteFieldAlias'), $fields));
+		return $fields_sql;
+	}
 	function buildFields($fields)
 	{
 		$fields_sql = implode(',', array_map(array(&$this, 'quoteField'), $fields));
@@ -203,8 +267,8 @@ class DBModel extends Model
 		else
 			$orderby_sql = ' ORDER BY '. (
 				is_array($fields)
-					? implode(',',array_map(array(&$this, 'quoteName'), $fields))
-					:	$fields)
+				? implode(',',array_map(array(&$this, 'quoteName'), $fields))
+				:	$fields)
 				;
 		return $orderby_sql;
 	}
@@ -229,9 +293,27 @@ class DBModel extends Model
 	}
 	function quoteField($name)
 	{
-		if (strpos($name, ' ')) return $name;
-		return implode('.', array_map(array(&$this, 'quoteName'), 
-		explode('.', $name)));
+		$info =& $this->_fields_info[$name];
+		if (!isset($info)) return NULL;
+
+		return $info['source'];
+	}
+	function quoteFieldAlias($name)
+	{
+		$info =& $this->_fields_info[$name];
+		if (!isset($info)) return NULL;
+
+		return isset($info['alias']) 
+			?  $info['source'].' AS '.$info['alias']
+			: $info['source'];
+	}
+
+	function _quoteField($name)
+	{
+		if (!isset($name) || strpos($name, ' ')) return $name;
+		return implode('.', 
+			array_map(array(&$this, 'quoteName'), 
+			explode('.', $name)));
 	}
 
 }  
