@@ -31,21 +31,21 @@ class MenuPlugin extends RenderablePlugin
 		 */
 		$this->rh->UseClass("models/Menu");
 		$menu =& new Menu();
-		$menu->initialize($this->rh);
 		switch($this->mode)
 		{
 		case 'submenu':
+			$parent = $this->getParentNodeByLevel($this->level - 1);
 			$menu->level = $this->level;
 			$menu->depth = $this->depth;
-			$parent = $this->getParentNodeByLevel($this->level - 1);
-			$menu->load(
-				' AND _left > '.$parent['_left']
-				.' AND _right < '.$parent['_right']
-			);
+			$menu->left = $parent['_left'];
+			$menu->right = $parent['_right'];
+			$menu->initialize($this->rh);
+			$menu->load();
 			break;
 		default:
 			$menu->level = $this->level;
 			$menu->depth = $this->depth;
+			$menu->initialize($this->rh);
 			$menu->load();
 		}
 

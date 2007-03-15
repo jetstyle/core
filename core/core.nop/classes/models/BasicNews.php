@@ -20,6 +20,7 @@ class BasicNews extends DBModel
 		"DATE_FORMAT(inserted, '/%d/%m/%Y/') as date_supertag",
 		 */
 	); 
+
 	var $fields_info = array(
 		array( 
 			'name' => 'date',		 

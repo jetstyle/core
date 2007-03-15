@@ -3,13 +3,25 @@ $this->UseClass("models/Model");
 
 class BasicBread extends Model
 {
-    function load($where='')
-    {
-        if ($where =='' )
-            $where = "AND _left<='".$this->rh->data['_left']."' AND _right>='".$this->rh->data['_right']."'";
+	var $fields = array('id', 'title_pre', '_left', '_right', '_level', '_path', '_parent');
 
-        $sql = "SELECT id, title_pre, _path, _parent FROM ".$this->rh->db_prefix."content WHERE _state=0 ".$where." ORDER by _left ASC";
-        $this->data = $this->rh->db->query($sql);
+    function load()
+    {
+		$this->rh->useClass('models/Content');
+		$m =& new Content();
+		$config = $this->config;
+		$config['fields'] = $this->fields;
+		$config['order'] = '_left ASC';
+
+		$m->initialize($this->rh, $config);
+		// FIXME: lucky: как еще можно узнать реальный путь до страницы?
+		$where = 
+			' AND _left <= '.$m->quote($this->rh->data['_left'])
+			.' AND _right >= '.$m->quote($this->rh->data['_right']);
+		$m->load($where);
+
+		$this->data = $m->data;
+		return;
     }
     
     function addItem($item)
@@ -17,4 +29,5 @@ class BasicBread extends Model
         $this->data[] = $item;
     }
 }
+
 ?>

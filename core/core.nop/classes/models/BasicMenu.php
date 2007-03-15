@@ -1,7 +1,7 @@
 <?
 $this->UseClass("models/DBModel");
 
-class BasicMenu extends DBModel
+class BasicMenu extends Model
 {
 	// lucky@npj:
 	// уровень, до которого подгружать меню
@@ -11,22 +11,23 @@ class BasicMenu extends DBModel
 	var $left = NULL;
 	var $right = NULL;
 	var $fields = array('id', 'title_pre', '_left', '_right', '_level', '_path', '_parent');
-	var $table = 'content';
-	var $where = "_state = 0 AND _path <> '' ";
 
-	function load($where='')
+	function load()
 	{
-		$where_sql = ' AND (_level >= '.$this->quote($this->level)
-			. ' AND _level <'.$this->quote($this->level + $this->depth) 
+		$this->rh->useClass('models/Content');
+		$m =& new Content();
+		$config = $this->config;
+		$config['fields'] = $this->fields;
+		$m->initialize($this->rh, $config);
+		$where = ' AND (_level >= '.$m->quote($this->level)
+			. ' AND _level <'.$m->quote($this->level + $this->depth) 
 			.')';
-		$where_sql = $this->buildWhere($where_sql . $where);
+		if (isset($this->left)) $where .= ' AND  _left > ' . $m->quote($this->left);
+		if (isset($this->right)) $where .= ' AND  _right < ' . $m->quote($this->right);
 
-		$sql = "SELECT ". $this->buildFields($this->fields) 
-			. " FROM ".$this->buildTableNameAlias($this->table)
-			. $where_sql
-			. $this->buildOrderBy('_left');
+		$m->load($where);
 
-		$this->data = $this->rh->db->query($sql);
+		$this->data = $m->data;
 	}
 
 }  
