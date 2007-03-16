@@ -51,6 +51,7 @@
   $rh->tpl_construct_object   = "#.";   // {{#obj.property}}
   $rh->tpl_construct_tplt     = "TPL:"; // {{TPL:Name}}...{{/TPL:Name}}
   $rh->tpl_construct_comment  = "#";    // <!-- # persistent comment -->
+  $rh->tpl_construct_for       = "!for";    // {{!for items do=template}}
 
   $rh->tpl_instant_plugins = array( "dummy" );
   // lucky:
@@ -316,6 +317,96 @@ class TemplateEngineCompiler
         }
         else $result =  ' if ('.$invert.'$tpl->Get("'.$what.'")) { ';
       } 
+		else
+		// {{!for *item do=template}}
+		if (preg_match('#^!(for.*)$#', $thing, $matches))
+		{
+			$params = $this->_ParseActionParams( $matches[1] );
+
+			$key = $params['each']?$params['each']:$params[0]; // ключ
+			//можно без each= а сразу, {{!for news do=test.html:news}}	     
+
+			$alias = $params['as']?$params['as']:NULL; // алиас
+			//можно {{!for news as news_item do=test.html:news}}	     
+			$template_name = $params['do']?$params['do']:$params['use']; // ключ
+
+			$caller = $params['_caller'];
+			if ($template_name[0]==':')
+				$template_name = $caller.'.html'.$template_name;   
+
+			if (isset($alias)) $item_store_to = $alias;
+			else $item_store_to = '*';
+
+			if(!(strpos($template_name, ":") === false))
+			{
+				$sep_tpl = $template_name."_sep";
+				$item_tpl = $template_name."_item";
+			}
+			else 
+			{
+				$sep_tpl = $template_name.":sep";
+				$item_tpl = $template_name.":item";
+			}
+
+			if(!(strpos($template_name, ":") === false))
+			{
+				$empty_tpl = $template_name."_empty";
+			}
+			else 
+			{
+				$empty_tpl = $template_name.":empty";
+			}
+
+
+			$script = $this->_ConstructGetValueScript($key);
+			$result = ' $_z = '.$script .";\n";
+			$result .= ' $template_name = "'.$template_name.'";'."\n";
+			$result .= ' $item_store_to = "'.$item_store_to.'";'."\n";
+			$result .= ' $sep_tpl = "'.$sep_tpl.'";'."\n";
+			$result .= ' $item_tpl = "'.$item_tpl.'";'."\n";
+			$result .= ' $empty_tpl = "'.$empty_tpl.'";'."\n";
+			$result .= '
+if(is_array($_z) && !empty($_z))
+{
+	$sep = $tpl->parse($sep_tpl);
+	// надо чтобы его могло и не быть
+
+	$old_ref =& $tpl->Get("*");
+
+	$first = True;
+	foreach($_z AS $r)
+	{
+		//if (is_array($r))
+		//{
+			$tpl->SetRef($item_store_to, $r);
+		//}
+		//else
+			//$tpl->Set("_", $r);
+		if ($first) 
+		{
+			echo $tpl->parse($item_tpl);
+			$first = False;
+		}
+		else 
+		{ 
+			echo $sep;
+			echo $tpl->parse($item_tpl);
+		}
+		
+	}
+
+	$tpl->SetRef("*", $old_ref );
+}
+else
+{
+	echo $tpl->parse($empty_tpl);
+}
+
+unset($_z);
+				'."\n";
+			$result .= ''."\n";
+        $instant = $result;
+		}
       else
       // {{!action param}}
       if (preg_match($this->action_regexp, $thing, $matches))
@@ -334,11 +425,12 @@ class TemplateEngineCompiler
         $result =  ' $_='.$param_contents.'; echo $tpl->Action("'.$params["_name"].'", $_ ); ';
         $instant = $result;
       }
+			/* lucky 20070316:
       else
       // {{#obj.property}}
       if (preg_match($this->object_regexp, $thing, $matches))
       {
-        $result = ' $_ = $tpl->Get( "'.$matches[1].'" ); '.
+         $result = ' $_ = $tpl->Get( "'.$matches[1].'" ); '.
                   ' echo '.$this->_ConstructGetValue($matches[2]).'; ';
         $instant = $result;
       }
@@ -361,6 +453,29 @@ class TemplateEngineCompiler
           $result = ' echo $tpl->Get( "'.$thing.'" ); ';
         $instant = $result;
       }
+			 */
+
+      // {{#obj.property}}
+      // {{var}}
+      else
+		{
+			//if (preg_match($this->object_regexp, $thing, $matches)) { }
+			//проверяем палка-синтаксис
+			$A = explode('|',$thing);
+			$var = array_shift($A);
+			$script = $this->_ConstructGetValueScript($var);
+			$result = ' $_r = '.$script .';'."\n";
+			if( count($A)>1 ){
+				//есть палка-вхождения
+				$result .= '$_formatters = array("'.implode('","',$A).'");'."\n";
+				$result .= 'foreach($_formatters as $_f){'."\n";
+				$result .= ' $_ = array("_plain"=>$_f,"_name"=>$_f,"_"=>$_r);'."\n";
+				$result .= ' $_r = $tpl->Action($_f,$_);'."\n";
+				$result .= "}\n";
+			}
+			$result .= 'echo $_r; ';
+			$instant = $result;
+		}
     }
 
     $tpl = &$this->tpl;
@@ -374,6 +489,53 @@ class TemplateEngineCompiler
       }
       else return "[!instant unavailable!]";
     return '<'.'?php '.$result.'?'.'>';
+  }
+
+  function _ConstructGetValueScript($key)
+  {
+	  $data_sources = array(); // тут будем искать данные для each
+
+	  if ($key{0} == '*')
+	  { // шаблонная переменная *var
+		  $data_sources[] = '$tpl->Get("*")';
+		  $key = substr($key, 1);
+		  $use_fixture = False;
+	  }
+	  elseif ($key{0} == '#')
+	  {  // шаблонная переменная #obj
+		  $data_sources[] = '$tpl->domain';
+		  $key = substr($key, 1);
+		  $use_fixture = True;
+	  }
+	  else
+	  { // данные из среды выполнения
+		  // lucky: пока не понятно: 
+		  //		как они туда попадут? 
+		  //		и нафиг вообще нужны?
+		  $data_sources[] = '$tpl->domain';
+		  $data_sources[] = '$tpl->rh->tpl_data';
+		  $use_fixture = True;
+	  }
+	  if ($use_fixture)
+		{
+		  // пошли за фикстурами
+		  // lucky: тут $key уже без префиксов
+		  $_key = array_shift(explode('.',$key));
+		  $data_sources[] = '((($s = $tpl->rh->FindScript( "fixtures", "'.$_key.'"))) ? array("'.$_key.'"=>include $s):NULL)';
+		}
+
+	  $value = $this->_ConstructGetValue($key);
+	  $expr = $this->_ConstructGetValueScriptRe($data_sources, $value);
+	  return $expr;
+
+  }
+
+  function _ConstructGetValueScriptRe($data_sources, $value)
+  {
+	  if (empty($data_sources)) return 'NULL';
+	  $source = array_shift($data_sources);
+	  $expr = '(((($_ = '.$source.') || True) && isset($_) && ($_t='.$value.') && isset($_t)) ? $_t : ('.$this->_ConstructGetValueScriptRe($data_sources, $value).'))';
+	  return $expr;
   }
 
   //нужно уметь обращаться к автомассиву
@@ -407,7 +569,10 @@ class TemplateEngineCompiler
 		  if ($this->rh->tpl_construct_standard_camelCase)
 			  $method = implode('', array_map('ucfirst', explode('_', $method))); // GetSomeValue
 		  $res = '(is_array($_)?$_["'.$k.'"]:'
-				  .'(method_exists($_,"'.$method.'")?$_->'.$method.'():$_->'.$k.'))';
+			  . ((preg_match ('#^[A-Za-z_][A-Za-z0-9_]*$#', $method)) 
+			  ?  '(method_exists($_,"'.$method.'")?$_->'.$method.'():$_->'.$k.'))'
+			  : 'NULL)');
+			  ;
 		  return (empty($parts)
 			  ? $res 
 			  /* lucky: я обожаю этот язык Ж), но тут требуют lvalue 
