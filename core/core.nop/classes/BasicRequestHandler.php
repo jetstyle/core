@@ -184,6 +184,8 @@ class BasicRequestHandler extends ConfigProcessor {
 			$this->_FuckQuotes($_REQUEST);
 		}
 
+		$this->onAfterLoadConfig();
+
 		//инициализируем базовые объекты
 		$this->UseClass("Debug");
 		$this->debug =& new Debug();
@@ -215,6 +217,10 @@ class BasicRequestHandler extends ConfigProcessor {
 		$this->debug->Trace("RH: constructor done");
 
 
+	}
+
+	function onAfterLoadConfig()
+	{
 	}
 
 	// функци€, заполн€юща€ пол€ *_domain, чтобы помогать кукам и вообще всем

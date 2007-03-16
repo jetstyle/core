@@ -6,6 +6,8 @@
 
 $_basedir = realpath(dirname(__FILE__).'/../../').'/';
 
+$this->base_dir = $_basedir;
+
 include( $_basedir."config/config.php" ); // подцепляем конфиг
 include( $_basedir."config/config_db.php" ); // подцепляем конфиг БД
 include( $_basedir."config/config_handlers.php" );
@@ -65,7 +67,7 @@ $this->shortcuts = array(
 $this->msg_default = "ru"; 
 
 // прочие настройки
-$this->cache_dir              = $_basedir."cache/web/"; // (+) or "../project.zcache/" -- куда сложен кэш
+$this->cache_dir              = $_basedir.'cache/'.$this->project_name.'/'; // (+) or "../project.zcache/" -- куда сложен кэш
 
 // для сторонних библиотек: размещение их
 $this->lib_href_part          = "libs"; // как правило не меняется. БЕЗ СЛЭША!
