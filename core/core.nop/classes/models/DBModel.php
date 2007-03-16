@@ -49,8 +49,6 @@ class DBModel extends Model
 		$fields_info = array();
 		if (isset($this->fields_info))
 		{
-			$field_names   = array();
-			$field_sources = array();
 			foreach ($this->fields_info as $v)
 			{
 				$field_name = $v['name']; // с точки зрения программы, в запросе это м.б. алиас
@@ -120,7 +118,7 @@ class DBModel extends Model
 	}
 	function onBeforeInsert(&$row)
 	{
-		if (array_key_exists('_created', $this->fields_sources) 
+		if (array_key_exists('_created', $this->fields) 
 			&& !array_key_exists('_created', $row))
 				$row['_created'] = date('Y-m-d H:i:s');
 	}
