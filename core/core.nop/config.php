@@ -4,7 +4,7 @@
 // (+) -- меняется почти всегда, by-default выставлено в production single-site version
 // (!) -- обязательно менять!
 
-$_basedir = realpath(dirname(__FILE__).'/../../').'/';
+$_basedir = realpath(dirname(__FILE__).'/../').'/';
 
 $this->base_dir = $_basedir;
 
