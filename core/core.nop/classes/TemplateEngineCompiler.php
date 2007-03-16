@@ -323,7 +323,12 @@ class TemplateEngineCompiler
         $params = $this->_ParseActionParams( $matches[1] );
 
         // let`s make it instant!
-        if (in_array($params["_name"], $this->rh->tpl_instant_plugins)) $_instant=true;
+		  if (in_array($params["_name"], $this->rh->tpl_instant_plugins) 
+			  // lucky: hint in template
+			  || (isset($params["instant"]) && $params["instant"]))
+		  {
+			  $_instant=true;
+		  }
 
         $param_contents = $this->_ImplodeActionParams( $params );
         $result =  ' $_='.$param_contents.'; echo $tpl->Action("'.$params["_name"].'", $_ ); ';
