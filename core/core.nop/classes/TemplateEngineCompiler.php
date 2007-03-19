@@ -490,17 +490,12 @@ unset($_z);
 
 	  $use_fixture = $this->rh->use_fixtures;
 
-	  if ($key{0} == '*')
-	  { // шаблонная переменная *var
-		  $data_sources[] = '$tpl->Get("*")';
-		  $key = substr($key, 1);
-		  $use_fixture = ($use_fixture && False);
-	  }
-	  elseif ($key{0} == '#')
+	  if ($key{0} == '#')
 	  {  // шаблонная переменная #obj
 		  $data_sources[] = '$tpl->domain';
+		  $use_fixture = ($use_fixture && ($key{1} != '*')); // не используем фикстуры 
+																	        // для '*foo'
 		  $key = substr($key, 1);
-		  $use_fixture = ($use_fixture && True);
 	  }
 	  else
 	  { // данные из среды выполнения
