@@ -1,7 +1,7 @@
 <?php
 
 /**
- * ÐšÐ»Ð°ÑÑ JsFileCache - ÑƒÐ¿Ñ€Ð°Ð²Ð»ÑÐµÑ‚ ÐºÐµÑˆÐ°Ð¼Ð¸
+ * Êëàññ JsFileCache - óïðàâëÿåò êåøàìè
  */
 class JsFileCache
 {
