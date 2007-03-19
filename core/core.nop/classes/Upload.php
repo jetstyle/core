@@ -41,7 +41,8 @@
 	$current->format -- формат файла, аббривеатура, например "MsWord"
 	$current->content_type -- content-type, например "application/msword"
 	$current->size -- размер файла в килобайтах
-	$current->link -- имя файла с расширением от корневой директории
+	$current->link -- путь файла на сайте с расширением
+	$current->href -- путь файла на сайте с расширением от корневой директории сайта
 
 	В БД нужна следующая таблица:
 
@@ -67,9 +68,10 @@ class Upload {
 	var $DENY = array(); // чёрный список расширений
 	var $DIRS_SWAPPED = array(); //для DirSwap(),  DirUnSwap();
  	
-	function Upload(&$rh,$dir="",$table_name=''){
+	function Upload(&$rh,$dir="",$table_name='',$path_link=''){
 		$this->rh =& $rh;
 		$this->dir = $dir;//with trailing '/'
+		$this->path_link=$path_link ? $path_link : dirname($dir).'/';
 		$this->table_name = $table_name ? $table_name : $rh->db_prefix.'upload';
 		$this->chmod = 0744;
 		//читаем базу знаний
@@ -88,7 +90,8 @@ class Upload {
 		$this->current->format = $this->TYPES[$ext][1];
 		$this->current->content_type = $this->TYPES[$ext][0];
 		$this->current->size = (integer)(@filesize($file_name_full)/1024);
-		$this->current->link = $this->dir.$this->current->name_short;
+		$this->current->link = $this->path_link.$this->current->name_short;
+		$this->current->href = $this->rh->base_url.$this->current->link;
 	}
 	
 	function _CheckExt($ext,$type){
