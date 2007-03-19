@@ -69,10 +69,20 @@ class RequestHandler extends ConfigProcessor {
     $this->GLOBALS = array_merge( $this->GLOBALS, $_GET );
     $this->GLOBALS = array_merge( $this->GLOBALS, $_COOKIE );
     
-    //читаем базовый конфиг
-    if(!@is_readable($config_path)) die("Cannot read local configurations.");
-    require_once($config_path);
-    
+	 //читаем базовый конфиг
+	 if (is_object($config_path))
+	 {
+		 foreach ($config_path->toArray() as $k=>$v) $this->$k = $v;
+	 }
+	 elseif(@is_readable($config_path)) 
+	 {
+		 require_once($config_path);
+	 }
+	 else
+	 {
+		 die("Cannot read local configurations.");
+	 }
+
     //инициализируем ConfigProcessor
     ConfigProcessor::ConfigProcessor();
     

@@ -1,10 +1,10 @@
 <?
 
   // прошиваем локали, чтобы у нас всё работало с case-sensitivity
-  setlocale(LC_CTYPE, array("ru_RU.CP1251","ru_SU.CP1251","ru_RU.KOI8-r","ru_RU","russian","ru_SU","ru"));
+  //setlocale(LC_CTYPE, array("ru_RU.CP1251","ru_SU.CP1251","ru_RU.KOI8-r","ru_RU","russian","ru_SU","ru"));
 
   //constants
-  if( !defined("CURRENT_LEVEL") ) define( "CURRENT_LEVEL", 0 );
+  //if( !defined("CURRENT_LEVEL") ) define( "CURRENT_LEVEL", 0 );
 	
 	
 	//include previous
@@ -13,33 +13,35 @@
 	$_dir = dirname(__FILE__);
 	
 	//level-based directories
-	$this->DIRS["scripts"][] 			= $_dir.'/';
-	$this->DIRS["classes"][] 			= $_dir.'/classes/';
-	$this->DIRS["modules"][] 			= $_dir.'/modules/';
-	$this->DIRS["libs"][] 				= $_dir.'/../libs/';
-	$this->DIRS["actions"][] 			= $_dir.'/actions/';
-	$this->DIRS["templates"][] 		= $_dir.'/templates/';
-	$this->DIRS["handlers"][] 		= $_dir.'/handlers/';
-	$this->DIRS["message_sets"][] = $_dir.'/message_sets/';
+	$DIRS = $c->get('DIRS');
+	$DIRS["scripts"][] 			= $_dir.'/';
+	$DIRS["classes"][] 			= $_dir.'/classes/';
+	$DIRS["modules"][] 			= $_dir.'/modules/';
+	$DIRS["libs"][] 				= $_dir.'/../libs/';
+	$DIRS["actions"][] 			= $_dir.'/actions/';
+	$DIRS["templates"][] 		= $_dir.'/templates/';
+	$DIRS["handlers"][] 		= $_dir.'/handlers/';
+	$DIRS["message_sets"][] = $_dir.'/message_sets/';
+	$DIRS = $c->set('DIRS', $DIRS);
 	
 	//database
-	$this->db_server = "localhost";
-	$this->db_user = "nop";
-	$this->db_password = "123456";
-	$this->db_database = "dummy";
+	$c->set_if_free('db_server',  "localhost");
+	$c->set_if_free('db_user',  "nop");
+	$c->set_if_free('db_password',  "123456");
+	$c->set_if_free('db_database',  "dummy");
 	
   //template engine
-  $this->templates_cache_dir = $_dir.'/_templates/';
-  $this->PRE_FILTERS = array("strip_comments");//,"pack_spaces","gather_css",
-  $this->POST_FILTERS = array();
-  $this->auto_css_temp_dir = "css/_auto/";
-  $this->auto_css_filename = "css/auto.css";
+  $c->set_if_free('templates_cache_dir',  $_dir.'/_templates/');
+  $c->set_if_free('PRE_FILTERS',  array("strip_comments"));//,"pack_spaces","gather_css",
+  $c->set_if_free('POST_FILTERS',  array());
+  $c->set_if_free('auto_css_temp_dir',  "css/_auto/");
+  $c->set_if_free('auto_css_filename',  "css/auto.css");
 	
   //misc
-  $this->default_page = 'test';
-  $this->hide_errors = false;
-	$this->path_class = 'Path';
-	$this->project_name = 'OSB6';
-	$this->show_logs = true;
+  $c->set_if_free('default_page',  'test');
+  $c->set_if_free('hide_errors',  false);
+	$c->set_if_free('path_class',  'Path');
+	$c->set_if_free('project_name',  'OSB6');
+	$c->set_if_free('show_logs',  true);
 
 ?>
