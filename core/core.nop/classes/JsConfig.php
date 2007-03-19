@@ -7,17 +7,6 @@
 class JsConfig_Array
 {
 
-	function keys(&$self)
-	{
-		return array_keys($self);
-	}
-
-	function replace(&$self, $name, $value)
-	{
-		$self[$name] = $value;
-		return $self[$name];
-	}
-
 	function get(&$self, $name, $default=NULL)
 	{
 		$res = NULL;
@@ -36,6 +25,17 @@ class JsConfig_Array
 		return $res;
 	}
 
+	function replace(&$self, $name, $value)
+	{
+		$self[$name] = $value;
+		return $self[$name];
+	}
+
+	function keys(&$self)
+	{
+		return array_keys($self);
+	}
+
 	function hasKey(&$self, $name)
 	{
 		return array_key_exists($name, $self);
@@ -46,12 +46,6 @@ class JsConfig_Array
 
 class JsConfig_Object
 {
-
-	function replace(&$self, $name, $value)
-	{
-		$self->$name =& $value;
-		return $self->$name;
-	}
 
 	function get(&$self, $name, $default=NULL)
 	{
@@ -72,6 +66,12 @@ class JsConfig_Object
 		return $res;
 	}
 
+	function replace(&$self, $name, $value)
+	{
+		$self->$name =& $value;
+		return $self->$name;
+	}
+
 	function keys(&$self)
 	{
 		return array_keys(get_object_vars($self));
@@ -88,10 +88,10 @@ class JsConfig_Object
 class JsConfig
 {
 
-	function _buildClassName(&$self)
+	function get(&$self, $name, $default=NULL)
 	{
-		$type = gettype($self);
-		return 'JsConfig_'.ucfirst($type);
+		$cls = JsConfig::_buildClassName($self);
+		return call_user_func(array($cls, 'get'), &$self, $name, &$default);
 	}
 
 	function set(&$self, $name, $value)
@@ -106,41 +106,64 @@ class JsConfig
 		return call_user_func(array($cls, 'replace'), &$self, $name, &$value);
 	}
 
-	function get(&$self, $name, $default=NULL)
+	function hasKey(&$self, $name)
 	{
 		$cls = JsConfig::_buildClassName($self);
-		return call_user_func(array($cls, 'get'), &$self, $name, &$default);
+		return call_user_func(array($cls, 'hasKey'), &$self, $name);
 	}
 
-	function merge(&$self, &$other)
+	function keys(&$self)
 	{
 		$cls = JsConfig::_buildClassName($self);
-		$other_cls = JsConfig::_buildClassName($other);
+		return call_user_func(array($cls, 'keys'), &$self);
+	}
 
-		$keys = call_user_func(array($other_cls, 'keys'), $other);
-		foreach ($keys as $k)
+
+	function _buildClassName(&$self)
+	{
+		$type = gettype($self);
+		return 'JsConfig_'.ucfirst($type);
+	}
+
+	function merge(&$self, &$other, $name)
+	{
+		if (JsConfig::hasKey($other, $name))
 		{
-			$value = JsConfig::get($other, $k);
-			JsConfig::set($self, $k, $value);
+			$value = JsConfig::get($other, $name);
+			JsConfig::set($self, $name, $value);
 		}
+	}
 
+	function join(&$self, &$other, $name)
+	{
+		$value = JsConfig::get($other, $name);
+		JsConfig::replace($self, $name, $value);
+	}
 
+	function mergeConfigs(&$self, &$other)
+	{
+		$names = JsConfig::keys($other);
+		foreach ($names as $name) JsConfig::merge(&$self, &$other, $name);
+	}
+
+	function joinConfigs(&$self, &$other)
+	{
+		$names = JsConfig::keys($other);
+		foreach ($names as $name) JsConfig::join(&$self, &$other, $name);
 	}
 
 	function chainConfig(&$loader, &$self, $expr, $name)
 	{
 		if (!isset($loader)) $loader =& new JsConfigLoader();
-		$folder = eval('return '.$expr.';');
-		$loader->chainConfig($self, $folder, $name);
+		$loader->chainConfig($self, $expr, $name);
 	}
 
-	function seeConfig(&$loader, &$self, $expr, $name)
+	function seeConfig(&$loader, &$self, $folder, $name)
 	{
 		if (!isset($loader)) 
 		{
 			$loader =& new JsConfigLoader();
 		}
-		$folder = eval('return '.$expr.';');
 		$loader->loadConfig($self, $folder, $name);
 	}
 
@@ -154,7 +177,7 @@ class JsConfigLoader
 
 	function chainConfig(&$self, $folder, $name)
 	{
-		array_push($this->chain, array($self, $folder, $name));
+		array_push($this->chain, array(&$self, $folder, $name));
 		if (!isset($this->loading)) $this->load();
 	}
 
@@ -163,7 +186,6 @@ class JsConfigLoader
 		while ($config_info = array_shift($this->chain))
 		{
 			//						 $self, $folder, $name
-			var_dump($config_info);
 			$this->loadConfig(
 				$config_info[0], 
 				eval('return '.$config_info[1].';'), 
@@ -197,7 +219,7 @@ class JsConfigLoader
 		$data = Spyc::YAMLLoad($source);
 		foreach ($data as $k=>$v) // для каждого environment
 			if ($k == $self->ctx->environment || $k == 'all')
-				JsConfig::merge($self, $v);
+				JsConfig::mergeConfigs($self, $v);
 	}
 
 	function loadConfig(&$self, $folder, $config_name)

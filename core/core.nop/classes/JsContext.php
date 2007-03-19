@@ -59,11 +59,11 @@ class JsContext
 		$self->ctx =& $self;
 
 
-		JsConfig::merge($self, $config);
+		JsConfig::mergeConfigs($self, $config);
 		JsConfig::set($self, 
 			'cache_dir', 
 							$self->project_dir
-							.'/cache/'
+							.'cache/'
 							.$self->app_name
 							.'/');
 
@@ -75,12 +75,14 @@ class JsContext
 			'file_path' => $self->cache_dir.$environment.'_config'.'.php',
 		));
 
-		if (False && $cache->isValid())
+		if ($cache->isValid())
 		{
 			// берем из кеша
 			$f = $cache->getFileName();
 			$data  = include $f;
-			JsConfig::merge($self, unserialize($data));
+			//JsConfig::mergeConfigs($self, unserialize($data));
+			$self = unserialize($data);
+			$self->ctx =& $self;
 		}
 		else
 		{
@@ -99,7 +101,7 @@ class JsContext
 			$vars = array(
 				'project_config_dir', 
 				'app_config_dir', 
-			//	'core_config_dir',
+				'core_config_dir',
 				);
 
 			$loader =& new JsConfigLoader();
@@ -108,13 +110,14 @@ class JsContext
 				JsConfig::chainConfig($loader, $self, 
 					'"'.$self->$var.'"', 'config');
 			}
-			var_dump($self);
 
 			foreach ($loader->getSources() as $source)
 				$cache->addSource($source);
 
+			unset($self->ctx);
 			$str = "return '".serialize($self)."';";
 			$cache->save($str);
+			$self->ctx =& $self;
 		}
 
 		return $self;
