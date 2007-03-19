@@ -153,7 +153,17 @@ class BasicRequestHandler extends ConfigProcessor {
 	{
 
 		//пытаемся прочесть файл конфигурации
-		if(!@is_readable($config_path)) 
+		if (is_object($config_path))
+		{
+			foreach($config_path->toArray() as $k=>$v) $this->$k = $v;
+			$this->cfg =& $config_path;
+		}
+		else
+		if(@is_readable($config_path)) 
+		{
+			require_once($config_path);
+		}
+		else
 		{
 			$uri  = preg_replace("/\?.*$/", "",$_SERVER["REQUEST_URI"]);
 			$page = $_REQUEST["page"];
@@ -161,7 +171,6 @@ class BasicRequestHandler extends ConfigProcessor {
 			$uri  = rtrim( $uri, "/" )."/setup";
 			die("Cannot read local configurations. May be you should try to <a href='".$uri."'>run installer</a>, if any?");
 		}
-		require_once($config_path);
 
 		//вычисляем base_url
 		if( !isset($this->base_url) )

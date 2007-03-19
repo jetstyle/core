@@ -374,6 +374,28 @@ require_once dirname(__FILE__).'/ConfigProcessor.php';
 require_once dirname(__FILE__).'/BasicRequestHandler.php';
 class RequestHandler extends BasicRequestHandler 
 {
+	var $fixtures = array();
+	var $use_fixtures = False;
+
+  function useFixture($type, $name)
+  {
+
+	  if (!array_key_exists($name, $this->fixtures)) 
+	  {
+		  if ($s = $this->FindScript( $type, $name))
+		  {
+			  $tpl =& $this->tpl;
+			  $this->fixtures[$name] = include $s;
+		  }
+		  else
+		  {
+			  $this->fixtures[$name] = NULL;
+		  }
+	  }
+	  return isset($this->fixtures[$name])
+		  ? $this->fixtures : NULL;
+
+  }
 
 	function _onCreatePage(&$page)
 	{ 
@@ -482,6 +504,9 @@ class RequestHandler extends BasicRequestHandler
 	{
 		return BasicRequestHandler::Execute($handler);
 	}
+
+	function finalize() { return $this->End(); }
+
 	/*
 	 * Отработать по ключу сайтмапа
 	 * TODO: А не дело ли это View ??

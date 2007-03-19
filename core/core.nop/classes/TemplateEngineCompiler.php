@@ -360,46 +360,38 @@ class TemplateEngineCompiler
 
 			$script = $this->_ConstructGetValueScript($key);
 			$result = ' $_z = '.$script .";\n";
-			$result .= ' $template_name = "'.$template_name.'";'."\n";
-			$result .= ' $item_store_to = "'.$item_store_to.'";'."\n";
-			$result .= ' $sep_tpl = "'.$sep_tpl.'";'."\n";
-			$result .= ' $item_tpl = "'.$item_tpl.'";'."\n";
-			$result .= ' $empty_tpl = "'.$empty_tpl.'";'."\n";
 			$result .= '
 if(is_array($_z) && !empty($_z))
 {
-	$sep = $tpl->parse($sep_tpl);
+	$sep = $tpl->parse("'.$sep_tpl.'");
 	// надо чтобы его могло и не быть
 
 	$old_ref =& $tpl->Get("*");
+	$old__ =& $tpl->Get("_");
 
 	$first = True;
 	foreach($_z AS $r)
 	{
-		//if (is_array($r))
-		//{
-			$tpl->SetRef($item_store_to, $r);
-		//}
-		//else
-			//$tpl->Set("_", $r);
-		if ($first) 
+		$tpl->SetRef("'.$item_store_to.'", $r);
+		if (True===$first) 
 		{
-			echo $tpl->parse($item_tpl);
+			echo $tpl->parse("'.$item_tpl.'");
 			$first = False;
 		}
 		else 
 		{ 
 			echo $sep;
-			echo $tpl->parse($item_tpl);
+			echo $tpl->parse("'.$item_tpl.'");
 		}
 		
 	}
 
 	$tpl->SetRef("*", $old_ref );
+	$tpl->SetRef("_", $old__ );
 }
 else
 {
-	echo $tpl->parse($empty_tpl);
+	echo $tpl->parse("'.$empty_tpl.'");
 }
 
 unset($_z);
@@ -491,21 +483,24 @@ unset($_z);
     return '<'.'?php '.$result.'?'.'>';
   }
 
+
   function _ConstructGetValueScript($key)
   {
 	  $data_sources = array(); // тут будем искать данные для each
+
+	  $use_fixture = $this->rh->use_fixtures;
 
 	  if ($key{0} == '*')
 	  { // шаблонная переменная *var
 		  $data_sources[] = '$tpl->Get("*")';
 		  $key = substr($key, 1);
-		  $use_fixture = False;
+		  $use_fixture = ($use_fixture && False);
 	  }
 	  elseif ($key{0} == '#')
 	  {  // шаблонная переменная #obj
 		  $data_sources[] = '$tpl->domain';
 		  $key = substr($key, 1);
-		  $use_fixture = True;
+		  $use_fixture = ($use_fixture && True);
 	  }
 	  else
 	  { // данные из среды выполнения
@@ -514,14 +509,14 @@ unset($_z);
 		  //		и нафиг вообще нужны?
 		  $data_sources[] = '$tpl->domain';
 		  $data_sources[] = '$tpl->rh->tpl_data';
-		  $use_fixture = True;
+		  $use_fixture = ($use_fixture && True);
 	  }
 	  if ($use_fixture)
 		{
 		  // пошли за фикстурами
 		  // lucky: тут $key уже без префиксов
 		  $_key = array_shift(explode('.',$key));
-		  $data_sources[] = '((($s = $tpl->rh->FindScript( "fixtures", "'.$_key.'"))) ? array("'.$_key.'"=>include $s):NULL)';
+		  $data_sources[] = '$tpl->rh->useFixture("fixtures", "'.$_key.'")';
 		}
 
 	  $value = $this->_ConstructGetValue($key);

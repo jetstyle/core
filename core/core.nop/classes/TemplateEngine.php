@@ -248,8 +248,8 @@ class TemplateEngine extends ConfigProcessor
 
     // 2. получение имён файлов исходника и компилята
     $file_cached = $this->rh->cache_dir.
-                   $this->_skin.
-                   $this->rh->tpl_template_file_prefix.
+                   $this->rh->environment.$this->rh->tpl_template_sepfix.
+                   $this->_skin.$this->rh->tpl_template_file_prefix.
                    //судя по названию, здесь должна использоваться tpl_template_file_prefix вместо tpl_cache_prefix
                    //$this->rh->tpl_cache_prefix.
                    $tname.".php";
@@ -334,6 +334,7 @@ class TemplateEngine extends ConfigProcessor
       //получение имён файлов для исходника и компилята
       $file_cached = $this->rh->cache_dir.
                      $this->rh->tpl_action_file_prefix.
+                     $this->rh->environment.$this->rh->tpl_template_sepfix.
                      $this->_skin.$this->rh->tpl_template_sepfix.
                      $action_name_for_cache.".php";
       
