@@ -485,7 +485,7 @@ class RequestHandler extends BasicRequestHandler
 	function Execute( $handler="", $type="" )
 	{
 		$this->UseClass("Upload");
-		$this->upload=&new Upload($this, "files/");
+		$this->upload=&new Upload($this, $this->project_dir."files/");
 
 		//до хандла чтобы в вью была нода
 		$this->tpl->setRef("node", $this->data);
