@@ -490,6 +490,14 @@ unset($_z);
 
 	  $use_fixture = $this->rh->use_fixtures;
 
+	  // lucky: FIXME: C&P from 
+      foreach( $this->rh->shortcuts as $shortcut=>$replacement )
+        if (strpos($key, $shortcut) === 0)
+        {
+          if (!is_array($replacement)) $replacement = array($replacement, "");
+          $key = $replacement[0]. substr($key, strlen($shortcut)). $replacement[1];
+        }
+
 	  if ($key{0} == '#')
 	  {  // шаблонная переменная #obj
 		  $data_sources[] = '$tpl->domain';
