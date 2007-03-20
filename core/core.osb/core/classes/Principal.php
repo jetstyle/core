@@ -44,7 +44,8 @@ class Principal {
   //for toolbar
   var $ADMIN_ROLES = array( ROLE_GOD, ROLE_ADMIN ); //для каких ролей показывать тулбар
   
-  function Principal(&$rh){
+  function Principal(&$rh)
+  {
     $this->rh =& $rh;
     $this->user = array();//$this->GetByID(0);
     $this->state = PRINCIPAL_UNKNOWN;
@@ -57,21 +58,23 @@ class Principal {
   
   //восстанавливаемся из сессии
   //или пытаемся залогиниться
-  function Authorise(){
+  function Authorise()
+  {
     $this->rh->debug->Trace("Principal::Authorise() - ...");
     
     //пытаемемся восстановить из сессии
-    if( $this->SessionRestore() ){
+    if( $this->SessionRestore() )
+    {
       $this->state = PRINCIPAL_RESTORED;
       return true;
     }
-    
     //пытаемся авторизоваться как в первый раз
     return $this->Login( $this->rh->GetVar($this->input_name_login), $this->rh->GetVar($this->input_name_password) );
   }
   
   //пытаемся залогиниться
-  function Login( $login, $password ){
+  function Login( $login, $password )
+  {
     
     //пытаемся загрузить пользователя по логину
     if( !($this->user = $this->GetByLogin($login)) ){
@@ -80,15 +83,15 @@ class Principal {
       $this->rh->debug->Trace("<font color='red'>Principal::Login('$login','$password') - неверный логин</font> ");
       return false;
     }
-    
+
     //проверяем пароль 
-    if( $this->user['password']!=$password ){
+    if( $this->user['password']!=$password )
+    {
       $this->user = $this->GetByID(0);
       $this->state = PRINCIPAL_WRONG_PWD;
       $this->rh->debug->Trace("<font color='red'>Principal::Login('$login','$password') - неверный пароль</font>");
       return false;
     }
-    
     //сохраняем пользователя в сессии
     $this->rh->debug->Trace("<font color='green'>Principal::Login('$login','$password') - OK</font>");
     $this->SessionStore();
@@ -112,7 +115,14 @@ class Principal {
     return $this->GetById(0);
   }
   
-  function IsGrantedTo( $location ){
+  function getUserRole()
+  {
+     return (integer)$this->user['role_id'];
+  }
+  
+  function IsGrantedTo( $location )
+  {
+    
     $ACL =& $this->ACL;
     $N = count($A);
     
@@ -120,22 +130,31 @@ class Principal {
     
     //бежим по всему ACL
     $granted = false;
-    $str = (integer)$this->user['role_id'];
-    $str1 = '!'.$this->user['role_id'];
-    $this->rh->debug->Trace("Principal::IsGrantedTo() - ищем [$str] [$str1]");
-    foreach($ACL as $loc=>$roles){
 
+    /* способ каким берется роль пользователя теперь можно перегружать */
+    $str = $this->getUserRole();
+    $str1 = '!'.$this->getUserRole();
+
+    $this->rh->debug->Trace("Principal::IsGrantedTo() - ищем [$str] [$str1]");
+    
+    
+    foreach($ACL as $loc=>$roles)
+    {
       //наша строка?
+      
       $OK = ($loc=='*' || $loc==$location);
       if( !$OK ){
         $n = strlen($loc)-1;
         $OK = ($loc[$n]=='*' && substr($location,0,$n)==substr($loc,0,$n));
       }
       //проверяем права
-      if( $OK ){
+      if( $OK )
+      {
 //        $this->rh->debug->Trace("Principal::IsGrantedTo() - строка $loc => [".implode(',',$roles)."]");
         //нашли строку с запретом?
-        if( in_array($str1,$roles,true) ){
+        if( in_array($str1,$roles,true) )
+        {
+          
           $this->granted_state = PRINCIPAL_ACL_NEGATIVE;
           $this->rh->debug->Trace("Principal::IsGrantedTo() - <font color='red'>denied</font>");
           return false;
@@ -144,7 +163,9 @@ class Principal {
 //$this->rh->debug->trace_r($roles);
 //$this->rh->debug->trace($str);
         //нашли строку, которая позволяет?
-        if( in_array($str,$roles,true) ){
+        if( in_array($str,$roles,true) )
+        {
+           
           $granted = true;
           $this->rh->debug->Trace("Principal::IsGrantedTo() - <font color='green'>granted</font>");
         }

@@ -42,11 +42,37 @@ class Module_ToolbarTree extends Module {
     $this->data->Load();
     //вычисляем доступность
     foreach($this->data->ITEMS as $id=>$r)
+    {
       $this->data->ITEMS[$id]["granted"] = $this->rh->prp->IsGrantedTo($r['href']);
+      $granted_ids[] = $id;
+    }
+    
+    //грантед узлы у которых нет грантед детей - скрыть
+    foreach ($granted_ids as $id)
+    {
+        //if ($this->data->ITEMS[$id]['granted'])
+       // echo '<br>'.$id.'  '.$this->data->ITEMS[$id]['title'].' ';
+        //у грантед узла есть дети
+        if (!empty($this->data->CHILDREN[$id]))
+        {
+            $no_sub_grants = true;
+            foreach ($this->data->CHILDREN[$id] as $children_id)
+            {
+                if ($this->data->ITEMS[$children_id]['granted']==true && $no_sub_grants == true)
+                    $no_sub_grants = false;
+            }
+            
+            if ($no_sub_grants)
+            {
+                $this->data->ITEMS[$id]['granted'] = false;
+            }
+        }
+    }
   }
   
   //помечаем открытые
-  function MarkOpen(){
+  function MarkOpen()
+  {
     $rh =& $this->rh;
     //ищем ту, на чью ссылку пришли
     $id = 0;
@@ -139,7 +165,8 @@ class Module_ToolbarTree extends Module {
     }
     
     //таки рисуем
-    if( $this->ShowToolbar() ){
+    if( $this->ShowToolbar() )
+    {
       
       $rh->UseClass("ListObject");
       
@@ -210,10 +237,11 @@ class Module_ToolbarTree extends Module {
   }
   
   //показывать или нет тулбар?
-  function ShowToolbar(){
+  function ShowToolbar()
+  {      
     $rh =& $this->rh;
     $prp =& $rh->prp;
-    return $rh->show_toolbar || in_array( $prp->user['role_id'], $this->rh->prp->ADMIN_ROLES );
+    return $rh->show_toolbar || in_array( $prp->getUserRole(), $this->rh->prp->ADMIN_ROLES );
   }
 }
 

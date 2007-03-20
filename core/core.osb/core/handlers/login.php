@@ -1,9 +1,24 @@
 <?
+
   $prp->Authorise();
+
+/*
+ *
+ 
+  
+  var_dump($prp->user);
+  echo '<hr>';
+  var_dump($prp->IsAuth());
+  echo '<hr>';
+  var_dump($rh->url);
+  die('login_');  
+  
+  */
+  
   if( $rh->GetVar('logout') )
     $prp->Logout( $rh->logout_url ? $rh->logout_url : $_SERVER["HTTP_REFERER"] );
 //    $prp->Logout('login');
-  
+
   //уже авторизован?
   if( $prp->IsAuth() )
     $rh->redirect( $rh->url );

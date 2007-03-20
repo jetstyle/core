@@ -1,9 +1,14 @@
 <?
-  
+  //die('start');
   include( $rh->FindScript("handlers","_start") );
-  
+  /*
+  vaR_dump($prp->user);
+  var_dump($prp->IsGrantedTo('start'));
+  die('start');
+*/
   //проверяем доступ к этому хэндлеру
-  if( !$prp->IsGrantedTo('start') ){
+  if( !$prp->IsGrantedTo('start') )
+  {
     echo $tpl->Parse('access_denied.html');
     $rh->End();
   }
@@ -12,6 +17,7 @@
   
   //собираем все разделы для главной страницы
   $ITEMS = array();
+  
   foreach( $rh->toolbar->data->ITEMS as $id=>$r )
     if(
       $r["granted"] && $r["main"] && 

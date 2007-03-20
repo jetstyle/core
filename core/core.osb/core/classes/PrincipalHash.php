@@ -22,7 +22,8 @@ class PrincipalHash extends Principal {
     else return false;
   }
   
-  function GetByLogin($login){
+  function GetByLogin($login)
+  {
     //ищем
     foreach($this->USERS as $i=>$user)
       if( $user['login']==$login )
@@ -32,7 +33,8 @@ class PrincipalHash extends Principal {
   }
   
   //сохраняем в куках
-  function SessionStore(){
+  function SessionStore()
+  {
     $rh =& $this->rh;
     $this->rh->debug->Trace("PrincipalHash::SessionStore()");
 //    setcookie( $this->cookie_prefix.'_usr', $this->user['login'] );

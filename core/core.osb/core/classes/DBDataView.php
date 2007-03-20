@@ -80,7 +80,8 @@ class DBDataView extends Obj {
     //load data
 //    print_r($this->SELECT_FIELDS);
 //    echo $sql.'<br>';
-//    die($sql);
+
+    //echo '<br>'.$sql;
     if($ARR) $rs = $db->SelectLimit( $sql, $ARR[1], $ARR[0] );
     else if($this->limit) $rs = $db->SelectLimit( $sql, $this->limit );
     else $rs = $db->execute( $sql );

@@ -13,9 +13,11 @@ class PrincipalDB extends Principal
   
   var $USERS = array(); //массив юзерей изначально пуст
 
+  var $id_field="id";
   var $SELECT_FIELDS = array("id","role_id","login","password");
   
-  function PrincipalDB(&$rh){
+  function PrincipalDB(&$rh)
+  {
     Principal::Principal($rh);
     $this->cookie_prefix = $rh->project_name.'_';
     $prp =& $this;
@@ -29,19 +31,23 @@ class PrincipalDB extends Principal
     $db =& $this->rh->db;
     $rs = $db->execute('SELECT '.implode(",",$this->SELECT_FIELDS).' FROM '.$this->users_table.' WHERE '.$this->users_where.' AND '.$where);
     $user = $rs->fields;
-    if( $user['id'] ){
+    if( $user[$this->id_field] )
+    {
       $this->rh->debug->Trace("PrincipalDB::_GetBy() - OK");
       $this->rh->debug->Trace_R($user,0,'PrincipalDB::user');
-      $this->USERS[ $user['id'] ] = $user;
+      $this->USERS[ $user[$this->id_field] ] = $user;
       return $user;
-    }else{
+    }
+    else
+    {
       $this->rh->debug->Trace("PrincipalDB::_GetBy() - не найден");
       return false;
     }
   }
   
-  function GetById($id){
-    return $this->_GetBy('id='.((integer)$id));
+  function GetById($id)
+  {
+    return $this->_GetBy($this->id_field.'='.((integer)$id));
   }
   
   function GetByLogin($login){
@@ -53,7 +59,8 @@ class PrincipalDB extends Principal
   function _Session(){
     $this->rh->debug->Trace("PrincipalDB::_Session() - ...");
     $db =& $this->rh->db;
-    if( !$this->session['id'] ){
+    if( !$this->session['id'] )
+    {
       $this->rh->debug->Trace("PrincipalDB::_Session() - сессии пока нет");
       //прибиваем старые сессии - брошенные на час и больше
       $db->execute('DELETE FROM '.$this->sessions_table.' WHERE time<'.(time()-3600));
@@ -90,14 +97,17 @@ class PrincipalDB extends Principal
   function SessionStore(){
     $this->rh->debug->Trace("PrincipalDB::SessionStore()");
     $this->_Session();
-    $this->rh->db->execute('UPDATE '.$this->sessions_table." SET user_id='".$this->user['id']."' WHERE id='".$this->session['id']."'");
+    $this->rh->db->execute('UPDATE '.$this->sessions_table." SET user_id='".$this->user[$this->id_field]."' WHERE id='".$this->session['id']."'");
     $this->session['user_id'] = $this->user['id'];
   }
   
   //восстанавливаем из сессии
-  function SessionRestore(){
+  function SessionRestore()
+  {
+      
     $this->rh->debug->Trace("PrincipalDB::SessionRestore()");
     $this->_Session();
+    
     return $this->user = $this->GetById($this->session['user_id']);
   }
   

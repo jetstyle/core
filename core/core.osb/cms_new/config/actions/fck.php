@@ -16,6 +16,6 @@ function action_fck( &$rh, $PARAMS ){
   $oFCKeditor->Width  = '100%' ;
   $oFCKeditor->Height = '300' ;
   $oFCKeditor->Value = trim($__string) ? $__string : '<p>&nbsp;</p>';
-  return "<div class='wrapper'>".$oFCKeditor->CreateHtml()."</div>";
+  return $oFCKeditor->CreateHtml();
 }
 ?>
