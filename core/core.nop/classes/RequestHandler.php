@@ -378,6 +378,39 @@ class RequestHandler extends BasicRequestHandler
 	var $fixtures = array();
 	var $use_fixtures = False;
 
+	function Error($msg)
+	{
+		trigger_error($msg, E_USER_ERROR);
+	}
+
+	function debugErrorHandler($errno, $errstr, $errfile, $errline, $errcontext=NULL, $error_types=NULL)
+	{
+		if ($errno & error_reporting())
+		{
+			switch($errno)
+			{
+			default:
+				$dump = debug_backtrace();
+				array_shift($dump);
+				echo sprintf('<div><b>Error: %s</b></div>', $errstr);
+				echo sprintf('<div>%s:%s</div>', $errfile, $errline);
+				echo sprintf('<p><b>backtrace</b></p>', $errfile, $errline);
+				foreach ($dump as $k=>$v)
+				{
+					echo sprintf('<p>%s%s%s</p>', $v['class'], $v['type'], $v['function']);
+					echo sprintf('<p>%s:%s</p>', $v['file'], $v['line']);
+				}
+				die();
+			}
+		}
+	}
+
+	function RequestHandler($config_path='')
+	{
+		set_error_handler(array(&$this, 'debugErrorHandler'));
+		parent::BasicRequestHandler($config_path);
+	}
+
   function useFixture($type, $name)
   {
 
@@ -402,7 +435,7 @@ class RequestHandler extends BasicRequestHandler
 	{ 
 	}
 
-	function &getPageDomains()
+	function getPageDomains()
 	{
 		if (!isset($this->page_domains))
 		{
@@ -410,10 +443,15 @@ class RequestHandler extends BasicRequestHandler
 			/*
 			 * ѕытаемс€ найти узел в хендлерах
 			 */
-			$hpc =& new HanlderPageDomain();
-			$hpc->initialize($this);
-			$hpc->handlers_map =& $this->handlers_map;
-			$this->page_domains[] =& $hpc;
+			$hpd =& new HanlderPageDomain();
+			$hpd->initialize($this);
+			$hpd->handlers_map =& $this->handlers_map;
+			$this->page_domains[] =& $hpd;
+
+			$hd =& new HanlderDomain();
+			$hd->initialize($this);
+			$hd->handlers_map =& $this->handlers_map;
+			$this->page_domains[] =& $hd;
 
 			/*
 			 * ѕытаемс€ найти узел в таблице контент
@@ -421,6 +459,13 @@ class RequestHandler extends BasicRequestHandler
 			$cpc =& new ContentPageDomain();
 			$cpc->initialize($this);
 			$this->page_domains[] =& $cpc;
+
+			/*
+			 * ѕытаемс€ найти узел в таблице контент
+			 */
+			$sd =& new SitemapDomain();
+			$sd->initialize($this);
+			$this->page_domains[] =& $sd;
 		}
 		return $this->page_domains;
 	}

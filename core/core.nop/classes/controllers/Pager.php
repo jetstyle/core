@@ -191,10 +191,10 @@ class Pager extends Controller
 class MonthPager extends Pager
 {
 
-	function initialize()
+	function initialize(&$ctx, $config=NULL)
 	{
 		$this->initialized = 
-			parent::initialize()
+			parent::initialize($ctx, $config)
 			&& $this->initialize_where();
 		return $this->initialized;
 	}
@@ -227,8 +227,7 @@ class MonthPager extends Pager
 
 	function handle()
 	{
-		if ($this->initialize())
-			$this->model->load($this->where);
+		$this->model->load($this->where);
 	}
 
 	function getDateRange($yearmonth, $pagesize, $offset=0)

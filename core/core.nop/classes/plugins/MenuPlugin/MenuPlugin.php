@@ -23,8 +23,9 @@ class MenuPlugin extends RenderablePlugin
 		return $rs;
 	}
 
-	function handle()
+	function initialize(&$ctx, $config=NULL)
 	{
+		parent::initialize($ctx, $config);
 		/*
 		 * загрузим модель меню
 		 * с условием на where
@@ -59,7 +60,6 @@ class MenuPlugin extends RenderablePlugin
 
 	function rend(&$ctx)
 	{
-		$this->handle();
 		//вывод блока меню
 		switch($this->view)
 		{

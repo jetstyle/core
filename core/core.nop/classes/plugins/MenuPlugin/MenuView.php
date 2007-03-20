@@ -23,8 +23,9 @@ class MenuView  extends View
 		$level_1 = array();
 		$level_2 = array();
 		// FIXME: lucky@npj - optimize it! 
-		$segs = explode('/', $this->rh->data['_path']);
+		$segs = explode('/', $this->rh->page->path);
 		$sel = $segs[0];
+		if (empty($sel)) $sel = 'v_efire'; // HACK: !!!!
 		foreach ($this->models['menu'] as $node)
 		{
 			if ($node['_level'] == 1)
@@ -33,7 +34,7 @@ class MenuView  extends View
 				#if (empty($sel)) $sel = $node['id'];
 				if (empty($sel)) $sel = $node['_path'];
 			} 
-			elseif ($node['_level'] == 2 && strpos($node['_path'], $sel) === 0)
+			elseif ($node['_level'] == 2 && (strpos($node['_path'], $sel) === 0))
 			{
 				$level_2[] = $node;
 			}
@@ -87,7 +88,6 @@ class MenuListView extends View
 
 	function handle()
 	{
-		//if (!isset($_GET['lucky'])) return;
 		$this->rh->UseClass("ListObject");
 		$list =& new ListObject($this->rh, $this->models['menu']);
 		$list->tpl_root = $this->template.':List';
