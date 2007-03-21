@@ -159,8 +159,8 @@ class BasicPage extends Controller
 		$parent_status = parent::initialize($ctx, $config);
 
 		if (isset($config['plugins'])) 
-			$this->plugins = $config['plugins'];
-		$this->path = $this->config['_path'] .'/';
+			JsConfig_Object::replace($this, 'plugins', $this->config['plugins']);
+		JsConfig_Object::set($this, 'path', $this->config['_path'] .'/');
 
 		return $parent_status && True;
 	}

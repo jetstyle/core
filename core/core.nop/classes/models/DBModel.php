@@ -152,12 +152,20 @@ class DBModel extends Model
 			.' WHERE '.$where;
 		return $this->rh->db->query($sql);
 	}
-	function delete($row)
+	function delete($where)
 	{
-		$where = array(); 
-		foreach ($row as $k=>$v)
-			$where[] = $this->quoteField($k) . '='. $this->quoteValue($v);
-		$where_sql = implode(' AND ', $where);
+		if (is_array($where))
+		{
+			$w = array(); 
+			foreach ($where as $k=>$v)
+				$w[] = $this->quoteField($k) . '='. $this->quoteValue($v);
+			$where_sql = implode(' AND ', $w);
+		}
+		else
+		{
+			$where_sql = $where;
+		}
+
 		$sql = 'DELETE FROM '.$this->buildTableName($this->table)
 			.$this->buildWhere(' AND '.$where_sql);
 		return $this->rh->db->query($sql);
@@ -205,8 +213,13 @@ class DBModel extends Model
 
 	function buildFieldsValues($data, &$fields_sql, &$values_sql)
 	{
-		$fields_sql = $this->buildFields(array_keys($data));
-		$values_sql = $this->buildValues(array_values($data));
+		// lucky: FIXME: filter row
+		$t = array();
+		foreach ($data as $k=>$v)
+			if (array_key_exists($k, $this->_fields_info)) 
+				$t[$k] = $v;
+		$fields_sql = $this->buildFields(array_keys($t));
+		$values_sql = $this->buildValues(array_values($t));
 	}
 	function buildFieldsValuesSet($data, &$set_sql)
 	{

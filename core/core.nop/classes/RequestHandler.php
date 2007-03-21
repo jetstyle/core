@@ -435,23 +435,26 @@ class RequestHandler extends BasicRequestHandler
 	{ 
 	}
 
-	function getPageDomains()
+	function &getPageDomains()
 	{
 		if (!isset($this->page_domains))
 		{
 			$this->page_domains = array();
 			/*
+			 * ѕытаемс€ найти узел в Page-хендлерах
+			 */
+			$hpc =& new HanlderPageDomain();
+			$hpc->initialize($this);
+			$hpc->handlers_map =& $this->handlers_map;
+			$this->page_domains[] =& $hpc;
+
+			/*
 			 * ѕытаемс€ найти узел в хендлерах
 			 */
-			$hpd =& new HanlderPageDomain();
-			$hpd->initialize($this);
-			$hpd->handlers_map =& $this->handlers_map;
-			$this->page_domains[] =& $hpd;
-
-			$hd =& new HanlderDomain();
-			$hd->initialize($this);
-			$hd->handlers_map =& $this->handlers_map;
-			$this->page_domains[] =& $hd;
+			$hc =& new HanlderDomain();
+			$hc->initialize($this);
+			$hc->handlers_map =& $this->handlers_map;
+			$this->page_domains[] =& $hc;
 
 			/*
 			 * ѕытаемс€ найти узел в таблице контент
@@ -463,12 +466,13 @@ class RequestHandler extends BasicRequestHandler
 			/*
 			 * ѕытаемс€ найти узел в таблице контент
 			 */
-			$sd =& new SitemapDomain();
-			$sd->initialize($this);
-			$this->page_domains[] =& $sd;
+			$smc =& new SitemapDomain();
+			$smc->initialize($this);
+			$this->page_domains[] =& $smc;
 		}
 		return $this->page_domains;
 	}
+
 
 	function MapHandler($url)
 	{
