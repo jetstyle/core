@@ -188,7 +188,7 @@ class JsConfigLoader
 			//						 $self, $folder, $name
 			$this->loadConfig(
 				$config_info[0], 
-				eval('return '.$config_info[1].';'), 
+				eval('return '.str_replace('\\','\\\\',$config_info[1]).';'), 
 				$config_info[2]);
 		}
 	}
