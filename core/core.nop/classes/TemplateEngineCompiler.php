@@ -310,12 +310,15 @@ class TemplateEngineCompiler
         if ($thing{1} == "!") $invert = "!"; else $invert="";
         $what = substr( $thing, strlen($invert)+1 );
         //в условный оператор можно писать свойства объектов
+		  /*
         if (preg_match($this->object_regexp, str_replace('*','#*.',$what), $matches))
         {
           $result = ' $_ = $tpl->Get( "'.$matches[1].'" ); '.
                     ' if('.$invert."(".$this->_ConstructGetValue($matches[2]).')) { ';
         }
         else $result =  ' if ('.$invert.'$tpl->Get("'.$what.'")) { ';
+			*/
+        $result =  ' if ('.$invert.$this->_ConstructGetValueScript($what).') { ';
       } 
 		else
 		// {{!for *item do=template}}
