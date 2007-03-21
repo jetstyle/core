@@ -160,7 +160,8 @@ class BasicPage extends Controller
 
 		if (isset($config['plugins'])) 
 			JsConfig_Object::replace($this, 'plugins', $this->config['plugins']);
-		JsConfig_Object::set($this, 'path', $this->config['_path'] .'/');
+		if (isset($config['_path'])) 
+			JsConfig_Object::replace($this, 'path', $this->config['_path'] .'/');
 
 		return $parent_status && True;
 	}
