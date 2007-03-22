@@ -274,7 +274,7 @@ class TemplateEngine extends ConfigProcessor
     if ($recompile) 
     { 
       $this->_SpawnCompiler();
-      $this->compiler->TemplateCompile( $this->_skin, $tname, $file_source, $file_cached );
+      $this->compiler->TemplateCompile( $this->_skin, $name, $tname, $file_source, $file_cached );
     }
     // 5. парсинг-таки
     
@@ -356,7 +356,7 @@ class TemplateEngine extends ConfigProcessor
       if ($recompile) 
       {
         $this->_SpawnCompiler();
-        $this->compiler->ActionCompile( $this->_skin, $action_name_for_cache, $file_source, $file_cached );
+        $this->compiler->ActionCompile( $this->_skin, $action_name, $action_name_for_cache, $file_source, $file_cached );
       }
       
       //подключить функцию
@@ -388,7 +388,7 @@ class TemplateEngine extends ConfigProcessor
   // Системные плугины
 
   function action_include( &$params ){
-    return $this->Parse($params[0]);
+    return $this->Parse(substr($params[0], 1));
   }
   
   function action_message( &$params ){

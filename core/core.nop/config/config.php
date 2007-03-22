@@ -48,6 +48,10 @@ JsConfig::set($self, 'tpl_construct_standard_camelCase',  True);
 																  // (на случай, если ru станет заведовать разработкой)
 JsConfig::set($self, 'tpl_construct_standard_getter_prefix',  'get');    // lucky: префиксы для getter'ов 
 
+// lucky+ru: аргументы внутри шаблона {{!for do=[[pages]]
+JsConfig::set($self, 'tpl_arg_prefix',  "[[");
+JsConfig::set($self, 'tpl_arg_postfix',  "]]");
+
 JsConfig::set($self, 'tpl_instant_plugins',  array( "dummy" )); // plugins that are ALWAYS instant
 
 JsConfig::set($self, 'shortcuts', array(
@@ -56,7 +60,7 @@ JsConfig::set($self, 'shortcuts', array(
 	"+>" => array("+", " typografica=1"),
 	"+<" => array("+", " strip_tags=1"),
 	"*" => "#*.",
-	"@" => "!include ",
+	"@" => "!include @",
 	"=" => "!text ",
 	"+" => "!message ",
 ));

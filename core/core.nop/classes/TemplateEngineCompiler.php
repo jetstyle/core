@@ -52,7 +52,7 @@
   $rh->tpl_construct_tplt     = "TPL:"; // {{TPL:Name}}...{{/TPL:Name}}
   $rh->tpl_construct_comment  = "#";    // <!-- # persistent comment -->
   $rh->tpl_construct_for       = "!for";    // {{!for items do=template}}
-
+ 
   $rh->tpl_instant_plugins = array( "dummy" );
   // lucky:
   $rh->tpl_construct_standard_camelCase   = True;   // $o->SomeValue(), иначе $o->some_value()
@@ -70,6 +70,12 @@
 
 =============================================================== v.1 (kuso@npj, zharik@npj)
 */
+define ('TE_TYPE', 0);
+define ('TE_VALUE', 1);
+
+define ('TE_TYPE_STRING', 0);
+define ('TE_TYPE_TEMPLATE', 1);
+define ('TE_TYPE_VARIABLE', 2);
 
 class TemplateEngineCompiler
 {
@@ -106,18 +112,21 @@ class TemplateEngineCompiler
           "[".$this->rh->tpl_construct_object{1}."](.+)$/i";
     $this->action_regexp = 
          "/^".$this->rh->tpl_construct_action."(.+)$/i";
+    $this->tpl_string_regexp = '/^([\'"])([^\\1]*)(\\1)$/i';
+	 $this->tpl_arg_regexp = '/^'.preg_quote($this->rh->tpl_arg_prefix, '/')
+		 .'(.+)'.preg_quote($this->rh->tpl_arg_postfix, '/').'$/i';
 
   }
 
   // Работа с шаблонами
 
-  function TemplateCompile( $skin_name, $tpl_name, $file_from, $file_to ) // -- возвращает true, если удачно
+  function TemplateCompile( $skin_name, $tpl_name, $tpl_name_for_cache, $file_from, $file_to ) // -- возвращает true, если удачно
   {
     if (!file_exists($file_from))
       $this->rh->debug->Error( "TPL::TemplateCompile: file_from *".$file_from."* not found" );
 
     // 1. разобрать файл на кусочки
-    if (!$pieces = $this->_TemplateRead( $tpl_name, $file_from ))
+    if (!$pieces = $this->_TemplateRead( $tpl_name_for_cache, $file_from ))
       return false;
 
     // 2. скомпилировать кусочки
@@ -127,7 +136,7 @@ class TemplateEngineCompiler
     foreach( $pieces as $k=>$v )
     {
       $functions[ $this->rh->tpl_template_prefix.$skin_name.
-                  $this->rh->tpl_template_sepfix.$tpl_name.
+                  $this->rh->tpl_template_sepfix.$tpl_name_for_cache.
                   $this->rh->tpl_template_sepfix.(($k=="@")?"":$k) ] = 
                   $this->_TemplateBuildFunction( $this->_TemplateCompile($v) );
     }
@@ -138,9 +147,9 @@ class TemplateEngineCompiler
     // 4. склеить готовый файл
     $fp = fopen( $file_to ,"w");
     fputs($fp, "<"."?php // made by Rockette. do not change manually, you mortal.\n\n" );
-    foreach($functions as $name=>$content)
+    foreach($functions as $fname=>$content)
     {
-      fputs($fp, 'function '.$name.'( &$tpl )'."\n" );
+      fputs($fp, 'function '.$fname.'( &$tpl )'."\n" );
       fputs($fp,$content);
       fputs($fp, "\n\n" );
     }
@@ -270,12 +279,12 @@ class TemplateEngineCompiler
     if (preg_match($this->double_regexp, $thing, $matches))
     {
       $params = $this->_ParseActionParams( $matches[1] );
-      if (isset($params["instant"]) && $params["instant"]) $_instant = true; // {{!!typografica instant=1}}...{{/!!}} prerenders
+      if (isset($params["instant"]) && $params["instant"][TE_VALUE]) $_instant = true; // {{!!typografica instant=1}}...{{/!!}} prerenders
 //      $params["_"] = $matches[2];
       $param_contents = $this->_ImplodeActionParams( $params );
       $result = "ob_start();?>".$this->_TemplateCompile($matches[2])."<"."?php \n";
       $result .= ' $_='.$param_contents.';'."\n".' $_["_"] = ob_get_contents(); ob_end_clean();'."\n";
-      $result .= ' echo $tpl->Action("'.$params["_name"].'", $_ ); ';
+      $result .= ' echo $tpl->Action('.$this->_compileParam($params['_name']).', $_ ); ';
       $instant = $result;
     }
     else
@@ -309,15 +318,6 @@ class TemplateEngineCompiler
       {
         if ($thing{1} == "!") $invert = "!"; else $invert="";
         $what = substr( $thing, strlen($invert)+1 );
-        //в условный оператор можно писать свойства объектов
-		  /*
-        if (preg_match($this->object_regexp, str_replace('*','#*.',$what), $matches))
-        {
-          $result = ' $_ = $tpl->Get( "'.$matches[1].'" ); '.
-                    ' if('.$invert."(".$this->_ConstructGetValue($matches[2]).')) { ';
-        }
-        else $result =  ' if ('.$invert.'$tpl->Get("'.$what.'")) { ';
-			*/
         $result =  ' if ('.$invert.$this->_ConstructGetValueScript($what).') { ';
       } 
 		else
@@ -328,45 +328,50 @@ class TemplateEngineCompiler
 
 			$key = $params['each']?$params['each']:$params[0]; // ключ
 			//можно без each= а сразу, {{!for news do=test.html:news}}	     
-
 			$alias = $params['as']?$params['as']:NULL; // алиас
 			//можно {{!for news as news_item do=test.html:news}}	     
 			$template_name = $params['do']?$params['do']:$params['use']; // ключ
 
-			$caller = $params['_caller'];
-			if ($template_name[0]==':')
-				$template_name = $caller.'.html'.$template_name;   
 
-			if (isset($alias)) $item_store_to = $alias;
-			else $item_store_to = '*';
-
-			if(!(strpos($template_name, ":") === false))
+			switch($key[TE_TYPE])
 			{
-				$sep_tpl = $template_name."_sep";
-				$item_tpl = $template_name."_item";
+			case TE_TYPE_VARIABLE: $key = $this->_compileParam($key); break;
+			case TE_TYPE_STRING: $key = $this->_ConstructGetValueScript($key[TE_VALUE]); break;
+			}
+
+			if (isset($alias)) 
+			{
+				$item_store_to = $alias;
+				$alias = $this->_compileParam($alias);
+			}
+			else $item_store_to = '"*"';
+
+			$sep_tpl = $template_name;
+			$item_tpl = $template_name;
+			$empty_tpl = $template_name;
+			if((strpos($template_name, ":") === false))
+			{
+				$sep_tpl[TE_VALUE] .= "_sep";
+				$item_tpl[TE_VALUE] .= "_item";
+				$empty_tpl[TE_VALUE] .= "_empty";
 			}
 			else 
 			{
-				$sep_tpl = $template_name.":sep";
-				$item_tpl = $template_name.":item";
+				$sep_tpl[TE_VALUE] .= ":sep";
+				$item_tpl[TE_VALUE] .= ":item";
+				$empty_tpl[TE_VALUE] .= ":empty";
 			}
-
-			if(!(strpos($template_name, ":") === false))
-			{
-				$empty_tpl = $template_name."_empty";
-			}
-			else 
-			{
-				$empty_tpl = $template_name.":empty";
-			}
+			$template_name = $this->_phpString($template_name[TE_VALUE]);
+			$sep_tpl = $this->_phpString($sep_tpl[TE_VALUE]);
+			$item_tpl = $this->_phpString($item_tpl[TE_VALUE]);
+			$empty_tpl = $this->_phpString($empty_tpl[TE_VALUE]);
 
 
-			$script = $this->_ConstructGetValueScript($key);
-			$result = ' $_z = '.$script .";\n";
+			$result = ' $_z = '.$key .";\n";
 			$result .= '
 if(is_array($_z) && !empty($_z))
 {
-	$sep = $tpl->parse("'.$sep_tpl.'");
+	$sep = $tpl->parse('.$sep_tpl.');
 	// надо чтобы его могло и не быть
 
 	$old_ref =& $tpl->Get("*");
@@ -375,16 +380,16 @@ if(is_array($_z) && !empty($_z))
 	$first = True;
 	foreach($_z AS $r)
 	{
-		$tpl->SetRef("'.$item_store_to.'", $r);
+		$tpl->SetRef('.$item_store_to.', $r);
 		if (True===$first) 
 		{
-			echo $tpl->parse("'.$item_tpl.'");
+			echo $tpl->parse('.$item_tpl.');
 			$first = False;
 		}
 		else 
 		{ 
 			echo $sep;
-			echo $tpl->parse("'.$item_tpl.'");
+			echo $tpl->parse('.$item_tpl.');
 		}
 		
 	}
@@ -394,7 +399,7 @@ if(is_array($_z) && !empty($_z))
 }
 else
 {
-	echo $tpl->parse("'.$empty_tpl.'");
+	echo $tpl->parse('.$empty_tpl.');
 }
 
 unset($_z);
@@ -409,47 +414,18 @@ unset($_z);
         $params = $this->_ParseActionParams( $matches[1] );
 
         // let`s make it instant!
-		  if (in_array($params["_name"], $this->rh->tpl_instant_plugins) 
+		  if (in_array($params["_name"][TE_VALUE], $this->rh->tpl_instant_plugins) 
 			  // lucky: hint in template
-			  || (isset($params["instant"]) && $params["instant"]))
+			  || (isset($params["instant"]) && $params["instant"][TE_VALUE]))
 		  {
 			  $_instant=true;
 		  }
 
         $param_contents = $this->_ImplodeActionParams( $params );
-        $result =  ' $_='.$param_contents.'; echo $tpl->Action("'.$params["_name"].'", $_ ); ';
+		  $result =  ' $_='.$param_contents.'; echo $tpl->Action('
+			  .$this->_compileParam($params['_name']).', $_ ); ';
         $instant = $result;
       }
-			/* lucky 20070316:
-      else
-      // {{#obj.property}}
-      if (preg_match($this->object_regexp, $thing, $matches))
-      {
-         $result = ' $_ = $tpl->Get( "'.$matches[1].'" ); '.
-                  ' echo '.$this->_ConstructGetValue($matches[2]).'; ';
-        $instant = $result;
-      }
-      else
-      // {{var}}
-      {
-        //проверяем палка-синтаксис
-        $A = explode('|',$thing);
-        if( count($A)>1 ){
-          //есть палка-вхождения
-          $result = ' $_r = $tpl->Get("'.$A[0].'");'."\n";
-          $result .= '$_formatters = array("'.implode('","',array_slice($A,1)).'");'."\n";
-          $result .= 'foreach($_formatters as $_f){'."\n";
-          $result .= ' $_ = array("_plain"=>$_f,"_name"=>$_f,"_"=>$_r);'."\n";
-          $result .= ' $_r = $tpl->Action($_f,$_);'."\n";
-          $result .= "}\n";
-          $result .= 'echo $_r; ';
-        }else
-          //нет палка-вхождений
-          $result = ' echo $tpl->Get( "'.$thing.'" ); ';
-        $instant = $result;
-      }
-			 */
-
       // {{#obj.property}}
       // {{var}}
       else
@@ -552,8 +528,7 @@ unset($_z);
 		* можем сослаться на структуру внутри структуры struct.substruct.substruct
 		* или так struct.getter().substruct
 		*/
-	  if (empty($f)) return '$_';
-	  elseif( preg_match("/[\d]+/",$f) ) return '$_['.$f.']';
+	  if (empty($f) && $f !== '0') return '$_';
 	  else
 	  {
 		  $parts = explode($this->rh->tpl_construct_object{1},$f);
@@ -571,7 +546,9 @@ unset($_z);
 			  $method = implode('', array_map('ucfirst', explode('_', $method))); // GetSomeValue
 		  $res = '(is_array($_)?$_["'.$k.'"]:'
 			  . ((preg_match ('#^[A-Za-z_][A-Za-z0-9_]*$#', $method)) 
-			  ?  '(method_exists($_,"'.$method.'")?$_->'.$method.'():$_->'.$k.'))'
+			  ?  '(method_exists($_,"'.$method.'")?$_->'.$method.'():'
+			  .(preg_match('#^[A-Za-z_]+$#', $k) ? '($_->'.$k.')' : 'NULL')
+			  .'))'
 			  : 'NULL)');
 			  ;
 		  return (empty($parts)
@@ -586,48 +563,118 @@ unset($_z);
 	  }
   }
 
-  function _ParseActionParams( $content )
+  function _parseParam($thing)
   {
-    $params = array();
-    $params["_plain"] = $content;
-    // 1. get name by explosion
-    $a = explode(" ", $content);
-    $params["_name"] = $a[0]; // kuso@npj removed: strtolower($a[0]);
-    if (sizeof($a) == 1) return $params;
-    $params["_caller"] = $this->_template_name;
+	  // @template.html:name или @:name
+	  if ($thing{0} == '@')
+	  {
+		  $what = substr($thing, 1);
+		  if ($what{0} == ':') $what = $this->_template_name.'.html'.$what;
+		  $res = array(
+			  TE_TYPE => TE_TYPE_TEMPLATE,
+			  TE_VALUE => $what,
+		  );
+	  }
+	  else
+	  if (preg_match($this->tpl_arg_regexp, $thing, $matches))
+	  // [[var]]
+	  {
+		  $what = $matches[1];
+		  $res = array(
+			  TE_TYPE => TE_TYPE_VARIABLE,
+			  TE_VALUE => $what,
+		  );
+	  }
+	  else
+	  if (preg_match($this->tpl_string_regexp, $thing, $matches))
+	  {
+		  $what = $matches[2];
+		  $res = array(
+			  TE_TYPE => TE_TYPE_STRING,
+			  TE_VALUE => $what,
+		  );
+	  }
+	  else
+	  {
+		  $what = $thing;
+		  $res = array(
+			  TE_TYPE => TE_TYPE_STRING,
+			  TE_VALUE => $what,
+		  );
 
+		}
+
+	  return $res;
+  }
+
+  function _compileParam($param)
+  {
+	  switch ($param[TE_TYPE])
+	  {
+	  case TE_TYPE_STRING: $res = $this->_phpString($param[TE_VALUE]); break;
+	  case TE_TYPE_VARIABLE: $res = $this->_ConstructGetValueScript($param[TE_VALUE]); break;
+	  case TE_TYPE_TEMPLATE: $res = $this->_phpString('@'.$param[TE_VALUE]); break;
+	  default: $this->rh->error('Unknown type'); break;
+	  }
+	  return $res;
+  }
+
+  function _parseParams($content)
+  {
+	  $params = array();
     // 2. link`em back
-    $a = array_slice( $a, 1 );
-    $_content = " ".implode(" ", $a);
     // 3. get matches      1     2       3 45       6    7      8  9
     $c = preg_match_all( "/(^|\s)([^= ]+)(=((\"|')?)(.*?)(\\4))?($|(?=\s))/i",
-                         $_content, $matches, PREG_SET_ORDER  );
+                         $content, $matches, PREG_SET_ORDER  );
     // 4. sort out
     $named = array();
     foreach( $matches as $match )
     {
       if ($match[3]) // named parameter
-        $named[ $match[2] ] = $match[6];
+        $named[ $match[2] ] = $this->_parseParam($match[6]);
       else // unnamed parameter
-        $params[] = $match[2];
+        $params[] = $this->_parseParam($match[2]);
     }
     foreach($named as $k=>$v) $params[$k] = $v;
     return $params;
   }
 
+  function _ParseActionParams( $content )
+  {
+    $params = array();
+    $params["_plain"] = $this->_parseParam('"'.$content.'"');
+    // 1. get name by explosion
+    $a = explode(" ", $content);
+    $params["_name"] = $this->_parseParam('"'.$a[0].'"'); // kuso@npj removed: strtolower($a[0]);
+    $params["_caller"] = $this->_parseParam('"'.$this->_template_name.'"');
+    if (count($a) == 1) return $params;
+
+    $a = array_slice( $a, 1 );
+    $_content = " ".implode(" ", $a);
+	 return array_merge($params, $this->_parseParams($_content));
+  }
+
+  function _phpString($what)
+  {
+	  $res = '"'.
+					 str_replace( "\"", "\\\"",
+					 str_replace( "\n", "\\n",
+					 str_replace( "\r", "",
+					 str_replace( "\\", "\\\\", $what )))).'"';
+	  return $res;
+  }
+
   function _ImplodeActionParams( $params )
   {
-    $result = 'array( ';
-    $f=0;
-    foreach( $params as $k=>$v )
-    {
-      if ($f) $result.=",\n"; else $f=1;
-      $result.= '"'.strtolower($k).'" => "'.
-          str_replace( "\"", "\\\"",
-          str_replace( "\n", "\\n",
-          str_replace( "\r", "",
-          str_replace( "\\", "\\\\", $v )))).'"';
-    }
+	  $result = 'array( ';
+	  $args = array();
+	  foreach( $params as $k=>$v )
+	  {
+		  $what = $this->_compileParam($v);
+		  $args[] = '"'.strtolower($k).'" => '.$what;
+
+	  }
+	 $result.= implode(",\n", $args);
     $result.= ')';
     return $result;
   }
@@ -644,7 +691,7 @@ unset($_z);
     Я старался, что бы эти две функции выглядели похоже, поэтому оставил массив $functions и 
     пробег по нему при склейке файла. Имхо, потерь производительности при этом почти никаких.
   */
-  function ActionCompile( $skin_name, $action_name, $file_from, $file_to ) // -- возвращает true, если удачно
+  function ActionCompile( $skin_name, $action_name, $action_name_for_cache, $file_from, $file_to ) // -- возвращает true, если удачно
   {
     if (!file_exists($file_from))
       $this->rh->debug->Error( "TPL::ActionCompile: file_from *".$file_name."* not found" );
@@ -656,7 +703,7 @@ unset($_z);
     //собственно оборачивание
     $functions = array();
     $functions[ $this->rh->tpl_action_prefix.$skin_name.
-                $this->rh->tpl_template_sepfix.$action_name ] = 
+                $this->rh->tpl_template_sepfix.$action_name_for_cache ] = 
                 $this->_TemplateBuildFunction( $enviroment.
                   preg_replace("/\/\*.*?\*\//s","",implode('',@file($file_from)))
                 );
