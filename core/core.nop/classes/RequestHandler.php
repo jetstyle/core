@@ -416,7 +416,16 @@ class RequestHandler extends BasicRequestHandler
 
 	  if (!array_key_exists($name, $this->fixtures)) 
 	  {
-		  if ($s = $this->FindScript( $type, $name))
+		  if ($s = $this->FindScript( $type, $name, false, -1, 'yml'))
+		  {
+			  $t = array();
+			  if (JsConfigLoader::loadYaml($t, $s))
+			  {
+				  $this->fixtures[$name] = $t;
+			  }
+		  }
+		  else
+		  if ($s = $this->FindScript( $type, $name, false, -1, 'php'))
 		  {
 			  $tpl =& $this->tpl;
 			  $this->fixtures[$name] = include $s;
