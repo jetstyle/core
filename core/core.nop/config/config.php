@@ -61,7 +61,7 @@ JsConfig::set($self, 'shortcuts', array(
 	"+<" => array("+", " strip_tags=1"),
 	"*" => "#*.",
 	"@" => "!include @",
-	"=" => "!text ",
+	"=" => "!_ tag=",
 	"+" => "!message ",
 ));
 
