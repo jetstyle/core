@@ -52,6 +52,7 @@ define ('__MESSAGE_PLUGIN', 1);
 
 $key = $params['tag']?$params['tag']:$params[0]; // тег
 
+$tpl->_SpawnCompiler();
 $key = TemplateEngineCompiler::_phpString($key);
 
 $data_sources = array(); // тут будем искать данные
