@@ -418,11 +418,8 @@ class RequestHandler extends BasicRequestHandler
 	  {
 		  if ($s = $this->FindScript( $type, $name, false, -1, 'yml'))
 		  {
-			  $t = array();
-			  if (JsConfigLoader::loadYaml($t, $s))
-			  {
-				  $this->fixtures[$name] = $t;
-			  }
+				if (!class_exists('Spyc')) $this->useLib('spyc');
+				$this->fixtures[$name] = Spyc::YAMLLoad($source);
 		  }
 		  else
 		  if ($s = $this->FindScript( $type, $name, false, -1, 'php'))
