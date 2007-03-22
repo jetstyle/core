@@ -22,7 +22,14 @@
        if ($subtemplate[0]==':')
          $subtemplate = $caller.'.html'.$subtemplate;
   	   $rh->tpl->Set($key,$rh->tpl->parse($subtemplate));
-  	 }else{
+	  }
+	  // lucky: HACK set objects.. check param types in future
+	  elseif (is_array($v) || is_object($v))
+	  {
+			$rh->tpl->SetRef($key, $v );
+	  }
+	  else
+	  {
   	   // если у нас в параметрах присутствуют переменные подстановок,
   	   // например [[images]]
   	   $v = str_replace('[[','{{',$v);
