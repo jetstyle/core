@@ -387,8 +387,55 @@ class TemplateEngine extends ConfigProcessor
 
   // Системные плугины
 
-  function action_include( &$params ){
-    return $this->Parse(substr($params[0], 1));
+  function action_include( &$params )
+  {
+	  //return $this->parse(substr( $params[0], 1 ));
+
+	  // lucky: from !render
+	  $template = substr( $params[0], 1 );
+	  // чтобы работал caller, надо пропатчить шаблонный движок
+	  unset($params[0]);
+	  unset($params['_name']);
+	  unset($params['_plain']);
+	  unset($params['_caller']);
+
+	  $stack = array(); // lucky: context saving storage
+
+	  foreach( $params as $key => $v)
+	  {
+		  if ($v[0]=='@')
+		  {
+			  $subtemplate = substr( $v, 1 );
+
+			  // чтобы работала возможность опускать имя текущего шаблона
+			  // с помощью caller, надо пропатчить шаблонный движок
+			  $stack[$key] =& $this->get($key);
+			  $this->Set($key,$this->parse($subtemplate));
+		  }
+		  // lucky: HACK set objects.. check param types in future
+		  elseif (is_array($v) || is_object($v))
+		  {
+			  $stack[$key] =& $this->get($key);
+			  $this->SetRef($key, $v );
+		  }
+		  else
+		  {
+			  // если у нас в параметрах присутствуют переменные подстановок,
+			  // например [[images]]
+			  $v = str_replace('[[','{{',$v);
+			  $v = str_replace(']]','}}',$v);
+			  $stack[$key] =& $this->get($key);
+			  $this->Set($key,$this->ParseInstant( $v ));
+		  }
+	  }
+
+	  //echo( $template );
+
+	  $result = $this->parse($template);
+
+	  // lucky: HACK: restore context
+	  foreach ($stack as $k=>$v) $this->Set($key, $v );
+	  return $result;
   }
   
   function action_message( &$params ){
