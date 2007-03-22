@@ -416,7 +416,7 @@ class TemplateEngine extends ConfigProcessor
 		  elseif (is_array($v) || is_object($v))
 		  {
 			  $stack[$key] =& $this->get($key);
-			  $this->SetRef($key, $v );
+			  $this->SetRef($key, $params[$key] );
 		  }
 		  else
 		  {
@@ -434,7 +434,7 @@ class TemplateEngine extends ConfigProcessor
 	  $result = $this->parse($template);
 
 	  // lucky: HACK: restore context
-	  foreach ($stack as $k=>$v) $this->Set($key, $v );
+	  foreach ($stack as $key=>$v) $this->SetRef($key, $stack[$key] );
 	  return $result;
   }
   
