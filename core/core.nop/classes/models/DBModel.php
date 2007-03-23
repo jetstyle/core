@@ -118,9 +118,15 @@ class DBModel extends Model
 	}
 	function onBeforeInsert(&$row)
 	{
-		if (array_key_exists('_created', $this->fields) 
+		if (array_key_exists('_created', $this->_fields_info) 
 			&& !array_key_exists('_created', $row))
 				$row['_created'] = date('Y-m-d H:i:s');
+	}
+	function onBeforeUpdate(&$row)
+	{
+		if (array_key_exists('_modified', $this->_fields_info) 
+			&& !array_key_exists('_modified', $row))
+				$row['_modified'] = date('Y-m-d H:i:s');
 	}
 	function insert(&$row)
 	{
@@ -144,8 +150,7 @@ class DBModel extends Model
 			$where = implode(' AND ', $_where);
 			unset($_where);
 		}
-		if (in_array('_updated', $this->fields) && !array_key_exists('_updated', $row))
-			$row['_updated'] = date('Y-m-d H:i:s');
+		$this->onBeforeUpdate($row);
 		$this->buildFieldsValuesSet($row, $fields_sql);
 		$sql = ' UPDATE '.$this->buildTableName($this->table)
 			.' SET '.$fields_sql
