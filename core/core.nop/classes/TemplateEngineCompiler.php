@@ -520,12 +520,13 @@ unset($_z);
   {
 	  if (empty($data_sources)) return 'NULL';
 	  $source = array_shift($data_sources);
-	  $expr = '(((($_ = '.$source.') || True) && isset($_) && ($_t='.$value.') && isset($_t)) ? $_t : ('.$this->_ConstructGetValueScriptRe($data_sources, $value).'))';
+	  $expr = '(((($_ = '.$source.') || True) && isset($_) && (($_t='.$value.')||True) && isset($_t)) ? $_t : ('.$this->_ConstructGetValueScriptRe($data_sources, $value).'))';
 	  return $expr;
   }
 
   //нужно уметь обращаться к автомассиву
   function _ConstructGetValue( $f ){
+	  $use_methods = True;
 	 /* lucky: refactor
 	  if( preg_match("/[\d]+/",$f) )
 		return '$_['.$f.']';
@@ -554,7 +555,7 @@ unset($_z);
 		  if ($this->rh->tpl_construct_standard_camelCase)
 			  $method = implode('', array_map('ucfirst', explode('_', $method))); // GetSomeValue
 		  $res = '(is_array($_)?$_["'.$k.'"]:'
-			  . ((preg_match ('#^[A-Za-z_][A-Za-z0-9_]*$#', $method)) 
+			  . ($use_methods && (preg_match ('#^[A-Za-z_][A-Za-z0-9_]*$#', $method)) 
 			  ?  '(method_exists($_,"'.$method.'")?$_->'.$method.'():'
 			  .(preg_match('#^[A-Za-z_]+$#', $k) ? '($_->'.$k.')' : 'NULL')
 			  .'))'
