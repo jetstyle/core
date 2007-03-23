@@ -302,9 +302,18 @@ class TemplateEngineCompiler
         }
 
       // {{?:}}
-      if ($thing == $this->rh->tpl_construct_ifelse)
+      if (strpos($thing, $this->rh->tpl_construct_ifelse) === 0)
       {
-        $result =  ' } else { ';
+        if ($thing{2} == "!") $invert = "!"; else $invert="";
+        $what = substr( $thing, strlen($invert)+2 );
+		  if ($what)
+		  {
+			  $result =  ' } elseif ('.$invert.$this->_ConstructGetValueScript($what).') { ';
+		  }
+		  else
+		  {
+			  $result =  ' } else { ';
+		  }
       }
       else
       // {{/?}}
