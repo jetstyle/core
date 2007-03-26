@@ -1,14 +1,14 @@
 <?php
 
 /**
- * Класс JsFileCache - управляет кешами
+ * Класс FileCache - управляет кешами
  */
-class JsFileCache
+class FileCache
 {
 
 	var $_sources = array();
 
-	function JsFileCache()
+	function FileCache()
 	{
 	}
 
@@ -115,7 +115,7 @@ class JsFileCache
 	{
 		if (empty($this->fp)) 
 		{
-			trigger_error('JsFileCache:: can\'t write to file '.$this->file_path);
+			trigger_error('FileCache:: can\'t write to file '.$this->file_path);
 			return False;
 		}
 		else

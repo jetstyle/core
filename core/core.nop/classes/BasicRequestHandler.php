@@ -155,7 +155,7 @@ class BasicRequestHandler extends ConfigProcessor {
 		//пытаемся прочесть файл конфигурации
 		if (is_object($config_path))
 		{
-			JsConfig::joinConfigs($this, $config_path);
+			config_joinConfigs($this, $config_path);
 		}
 		else
 		if(@is_readable($config_path)) 

@@ -6,44 +6,18 @@ define ('_JS_CONTEXT_METHOD_SET', 2);
 define ('_JS_CONTEXT_METHOD_FREE', 3);
 define ('_JS_CONTEXT_METHOD_IS_SET', 4);
 
-require_once 'JsConfig.php';
-
-class JsContext
+require_once 'Config.php';
+require_once 'Configurable.php';
+/**
+ * Класс Context - контекст всего на свете
+ */
+class Context extends Configurable
 {
 
 	/**
-	 * Вернуть контроллер приложения
+	 * Инициализация
 	 *
-	 */
-	function &getController($cfg)
-	{
-		$app_name = $cfg->app_name;
-		$app_dir =	$cfg->app_dir;
-
-		$o =& JsContext::__store(_JS_CONTEXT_METHOD_GET, $app_name);
-
-		if (!isset($o))
-		{
-			if (isset($cfg->app_controller_cls))
-			{
-				$cls = $cfg->app_controller_cls;
-			}
-			else
-			{
-				$cls = ucfirst($app_name) . 'RequestHandler';
-				require_once 'RequestHandler.php'; // HACK: lucky
-				require_once $app_dir.'/classes/controllers/'.$cls.'.php';
-			}
-			//site controller, builds site environment
-			$o =& new $cls($cfg);
-			JsContext::__store(_JS_CONTEXT_METHOD_SET, $app_name, &$o);
-		}
-
-		return $o;
-	}
-
-	/**
-	 * Создать конфиг приложения
+	 * Найти и загрузить свои конфиги 
 	 *
 	 * @param array $config (
 	 *		'project_dir' : dir				-- путь к инсталяции проекта
@@ -53,26 +27,23 @@ class JsContext
 	 *		'debug'			: int				-- уровень отладки
 	 * )
 	 */
-	function &buildConfig($config)
+	function initialize(&$ctx, $config=NULL)
 	{
-		$self =& new StdClass();
-		$self->ctx =& $self;
+		$status = parent::initialize($ctx, $config);
 
-
-		JsConfig::mergeConfigs($self, $config);
-		JsConfig::set($self, 
+		config_set($this, 
 			'cache_dir', 
-							$self->project_dir
+							$this->project_dir
 							.'cache/'
-							.$self->app_name
+							.$this->app_name
 							.'/');
 
-		$environment = $self->ctx->environment;
+		$environment = $this->ctx->environment;
 
-		require_once 'JsFileCache.php';
-		$cache =& new JsFileCache();
+		require_once 'FileCache.php';
+		$cache =& new FileCache();
 		$cache->initialize(array(
-			'file_path' => $self->cache_dir.$environment.'_config'.'.php',
+			'file_path' => $this->cache_dir.$environment.'_config'.'.php',
 		));
 
 		if ($cache->isValid())
@@ -80,20 +51,20 @@ class JsContext
 			// берем из кеша
 			$f = $cache->getFileName();
 			$data  = include $f;
-			//JsConfig::mergeConfigs($self, unserialize($data));
-			$self = unserialize($data);
-			$self->ctx =& $self;
+			//config_mergeConfigs($this, unserialize($data));
+			$this = unserialize($data);
+			$this->ctx =& $this;
 		}
 		else
 		{
 			// строим конфиг
 
 			// путь к конфигам проекта
-			JsConfig::set($self, 'project_config_dir', $self->project_dir .'config/');
+			config_set($this, 'project_config_dir', $this->project_dir .'config/');
 			// путь к конфигам приложения
-			JsConfig::set($self, 'app_config_dir', $self->app_dir .'config/');
+			config_set($this, 'app_config_dir', $this->app_dir .'config/');
 			// путь к конфигам ядра
-			JsConfig::set($self, 'core_config_dir', JS_CORE_DIR.'config/');
+			config_set($this, 'core_config_dir', JS_CORE_DIR.'config/');
 
 			// список загружаемых файлов конфигурации по умолчанию
 			// (!) порядок записей определяет порядок загрузки конфигов
@@ -104,23 +75,54 @@ class JsContext
 				'core_config_dir',
 				);
 
-			$loader =& new JsConfigLoader();
+			$loader =& new ConfigLoader();
 			foreach ($vars as $var)
 			{
-				JsConfig::chainConfig($loader, $self, 
-					'"'.$self->$var.'"', 'config');
+				config_chainConfig($loader, $this, 
+					'"'.$this->$var.'"', 'config');
 			}
 
 			foreach ($loader->getSources() as $source)
 				$cache->addSource($source);
 
-			unset($self->ctx);
-			$str = "return '".serialize($self)."';";
+			unset($this->ctx);
+			$str = "return '".serialize($this)."';";
 			$cache->save($str);
-			$self->ctx =& $self;
+			$this->ctx =& $this;
 		}
 
-		return $self;
+		return $status;
+	}
+
+	/**
+	 * Вернуть контроллер приложения
+	 *
+	 */
+	function &getController()
+	{
+		$app_name = $this->app_name;
+		$app_dir =	$this->app_dir;
+
+		$o =& Context::__store(_JS_CONTEXT_METHOD_GET, $app_name);
+
+		if (!isset($o))
+		{
+			if (isset($this->app_controller_cls))
+			{
+				$cls = $this->app_controller_cls;
+			}
+			else
+			{
+				$cls = ucfirst($app_name) . 'RequestHandler';
+				require_once 'RequestHandler.php'; // HACK: lucky
+				require_once $app_dir.'/classes/controllers/'.$cls.'.php';
+			}
+			//site controller, builds site environment
+			$o =& new $cls($this);
+			Context::__store(_JS_CONTEXT_METHOD_SET, $app_name, &$o);
+		}
+
+		return $o;
 	}
 
 	/**
