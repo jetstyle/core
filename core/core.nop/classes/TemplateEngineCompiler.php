@@ -445,7 +445,7 @@ unset($_z);
 			$var = array_shift($A);
 			$script = $this->_ConstructGetValueScript($var);
 			$result = ' $_r = '.$script .';'."\n";
-			if( count($A)>1 ){
+			if( count($A)>0 ){
 				//есть палка-вхождения
 				$result .= '$_formatters = array("'.implode('","',$A).'");'."\n";
 				$result .= 'foreach($_formatters as $_f){'."\n";
