@@ -72,7 +72,7 @@ class RequestHandler extends ConfigProcessor {
 	 //читаем базовый конфиг
 	 if (is_object($config_path))
 	 {
-		 JsConfig::joinConfigs($this, $config_path);
+		 config_joinConfigs($this, $config_path);
 	 }
 	 elseif(@is_readable($config_path)) 
 	 {

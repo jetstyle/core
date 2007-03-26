@@ -22,26 +22,26 @@ $DIRS["actions"][] 			= $_dir.'/actions/';
 $DIRS["templates"][] 		= $_dir.'/templates/';
 $DIRS["handlers"][] 		= $_dir.'/handlers/';
 $DIRS["message_sets"][] = $_dir.'/message_sets/';
-$DIRS = JsConfig::replace($self, 'DIRS', $DIRS);
+$DIRS = config_replace($self, 'DIRS', $DIRS);
 
 //database
-JsConfig::set($self, 'db_server',  "localhost");
-JsConfig::set($self, 'db_user',  "nop");
-JsConfig::set($self, 'db_password',  "123456");
-JsConfig::set($self, 'db_database',  "dummy");
+config_set($self, 'db_server',  "localhost");
+config_set($self, 'db_user',  "nop");
+config_set($self, 'db_password',  "123456");
+config_set($self, 'db_database',  "dummy");
 
 //template engine
-JsConfig::set($self, 'templates_cache_dir',  $_dir.'/_templates/');
-JsConfig::set($self, 'PRE_FILTERS',  array("strip_comments"));//,"pack_spaces","gather_css",
-JsConfig::set($self, 'POST_FILTERS',  array());
-JsConfig::set($self, 'auto_css_temp_dir',  "css/_auto/");
-JsConfig::set($self, 'auto_css_filename',  "css/auto.css");
+config_set($self, 'templates_cache_dir',  $_dir.'/_templates/');
+config_set($self, 'PRE_FILTERS',  array("strip_comments"));//,"pack_spaces","gather_css",
+config_set($self, 'POST_FILTERS',  array());
+config_set($self, 'auto_css_temp_dir',  "css/_auto/");
+config_set($self, 'auto_css_filename',  "css/auto.css");
 
 //misc
-JsConfig::set($self, 'default_page',  'test');
-JsConfig::set($self, 'hide_errors',  false);
-JsConfig::set($self, 'path_class',  'Path');
-JsConfig::set($self, 'project_name',  'OSB6');
-JsConfig::set($self, 'show_logs',  true);
+config_set($self, 'default_page',  'test');
+config_set($self, 'hide_errors',  false);
+config_set($self, 'path_class',  'Path');
+config_set($self, 'project_name',  'OSB6');
+config_set($self, 'show_logs',  true);
 
 ?>
