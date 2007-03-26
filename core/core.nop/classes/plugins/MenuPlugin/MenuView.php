@@ -25,18 +25,23 @@ class MenuView  extends View
 		// FIXME: lucky@npj - optimize it! 
 		$segs = explode('/', $this->rh->page->path);
 		$sel = $segs[0];
-		if (empty($sel)) $sel = 'v_efire'; // HACK: !!!!
+		$paths_1 = array();
+		//if (empty($sel)) $sel = 'v_efire'; // HACK: !!!!
+		$first_2 = true;
 		foreach ($this->models['menu'] as $node)
 		{
 			if ($node['_level'] == 1)
 			{
 				$level_1[] = $node;
+				$paths_1[] = $node['_path'];
 				#if (empty($sel)) $sel = $node['id'];
 				if (empty($sel)) $sel = $node['_path'];
 			} 
-			elseif ($node['_level'] == 2 && (strpos($node['_path'], $sel) === 0))
+			elseif ($node['_level'] == 2)
 			{
-				$level_2[] = $node;
+				if ($first_2 && !in_array($sel, $paths_1)) $sel = $paths_1[0];
+				if (strpos($node['_path'], $sel) === 0) $level_2[] = $node;
+				$first_2 = False;
 			}
 		}
 		$list_1 =& new ListObject($this->rh, $level_1);

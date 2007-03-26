@@ -11,6 +11,7 @@ class BasicMenu extends Model
 	var $left = NULL;
 	var $right = NULL;
 	var $fields = array('id', 'title_pre', '_left', '_right', '_level', '_path', '_parent');
+	var $order = array('_left');
 
 	function load($where=NULL, $limit=NULL, $offset=NULL)
 	{
@@ -18,6 +19,7 @@ class BasicMenu extends Model
 		$m =& new Content();
 		$config = $this->config;
 		$config['fields'] = $this->fields;
+		$config['order'] = $this->order;
 		$m->initialize($this->rh, $config);
 		if (!isset($where)) $where = '';
 		$where .= ' AND (_level >= '.$m->quote($this->level)
