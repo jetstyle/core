@@ -240,6 +240,11 @@ class CyrDate
 	function setMinute($value) { $this->minute = intval($value); }
 	function setSecond($value) { $this->second = intval($value); }
 
+	function getIsMorning() { return ($this->hour() >= 4 && $this->hour() < 8); } 
+	function getIsDay() { return ($this->hour() >= 8 && $this->hour() < 18); } 
+	function getIsEvening() { return ($this->hour() >= 18 && $this->hour() < 22); } 
+	function getIsNight() { return ($this->hour() >= 22 || $this->hour() < 4); } 
+
 	function mktime()
 	{
 		return mktime($this->hour(), $this->minute(), $this->second(), 
