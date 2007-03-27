@@ -513,17 +513,27 @@ class RequestHandler extends BasicRequestHandler
 			return $this->cls2page[$cls];
 		}
 
-		if (!isset($page_domains)) $page_domains = $this->getPageDomains();
-		foreach ($page_domains as $page_domain)
+		if (isset($criteria['class']) && $criteria['class'] === '__self__')
 		{
-			if (True === $page_domain->find($criteria))
+			$page =& $this->page;
+		}
+		else
+		{
+			if (!isset($page_domains)) $page_domains = $this->getPageDomains();
+			foreach ($page_domains as $page_domain)
 			{
-				$page =& $page_domain->handler;
-				$cls = substr(get_class($page), 0, -strlen('Page'));
-				$this->cls2page[$cls] =& $page;
-				$this->url2page[$page->url] =& $page;
-				break;
+				if (True === $page_domain->find($criteria))
+				{
+					$page =& $page_domain->handler;
+					break;
+				}
 			}
+		}
+		if (isset($page))
+		{
+			$cls = substr(get_class($page), 0, -strlen('Page'));
+			$this->cls2page[$cls] =& $page;
+			$this->url2page[$page->url] =& $page;
 		}
 		return $page;
 	}
