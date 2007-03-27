@@ -14,7 +14,7 @@ class CyrDate
 	var $minute=NULL;
 	var $second=NULL;
 
-	var $cyr_months = array(
+	var $months = array(
 		1 => '€нвар€',
 		2 => 'феврал€',
 		3 => 'марта',
@@ -28,7 +28,21 @@ class CyrDate
 		11 => 'но€бр€',
 		12 => 'декабр€',
 	);
-	var $cyr_month = array(
+	var $en_months = array(
+		1 => 'january',
+		2 => 'february',
+		3 => 'march',
+		4 => 'april',
+		5 => 'may',
+		6 => 'june',
+		7 => 'july',
+		8 => 'august',
+		9 => 'september',
+		10 => 'october',
+		11 => 'november',
+		12 => 'december',
+	);
+	var $month = array(
 		1 => '€нварь',
 		2 => 'февраль',
 		3 => 'март',
@@ -41,6 +55,20 @@ class CyrDate
 		10 => 'окр€брь',
 		11 => 'но€брь',
 		12 => 'декабрь',
+	);
+	var $en_month = array(
+		1 => 'january',
+		2 => 'february',
+		3 => 'march',
+		4 => 'april',
+		5 => 'may',
+		6 => 'june',
+		7 => 'july',
+		8 => 'august',
+		9 => 'september',
+		10 => 'october',
+		11 => 'november',
+		12 => 'december',
 	);
 	var $cyr_quarter = array(
 		1 => 'I квартал', 
@@ -229,8 +257,27 @@ class CyrDate
 	function hour() { return sprintf('%02d', $this->hour); }
 	function minute() { return sprintf('%02d', $this->minute); }
 	function second() { return sprintf('%02d', $this->second); }
-	function months_str() { return $this->cyr_months[$this->month]; }
-	function month_str() { return $this->cyr_month[$this->month]; }
+	function months_str() 
+	{ 
+		return (
+			isset($this->ctx->lang) 
+			&& ($attr = $this->ctx->lang.'_months') 
+			&& (isset($this->$attr))
+			&& ($src =& $this->$attr)
+			)	
+			?  $src[$this->month]
+			:  $this->months[$this->month]; 
+	}
+	function month_str() 
+	{ 
+		return (isset($this->ctx->lang) 
+			&& ($attr = $this->ctx->lang.'_month') 
+			&& (isset($this->$attr))
+			&& ($src =& $this->$attr)
+			)	
+			?  $src[$this->month]
+			:  $this->month[$this->month]; 
+	}
 
 	// setters:
 	function setYear($value) { $this->year = intval($value); }
