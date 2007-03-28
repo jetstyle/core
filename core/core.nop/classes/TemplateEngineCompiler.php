@@ -135,10 +135,37 @@ class TemplateEngineCompiler
     $functions = array();
     foreach( $pieces as $k=>$v )
     {
-      $functions[ $this->rh->tpl_template_prefix.$skin_name.
+		 // объединяем одноимянные шаблоны в одну функцию if () elseif () ... else
+		 // если кусок один -- тогда возвращаем без условий
+		 // на выходе $fbody - тело функции
+		 $fbody = '';
+		 foreach ($v as $vv)
+		 {
+			 $args = $vv[0];
+			 $body = $vv[1];
+			 if (empty($fbody) && empty($args)) 
+			 { 
+				 // мы тут первый и последний раз. это {{:tpl}}
+				 $fbody = $body; break; 
+			 }
+			 elseif (empty($args)) 
+			 {  // мы тут последний раз. это .. {{:tpl}}
+				 $fbody .= '{{?:}}'.$body.'{{/?}}'; 
+				 break; 
+			 }
+			 elseif (empty($fbody)) 
+			 { // мы тут первый раз. это {{:tpl *whatsup}}
+				 $fbody .= '{{?'.$args.'}}'.$body; 
+			 }
+			 else 
+			 { // мы тут уже были. это очередной .. {{:tpl *whatsnext}}
+				 $fbody .= '{{?:'.$args.'}}'.$body; 
+			 }
+		 }
+       $functions[ $this->rh->tpl_template_prefix.$skin_name.
                   $this->rh->tpl_template_sepfix.$tpl_name_for_cache.
                   $this->rh->tpl_template_sepfix.(($k=="@")?"":$k) ] = 
-                  $this->_TemplateBuildFunction( $this->_TemplateCompile($v) );
+                  $this->_TemplateBuildFunction( $this->_TemplateCompile($fbody) );
     }
 
     // 3. можем ли записывать файл?
@@ -210,9 +237,10 @@ class TemplateEngineCompiler
     $contents = str_replace( "<?", "<<?php ; ?>?", $contents );
                               
     // 2. grep all {{TPL:..}} & replace `em by !includes
-    $include_prefix = $this->rh->tpl_prefix.$this->rh->tpl_construct_action."include ";
+    //$include_prefix = $this->rh->tpl_prefix.$this->rh->tpl_construct_action."include ";
     $stack     = array( $contents );
     $stackname = array( "@" );
+    $stackargs = array( '' );
     $stackpos = 0;
 
 	 // lucky: aka итребитель копипастов
@@ -224,7 +252,8 @@ class TemplateEngineCompiler
       $data = $stack[$stackpos];
       $c =preg_match_all( "/".$this->rh->tpl_prefix.
                           /*$this->rh->tpl_construct_tplt*/
-                          $tpl_construct_tplt_re."([A-Za-z0-9_]+)".
+                          //$tpl_construct_tplt_re."([A-Za-z0-9_]+)".
+                          $tpl_construct_tplt_re."([A-Za-z0-9_]+)(?:(?:\s+)(.+?))?".
                           $this->rh->tpl_postfix."(.*?)".
                           $this->rh->tpl_prefix."\/".
                           /*$this->rh->tpl_construct_tplt*/"\\1\\2".
@@ -236,8 +265,9 @@ class TemplateEngineCompiler
         //$data = str_replace( $match[0], $include_prefix.$sub.$this->rh->tpl_postfix, $data );
         $data = str_replace( $match[0], '', $data ); // ru@jetstyle
 
-        $stack[] = $match[3];
+        $stack[] = $match[4];
         $stackname[] = $match[2];
+        $stackargs[] = $match[3];
       }
 
       $stack[$stackpos] = $data;
@@ -248,7 +278,7 @@ class TemplateEngineCompiler
     $res = array();
     foreach( $stack as $k=>$v )
     {
-         $res[ $stackname[$k] ] = $v;
+         $res[ $stackname[$k] ][] = array($stackargs[$k], $v);
     }
 
 
@@ -357,23 +387,18 @@ class TemplateEngineCompiler
 
 			$sep_tpl = $template_name;
 			$item_tpl = $template_name;
-			$empty_tpl = $template_name;
 			if((strpos($template_name, ":") === false))
 			{
 				$sep_tpl[TE_VALUE] .= "_sep";
 				$item_tpl[TE_VALUE] .= "_item";
-				$empty_tpl[TE_VALUE] .= "_empty";
 			}
 			else 
 			{
 				$sep_tpl[TE_VALUE] .= ":sep";
 				$item_tpl[TE_VALUE] .= ":item";
-				$empty_tpl[TE_VALUE] .= ":empty";
 			}
-			$template_name = $this->_phpString($template_name[TE_VALUE]);
 			$sep_tpl = $this->_phpString($sep_tpl[TE_VALUE]);
 			$item_tpl = $this->_phpString($item_tpl[TE_VALUE]);
-			$empty_tpl = $this->_phpString($empty_tpl[TE_VALUE]);
 
 
 			$result = ' $_z = '.$key .";\n";
@@ -405,10 +430,6 @@ if(is_array($_z) && !empty($_z))
 
 	$tpl->SetRef("*", $old_ref );
 	$tpl->SetRef("_", $old__ );
-}
-else
-{
-	echo $tpl->parse('.$empty_tpl.');
 }
 
 unset($_z);
