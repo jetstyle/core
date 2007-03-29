@@ -12,6 +12,8 @@ class BasicNews extends DBModel
 		'year',
 		'date',
 		'date_supertag',
+		'inserted',
+		'_order',
 		/*
 		"DATE_FORMAT(inserted, '%d') as `day`", 
 		"DATE_FORMAT(inserted, '%m') as `month`", 
@@ -38,6 +40,11 @@ class BasicNews extends DBModel
 			'alias' => 'year',
 		),
 
+		array( 'name' => 'year',			 'order' => 'DESC',),
+		array( 'name' => 'month',			 'order' => 'DESC',),
+		array( 'name' => 'day',	   		 'order' => 'DESC',),
+		array( 'name' => 'inserted', 		 'order' => 'DESC',),
+
 		array( 'name' => 'title',			 'source' => 'title',				'lang' => NULL,),
 		array( 'name' => 'title',			 'source' => 'eng_title',			'lang' => 'en',),
 
@@ -59,7 +66,7 @@ class BasicNews extends DBModel
 	);
 
 	var $where = '_state=0';
-	var $order = 'inserted DESC';
+	var $order = array('inserted');
 
 	function loadYearsRange($where=NULL, $limit=NULL, $offset=NULL)
 	{
