@@ -387,18 +387,22 @@ class TemplateEngineCompiler
 
 			$sep_tpl = $template_name;
 			$item_tpl = $template_name;
+			$empty_tpl = $template_name;
 			if((strpos($template_name, ":") === false))
 			{
 				$sep_tpl[TE_VALUE] .= "_sep";
 				$item_tpl[TE_VALUE] .= "_item";
+				$empty_tpl[TE_VALUE] .= "_empty";
 			}
 			else 
 			{
 				$sep_tpl[TE_VALUE] .= ":sep";
 				$item_tpl[TE_VALUE] .= ":item";
+				$empty_tpl[TE_VALUE] .= ":empty";
 			}
 			$sep_tpl = $this->_phpString($sep_tpl[TE_VALUE]);
 			$item_tpl = $this->_phpString($item_tpl[TE_VALUE]);
+			$empty_tpl = $this->_phpString($empty_tpl[TE_VALUE]);
 
 
 			$result = ' $_z = '.$key .";\n";
@@ -430,6 +434,10 @@ if(is_array($_z) && !empty($_z))
 
 	$tpl->SetRef("*", $old_ref );
 	$tpl->SetRef("_", $old__ );
+}
+else
+{
+	echo $tpl->parse('.$empty_tpl.');
 }
 
 unset($_z);
