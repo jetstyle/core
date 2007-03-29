@@ -227,6 +227,7 @@ class BasicPage extends Controller
 		// lucky@npj еще не определился с этим
 		// 'name' переменная главного шаблона для title сраницы
 		// (первого из элементов)
+		$this->rh->tpl->set('PAGE', $this);
 		$this->rh->tpl->set('name', $this->title);
 		$this->notifyOnRend();
 	}
