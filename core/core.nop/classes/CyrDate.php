@@ -57,18 +57,27 @@ class CyrDate
 		12 => 'декабрь',
 	);
 	var $en_month = array(
-		1 => 'january',
-		2 => 'february',
-		3 => 'march',
-		4 => 'april',
-		5 => 'may',
-		6 => 'june',
-		7 => 'july',
-		8 => 'august',
-		9 => 'september',
-		10 => 'october',
-		11 => 'november',
-		12 => 'december',
+		1 => 'January',
+		2 => 'February',
+		3 => 'March',
+		4 => 'April',
+		5 => 'May',
+		6 => 'June',
+		7 => 'July',
+		8 => 'August',
+		9 => 'September',
+		10 => 'October',
+		11 => 'November',
+		12 => 'December',
+	);
+	var $en_week = array(
+		0 => 'Monday',
+		1 => 'Tuesday',
+		2 => 'Wednesday',
+		3 => 'Thursday',
+		4 => 'Friday',
+		5 => 'Saturday',
+		6 => 'Sunday',
 	);
 	var $cyr_quarter = array(
 		1 => 'I квартал', 
@@ -86,6 +95,11 @@ class CyrDate
 		'H'=>'hour',
 		'i'=>'minute',
 		's'=>'second',
+		'B'=>'month_str',
+		'b' => 'month_str3',
+		'A' => 'week_str',
+		'a' => 'week_str3',
+		'z' => 'timezone',
 	);
 	var $prsrs = array(
 		'Y'=>array('\d{4}',   'setYear'),
@@ -131,7 +145,7 @@ class CyrDate
 	{
 		$this->hour = 0;
 		$this->minute = 0;
-		$this->second = 0;
+		$this->second = 1;
 	}
 	function dayEnd()
 	{
@@ -139,13 +153,19 @@ class CyrDate
 		$this->minute = 59;
 		$this->second = 59;
 	}
+	function getDayOfWeek()
+	{
+		$now = mktime($this->hour, $this->minute, $this->second, 
+			$this->month, $this->day, $this->year);
+		$day_of_week = intval(date('w',  // 0 - sunday, 1 - monday
+			$now));
+		$day_of_week = (int)(($day_of_week + 6) % 7); // 0 - monday, 6 - sunday
+		return $day_of_week;
+	}
 	function weekStart()
 	{
 		$this->dayStart();
-		$day_of_week = intval(date('w',  // 0 - sunday, 1 - monday
-			mktime(0, 0, 1, $this->month, $this->day, $this->year)));
-		$day_of_week = ($day_of_week + 6) % 7; // 0 - monday, 6 - sunday
-		$this->day = $this->day - $day_of_week;
+		$this->day = $this->day - $this->getDayOfWeek();
 
 		$this->fromStr('%Y %m %d %H %i %s',
 			date('Y m d H i s',
@@ -155,12 +175,7 @@ class CyrDate
 	function weekEnd()
 	{
 		$this->dayEnd();
-		$now = mktime($this->hour, $this->minute, $this->second, 
-			$this->month, $this->day, $this->year);
-		$day_of_week = intval(date('w',  // 0 - sunday, 1 - monday
-			$now));
-		$day_of_week = ($day_of_week + 6) % 7; // 0 - monday, 6 - sunday
-		$this->day = $this->day + (6 - $day_of_week);
+		$this->day = $this->day + (6 - $this->getDayOfWeek());
 
 		$this->fromStr('%Y %m %d %H %i %s',
 			date('Y m d H i s',
@@ -257,27 +272,12 @@ class CyrDate
 	function hour() { return sprintf('%02d', $this->hour); }
 	function minute() { return sprintf('%02d', $this->minute); }
 	function second() { return sprintf('%02d', $this->second); }
-	function months_str() 
-	{ 
-		return (
-			isset($this->ctx->lang) 
-			&& ($attr = $this->ctx->lang.'_months') 
-			&& (isset($this->$attr))
-			&& ($src =& $this->$attr)
-			)	
-			?  $src[$this->month]
-			:  $this->months[$this->month]; 
-	}
-	function month_str() 
-	{ 
-		return (isset($this->ctx->lang) 
-			&& ($attr = $this->ctx->lang.'_month') 
-			&& (isset($this->$attr))
-			&& ($src =& $this->$attr)
-			)	
-			?  $src[$this->month]
-			:  $this->month[$this->month]; 
-	}
+
+	function months_str() { return $this->_toStr('months', $this->month); }
+	function month_str() { return $this->_toStr('month', $this->month); }
+	function month_str3() { return substr($this->month_str(), 0, 3); }
+	function week_str() { return $this->_toStr('week', $this->getDayOfWeek()); }
+	function week_str3() { return substr($this->week_str(), 0, 3); }
 
 	// setters:
 	function setYear($value) { $this->year = intval($value); }
@@ -291,6 +291,17 @@ class CyrDate
 	function getIsDay() { return ($this->hour() >= 8 && $this->hour() < 18); } 
 	function getIsEvening() { return ($this->hour() >= 18 && $this->hour() < 22); } 
 	function getIsNight() { return ($this->hour() >= 22 || $this->hour() < 4); } 
+
+	function timezone() 
+	{ 
+		return (($this->tz >= 0) ? '+' : '-').sprintf('%04d', $this->tz * 100); 
+	}
+	function getRss()
+	{
+		$this->lang = 'en';
+		$fmt = '%b, %d %a %H:%i:%s %z';
+		return $this->format($fmt);
+	}
 
 	function mktime()
 	{
@@ -326,6 +337,24 @@ class CyrDate
 		}
 
 		return True;
+	}
+	function _toStr($name, $value)
+	{
+		$lang = (isset($this->lang) 
+			? $this->lang 
+			: (
+				isset($this->ctx->lang) 
+				? $this->ctx->lang 
+				: NULL));
+		$src = 
+			(
+				isset($lang) 
+				&& ($attr = $lang.'_'.$name) 
+				&& (isset($this->$attr))
+			)
+			? $this->$attr
+			: $this->$name;
+		return $src[$value];
 	}
 }
 

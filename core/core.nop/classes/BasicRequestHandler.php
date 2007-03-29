@@ -358,6 +358,7 @@ class BasicRequestHandler extends ConfigProcessor {
 		// шаблонной переменной "/", соответствующей корню сайта
 		$this->tpl->Set( "/", $this->ri->Href("") );
 		$this->tpl->Set( "lib", $this->ri->Href($this->lib_href_part)."/" );
+		$this->tpl->SetRef( "SITE", $this);
 	}
 
 	//Запуск выбранного обработчика на исполнение.
