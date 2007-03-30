@@ -13,13 +13,12 @@ class BasicGallery extends DBModel
 	); 
 
 	var $fields_info = array(
-		array( 'name' => 'title',			 'source' => 'title',				'lang' => NULL,),
-	//	array( 'name' => 'title',			 'source' => 'eng_title',			'lang' => 'en',),
-
-		array( 'name' => 'descr',			 'source' => 'descr',				'lang' => NULL,),
-	//	array( 'name' => 'descr',			 'source' => 'eng_descr',			'lang' => 'en',),
-
+		array( 'name' => 'topic_id',		 'source' => 'topic_id',									 ),
+		array( 'name' => 'title',			 'source' => 'title_pre',				 'lang' => NULL,),
+		array( 'name' => 'descr',			 'source' => 'descr',					 'lang' => NULL,),
+		array( 'name' => '_state',			 'source' => '_state',									    ),
 	);
+
 
 	var $where = ' _state = 0 ';
 
