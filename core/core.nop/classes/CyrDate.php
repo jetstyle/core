@@ -298,9 +298,14 @@ class CyrDate
 	}
 	function getRss()
 	{
+		$fmt = '%a, %d %b %Y %H:%i:%s %z';
+
+		$l_tmp = NULL; if (!isset($this->lang)) $l_tmp = $this->lang;
 		$this->lang = 'en';
-		$fmt = '%b, %d %a %H:%i:%s %z';
-		return $this->format($fmt);
+		$out = $this->format($fmt);
+		if ($l_tmp !== NULL) $this->lang = $l_tmp;
+
+		return $out;
 	}
 
 	function mktime()
