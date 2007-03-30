@@ -21,6 +21,8 @@ class BasicGallery extends DBModel
 
 	);
 
+	var $where = ' _state = 0 ';
+
 	var $order = array('_order');
 
 	var $folder = 'tiles';
