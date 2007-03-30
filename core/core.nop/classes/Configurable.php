@@ -1,8 +1,8 @@
 <?php
 
-require_once 'Config.php';
+require_once dirname(__FILE__).'/Config.php';
 /**
- * РљР»Р°СЃСЃ JsConfigurable - РїСЂРѕС‚РѕС‚РёРї РІСЃРµС… РѕР±СЉРµРєС‚РѕРІ
+ * Класс JsConfigurable - прототип всех объектов
  *
  */
 class Configurable
@@ -15,9 +15,9 @@ class Configurable
 	function initialize(&$ctx, $config=NULL)
 	{
 		$this->ctx =& $ctx;
-		$this->rh =& $ctx; // FIXME: lucky: СѓРґР°Р»РёРј СЌС‚Рѕ, РєРѕРіРґР° RH РїРµСЂРµСЃС‚Р°РЅРµС‚ Р±С‹С‚СЊ РєРѕРЅС‚РµРєСЃС‚РѕРј
+		$this->rh =& $ctx; // FIXME: lucky: удалим это, когда RH перестанет быть контекстом
 
-		// Р·Р°РјРµС‰Р°РµС‚ СЃРІРѕРё Р°С‚СЂРёР±СѓС‚С‹ РЅР° СѓРєР°Р·Р°РЅРЅС‹Рµ СЏРІРЅРѕ
+		// замещает свои атрибуты на указанные явно
 		if (isset($config)) config_joinConfigs($this, $config);
 		return True;
 	}
