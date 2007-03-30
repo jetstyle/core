@@ -622,6 +622,25 @@ class RequestHandler extends BasicRequestHandler
 			return $v;
 	}
 
+	function PrepareResult( $after_execute )
+	{
+	 /*
+	 Ќа этом уровне провер€ем, нужно ли оборачивать результат в html.html
+	 ƒл€ дополнительной пост-обработки окружени€ перегружать этот метод в наследниках.
+	  */
+		$template = isset($this->page->template) 
+			? $this->page->template
+			: 'html.html';
+
+		$tpl =& $this->tpl;
+		if( !$tpl->Is("HTML:html") )
+		{
+			if (!$tpl->Is("HTML:body")) $tpl->Set("HTML:body", $after_execute);
+			return $tpl->Parse( $template );
+		}
+		else
+			return $tpl->get("HTML:html");
+	}
 
 } 
 
