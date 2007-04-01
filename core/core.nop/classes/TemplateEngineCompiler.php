@@ -252,7 +252,7 @@ class TemplateEngineCompiler
       $c =preg_match_all( "/".$this->rh->tpl_prefix.
                           /*$this->rh->tpl_construct_tplt*/
                           //$tpl_construct_tplt_re."([A-Za-z0-9_]+)".
-                          $tpl_construct_tplt_re."([A-Za-z0-9_]+)(?:(?:\s+)(.+?))?".
+                          $tpl_construct_tplt_re.'([A-Za-z0-9_]+)(?:\s+(.+?))?'.
                           $this->rh->tpl_postfix."(.*?)".
                           $this->rh->tpl_prefix."\/".
                           /*$this->rh->tpl_construct_tplt*/"\\1\\2".
