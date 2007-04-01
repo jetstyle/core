@@ -139,6 +139,7 @@ class TemplateEngineCompiler
 		 // если кусок один -- тогда возвращаем без условий
 		 // на выходе $fbody - тело функции
 		 $fbody = '';
+		 $single_pattern = False;
 		 foreach ($v as $vv)
 		 {
 			 $args = $vv[0];
@@ -146,22 +147,20 @@ class TemplateEngineCompiler
 			 if (empty($fbody) && empty($args)) 
 			 { 
 				 // мы тут первый и последний раз. это {{:tpl}}
-				 $fbody = $body; break; 
-			 }
-			 elseif (empty($args)) 
-			 {  // мы тут последний раз. это .. {{:tpl}}
-				 $fbody .= '{{?:}}'.$body.'{{/?}}'; 
-				 break; 
+				 $fbody = $body; $single_pattern = True; break; 
 			 }
 			 elseif (empty($fbody)) 
 			 { // мы тут первый раз. это {{:tpl *whatsup}}
 				 $fbody .= '{{?'.$args.'}}'.$body; 
 			 }
 			 else 
-			 { // мы тут уже были. это очередной .. {{:tpl *whatsnext}}
+			 { // это {{:tpl *whatsnext}}
 				 $fbody .= '{{?:'.$args.'}}'.$body; 
+				 if (empty($args)) break; // нет аргументов -- это безусловный шаблон
+												  // шаблоны после можно пропустить
 			 }
 		 }
+		 if (!$single_pattern) $fbody .= '{{/?}}';
        $functions[ $this->rh->tpl_template_prefix.$skin_name.
                   $this->rh->tpl_template_sepfix.$tpl_name_for_cache.
                   $this->rh->tpl_template_sepfix.(($k=="@")?"":$k) ] = 
@@ -372,11 +371,15 @@ class TemplateEngineCompiler
 			$template_name = $params['do']?$params['do']:$params['use']; // ключ
 
 
+			/*
 			switch($key[TE_TYPE])
 			{
 			case TE_TYPE_VARIABLE: $key = $this->_compileParam($key); break;
 			case TE_TYPE_STRING: $key = $this->_ConstructGetValueScript($key[TE_VALUE]); break;
 			}
+			 */
+			$key = $this->_compileParam($key);
+
 
 			if (isset($alias)) 
 			{
@@ -387,22 +390,22 @@ class TemplateEngineCompiler
 
 			$sep_tpl = $template_name;
 			$item_tpl = $template_name;
-			$empty_tpl = $template_name;
+			#$empty_tpl = $template_name;
 			if((strpos($template_name, ":") === false))
 			{
 				$sep_tpl[TE_VALUE] .= "_sep";
-				$item_tpl[TE_VALUE] .= "_item";
-				$empty_tpl[TE_VALUE] .= "_empty";
+				#$item_tpl[TE_VALUE] .= "_item";
+				#$empty_tpl[TE_VALUE] .= "_empty";
 			}
 			else 
 			{
 				$sep_tpl[TE_VALUE] .= ":sep";
-				$item_tpl[TE_VALUE] .= ":item";
-				$empty_tpl[TE_VALUE] .= ":empty";
+				#$item_tpl[TE_VALUE] .= ":item";
+				#$empty_tpl[TE_VALUE] .= ":empty";
 			}
 			$sep_tpl = $this->_phpString($sep_tpl[TE_VALUE]);
 			$item_tpl = $this->_phpString($item_tpl[TE_VALUE]);
-			$empty_tpl = $this->_phpString($empty_tpl[TE_VALUE]);
+			#$empty_tpl = $this->_phpString($empty_tpl[TE_VALUE]);
 
 
 			$result = ' $_z = '.$key .";\n";
@@ -435,10 +438,12 @@ if(is_array($_z) && !empty($_z))
 	$tpl->SetRef("*", $old_ref );
 	$tpl->SetRef("_", $old__ );
 }
+/*
 else
 {
 	echo $tpl->parse('.$empty_tpl.');
 }
+ */
 
 unset($_z);
 				'."\n";
@@ -615,21 +620,21 @@ unset($_z);
 		  );
 	  }
 	  else
+	  if (preg_match($this->tpl_string_regexp, $thing, $matches))
+	  {
+		  $what = $matches[2];
+		  $res = array(
+			  TE_TYPE => TE_TYPE_STRING,
+			  TE_VALUE => $what,
+		  );
+	  }
+	  else
 	  if (preg_match($this->tpl_arg_regexp, $thing, $matches))
 	  // [[var]]
 	  {
 		  $what = $matches[1];
 		  $res = array(
 			  TE_TYPE => TE_TYPE_VARIABLE,
-			  TE_VALUE => $what,
-		  );
-	  }
-	  else
-	  if (preg_match($this->tpl_string_regexp, $thing, $matches))
-	  {
-		  $what = $matches[2];
-		  $res = array(
-			  TE_TYPE => TE_TYPE_STRING,
 			  TE_VALUE => $what,
 		  );
 	  }
@@ -662,17 +667,17 @@ unset($_z);
   {
 	  $params = array();
     // 2. link`em back
-    // 3. get matches      1     2       3 45       6    7      8  9
-    $c = preg_match_all( "/(^|\s)([^= ]+)(=((\"|')?)(.*?)(\\4))?($|(?=\s))/i",
+    // 3. get matches      1        2  		  34      5        6  7
+    $c = preg_match_all( '/(^\s*|\s+)(?:([^=\s]+)=)?((["\']?)(.*?)\\4)($|(?=\s))/i',
                          $content, $matches, PREG_SET_ORDER  );
     // 4. sort out
     $named = array();
     foreach( $matches as $match )
     {
-      if ($match[3]) // named parameter
-        $named[ $match[2] ] = $this->_parseParam($match[6]);
+      if ($match[2]) // named parameter
+        $named[ $match[2] ] = $this->_parseParam($match[3]);
       else // unnamed parameter
-        $params[] = $this->_parseParam($match[2]);
+        $params[] = $this->_parseParam($match[3]);
     }
     foreach($named as $k=>$v) $params[$k] = $v;
     return $params;
@@ -718,10 +723,13 @@ unset($_z);
     return $result;
   }
 
-  function _TemplateBuildFunction( $content ) // -- строит тело функции вокруг $content, включая { }
+  /** 
+	* строит тело функции вокруг $content, включая { }
+	*/
+  function _TemplateBuildFunction( $content ) 
   {
-    $content = "{ ?>\n".$content."\n<"."?php }";
-    return $content;
+		$content = "{ ?>\n".$content."\n<"."?php }";
+		return $content;
   }
 
   //zharik

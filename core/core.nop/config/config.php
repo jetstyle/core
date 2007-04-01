@@ -49,8 +49,10 @@ config_set($self, 'tpl_construct_standard_camelCase',  True);
 config_set($self, 'tpl_construct_standard_getter_prefix',  'get');    // lucky: префиксы для getter'ов 
 
 // lucky+ru: аргументы внутри шаблона {{!for do=[[pages]]
-config_set($self, 'tpl_arg_prefix',  "[[");
-config_set($self, 'tpl_arg_postfix',  "]]");
+//config_set($self, 'tpl_arg_prefix',  "[[");
+config_set($self, 'tpl_arg_prefix',  "");
+config_set($self, 'tpl_arg_postfix',  "");
+//config_set($self, 'tpl_arg_postfix',  "]]");
 
 config_set($self, 'tpl_instant_plugins',  array( "dummy" )); // plugins that are ALWAYS instant
 

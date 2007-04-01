@@ -15,9 +15,11 @@ $ofmt = $params['oformat'];
 
 $rh->useClass('CyrDate');
 $d = CyrDate::newFromStr($ifmt, $date);
-$d->ctx =& $rh;
 if (isset($d))
+{
+	$d->ctx =& $rh;
 	echo $d->format($ofmt);
+}
 else
 	echo $date;
 
