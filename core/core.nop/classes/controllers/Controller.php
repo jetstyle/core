@@ -3,7 +3,8 @@
  * Parent Controller
  *
  */
-class Controller 
+
+class Controller extends Configurable
 {
 	var $rh;
 	var $config = array();
@@ -14,7 +15,7 @@ class Controller
 
 	function initialize(&$ctx, $config=NULL) 
 	{ 
-		$this->rh =& $ctx; 
+		parent::initialize($ctx, $config);
 		if (isset($config)) 
 			$this->config = array_merge($this->config, $config);
 		return True;
