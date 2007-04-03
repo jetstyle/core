@@ -6,7 +6,8 @@ class TemplateEngineCompilerTest extends UnitTestCase
 
 	function setUp()
 	{
-		$this->compiller =& new TemplateEngineCompiler($this->ctx->tpl);
+		$this->compiller =& new TemplateEngineCompiler($this->_reporter->ctx->tpl);
+		$this->compiller->rh->use_fixtures = False;
 	}
 
 	function test_ParseParam()
@@ -310,6 +311,63 @@ class TemplateEngineCompilerTest extends UnitTestCase
 		$this->assertEqual($expect, $output);
 	}
 
+
+	function test_TemplateCallback_action()
+	{
+		$input = array('{{!plugin}}');
+
+		$expect = 
+'<?php  $_=array( "_plain" => "plugin",
+"_name" => "plugin",
+"_caller" => ""); $_r = $tpl->Action("plugin", $_ ); echo $_r; ?>';
+		$output = $this->compiller->_TemplateCallback($input);
+		$this->assertEqual($expect, $output);
+	}
+
+	function test_TemplateCallback_var_pipe_action()
+	{
+		$input = array('{{var|action}}');
+
+		$expect = 
+'<?php  $_r = (((($_ = $tpl->domain) || True) && isset($_) && (($_t=(is_array($_)?$_["var"]:(method_exists($_,"GetVar")?$_->GetVar():($_->var))))||True) && isset($_t)) ? $_t : ((((($_ = $tpl->rh->tpl_data) || True) && isset($_) && (($_t=(is_array($_)?$_["var"]:(method_exists($_,"GetVar")?$_->GetVar():($_->var))))||True) && isset($_t)) ? $_t : (NULL))));
+ $_=array( "_plain" => "action",
+"_name" => "action",
+"_caller" => "",
+"_" => $_r); $_r = $tpl->Action("action", $_ ); echo $_r; ?>';
+		$output = $this->compiller->_TemplateCallback($input);
+		$this->assertEqual($expect, $output);
+	}
+
+	function test_TemplateCallback_var_pipe_action_text()
+	{
+		$input = array('{{var|action "hi all"}}');
+
+		$expect = 
+'<?php  $_r = (((($_ = $tpl->domain) || True) && isset($_) && (($_t=(is_array($_)?$_["var"]:(method_exists($_,"GetVar")?$_->GetVar():($_->var))))||True) && isset($_t)) ? $_t : ((((($_ = $tpl->rh->tpl_data) || True) && isset($_) && (($_t=(is_array($_)?$_["var"]:(method_exists($_,"GetVar")?$_->GetVar():($_->var))))||True) && isset($_t)) ? $_t : (NULL))));
+ $_=array( "_plain" => "action \"hi all\"",
+"_name" => "action",
+"_caller" => "",
+"0" => "hi all",
+"_" => $_r); $_r = $tpl->Action("action", $_ ); echo $_r; ?>';
+		$output = $this->compiller->_TemplateCallback($input);
+		$this->assertEqual($expect, $output);
+	}
+
+	function test_TemplateCallback_var_pipe_action_text_AND_let_nameA_is_template()
+	{
+		$input = array('{{var | action "hi all" name_a=@:template}}');
+
+		$expect = 
+'<?php  $_r = (((($_ = $tpl->domain) || True) && isset($_) && (($_t=(is_array($_)?$_["var"]:(method_exists($_,"GetVar")?$_->GetVar():($_->var))))||True) && isset($_t)) ? $_t : ((((($_ = $tpl->rh->tpl_data) || True) && isset($_) && (($_t=(is_array($_)?$_["var"]:(method_exists($_,"GetVar")?$_->GetVar():($_->var))))||True) && isset($_t)) ? $_t : (NULL))));
+ $_=array( "_plain" => "action \"hi all\" name_a=@:template",
+"_name" => "action",
+"_caller" => "",
+"0" => "hi all",
+"name_a" => "@.html:template",
+"_" => $_r); $_r = $tpl->Action("action", $_ ); echo $_r; ?>';
+		$output = $this->compiller->_TemplateCallback($input);
+		$this->assertEqual($expect, $output);
+	}
 }
 
 

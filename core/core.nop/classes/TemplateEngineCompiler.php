@@ -76,6 +76,7 @@ define ('TE_VALUE', 1);
 define ('TE_TYPE_STRING', 0);
 define ('TE_TYPE_TEMPLATE', 1);
 define ('TE_TYPE_VARIABLE', 2);
+define ('TE_TYPE_PHP_SCRIPT', 3);
 
 class TemplateEngineCompiler
 {
@@ -371,13 +372,6 @@ class TemplateEngineCompiler
 			$template_name = $params['do']?$params['do']:$params['use']; // ключ
 
 
-			/*
-			switch($key[TE_TYPE])
-			{
-			case TE_TYPE_VARIABLE: $key = $this->_compileParam($key); break;
-			case TE_TYPE_STRING: $key = $this->_ConstructGetValueScript($key[TE_VALUE]); break;
-			}
-			 */
 			$key = $this->_compileParam($key);
 
 
@@ -464,21 +458,51 @@ unset($_z);
 			  $_instant=true;
 		  }
 
+		  $result = '';
         $param_contents = $this->_ImplodeActionParams( $params );
-		  $result =  ' $_='.$param_contents.'; echo $tpl->Action('
+		  $result .= ' $_='.$param_contents.';';
+		  $result .= ' $_r = $tpl->Action('
 			  .$this->_compileParam($params['_name']).', $_ ); ';
+			$result .= 'echo $_r; ';
         $instant = $result;
       }
       // {{#obj.property}}
       // {{var}}
+      // {{var|plugin}}
       else
 		{
 			//if (preg_match($this->object_regexp, $thing, $matches)) { }
 			//проверяем палка-синтаксис
-			$A = explode('|',$thing);
+			$A = array_map('trim', explode('|',$thing));
 			$var = array_shift($A);
-			$script = $this->_ConstructGetValueScript($var);
-			$result = ' $_r = '.$script .';'."\n";
+			$result = '';
+
+			if (!empty($var))
+			{
+				$script = $this->_ConstructGetValueScript($var);
+				$result .= ' $_r = '.$script .';'."\n";
+			}
+
+			foreach ($A as $stmt)
+			{
+				// FIXME:
+				// c&p {{!action param}} 
+				if (preg_match($this->action_regexp, '!'.$stmt, $matches))
+				{
+				  $params = $this->_ParseActionParams( $matches[1] );
+
+				  $params['_'] = array(
+					  TE_TYPE => TE_TYPE_PHP_SCRIPT,
+					  TE_VALUE => '$_r'
+				  );
+				  $param_contents = $this->_ImplodeActionParams( $params );
+				  $result .= ' $_='.$param_contents.';';
+				  $result .= ' $_r = $tpl->Action('
+					  .$this->_compileParam($params['_name']).', $_ ); ';
+				}
+				// с&p
+			}
+			/*
 			if( count($A)>0 ){
 				//есть палка-вхождения
 				$result .= '$_formatters = array("'.implode('","',$A).'");'."\n";
@@ -487,6 +511,7 @@ unset($_z);
 				$result .= ' $_r = $tpl->Action($_f,$_);'."\n";
 				$result .= "}\n";
 			}
+			 */
 			$result .= 'echo $_r; ';
 			$instant = $result;
 		}
@@ -658,6 +683,7 @@ unset($_z);
 	  case TE_TYPE_STRING: $res = $this->_phpString($param[TE_VALUE]); break;
 	  case TE_TYPE_VARIABLE: $res = $this->_ConstructGetValueScript($param[TE_VALUE]); break;
 	  case TE_TYPE_TEMPLATE: $res = $this->_phpString('@'.$param[TE_VALUE]); break;
+	  case TE_TYPE_PHP_SCRIPT: $res = $param[TE_VALUE]; break;
 	  default: $this->rh->error('Unknown type'); break;
 	  }
 	  return $res;
