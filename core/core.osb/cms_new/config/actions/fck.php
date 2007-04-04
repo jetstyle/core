@@ -12,6 +12,7 @@ function action_fck( &$rh, $PARAMS ){
   
   $oFCKeditor = new FCKeditor($rh->tpl->GetAssigned( $tpl_prefix ) . $input_name) ;
   $oFCKeditor->BasePath = $rh->path_rel.'FCKeditor/' ;  
+  $oFCKeditor->ToolbarSet = isset($ToolbarSet) ? $ToolbarSet : 'Default';
 
   $oFCKeditor->Width  = '100%' ;
   $oFCKeditor->Height = '300' ;
