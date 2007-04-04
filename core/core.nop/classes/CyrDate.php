@@ -14,7 +14,7 @@ class CyrDate
 	var $minute=NULL;
 	var $second=NULL;
 
-	var $months = array(
+	var $cyr_months = array(
 		1 => 'ÿםגאנÿ',
 		2 => 'פוגנאכÿ',
 		3 => 'לאנעא',
@@ -42,7 +42,7 @@ class CyrDate
 		11 => 'november',
 		12 => 'december',
 	);
-	var $month = array(
+	var $cyr_month = array(
 		1 => 'ÿםגאנü',
 		2 => 'פוגנאכü',
 		3 => 'לאנע',
@@ -350,15 +350,9 @@ class CyrDate
 			: (
 				isset($this->ctx->lang) 
 				? $this->ctx->lang 
-				: NULL));
-		$src = 
-			(
-				isset($lang) 
-				&& ($attr = $lang.'_'.$name) 
-				&& (isset($this->$attr))
-			)
-			? $this->$attr
-			: $this->$name;
+				: 'cyr'));
+		$attr = $lang.'_'.$name; 
+		$src = $this->$attr;
 		return $src[$value];
 	}
 }
