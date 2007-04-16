@@ -135,6 +135,18 @@ class CyrDate
 		$o = &new CyrDate();
 		return $o->fromStr($fmt, $str);
 	}
+
+	function &newFromTimestamp($timestamp)
+	{
+		$o = &new CyrDate();
+		return $o->fromTimestamp($timestamp);
+	}
+
+	function fromTimestamp($timestamp)
+	{
+		return $this->fromStr('%Y %m %d %H %i %s', date('Y m d H i s', $timestamp));
+	}
+
 	// compability
 	function &createFromStr($fmt, $str)
 	{
@@ -308,10 +320,15 @@ class CyrDate
 		return $out;
 	}
 
-	function mktime()
+	function mktime($hour=0, $minute=0, $second=0, $month=0, $day=0, $year=0)
 	{
-		return mktime($this->hour(), $this->minute(), $this->second(), 
-			$this->month(), $this->day(), $this->year());
+		return mktime(
+			$this->hour() + $hour, 
+			$this->minute() + $minute, 
+			$this->second() + $second, 
+			$this->month() + $month, 
+			$this->day() + $day, 
+			$this->year() + $year);
 	}
 
 	// private: 
