@@ -1,5 +1,5 @@
 <?php
-$TEST_TOOLS='/home/lucky/public_html/redarmy/core.nop/libs';
+$TEST_TOOLS=dirname(dirname(__FILE__)).'/libs';
 
 require_once($TEST_TOOLS.'/simpletest/unit_tester.php');
 require_once($TEST_TOOLS.'/simpletest/web_tester.php');
