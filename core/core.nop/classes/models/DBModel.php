@@ -19,6 +19,8 @@ class DBModel extends Model
 	//var $lang_fields = array();
 	/** условие where запроса */
 	var $where = NULL;
+	/** параметры GROUP BY запроса */
+	var $group = NULL;
 	/** параметры ORDER BY запроса */
 	var $order = NULL;
 	/** параметры LIMIT запроса */
@@ -131,7 +133,8 @@ class DBModel extends Model
 	{
 		$sql1 =  ' SELECT ' . $this->buildFieldAliases($this->fields)
 			. ' FROM '   . $this->buildTableName($this->table)
-			. $this->buildWhere($where);
+			. $this->buildWhere($where)
+			. $this->buildGroupBy($this->group);
 		$sql = $sql1
 			. $this->buildOrderBy($this->order)
 			. $this->buildLimit($limit, $offset);
@@ -314,6 +317,18 @@ class DBModel extends Model
 		else
 			$where_sql = '';
 		return $where_sql;
+	}
+	function buildGroupBy($fields)
+	{
+		if (empty($fields))
+			$sql = '';
+		else
+			$sql = ' GROUP BY '. (
+				is_array($fields)
+				? implode(',',array_map(array(&$this, 'quoteField'), $fields))
+				:	$fields)
+				;
+		return $sql;
 	}
 	function buildOrderBy($fields)
 	{
