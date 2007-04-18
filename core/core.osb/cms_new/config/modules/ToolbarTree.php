@@ -73,18 +73,24 @@ class Module_ToolbarTree extends Module {
   //помечаем открытые
   function MarkOpen()
   {
+    
     $rh =& $this->rh;
     //ищем ту, на чью ссылку пришли
     $id = 0;
-    foreach($this->data->ITEMS as $_id=>$r){
+    $module_name = $rh->getVar('module');
+    foreach($this->data->ITEMS as $_id=>$r)
+    {
+      //echo '<hr> '.$module_name." == ".$r['href'];
       if( 
-        $r["href"]!="" && 
-        !is_array($this->data->CHILDREN[$_id]) && 
-        substr( $rh->url_rel, 0, strlen($r['href']) ) == $r['href'] 
-        ){
+            $r["href"]!="" && 
+            !is_array($this->data->CHILDREN[$_id]) && 
+            //nop: bug is here: substr( $rh->url_rel, 0, strlen($r['href']) ) == $r['href'] 
+            "do/".$module_name == $r['href']
+        )
+        {
           $id = $_id;
           break;
-      }
+        }
     }
     //назначаем раздел 1го уровня на открытие
     if($id){
