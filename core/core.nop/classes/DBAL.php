@@ -80,11 +80,13 @@ class DBAL
   {
     $this->rh = &$rh;
     $this->prefix = $rh->db_prefix;
+
     // создать низкоуровневый дбал
     require_once( dirname(__FILE__)."/DBAL_".$rh->db_al.".php" );
     $lowlevel_name = "DBAL_".$rh->db_al;
     $lowlevel =& new $lowlevel_name( $this );
     $this->lowlevel = &$lowlevel;
+    
     // connection, if any
     if ($connect) $this->_Connect();
   }
@@ -111,6 +113,10 @@ class DBAL
   function _Query( $sql, $limit=0, $offset=0 ) 
   {
    $data = array();
+   
+   //плейсхолдер для префикса
+   $sql = str_replace ("??", $this->prefix, $sql);
+   
    if ($r = $this->lowlevel->Query($sql, $limit, $offset))
    {
      while ($row = $this->lowlevel->FetchAssoc($r)) $data[] = $row;
@@ -123,7 +129,8 @@ class DBAL
   {
     $error_msg = "DBAL [".$this->rh->db_al."] Error: ".$error_msg;
     if ($this->rh->debug)
-      $this->rh->Error($error_msg);
+        echo '<hr>'.$error_msg;
+      //$this->rh->Error($error_msg);
     else
     {
       ob_end_clean();
@@ -161,6 +168,78 @@ class DBAL
     else return 0;
   }
 
+  /**
+   *  выполняет запрос, запоминает ссылку на результат
+   *  подразумевается для использования getRow, getObject, getArray
+   */
+  function Execute($sql, $limit=0, $offset=0 )
+  {
+  	  //типа такой плейсхолдер
+  	  $sql = str_replace ("??", $this->prefix, $sql);
+
+  	  $this->handle = $this->lowlevel->Query($sql, $limit, $offset);
+  	  
+  	  if ($this->handle)
+   	  {
+     	$this->numRows = $this->lowlevel->getNumRows($this->handle);
+		$this->currentRow = 0;
+
+     	return $this->handle;
+      }
+  }
+  
+  
+  /**
+   * возвращает строчку объектом нужного класса
+   */
+  function getObject($class_name=null)
+  {
+  	 if ($this->handle && $this->currentRow < $this->numRows)
+  	 {
+  		$ret = $this->lowlevel->FetchObject($this->handle, $class_name);
+  		$this->currentRow++;
+  	 }
+  	 else
+  	 {
+  	 	$this->lowlevel->FreeResult($this->handle);	 
+  	 	$ret = null;
+  	 }
+  	 return $ret;
+  }
+  
+  
+  /**
+   * возвращает строчку массивом
+   */
+  function getRow()
+  {
+  	 if ($this->handle && $this->currentRow < $this->numRows)
+  	 {
+  		$ret = $this->lowlevel->FetchAssoc($this->handle);
+  		$this->currentRow++;
+  	 }
+  	 else
+  	 {
+  	 	$this->lowlevel->FreeResult($this->handle);	 
+  	 	$ret = null;
+  	 }
+  	 return $ret;
+  }
+
+  /**
+   * возвращает все строчки результата массом
+   * вообще-то хак для билдера
+   */
+  function getArray()
+  {
+      if ($this->handle)
+      {
+          while ($row = $this->getRow())
+              $ret[] = $row;
+            
+          return $ret;      
+      }
+  }
 // EOC{ DBAL } 
 }
 

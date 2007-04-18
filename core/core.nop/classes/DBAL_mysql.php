@@ -105,6 +105,11 @@ class DBAL_mysql
 	function AffectedRows( ) 
 	{ return mysql_affected_rows($this->dblink); }
 
+    function GetNumRows($handle)
+    {
+      return mysql_num_rows($handle);
+    }
+
 	// EOC{ DBAL_mysql } 
 }
 
