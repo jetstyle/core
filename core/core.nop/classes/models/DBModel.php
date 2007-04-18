@@ -13,6 +13,8 @@ class DBModel extends Model
 	var $table=NULL;
 	/** список полей таблицы */
 	var $fields = array();
+	/** список внешних полей */
+	var $foreign_fields = array();
 	var $fields_info= array();
 	//var $lang_fields = array();
 	/** условие where запроса */
@@ -97,6 +99,34 @@ class DBModel extends Model
 		$this->notify('load', array(&$this));
 	}
 
+	// relations
+	/**
+	 * $data -- массив с данными этой модели (который возвращает select(), 
+	 * например)
+	 * $info -- инфа о field
+	 */
+	function mapMany(&$data, $info)
+	{
+		$field_name = $info['name'];
+		$fk = $info['has_many']['fk'];
+		$pk = $info['has_many']['pk'];
+		$self_name = $info['has_many']['name'];
+
+
+		$model =& $this->$field_name;
+		if (!isset($model)) return;
+
+		foreach ($data as $k=>$v)
+		{
+			$where = ' AND '.$model->quoteField($fk) .'='.$model->quote($v[$pk]);
+			$model->load($where);
+			$item = $model->data;
+			foreach($item as $kk=>$vv) $item[$kk][$self_name] =& $data[$k];
+			$data[$k][$field_name] = $item;
+		}
+	}
+
+
 	function getSelectSql($where=NULL, $limit=NULL, $offset=NULL)
 	{
 		$sql1 =  ' SELECT ' . $this->buildFieldAliases($this->fields)
@@ -114,7 +144,16 @@ class DBModel extends Model
 	{
 		list($sql, $sql1) = $this->getSelectSql($where, $limit, $offset, $is_load);
 		if ($is_load) $this->sql = $sql1;
-		return $this->rh->db->query($sql);
+		$data = $this->rh->db->query($sql);
+		foreach ($this->foreign_fields as $v)
+		{
+			$info = $this->_fields_info[$v];
+			if (isset($info['has_many']))
+			{
+				$this->mapMany($data, $info);
+			}
+		}
+		return $data;
 	}
 	function onBeforeInsert(&$row)
 	{
