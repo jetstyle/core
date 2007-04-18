@@ -17,10 +17,10 @@ class BasicMenu extends Model
 	{
 		$this->rh->useClass('models/Content');
 		$m =& new Content();
-		$config = $this->config;
-		$config['fields'] = $this->fields;
-		$config['order'] = $this->order;
-		$m->initialize($this->rh, $config);
+		if (isset($this->fields_info)) $m->fields_info = $this->fields_info;
+		if (isset($this->fields)) $m->fields = $this->fields;
+		if (isset($this->order)) $m->order = $this->order;
+		$m->initialize($this->rh);
 		if (!isset($where)) $where = '';
 		$where .= ' AND (_level >= '.$m->quote($this->level)
 			. ' AND _level <'.$m->quote($this->level + $this->depth) 

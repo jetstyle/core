@@ -9,11 +9,11 @@ class BasicBread extends Model
     {
 		$this->rh->useClass('models/Content');
 		$m =& new Content();
-		$config = $this->config;
-		$config['fields'] = $this->fields;
-		$config['order'] = '_left ASC';
+		if (isset($this->fields)) $m->fields = $this->fields;
+		if (isset($this->fields_info)) $m->fields_info = $this->fields_info;
+		$m->order = '_left ASC';
+		$m->initialize($this->rh);
 
-		$m->initialize($this->rh, $config);
 		// FIXME: lucky: как еще можно узнать реальный путь до страницы?
 		$where = 
 			' AND _left <= '.$m->quote($this->rh->data['_left'])
