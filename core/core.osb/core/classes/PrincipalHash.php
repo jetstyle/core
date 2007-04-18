@@ -1,5 +1,5 @@
 <?
-  $this->UseClass('Principal',0);
+  $this->UseClass('Principal');
   
 class PrincipalHash extends Principal {
   

@@ -79,7 +79,8 @@ class ListObject extends Obj {
     }else{
       
       //try from DB
-      if( is_string($DATA) ){
+      if( is_string($DATA) )
+      {
         $this->rh->db->execute( $DATA );
         $this->DATA =& $this->rh->db->GetArray();
         if( $this->cache_id ) $this->rh->cache->Store( $this->cache_class, $this->cache_id );

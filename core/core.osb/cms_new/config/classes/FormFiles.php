@@ -8,7 +8,7 @@
   );
 */
   
-  $this->UseClass('FormSimple',1);
+  $this->UseClass('FormSimple');
   
 class FormFiles extends FormSimple  {
   

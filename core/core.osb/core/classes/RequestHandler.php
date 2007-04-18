@@ -213,8 +213,11 @@ class RequestHandler extends ConfigProcessor {
     return include($this->FindScript('handlers', $handler));
   }
 
-  function UseClass( $name, $level=CURRENT_LEVEL, $direction=SEARCH_DOWN ){   
-    if( !$this->CLASSES[$name] ){
+  function UseClass( $name, $level=CURRENT_LEVEL, $direction=SEARCH_DOWN )
+  {   
+
+    if( !$this->CLASSES[$name] )
+    {
       $fname = $this->FindScript( "classes", $name, $level, $direction );
       require_once( $fname );
       $this->CLASSES[$name] = true;

@@ -1,5 +1,5 @@
 <?
-  $this->UseClass('Principal',0);
+  $this->UseClass('Principal');
   
 class PrincipalDB extends Principal 
 {

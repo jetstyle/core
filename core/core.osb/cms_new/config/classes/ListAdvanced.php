@@ -1,6 +1,6 @@
 <?
   
-  $this->UseClass('ListSimple',1);
+  $this->UseClass('ListSimple');
   
 class ListAdvanced extends ListSimple  {
   
@@ -53,7 +53,7 @@ class ListAdvanced extends ListSimple  {
     $tpl->Parse( $this->template_engine, '__picker' );
     
     //постраничный рубрикатор
-    $rh->UseClass('Arrows',0);
+    $rh->UseClass('Arrows');
     $this->arrows = new Arrows( $rh );
     $this->arrows->outpice = $this->config->outpice ? $this->config->outpice : 10;
     $this->arrows->mega_outpice = $this->config->mega_outpice ? $this->config->mega_outpice : 10;

@@ -64,6 +64,7 @@ class DBDataView extends Obj {
   function Load($where=""){
     //aliaces
     $db =& $this->rh->db;
+
     //function
     $this->ITEMS = array();
     //construct sql
@@ -79,36 +80,48 @@ class DBDataView extends Obj {
     }
     //load data
 //    print_r($this->SELECT_FIELDS);
-//    echo $sql.'<br>';
 
-    //echo '<br>'.$sql;
     if($ARR) $rs = $db->SelectLimit( $sql, $ARR[1], $ARR[0] );
     else if($this->limit) $rs = $db->SelectLimit( $sql, $this->limit );
     else $rs = $db->execute( $sql );
-    if(!$rs->EOF){
-      if( $this->result_mode === 0 ){
+
+    if($rs && $db->numRows > 0)
+    {
+      if( $this->result_mode === 0)
+      {
         //array mode
-        $this->ITEMS = $rs->GetArray();
-      }else{
+        $result = $db->GetArray();
+        if ($result)
+            $this->ITEMS = $result;
+      }
+      else
+      {
         $id_field = $this->SELECT_FIELDS[0];
-        if( $this->result_mode === 1 ){
+        if( $this->result_mode === 1 )
+        {
           //by id mode
           $this->IDS = array();
-          while(!$rs->EOF){
-            $this->IDS[] = $rs->fields[$id_field];
-            $this->ITEMS[ $rs->fields[$id_field] ] = $rs->fields;
-            $rs->MoveNext();
+
+          while($row = $db->getRow())
+          {
+            $this->IDS[] = $row[$id_field];
+            $this->ITEMS[ $row[$id_field] ] = $row;
+            //$rs->MoveNext();
           }
-        }else{
+        }
+        else
+        {
           //tree mode
           $this->CHILDREN = array();
-          while(!$rs->EOF){
-            $this->ITEMS[ $rs->fields['id'] ] = $rs->fields;
-            $this->CHILDREN[ (integer)$rs->fields['_parent'] ][] = $rs->fields['id'];
-            $rs->MoveNext();
+          while($row = $db->getRow())
+          {
+            $this->ITEMS[ $row['id'] ] = $row;
+            $this->CHILDREN[ (integer)$row['_parent'] ][] = $row['id'];
+            //$rs->MoveNext();
           }
         }
       }
+      
     }
     //usefull aliace
     if( count($this->ITEMS)==1 )

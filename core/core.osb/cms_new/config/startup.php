@@ -1,9 +1,10 @@
 <?
 	//базовый стартап
-	include($this->FindScript('scripts','startup',0));
-	
+    
+	include($this->FindScript('scripts','startup'));
+
 	//корзина
-	$this->UseClass('Trash',1);
+	$this->UseClass('Trash');
 	$this->trash =& new Trash($this);
 	
   //шаблонные переменные для вставки htmlarea
@@ -13,12 +14,13 @@
 	$this->tpl->assign('fe_js',$this->front_end->path_rel.'js/');
 	
 	//логирование
-	if( $this->trace_logs ){
-		$this->UseClass('Logs',1);
+	if( $this->trace_logs )
+    {
+		$this->UseClass('Logs');
 		$this->logs =& new Logs($this);
 	}else{
-		$this->UseClass('LogsDummy',1);
+		$this->UseClass('LogsDummy');
 		$this->logs =& new LogsDummy($this);
 	}
-	
+    
 ?>

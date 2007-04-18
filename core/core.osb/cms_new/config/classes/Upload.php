@@ -72,10 +72,9 @@ class Upload {
     $this->table_name = $table_name ? $table_name : $rh->project_name.'_upload';
     $this->chmod = 0744;
     //читаем базу знаний
-    $rs = $rh->db->execute("SELECT * FROM ".$this->table_name);
-    while(!$rs->EOF){
-      $this->TYPES[ $rs->fields['ext'] ] = array($rs->fields['type'],$rs->fields['title']);
-      $rs->MoveNext();
+    $rh->db->execute("SELECT * FROM ".$this->table_name);
+    while($row = $rh->db->getRow()){
+      $this->TYPES[ $row['ext'] ] = array($row['type'],$row['title']);
     }
   }
   

@@ -10,7 +10,7 @@
   Заполнение полей на совести обработчика формы.
 */
   
-  $this->UseClass('ListSimple',1);
+$this->UseClass('ListSimple');
   
 class ListNews extends ListSimple  {
   
@@ -68,9 +68,9 @@ class ListNews extends ListSimple  {
     //грузим признаки загруженности по месяцам
     $M = array();
     $rs = $rh->db->execute("SELECT DISTINCT month FROM ".$this->table_name." WHERE year='".$this->year."' AND _state<=1 ".($this->config->where ? " AND ".$this->config->where : "" ) );
-    while(!$rs->EOF){
-      $M[ $rs->fields['month'] ] = true;
-      $rs->MoveNext();
+    while($row = $rh->db->getRow())
+    {
+      $M[ $row['month'] ] = true;
     }
     include( $rh->FindScript('handlers','_monthes') );
     for($i=1;$i<=12;$i++)
@@ -83,7 +83,7 @@ class ListNews extends ListSimple  {
     $tpl->Parse( $this->template_calendar, '__calendar' );
     
     //постраничный рубрикатор
-    $rh->UseClass('Arrows',0);
+    $rh->UseClass('Arrows');
     $this->arrows = new Arrows( $rh );
     $this->arrows->outpice = $this->config->outpice ? $this->config->outpice : 10;
     $this->arrows->mega_outpice = $this->config->mega_outpice ? $this->config->mega_outpice : 10;
@@ -105,22 +105,25 @@ class ListNews extends ListSimple  {
     ListSimple::Handle();
   }
   
-  function Load(){
+  function Load()
+  {
     ListSimple::Load($this->date_where);
   }
   
   function DateFilter(){
     $rh =& $this->rh;
     //самый первый год из заведённых
-    $rs = $rh->db->SelectLimit("SELECT year FROM ".$this->table_name." WHERE _state<=1 ".($this->config->where ? " AND ".$this->config->where : "" )." ORDER BY year ASC",1);
-    if(!$rs->EOF)
-      $this->year_first = $rs->fields['year'];
+    //$rs = $rh->db->SelectLimit("SELECT year FROM ".$this->table_name." WHERE _state<=1 ".($this->config->where ? " AND ".$this->config->where : "" )." ORDER BY year ASC",1);
+    $rs = $rh->db->queryOne("SELECT year FROM ".$this->table_name." WHERE _state<=1 ".($this->config->where ? " AND ".$this->config->where : "" )." ORDER BY year ASC");
+    if($rs)
+      $this->year_first = $rs['year'];
     else
       $this->year_first = date('Y');
     //самый последний год из заведённых
-    $rs = $rh->db->SelectLimit("SELECT year FROM ".$this->table_name." WHERE _state<=1 ".($this->config->where ? " AND ".$this->config->where : "" )." ORDER BY year DESC",1);
-    if(!$rs->EOF)
-      $this->year_last = $rs->fields['year'];
+    //$rs = $rh->db->SelectLimit("SELECT year FROM ".$this->table_name." WHERE _state<=1 ".($this->config->where ? " AND ".$this->config->where : "" )." ORDER BY year DESC",1);
+    $rs = $rh->db->queryOne("SELECT year FROM ".$this->table_name." WHERE _state<=1 ".($this->config->where ? " AND ".$this->config->where : "" )." ORDER BY year DESC");
+    if($rs)
+      $this->year_last = $rs['year'];
     else
       $this->year_last = date('Y');
     //текущие год и месяц
@@ -129,9 +132,10 @@ class ListNews extends ListSimple  {
     if(!$this->year) $this->year = $this->year_last;
     if(!$this->month){
       //самый последний месяц из указанного года
-      $rs = $rh->db->SelectLimit("SELECT month FROM ".$this->table_name." WHERE year='".$this->year."' AND _state<=1 ".($this->config->where ? " AND ".$this->config->where : "" )." ORDER BY month DESC",1);
-      if(!$rs->EOF)
-        $this->month = $rs->fields['month'];
+      //$rs = $rh->db->SelectLimit("SELECT month FROM ".$this->table_name." WHERE year='".$this->year."' AND _state<=1 ".($this->config->where ? " AND ".$this->config->where : "" )." ORDER BY month DESC",1);
+      $rs = $rh->db->queryOne("SELECT month FROM ".$this->table_name." WHERE year='".$this->year."' AND _state<=1 ".($this->config->where ? " AND ".$this->config->where : "" )." ORDER BY month DESC");
+      if($rs)
+        $this->month = $rs['month'];
       else
         $this->month = date('n');
     }

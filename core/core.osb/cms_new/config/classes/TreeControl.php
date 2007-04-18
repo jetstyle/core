@@ -124,10 +124,12 @@ class TreeControl extends DBDataEditTree  {
 			//render trash switcher
 			$show_trash = $this->rh->state->Get('_show_trash');
 			$tpl->Assign( '_href', $this->_href_template.'&_show_trash='.(!$show_trash) );
+            
 			$tpl->Parse( $show_trash ? $this->template_trash_hide : $this->template_trash_show, '__trash_switch' );
+
 			//ссылка на просмотр логов
 			$this->rh->logs->ParseLink( $this->config->module_name, 0, '__logs' );
-			//собственно шаблон
+            //собственно шаблон
 			$_href = str_replace('&amp;','&',$this->_href_template);
 			$_config_name = $this->config->PASSED[ 1 ];
 

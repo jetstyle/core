@@ -40,7 +40,7 @@ class ListSimple extends DBDataEdit  {
 		$tpl =& $this->rh->tpl;
 		
 		$this->Load();
-	
+
 		//render trash switcher
         if (!$this->config->HIDE_CONTROLS['show_trash'])
         {
@@ -64,6 +64,7 @@ class ListSimple extends DBDataEdit  {
 		//load data
 		if( !$this->loaded ){
 			DBDataEdit::Load( $where );
+
 			$this->loaded = true;
 		}
 	}

@@ -25,11 +25,12 @@ $DIRS["message_sets"][] = $_dir.'/message_sets/';
 $DIRS = config_replace($self, 'DIRS', $DIRS);
 
 //database
+/*
 config_set($self, 'db_server',  "localhost");
 config_set($self, 'db_user',  "nop");
 config_set($self, 'db_password',  "123456");
 config_set($self, 'db_database',  "dummy");
-
+*/
 //template engine
 config_set($self, 'templates_cache_dir',  $_dir.'/_templates/');
 config_set($self, 'PRE_FILTERS',  array("strip_comments"));//,"pack_spaces","gather_css",

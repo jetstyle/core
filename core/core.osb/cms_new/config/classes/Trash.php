@@ -53,17 +53,24 @@ class Trash {
   function Delete( $table_name, $item_id, $module_title, $item_title, $view_link )
   {
     $sql = "SELECT ".$this->table_id_field.", _state FROM $table_name WHERE ".$this->table_id_field."='$item_id'";
-    $rs = $this->rh->db->execute($sql);
+    $this->rh->db->execute($sql);
+    $row = $this->rh->db->getRow();
 
-    if( $rs->fields['_state']!=2 ){
+    if( $row['_state']!=2 )
+    {
       //удаляем в корзину
       $this->ToTrash($table_name, $item_id, $module_title, $item_title, $view_link);
       return 1;
-    }else{
+    }
+    else
+    {
+    /*
         var_dump($table_name);
         echo '<hr>';
         var_dump($item_id);
         echo '<hr>';
+        die();
+        */
         //die('erase');
       //удаляем совсем
       $this->Erase($table_name, $item_id);
@@ -77,12 +84,18 @@ class Trash {
     //помечаем запись в исходной таблице как удалённую
     $db->execute("UPDATE $table_name SET _state=2 WHERE ".$this->table_id_field."='$item_id'");
     //вставляем запись в таблицу мусора
-    $rs = $db->execute("SELECT id FROM ".$this->table_trash_tables." WHERE table_name='$table_name'");
-    if( !$rs->EOF ) $table_id = $rs->fields['id'];
+    $rs = $db->queryOne("SELECT id FROM ".$this->table_trash_tables." WHERE table_name='$table_name'");
+    
+    if( $rs['id'] ) $table_id = $rs['id'];
     else
     {
-      $db->execute("INSERT INTO ".$this->table_trash_tables."(table_name) VALUES('$table_name')");
-      $table_id = $db->Insert_ID();
+      $s = "INSERT INTO ".$this->table_trash_tables."(table_name) VALUES('$table_name')";
+      $table_id =  $db->Insert($s);
+      /*
+      echo $s.'<br>';
+      var_dump($table_id);
+      die();
+      */
     }
     $sql = "INSERT INTO ".$this->table_trash."(table_id,item_id,module_title,item_title,view_link)";
     $sql .= " VALUES('$table_id','$item_id','$module_title','$item_title','$view_link')";
@@ -104,8 +117,6 @@ class Trash {
     $db =& $this->rh->db;
     //читаем запись из таблицы мусора
     $r = $this->_ReadTrashRecord($table_name, $item_id);
-    //var_dump($r);
-    //die();
     //удаляем запись в исходной таблице
     if($r->table_name)
       $db->execute("DELETE FROM ".$r->table_name." WHERE ".$this->table_id_field."='".$r->item_id."'");
@@ -118,7 +129,9 @@ class Trash {
     $sql .= " FROM ".$this->table_trash." as tr, ".$this->table_trash_tables." as tb ";
     $sql .= " WHERE tb.id=tr.table_id AND tr.item_id='$item_id' AND tb.table_name='$table_name'";
     $rs = $this->rh->db->execute($sql);
-    return (object)$rs->fields;
+    //die($sql);
+    //var_dump($this->rh->db->getRow());
+    return $this->rh->db->getObject();
   }
 }
   

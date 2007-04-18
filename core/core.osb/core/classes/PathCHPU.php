@@ -1,5 +1,5 @@
 <?
-  $this->UseClass('Path',0);
+  $this->UseClass('Path');
   
 class PathCHPU extends Path {
   

@@ -3,7 +3,7 @@
 	$WRAPPED = array( "tree", "form" );
 */
 	
-	$this->UseClass('Wrapper',1);
+$this->UseClass('Wrapper');
 	
 class TreeForm extends Wrapper {
 	

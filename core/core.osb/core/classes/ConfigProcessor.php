@@ -35,7 +35,8 @@ class ConfigProcessor{
 		die("<font color='red'><b>ConfigProcessor error</b>: ".$str."</font>");
 	}
 	
-	function FindScript( $type, $name, $level=CURRENT_LEVEL, $direction=SEARCH_DOWN, $has_ext=false ){
+	function FindScript( $type, $name, $level=CURRENT_LEVEL, $direction=SEARCH_DOWN, $has_ext=false )
+    {
 		
 		if( !$this->missed_OK && $name=="" ) $this->EndError("ConfigProcessor::_FindScript - script name is empty, \$type=$type");
 		
@@ -45,14 +46,28 @@ class ConfigProcessor{
 		$count_ARR = count($ARR);
 		
 		$ext = $has_ext ? '' : '.php';
-		for( $i=$level; $i>=0 && $i<$count_ARR; $i+=$direction ){
+
+		for( $i=$level; $i>=0 && $i<$count_ARR; $i+=$direction )
+        {
 			$fname = $ARR[$i].$name.$ext;
+/*
+	        if ($type=="models")
+            {
+                echo '<hr>'.$fname;
+            }
+*/
 //			echo $fname.'<br>\n';
 			if( @file_exists($fname) && !@is_dir($fname) ) break;
 			else $fname = "";
 		}
 		
-		if( $fname=="" ){
+		if( $fname=="" )
+        {
+            /*
+            echo '<pre>';
+            var_dump(debug_backtrace());
+            echo '</pre>';
+            */
 			if(!$this->missed_OK) $this->EndError("Script not found: type=<b>$type</b>, name=<b>$name</b>, level=<b>$level</b>, direction=<b>$direction</b>");
 			else return false;
 		}else return $fname;
