@@ -29,7 +29,13 @@
     					$STACK[] = $_id;
     			//модифицируем узел
     			$r = $tree->ITEMS[$id];
-    			$r['_path'] = $tree->ITEMS[ $r['_parent'] ]['_path'].( $r['_parent'] ? '/' : '').$r["_supertag"];
+                if ($r['_parent'] == 0)
+                {
+                    $r['_path'] = '';
+                    $r['_supertag'] = '';
+                }
+                else
+        			$r['_path'] = $tree->ITEMS[ $r['_parent'] ]['_path'].( $r['_parent'] ? '/' : '').$r["_supertag"];
     			$db->execute("UPDATE ".$this->table_name." SET _supertag='".$r["_supertag"]."',_path='".$r['_path']."' WHERE id='".$r['id']."'");            
     			$tree->ITEMS[$id] = $r;
     		}
