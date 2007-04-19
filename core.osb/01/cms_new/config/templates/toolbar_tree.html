@@ -1,0 +1,97 @@
+{{TPL:not_auth}}
+<form action='{{/}}' method='post'>
+<input type='hidden' name='page' value='login'>
+<table cellspacing="0" cellpadding="0" class="cms-login w100">
+  <tr>
+    <td class="middle">
+      <table cellspacing="0" cellpadding="2" align="center">
+        <tr>
+          <td class="text-">логин:</td>
+          <td><input type='text' name='login'></td>
+        </tr>
+        <tr>
+          <td class="text-">пароль:</td>
+          <td><input type='password' name='password'></td>
+        </tr>
+        <tr>
+          <td>{{@dummy.html}}</td>
+          <td>
+            <input type="submit" value="войти">
+          </td>
+        </tr>
+      </table>
+    </td>
+  </tr>
+</table>
+</form>
+{{/TPL:not_auth}}
+
+{{TPL:auth}}
+Вы &mdash; <b>{{login}}</b>: {{role}}
+{{/TPL:auth}}
+
+{{TPL:menu}}
+  {{TPL:List_Empty}}<td class="item-" nowrap="nowrap">[Здесь будет меню]</td>{{/TPL:List_Empty}}
+  {{TPL:List_Item}}<td class="item-" nowrap="nowrap"><a href="{{_/}}{{_href}}" onclick="{{_onclick}}">{{$_title}}</a></td>{{/TPL:List_Item}}
+  {{TPL:List_Item_sel}}<td class="selected-" nowrap="nowrap">{{$_title}}</td>{{/TPL:List_Item_sel}}
+  {{TPL:List_Separator}}<td class="seporate-" nowrap="nowrap">|</td>{{/TPL:List_Separator}}
+  {{__list}}
+{{/TPL:menu}}
+
+{{TPL:submenu}}
+  {{TPL:List_Empty}}{{/TPL:List_Empty}}
+  {{TPL:List_Item}}<a href="{{_/}}{{_href}}">{{$_title}}</a>{{/TPL:List_Item}}
+  {{TPL:List_Item_sel}}<strong>{{$_title}}</strong>{{/TPL:List_Item_sel}}
+  {{TPL:List_Separator}} | {{/TPL:List_Separator}}
+<p>&nbsp;
+  {{__list}}
+</p>  
+{{/TPL:submenu}}
+
+{{TPL:toolbar}}
+<div id="{{tb_id}}" style="display:none">
+<div class="cms-toolbar"><img class="block" src="{{images}}z.gif" width="1" height="4" align="top" alt="" /></div>
+<table cellspacing="0" cellpadding="0" class="cms-toolbar w100">
+<tr>
+  <td nowrap="nowrap">{{user_part}}</td>
+  <td class="sep-"><img class="block" src="{{images}}seporate.gif" width="2" height="20" align="top" alt="" /></td>
+  <td>Меню:</td>
+  {{menu_part}}
+  </td>
+  <td class="w100">{{@dummy.html}}</td>
+  <td class="sep-"><img class="block" src="{{images}}seporate.gif" width="2" height="20" align="top" alt="" /></td>
+  <td nowrap="nowrap">
+    <a href="{{/}}start">основное меню</a> | 
+    <a href="{{fe_/}}">на сайт</a> | 
+    <a href="{{/}}login?logout=1" onclick="return confirm('Вы действительно желаете выйти?');">выход</a>
+  </td>
+</tr>
+</table>
+{{submenu_part}}
+</div>
+{{/TPL:toolbar}}
+
+{{TPL:toolbar_wrapper}}
+
+{{_toolbars}}
+
+{{!!script}}
+
+var ctd = "";
+
+function SwitchBar(id){
+  if(ctd!="")
+    document.getElementById(ctd).style.display = "none";
+  document.getElementById(id).style.display = "block";
+  ctd = id;
+}
+
+SwitchBar("tb_{{opened_id}}");
+
+{{/!!script}}
+
+{{/TPL:toolbar_wrapper}}
+
+
+
+

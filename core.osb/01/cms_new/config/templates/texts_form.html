@@ -1,0 +1,30 @@
+<table cellspacing="0" cellpadding="0" class="cms-simple-form w100">
+<tr>
+  <td width="20%">заголовок</td>
+  <td width="80%"><input type="text" name="{{$prefix}}title" value="{{$*title|escape}}" class="w100"></td>
+</tr>
+<tr>
+  <td>имя для адреса</td>
+  <td><input type="text" name="{{$prefix}}_supertag" value="{{*_supertag|escape}}" class="w100"></td>
+</tr>
+<tr>
+  <td>режим редактирования</td>
+  <td><select name="{{prefix}}type">{{options_type}}</select></td>
+</tr>
+{{TPL:text_rich}}
+<tr>
+  <td colspan="2">{{!!fck input_name=text tpl_prefix=prefix}}{{*text}}{{/!!fck}}</td>
+
+</tr>
+{{/TPL:text_rich}}
+{{TPL:text_plain}}
+<tr>
+  <td colspan="2"><textarea name="{{prefix}}text" class="w100" rows="5">{{*text}}</textarea></td>
+</tr>
+{{/TPL:text_plain}}
+{{text}}
+<tr>
+  <td><label for="{{$prefix}}_state">скрыть</label></td>
+  <td><input type="checkbox" name="{{$prefix}}_state" value="1" id="{{$prefix}}_state" {{checkbox__state}}></td>
+</tr>
+</table>

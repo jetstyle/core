@@ -1,0 +1,30 @@
+<table border='0'>
+<tr>
+	<td>заголовок</td>
+	<td><input type="text" name="{{$prefix}}title" value="{{$*title|escape}}" size="50"></td>
+</tr>
+<!--tr>
+	<td>описание</td>
+	<td><input type="text" name="{{$prefix}}descr" value="{{$*descr|escape}}" size="50"></td>
+</tr-->
+<tr>
+	<td>превью<br />{{_strict}} {{max_width}}x{{max_height}}</td>
+	<td>
+		<input type="file" name="{{$prefix}}file_small"><br>
+		<input type="checkbox" name="{{$prefix}}file_small_del" value='1'>&nbsp;<font color='red'>удалить</font>
+		<br>{{file_file_small}}
+	</td>
+</tr>
+<tr>
+	<td>иллюстрация</td>
+	<td>
+		<input type="file" name="{{$prefix}}file"><br>
+		<input type="checkbox" name="{{$prefix}}file_del" value='1'>&nbsp;<font color='red'>удалить</font>
+		<br>{{file_file}}
+	</td>
+</tr>
+<tr>
+	<td>скрыть</td>
+	<td><input type="checkbox" name="{{$prefix}}_state" value="1" {{checkbox__state}}></td>
+</tr>
+</table>

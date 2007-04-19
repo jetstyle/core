@@ -1,0 +1,89 @@
+<html>
+<head><title>Добавить картинку</title></head>
+<meta http-equiv="Content-Type" content="text/html; charset=windows-1251">
+<STYLE>
+.bg {background-color: buttonface}
+HR {padding-top: 0; padding-bottom: 0}
+BODY, TD, INPUT {font-size: 12px} 
+</STYLE>
+<body class="bg">
+<SCRIPT Language="JavaScript">
+var pt = false;
+function SetImage(p, url){
+	window.returnValue = new Array(p,url.replace("../../","images/"));
+	window.close();
+	}
+</SCRIPT>
+<SCRIPT Language="JavaScript" FOR="CachePrev" EVENT="onload">
+prev.src = pt;
+imgSz = CachePrev.fileSize;
+	if(pt !=1){
+		if(imgSz >= 1000){
+			Sz = (imgSz / 1000) + " Килобайт";
+			}else{
+			Sz = imgSz + " Байт";
+			}
+	ImgInfo.innerHTML = "Ширина: "+CachePrev.width+" pixels<br>Высота: "+CachePrev.height+" pixels<br>Размер: "+Sz+"<HR size=1>Для того чтобы задать дополнительные параметры картики, нажмите кнопку [Далее]";
+	}
+</SCRIPT>
+
+<SCRIPT Language="JavaScript" FOR=Ok EVENT=onclick>
+	SetImage(1, pt);
+</SCRIPT>
+<SCRIPT Language="JavaScript" FOR=Next EVENT=onclick>
+	SetImage(2, pt);
+</SCRIPT>
+
+<SCRIPT Language="JavaScript" FOR="ImgList" EVENT="onchange">
+	var CachePrev = document.all["CachePrev"];
+	Idx = ImgList.selectedIndex;
+	pt = ImgList.options[selectedIndex].value;
+	if(pt != 1){
+		Ok.disabled = 0;
+		Next.disabled = 0;
+		CachePrev.src = pt;
+		CachePrev.src = pt;
+//		alert(CachePrev.src);
+		prev.style.visibility = "visible";
+	}else{
+		Ok.disabled = 1;
+		pt= false;
+		Next.disabled = 0;
+		prev.style.visibility = "hidden";
+		ImgInfo.innerHTML = "";
+	}
+</SCRIPT>
+<SELECT size="5" id="ImgList" style="width: 100%; margin: 0">
+
+<OPTION value="1">выбрать другую</OPTION>
+<OPTION value="../../os_03.gif">os_03.gif</OPTION>
+<OPTION value="../../os_06.gif">os_06.gif</OPTION>
+
+<!--<SCRIPT Language="JavaScript">
+  iarr = window.dialogArguments;
+	for(i=0; i<iarr.length; i++){
+	fullPath = iarr[i];
+	if(fullPath.length >=48){
+		stripPath = fullPath.substring(0, 24) + " ... " + fullPath.substring(fullPath.length - 24, fullPath.length);
+		}else{stripPath = fullPath;}
+	stripPath = stripPath.replace("../../","");
+	document.writeln("<OPTION value=\""+fullPath+"\">"+stripPath+"</OPTION>\n");
+	}
+</SCRIPT>-->
+</SELECT>
+<TABLE border="0" cellspacing="0" cellpadding="3">
+<TR>
+<TD rowspan="2" valign="top" width="153" height="153">
+<IMG border="1" width="150" height="150" id="prev" style="visibility: hidden">
+<IMG  id="CachePrev" style="position: absolute; visibility: hidden">
+</TD>
+<TD id="ImgInfo" valign="top" width="100%"></TD>
+</TR>
+<TR>
+<TD valign="bottom" NOWRAP><INPUT type="button" value=" O K " id="Ok" disabled> <INPUT type="button" value="Далее >>" id="Next" disabled> <INPUT type="button" value="Отмена" onclick="window.close()"></TD>
+</TR>
+</TABLE>
+
+
+</body>
+</html>
