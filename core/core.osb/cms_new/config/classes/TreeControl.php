@@ -183,12 +183,12 @@ class TreeControl extends DBDataEditTree  {
 				$db->execute("
 					UPDATE ". $this->config->table_name ."
 					SET _order = _order + 1
-					WHERE _order > " . $rs->fields['_order'] . " AND _parent = '" . $rs->fields['_parent'] . "'
+					WHERE _order > " . $rs['_order'] . " AND _parent = '" . $rs['_parent'] . "'
 				");
 
 				$db->execute("
 					UPDATE ". $this->config->table_name ."
-					SET _order = " . ($rs->fields['_order'] + 1) . "
+					SET _order = " . ($rs['_order'] + 1) . "
 					WHERE id = " . $new_id  . "
 				");
 				
@@ -204,7 +204,7 @@ class TreeControl extends DBDataEditTree  {
 				
 				$db->execute("
 					UPDATE ". $this->config->table_name ."
-					SET _order = " . ($rs->fields['_max'] + 1) . "
+					SET _order = " . ($rs['_max'] + 1) . "
 					WHERE id = " . $new_id  . "
 				");
 			}
@@ -234,12 +234,12 @@ class TreeControl extends DBDataEditTree  {
 					$db->execute("
 						UPDATE ". $this->config->table_name ."
 						SET _order = _order + 1
-						WHERE _order > " . $rs->fields['_order'] . " AND _parent = '" . $rs->fields['_parent'] . "'
+						WHERE _order > " . $rs['_order'] . " AND _parent = '" . $rs['_parent'] . "'
 					");
 
 					$db->execute("
 						UPDATE ". $this->config->table_name ."
-						SET _order = " . ($rs->fields['_order'] + 1) . "
+						SET _order = " . ($rs['_order'] + 1) . "
 						WHERE id = " . $id  . "
 					");
 									
@@ -255,7 +255,7 @@ class TreeControl extends DBDataEditTree  {
 						LIMIT 1
 					");
 					
-					$db->execute("UPDATE ".$this->config->table_name." SET _parent = '".$parent_id."', _order = '".($rs->fields['_max'] + 1)."' WHERE id='".$id."'");
+					$db->execute("UPDATE ".$this->config->table_name." SET _parent = '".$parent_id."', _order = '".($rs['_max'] + 1)."' WHERE id='".$id."'");
 				}
 				
 				$this->Load();
