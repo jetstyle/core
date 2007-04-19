@@ -70,8 +70,7 @@ class LogsView {
 		//сложный запрос
 		$sql .= " ORDER BY l.inserted DESC";
 		//грузим
-		$rs = $rh->db->execute($sql);
-		$this->ITEMS = $rs->GetArray();
+		$this->ITEMS = $rh->db->Query($sql);
 	}
 	
 	function _bgcolor(&$list){

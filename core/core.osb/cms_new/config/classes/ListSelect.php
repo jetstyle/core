@@ -19,8 +19,7 @@ class ListSelect extends ListAdvanced
     $this->rh->tpl->assign('_name', $topic_field);
     $sql = "SELECT $id_opts, CONCAT(SUBSTRING(title,1,40),'..') as title".($this->config->format_opts ? ", _level" : "")." FROM ".$this->config->table_opts." WHERE ".$this->config->where_opts.($this->config->order_opts ? " ORDER by ".$this->config->order_opts : "");
     
-    $rs = $this->rh->db->Execute($sql);
-    $opts = $rs->GetArray();
+    $opts = $this->rh->db->Query($sql);
     foreach ($opts as $i=>$k)
     {
       $_opts .= "<option value='".$k[$id_opts]."'".($_GET['topic_id'] == $k[$id_opts] ? " selected='selected'" : '').">".($this->config->format_opts ? str_repeat("&nbsp;&nbsp;", $k['_level']-1)  : '' ).$k['title']."</option>";

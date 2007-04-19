@@ -35,10 +35,14 @@ class Logs {
 	function PutClass( $class_title, $add=true ){
 		$db =& $this->rh->db;
 		$rs = $db->execute("SELECT id FROM ".$this->table_classes." WHERE title='$class_title'");
-		if(!$rs->EOF) return $rs->fields['id'];
-		else if($add){
-			$db->execute("INSERT INTO ".$this->table_classes."(title) VALUES('$class_title')");
-			return $db->Insert_ID();
+		if($rs)
+        {   
+            $row = $db->getRow();
+            return $row['id'];
+        }
+		else if($add)
+        {
+			return $db->Insert("INSERT INTO ".$this->table_classes."(title) VALUES('$class_title')");
 		}else return 0;
 	}
 	

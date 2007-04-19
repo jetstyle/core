@@ -73,7 +73,8 @@ class Upload {
     $this->chmod = 0744;
     //читаем базу знаний
     $rh->db->execute("SELECT * FROM ".$this->table_name);
-    while($row = $rh->db->getRow()){
+    while($row = $rh->db->getRow())
+    {
       $this->TYPES[ $row['ext'] ] = array($row['type'],$row['title']);
     }
   }

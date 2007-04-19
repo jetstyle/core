@@ -61,7 +61,7 @@ class NewsForm extends FormFiles  {
     $table_name = $this->rh->project_name.'_htcron';
     $command = 'http://'.$this->rh->host_name.$this->rh->front_end->path_rel.'send_news';
     $rs = $db->execute("SELECT id FROM $table_name WHERE command='$command'");
-    if($rs->EOF)
+    if(!$rs)
       $db->execute("INSERT INTO $table_name(spec,command,last_news) VALUES('* * * * * *','$command','".(time() - 10)."')");
     //по этапу
     return FormFiles::AddNew();

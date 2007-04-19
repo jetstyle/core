@@ -258,12 +258,11 @@ class FormSimple extends DBDataEdit  {
       {
          $sql = "SELECT id, _supertag FROM ".$this->config->table_name." WHERE _supertag=".$rh->db->quote($rh->GLOBALS[ $this->prefix.'_supertag'.$suffix ]);
          $rs = $rh->db->execute($sql);
-         $all = $rs->getArray();
-         if (!empty($all))
+         //$all = $db->getArray();
+         if ($rs)
          {
             $rh->GLOBALS[ $this->prefix.'_supertag'.$suffix ] .= "_".$this->id;
          }
-        
       }
       $this->UPDATE_FIELDS[] = '_supertag';
     }

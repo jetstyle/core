@@ -23,8 +23,8 @@
 	if(!$file) $rh->EndError('Файл не найден.');
 	
 	//грузим название файла
-	$rs = $db->execute("SELECT title FROM ".$rh->project_name."_$table WHERE id='$id'");
-	$title = $rs->fields['title'];
+	$rs = $db->QueryOne("SELECT title FROM ".$rh->project_name."_$table WHERE id='$id'");
+	$title = $rs['title'];
 	
 	//чтоб не кэшировалось
   header("Expires: Mon, 26 Jul 1997 05:00:00 GMT");

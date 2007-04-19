@@ -169,8 +169,8 @@ class TreeControl extends DBDataEditTree  {
 				//определяем ИД предка
 				$rh->GetVar('parent','integer');
 				if( $brother_id = $rh->GetVar('brother','integer') ){
-					$rs = $db->execute("SELECT _parent FROM ".$this->config->table_name." WHERE id='$brother_id'");
-					$parent_id = $rs->fields["_parent"];
+					$rs = $db->QueryOne("SELECT _parent FROM ".$this->config->table_name." WHERE id='$brother_id'");
+					$parent_id = $rs["_parent"];
 					$add_brother_mode = true;
 				}else
 					$parent_id = $rh->GetVar('parent','integer');
@@ -204,8 +204,7 @@ class TreeControl extends DBDataEditTree  {
 			//если добавили рядом, то нужно поставить после брата
 			if( $add_brother_mode && $new_id ){
 				//грузим детей
-				$rs = $db->execute("SELECT id,_order FROM ".$this->config->table_name." WHERE _parent='$parent_id' AND _state<2 ORDER BY _order ASC");
-				$BRS = $rs->GetArray();
+				$BRS = $db->Query("SELECT id,_order FROM ".$this->config->table_name." WHERE _parent='$parent_id' AND _state<2 ORDER BY _order ASC");
 				//        print_r($BRS);
 				//ищем брата
 				$m = count($BRS);
@@ -331,8 +330,8 @@ class TreeControl extends DBDataEditTree  {
 		//вишибаем их на первый уровень, в невалидный режим
 		$this->rh->db->execute("UPDATE ".$this->table_name." SET _parent=0,_left=-1,_right=-1 WHERE ".$where);
 		//удаляем поштучно в корзину
-		$rs = $db->execute("SELECT id,title FROM ".$this->table_name." WHERE ".$where);
-		$TO_KILL = $rs->GetArray();
+		$TO_KILL = $db->Query("SELECT id,title FROM ".$this->table_name." WHERE ".$where);
+
 		foreach($TO_KILL as $r){
 			$rh->logs->Put( 'Древесный контрол: отчистка структуры', $r['id'], $this->config->module_title, $r['title'], $this->_redirect.'&_show_trash=1' );
 			$rh->trash->Delete( $this->config->table_name, $r['id'], $this->config->module_title, $r['title'], $rh->path_rel.'?'.str_replace('&amp;','&',$this->state->StateAll()).'&id='.$r['id'] );

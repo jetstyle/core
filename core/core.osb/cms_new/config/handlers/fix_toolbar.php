@@ -7,8 +7,8 @@
   
   //таблица должна содержать древесную структуру
   //проверяем
-  $rs = $db->execute("SHOW FIELDS FROM ".$rh->project_name."_toolbar");
-  $FIELDS = $rs->GetArray();
+  $FIELDS = $db->Query("SHOW FIELDS FROM ".$rh->project_name."_toolbar");
+  
   $OK = false;
   foreach($FIELDS as $r)
     if( $r["Field"]=="_parent" ){
