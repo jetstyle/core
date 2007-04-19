@@ -26,7 +26,8 @@ class TreeControl extends DBDataEditTree  {
 	var $EVOLUTORS = array();
 
 
-	function TreeControl( &$config ){
+	function TreeControl( &$config )
+    {
 		//base modules binds
 		$this->config =& $config;
 		//DBData
@@ -69,13 +70,11 @@ class TreeControl extends DBDataEditTree  {
 		}
 	}
 
-	function Handle(){
-
+	function Handle()
+    {
 		$this->Load();
-
 		$rh =& $this->rh;
 		$tpl =& $rh->tpl;
-
 		//  -
 		$action = $rh->GetVar('action');
 
@@ -130,7 +129,10 @@ class TreeControl extends DBDataEditTree  {
 				$_href = str_replace('&amp;','&',$this->_href_template);
 				$_config_name = $this->config->PASSED[ 1 ];
 
+                $tpl->Assign('root_id',  "'".(string)$this->getRootId()."'");
+
 				$tpl->Assign( '_url_connect', $_href.'mode='.$_config_name.'&action=update&_show_trash='.$show_trash.'&' );
+                
 				$tpl->Assign( '_url_xml', $_href.'mode='.$_config_name.'&action=xml&_show_trash='.$show_trash.'&'.$this->id_get_var.'='.$this->id.'&' );
 
 				$tpl->Assign( '_behavior', $this->tree_behavior );
@@ -138,6 +140,7 @@ class TreeControl extends DBDataEditTree  {
 				$tpl->Assign( '_level_limit', $this->config->level_limit  ? $this->config->level_limit : 100 );
 				$tpl->Parse( $this->template_head, 'html_head', true );
 				$tpl->Parse( $this->template_control, '__tree' );
+                
 				$tpl->Parse( $this->template, $this->store_to, true );
 				break;
 		}
@@ -278,15 +281,23 @@ class TreeControl extends DBDataEditTree  {
 		return false;
 	}
 
+    function getRootId()
+    {
+        return $this->rh->GetVar("display_root","integer") ? $this->rh->GetVar("display_root","integer") : 1  ;
+    }
+
 	function ToXML(){  //$iconv=true
 		//start XML
-		$str = "<?xml version=\"1.0\"?>\n\n";
+		$str = "<?xml version=\"1.0\" encoding=\"windows-1251\" ?>\n\n";
 		$str .= "<tree>\n";
 
 		//  ?
-		$root_id = $this->rh->GetVar("display_root","integer");
+		$root_id = $this->getRootId();
 		$root = $this->ITEMS[$root_id];
 
+        $node = (object)$root;
+        $str .= str_repeat(" ",$node->_level)."<tree text=\"".($this->_getTitle($node->title) ? $this->_getTitle($node->title) : 'node_'.$node->id )."\" ".$this->_getAction($node->id, count($this->CHILDREN[$node->id]), true)." db_id=\"".$node->id."\" db_selected=\"".( $node->id==$this->id ? "1" : "" )."\" db_state=\"".$node->_state."\" >\n";
+		
 		//   
 		$current = (object)$this->ITEMS[ $this->rh->GetVar("id","integer") ];
 		$c_parent = (object)$this->ITEMS[ $current->_parent ];
@@ -297,9 +308,12 @@ class TreeControl extends DBDataEditTree  {
 		$level = array();
 		//put root
 		$arr =& $this->CHILDREN[$root_id];
+
 		for($i=count($arr)-1;$i>=0;$i--) $stack[] = $arr[$i];
+
 		//main loop
-		while(count($stack)){
+		while(count($stack))
+        {
 			$node = (object)$this->ITEMS[array_pop($stack)];
 			$level[ $node->id ] = $level[ $node->_parent] + 1;
 
@@ -322,24 +336,15 @@ class TreeControl extends DBDataEditTree  {
 			}
 			//write node
 			//action or src?
-			$action_src = "action=\"".$this->_href_template.$this->id_get_var."=".$node->id."\"";
-			if( $_is_folder && !$display_children )
-			$action_src .= " src=\"".$this->_href_template."mode=tree&amp;action=xml&amp;display_root=".$node->id."\"";
-			//    
-			$_title = preg_replace( "/<.*?>/is", '', $node->title);
-			//  
-			$_title = str_replace('"','\'',$_title);
-            
-            if (function_exists('iconv'))
-			{
-				$str .= str_repeat(" ",$node->_level)."<tree text=\"".iconv("CP1251","UTF-8", $_title ? $_title : 'node_'.$node->id )."\" ".$action_src." db_id=\"".$node->id."\" db_selected=\"".( $node->id==$this->id ? "1" : "" )."\" db_state=\"".$node->_state."\" ".(($is_folder)?">":"/>")."\n";
-			}
-			else
-			{
-				$str .= str_repeat(" ",$node->_level)."<tree text=\"".($_title ? $_title : 'node_'.$node->id )."\" ".$action_src." db_id=\"".$node->id."\" db_selected=\"".( $node->id==$this->id ? "1" : "" )."\" db_state=\"".$node->_state."\" ".(($is_folder)?">":"/>")."\n";
-			}
+			$action_src = $this->_getAction($node->id, $_is_folder, $display_childen);
+
+            $_title = $this->_getTitle($node->title);
+
+			$str .= str_repeat(" ",$node->_level)."<tree text=\"".($_title ? $_title : 'node_'.$node->id )."\" ".$action_src." db_id=\"".$node->id."\" db_selected=\"".( $node->id==$this->id ? "1" : "" )."\" db_state=\"".$node->_state."\" ".(($is_folder)?">":"/>")."\n";
+
 			//put children
-			if($is_folder){
+			if($is_folder)
+            {
 				$arr = $this->CHILDREN[$node->id];
 				for($i=count($arr)-1;$i>=0;$i--) $stack[] = $arr[$i];
 				$cparent = $node->id;
@@ -348,6 +353,7 @@ class TreeControl extends DBDataEditTree  {
 		for( $i=(integer)$root["_level"] ; $i<$this->ITEMS[$cparent]['_level']; $i++ ) $str .= "</tree>\n";
 
 		//end XML
+        $str .= "</tree>\n";
 		$str .= "</tree>\n";
 		//mail ("nop@jetstyle.ru", "debug tree", $str);
 		return $str;
@@ -358,6 +364,22 @@ class TreeControl extends DBDataEditTree  {
 	   _parent.
 	  ->Load();
 	*/
+    
+    function _getAction($id)
+    {
+        $action_src = "action=\"".$this->_href_template.$this->id_get_var."=".$id."\"";   
+       	if( $_is_folder && !$display_children )
+		    $action_src .= " src=\"".$this->_href_template."mode=tree&amp;action=xml&amp;display_root=".$node->id."\"";
+        return $action_src;
+    }
+    
+    function _getTitle($title)
+    {
+     	$_title = preg_replace( "/<.*?>/is", '', $title);
+		$_title = str_replace('"','\'',$_title);   
+        return $_title;
+    }
+    
 	function _KillOutsiders(){
 		//  ,    
 		$S[] = 0;

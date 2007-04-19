@@ -20,8 +20,12 @@ window.parent.webFXTreeConfig.control.connect.Receive();
 <script type="text/javascript">
 
 /// XP Look
-webFXTreeConfig.rootIcon    = "{{/}}xloadtree/images/xp/folder.png";
+webFXTreeConfig.rootIcon    = "{{images}}z.gif";
 webFXTreeConfig.openRootIcon  = "{{/}}xloadtree/images/xp/openfolder.png";
+
+webFXTreeConfig.lMinusRootIcon    = "{{/}}xloadtree/images/xp/Lminus_root.png";
+webFXTreeConfig.lPlusRootIcon   = "{{/}}xloadtree/images/xp/Lplus_root.png";
+
 webFXTreeConfig.folderIcon    = "{{/}}xloadtree/images/xp/folder.png";
 webFXTreeConfig.openFolderIcon  = "{{/}}xloadtree/images/xp/openfolder.png";
 webFXTreeConfig.fileIcon    = "{{/}}xloadtree/images/xp/file.png";
@@ -58,6 +62,8 @@ webFXTreeConfig.cur_db_id   = {{_cur_id}};
 
 //для ограничения глубины дерева
 webFXTreeConfig.level_limit   = 1*'{{_level_limit}}';
+
+var root_id = {{root_id}};
 
 var tree = new WebFXLoadTree("root","{{_url_xml}}");
 tree.setBehavior("{{_behavior}}");
