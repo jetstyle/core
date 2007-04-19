@@ -35,7 +35,7 @@
                     $r['_supertag'] = '';
                 }
                 else
-        			$r['_path'] = $tree->ITEMS[ $r['_parent'] ]['_path'].( $r['_parent'] ? '/' : '').$r["_supertag"];
+        			$r['_path'] = $tree->ITEMS[ $r['_parent'] ]['_path'].( $r['_parent']!=1 ? '/' : '').$r["_supertag"];
     			$db->execute("UPDATE ".$this->table_name." SET _supertag='".$r["_supertag"]."',_path='".$r['_path']."' WHERE id='".$r['id']."'");            
     			$tree->ITEMS[$id] = $r;
     		}
