@@ -168,8 +168,8 @@ class TreeControl extends DBDataEditTree  {
 			//$rh->GetVar('parent','integer');
 			if( $brother_id = $rh->GetVar('brother','integer') )
 			{
-				$rs = $db->execute("SELECT _parent, _order FROM ".$this->config->table_name." WHERE id='$brother_id'");
-				$parent_id = $rs->fields["_parent"];
+				$rs = $db->QueryOne("SELECT _parent, _order FROM ".$this->config->table_name." WHERE id='$brother_id'");
+				$parent_id = $rs["_parent"];
 				$add_brother_mode = true;
 				
 			}
@@ -226,8 +226,8 @@ class TreeControl extends DBDataEditTree  {
 			{
 				if( $brother_id = $rh->GetVar('brother','integer') )
 				{
-					$rs = $db->execute("SELECT _parent, _order FROM ".$this->config->table_name." WHERE id='$brother_id'");
-					$parent_id = $rs->fields["_parent"];
+					$rs = $db->QueryOne("SELECT _parent, _order FROM ".$this->config->table_name." WHERE id='$brother_id'");
+					$parent_id = $rs["_parent"];
 															
 					$db->execute("
 						UPDATE ".$this->config->table_name." 
@@ -376,8 +376,8 @@ class TreeControl extends DBDataEditTree  {
 		//    ,   
 		$this->rh->db->execute("UPDATE ".$this->table_name." SET _parent=0,_left=-1,_right=-1 WHERE ".$where);
 		//   
-		$rs = $db->execute("SELECT id,title FROM ".$this->table_name." WHERE ".$where);
-		$TO_KILL = $rs->GetArray();
+		$TO_KILL = $db->query("SELECT id,title FROM ".$this->table_name." WHERE ".$where);
+		
 		foreach($TO_KILL as $r){
 			$rh->logs->Put( ' :  ', $r['id'], $this->config->module_title, $r['title'], $this->_redirect.'&_show_trash=1' );
 			$rh->trash->Delete( $this->config->table_name, $r['id'], $this->config->module_title, $r['title'], $rh->path_rel.'?'.str_replace('&amp;','&',$this->state->StateAll()).'&id='.$r['id'] );
