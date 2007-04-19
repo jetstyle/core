@@ -204,6 +204,7 @@ function _xmlTreeToJsTree(oNode) {
 	
 	//OS: tree_control inclusion
 	jsNode.db_id = oNode.getAttribute("db_id");
+	jsNode.db_selected = oNode.getAttribute("db_selected");
 	jsNode.db_state = oNode.getAttribute("db_state");
 	
 	return jsNode;

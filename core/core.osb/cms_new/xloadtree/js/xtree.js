@@ -160,8 +160,6 @@ WebFXTreeAbstractNode.prototype.add = function (node, bNoIdent) {
 	if (root.rendered) {
 		if (this.childNodes.length >= 2) {
 			document.getElementById(this.childNodes[this.childNodes.length - 2].id + '-plus').src = ((this.childNodes[this.childNodes.length -2].folder)?((this.childNodes[this.childNodes.length -2].open)?webFXTreeConfig.tMinusIcon:webFXTreeConfig.tPlusIcon):webFXTreeConfig.tIcon);
-			//OS - модифицируем отступ для прогнозов
-			document.getElementById(this.childNodes[this.childNodes.length - 2].id + '-plus-os').src = webFXTreeConfig.iIcon;
 			this.childNodes[this.childNodes.length - 2].plusIcon = webFXTreeConfig.tPlusIcon;
 			this.childNodes[this.childNodes.length - 2].minusIcon = webFXTreeConfig.tMinusIcon;
 			this.childNodes[this.childNodes.length - 2]._last = false;
@@ -268,14 +266,10 @@ WebFXTreeAbstractNode.prototype.indent = function(lvl, del, last, level, nodesLe
 		if ((level >= this._level) && (document.getElementById(this.id + '-plus'))) {
 			if (this.folder) {
 				document.getElementById(this.id + '-plus').src = (this.open)?webFXTreeConfig.lMinusIcon:webFXTreeConfig.lPlusIcon;
-				document.getElementById(this.id + '-plus-os').src = webFXTreeConfig.iIcon;
 				this.plusIcon = webFXTreeConfig.lPlusIcon;
 				this.minusIcon = webFXTreeConfig.lMinusIcon;
 			}
-			else if (nodesLeft) {
-				document.getElementById(this.id + '-plus').src = webFXTreeConfig.lIcon;
-				document.getElementById(this.id + '-plus-os').src = webFXTreeConfig.iIcon;
-			}
+			else if (nodesLeft) { document.getElementById(this.id + '-plus').src = webFXTreeConfig.lIcon; }
 			return 1;
 	}	}
 	var foo = document.getElementById(this.id + '-indent-' + lvl);
@@ -283,14 +277,6 @@ WebFXTreeAbstractNode.prototype.indent = function(lvl, del, last, level, nodesLe
 		if ((foo._last) || ((del) && (last))) { foo.src =  webFXTreeConfig.blankIcon; }
 		else { foo.src =  webFXTreeConfig.iIcon; }
 	}
-	//OS - нужно модифицировать отступ для прогнозов тоже
-	var foo1 = document.getElementById(this.id + '-indent-os-' + lvl);
-	if(foo1) foo1.src = foo.src;
-	//OS - нужно так же модифицировать последнюю картинку в прогнозе
-	/*if(this.level){
-		var foo2 = document.getElementById(this.id + '-indent-os-' + this._level );
-		foo2.src = this.parentNode._last ? webFXTreeConfig.iIcon : webFXTreeConfig.blankIcon;
-	}*/
 	return 0;
 }
 
@@ -512,13 +498,11 @@ WebFXTreeItem.prototype.keydown = function(key) {
 WebFXTreeItem.prototype.toString = function (nItem, nItemCount) {
 	var foo = this.parentNode;
 	var indent = '';
-	var indent1 = '';
 	if (nItem + 1 == nItemCount) { this.parentNode._last = true; }
 	var i = 0;
 	while (foo.parentNode) {
 		foo = foo.parentNode;
 		indent = "<img id=\"" + this.id + "-indent-" + i + "\" src=\"" + ((foo._last)?webFXTreeConfig.blankIcon:webFXTreeConfig.iIcon) + "\">" + indent;
-		indent1 = "<img id=\"" + this.id + "-indent-os-" + i + "\" src=\"" + ((foo._last)?webFXTreeConfig.blankIcon:webFXTreeConfig.iIcon) + "\">" + indent1;
 		i++;
 	}
 	this._level = i;
@@ -533,28 +517,12 @@ WebFXTreeItem.prototype.toString = function (nItem, nItemCount) {
 	}
 	else if (!this.icon) { this.icon = webFXTreeConfig.fileIcon; }
 	var label = this.text.replace(/</g, '&lt;').replace(/>/g, '&gt;');
-	if( this.db_id==webFXTreeConfig.cur_db_id )
+	if( this.db_selected=="1" )
 		label = '<strong>'+label+'</strong>';
-	//сам узел
 	var str = "<div id=\"" + this.id + "\" ondblclick=\"webFXTreeHandler.toggle(this);\" class=\"webfx-tree-item\" onkeydown=\"return webFXTreeHandler.keydown(this, event)\">";
 	str += indent;
 	str += "<img id=\"" + this.id + "-plus\" src=\"" + ((this.folder)?((this.open)?((this.parentNode._last)?webFXTreeConfig.lMinusIcon:webFXTreeConfig.tMinusIcon):((this.parentNode._last)?webFXTreeConfig.lPlusIcon:webFXTreeConfig.tPlusIcon)):((this.parentNode._last)?webFXTreeConfig.lIcon:webFXTreeConfig.tIcon)) + "\" onclick=\"webFXTreeHandler.toggle(this);\">"
 	str += "<img id=\"" + this.id + "-icon\" class=\"webfx-tree-icon\" src=\"" + ((webFXTreeHandler.behavior == 'classic' && this.open)?this.openIcon:this.icon) + "\" onclick=\"webFXTreeHandler.select(this);\"><a href=\"" + this.action + "\" id=\"" + this.id + "-anchor\" onfocus=\"webFXTreeHandler.focus(this);\" onblur=\"webFXTreeHandler.blur(this);\">" + label + "</a> " + webFXTreeConfig.control.renderButtonsNode(this) + "</div>";
-	
-	//для показа прогнозов
-	str += "<div id=\"" + this.id + "-show\" class=\"webfx-tree-item\" style=\"display: none;\">";
-//	if(indent1=='')
-	str += indent1;
-		str += "<img id=\"" + this.id + "-plus-os\" src=\"" + ((this.parentNode._last)?webFXTreeConfig.blankIcon:webFXTreeConfig.iIcon) + "\">";
-//	str += "<img src=\"" + ( this.parentNode._last ? webFXTreeConfig.lIcon : webFXTreeConfig.tIcon ) + "\">"
-//	str += "<img src=\"" + ( this.parentNode._last ? webFXTreeConfig.blankIcon : webFXTreeConfig.iIcon ) + "\">"
-	str += "<img id=\"" + this.id + "-indent-os-" + (this._level+1) + "\" src=\"" + ( this.childNodes.length ? webFXTreeConfig.tIcon : webFXTreeConfig.lIcon ) + "\">"
-	str += "<img class=\"webfx-tree-icon\" src=\"" + ((webFXTreeHandler.behavior == 'classic' && this.open)?this.openIcon:this.icon) + "\">";
-	str += " подрубрика";
-//	str += "<img id=\"" + this.id + "-icon\" class=\"webfx-tree-icon\" src=\"" + ((webFXTreeHandler.behavior == 'classic' && this.open)?this.openIcon:this.icon) + "\" onclick=\"webFXTreeHandler.select(this);\"><a href=\"" + this.action + "\" id=\"" + this.id + "-anchor\" onfocus=\"webFXTreeHandler.focus(this);\" onblur=\"webFXTreeHandler.blur(this);\">" + label + "</a> " + webFXTreeConfig.control.renderButtonsNode(this) + "</div>";
-	str += "</div>";
-	
-	//контейнер с детьми
 	str += "<div id=\"" + this.id + "-cont\" class=\"webfx-tree-container\" style=\"display: " + ((this.open)?'block':'none') + ";\">";
 	for (var i = 0; i < this.childNodes.length; i++) {
 		str += this.childNodes[i].toString(i,this.childNodes.length);

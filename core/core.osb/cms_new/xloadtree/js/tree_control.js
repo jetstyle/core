@@ -35,8 +35,8 @@ OSTreeControl.prototype.renderButtonsNode = function (node) {
 		controls += "<img id=\"" + node.id + "-control_1\" src=\"" + webFXTreeConfig.Control1Icon + "\" onclick=\"webFXTreeConfig.control.Touch_1('" + node.id + "');\" title=\""+this.STRINGS['move as']+"\">&nbsp;";
 	else controls += "<img src=\"" + webFXTreeConfig.blankIcon + "\">&nbsp;";
 	//добавление потомка, перемещение как потомка
-	if( !webFXTreeConfig.ban_all_buttons && (ban==null || !ban[1]) )
-		controls += "<img id=\"" + node.id + "-control_2\" src=\"" + webFXTreeConfig.Control2Icon + "\" onclick=\"webFXTreeConfig.control.Touch_2('" + node.id + "');\" title=\""+this.STRINGS['add child']+"\" onmouseover=\"webFXTreeConfig.control.ToogleExample('" + node.id + "','block');\" onmouseout=\"webFXTreeConfig.control.ToogleExample('" + node.id + "','none');\">&nbsp;";
+	if( node._level<webFXTreeConfig.level_limit-1 && !webFXTreeConfig.ban_all_buttons && (ban==null || !ban[1]) )
+		controls += "<img id=\"" + node.id + "-control_2\" src=\"" + webFXTreeConfig.Control2Icon + "\" onclick=\"webFXTreeConfig.control.Touch_2('" + node.id + "');\" title=\""+this.STRINGS['add child']+"\">&nbsp;";
 	else controls += "<img src=\"" + webFXTreeConfig.blankIcon + "\" >&nbsp;";
 	//добавление соседа, перемещение как соседа
 	if( !webFXTreeConfig.ban_all_buttons && (ban==null || !ban[2]) )
@@ -62,7 +62,7 @@ window.onclick = OSTreeControl_ClickCancel();*/
 
 OSTreeControl.prototype.MovePrepare = function (id) {
 // alert('MovePrepare('+id+')');
-	
+			
 	this.state = 1;
 	this.current_id = id;
 	this.RenderSelected(id);
@@ -213,8 +213,10 @@ OSTreeControl.prototype.RenderSelected = function (id) {
 	if( o = document.getElementById(id + '-control_1') ) {
 		o.title = this.STRINGS['cansel'];
 		o.src = webFXTreeConfig.Control4Icon;
-		document.getElementById(id + '-control_2').style.visibility = 'hidden';
-		document.getElementById(id + '-control_3').style.visibility = 'hidden';
+		if( o = document.getElementById(id + '-control_2') ) 
+      o.style.visibility = 'hidden';
+		if( o = document.getElementById(id + '-control_3') ) 
+  		o.style.visibility = 'hidden';
 	}
 }
 
@@ -273,7 +275,10 @@ OSTreeControl.prototype.Touch_2 = function (id) {
 		this.Save('&add=1&parent=' + ( node.db_id!=null ? node.db_id : 0) );
 	}else{
 		if( this.MoveAsChild(id) )
-			this.Save();
+		{
+			var cur = webFXTreeHandler.all[this.current_id];
+			this.Save('&move=1&parent=' + ( node.db_id!=null ? node.db_id : 0) + '&id='+cur.db_id);
+		}
 	}
 }
 
@@ -284,16 +289,14 @@ OSTreeControl.prototype.Touch_3 = function (id) {
 	var node = webFXTreeHandler.all[id];
 	if(this.state==0){
 		this.new_node = this.AddBrother(id);
-		this.Save('&add=1&parent=' + ( node.db_id!=null ? node.db_id : 0) );
+		this.Save('&add=1&brother=' + ( node.db_id!=null ? node.db_id : 0) );
 	}else{
 		if( this.MoveAsBrother(id) )
-			this.Save();
+		{
+			var cur = webFXTreeHandler.all[this.current_id];
+			this.Save('&move=1&brother=' + ( node.db_id!=null ? node.db_id : 0) + '&id='+cur.db_id);
+		}
 	}
-}
-
-OSTreeControl.prototype.ToogleExample = function (id,display) {
-	if( o = document.getElementById(id + '-show') )
-		o.style.display = display;
 }
 
 /*
@@ -302,7 +305,9 @@ OSTreeControl.prototype.ToogleExample = function (id,display) {
 
 //Рекурсия.
 //Формируем get-строку со списками потомков для каждого узла
-OSTreeControl.prototype.TreeDump = function (node) {
+OSTreeControl.prototype.TreeDump = function (node) 
+{
+	return '';
 	//формируем строку для этого узла
 	var id = ( node.db_id!=null ? node.db_id : 0 );
 	var str = '';
@@ -325,7 +330,7 @@ OSTreeControl.prototype.Save = function ( add_to ) {
 	//подготовить данные
 	var get_str = this.TreeDump(this.tree);
 	//отослать через объект связи
-//	alert(add_to+'&'+get_str);
+	//alert(add_to+'&'+get_str);
 	this.connect.Send( add_to+get_str );
 }
 
@@ -369,7 +374,7 @@ OSTreeConnect.prototype.Send = function(get_str) {
 	//послыаем запрос
 	var frame = document.getElementById(this.frame_id);
 	frame.src = webFXTreeConfig.url_connect + get_str;
-//	alert(webFXTreeConfig.url_connect + get_str);
+	//alert(webFXTreeConfig.url_connect + get_str);
 //	frame.document.write(webFXTreeConfig.url_connect + get_str);
 	//вывешиваем заставку
 	this.RenderBar('visible');
