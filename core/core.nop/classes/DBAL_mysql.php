@@ -68,8 +68,19 @@ class DBAL_mysql
 	function Close() { /* в нашем случае ничего */ }
 
 	// Защита строкового значения кавычками
-	function Quote( $value ) 
-	{ return "'".mysql_escape_string($value)."'"; }
+    function Quote( $value ) 
+    {
+     if (is_array($value))
+     {
+        $ret = array_map(array(&$this, "quote"), $value);
+        $ret = implode (",", $ret);
+        return $ret;
+     }
+     else if (is_numeric($value))
+        return $value;
+     else
+        return "'".mysql_escape_string($value)."'"; 
+    }
 
 	// Прямой вызов SQL
 	function Query( $sql, $limit=0, $offset=0 ) 

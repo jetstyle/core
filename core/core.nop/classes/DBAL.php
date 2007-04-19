@@ -181,13 +181,14 @@ class DBAL
   	  
   	  if ($this->handle)
    	  {
+     	
      	$this->numRows = $this->lowlevel->getNumRows($this->handle);
 		$this->currentRow = 0;
-
-     	return $this->handle;
+     	return $this->numRows; //$this->handle;
       }
+      
+      return null;
   }
-  
   
   /**
    * возвращает строчку объектом нужного класса
@@ -232,13 +233,33 @@ class DBAL
    */
   function getArray()
   {
+      //var_dump($this->handle);  
+
       if ($this->handle)
       {
           while ($row = $this->getRow())
+          {
+            //echo '<hr>';
+           // var_dump($row);  
               $ret[] = $row;
-            
+          }
+          
+          
           return $ret;      
       }
+  }
+
+  /**
+   * for osb
+   */
+  function insert_id()
+  {
+      return $this->lowlevel->InsertId();
+  }
+  
+  function SelectLimit($sql, $limit, $offset)
+  {
+    return $this->execute($sql, $limit, $offset);   
   }
 // EOC{ DBAL } 
 }
