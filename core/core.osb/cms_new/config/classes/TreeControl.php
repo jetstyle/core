@@ -100,14 +100,7 @@ class TreeControl extends DBDataEditTree  {
 				}
 				// ,   XML
 				$rh->HeadersNoCache();
-       			if (function_exists('iconv'))
-    			{
-    				$this->xml_encoding = 'utf-8';
-    			}
-    			else
-    			{
     				$this->xml_encoding = 'windows-1251';
-    			}
 				header("Content-type: text/xml; charset=".$this->xml_encoding);
 				echo $this->ToXML();
 				die();
@@ -288,7 +281,7 @@ class TreeControl extends DBDataEditTree  {
 
 	function ToXML(){  //$iconv=true
 		//start XML
-		$str = "<?xml version=\"1.0\" encoding=\"windows-1251\" ?>\n\n";
+		$str = "<?xml version=\"1.0\" encoding=\"".$this->xml_encoding."\" ?>\n\n";
 		$str .= "<tree>\n";
 
 		//  ?
