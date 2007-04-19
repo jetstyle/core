@@ -2,7 +2,8 @@
   
   $this->UseClass('ListSimple');
   
-class ListAdvanced extends ListSimple  {
+class ListAdvanced extends ListSimple  
+{
   
   var $template = 'list_advanced.html';
   var $template_list = 'list_advanced.html:List';
@@ -14,7 +15,8 @@ class ListAdvanced extends ListSimple  {
   
   var $arrows; //объект постраничной рубрикации
   
-  function ListAdvanced( &$config ){
+  function ListAdvanced( &$config )
+  {
     //упорядочиваем список
     $config->SELECT_FIELDS[] = ($config->order_field) ? $config->order_field . " as '_order'" : '_order';//'_order';
     if(!$config->order_by) $config->order_by = ( $config->order_field ? $config->order_field : "_order" ) . " ASC";//'_order ASC';
