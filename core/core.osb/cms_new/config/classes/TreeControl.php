@@ -276,7 +276,7 @@ class TreeControl extends DBDataEditTree  {
 
     function getRootId()
     {
-        return $this->rh->GetVar("display_root","integer") ? $this->rh->GetVar("display_root","integer") : 1  ;
+        return $this->rh->GetVar("display_root","integer") ? $this->rh->GetVar("display_root","integer") : ($this->config->old_style ? 0 : 1)  ;
     }
 
 	function ToXML(){  //$iconv=true
@@ -288,9 +288,11 @@ class TreeControl extends DBDataEditTree  {
 		$root_id = $this->getRootId();
 		$root = $this->ITEMS[$root_id];
 
-        $node = (object)$root;
-        $str .= str_repeat(" ",$node->_level)."<tree text=\"".($this->_getTitle($node->title) ? $this->_getTitle($node->title) : 'node_'.$node->id )."\" ".$this->_getAction($node->id, count($this->CHILDREN[$node->id]), true)." db_id=\"".$node->id."\" db_selected=\"".( $node->id==$this->id ? "1" : "" )."\" db_state=\"".$node->_state."\" >\n";
-		
+        if (!$this->config->old_style)
+        {
+            $node = (object)$root;
+            $str .= str_repeat(" ",$node->_level)."<tree text=\"".($this->_getTitle($node->title) ? $this->_getTitle($node->title) : 'node_'.$node->id )."\" ".$this->_getAction($node->id, count($this->CHILDREN[$node->id]), true)." db_id=\"".$node->id."\" db_selected=\"".( $node->id==$this->id ? "1" : "" )."\" db_state=\"".$node->_state."\" >\n";
+		}
 		//   
 		$current = (object)$this->ITEMS[ $this->rh->GetVar("id","integer") ];
 		$c_parent = (object)$this->ITEMS[ $current->_parent ];
@@ -346,7 +348,8 @@ class TreeControl extends DBDataEditTree  {
 		for( $i=(integer)$root["_level"] ; $i<$this->ITEMS[$cparent]['_level']; $i++ ) $str .= "</tree>\n";
 
 		//end XML
-        $str .= "</tree>\n";
+        if (!$this->config->old_style)
+            $str .= "</tree>\n";
 		$str .= "</tree>\n";
 		//mail ("nop@jetstyle.ru", "debug tree", $str);
 		return $str;
