@@ -12,6 +12,8 @@ require_once('Configurable.php');
 class UnitTester extends Configurable
 {
 
+	var $tests = array();
+
 	function addTests($path,$recursive)
 	{
 		$dir=opendir($path);
@@ -19,8 +21,11 @@ class UnitTester extends Configurable
 		{
 			if(is_file($path.'/'.$entry) && preg_match('#^(.+)Test\.php$#', $entry, $matches))
 			{
-				$this->ctx->useClass($matches[1]);
-				$this->test->addTestFile($path.'/'.$entry);
+				if (empty($this->tests) || in_array($matches[1], $this->tests))
+				{
+					$this->ctx->useClass($matches[1]);
+					$this->test->addTestFile($path.'/'.$entry);
+				}
 			}
 			else 
 			if($recursive && $entry!=='.' && $entry!=='..' && $entry!=='.svn' && is_dir($path.'/'.$entry))
@@ -37,8 +42,14 @@ class UnitTester extends Configurable
 
 		config_set($this, 'recursive', True);
 		config_set($this, 'namespaces', array('classes'));
-
 		config_set($this, 'test', new GroupTest($ctx->project_name));
+		config_set($this, 'reporter', new TextReporter());
+		// lucky: да простят мя. ;)
+		// однако в тестах бывает нужен $ctx
+		config_set($this->reporter, 'ctx', &$ctx);
+		if (is_array($ctx->tests)) 
+			config_replace($this, 'tests', &$ctx->tests);
+
 		foreach ($ctx->DIRS as $dir)
 		{
 			foreach ($this->namespaces as $namespace)
@@ -53,10 +64,6 @@ class UnitTester extends Configurable
 			include_once($fullpath);
 			$test=new $testClass(basename($rootPath)."/$target");
 		 */
-		config_set($this, 'reporter', new TextReporter());
-		// lucky: да простят мя. ;)
-		// однако в тестах бывает нужен $ctx
-		config_set($this->reporter, 'ctx', &$ctx);
 	}
 
 	function run()
