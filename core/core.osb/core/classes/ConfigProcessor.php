@@ -47,11 +47,14 @@ class ConfigProcessor{
 		
 		$ext = $has_ext ? '' : '.php';
 
+        if ($level >= $count_ARR)
+            $level = $count_ARR-1;
+        
 		for( $i=$level; $i>=0 && $i<$count_ARR; $i+=$direction )
         {
 			$fname = $ARR[$i].$name.$ext;
 /*
-	        if ($type=="models")
+	        if ($type=="handlers")
             {
                 echo '<hr>'.$fname;
             }

@@ -9,10 +9,12 @@ class PrincipalHash extends Principal {
   );
   var $cookie_prefix = '';
   
-  function PrincipalHash(&$rh){
+  function PrincipalHash(&$rh)
+  {
     Principal::Principal($rh);
     $this->cookie_prefix = $rh->project_name.'_';
     $prp =& $this;
+    
     include( $rh->FindScript('handlers','_prp') );
   }
   

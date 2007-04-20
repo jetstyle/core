@@ -29,8 +29,8 @@ class PrincipalDB extends Principal
   function _GetBy($where){
     $this->rh->debug->Trace("PrincipalDB::_GetBy() - [$where] ...");
     $db =& $this->rh->db;
-    $rs = $db->execute('SELECT '.implode(",",$this->SELECT_FIELDS).' FROM '.$this->users_table.' WHERE '.$this->users_where.' AND '.$where);
-    $user = $rs->fields;
+    $user = $db->queryOne('SELECT '.implode(",",$this->SELECT_FIELDS).' FROM '.$this->users_table.' WHERE '.$this->users_where.' AND '.$where);
+
     if( $user[$this->id_field] )
     {
       $this->rh->debug->Trace("PrincipalDB::_GetBy() - OK");
@@ -65,25 +65,27 @@ class PrincipalDB extends Principal
       //прибиваем старые сессии - брошенные на час и больше
       $db->execute('DELETE FROM '.$this->sessions_table.' WHERE time<'.(time()-3600));
       //пытаемся загрузить сессию
-      $rs = $db->execute('SELECT * FROM '.$this->sessions_table.' WHERE id='.((integer)$_COOKIE[$this->cookie_prefix.'_sessid']));
-      if( !$rs->EOF ){
+      $session = $db->QueryOne('SELECT * FROM '.$this->sessions_table.' WHERE id='.((integer)$_COOKIE[$this->cookie_prefix.'_sessid']));
+      if( !empty($session) ){
         //помечаем текущую сессию как используемую
-        $session = $rs->fields;
+
         $db->execute('UPDATE '.$this->sessions_table.' SET time='.time()." WHERE id='".$session['id']."'");
         $this->rh->debug->Trace("PrincipalDB::_Session() - восстановлена через куки [".$session['id']."]");
-      }else{
+      }
+      else
+      {
         //нужна новая сессия
         //генерим sessid
-        do{
+        do
+        {
           $sessid = rand(1,1000000);
-          $rs = $db->execute('SELECT id FROM '.$this->sessions_table.' WHERE id='.$sessid);
-        }while($rs->fields['id']);
+          $rs = $db->queryOne('SELECT id FROM '.$this->sessions_table.' WHERE id='.$sessid);
+        }while($rs['id']);
         //вставляем запись
         $ip = ($_SERVER["HTTP_X_FORWARDED_FOR"]!="") ? $_SERVER["HTTP_X_FORWARDED_FOR"] : $_SERVER["REMOTE_ADDR"];
         $db->execute('INSERT DELAYED INTO '.$this->sessions_table.'(id,ip,time) VALUES('.$sessid.',\''.$ip.'\','.time().')');
         //грузим новую запись
-        $rs = $db->execute('SELECT * FROM '.$this->sessions_table.' WHERE id='.$sessid);
-        $session = $rs->fields;
+        $session = $db->queryOne('SELECT * FROM '.$this->sessions_table.' WHERE id='.$sessid);
         $this->rh->debug->Trace("PrincipalDB::_Session() - вставили новую [".$sessid."]");
       }
       //сохраняем sessid

@@ -50,16 +50,6 @@
   $this->tpl->assign('project_title',$this->project_title);
   
   $this->debug->Trace("startup done");
-  
-  if( $this->trace_logs )
-    {
-		$this->UseClass('Logs');
-		$this->logs =& new Logs($this);
-	}else{
-		$this->UseClass('LogsDummy');
-		$this->logs =& new LogsDummy($this);
-	}
-    
-	$this->UseClass('Trash');
-	$this->trash =& new Trash($this);  
+
+
 ?>

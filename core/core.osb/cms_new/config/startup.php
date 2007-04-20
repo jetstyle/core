@@ -1,7 +1,7 @@
 <?
 	//базовый стартап
     
-	include($this->FindScript('scripts','startup'));
+	include($this->FindScript('scripts','startup', 1));
 
 	//корзина
 	$this->UseClass('Trash');
@@ -22,5 +22,5 @@
 		$this->UseClass('LogsDummy');
 		$this->logs =& new LogsDummy($this);
 	}
-    
+   
 ?>
