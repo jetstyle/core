@@ -64,6 +64,8 @@
 {{&js:coordinates}}
 {{&js:drag}}
 {{&js:dragdrop}}
+{{&js:default}}
+
 
 <script language="JavaScript" type="text/javascript">
 <!--#
@@ -71,7 +73,7 @@
        function onDrop() 
        {
           //var data = DragDrop.serData('g2'); 
-          update_timeout = setTimeout(getSort, 3000);
+          update_timeout = setTimeout(getSort, 1500);
        }
 
 		window.onload = function() 
@@ -84,10 +86,14 @@
 			list.onDragDrop = function() {onDrop(); };
 		};
 
+
         function getSort()
         {
-          order = document.getElementById("order");
+          var order = document.getElementById("order");
           order.value = DragDrop.serData('g1', null);
+		  
+		  findObj("group-minus-icon").src = findObj("group-minus-icon").src.replace("hide.gif", "ajax-loader-arrows.gif");;
+		  
           //url, table, order_values
           clearTimeout(update_timeout);
           
@@ -106,8 +112,10 @@
 		        { 
 		           if (req.responseText!="error" && req.responseText.length>0) 
 		           { 
-		           	   return true;
+		           	   
 		           	   //сохраниение прошло успешно
+		           	   findObj("group-minus-icon").src = findObj("group-minus-icon").src.replace("ajax-loader-arrows.gif", "hide.gif");
+		           	   return true;
 		           }
 		           else
 		           {

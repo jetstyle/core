@@ -11,11 +11,11 @@
 >
 <table width="100%" cellspacing="0" cellpadding="0" class="module-title- m-opened-" id="module_name_opened_{{_id}}">
   <tr>
-    <td class="w100">{{_title}}</td>
+    <td class="w100" id="module_title_opened">{{_title}}</td>
     <td><a href="javascript:;"
       onmouseover="document.getElementById('module_name_opened_{{_id}}').className='module-title- m-over-'; return false;"
       onmouseout="document.getElementById('module_name_opened_{{_id}}').className='module-title- m-opened-'; return true;"
-    /><img src="{{images}}hide.gif" width="12" height="12" alt="-" align="top" title="Свернуть группу" /></a></td>
+    /><img id="group-minus-icon" src="{{images}}hide.gif" width="12" height="12" alt="-" align="top" title="Свернуть группу" /></a></td>
   </tr>
 </table>
 </div>
@@ -43,7 +43,7 @@
 >
 <table width="100%" cellspacing="0" cellpadding="0" class="module-title- m-closed-" id="module_name_closed_{{_id}}">
   <tr>
-    <td class="w100">{{_title}}</td>
+    <td class="w100" id="module_title_closed">{{_title}}</td>
     <td>
     <a href="javascript:;"
       onmouseover="document.getElementById('module_name_closed_{{_id}}').className='module-title- m-over2-'; return false;"
