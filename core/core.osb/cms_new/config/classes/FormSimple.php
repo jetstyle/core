@@ -1,6 +1,6 @@
 <?
   
-  $this->UseClass("DBDataEdit",0);
+  $this->UseClass("DBDataEdit");
   
 class FormSimple extends DBDataEdit  {
   

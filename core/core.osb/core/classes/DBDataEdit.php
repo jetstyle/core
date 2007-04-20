@@ -139,8 +139,9 @@ class DBDataEdit extends DBDataView {
   		$sql2 .= (($sql2)?",":"").$db->Quote( $VALUES[$field] );
   	}
   	$sql = "INSERT INTO ".$this->table_name."($sql1) VALUES($sql2)";
-  	$db->execute($sql);
-  	return $db->Insert_ID();
+    
+  	$isert_id = $db->insert($sql);
+  	return $isert_id;
   }
 	
   function AddNewArr($N,$VALUES=array()){

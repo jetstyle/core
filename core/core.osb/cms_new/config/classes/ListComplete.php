@@ -1,6 +1,6 @@
 <?
   
-  $this->UseClass('ListAdvanced',1);
+  $this->UseClass('ListAdvanced');
   
 class ListComplete extends ListAdvanced  {
   

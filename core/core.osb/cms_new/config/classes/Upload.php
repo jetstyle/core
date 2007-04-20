@@ -72,11 +72,25 @@ class Upload {
     $this->table_name = $table_name ? $table_name : $rh->project_name.'_upload';
     $this->chmod = 0744;
     //читаем базу знаний
-    $rh->db->execute("SELECT * FROM ".$this->table_name);
+    $this->init();
+  }
+  
+  function init()
+  {
+    $row = $this->rh->db->queryOne("SELECT value FROM ??config WHERE name='upload_ext'");
+    $r = unserialize($row['value']);
+
+    foreach ($r as $row)
+    {
+        $this->TYPES[ $row['ext'] ] = array($row['type'],$row['title']);
+    }
+    
+    /*
     while($row = $rh->db->getRow())
     {
       $this->TYPES[ $row['ext'] ] = array($row['type'],$row['title']);
-    }
+    } 
+    */  
   }
   
   function _Current($file_name,$ext){
