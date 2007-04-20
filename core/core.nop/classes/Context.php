@@ -46,7 +46,7 @@ class Context extends Configurable
 			'file_path' => $this->cache_dir.$environment.'_config'.'.php',
 		));
 
-		if ($cache->isValid())
+		if ($cache->isValid() && false)
 		{
 			// берем из кеша
 			$f = $cache->getFileName();
@@ -76,12 +76,14 @@ class Context extends Configurable
 				);
 
 			$loader =& new ConfigLoader();
+            $loader->loading = true;
 			foreach ($vars as $var)
 			{
-				config_chainConfig($loader, $this, 
-					'"'.$this->$var.'"', 'config');
+				config_chainConfig($loader, $this, '"'.$this->$var.'"', 'config');
 			}
-
+            unset ($loader->loading);
+            $loader->load();
+                
 			foreach ($loader->getSources() as $source)
 				$cache->addSource($source);
 
