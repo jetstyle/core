@@ -92,9 +92,14 @@ class ConfigProcessor {
   
   //Тоже, что и FindScript_(), но кроме того инклюдим найденный скрипт
   function UseScript( $type, $name, $level=false, $dr=-1, $ext = 'php' ){
-    include_once( $this->FindScript_($type,$name,$level,$dr,$ext) );
+    $this->_useScript( $this->FindScript_($type,$name,$level,$dr,$ext) );
   }
   
+  // Грузит скрипт в контексте меня
+  function _useScript($source)
+  {
+    include_once( $source );
+  }
   
 }
 

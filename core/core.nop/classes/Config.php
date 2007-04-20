@@ -66,10 +66,10 @@ function config_chainConfig(&$loader, &$self, $expr, $name)
 	$loader->chainConfig($self, $expr, $name);
 }
 
-function config_seeConfig(&$loader, &$self, $folder, $name)
+function config_seeConfig(&$loader, &$self, $folder, $name=NULL)
 {
 	if (!isset($loader)) $loader =& new ConfigLoader();
-	$loader->loadConfig($self, $folder, $name);
+	$loader->seeConfig($self, $folder, $name);
 }
 
 
@@ -182,7 +182,7 @@ class ConfigLoader
 		while ($config_info = array_shift($this->chain))
 		{
 			//						 $self, $folder, $name
-			$this->loadConfig(
+			$this->seeConfig(
 				$config_info[0], 
 				eval('return '.str_replace('\\','\\\\',$config_info[1]).';'), 
 				$config_info[2]);
@@ -233,9 +233,36 @@ class ConfigLoader
 	 * @param string $folder -- директория файлом конфига
 	 * @param string $config_name -- имя файла конфига (без расширения)
 	 */
-	function loadConfig(&$self, $folder, $config_name)
+	function loadConfig(&$self, $source, $type='php')
 	{
 		$status = False;
+		if (@is_readable($source))
+		{
+			switch ($type)
+			{
+			case 'php':
+				$status = $this->loadPhp($self, $source);
+				break;
+			case 'yml':
+				$status = $this->loadYaml($self, $source);
+				break;
+			}
+			$this->addSource($source);
+		}
+		return $status;
+	}
+
+	/**
+	 * Найти конфиг с указанным именем в указанной директории
+	 *
+	 * @param string $folder -- директория файлом конфига
+	 * @param string $config_name -- имя файла конфига (без расширения)
+	 *
+	 * @return array($path, $type) -- полный путь, тип конфига
+	 */
+	function findConfig(&$self, $folder, $config_name)
+	{
+		$status = NULL;
 		$ctx =& config_get($self, 'ctx');
 		$environment = $ctx->environment;
 		// путь к конфигов
@@ -248,23 +275,28 @@ class ConfigLoader
 		foreach ($choises as $choise)
 		{
 			list($name, $type) = $choise;
-			$source = $folder.'/'.$name.'.'.$type;
+			$source = ($folder ? $folder.'/' : ''). $name.'.'.$type;
 			if (@is_readable($source))
 			{
-				switch ($type)
-				{
-				case 'php':
-					$status = $this->loadPhp($self, $source);
-					break;
-				case 'yml':
-					$status = $this->loadYaml($self, $source);
-					break;
-				}
-				$this->addSource($source);
-				break; // foreach
+				$status = array($source, $type);
+				break;
 			}
 		}
 		return $status;
+	}
+
+	/**
+	 * Найти из загрузить конфиг с указанным именем из указанной директории
+	 *
+	 * @param string $folder -- директория файлом конфига
+	 * @param string $config_name -- имя файла конфига (без расширения)
+	 */
+	function seeConfig(&$self, $folder, $config_name)
+	{
+		return (
+			  ($info = $this->findConfig($self, $folder, $config_name))
+			&& $this->loadConfig($self, $info[0], $info[1])
+		);
 	}
 
 }

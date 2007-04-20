@@ -437,6 +437,15 @@ class RequestHandler extends BasicRequestHandler
 
   }
 
+	function useModule($name, $type=NULL)
+	{
+		$this->useClass('ModuleLoader');
+		$o =& new ModuleLoader();
+		$o->initialize($this);
+		$o->load($name);
+		return $o->data;
+	}
+
 	function _onCreatePage(&$page)
 	{ 
 	}
