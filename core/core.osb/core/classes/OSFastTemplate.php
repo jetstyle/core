@@ -323,6 +323,26 @@ class OSFastTemplate {
   function &GetAssigned( $handler="" ){
     return $this->VALUES[$handler];
   }
+
+  /**
+   * rocket-TE wrapper functinons
+   * for reducing missprints
+   * nop @ 10:46 22.04.2007
+   */
+  function set($assign_map, $value="", $append=false)
+  {
+      $this->assign($assign_map, $value="", $append=false);
+  }
+  
+  function setRef($handler,&$value)
+  {
+      $this->assign($handler,&$value);
+  }
+  
+  function get($handler="")
+  {
+    return $this->getAssigned($handler);
+  }
   
   /*** Actual parcing ***/
   function &Parse ( $tpl, $store_to="", $append=false, $full_path=false ){
