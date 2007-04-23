@@ -9,10 +9,27 @@ require_once('Config.php');
 require_once('Configurable.php');
 
 
+/**
+ * Класс UnitTester -- автоматизирует поиск и выполнение юнит-тестов.
+ *
+ * Юнит-тест должен находиться в той же директории, что и сам юнит, и иметь 
+ * суффикс названия Test.
+ *
+ *  например:
+ *		classes/Aspect.php			-- юнит
+ *		classes/AspectTest.php		-- тест для юнита
+ * 
+ */
 class UnitTester extends Configurable
 {
 
 	var $tests = array();
+	/*
+	var $recursive = NULL;
+	var $test = NULL;
+	var $reporter = NULL;
+	var $namespaces = NULL;
+	 */
 
 	function addTests($path,$recursive)
 	{
@@ -21,9 +38,10 @@ class UnitTester extends Configurable
 		{
 			if(is_file($path.'/'.$entry) && preg_match('#^(.+)Test\.php$#', $entry, $matches))
 			{
-				if (empty($this->tests) || in_array($matches[1], $this->tests))
+				$unit = $matches[1];
+				if (empty($this->tests) || in_array($unit, $this->tests))
 				{
-					$this->ctx->useClass($matches[1]);
+					$this->ctx->useClass($unit);
 					$this->test->addTestFile($path.'/'.$entry);
 				}
 			}
