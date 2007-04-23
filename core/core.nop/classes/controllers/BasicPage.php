@@ -206,8 +206,13 @@ class BasicPage extends Controller
 				$aspect = $config['__aspect'];
 			}
 
-			$this->rh->useClass('plugins/'.$name.'/'.$name);
-			$o =& new $name();
+			unset($o);
+			$o =& $this->rh->useModule($name);
+			if (empty($o))
+			{
+				$this->rh->useClass('plugins/'.$name.'/'.$name);
+				$o =& new $name();
+			}
 			$config['factory'] =& $this;
 			$o->initialize($this->rh, $config);
 			$this->o_plugins[] =& $o;

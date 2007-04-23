@@ -170,6 +170,80 @@ class ContentPageDomain extends BasicPageDomain
 
 }
 
+class ModuleContentPageDomain extends BasicPageDomain
+{
+
+	function getPageClassByMode($mode)
+	{
+		return isset($this->rh->mode_map[$mode]) 
+			? $this->rh->mode_map[$mode]
+			: (($mode ? implode('', array_map(ucfirst, explode('_', $mode))) : "Content" ) .  "Page");
+	}
+	function getModeByPageClass($cls)
+	{
+		$res = strtolower(trim(preg_replace('#([A-Z])#', '_\\1', $cls), '_'));
+		if ($res == 'content') $res = 0;
+		return $res;
+	}
+
+	function &find($criteria=NULL)
+	{
+		if (empty($criteria)) return False; // FIXME: lucky@npj -- вернуть все страницы?
+
+		$this->rh->useClass('models/Content');
+		$content =& new Content();
+		$content->initialize($this->rh);
+
+		$where = '';
+		if (isset($criteria['url']))
+		{
+			$url = $criteria['url'];
+			$possible_paths = $this->getPossiblePaths($url);
+			$where .= ' AND _path IN ('.$content->buildValues($possible_paths). ')';
+		}
+		if (isset($criteria['class']))
+		{
+			$where .= ' AND mode='.$content->quote($this->getModeByPageClass($criteria['class']));
+		}
+
+		$content->load($where);
+		$data = $content->data[0];
+
+		if (!empty($data))
+		{
+			$page_cls = $this->getPageClassByMode($data['mode']);
+			$config = array (
+				'config' => $data,
+				'path' => $data['_path'],
+				'url' => $url,
+			);
+			if ($config['page'] =& $this->rh->useModule('pages/'.$page_cls))
+			{
+				if ($this->handler = &$this->buildPage($config))
+				{
+					//var_dump($this->handler->plugins);
+					return True;
+				}
+			}
+		}
+		return False;
+	}
+
+	function &buildPage($config)
+	{
+		$page =& $config['page'];
+		$page->domain =& $this;
+		$page->url = $config['url'];
+		$page->path = $config['path'];
+		$page->params = $this->getParams($page->url, $page->path);
+		$this->rh->_onCreatePage($page,$config);
+		$page->initialize($this->rh, $config['config']);
+
+		return $page;
+	}
+
+}
+
 
 /**
  *  ласс HanlderDomain -- старинцы среди хендлеров
@@ -470,6 +544,13 @@ class RequestHandler extends BasicRequestHandler
 			$hc->initialize($this);
 			$hc->handlers_map =& $this->handlers_map;
 			$this->page_domains[] =& $hc;
+
+			/*
+			 * ѕытаемс€ найти модуль в таблице контент
+			 */
+			$mpc =& new ModuleContentPageDomain();
+			$mpc->initialize($this);
+			$this->page_domains[] =& $mpc;
 
 			/*
 			 * ѕытаемс€ найти узел в таблице контент

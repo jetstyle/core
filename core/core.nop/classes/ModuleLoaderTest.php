@@ -1,5 +1,6 @@
 <?php
 
+
 class ModuleLoaderTest extends UnitTestCase
 {
 
@@ -8,37 +9,22 @@ class ModuleLoaderTest extends UnitTestCase
 		$this->ctx =& $this->_reporter->ctx;
 	}
 
-	function test_loadConfig_types_String()
+	function test_load_modules_spots_Breadcrumbs()
 	{
-		$expected = array(
-			'String' =>
-				array(
-					'class' => 'TypeString',
-				),
-		);
+		$expected_class = 'Breadcrumbs';
 
 		$this->ctx->useClass('ModuleLoader');
 		$o =& new ModuleLoader();
 		$o->initialize($this->ctx);
-		$output = $o->loadConfig('types/String');
-		$this->assertEqual($output, $expected);
-	}
-
-	function test_load_types_String()
-	{
-		$expected_class = 'TypeString';
-
-		$this->ctx->useClass('ModuleLoader');
-		$o =& new ModuleLoader();
-		$o->initialize($this->ctx);
-		$o->load('types/String');
+		$o->load('spots/Breadcrumbs');
 		$output =& $o->data;
 		$this->assertIsA($output, $expected_class);
 		$this->assertEqual($output->class, $expected_class);
+		$this->assertEqual($output->a, 1);
 	}
 
-
 }
+//SimpleTest::ignore('ModuleLoaderTest');
 
 
 ?>
