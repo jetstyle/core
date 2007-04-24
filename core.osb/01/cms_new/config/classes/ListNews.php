@@ -56,6 +56,8 @@ class ListNews extends ListSimple  {
     //ссылка на новое
     $this->_add_new_href = $this->url.'?'.$this->state->State(0,array( $this->id_get_var ));
     $tpl->Assign( '_add_new_href', $this->_add_new_href );
+    $tpl->Assign( '_add_new_title', $this->config->add_new_title ? $this->config->add_new_title : 'создать новый элемент' );
+
     $tpl->Parse( $this->template_new, '__add_new' );
     
     //assign some
