@@ -53,7 +53,7 @@ class MenuView  extends View
 		$list_2 =& new ListObject($this->rh, $level_2);
 		$list_2->tpl_root = "_hp/menu.html:SubMenu";
 		$list_2->store_to = False;
-		$list_2->EVOLUTORS['suffix'] = array(&$this, "isParentSel");
+		$list_2->EVOLUTORS['suffix'] = array(&$this, "isParentSel2");
 
 		$out = $this->rh->tpl->set($this->store_to,
 						$list_1->parse($list_1->tpl_root, $list_1->store_to)
@@ -81,7 +81,23 @@ class MenuView  extends View
 		$item['href'] = $this->rh->base_url.$item['_path'];
 		//TODO: optimize it
 		$path = implode('/',array_slice(explode('/',$item['_path']), 0, $item['_level']));
+
 		$sel = (empty($path) ? '' : (strpos($this->rh->url, $path) === 0 ? '_Sel' : ''));
+		if ($sel) $this->rh->tpl->set('_menu_level1_sel', $list->loop_index);
+		return $sel;
+	}
+
+	function isParentSel2(&$list)
+	{
+		$item =& $list->ITEMS[$list->loop_index];
+		$item['href'] = $this->rh->base_url.$item['_path'];
+		//TODO: optimize it
+		$path = implode('/',array_slice(explode('/',$item['_path']), 0, $item['_level']));
+
+		$sel = (empty($path) ? '' 
+			: ($this->rh->url == $path ? '_Sel' 
+			: (strpos($this->rh->url, $path) === 0 ? '_SubSel' : '')
+		));
 		if ($sel) $this->rh->tpl->set('_menu_level1_sel', $list->loop_index);
 		return $sel;
 	}
@@ -125,6 +141,7 @@ class MenuListView extends View
 		return ($url_path === $path) ? 'Sel' : '';
 	}
 }
+
 class MenuTreeView extends View
 {
 	function handle()
