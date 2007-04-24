@@ -1,8 +1,9 @@
 <?
   
-  $this->UseClass('ListSimple',1);
+  $this->UseClass('ListSimple');
   
-class ListAdvanced extends ListSimple  {
+class ListAdvanced extends ListSimple  
+{
   
   var $template = 'list_advanced.html';
   var $template_list = 'list_advanced.html:List';
@@ -14,7 +15,8 @@ class ListAdvanced extends ListSimple  {
   
   var $arrows; //объект постраничной рубрикации
   
-  function ListAdvanced( &$config ){
+  function ListAdvanced( &$config )
+  {
     //упорядочиваем список
     $config->SELECT_FIELDS[] = ($config->order_field) ? $config->order_field . " as '_order'" : '_order';//'_order';
     if(!$config->order_by) $config->order_by = ( $config->order_field ? $config->order_field : "_order" ) . " ASC";//'_order ASC';
@@ -44,6 +46,7 @@ class ListAdvanced extends ListSimple  {
 //    $this->_add_new_href = $this->url.'?'.$this->state->State(0,array( $this->id_get_var ));
 //    $tpl->Assign( '_add_new_href', $this->_add_new_href );
       $tpl->Assign( '_add_new_href', $this->_href_template );
+      $tpl->Assign( '_add_new_title', $this->config->add_new_title ? $this->config->add_new_title : 'создать новый элемент' );
       $tpl->Parse( $this->template_new, '__add_new' );
      
     }
@@ -55,7 +58,7 @@ class ListAdvanced extends ListSimple  {
     $tpl->Parse( $this->template_engine, '__picker' );
     
     //постраничный рубрикатор
-    $rh->UseClass('Arrows',0);
+    $rh->UseClass('Arrows');
     $this->arrows = new Arrows( $rh );
     $this->arrows->outpice = $this->config->outpice ? $this->config->outpice : 10;
     $this->arrows->mega_outpice = $this->config->mega_outpice ? $this->config->mega_outpice : 10;
