@@ -78,19 +78,23 @@ class Upload {
   function init()
   {
     $row = $this->rh->db->queryOne("SELECT value FROM ??config WHERE name='upload_ext'");
-    $r = unserialize($row['value']);
+    $exts = explode(",", $row['value']);
 
-    foreach ($r as $row)
+    if (!empty($exts))
     {
-        $this->TYPES[ $row['ext'] ] = array($row['type'],$row['title']);
+        foreach ($exts as $ext)
+        {
+            $this->TYPES[ $ext ] = array($ext,$ext);
+        }
     }
-    
-    /*
-    while($row = $rh->db->getRow())
+    else    
     {
-      $this->TYPES[ $row['ext'] ] = array($row['type'],$row['title']);
-    } 
-    */  
+        $this->rh->db->execute("SELECT * FROM ??upload ");
+        while($row = $this->rh->db->getRow())
+        {
+          $this->TYPES[ $row['ext'] ] = array($row['type'],$row['title']);
+        } 
+    }
   }
   
   function _Current($file_name,$ext){
@@ -105,8 +109,10 @@ class Upload {
     $this->current->link = $this->dir.$this->current->name_short;
   }
   
-  function CheckExt($ext,$type){
-    if(!isset($this->TYPES[$ext])){
+  function CheckExt($ext,$type)
+  {
+    if(!isset($this->TYPES[$ext]))
+    {
       $this->TYPES[$ext] = array( $type, $ext );
       $this->rh->db->execute("INSERT INTO ".$this->table_name."(ext,type,title) VALUES('$ext','$type','$ext')");
     }
@@ -150,7 +156,7 @@ class Upload {
       {
       	move_uploaded_file($uploaded_file,$file_name_full);
       }
-      
+
       chmod($file_name_full,$this->chmod);
       $this->_Current($file_name,$ext);
       return $this->current;
