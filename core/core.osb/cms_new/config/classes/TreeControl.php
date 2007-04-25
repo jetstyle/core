@@ -46,6 +46,12 @@ class TreeControl extends DBDataEditTree  {
 		// 
 		$this->store_to = "tree_".$config->module_name;
 		$this->_href_template = $this->rh->path_rel."do/".$config->module_name."?".$this->rh->state->State();
+        
+        //nop: dirty hack
+        if ($this->config->open_id > 0)
+        {
+           setcookie($this->config->open_id, "1");
+        }
 	}
 
 	//  TreeSimple::Load().
