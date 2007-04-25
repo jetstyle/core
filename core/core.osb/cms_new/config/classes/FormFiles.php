@@ -45,7 +45,8 @@ class FormFiles extends FormSimple  {
     FormSimple::Handle();
   }
   
-  function RenderFiles(){
+  function RenderFiles()
+  {
     if( $this->files_rendred ) return;
     
     $rh =& $this->rh;
@@ -56,6 +57,52 @@ class FormFiles extends FormSimple  {
     //рендерим файлы
     if( is_array($config->FILES) )
     {
+        $this->_renderFilesOld();
+    }
+    elseif(is_array($this->config->_FILES))	
+    {
+    	$this->_renderFiles();
+    }
+    
+    $tpl->Assign( '__max_file_size', $config->max_file_size ? $config->max_file_size : $this->max_file_size );
+    $this->files_rendered = true;
+  }
+  
+  function _renderFiles()
+  {       
+        $rh =& $this->rh;
+        $tpl =& $rh->tpl;
+        $upload =& $this->upload;
+        $config =& $this->config;
+    
+        foreach($this->config->_FILES AS $field_file => $v)	
+        {
+      		if(is_array($v))	
+            {
+      			foreach($v AS $vv)	
+                {
+      				if($vv['show'])	
+                    {
+      					$file = $upload->GetFile(str_replace('*', $this->id, $vv['filename']));
+                        
+      					if($file->name_full)	
+                        {
+          					$this->item[$field_file] = '<img src="'.$this->rh->front_end->path_rel.'files/'.($this->config->upload_dir ? $this->config->upload_dir."/" : "").$file->name_short.'" />';
+        				}
+        			}
+      			}
+      		}
+      	}   
+  }
+  
+  function _renderFilesOld()
+  {
+          
+      $rh =& $this->rh;
+      $tpl =& $rh->tpl;
+      $upload =& $this->upload;
+      $config =& $this->config;
+
       foreach($config->FILES as $row)
       {
           
@@ -95,34 +142,17 @@ class FormFiles extends FormSimple  {
           { */
             //файл? рисуем статистику и ссылку "скачать"
             $_href = $this->rh->front_end->path_rel.'files/'.($this->config->upload_dir ? $this->config->upload_dir."/" : "").$file->name_short;
-//            $_href = $rh->url.'files/'.$file->name_short;
+    //            $_href = $rh->url.'files/'.$file->name_short;
             $tpl->Assign( 'file_'.$row[1], '('.$file->size.'kb, '.$file->format.", <a href='".$_href."'>скачать</a>)" );
             $this->item[$this->field_file] = '<img src="'.$this->rh->front_end->path_rel.'files/'.($this->config->upload_dir ? $this->config->upload_dir."/" : "").$file->name_short.'" />';
 
-/*
+    /*
           }
           */
         }
       }
-    }
-    elseif(is_array($this->config->_FILES))	{
-    	foreach($this->config->_FILES AS $field_file => $v)	{
-      		if(is_array($v))	{
-      			foreach($v AS $vv)	{
-      				if($vv['show'])	{
-      					$file = $upload->GetFile(str_replace('*', $this->id, $vv['filename']));      					
-      					if($file->name_full)	{
-	      					$this->item[$field_file] = '<img src="'.$this->rh->front_end->path_rel.'files/'.($this->config->upload_dir ? $this->config->upload_dir."/" : "").$file->name_short.'" />';
-  	    				}
-  	    			}
-      			}
-      		}
-      	}
-    }
-    
-    $tpl->Assign( '__max_file_size', $config->max_file_size ? $config->max_file_size : $this->max_file_size );
-    $this->files_rendered = true;
   }
+  
   
   function Update()
   {
@@ -174,30 +204,27 @@ class FormFiles extends FormSimple  {
             @unlink( $file->name_full );
         }
       } /* added by lunatic */
-      elseif(is_array($this->config->_FILES))	{
-      	foreach($this->config->_FILES AS $field_file => $v)	{
-
-     		if(is_uploaded_file($_FILES[$this->prefix.$field_file]['tmp_name']))	{
-      			if(is_array($v))	{
-      				foreach($v AS $vv)	{
-      					$file = $upload->GetFile( str_replace('*', $this->id, $vv['filename']));
-    						if($file->name_full)
-    							@unlink( $file->name_full );
-    							
-      					$upload->UploadFile($this->prefix.$field_file, str_replace('*', $this->id, $vv['filename']), false, array($vv['size'][0], $vv['size'][1], $vv['crop']));      					
-      				}
-      			}
+      elseif(is_array($this->config->_FILES))	
+      {
+      	foreach($this->config->_FILES AS $field_file => $result_arrays)	
+        {
+            /**
+             * файл заусунули в инпут
+             */
+     		if(is_uploaded_file($_FILES[$this->prefix.$field_file]['tmp_name']))	
+            {
+      			$this->_handleUpload($field_file, $result_arrays, true);
+                
       		}
-      		elseif($this->rh->GetVar($this->prefix.$field_file.'_del'))	{
-      			if(is_array($v))	{
-      				foreach($v AS $vv)	{
-      					$file = $upload->GetFile( str_replace('*', $this->id, $vv['filename']));
-    						if($file->name_full)
-    							@unlink( $file->name_full );
-      				}
-      			}
+            /**
+             * не засунули в инпут ничего, да еще и галочку удалить включили
+             */
+      		elseif($this->rh->GetVar($this->prefix.$field_file.'_del'))	
+            {
+      			$this->_handleUpload($field_file, $result_arrays);
       		}
       	}
+        //die();
       }
       
       return true;
@@ -207,6 +234,50 @@ class FormFiles extends FormSimple  {
         //die('22');
         return false;
     }
+  }
+
+  function _shouldTakeFromIfEmpty($from_field_file)
+  {
+      foreach($this->config->_FILES AS $field_file => $result_arrays)	
+      {
+          foreach($result_arrays AS $vv)
+          {
+              if ($vv['take_from_if_empty'][0]==$from_field_file)
+              {
+                $this->take_to = $vv;
+                return $field_file;
+              }
+          }
+      }
+      return false;
+      //die();   
+  }
+
+  function _handleUpload($field_file, &$result_arrays, $do_upload=false)
+  {
+        $rh =& $this->rh;
+        $upload =& $this->upload;
+        
+        if(is_array($result_arrays))	
+        {
+    		foreach($result_arrays AS $vv)	
+            {
+    			$file = $upload->GetFile( str_replace('*', $this->id, $vv['filename']));
+    				if($file->name_full)
+    					@unlink( $file->name_full );
+
+                if ($do_upload)
+                {
+                    //нужно сохранить превью?
+                    if ($me_too = $this->_shouldTakeFromIfEmpty($field_file))
+                    {
+                        $vvv = $this->take_to;
+                        $upload->UploadFile($this->prefix.$field_file, str_replace('*', $this->id, $vvv['filename']), false, array($vvv['size'][0], $vvv['size'][1], $vvv['crop']));      					
+                    }
+    			    $upload->UploadFile($this->prefix.$field_file, str_replace('*', $this->id, $vv['filename']), false, array($vv['size'][0], $vv['size'][1], $vv['crop']));
+                }
+    		}
+    	}   
   }
 
 }

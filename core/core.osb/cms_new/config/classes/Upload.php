@@ -79,7 +79,7 @@ class Upload {
   {
     $row = $this->rh->db->queryOne("SELECT value FROM ??config WHERE name='upload_ext'");
     $exts = explode(",", $row['value']);
-
+    
     if (!empty($exts))
     {
         foreach ($exts as $ext)
@@ -131,7 +131,8 @@ class Upload {
 	}
   	
   	$uploaded_file = $_file['tmp_name'];
-    if(is_uploaded_file($uploaded_file)){
+    if(is_uploaded_file($uploaded_file))
+    {
       $this->current = false;
       //клиентские данные
       $type = $_file['type'];
@@ -163,21 +164,22 @@ class Upload {
     }
   }
   
-  function GetFile( $file_name, $is_full_name=false ){
+  function GetFile( $file_name, $is_full_name=false )
+  {
     $this->current = false;
     //взять расширение из полного имени?
-    if( $is_full_name && @file_exists($file_name) ){
+    if( $is_full_name && @file_exists($file_name) )
+    {
       $path_info = pathinfo($file_name);
       $ext = $path_info['extension'];
       $file_name = basename($file_name,'.'.$ext);
     }
     //указано не полное имя - ищем расширение
-    if($ext==''){
+    if($ext=='')
+    {
       $A = array_keys($this->TYPES);
-      foreach($A as $ext){
-      	//$ext = strtolower($ext);
-        if ($_GET['debug'])
-            echo '<br>'.$ext;
+      foreach($A as $ext)
+      {
         //echo $this->dir.$file_name.'.'.$ext."<br>\n";
         if(@file_exists($this->dir.$file_name.'.'.$ext))
           break;
