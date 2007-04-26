@@ -79,6 +79,7 @@ class FormFiles extends FormSimple  {
         {
       		if(is_array($v))	
             {
+      			unset($exts);
       			foreach($v AS $vv)	
                 {
       				if($vv['show'])	
@@ -96,10 +97,22 @@ class FormFiles extends FormSimple  {
                         }
         			}
       			}
-      		}
+                if (isset($vv['exts']))
+                        $exts = $vv['exts'];
+                $this->item[$field_file."_exts"] = $this->_getExts($exts);
+            }
       	}
+  }
+  
+  function _getExts($exts)
+  {
+        if (is_array($exts))
+            $exts = array_unique($exts);
 
-        $this->rh->tpl->assign("allowed_exts", "(".implode(", ",array_keys($upload->TYPES)).")" );
+        if (empty($exts))
+            $exts = array_keys($this->upload->TYPES);
+
+        return "(".implode(", ",$exts).")";
   }
   
   function _renderFilesOld()
@@ -111,55 +124,17 @@ class FormFiles extends FormSimple  {
 
       foreach($config->FILES as $row)
       {
-          
         if( $file = $upload->GetFile( str_replace('*', $this->id, $row[0])) )
         {
-
-        /*        
-          if( in_array( $file->ext, $this->GRAPHICS ) )
-          {
-
-            //графика? показываем
-            $A = @getimagesize( $file->name_full );
-            $width_max = $config->view_width_max ? $config->view_width_max : $this->view_width_max;
-            $height_max = $config->view_height_max ? $config->view_height_max : $this->view_height_max;
-            
-            $file->link = realpath($file->name_full);
-            
-            //die(realpath($upload->dir)."/".$file->name_short);
-            
-            if( $A[0]>$width_max || $A[1]>$height_max )
-            {
-              
-              //слишком больша€? показываем превью
-              $_href = $rh->url.'picture?pict='.$file->name_short;
-              $_onclick = "pictwnd('$_href','popup_".$this->id."','top=100,left=100,width=".$A[0].", height=".$A[1]."');";
-              $_str = '<a href="'.$_href.'" onclick="'.$_onclick.'return false;"><img src="'.$rh->url.'pict.php?img='.$file->link.'" width="100" height="100" alt="'.$file->link.'" border="0"></a>';
-              $tpl->Assign( 'file_'.$row[1], $_str );
-            }
-            else
-            {
-              //достаточно маленька€? показываем целиком
-              
-              $tpl->Assign( 'file_'.$row[1], '<img src="'.$rh->url.'pict.php?img='.$file->link.'" "'.$A[3].'" alt="'.$file->link.'">' );
-            }
-          }
-          else
-          { */
             //файл? рисуем статистику и ссылку "скачать"
             $_href = $this->rh->front_end->path_rel.'files/'.($this->config->upload_dir ? $this->config->upload_dir."/" : "").$file->name_short;
     //            $_href = $rh->url.'files/'.$file->name_short;
             $tpl->Assign( 'file_'.$row[1], '('.$file->size.'kb, '.$file->format.", <a href='".$_href."'>скачать</a>)" );
             $this->item[$this->field_file] = '<img src="'.$this->rh->front_end->path_rel.'files/'.($this->config->upload_dir ? $this->config->upload_dir."/" : "").$file->name_short.'" />';
-
-    /*
-          }
-          */
         }
       }
   }
-  
-  
+
   function Update()
   {
     $fields = array('text', 'lead', 'blog_descr', 'down_descr');
@@ -180,7 +155,8 @@ class FormFiles extends FormSimple  {
       //загружаем и удал€ем файлы
       $upload =& $this->upload;
       if( is_array($this->config->FILES) )	{
-        foreach($this->config->FILES as $row){
+        foreach($this->config->FILES as $row)
+        {
           $fname = str_replace('*', $this->id, $row[0]);
           //грузим файл и провер€ем формат, если нужно
           if($this->config->RESIZE)
@@ -220,7 +196,6 @@ class FormFiles extends FormSimple  {
      		if(is_uploaded_file($_FILES[$this->prefix.$field_file]['tmp_name']))	
             {
       			$this->_handleUpload($field_file, $result_arrays, true);
-                
       		}
             /**
              * не засунули в инпут ничего, да еще и галочку удалить включили
@@ -274,12 +249,15 @@ class FormFiles extends FormSimple  {
 
                 if ($do_upload)
                 {
+                    if ($vv['exts'])
+                        $upload->ALLOW = $vv['exts'];
                     //нужно сохранить превью?
                     if ($me_too = $this->_shouldTakeFromIfEmpty($field_file))
                     {
                         $vvv = $this->take_to;
                         $upload->UploadFile($this->prefix.$field_file, str_replace('*', $this->id, $vvv['filename']), false, array($vvv['size'][0], $vvv['size'][1], $vvv['crop']));      					
                     }
+                    
     			    $upload->UploadFile($this->prefix.$field_file, str_replace('*', $this->id, $vv['filename']), false, array($vv['size'][0], $vv['size'][1], $vv['crop']));
                 }
     		}

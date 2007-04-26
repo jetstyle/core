@@ -55,15 +55,23 @@ $upload =& new Upload($rh, $rh->front_end->file_dir);
 	
 		if(is_array($res) && !empty($res))
 		{
+    		include(dirname(__FILE__)."/_files.php");
+            $filename = $this->_FILES['file'][0]['filename'];
+
+            $upload->dir .= $this->upload_dir.'/';
 			foreach($res AS $i => $r)
 			{
-				if ($file = $upload->getFile('picfile_'.$r['id']))
+				//if ($file = $upload->getFile('picfile_'.$r['id']))
+                //echo '<hr>'.str_replace("*", $r['id'], $filename);
+                
+                
+                if ($file = $upload->getFile(str_replace("*", $r['id'], $filename)))
 				{
 					$data = array(
 						'id' => $r['id'],
 						'title' => str_replace("'", "\'", $r['title']),
 						'i' => $i,
-						'src' => $rh->front_end->path_rel.'files/'.$file->name_short,
+						'src' => $rh->front_end->path_rel.'files/'.$this->upload_dir.'/'.$file->name_short,
 						'size' => $file->size,
 						'ext' => $file->ext,
 					);
