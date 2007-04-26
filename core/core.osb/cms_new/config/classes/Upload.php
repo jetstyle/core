@@ -84,6 +84,7 @@ class Upload {
     {
         foreach ($exts as $ext)
         {
+            $ext = trim($ext);
             $this->TYPES[ $ext ] = array($ext,$ext);
         }
     }
@@ -97,7 +98,8 @@ class Upload {
     }
   }
   
-  function _Current($file_name,$ext){
+  function _Current($file_name,$ext)
+  {
     $file_name_ext = $file_name.".".$ext;
     $file_name_full = $this->dir.$file_name_ext;
     $this->current->name_full = $file_name_full;
@@ -180,7 +182,7 @@ class Upload {
       $A = array_keys($this->TYPES);
       foreach($A as $ext)
       {
-        //echo $this->dir.$file_name.'.'.$ext."<br>\n";
+        //echo $this->dir.$file_name.'.'.$ext.'('.var_export(file_exists($this->dir.$file_name.'.'.$ext), true).")<br>\n";
         if(@file_exists($this->dir.$file_name.'.'.$ext))
           break;
         else $ext = '';

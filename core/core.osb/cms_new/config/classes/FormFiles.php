@@ -84,20 +84,26 @@ class FormFiles extends FormSimple  {
       				if($vv['show'])	
                     {
       					$file = $upload->GetFile(str_replace('*', $this->id, $vv['filename']));
-                        
-      					if($file->name_full)	
+                        //var_dump($file);
+      					if($file->name_full && in_array($file->ext, $this->GRAPHICS ) )	
                         {
           					$this->item[$field_file] = '<img src="'.$this->rh->front_end->path_rel.'files/'.($this->config->upload_dir ? $this->config->upload_dir."/" : "").$file->name_short.'" />';
         				}
+                        else if ($file->name_full)
+                        {
+           					$this->item[$field_file] = '('.$file->size.'kb, '.$file->format.", <a href='".$_href."'>скачать</a>)";
+                         //    $tpl->Assign( 'file_'.$row[1], '('.$file->size.'kb, '.$file->format.", <a href='".$_href."'>скачать</a>)" );
+                        }
         			}
       			}
       		}
-      	}   
+      	}
+
+        $this->rh->tpl->assign("allowed_exts", "(".implode(", ",array_keys($upload->TYPES)).")" );
   }
   
   function _renderFilesOld()
   {
-          
       $rh =& $this->rh;
       $tpl =& $rh->tpl;
       $upload =& $this->upload;
