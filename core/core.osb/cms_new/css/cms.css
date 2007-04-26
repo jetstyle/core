@@ -5,6 +5,7 @@
 /* переоформление базовых элементов */
 html,body { height: 100%; }
 body      { margin:0; padding:0; background: #ffffff; color:#444444; }
+
 table     { border:none; }
 td        { vertical-align:top; }
 

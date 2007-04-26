@@ -58,6 +58,8 @@ class FormSimple extends DBDataEdit  {
         $this->id = $this->state->Keep( $this->id_get_var, 'integer' );
       
       DBDataEdit::Load( $this->SELECT_FIELDS[0]."='".$this->id."'" );
+      if ($this->item['_state']>0)
+          $this->rh->tpl->assign("body_class", "class='state1'");
       $this->loaded = true;
       return true;
     }
