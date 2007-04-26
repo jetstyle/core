@@ -38,6 +38,7 @@ class TypeLoader extends Configurable
 			$class = end(explode('/', $class_name));
 			$self =& new $class();
 			config_joinConfigs($self, $type_info);
+			$self->class = $class;
 		}
 		$this->data =& $self;
 	}

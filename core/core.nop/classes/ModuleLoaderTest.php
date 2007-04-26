@@ -11,7 +11,7 @@ class ModuleLoaderTest extends UnitTestCase
 
 	function test_load_modules_spots_Breadcrumbs()
 	{
-		$expected_class = 'Breadcrumbs';
+		$expected_class = 'BreadPlugin';
 
 		$this->ctx->useClass('ModuleLoader');
 		$o =& new ModuleLoader();

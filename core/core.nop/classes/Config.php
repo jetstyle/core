@@ -169,11 +169,12 @@ class ConfigLoader
 {
 	var $chain = array();
 	var $sources = array();
+	var $loading = False;
 
 	function chainConfig(&$self, $expr, $name)
 	{
 		array_push($this->chain, array(&$self, $expr, $name));
-		if (!isset($this->loading)) $this->load();
+		if (!$this->loading) $this->load();
 	}
 
 	function load()
@@ -187,7 +188,7 @@ class ConfigLoader
 				eval('return '.str_replace('\\','\\\\',$config_info[1]).';'), 
 				$config_info[2]);
 		}
-		unset($this->loading);
+		$this->loading;
 	}
 
 	function addSource($source)

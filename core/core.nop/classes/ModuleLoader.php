@@ -19,6 +19,7 @@ class ModuleLoader extends TypeLoader
 		if (isset($this->data))
 		{
 			$loader =& new ConfigLoader();
+			$loader->ctx =& $this->ctx;
 			$loader->seeConfig($this->data, $this->namespace.'/'. $name, $this->config_name);
 		}
 	}
