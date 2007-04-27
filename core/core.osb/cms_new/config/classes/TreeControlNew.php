@@ -45,11 +45,17 @@ class TreeControlNew extends TreeControl
 		switch($action){
 			
 			case 'update':
-				if( $new_id = $this->UpdateTreeStruct() )
+				
+				/*if( $new_id = $this->UpdateTreeStruct() )
 					$tpl->set('_new_id',$new_id);
 				$tpl->set('_new_action',$this->_href_template.$this->id_get_var."=".$new_id);
 
-				$res = $tpl->parse('html.html');
+				$res = $tpl->parse('html.html');*/
+				
+				$res = $this->UpdateTreeStruct();
+				echo $res;
+				die();
+				
 				echo $res;
 				die('1');
 			break;
@@ -62,20 +68,16 @@ class TreeControlNew extends TreeControl
 			break;
 			
 			default:
-				$tpl->set( '_href', $this->_href_template );
-//				$tpl->Parse( $this->template_trash_hide : $this->template_trash_show, '__trash_switch' );
+				$tpl->set( '_href', $this->rh->path_rel."do/".$this->config->module_name."?");
 
 				$_href = str_replace('&amp;','&',$this->_href_template);
 				$tpl->set( '_url_connect', $_href.'&action=update&_show_trash='.$show_trash.'&' );
-//				$_config_name = $this->config->PASSED[ count($this->config->PASSED) - 1 ];
 				$tpl->set( '_url_xml', $_href.'action=xml&'.$this->id_get_var.'='.$this->id.'&' );
 
-                //die($_href.'&action=xml&'.$this->id_get_var.'='.$this->id.'&');
 				$tpl->set( '_behavior', $this->tree_behavior );
 				$tpl->set( '_cur_id', $this->id );
 				$tpl->set( '_level_limit', 3 );
 				
-				//$tpl->Parse( $this->template_head, 'html_head', true );
 				$tpl->Parse( $this->template_control, '__tree' );
 				return $tpl->Parse( $this->template, $this->store_to, true );
 
@@ -138,7 +140,7 @@ class TreeControlNew extends TreeControl
               	$action_src .= " src=\"".$this->_href_template."mode=tree&amp;action=xml&amp;display_root=".$node->id."\"";
 
             $_title = $this->_getTitle($node->title);
-			$str .= str_repeat(" ",$node->_level)."<item text=\"".($_title ? $_title : 'node_'.$node->id )."\" ".$action_src." id=\"".$node->id."\" db_selected=\"".( $node->id==$this->id ? "1" : "" )."\" db_state=\"".$node->_state."\" ".(($is_folder)?">":"/>")."\n";
+			$str .= str_repeat(" ",$node->_level)."<item text=\"".($_title ? $_title : 'node_'.$node->id )."\" ".$action_src." id=\"".$node->id."\" ".( $node->id==$this->id ? "select='true'" : "" )." db_state=\"".$node->_state."\" ".(($is_folder)?">":"/>")."\n";
 
 			//put children
 			if($is_folder){
@@ -156,6 +158,90 @@ class TreeControlNew extends TreeControl
         
 		return $str;
 	}
+	
+	
+	function UpdateTreeStruct(){
+		$rh =& $this->rh;
+		$db =& $rh->db;
+
+		if( $rh->getVar('add') )
+		{
+			$parent = intval($rh->getVar('parent'));
+			$id = $db->insert("
+				INSERT INTO ". $this->config->table_name ."
+				(title, _parent)
+				VALUES
+				('new', '".$parent."')
+			");
+			
+			$this->loaded = false;
+			$this->Load();
+			$this->Restore();
+			return $id;
+		}
+		elseif($delete = intval($rh->getVar('delete')))	
+		{
+			
+			$res = $db->queryOne("
+				SELECT _left, _right
+				FROM ". $this->config->table_name ."
+				WHERE id = '".$delete."'
+			");
+
+			if(is_array($res) && !empty($res))	{
+				$db->query("
+					UPDATE ". $this->config->table_name ."
+					SET _state = 2
+					WHERE _left >= ".$res['_left']." AND _right <= ".$res['_right']."
+				");
+			}
+			$this->loaded = false;
+			$this->Load();
+			$this->Restore();
+			return '1';
+		}
+		elseif($rh->ri->get('change'))	
+		{
+			$itemId = intval($rh->getVar('id'));
+			$targetId = intval($rh->getVar('target'));
+			$beforeId = intval($rh->getVar('before'));
+
+			$db->query("
+				UPDATE ". $this->config->table_name ."
+				SET _parent = '".$targetId."'
+				WHERE id = '".$itemId."'
+			");
+
+			if($beforeId)	{
+
+				$node = $db->queryOne("
+					SELECT _parent, _order
+					FROM ". $this->config->table_name ."
+					WHERE id = '".$beforeId."'
+				");
+
+				$db->query("
+					UPDATE ". $this->config->table_name ."
+					SET _order = _order + 1
+					WHERE _order >= " . $node['_order'] . " AND _parent = '" . $node['_parent'] . "'
+				");
+
+				$db->query("
+					UPDATE ". $this->config->table_name ."
+					SET _order = " . $node['_order'] . "
+					WHERE id = " . $itemId  . "
+				");
+			}
+			
+			$this->loaded = false;
+			$this->Load();
+			$this->Restore();
+
+			return '1';
+		}
+		return '0';
+	}
+	
 
 }
 	
