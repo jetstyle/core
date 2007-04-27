@@ -143,7 +143,7 @@ class TreeControlNew extends TreeControl
 			}
 			//write node
             //action or src?
-            $title = $this->_getTitle($node). " ". $display_children;
+            $title = $this->_getTitle($node);
 			$str .= str_repeat(" ",$node->_level)."<item text=\"".($title)."\" ".$this->_getOpen($node)." id=\"".$node->id."\" ".( $node->id==$this->id ? "select='true'" : "" )." db_state=\"".$node->_state."\" ".(($is_folder)?">":"/>")."\n";
 
 			//put children
