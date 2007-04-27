@@ -307,10 +307,13 @@ class OSFastTemplate {
       //only one pair
       if($append) $this->VALUES[ $assign_map ] .= $value; 
       else $this->VALUES[ $assign_map ] = $value; 
-    }else{
+    }
+    else
+    {
       //assign values to tag name
       reset( $assign_map );
-      while( list($handler,$value) = each($assign_map) ) $this->VALUES[ $handler ] = $value;
+      while( list($handler,$value) = each($assign_map) )
+         $this->VALUES[ $handler ] = $value;
     }
   }
   
@@ -329,9 +332,9 @@ class OSFastTemplate {
    * for reducing missprints
    * nop @ 10:46 22.04.2007
    */
-  function set($assign_map, $value="", $append=false)
+  function set($name, $value="")
   {
-      $this->assign($assign_map, $value="", $append=false);
+      $this->VALUES[ $name ] = $value;
   }
   
   function setRef($handler,&$value)
