@@ -2,6 +2,8 @@
 {{&css:dhtmlXTree}}
 {{&js:dhtmlXCommon}}
 {{&js:dhtmlXTree}}
+{{&js:jquery_latest}}
+
 
 	<!--a href="javascript:void(0)" onclick="addNew(0)">New Root Item</a-->
 	<br /><br />
@@ -25,7 +27,16 @@
 		tree.setOnClickHandler(doOnSelect);
 		tree.setDragHandler(doOnDrag);
 
-		tree.loadXML("{{_url_xml}}");
+/*
+		tree.hideAddBut = true;
+		tree.hideAddChildBut = true;
+		tree.hideDelBut = true;
+		*/
+		var tree_control_btns = false;
+
+		//tree.loadXML("{{_url_xml}}");
+		tree.loadXMLString("{{xml_string|pack_spaces}}");
+		
 		var treeBox_inform = document.getElementById('treeBox_inform');
 		
 		function showUpdateMsg(mode)	
@@ -38,6 +49,12 @@
 			{
 				treeBox_inform.style.display = 'none';	
 			}
+		}
+		
+		function toggleEditTree()
+		{
+			$(".tree_control_btn").css({ display: tree_control_btns ? "none" : "inline"});
+			tree_control_btns = !tree_control_btns;
 		}
 		
 		function doOnDrag(itemId, targetId, beforeId)	
@@ -200,6 +217,7 @@
 {{TPL:content}}
 	<div class="cms-list-advanced">
 		{{__trash_switch}}
+		<a href="#" onclick="toggleEditTree(); return false;" style="float:right;"><img src="{{images}}tree/npj_edit.gif"</a>
 		{{__logs}}
 		<img class="block" src="{{images}}z.gif" width="1" height="10" align="top" alt="" />
 		{{__tree}}

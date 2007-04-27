@@ -32,6 +32,7 @@ class TreeControlNew extends TreeControl
     {
 		parent::TreeControl(&$config);
         $this->store_to = "__tree";
+        $this->_href_template = $this->rh->path_rel."do/".$config->module_name."tree?".$this->rh->state->State();
 	}
 	
 	function Handle()
@@ -68,9 +69,10 @@ class TreeControlNew extends TreeControl
 			break;
 			
 			default:
-				$tpl->set( '_href', $this->rh->path_rel."do/".$this->config->module_name."?");
-
+				$this->_href_template = $this->rh->path_rel."do/".$this->config->module_name."/tree?";
+				$tpl->set( '_href', $this->_href_template);
 				$_href = str_replace('&amp;','&',$this->_href_template);
+
 				$tpl->set( '_url_connect', $_href.'&action=update&_show_trash='.$show_trash.'&' );
 				$tpl->set( '_url_xml', $_href.'action=xml&'.$this->id_get_var.'='.$this->id.'&' );
 
@@ -78,7 +80,13 @@ class TreeControlNew extends TreeControl
 				$tpl->set( '_cur_id', $this->id );
 				$tpl->set( '_level_limit', 3 );
 				
+				$xml_string = $this->toXML();
+                $xml_string = str_replace('"', "'", $xml_string);
+				$tpl->set( 'xml_string', $xml_string );
 				$tpl->Parse( $this->template_control, '__tree' );
+                
+                
+                
 				return $tpl->Parse( $this->template, $this->store_to, true );
 
 			break;
@@ -147,7 +155,8 @@ class TreeControlNew extends TreeControl
 			$str .= str_repeat(" ",$node->_level)."<item text=\"".($title)."\" ".$this->_getOpen($node)." id=\"".$node->id."\" ".( $node->id==$this->id ? "select='true'" : "" )." db_state=\"".$node->_state."\" ".(($is_folder)?">":"/>")."\n";
 
 			//put children
-			if($is_folder){
+			if($is_folder)
+            {
 				$arr = $this->CHILDREN[$node->id];
 				for($i=count($arr)-1;$i>=0;$i--) $stack[] = $arr[$i];
 				$cparent = $node->id;
