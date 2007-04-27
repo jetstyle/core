@@ -299,7 +299,7 @@ class TreeControl extends DBDataEditTree  {
         if (!$this->config->old_style)
         {
             $node = (object)$root;
-            $str .= str_repeat(" ",$node->_level)."<tree text=\"".($this->_getTitle($node->title) ? $this->_getTitle($node->title) : 'node_'.$node->id )."\" ".$this->_getAction($node->id, count($this->CHILDREN[$node->id]), true)." db_id=\"".$node->id."\" db_selected=\"".( $node->id==$this->id ? "1" : "" )."\" db_state=\"".$node->_state."\" >\n";
+            $str .= str_repeat(" ",$node->_level)."<tree text=\"".($this->_getTitle($node))."\" ".$this->_getAction($node->id, count($this->CHILDREN[$node->id]), true)." db_id=\"".$node->id."\" db_selected=\"".( $node->id==$this->id ? "1" : "" )."\" db_state=\"".$node->_state."\" >\n";
 		}
 		//   
 		$current = (object)$this->ITEMS[ $this->rh->GetVar("id","integer") ];
@@ -340,8 +340,8 @@ class TreeControl extends DBDataEditTree  {
 			//write node
 			//action or src?
 			$action_src = $this->_getAction($node->id, $_is_folder, $display_childen);
-            $_title = $this->_getTitle($node->title);
-			$str .= str_repeat(" ",$node->_level)."<tree text=\"".($_title ? $_title : 'node_'.$node->id )."\" ".$action_src." db_id=\"".$node->id."\" db_selected=\"".( $node->id==$this->id ? "1" : "" )."\" db_state=\"".$node->_state."\" ".(($is_folder)?">":"/>")."\n";
+
+			$str .= str_repeat(" ",$node->_level)."<tree text=\"".($this->_getTitle($node))."\" ".$action_src." db_id=\"".$node->id."\" db_selected=\"".( $node->id==$this->id ? "1" : "" )."\" db_state=\"".$node->_state."\" ".(($is_folder)?">":"/>")."\n";
 
 			//put children
 			if($is_folder)
@@ -369,10 +369,12 @@ class TreeControl extends DBDataEditTree  {
         return $action_src;
     }
     
-    function _getTitle($title)
+    function _getTitle(&$node)
     {
-     	$_title = preg_replace( "/<.*?>/is", '', $title);
+     	$_title = preg_replace( "/<.*?>/is", '', $node->title);
 		$_title = str_replace('"','\'',$_title);   
+        if (!$_title)
+            $_title = 'node_'.$node->id;
         return $_title;
     }
     

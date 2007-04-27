@@ -97,14 +97,22 @@ class TreeControlNew extends TreeControl
 
         //var_dump($this->ITEMS);
         //die();
+        $current = (object)$this->ITEMS[ $this->rh->getVar("id", "integer") ];
+        $c_parent = (object)$this->ITEMS[ $current->_parent ];
+
+        $c = $this->ITEMS[ $this->rh->getVar("id", "integer") ];
+        do
+        {
+            $this->to_root[] = $c['id'];
+            $c = $this->ITEMS[$c['_parent']] ;
+        }while($c);
+            
 
         if (!$this->config->old_style)
         {
             $node = (object)$root;
-            $str .= str_repeat(" ",$node->_level)."<item text=\"".($this->_getTitle($node->title) ? $this->_getTitle($node->title) : 'node_'.$node->id )."\" ".$this->_getAction($node->id, count($this->CHILDREN[$node->id]), true)." id=\"".$node->id."\" open=\"".( $node->id==$this->id ? "1" : "" )."\" db_state=\"".$node->_state."\" >\n";
+            $str .= str_repeat(" ",$node->_level)."<item text=\"".($this->_getTitle($node))."\" ".$this->_getAction($node->id, count($this->CHILDREN[$node->id]), true)." id=\"".$node->id."\" open='1' db_state=\"".$node->_state."\" >\n";
 		}
-        $current = (object)$this->ITEMS[ $this->rh->getVar("id", "integer") ];
-        $c_parent = (object)$this->ITEMS[ $current->_parent ];
 
 		/* deep search */
 		$stack = array();
@@ -135,12 +143,8 @@ class TreeControlNew extends TreeControl
 			}
 			//write node
             //action or src?
-     	    $action_src = "action=\"".$this->_href_template.$this->id_get_var."=".$node->id."\"";
-            if( $_is_folder && !$display_children )
-              	$action_src .= " src=\"".$this->_href_template."mode=tree&amp;action=xml&amp;display_root=".$node->id."\"";
-
-            $_title = $this->_getTitle($node->title);
-			$str .= str_repeat(" ",$node->_level)."<item text=\"".($_title ? $_title : 'node_'.$node->id )."\" ".$action_src." id=\"".$node->id."\" ".( $node->id==$this->id ? "select='true'" : "" )." db_state=\"".$node->_state."\" ".(($is_folder)?">":"/>")."\n";
+            $title = $this->_getTitle($node). " ". $display_children;
+			$str .= str_repeat(" ",$node->_level)."<item text=\"".($title)."\" ".$this->_getOpen($node)." id=\"".$node->id."\" ".( $node->id==$this->id ? "select='true'" : "" )." db_state=\"".$node->_state."\" ".(($is_folder)?">":"/>")."\n";
 
 			//put children
 			if($is_folder){
@@ -158,6 +162,15 @@ class TreeControlNew extends TreeControl
         
 		return $str;
 	}
+	
+	function _getOpen(&$node)
+    {
+        $ret = "";
+        if (@in_array($node->id, $this->to_root))
+            $ret = " open='1' ";
+
+        return $ret;
+    }
 	
 	
 	function UpdateTreeStruct(){
