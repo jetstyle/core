@@ -52,13 +52,16 @@ class TreeControl extends DBDataEditTree  {
         {
            setcookie($this->config->open_id, "1");
         }
+        
+        $this->xml_encoding = 'windows-1251';
 	}
 
 	//  TreeSimple::Load().
 	//      ?
 	function Load(){
 		//load data
-		if( !$this->loaded ){
+		if( !$this->loaded )
+        {
 			//  
 			$cache =& $this->rh->cache;
 			$object_class = 'trees';
@@ -106,7 +109,6 @@ class TreeControl extends DBDataEditTree  {
 				}
 				// ,   XML
 				$rh->HeadersNoCache();
-    				$this->xml_encoding = 'windows-1251';
 				header("Content-type: text/xml; charset=".$this->xml_encoding);
 				echo $this->ToXML();
 				die();
@@ -338,9 +340,7 @@ class TreeControl extends DBDataEditTree  {
 			//write node
 			//action or src?
 			$action_src = $this->_getAction($node->id, $_is_folder, $display_childen);
-
             $_title = $this->_getTitle($node->title);
-
 			$str .= str_repeat(" ",$node->_level)."<tree text=\"".($_title ? $_title : 'node_'.$node->id )."\" ".$action_src." db_id=\"".$node->id."\" db_selected=\"".( $node->id==$this->id ? "1" : "" )."\" db_state=\"".$node->_state."\" ".(($is_folder)?">":"/>")."\n";
 
 			//put children
@@ -360,12 +360,6 @@ class TreeControl extends DBDataEditTree  {
 		//mail ("nop@jetstyle.ru", "debug tree", $str);
 		return $str;
 	}
-
-	/*
-	    ,      ,
-	   _parent.
-	  ->Load();
-	*/
     
     function _getAction($id)
     {
