@@ -200,6 +200,12 @@ class BasicPage extends Controller
 				$name = $info; 
 				$config = array(); 
 			}
+			$this->loadPlugin($name, $config);
+		}
+	}
+
+	function loadPlugin($name, $config)
+	{
 			$aspect = NULL;
 			if (array_key_exists('__aspect', $config))
 			{
@@ -217,7 +223,6 @@ class BasicPage extends Controller
 			$o->initialize($this->rh, $config);
 			$this->o_plugins[] =& $o;
 			if ($aspect) $this->o_aspects[$aspect] =& $o;
-		}
 	}
 
 	function &getAspect($name)
