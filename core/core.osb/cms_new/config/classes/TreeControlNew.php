@@ -46,13 +46,6 @@ class TreeControlNew extends TreeControl
 		switch($action){
 			
 			case 'update':
-				
-				/*if( $new_id = $this->UpdateTreeStruct() )
-					$tpl->set('_new_id',$new_id);
-				$tpl->set('_new_action',$this->_href_template.$this->id_get_var."=".$new_id);
-
-				$res = $tpl->parse('html.html');*/
-				
 				$res = $this->UpdateTreeStruct();
 				echo $res;
 				die();
@@ -69,12 +62,14 @@ class TreeControlNew extends TreeControl
 			break;
 			
 			default:
-				$this->_href_template = $this->rh->path_rel."do/".$this->config->module_name."/tree?";
+				$this->_href_template = $this->rh->path_rel."do/".$this->config->module_name."?";
 				$tpl->set( '_href', $this->_href_template);
-				$_href = str_replace('&amp;','&',$this->_href_template);
+                
+                $this->_href_actions = $this->rh->path_rel."do/".$this->config->module_name."/tree?";
+				$_href = str_replace('&amp;','&',$this->_href_actions);
 
 				$tpl->set( '_url_connect', $_href.'&action=update&_show_trash='.$show_trash.'&' );
-				$tpl->set( '_url_xml', $_href.'action=xml&'.$this->id_get_var.'='.$this->id.'&' );
+				$tpl->set( '_url_xml', $_href."action=xml&".$this->id_get_var.'='.$this->id.'&' );
 
 				$tpl->set( '_behavior', $this->tree_behavior );
 				$tpl->set( '_cur_id', $this->id );
