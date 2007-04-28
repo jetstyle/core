@@ -1,5 +1,11 @@
 {{TPL:Control}}
+
 {{&css:dhtmlXTree}}
+
+<!-- важно грузить default до treeControl -->
+{{&js:default}}
+{{&js:treeControl}}
+
 {{&js:dhtmlXCommon}}
 {{&js:dhtmlXTree}}
 {{&js:jquery_latest}}
@@ -11,204 +17,8 @@
 	<div id="treeBox" style="width:300px; height:400px; "></div> 
 	
 	<script language="javascript">  
-		//default label for new item
-		var newItemLabel = "New Item";
-		//id for new (unsaved) item
-		//var newItemId = "-1";
-		var tree;
-		var treeRequest=null;
-		var treeSend = 0;
-		
-		tree = new dhtmlXTreeObject(document.getElementById('treeBox'),"100%","100%",0); 
-		tree.setImagePath("{{images}}tree/"); 
-		tree.enableCheckBoxes(false); 
-		tree.enableDragAndDrop(true);
-		
-		tree.setOnClickHandler(doOnSelect);
-		tree.setDragHandler(doOnDrag);
-
-/*
-		tree.hideAddBut = true;
-		tree.hideAddChildBut = true;
-		tree.hideDelBut = true;
-		*/
-		var tree_control_btns = false;
-
-		//tree.loadXML("{{_url_xml}}");
-		tree.loadXMLString("{{xml_string|pack_spaces}}");
-		
-		var treeBox_inform = document.getElementById('treeBox_inform');
-		
-		function showUpdateMsg(mode)	
-		{
-			if(mode)	
-			{
-				treeBox_inform.style.display = '';
-			}
-			else
-			{
-				treeBox_inform.style.display = 'none';	
-			}
-		}
-		
-		function toggleEditTree()
-		{
-			$(".tree_control_btn").css({ display: tree_control_btns ? "none" : "inline"});
-			tree_control_btns = !tree_control_btns;
-		}
-		
-		function doOnDrag(itemId, targetId, beforeId)	
-		{
-			if (!treeRequest || treeSend)	
-			{
-				return false;
-			}
-			showUpdateMsg(true);		
-			treeRequest.open('GET', '{{_url_connect}}change=1&id='+ itemId +'&target='+ targetId +'&before='+ beforeId +'&rnd=' + Math.random(), true);	
-			
-			treeRequest.onreadystatechange = function (aEvt) 
-			{
-  				if(treeRequest.readyState == 4) 
-  				{
-   	  				if(treeRequest.status == 200) 
-   	  				{
-   	  					treeSend = 0; 	  
-   	  					showUpdateMsg(false);
-   	  				}
-   	  			}
-   	  		}   	  
-			
-			treeSend = 1;
-			treeRequest.send(null);
-			
-			return true;
-		}
-		
-		
-		//what to do when item selected
-		function doOnSelect(itemId, flag)
-		{
-			if(flag)	return;
-			window.location.assign("{{_href}}id=" + itemId);
-		}
-		
-		//add new node next to currently selected (or the first in tree)
-		function addNew(selectedId)
-		{
-				
-			if (!treeRequest || treeSend)	
-			{
-				return false;
-			}
-			/*
-			if(root)
-				var selectedId = 0;
-			else
-				var selectedId = tree.getSelectedItemId();*/
-			showUpdateMsg(true);
-			treeRequest.open('GET', '{{_url_connect}}add=1&parent='+ selectedId +'&rnd=' + Math.random(), true);	
-			
-			treeRequest.onreadystatechange = function (aEvt) 
-			{
-	  			if(treeRequest.readyState == 4) 
-	  			{
-		   	  		if(treeRequest.status == 200) 
-		   	  		{
-		   	  			treeSend = 0;
-		   	  			showUpdateMsg(false);
-		   	  			var response  = treeRequest.responseText;
-		   	  			response  = parseInt(response, 10);
-		  	  			if(response)
-		  	  			{
-		   	  				_addNew(selectedId, response);
-		   	  			}
-		   	  		}
-	   	  		}
-   	  		}
-
-			treeSend = 1;
-			treeRequest.send(null);
-			return true;						
-		}
-		
-		function _addNew(selectedId, newItemId)	
-		{
-			if(selectedId!="")
-			{
-				tree.insertNewChild(selectedId,newItemId,newItemLabel,"","","","","",0)
-			}
-			else
-			{
-				tree.insertNewItem(0,newItemId,newItemLabel,"","","","","",0)
-			}
-		}
-		
-		function deleteNode(id)	
-		{
-			
-			//id = tree.getSelectedItemId();
-			if(id > 0)	
-			{
-				if (!treeRequest || treeSend)	
-				{
-					return false;
-				}
-				if(!confirm("Are you sure you want to delete selected node?"))
-					return false;
-				
-				showUpdateMsg(true);
-					
-				treeRequest.open('GET', '{{_url_connect}}delete='+ id +'&rnd=' + Math.random(), true);	
-				
-				treeRequest.onreadystatechange = function (aEvt) 
-				{
-		  			if(treeRequest.readyState == 4)
-		  			{
-		   	  			if(treeRequest.status == 200)
-		   	  			{
-			   	  			treeSend = 0;
-		   	  				var response  = treeRequest.responseText;
-		   	  				response  = parseInt(response, 10);
-		   	  				showUpdateMsg(false);
-		  	  				if(response == 1)
-		  	  				{
-			   	  				//var pId = tree.getParentId(id);
-										tree.deleteItem(id, true);
-										//if(pId!="0")	{
-		//									tree.selectItem(pId,true);
-										//}
-		   	  				}
-		   	  			}
-	   	  			}
-   	  			}
-				
-				treeSend = 1;
-				treeRequest.send(null);
-				return true;	
-			}
-			return false;
-		}
-		
-		function preloadXmlHttpRequest()
-		{		
-			// пытаемся создать объект для MSXML 2 и старше
-			if(!treeRequest) try 
-			{
-				treeRequest=new ActiveXObject('Msxml2.XMLHTTP');
-			} catch (e){}
-
-			// не вышло... попробуем для MSXML 1
-			if(!treeRequest) try {
-				treeRequest=new ActiveXObject('Microsoft.XMLHTTP');
-			} catch (e){}     	
-		
-			// не вышло... попробуем для Mozilla
-			if(!treeRequest) try {
-				treeRequest=new XMLHttpRequest();
-			} catch (e){}
-		}
-
-		preloadXmlHttpRequest();
+		var tc = new treeControl('{{_url_connect}}', "{{_url_xml}}", "{{images}}tree/", "{{_href}}");
+		tc.load();
 
 	</script>
 	
@@ -217,7 +27,7 @@
 {{TPL:content}}
 	<div class="cms-list-advanced">
 		{{__trash_switch}}
-		<a href="#" onclick="toggleEditTree(); return false;" style="float:right;"><img src="{{images}}tree/npj_edit.gif"</a>
+		<a href="#" title="Показать/скрыть элементы управления" onclick="tc.toggleEditTree(); return false;" style="float:right;"><img src="{{images}}tree/npj_edit.gif"</a>
 		{{__logs}}
 		<img class="block" src="{{images}}z.gif" width="1" height="10" align="top" alt="" />
 		{{__tree}}
