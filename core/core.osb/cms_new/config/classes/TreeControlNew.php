@@ -217,7 +217,7 @@ class TreeControlNew extends TreeControl
 			$this->Restore();
 			return '1';
 		}
-		elseif($rh->ri->get('change'))	
+		elseif($rh->getVar('change'))	
 		{
 			$itemId = intval($rh->getVar('id'));
 			$targetId = intval($rh->getVar('target'));
