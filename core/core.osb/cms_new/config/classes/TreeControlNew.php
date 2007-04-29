@@ -43,15 +43,22 @@ class TreeControlNew extends TreeControl
 		$tpl =& $rh->tpl;
 		
 		$action = $rh->getVar('action');
-		switch($action){
-			
+		switch($action)
+        {
 			case 'update':
-				$res = $this->UpdateTreeStruct();
+                $title = $rh->getVar('title');
+                $id    = $rh->getVar('itemId');
+                
+                if (!empty($title))
+                {
+                    $res = $this->saveTitle($id, $title);
+                }
+                else
+                {    
+				    $res = $this->UpdateTreeStruct();
+                }
 				echo $res;
 				die();
-				
-				echo $res;
-				die('1');
 			break;
 			
 			case 'xml':
@@ -79,15 +86,22 @@ class TreeControlNew extends TreeControl
                 $xml_string = str_replace('"', "'", $xml_string);
 				$tpl->set( 'xml_string', $xml_string );
 				$tpl->Parse( $this->template_control, '__tree' );
-                
-                
-                
+
 				return $tpl->Parse( $this->template, $this->store_to, true );
 
 			break;
 		}
 
 	}
+
+    function saveTitle($id, $title)
+    {
+        $title = iconv("UTF-8", "CP1251", $title);
+        
+        $sql = "UPDATE ".$this->table_name." SET title=".$this->rh->db->quote($title).", title_pre=".$this->rh->db->quote($title)." WHERE id=".$this->rh->db->quote($id);   
+        $this->rh->db->execute($sql);
+        return $sql;
+    }
 
 	function ToXML()
     {
@@ -177,7 +191,8 @@ class TreeControlNew extends TreeControl
     }
 	
 	
-	function UpdateTreeStruct(){
+	function UpdateTreeStruct()
+    {
 		$rh =& $this->rh;
 		$db =& $rh->db;
 
@@ -229,8 +244,8 @@ class TreeControlNew extends TreeControl
 				WHERE id = '".$itemId."'
 			");
 
-			if($beforeId)	{
-
+			if($beforeId)
+            {
 				$node = $db->queryOne("
 					SELECT _parent, _order
 					FROM ". $this->config->table_name ."
