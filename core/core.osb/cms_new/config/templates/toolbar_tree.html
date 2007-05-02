@@ -6,11 +6,11 @@
     <td class="middle">
       <table cellspacing="0" cellpadding="2" align="center">
         <tr>
-          <td class="text-">логин:</td>
+          <td class="text-">Имя пользователя:</td>
           <td><input type='text' name='login'></td>
         </tr>
         <tr>
-          <td class="text-">пароль:</td>
+          <td class="text-">Пароль:</td>
           <td><input type='password' name='password'></td>
         </tr>
         <tr>
@@ -27,7 +27,7 @@
 {{/TPL:not_auth}}
 
 {{TPL:auth}}
-Вы &mdash; <b>{{login}}</b>: {{role}}
+Вы &mdash; <strong>{{login}}</strong>: {{role}}
 {{/TPL:auth}}
 
 {{TPL:menu}}
@@ -41,11 +41,11 @@
 {{TPL:submenu}}
   {{TPL:List_Empty}}{{/TPL:List_Empty}}
   {{TPL:List_Item}}<a href="{{_/}}{{_href}}">{{$_title}}</a>{{/TPL:List_Item}}
-  {{TPL:List_Item_sel}}<strong>{{$_title}}</strong>{{/TPL:List_Item_sel}}
-  {{TPL:List_Separator}} | {{/TPL:List_Separator}}
-<p>&nbsp;
+  {{TPL:List_Item_sel}}<h1>{{$_title}}</h1>{{/TPL:List_Item_sel}}
+  {{TPL:List_Separator}}&nbsp;|&nbsp;{{/TPL:List_Separator}}
+<div class="cms-toolbar-sub">
   {{__list}}
-</p>  
+</div>  
 {{/TPL:submenu}}
 
 {{TPL:toolbar}}

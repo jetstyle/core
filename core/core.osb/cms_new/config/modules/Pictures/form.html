@@ -1,30 +1,39 @@
-<table border='0'>
+<table class="quick-simple-form w100">
 <tr>
-	<td>заголовок</td>
-	<td><input type="text" name="{{$prefix}}title" value="{{$*title|escape}}" size="50"></td>
+	<td class="right"><a href="" title="Открыть оригинал изображения">{{*file_small}}</a><br>
+	  1600x1280px
+	</td>
+	<td class="desc"><input type="text" name="{{$prefix}}title" value="{{$*title|escape}}" size="50"><br>
+          Название изображения, выводится на сайте в качестве альтернативного текста для загруженного изображения, 
+          если у посетителя отключен вывод изображений. 
+	</td>
 </tr>
 <!--tr>
 	<td>описание</td>
 	<td><input type="text" name="{{$prefix}}descr" value="{{$*descr|escape}}" size="50"></td>
 </tr-->
 <tr>
-	<td>превью<br />{{_strict}} {{max_width}}x{{max_height}}</td>
-	<td>
-		<input type="file" name="{{$prefix}}file_small"><br>
-		<input type="checkbox" name="{{$prefix}}file_small_del" value='1'>&nbsp;<font color='red'>удалить</font>
-		<br>{{*file_small}}
+	<td class="right">Иллюстрация:</td>
+	<td class="desc">
+          <input type="file" name="{{$prefix}}file"><br>
+          Нажмите кнопку <dfn>Обзор</dfn> и выберите иллюстрацию со своего компьютера.
+          <br>
+          <!--{{*file}}<br>
+          <input type="checkbox" id="{{$prefix}}file_del" name="{{$prefix}}file_del" value='1'>&nbsp;<label for="{{$prefix}}file_del" class="warning">удалить изображение</label>-->
 	</td>
 </tr>
 <tr>
-	<td>иллюстрация</td>
-	<td>
-		<input type="file" name="{{$prefix}}file"><br>
-		<input type="checkbox" name="{{$prefix}}file_del" value='1'>&nbsp;<font color='red'>удалить</font>
-		<br>{{*file}}
+	<td class="right">Уменьшенное изображение:</td>
+	<td class="desc">
+          <input type="file" name="{{$prefix}}file_small"><br>
+          Уменьшеная копия (<dfn>{{_strict}} {{max_width}}x{{max_height}}</dfn>) изображения, обычно используется для вывода в списках или анонсах.
+          Будет уменьшено автоматически, если вы его не загрузите.<br>
+          <!--{{*file_small}}<br>
+          <input type="checkbox" id="{{$prefix}}file_small_del" name="{{$prefix}}file_small_del" value='1'>&nbsp;<label for="{{$prefix}}file_small_del" class="warning">удалить изображение</label>-->
 	</td>
 </tr>
-<tr>
-	<td>скрыть</td>
-	<td><input type="checkbox" name="{{$prefix}}_state" value="1" {{checkbox__state}}></td>
-</tr>
+<!--tr>
+	<td class="right">Скрыть:</td>
+	<td class="desc"><input type="checkbox" name="{{$prefix}}_state" value="1" {{checkbox__state}}></td>
+</tr-->
 </table>

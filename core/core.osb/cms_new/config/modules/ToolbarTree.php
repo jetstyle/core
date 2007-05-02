@@ -94,6 +94,8 @@ class Module_ToolbarTree extends Module {
     }
     //назначаем раздел 1го уровня на открытие
     if($id){
+      $this->rh->tpl->assign("cur_rubric_title",$this->data->ITEMS[$id]['title']);
+      
       while($this->data->ITEMS[$id]["_parent"]){
         $this->data->ITEMS[$id]["opened"] = true;
         $id = $this->data->ITEMS[$id]["_parent"];

@@ -1,7 +1,7 @@
 <?
 	
 	//module config
-	$this->module_title = "Изображения: позиции";
+	$this->module_title = "Изображения";
 	$this->class_name = "TreeForm";
 	$this->WRAPPED = array("list","form");
 	$this->template = "tree_form.html";
