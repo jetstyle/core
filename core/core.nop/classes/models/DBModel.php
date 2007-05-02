@@ -73,7 +73,8 @@ class DBModel extends Model
 					)
 				);
 				$v['name'] = $field_name;
-				$v['source'] = $this->_quoteField($field_source, $this->table);
+				$v['source_full'] = $this->_quoteField($field_source, $this->table);
+				$v['source'] = $this->_quoteField($field_source);
 				$v['alias'] = $this->_quoteField($field_alias);
 				$fields_info[$field_name] = $v;
 			}
@@ -84,7 +85,8 @@ class DBModel extends Model
 			{
 				$info = array(
 					'name' => $field_name,
-					'source' => $this->_quoteField($field_name, $this->table),
+					'source_full' => $this->_quoteField($field_name, $this->table),
+					'source' => $this->_quoteField($field_name),
 					'alias' => NULL,
 				);
 				$fields_info[$field_name] = $info;
@@ -211,7 +213,7 @@ class DBModel extends Model
 			$_where = array();
 			foreach($where as $field)
 			{
-				$_where[] = $this->quoteField($field) .'='.$this->quote($row[$field]);
+				$_where[] = $this->quoteFieldShort($field) .'='.$this->quote($row[$field]);
 			}
 			$where = implode(' AND ', $_where);
 			unset($_where);
@@ -229,7 +231,7 @@ class DBModel extends Model
 		{
 			$w = array(); 
 			foreach ($where as $k=>$v)
-				$w[] = $this->quoteField($k) . '='. $this->quoteValue($v);
+				$w[] = $this->quoteFieldShort($k) . '='. $this->quoteValue($v);
 			$where_sql = implode(' AND ', $w);
 		}
 		else
@@ -289,20 +291,25 @@ class DBModel extends Model
 		foreach ($data as $k=>$v)
 			if (array_key_exists($k, $this->_fields_info)) 
 				$t[$k] = $v;
-		$fields_sql = $this->buildFields(array_keys($t));
+		$fields_sql = $this->buildFieldsShort(array_keys($t));
 		$values_sql = $this->buildValues(array_values($t));
 	}
 	function buildFieldsValuesSet($data, &$set_sql)
 	{
 		$set = array(); 
 		foreach ($data as $k=>$v)
-			$set[] = $this->quoteField($k) . '='. $this->quoteValue($v);
+			$set[] = $this->quoteFieldShort($k) . '='. $this->quoteValue($v);
 		$set_sql = implode(',', $set);
 	}
 
 	function buildFieldAliases($fields)
 	{
 		$fields_sql = implode(',', array_map(array(&$this, 'quoteFieldAlias'), $fields));
+		return $fields_sql;
+	}
+	function buildFieldsShort($fields)
+	{
+		$fields_sql = implode(',', array_map(array(&$this, 'quoteFieldShort'), $fields));
 		return $fields_sql;
 	}
 	function buildFields($fields)
@@ -390,6 +397,13 @@ class DBModel extends Model
 		$info =& $this->_fields_info[$name];
 		if (!isset($info)) return NULL;
 
+		return $info['source_full'];
+	}
+	function quoteFieldShort($name)
+	{
+		$info =& $this->_fields_info[$name];
+		if (!isset($info)) return NULL;
+
 		return $info['source'];
 	}
 	function quoteOrderField($name)
@@ -397,7 +411,7 @@ class DBModel extends Model
 		$info =& $this->_fields_info[$name];
 		if (!isset($info)) return NULL;
 
-		return $info['source'].(isset($info['order']) 
+		return $info['source_full'].(isset($info['order']) 
 			? ' '.$info['order'] 
 			: '');
 	}
@@ -407,8 +421,8 @@ class DBModel extends Model
 		if (!isset($info)) return NULL;
 
 		return isset($info['alias']) 
-			?  $info['source'].' AS '.$info['alias']
-			: $info['source'];
+			?  $info['source_full'].' AS '.$info['alias']
+			: $info['source_full'];
 	}
 
 	function _quoteField($name, $table_name=NULL)
