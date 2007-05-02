@@ -89,6 +89,22 @@ class FormFiles extends FormSimple  {
       					if($file->name_full && in_array($file->ext, $this->GRAPHICS ) )	
                         {
           					$this->item[$field_file] = '<img src="'.$this->rh->front_end->path_rel.'files/'.($this->config->upload_dir ? $this->config->upload_dir."/" : "").$file->name_short.'" />';
+          					if($vv['link_to'])
+          					{
+          						foreach($this->config->_FILES[$vv['link_to']] AS $_vv)
+        						{
+               						if($_vv['show'])	
+                   					{
+   										$file = $upload->GetFile(str_replace('*', $this->id, $_vv['filename']));
+   										
+                      					if($file->name_full && in_array($file->ext, $this->GRAPHICS ) )	
+                      					{
+                      						$A = getimagesize($file->name_full);
+                      						$this->item[$field_file] = '<a title="Открыть оригинал изображения" href="'.$this->rh->front_end->path_rel.'files/'.($this->config->upload_dir ? $this->config->upload_dir."/" : "").$file->name_short.'?popup=1" onclick="popup_image(this.href, \''.$A[0].'\', \''.$A[1].'\'); return false;">'.$this->item[$field_file].'</a><br /><a title="Открыть оригинал изображения" href="'.$this->rh->front_end->path_rel.'files/'.($this->config->upload_dir ? $this->config->upload_dir."/" : "").$file->name_short.'?popup=1" onclick="popup_image(this.href, \''.$A[0].'\', \''.$A[1].'\'); return false;">'.$A[0].'x'.$A[1].'px</a>';
+                      					}
+               						}
+         						}
+          					}
         				}
                         else if ($file->name_full)
                         {

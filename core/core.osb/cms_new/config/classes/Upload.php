@@ -86,6 +86,7 @@ class Upload {
         {
             $ext = trim($ext);
             $this->TYPES[ $ext ] = array($ext,$ext);
+			$this->ALLOW [$ext]  = $ext;
         }
     }
     else    
@@ -94,6 +95,7 @@ class Upload {
         while($row = $this->rh->db->getRow())
         {
           $this->TYPES[ $row['ext'] ] = array($row['type'],$row['title']);
+			$this->ALLOW [$row['ext']]  = $row['ext'];
         } 
     }
   }
@@ -143,7 +145,7 @@ class Upload {
       //проверка на допуск
       if( !$this->IsAllowed($ext) ) return false;
       //грузим
-      $this->CheckExt($ext,$type);
+//      $this->CheckExt($ext,$type);
       $this->DelFile($file_name);         //if($del_prev) ...
       $file_name_ext = $file_name.".".$ext;
       $file_name_full = ( $is_full_name )? $file_name : $this->dir.$file_name_ext;

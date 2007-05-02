@@ -23,7 +23,7 @@ class TreeControlNew extends TreeControl
 	
 	var $EVOLUTORS = array();
 	
-	var $fields = array("id","title","_parent","_left","_right","_state","_level");
+	var $fields = array("id","title_short AS title","_parent","_left","_right","_state","_level");
 	var $pk_field = "id";
 
 	var $table_name = "jetsite_content";
@@ -109,7 +109,7 @@ class TreeControlNew extends TreeControl
     {
         $title = iconv("UTF-8", "CP1251", $title);
         
-        $sql = "UPDATE ".$this->table_name." SET title=".$this->rh->db->quote($title).", title_pre=".$this->rh->db->quote($title)." WHERE id=".$this->rh->db->quote($id);   
+        $sql = "UPDATE ".$this->table_name." SET title_short=".$this->rh->db->quote($title)." WHERE id=".$this->rh->db->quote($id);   
         $this->rh->db->execute($sql);
         return $sql;
     }
@@ -223,9 +223,9 @@ class TreeControlNew extends TreeControl
 			$parent = intval($rh->getVar('parent'));
 			$id = $db->insert("
 				INSERT INTO ". $this->config->table_name ."
-				(title, _parent)
+				(title, title_short, _parent)
 				VALUES
-				('new', '".$parent."')
+				('new', 'new', '".$parent."')
 			");
 			
 			$this->loaded = false;
