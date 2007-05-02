@@ -5,10 +5,14 @@
 <!-- важно грузить default до treeControl -->
 {{&js:default}}
 {{&js:treeControl}}
+{{&js:cookie}}
 
+<!-- файлы дерева -->
 {{&js:dhtmlXCommon}}
 {{&js:dhtmlXTree}}
+
 {{&js:jquery_latest}}
+
 	<br /><br />
 	<div id="treeBox" style="width:300px; height:400px; "></div> 
 	
@@ -23,7 +27,7 @@
 {{TPL:content}}
 	<div class="cms-list-advanced">
 		{{__trash_switch}}
-		<a href="#" title="Показать/скрыть элементы управления" onclick="tc.toggleEditTree(); return false;" style="float:right;"><img src="{{images}}tree/npj_edit.gif"</a>
+		<a href="#" title="Показать/скрыть элементы управления" onclick="tc.toggleEditTree(); return false;" style="float:right;"><img {{toggleEditTreeClass}} src="{{images}}tree/npj_edit.gif" id="toggleEditImg"></a>
 		{{__logs}}
 		<img class="block" src="{{images}}z.gif" width="1" height="10" align="top" alt="" />
 		{{__tree}}

@@ -32,7 +32,7 @@ class TreeControlNew extends TreeControl
     {
 		parent::TreeControl(&$config);
         $this->store_to = "__tree";
-        $this->_href_template = $this->rh->path_rel."do/".$config->module_name."tree?".$this->rh->state->State();
+        $this->_href_to_module = $this->rh->path_rel."do/".$config->module_name;//."?".$this->rh->state->State();
 	}
 	
 	function Handle()
@@ -69,22 +69,33 @@ class TreeControlNew extends TreeControl
 			break;
 			
 			default:
-				$this->_href_template = $this->rh->path_rel."do/".$this->config->module_name."?";
-				$tpl->set( '_href', $this->_href_template);
-                
+                $show_trash = $this->rh->state->Get('_show_trash');
+
+				//$this->_href_template = $this->rh->path_rel."do/".$this->config->module_name."?";
+                $rh->state->free('_show_trash');
+				$tpl->set( '_href', $this->_href_to_module.'?'.$rh->state->state().(!$show_trash ? '_show_trash='.!$show_trash : '' ) );
+                $tpl->Parse( $show_trash ? $this->template_trash_hide : $this->template_trash_show, '__trash_switch' );
+
+
+
+                $tpl->set( '_href', $this->_href_to_module.'?' );
                 $this->_href_actions = $this->rh->path_rel."do/".$this->config->module_name."/tree?";
 				$_href = str_replace('&amp;','&',$this->_href_actions);
 
 				$tpl->set( '_url_connect', $_href.'&action=update&_show_trash='.$show_trash.'&' );
-				$tpl->set( '_url_xml', $_href."action=xml&".$this->id_get_var.'='.$this->id.'&' );
+				$tpl->set( '_url_xml', $_href."action=xml&".$this->id_get_var.'='.$this->id.'&_show_trash='.$show_trash.'&' );
 
 				$tpl->set( '_behavior', $this->tree_behavior );
 				$tpl->set( '_cur_id', $this->id );
 				$tpl->set( '_level_limit', 3 );
-				
+
+				/*
 				$xml_string = $this->toXML();
                 $xml_string = str_replace('"', "'", $xml_string);
 				$tpl->set( 'xml_string', $xml_string );
+                */
+                if ($_COOKIE['tree_control_btns'] == 'true')
+                    $tpl->set("toggleEditTreeClass", "class='toggleEditTreeClass-Sel'");
 				$tpl->Parse( $this->template_control, '__tree' );
 
 				return $tpl->Parse( $this->template, $this->store_to, true );
@@ -190,7 +201,18 @@ class TreeControlNew extends TreeControl
         return $ret;
     }
 	
-	
+	function _getTitle(&$node)
+    {
+     	$_title = preg_replace( "/<.*?>/is", '', $node->title);
+		$_title = str_replace('"','\'',$_title);   
+        if (!$_title)
+            $_title = 'node_'.$node->id;
+        
+        if ($node->_state > 0)
+            $_title = $_title  .' [удален]';
+        return $_title;
+    }
+    
 	function UpdateTreeStruct()
     {
 		$rh =& $this->rh;
