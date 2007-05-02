@@ -73,7 +73,7 @@ class DBModel extends Model
 					)
 				);
 				$v['name'] = $field_name;
-				$v['source'] = $this->_quoteField($field_source);
+				$v['source'] = $this->_quoteField($field_source, $this->table);
 				$v['alias'] = $this->_quoteField($field_alias);
 				$fields_info[$field_name] = $v;
 			}
@@ -84,7 +84,7 @@ class DBModel extends Model
 			{
 				$info = array(
 					'name' => $field_name,
-					'source' => $this->_quoteField($field_name),
+					'source' => $this->_quoteField($field_name, $this->table),
 					'alias' => NULL,
 				);
 				$fields_info[$field_name] = $info;
@@ -100,6 +100,12 @@ class DBModel extends Model
 		$this->data = $this->select($where, $limit, $offset, true);
 		$this->notify('load', array(&$this));
 	}
+	function loadSql($sql)
+	{
+		$this->notify('before_load', array(&$this));
+		$this->data = $this->selectSql($sql, true);
+		$this->notify('load', array(&$this));
+	}
 
 	// relations
 	/**
@@ -107,7 +113,7 @@ class DBModel extends Model
 	 * например)
 	 * $info -- инфа о field
 	 */
-	function mapMany(&$data, $info)
+	function mapHasMany(&$data, $info)
 	{
 		$field_name = $info['name'];
 		$fk = $info['has_many']['fk'];
@@ -132,7 +138,7 @@ class DBModel extends Model
 	function getSelectSql($where=NULL, $limit=NULL, $offset=NULL)
 	{
 		$sql1 =  ' SELECT ' . $this->buildFieldAliases($this->fields)
-			. ' FROM '   . $this->buildTableName($this->table)
+			. ' FROM '   . $this->buildTableNameAlias($this->table)
 			. $this->buildWhere($where)
 			. $this->buildGroupBy($this->group);
 		$sql = $sql1
@@ -143,20 +149,38 @@ class DBModel extends Model
 		// count() например
 		return array($sql, $sql1);
 	}
-	function select($where=NULL, $limit=NULL, $offset=NULL, $is_load=false)
+	function selectSql($sql_parts, $is_load=false)
 	{
-		list($sql, $sql1) = $this->getSelectSql($where, $limit, $offset, $is_load);
+		list($sql, $sql1) = $sql_parts;
 		if ($is_load) $this->sql = $sql1;
 		$data = $this->rh->db->query($sql);
+		$this->loadForeignFields($data);
+		return $data;
+	}
+
+	function loadForeignFields(&$data)
+	{
 		foreach ($this->foreign_fields as $v)
 		{
 			$info = $this->_fields_info[$v];
+			if (isset($info['type']))
+			{
+				$method_name = 'map'.$info['type'];
+				$this->$method_name($data, $info);
+			}
+			// lucky: compability -- remove it
+			else
 			if (isset($info['has_many']))
 			{
-				$this->mapMany($data, $info);
+				$this->mapHasMany($data, $info);
 			}
 		}
-		return $data;
+	}
+
+	function select($where=NULL, $limit=NULL, $offset=NULL, $is_load=false)
+	{
+		$sql = $this->getSelectSql($where, $limit, $offset, $is_load);
+		return $this->selectSql($sql, $is_load);
 	}
 	function onBeforeInsert(&$row)
 	{
@@ -387,12 +411,16 @@ class DBModel extends Model
 			: $info['source'];
 	}
 
-	function _quoteField($name)
+	function _quoteField($name, $table_name=NULL)
 	{
 		if (!isset($name) || strpos($name, ' ')) return $name;
 		return implode('.', 
 			array_map(array(&$this, 'quoteName'), 
-			explode('.', $name)));
+			explode('.',  (
+				(strpos('.', $name) === false && isset($table_name))
+					? $table_name.'.'.$name 
+					: $name
+			))));
 	}
 
 }  
