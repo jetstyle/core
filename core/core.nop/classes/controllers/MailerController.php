@@ -73,22 +73,22 @@ class MailerController extends Controller
 	function buildSubject()
 	{
 		$this->rh->tpl->set('*', $this->data);
-		$out = $this->rh->tpl->Parse($this->template.':subject');
-		return $out;
+		$out = trim($this->rh->tpl->Parse($this->template.':subject'));
+		return $out ? $out : $this->subject;
 	}
 
 	function buildText()
 	{
 		$this->rh->tpl->set('*', $this->data);
-		$out = $this->rh->tpl->Parse($this->template.':text');
-		return $out;
+		$out = trim($this->rh->tpl->Parse($this->template.':text'));
+		return $out ? $out : NULL;
 	}
 
 	function buildHtml()
 	{
 		$this->rh->tpl->set('*', $this->data);
-		$out = $this->rh->tpl->Parse($this->template.':html');
-		return $out;
+		$out = trim($this->rh->tpl->Parse($this->template.':html'));
+		return $out ? $out : NULL;
 	}
 
 
