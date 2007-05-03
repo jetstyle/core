@@ -117,7 +117,6 @@ class DBDataEdit extends DBDataView {
   }
 	
   function AddNew($_VALUES=array()){
-
   	//aliaces
   	$db =& $this->rh->db;
   	$rh =& $this->rh;
@@ -135,8 +134,8 @@ class DBDataEdit extends DBDataView {
   	reset($VALUES);
   	$sql1 = $sql2 = "";
   	foreach($VALUES as $field=>$value){
-  		$sql1 .= (($sql1)?",":"").$field;
-  		$sql2 .= (($sql2)?",":"").$db->Quote( $VALUES[$field] );
+  		$sql1 .= ((strlen($sql1) > 0)?",":"").$field;
+  		$sql2 .= ((strlen($sql2) > 0)?",":"").$db->Quote( $VALUES[$field] );
   	}
   	$sql = "INSERT INTO ".$this->table_name."($sql1) VALUES($sql2)";
     
