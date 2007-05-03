@@ -371,10 +371,11 @@ class TreeControl extends DBDataEditTree  {
     
     function _getTitle(&$node)
     {
+    	$_title = $node->title_short ? $node->title_short : $node->title;
+    	$_title = $_title ? $_title : 'node_'.$node->id;
+    	
      	$_title = preg_replace( "/<.*?>/is", '', $node->title);
 		$_title = str_replace('"','\'',$_title);   
-        if (!$_title)
-            $_title = 'node_'.$node->id;
         return $_title;
     }
     

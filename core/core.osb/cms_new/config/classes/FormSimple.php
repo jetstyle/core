@@ -121,10 +121,13 @@ class FormSimple extends DBDataEdit  {
     $tpl->Parse( $this->template_item, '___form', false, $this->full_path );
     if($this->id && !$this->config->hide_delete_button )
       $tpl->Parse( $this->template.':delete_button', '_delete_button' );
+    
     if(!$this->config->hide_save_button )
       $tpl->Parse( $this->template.':save_button', '_save_button' );
+    
     if(($this->config->save_button_norefresh ))
       $tpl->Parse( $this->template.':save_button_norefresh', '_save_button' );
+    
     $tpl->Parse( $this->template, $this->store_to, true );
     
     //ссылка на просмотр логов
