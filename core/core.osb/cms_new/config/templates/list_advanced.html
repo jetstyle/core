@@ -66,7 +66,7 @@
 {{$POST_STATE}}
 <input type='text' name='{{prefix}}title' value='{{_title}}' style="width:148px;" /><br />
 <input type="submit" class="cms-save-small-but hand" value="{{_save_string}}" />&nbsp;
-{{TPL:delete}}<input type="submit" class="cms-delete-small-but hand" name="{{$prefix}}delete" value="удалить" onclick="return confirm('Действительно удалить?\nКорзины-то пока нет...');" />{{/TPL:delete}}
+{{TPL:delete}}<input type="submit" class="cms-delete-small-but hand" name="{{$prefix}}delete" value="удалить" onclick="return confirm('Действительно удалить?');" />{{/TPL:delete}}
 {{__delete}}
 </form>
 </div>
