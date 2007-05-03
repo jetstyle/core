@@ -79,6 +79,7 @@ class FormSimple extends DBDataEdit  {
     
     //update data
     $redirect = $this->Delete();
+    if(!$redirect) $redirect = $this->Restore();
     if(!$redirect) $redirect = $this->Update();
     
     //редирект или выставление флага, что он нужен
@@ -123,7 +124,16 @@ class FormSimple extends DBDataEdit  {
       $tpl->Parse( $this->template.':delete_button', '_delete_button' );
     
     if(!$this->config->hide_save_button )
-      $tpl->Parse( $this->template.':save_button', '_save_button' );
+    {
+    	if($item->_state == 2)
+    	{
+    		$tpl->Parse( $this->template.':restore_button', '_save_button' );
+    	}
+    	else 
+    	{
+      		$tpl->Parse( $this->template.':save_button', '_save_button' );
+    	}
+    }
     
     if(($this->config->save_button_norefresh ))
       $tpl->Parse( $this->template.':save_button_norefresh', '_save_button' );
@@ -178,6 +188,16 @@ class FormSimple extends DBDataEdit  {
     {
       $this->rh->logs->Put( 'Форма: '.($this->item['_state']<=1 ? 'удаление в корзину' : 'окончательное удаление'), $this->id, $this->config->module_title, $this->item[$this->SELECT_FIELDS[1]], $this->_redirect.'&_show_trash=1' );
       return $this->rh->trash->Delete( $this->config->table_name, $this->id, $this->config->module_title, $this->item[ $this->SELECT_FIELDS[1] ], $this->rh->path_rel.'?'.str_replace('&amp;','&',$this->state->StateAll()), $this->SELECT_FIELDS[0] );
+    }else 
+    {
+        return false;
+    }
+  }
+  
+  function Restore(){
+    if( $this->rh->GetVar( $this->prefix."restore" ) )
+    {
+      return $this->rh->trash->FromTrash( $this->config->table_name, $this->id);
     }else 
     {
         return false;

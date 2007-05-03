@@ -64,14 +64,6 @@ class Trash {
     }
     else
     {
-    /*
-        var_dump($table_name);
-        echo '<hr>';
-        var_dump($item_id);
-        echo '<hr>';
-        die();
-        */
-        //die('erase');
       //удаляем совсем
       $this->Erase($table_name, $item_id);
       return 2;

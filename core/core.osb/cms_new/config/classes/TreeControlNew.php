@@ -201,7 +201,7 @@ class TreeControlNew extends TreeControl
         return $ret;
     }
 	
-	function _getTitle(&$node)
+	/*function _getTitle(&$node)
     {
      	$_title = preg_replace( "/<.*?>/is", '', $node->title);
 		$_title = str_replace('"','\'',$_title);   
@@ -211,7 +211,7 @@ class TreeControlNew extends TreeControl
         if ($node->_state > 0)
             $_title = $_title  .' [удален]';
         return $_title;
-    }
+    }*/
     
 	function UpdateTreeStruct()
     {

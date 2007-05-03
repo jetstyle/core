@@ -22,8 +22,13 @@
 <!--input id="update_1" name="update_1" class="cms-save-but hand" type="button" value="сохранить без перезагрузки" onclick="OSFormSend('{{__form_name}}');"--> 
 <input id="update_2" name="update_2" class="cms-save-but hand" type="submit" value="сохранить/обновить"> 
 {{/TPL:save_button}}
+{{TPL:restore_button}}
+<input name="{{prefix}}restore" class="cms-save-but hand" type="submit" value="восстановить"> 
+{{/TPL:restore_button}}
 {{_save_button}}
-{{TPL:delete_button}}<input type="submit" class="cms-delete-but hand" name="{{prefix}}delete" value="{{__delete_title}}" onclick="return confirm('{{__delete_title}}?');">{{/TPL:delete_button}}
+{{TPL:delete_button}}
+	<input type="submit" class="cms-delete-but hand" name="{{prefix}}delete" value="{{__delete_title}}" onclick="return confirm('{{__delete_title}}?');">
+{{/TPL:delete_button}}
 {{_delete_button}}
 </form>
 </div>
