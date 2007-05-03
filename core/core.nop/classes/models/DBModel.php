@@ -231,7 +231,13 @@ class DBModel extends Model
 		{
 			$w = array(); 
 			foreach ($where as $k=>$v)
-				$w[] = $this->quoteFieldShort($k) . '='. $this->quoteValue($v);
+				$w[] = '('
+					.(isset($v) 
+						?  $this->quoteFieldShort($k) . '='. $this->quoteValue($v)
+						:  $this->quoteFieldShort($k) . ' IS NULL '
+					)
+					.')'
+					;
 			$where_sql = implode(' AND ', $w);
 		}
 		else
