@@ -7,6 +7,8 @@
  * 
  */
 $this->useClass('models/Model');
+$this->useClass('DBQueryParser');
+
 class DBModel extends Model
 {
 	/** имя таблицы */
@@ -443,6 +445,19 @@ class DBModel extends Model
 			))));
 	}
 
+	function parse($query)
+	{
+		$args = func_get_args();
+		$query = array_shift($args);
+		$parser =& new DBQueryParser();
+		$parser->factory =& $this;
+		$parser->params =& $args;
+		$parser->initialize($this->rh);
+		$sql = $parser->parse($query);
+		return $sql;
+	}
+
 }  
+
 
 ?>
