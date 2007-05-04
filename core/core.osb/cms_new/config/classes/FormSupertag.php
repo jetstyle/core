@@ -1,6 +1,6 @@
 <?
 	
-	$this->UseClass("FormFiles",1);
+	$this->UseClass("FormFiles");
 	
 class FormSupertag extends FormFiles  {
 	
