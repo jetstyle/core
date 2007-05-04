@@ -290,7 +290,8 @@ class TreeControl extends DBDataEditTree  {
 	function ToXML(){  //$iconv=true
 		//start XML
 		$str = "<?xml version=\"1.0\" encoding=\"".$this->xml_encoding."\" ?>\n\n";
-		$str .= "<tree>\n";
+		//$str .= "<tree>\n";
+		$str .= $this->xmlOpenTag('tree');
 
 		//  ?
 		$root_id = $this->getRootId();
@@ -299,7 +300,17 @@ class TreeControl extends DBDataEditTree  {
         if (!$this->config->old_style)
         {
             $node = (object)$root;
-            $str .= str_repeat(" ",$node->_level)."<tree text=\"".($this->_getTitle($node))."\" ".$this->_getAction($node->id, count($this->CHILDREN[$node->id]), true)." db_id=\"".$node->id."\" db_selected=\"".( $node->id==$this->id ? "1" : "" )."\" db_state=\"".$node->_state."\" >\n";
+            //$str .= str_repeat(" ",$node->_level)."<tree text=\"".($this->_getTitle($node))."\" ".$this->_getAction($node->id, count($this->CHILDREN[$node->id]), true)." db_id=\"".$node->id."\" db_selected=\"".( $node->id==$this->id ? "1" : "" )."\" db_state=\"".$node->_state."\" >\n";
+				$xml_attrs = array_merge( 
+					array(
+						'text',				($this->_getTitle($node)),
+						'db_id',				$node->id,
+						'db_selected',		( $node->id==$this->id ? 1 : '' ),
+						'db_state',			$node->_state,
+					),
+					$this->_getAction($node->id, count($this->CHILDREN[$node->id]), true)
+				);
+				$str .= str_repeat(" ",$node->_level). $this->xmlOpenTag('tree', $xml_attrs)."\n";
 		}
 		//   
 		$current = (object)$this->ITEMS[ $this->rh->GetVar("id","integer") ];
@@ -341,7 +352,24 @@ class TreeControl extends DBDataEditTree  {
 			//action or src?
 			$action_src = $this->_getAction($node->id, $_is_folder, $display_childen);
 
-			$str .= str_repeat(" ",$node->_level)."<tree text=\"".($this->_getTitle($node))."\" ".$action_src." db_id=\"".$node->id."\" db_selected=\"".( $node->id==$this->id ? "1" : "" )."\" db_state=\"".$node->_state."\" ".(($is_folder)?">":"/>")."\n";
+			//$str .= str_repeat(" ",$node->_level)."<tree text=\"".($this->_getTitle($node))."\" ".$action_src." db_id=\"".$node->id."\" db_selected=\"".( $node->id==$this->id ? "1" : "" )."\" db_state=\"".$node->_state."\" ".(($is_folder)?">":"/>")."\n";
+			$xml_attrs = array_merge(
+				array(
+					'text', ($this->_getTitle($node)),
+					'db_id', $node->id,
+					'db_selected', ( $node->id==$this->id ? "1" : "" ),
+					'db_state', $node->_state,
+				),
+				$action_src
+			);
+			$str .= str_repeat(" ",$node->_level)
+				.(
+					$is_folder 
+					? 
+						$this->xmlOpenTag('tree', $xml_attrs) 
+					:  $this->xmlTag('tree', $xml_attrs)
+				)
+				."\n";
 
 			//put children
 			if($is_folder)
@@ -355,12 +383,87 @@ class TreeControl extends DBDataEditTree  {
 
 		//end XML
         if (!$this->config->old_style)
-            $str .= "</tree>\n";
-		$str .= "</tree>\n";
+            //$str .= "</tree>\n";
+            $str .= $this->xmlCloseTag('tree')."\n";
+		$str .= $this->xmlCloseTag('tree')."\n";
 		//mail ("nop@jetstyle.ru", "debug tree", $str);
 		return $str;
 	}
     
+	function xmlQuote($str)
+	{
+		return htmlspecialchars($str, ENT_COMPAT, $this->xml_encoding);
+	}
+
+	function xmlQuoteAttr($str)
+	{
+		return htmlspecialchars($str, ENT_COMPAT, $this->xml_encoding);
+	}
+
+	function xmlTag($name, $args=NULL)
+	{
+		return '<'.$name.($args ? $this->xmlAttrs($args) : '').'/>';
+	}
+
+	function xmlOpenTag($name, $args=NULL)
+	{
+		return '<'.$name.($args ? $this->xmlAttrs($args) : '').'>';
+	}
+
+	function xmlCloseTag($name)
+	{
+		return '</'.$name.'>';
+	}
+
+	/**
+	 * из списка $args = 
+	 *	  array('name1', 'value1', 'name2', 'value2', ...);
+	 * а можно и такого: 
+	 *	  array(array('name1', 'value1'), 'name2', 'value2', ...);
+	 *
+	 * составить аргументы тега 
+	 *	  name1="value1' name2="value2" ...
+	 *
+	 */
+	function xmlAttrs($args)
+	{
+		$result = '';
+		if (is_array($args))
+		{
+			reset($args);
+			while (list($key, $name) = each($args) )
+			{
+				if ($name)
+				{
+					if (is_array($name))  // это пара $name, $value
+						list($name, $value) = $name;
+					else // это $name, $value -- следующее за ней
+					{
+						$next = each($args); 
+						if ($next) 
+						{
+							list($key1, $value) = $next;
+						}
+						// список закончился -- это баг в вызвашем меня
+						else
+						{
+							// FIXME: как-то уведомить об ошибке
+							die('xmlAttrs');
+						}
+					}
+					$result .= ' ' .$this->xmlAttr($name, $value);
+				}
+			}
+		}
+		return $result;
+	}
+
+	function xmlAttr($name, $value)
+	{
+		return $this->xmlQuoteAttr($name) .'="'.$this->xmlQuoteAttr($value).'"';
+	}
+
+	/* lucky: refactored
     function _getAction($id)
     {
         $action_src = "action=\"".$this->_href_template.$this->id_get_var."=".$id."\"";   
@@ -383,6 +486,37 @@ class TreeControl extends DBDataEditTree  {
 		
         return $_title;
     }
+	 */
+
+	function _getAction($id)
+	{
+		$actions = array(
+			array('action', $this->_href_template.$this->id_get_var."=".$id),
+		);
+
+	// !FIXME: what's $_is_folder && $display_children here?
+		if( $_is_folder && !$display_children )
+			$actions[] = array(
+				'src', $this->_href_template."mode=tree&action=xml&display_root=".$node->id
+			);
+	  return $actions;
+	}
+
+	function _getTitle(&$node)
+	 {
+    	$_title = $node->title_short ? $node->title_short : $node->title;
+    	$_title = $_title ? $_title : 'node_'.$node->id;
+
+    	if ($node->_state > 0)
+    	{
+            $_title = $_title  .' [удален]';
+    	}
+    	
+     	$_title = preg_replace( "/<.*?>/is", '', $_title);
+		
+	   return $_title;
+	}
+
     
 	function _KillOutsiders(){
 		//  ,    
