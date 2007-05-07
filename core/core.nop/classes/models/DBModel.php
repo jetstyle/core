@@ -52,7 +52,9 @@ class DBModel extends Model
 		//		array('name', 'source', alias'),
 		//		);
 
-		$fields_info = array();
+		$this->_fields_info = array();
+		$fields_info =& $this->_fields_info;
+
 		if (isset($this->fields_info))
 		{
 			foreach ($this->fields_info as $v)
@@ -75,26 +77,43 @@ class DBModel extends Model
 					)
 				);
 				$v['name'] = $field_name;
-				$v['source_full'] = $this->_quoteField($field_source, $this->table);
-				$v['source'] = $this->_quoteField($field_source);
+				$v['source_full'] = $this->parse($this->_quoteField($field_source, $this->table));
+				$v['source'] = $this->parse($this->_quoteField($field_source));
 				$v['alias'] = $this->_quoteField($field_alias);
 				$fields_info[$field_name] = $v;
 			}
 		}
+		$fields = array();
 		foreach ($this->fields as $field_name)
 		{
 			if (!array_key_exists($field_name, $fields_info))
 			{
 				$info = array(
 					'name' => $field_name,
-					'source_full' => $this->_quoteField($field_name, $this->table),
-					'source' => $this->_quoteField($field_name),
+					'source_full' => $this->parse($this->_quoteField($field_name, $this->table)),
+					'source' => $this->parse($this->_quoteField($field_name)),
 					'alias' => NULL,
 				);
 				$fields_info[$field_name] = $info;
 			}
+			// проверяем тип поля. и если не БД'шный -- перебрасываем в foreign_fields
+			// (по умолчанию, если тип не указан, считаем что он БД'шный
+			if (isset($fields_info[$field_name]['type'])
+				// && $fields_info[$field_name]['type'] ! в списке типов полей из БД
+				&& !in_array($field_name, $this->foreign_fields)
+				)
+			{
+				$this->foreign_fields[] = $field_name;
+			}
+			else
+			{
+				$fields[] = $field_name;
+			}
 		}
-		$this->_fields_info = $fields_info;
+		//$this->_fields_info = $fields_info;
+		// теперь здесь только БД'шные поля
+		// остальные -- в $this->foreign_fields
+		$this->fields = $fields;
 
 		return $parent_status && True;
 	}
@@ -138,6 +157,47 @@ class DBModel extends Model
 		}
 	}
 
+
+	/**
+	 * Загрузить данные о файлах из аплоада
+	 *
+	 * FIXME: плохо, что для добавления новых типов
+	 *			нужно править класс
+	 */
+	function mapUpload(&$data, $info)
+	{
+		$field_name = $info['name'];
+		$dir = $info['dir'];
+		$name = $info['source'];
+		$model =& $this->rh->upload;
+
+		if (!isset($model)) return;
+
+		if (isset($info['path']))
+		{
+			$pattern = $info['path']; 
+		}
+		else
+		if (isset($info['dir']) && isset($info['file']))
+		{
+			$pattern = $info['dir'] .'/'.$info['file'];
+		}
+
+		$pattern = str_replace('*', '%s', $info['path']);
+
+		foreach ($data as $k=>$v)
+		{
+			$fname = sprintf($pattern, $v['id']);
+			$file = $this->rh->upload->getFile($fname);
+			if ($file) 
+			{
+				list($width, $height, $type, $attr) = getimagesize($file->name_full);
+				$file->height = $height;
+				$file->width = $width;
+			}
+			$data[$k][$field_name] = $file;
+		}
+	}
 
 	function getSelectSql($where=NULL, $limit=NULL, $offset=NULL)
 	{

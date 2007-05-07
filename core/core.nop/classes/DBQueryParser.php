@@ -20,8 +20,8 @@ class DBQueryParser extends Configurable
 	{
 		$fn_alias = array(&$this, 'onAlias');
 		$fn_args = array(&$this, 'onArg');
-		// заменяем алиасы {foo} на сорсы
 		$this->param_idx = 0;
+		// заменяем алиасы {foo} на сорсы
 		$sql = preg_replace_callback('#{([^}]+)}#', $fn_alias, $query);
 		// заменяем ? (кроме \?) на аргументы
 		$sql = preg_replace_callback('#(?=[^\\\\])\\?#', $fn_args, $sql);
@@ -39,7 +39,10 @@ class DBQueryParser extends Configurable
 
 	function onArg($matches)
 	{
-		$res = $this->factory->quote($this->params[$this->param_idx++]);
+		$param = $this->params[$this->param_idx++];
+		$res = is_array($param)
+			? $this->factory->quoteValues($param)
+			: $this->factory->quote($param);
 		return $res;
 	}
 
