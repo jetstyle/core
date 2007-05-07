@@ -313,7 +313,7 @@ class TemplateEngine extends ConfigProcessor
   // языковые конструкты шаблонного движка (Actions) -----------------------------------------------
 
   //zharik
-  function Action( $action_name, &$params, $level=false, $direction=-1 ) // -- вызов действи€
+  function Action( $action_name, &$params, $level=0, $direction=1 ) // -- вызов действи€
   {
     // by kuso@npj, 16-09-2004
     $action_name_for_cache = str_replace("/", "__", $action_name);
