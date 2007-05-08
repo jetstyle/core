@@ -157,6 +157,29 @@ class DBModel extends Model
 		}
 	}
 
+	function mapHasOne(&$data, $info)
+	{
+		$field_name = $info['name'];
+		$fk = $info['has_one']['fk'];
+		$pk = $info['has_one']['pk'];
+		$self_name = $info['has_one']['name'];
+
+
+		$model =& $this->$field_name;
+		if (!isset($model)) return;
+
+		foreach ($data as $k=>$v)
+		{
+			$where = ' AND '.$model->quoteField($pk) .'='.$model->quote($v[$fk]);
+			$model->load($where);
+			$item = $model->data[0];
+			if ($item)
+			{
+				$item[$kk][$self_name] =& $data[$k];
+				$data[$k][$field_name] = $item;
+			}
+		}
+	}
 
 	/**
 	 * Загрузить данные о файлах из аплоада
