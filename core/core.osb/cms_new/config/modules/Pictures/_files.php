@@ -10,7 +10,8 @@
     		'base' => false,
     		'show' => 1,
             'take_from_if_empty' => array('file',0),
-            'link_to' => 'file'
+            'link_to' => 'file',
+            'exts'  => array('jpg', 'jpeg', 'bmp', 'gif', 'png')
     		),
     	),
     'file' => array(
@@ -20,6 +21,7 @@
     		'crop' => false,
     		'base' => false,
     		'show' => 1,
+            'exts'  => array('jpg', 'jpeg', 'bmp', 'gif', 'png')
     		),
     	)
     );
