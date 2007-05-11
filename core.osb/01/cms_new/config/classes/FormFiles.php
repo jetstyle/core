@@ -134,7 +134,12 @@ class FormFiles extends FormSimple  {
             $post = str_replace("<div class=\"text\">", "", $this->rh->GLOBALS[$this->prefix.$field.$this->suffix]);
             $post = substr($post, 0, -6);
             
-            $post = preg_replace("/<div(.*)>\s+<\/div>/", "", $post);
+            //var_dump($post);
+            //echo '<hr>';
+            
+            $post = preg_replace("/<div([^>]*)>\s+<\/div>/", "", $post);
+            //var_dump($post);
+            //die();
             $this->rh->GLOBALS[$this->prefix.$field.$this->suffix] = $post;
         }
     }
