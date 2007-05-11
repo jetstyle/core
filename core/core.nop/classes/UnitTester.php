@@ -33,22 +33,25 @@ class UnitTester extends Configurable
 
 	function addTests($path,$recursive)
 	{
-		$dir=opendir($path);
+		$full_path = $this->base_dir.$path;
+		$dir=opendir($full_path);
 		while(($entry=readdir($dir))!==false)
 		{
-			if(is_file($path.'/'.$entry) && preg_match('#^(.+)Test\.php$#', $entry, $matches))
+			if(is_file($full_path.$entry) && preg_match('#^(.+)Test\.php$#', $entry, $matches))
 			{
 				$unit = $matches[1];
 				if (empty($this->tests) || in_array($unit, $this->tests))
 				{
-					$this->ctx->useClass($unit);
-					$this->test->addTestFile($path.'/'.$entry);
+					$this->ctx->useClass($path.$unit);
+					$this->test->addTestFile($full_path.$entry);
 				}
 			}
 			else 
-			if($recursive && $entry!=='.' && $entry!=='..' && $entry!=='.svn' && is_dir($path.'/'.$entry))
+			if($recursive 
+				&& $entry !== '.' && $entry !== '..' 
+				&& $entry !== '.svn' && is_dir($full_path.$entry))
 			{
-				$this->addTests($path.'/'.$entry,$recursive);
+				$this->addTests($path.$entry.'/',$recursive);
 			}
 		}
 		closedir($dir);
@@ -72,16 +75,12 @@ class UnitTester extends Configurable
 		{
 			foreach ($this->namespaces as $namespace)
 			{
-				$fullpath = $dir.'/'.$namespace.'/';
-				if (is_dir($fullpath))
-					$this->addTests($fullpath, $this->recursive);
+				$fullpath = $dir.$namespace.'/';
+				$this->base_dir = $fullpath;
+				if (is_dir($this->base_dir))
+					$this->addTests('', $this->recursive);
 			}
 		}
-		/*
-			$testClass=basename($fullpath,'.php');
-			include_once($fullpath);
-			$test=new $testClass(basename($rootPath)."/$target");
-		 */
 	}
 
 	function run()
@@ -91,4 +90,14 @@ class UnitTester extends Configurable
 
 }
 
+class CtxUnitTestCase extends UnitTestCase
+{
+
+	function setUp()
+	{
+		$this->ctx =& $this->_reporter->ctx;
+		parent::setUp();
+	}
+
+}
 ?>
