@@ -1,6 +1,6 @@
 <?php
 
-class Aspect_is_referecne_Test extends UnitTestCase
+class Aspect_is_reference_Test extends UnitTestCase
 {
 
 	function test_self_ctx()
@@ -11,7 +11,7 @@ class Aspect_is_referecne_Test extends UnitTestCase
 		$output = is_reference($self, $self->ctx);
 
 		$this->assertTrue($output);
-		// lucky: Ð¼Ð¼Ð´Ñ, ÑÑ‚Ð¾ Ð¿Ð¾-Ð¿Ñ€ÐµÐ¶Ñ‰ÐµÐ¼Ñƒ Ð¼Ñ‹?
+		// lucky: ììäÿ, ýòî ïî-ïðåæùåìó ìû?
 		$this->assertIsA($self, 'stdclass');
 	}
 
