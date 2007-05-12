@@ -1,12 +1,7 @@
 <?php
 
-class TypeLoaderTest extends UnitTestCase
+class TypeLoaderTest extends CtxUnitTestCase
 {
-
-	function setUp()
-	{
-		$this->ctx =& $this->_reporter->ctx;
-	}
 
 	function test_loadConfig_types_String()
 	{
