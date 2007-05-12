@@ -132,38 +132,181 @@ class DBModel extends Model
 
 	// relations
 	/**
+	 * Один-ко-многим или Многие-ко-многим
 	 * $data -- массив с данными этой модели (который возвращает select(), 
 	 * например)
 	 * $info -- инфа о field
 	 */
 	function mapHasMany(&$data, $info)
 	{
+		$type = 'HasMany';
+		if (isset($info[$type]['through'])) 
+			// скорее всего многие - ко - многим
+			return $this->mapHasManyThrough($data, $info);
+
+		// один - ко - многим
 		$field_name = $info['name'];
-		$fk = $info['has_many']['fk'];
-		$pk = $info['has_many']['pk'];
-		$self_name = $info['has_many']['name'];
+		$fk = $info[$type]['fk'];
+		$pk = $info[$type]['pk'];
+		$self_name = $info[$type]['name'];
 
 
 		$model =& $this->$field_name;
 		if (!isset($model)) return;
 
+		if (1)
+		{
+
 		foreach ($data as $k=>$v)
 		{
+			//  lucky: этот load можно вынести "за скобки", и делать выборку для всех
+			//  $pk из $data одним запросом. 
+			//  тогда цикл можно сделать по результату $model->load
+			//  lucky: done (см. ниже)
+			//
+			//  lucky: oups... так делать нельзя.
+			//		 в $model могут быть специфичные ограничения (скажем $limit)
+			//		 тогда результат будет неправильным
 			$where = ' AND '.$model->quoteField($fk) .'='.$model->quote($v[$pk]);
 			$model->load($where);
+
 			$item = $model->data;
 			foreach($item as $kk=>$vv) $item[$kk][$self_name] =& $data[$k];
 			$data[$k][$field_name] = $item;
 		}
+
+
+		}
+			/* lucky: нах. см. выше %)
+		else
+		{
+
+
+		$pks = array();
+		$datas = array();
+		foreach ($data as $k=>$v)
+		{
+			$id = $data[$k][$pk];
+			$pks[] = $id;
+			$datas[$id] =& $data[$k];
+		}
+		$where = ' AND '.$model->quoteField($fk) .'IN ('.$model->quote($pks).')';
+		unset($pks);
+
+		$model->load($where);
+		foreach ($model->data as $k=>$v)
+		{
+			$item = $model->data[$k];
+			$f_id = $item[$fk];
+			$my =& $datas[$f_id];
+			$item[$self_name] =& $my;
+			$my[$field_name] =& $item;
+		}
+
+		}
+			 */
 	}
+
+	function buildJoin($fields)
+	{
+		$sql = '';
+		$types = array('HasMany','HasOne');
+
+		foreach ($fields as $v)
+		{
+			$info = $this->_fields_info[$v];
+			$type = $info['type'];
+			if (in_array($type, $types))
+			{
+				$field_name = $info['name'];
+				$fk = $info[$type]['fk'];
+				$pk = $info[$type]['pk'];
+				$self_name = $info[$type]['name'];
+				//$model =& $this->$field_name;
+				//if (!isset($model)) continue;
+
+				$t_table = $info[$type]['through']['name'];
+				$t_pk = $info[$type]['through']['pk'];
+				$t_fk = $info[$type]['through']['fk'];
+
+				$sql .= 
+				   ($info[$type]['only'] 
+						? " INNER JOIN "
+						: " LEFT JOIN "
+					)
+					. $this->buildTableNameAlias($t_table) 
+					.	 "ON ("
+					.		  $this->quoteField($pk)." = ".$t_table.".".$t_pk 
+					.	     ")"
+					;
+			}
+		}
+		return $sql;
+	}
+
+	function mapHasManyThrough(&$data, $info)
+	{
+		$type = 'HasMany';
+		$field_name = $info['name'];
+		$fk = $info[$type]['fk'];
+		$pk = $info[$type]['pk'];
+		$self_name = $info[$type]['name'];
+
+		$model =& $this->$field_name;
+		if (!isset($model)) return;
+
+
+		$t_table = $info[$type]['through']['name'];
+		$t_pk = $info[$type]['through']['pk'];
+		$t_fk = $info[$type]['through']['fk'];
+
+		foreach ($data as $k=>$v)
+		{
+			$id = $v[$pk];
+			$sql1 = 
+				 " SELECT ". $model->buildFieldAliases($model->fields) 
+				." FROM ".   $model->buildTableNameAlias($model->table)
+				/*
+				.  ($info['only'] 
+						? " INNER JOIN "
+						: " LEFT JOIN "
+					)
+				 */
+				. " INNER JOIN "
+				. $model->buildTableNameAlias($t_table) 
+				.	 "ON ("
+				.		  $model->quoteField($fk)." = ".$t_table.".".$t_fk 
+				.	 " AND "
+				.		  $this->quote($id)." = ".$t_table.".".$t_pk 
+				.	     ")"
+			. $model->buildWhere($where)
+			. $model->buildGroupBy($model->group);
+			$sql = $sql1
+				. $model->buildOrderBy($model->order)
+				. $model->buildLimit($limit, $offset);
+			;
+			// сохраним sql1 для будщих поколений ;)
+			// count() например
+			$sql_parts = array($sql, $sql1);
+
+			$model->loadSql($sql_parts);
+			foreach ($model->data as $kk=>$vv)
+			{
+				$ii =& $model->data[$kk];
+				$ii[$self_name] =& $data[$k];
+			}
+			$data[$k][$field_name] = $model->data;
+		}
+	}
+
 
 	function mapHasOne(&$data, $info)
 	{
+		$type = 'HasOne';
 		$field_name = $info['name'];
-		$fk = $info['has_one']['fk'];
-		$pk = $info['has_one']['pk'];
-		$self_name = $info['has_one']['name'];
-
+		$fk = $info[$type]['fk'];
+		$pk = $info[$type]['pk'];
+		$self_name = $info[$type]['name'];
 
 		$model =& $this->$field_name;
 		if (!isset($model)) return;
@@ -189,24 +332,24 @@ class DBModel extends Model
 	 */
 	function mapUpload(&$data, $info)
 	{
+		$type = 'Upload';
 		$field_name = $info['name'];
-		$dir = $info['dir'];
-		$name = $info['source'];
+		$dir = $info[$type]['dir'];
+		$name = $info[$type]['source'];
 		$model =& $this->rh->upload;
-
 		if (!isset($model)) return;
 
-		if (isset($info['path']))
+		if (isset($info[$type]['path']))
 		{
-			$pattern = $info['path']; 
+			$pattern = $info[$type]['path']; 
 		}
 		else
-		if (isset($info['dir']) && isset($info['file']))
+		if (isset($info[$type]['dir']) && isset($info[$type]['file']))
 		{
-			$pattern = $info['dir'] .'/'.$info['file'];
+			$pattern = $info[$type]['dir'] .'/'.$info[$type]['file'];
 		}
 
-		$pattern = str_replace('*', '%s', $info['path']);
+		$pattern = str_replace('*', '%s', $info[$type]['path']);
 
 		foreach ($data as $k=>$v)
 		{
@@ -226,6 +369,7 @@ class DBModel extends Model
 	{
 		$sql1 =  ' SELECT ' . $this->buildFieldAliases($this->fields)
 			. ' FROM '   . $this->buildTableNameAlias($this->table)
+			//. $this->buildJoin($this->foreign_fields)
 			. $this->buildWhere($where)
 			. $this->buildGroupBy($this->group);
 		$sql = $sql1
@@ -236,6 +380,7 @@ class DBModel extends Model
 		// count() например
 		return array($sql, $sql1);
 	}
+
 	function selectSql($sql_parts, $is_load=false)
 	{
 		list($sql, $sql1) = $sql_parts;
@@ -254,12 +399,6 @@ class DBModel extends Model
 			{
 				$method_name = 'map'.$info['type'];
 				$this->$method_name($data, $info);
-			}
-			// lucky: compability -- remove it
-			else
-			if (isset($info['has_many']))
-			{
-				$this->mapHasMany($data, $info);
 			}
 		}
 	}
@@ -422,9 +561,9 @@ class DBModel extends Model
 		$table_name_sql = $this->quoteName($this->rh->db_prefix.$table);
 		return $table_name_sql;
 	}
-	function buildTableNameAlias($table)
+	function buildTableNameAlias($table, $alias=NULL)
 	{
-		$table_name_sql = $this->quoteName($this->rh->db_prefix.$table) .' AS '.$this->quoteName($table);
+		$table_name_sql = $this->quoteName($this->rh->db_prefix.$table) .' AS '.$this->quoteName(($alias) ? $alias : $table);
 		return $table_name_sql;
 	}
 	function buildWhere($where)
@@ -541,6 +680,5 @@ class DBModel extends Model
 	}
 
 }  
-
 
 ?>
