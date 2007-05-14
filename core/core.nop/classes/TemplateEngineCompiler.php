@@ -411,15 +411,21 @@ if(is_array($_z) && !empty($_z))
 
 	$old_ref =& $tpl->Get("*");
 	$old__ =& $tpl->Get("_");
+	$old_For =& $tpl->Get("For");
 
 	$first = True;
-	$num = 1;
+	$num = 0;
+	$for = array(
+			"num"=>&$num,
+		);
+   $tpl->setRef("For", $for);
 	foreach($_z AS $r)
 	{
+		$num++;
+		$for["odd"] = $num % 2;
+		$for["even"] = !$for["odd"];
 		$tpl->SetRef('.$item_store_to.', $r);
 
-    $for = array("num"=>$num++);
-    $tpl->set("For", $for);
 		if (True===$first) 
 		{
 			echo $tpl->parse('.$item_tpl.');
@@ -435,6 +441,7 @@ if(is_array($_z) && !empty($_z))
 
 	$tpl->SetRef("*", $old_ref );
 	$tpl->SetRef("_", $old__ );
+	$tpl->SetRef("For", $old_For );
 }
 /*
 else
