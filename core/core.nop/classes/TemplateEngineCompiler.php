@@ -413,9 +413,13 @@ if(is_array($_z) && !empty($_z))
 	$old__ =& $tpl->Get("_");
 
 	$first = True;
+	$num = 1;
 	foreach($_z AS $r)
 	{
 		$tpl->SetRef('.$item_store_to.', $r);
+
+    $for = array("num"=>$num++);
+    $tpl->set("For", $for);
 		if (True===$first) 
 		{
 			echo $tpl->parse('.$item_tpl.');
