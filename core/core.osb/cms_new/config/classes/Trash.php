@@ -37,6 +37,11 @@
 =============================================================== v.1 (Zharik)
 */
   
+// поместить в конзину
+define ('OSB_TRASH_WASTE', 1);
+// удалить навсегда
+define ('OSB_TRASH_ERASE', 2);
+
 class Trash {
   
   var $rh;
@@ -60,13 +65,13 @@ class Trash {
     {
       //удаляем в корзину
       $this->ToTrash($table_name, $item_id, $module_title, $item_title, $view_link);
-      return 1;
+      return OSB_TRASH_WASTE;
     }
     else
     {
       //удаляем совсем
       $this->Erase($table_name, $item_id);
-      return 2;
+      return OSB_TRASH_ERASE;
     }
   }
   
