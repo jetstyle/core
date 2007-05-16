@@ -1,7 +1,7 @@
 <?php
 
-$this->useClass('models/DBModel');
-class BasicContent extends DBModel
+$this->useClass('models/DBTreeModel');
+class BasicContent extends DBTreeModel
 {
 	var $fields = array('id', 
 		'mode',

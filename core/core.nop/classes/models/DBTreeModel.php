@@ -15,6 +15,30 @@ class DBTreeModel extends DBModel
 
 	var $order = array('_left');
 
+	function getSelectSql($where=NULL, $limit=NULL, $offset=NULL)
+	{
+		$ta = $this->quoteName($this->table);
+		$use_parent = strpos($where, 'parent') !== false;
+
+		if (!isset($where)) $where = '';
+		if ($use_parent)
+			$where .= 
+				' AND ('.$ta.'._left >= parent._left AND '.$ta.'._right <= parent._right) ';
+		$sql1 =  ' SELECT ' . $this->buildFieldAliases($this->fields)
+			. ' FROM '   . $this->buildTableNameAlias($this->table)
+			. ($use_parent ? ' ,' . $this->buildTableNameAlias($this->table, 'parent') : '')
+			//. $this->buildJoin($this->foreign_fields)
+			. $this->buildWhere($where)
+			. $this->buildGroupBy($this->group);
+		$sql = $sql1
+			. $this->buildOrderBy($this->order)
+			. $this->buildLimit($limit, $offset);
+		;
+		// сохраним sql1 для будщих поколений ;)
+		// count() например
+		return array($sql, $sql1);
+	}
+
 	/** загрузить как таблицу 
 	 *
 	 * реализация:
