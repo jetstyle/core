@@ -114,8 +114,13 @@ class FormFiles extends FormSimple  {
 					}
 				}
 				if (isset($vv['exts']))
-				$exts = $vv['exts'];
-				$this->item[$field_file."_exts"] = $this->_getExts($exts);
+				{
+					$exts = $vv['exts'];
+				}
+				
+				$ar = $this->_getExts($exts);
+				$this->item[$field_file."_exts"] = $ar['all'];
+				$this->item[$field_file."_exts_graphics"] = $ar['graphics'];
 			}
 		}
 	}
@@ -123,12 +128,16 @@ class FormFiles extends FormSimple  {
 	function _getExts($exts)
 	{
 		if (is_array($exts))
-		$exts = array_unique($exts);
+		{
+			$exts = array_unique($exts);
+		}
 
 		if (empty($exts))
-		$exts = array_keys($this->upload->TYPES);
+		{
+			$exts = array_keys($this->upload->TYPES);
+		}
 
-		return "(".implode(", ",$exts).")";
+		return array("all" => "(".implode(", ",$exts).")", "graphics" => "(".implode(", ", array_intersect($exts, $this->GRAPHICS)).")");
 	}
 
 	function _renderFilesOld()
@@ -207,15 +216,15 @@ class FormFiles extends FormSimple  {
 				foreach($this->config->_FILES AS $field_file => $result_arrays)
 				{
 					/**
-             * файл заусунули в инпут
-             */
+             		* файл заусунули в инпут
+             		*/
 					if(is_uploaded_file($_FILES[$this->prefix.$field_file]['tmp_name']))
 					{
 						$this->_handleUpload($field_file, $result_arrays, true);
 					}
 					/**
-             * не засунули в инпут ничего, да еще и галочку удалить включили
-             */
+             		* не засунули в инпут ничего, да еще и галочку удалить включили
+             		*/
 					elseif($this->rh->GetVar($this->prefix.$field_file.'_del'))
 					{
 						$this->_handleUpload($field_file, $result_arrays);
@@ -261,12 +270,21 @@ class FormFiles extends FormSimple  {
 			{
 				$file = $upload->GetFile( str_replace('*', $this->id, $vv['filename']));
 				if($file->name_full)
-				@unlink( $file->name_full );
+				{
+					@unlink( $file->name_full );
+				}
 
 				if ($do_upload)
 				{
 					if ($vv['exts'])
-					$upload->ALLOW = $vv['exts'];
+					{
+						$upload->ALLOW = $vv['exts'];
+					}
+					elseif ($vv['graphics'])
+					{
+						$upload->ALLOW = array_intersect($upload->ALLOW, $this->GRAPHICS);
+					}
+					
 					//нужно сохранить превью?
 					if ($me_too = $this->_shouldTakeFromIfEmpty($field_file))
 					{
