@@ -14,7 +14,7 @@
 	<td class="right">Иллюстрация:</td>
 	<td class="desc">
           <input type="file" name="{{$prefix}}file"><br>
-          {{*file_exts}}<br>
+          {{*file_exts_graphics}}<br>
           Нажмите кнопку <dfn>Обзор</dfn> и выберите иллюстрацию со своего компьютера.
           <br>
           <!--{{*file}}<br>
@@ -25,7 +25,7 @@
 	<td class="right">Уменьшенное изображение:</td>
 	<td class="desc">
           <input type="file" name="{{$prefix}}file_small"><br>
-          {{*file_exts}}<br>
+          {{*file_exts_graphics}}<br>
           Уменьшеная копия (<dfn>{{_strict}} {{max_width}}x{{max_height}}</dfn>) изображения, обычно используется для вывода в списках или анонсах.
           Будет уменьшено автоматически, если вы его не загрузите.<br>
           <!--{{*file_small}}<br>
