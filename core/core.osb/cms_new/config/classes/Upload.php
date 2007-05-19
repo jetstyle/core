@@ -141,7 +141,7 @@ class Upload {
       //клиентские данные
       $type = $_file['type'];
       $ext = explode(".",$_file['name']);
-      $ext = $ext[ count($ext)-1 ];
+      $ext = strtolower($ext[ count($ext)-1 ]);
       //проверка на допуск
       if( !$this->IsAllowed($ext) ) return false;
       //грузим
