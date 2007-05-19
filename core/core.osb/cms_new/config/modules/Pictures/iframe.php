@@ -7,16 +7,19 @@
 	}
     else
     {
-		$res = $this->rh->db->queryOne("
-			SELECT id FROM ".$this->rh->project_name."_pictures_topics
-			ORDER BY _order ASC
-		");
-		
-		if($res['id'])
-		{
-			$this->rh->redirect($this->rh->url.'do/'.$this->module_name.'?id='.$res['id']);
-			die();
-		}
+    	if(!$this->rh->getVar('_new'))
+    	{
+			$res = $this->rh->db->queryOne("
+				SELECT id FROM ".$this->rh->project_name."_pictures_topics
+				ORDER BY _order ASC
+			");
+			
+			if($res['id'])
+			{
+				$this->rh->redirect($this->rh->url.'do/'.$this->module_name.'?id='.$res['id']);
+				die();
+			}
+    	}
 
 		$this->class_name="Dummy";
     }
