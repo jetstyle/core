@@ -44,9 +44,9 @@ class ListAdvanced extends ListSimple
     if( !$this->config->HIDE_CONTROLS['add_new'] ){
 //    $this->_add_new_href = $this->url.'?'.$this->state->State(0,array( $this->id_get_var ));
 //    $tpl->Assign( '_add_new_href', $this->_add_new_href );
-		
-      $tpl->Assign( '_add_new_href',  $this->rh->path_rel."do/".$this->config->module_name."?".$this->rh->state->StatePlus(0, array('new' => 1)) );
-//      $tpl->Assign( '_add_new_href', $this->_href_template );
+	
+//      $tpl->Assign( '_add_new_href',  $this->rh->path_rel."do/".$this->config->module_name."?".$this->rh->state->StatePlus(0, array('_new' => 1)) );
+      $tpl->Assign( '_add_new_href', $this->_href_template.$this->rh->state->StatePlus(0, array('_new' => 1)) );
       $tpl->Assign( '_add_new_title', $this->config->add_new_title ? $this->config->add_new_title : 'создать новый элемент' );
       $tpl->Parse( $this->template_new, '__add_new' );
     }

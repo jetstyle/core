@@ -47,6 +47,7 @@
   $this->tpl->assign('images',$this->path_rel.'images/');
   $this->tpl->assign('css',$this->path_rel.'css/');
   $this->tpl->assign('js',$this->path_rel.'js/');
+  
   $this->tpl->assign('project_title',$this->project_title);
   
   $this->debug->Trace("startup done");

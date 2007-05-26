@@ -135,6 +135,18 @@ class FormSimple extends DBDataEdit  {
     	}
     }
     
+    if($this->config->send_button && $item->id  && $item->_state == 0)
+    {
+    	if($item->sended)
+    	{
+    		$tpl->Parse( $this->template.':send_button_disabled', '_send_button' );
+    	}
+    	else 
+    	{
+    		$tpl->Parse( $this->template.':send_button', '_send_button' );
+    	}
+    }
+    
     if(($this->config->save_button_norefresh ))
       $tpl->Parse( $this->template.':save_button_norefresh', '_save_button' );
     
@@ -261,6 +273,7 @@ class FormSimple extends DBDataEdit  {
           $field_pre = $field.'_pre';
           //пререндеринг содержимого поля
           $GLOBALS1[ $this->prefix.$field_pre.$suffix ] = $tpl->Action( $filter, isset($GLOBALS1[ $this->prefix.$field_pre.$suffix ]) ? $GLOBALS1[ $this->prefix.$field_pre.$suffix ] : $GLOBALS1[ $this->prefix.$field.$suffix ] );
+          $this->item[$field_pre] = $GLOBALS1[ $this->prefix.$field_pre.$suffix ];
           //добавляем поле в список для сохранения
           $this->UPDATE_FIELDS[] = $field_pre;
         }

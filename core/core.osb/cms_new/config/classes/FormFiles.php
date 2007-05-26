@@ -108,7 +108,7 @@ class FormFiles extends FormSimple  {
 						}
 						else if ($file->name_full)
 						{
-							$this->item[$field_file] = '('.$file->size.'kb, '.$file->format.", <a href='".$_href."'>скачать</a>)";
+							$this->item[$field_file] = '('.$file->size.'kb, '.$file->format.", <a href='".$this->rh->front_end->path_rel.'files/'.($this->config->upload_dir ? $this->config->upload_dir."/" : "").$file->name_short."'>скачать</a>)";
 							//    $tpl->Assign( 'file_'.$row[1], '('.$file->size.'kb, '.$file->format.", <a href='".$_href."'>скачать</a>)" );
 						}
 					}

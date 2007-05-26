@@ -26,6 +26,13 @@
 <input name="{{prefix}}restore" class="cms-save-but hand" type="submit" value="восстановить"> 
 {{/TPL:restore_button}}
 {{_save_button}}
+{{TPL:send_button}}
+<input name="{{prefix}}send" class="cms-save-but hand" type="submit" value="отправить"> 
+{{/TPL:send_button}}
+{{TPL:send_button_disabled}}
+<input name="{{prefix}}send" class="cms-save-but hand" type="submit" disabled="disabled" value="отправлено"> 
+{{/TPL:send_button_disabled}}
+{{_send_button}}
 {{TPL:delete_button}}
 	<input type="submit" class="cms-delete-but hand" name="{{prefix}}delete" value="{{__delete_title}}" onclick="return confirm('{{__delete_title}}?');">
 {{/TPL:delete_button}}

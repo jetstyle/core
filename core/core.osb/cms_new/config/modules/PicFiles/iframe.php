@@ -1,14 +1,17 @@
 <?
 if(!$this->rh->GetVar('id','integer'))
 {
-	$res = $this->rh->db->queryOne("
-		SELECT id FROM ".$this->rh->project_name."_picfiles_topics
-		ORDER BY _order ASC
-	");
-	if($res['id'])
+	if(!$this->rh->getVar('_new'))
 	{
-		$this->rh->redirect($this->rh->url.'do/'.$this->module_name.'?id='.$res['id']);
-		die();
+		$res = $this->rh->db->queryOne("
+			SELECT id FROM ".$this->rh->project_name."_picfiles_topics
+			ORDER BY _order ASC
+		");
+		if($res['id'])
+		{
+			$this->rh->redirect($this->rh->url.'do/'.$this->module_name.'?id='.$res['id']);
+			die();
+		}
 	}
 	$this->class_name = 'Dummy';
 }
