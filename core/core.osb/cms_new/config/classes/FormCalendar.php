@@ -71,11 +71,28 @@ class FormCalendar extends FormFiles	{
 
 	function Update(){
 
-		if(parent::Update())	{
-
-			$rh =& $this->rh;
-
-			foreach($this->CALENDAR_FIELDS AS $field)	{
+		$rh =& $this->rh;
+		
+		if($this->needUpdate())
+		{
+			if($this->YEAR)
+			{
+				$rh->GLOBALS[$this->prefix.'year'] = preg_replace($this->r_date_in, $this->r_year, $rh->GetVar($this->prefix.$this->YEAR));
+				$this->UPDATE_FIELDS[] = 'year'; 
+			}
+			if($this->MONTH)
+			{
+				$rh->GLOBALS[$this->prefix.'month'] = preg_replace($this->r_date_in, $this->r_month, $rh->GetVar($this->prefix.$this->MONTH));
+				$this->UPDATE_FIELDS[] = 'month'; 
+			}
+			if($this->DAY)
+			{
+				$rh->GLOBALS[$this->prefix.'day'] = preg_replace($this->r_date_in, $this->r_day, $rh->GetVar($this->prefix.$this->DAY));
+				$this->UPDATE_FIELDS[] = 'day'; 
+			}
+			
+			foreach($this->CALENDAR_FIELDS AS $field)	
+			{
 				if($this->config->USE_TIME)
 				{
 					$time = $rh->GetVar($this->prefix.$field.'_time').':00';
@@ -84,31 +101,11 @@ class FormCalendar extends FormFiles	{
 				{
 					$time = date('H:i:s', time());
 				}
-
-				$where[]= $field."='".preg_replace($this->r_date_in, $this->r_date_out_mysql, $rh->GetVar($this->prefix.$field)).' '.$time."'";
-				$this->item[$field] = $rh->GetVar($this->prefix.$field);
+				$rh->GLOBALS[$this->prefix.$field] =preg_replace($this->r_date_in, $this->r_date_out_mysql, $rh->GetVar($this->prefix.$field)).' '.$time; 
 			}
-
-			if($this->YEAR)
-			{
-				$where[]= "year='".preg_replace($this->r_date_in, $this->r_year, $rh->GetVar($this->prefix.$this->YEAR))."'";
-			}
-			if($this->MONTH)
-			{
-				$where[]= "month='".preg_replace($this->r_date_in, $this->r_month, $rh->GetVar($this->prefix.$this->MONTH))."'";
-			}
-			if($this->DAY)
-			{
-				$where[]= "day='".preg_replace($this->r_date_in, $this->r_day, $rh->GetVar($this->prefix.$this->DAY))."'";
-			}
-
-			if(is_array($where) AND !empty($where))
-			{
-				$rh->db->execute("UPDATE ".$this->config->table_name." SET ".@implode(',', $where)." WHERE id='".$this->id."'");
-			}
-
-			return true;
 		}
+		
+		return parent::Update();
 	}
 
 }

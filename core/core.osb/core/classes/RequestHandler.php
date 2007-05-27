@@ -54,8 +54,7 @@ class RequestHandler extends ConfigProcessor {
   var $MODULES = array();
   
   function RequestHandler( $config_path="core/config.php" ) {
-
-    //переменная для хэндлеров по умолчанию
+	    //переменная для хэндлеров по умолчанию
     $this->page_var_name = "page";
     
     //избавляемся от квотов
@@ -107,7 +106,6 @@ class RequestHandler extends ConfigProcessor {
     $this->GLOBALS = array_merge( $this->GLOBALS, $_GLOBALS );
     //подготавливаем путь
     $_path = $this->GLOBALS['path'] ? $this->GLOBALS['path'] : $A[0];
-    
     //сценарий инициализации
     include($this->FindScript("scripts","startup"));
     $this->_close_php = $this->FindScript("scripts","close");

@@ -86,6 +86,7 @@ class DBDataEdit extends DBDataView {
   	}	
   	$sql .= " WHERE ".$this->SELECT_FIELDS[0]."='$id'".(($where)? " AND ".$where : "" );
 	
+	
   	$db->execute($sql);
 		return true;
   }
@@ -138,7 +139,7 @@ class DBDataEdit extends DBDataView {
   		$sql2 .= ((strlen($sql2) > 0)?",":"").$db->Quote( $VALUES[$field] );
   	}
   	$sql = "INSERT INTO ".$this->table_name."($sql1) VALUES($sql2)";
-    
+           
   	$isert_id = $db->insert($sql);
   	return $isert_id;
   }

@@ -37,7 +37,7 @@ class ConfigProcessor{
 	
 	function FindScript( $type, $name, $level=CURRENT_LEVEL, $direction=SEARCH_DOWN, $has_ext=false )
     {
-		
+	
 		if( !$this->missed_OK && $name=="" ) $this->EndError("ConfigProcessor::_FindScript - script name is empty, \$type=$type");
 		
 		if( !isset($this->DIRS[$type]) ) $this->EndError("Script type \"<b>$type</b>\" is not defined.");

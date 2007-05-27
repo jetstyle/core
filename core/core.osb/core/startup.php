@@ -26,6 +26,11 @@
 
   $this->UseClass("DBAL");
   $this->db =& new DBAL( $this, true );
+if($this->db_set_encoding)
+{
+	$this->db->query("SET CHARACTER SET ".$this->db_set_encoding);
+}
+
 
   //template engine
   $this->UseClass("OSFastTemplateWrapper");

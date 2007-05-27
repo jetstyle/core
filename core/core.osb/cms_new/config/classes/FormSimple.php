@@ -77,6 +77,11 @@ class FormSimple extends DBDataEdit  {
     if( $this->rh->GetVar('update_2') )
       $this->_redirect .= '&update_2=1';
     
+    if(!$this->rh->GLOBALS[$this->prefix.'_state'])
+    {
+    	$this->rh->GLOBALS[$this->prefix.'_state'] = 0 ;
+    }
+    
     //update data
     $redirect = $this->Delete();
     if(!$redirect) $redirect = $this->Restore();
@@ -217,9 +222,8 @@ class FormSimple extends DBDataEdit  {
   }
   
   function Update(){
-    if( $this->rh->GetVar( $this->prefix."update" ) )
+    if( $this->needUpdate() )
     {
-      //die('111');
       if( $this->id )
       {
         $this->_Filters();
@@ -234,11 +238,14 @@ class FormSimple extends DBDataEdit  {
     }
     else 
     {
-        //var_dump($_POST);
-        //die('222');
         return false;
     }
   }
+  
+  function needUpdate()
+  {
+  	return $this->rh->GetVar( $this->prefix."update" ) ? true : false;
+  } 
   
   function _Filters( $suffix='' ){
     $rh =& $this->rh;
