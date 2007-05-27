@@ -1,21 +1,16 @@
-<?
+<?php
 
   $type = $params['type'] ? $params['type'] : 'texts';
   $good = true;
 
-  if ($type != 'texts' && $type != 'banners')
+  if ($type != 'texts')
   {
-//     $module = $params['module'];
-//     if(!$module)
-//    	echo "<font color='red'><strong>[\$module пуст]</strong></font>";
-
-  	 $id = $tpl->get('_id');
+  	 $id = $params['id'];
      if(!$id)
      {
     	echo "<font color='red'><strong>[id пуст]</strong></font>";
 		$good = false;
      }
-
 
     //пририсовываем OCE
     $para = array( 
@@ -24,7 +19,6 @@
           'width'=>'800',
           'height'=>'600',
          );
-
   }
   else
   {
@@ -58,10 +52,8 @@
 	  echo $r[$custom['field']];  
   }
 
-  /*
+  
 	if ($good)
 	    echo $rh->tpl->Action( 'oce', $para );
-	*/
-
-
+	
 ?>

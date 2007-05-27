@@ -39,7 +39,6 @@ class ConfigProcessor {
   //Ищет скрипт по уровням проектов.
   function FindScript( $type, $name, $level=0, $dr=1, $ext = 'php' )
   {
-    
     //проверяем входные данные
     if($type==''){
       $error = "FindScript: <b>*type* пусто</b>, type=<b>$type</b>, name=<b>$name</b>, level=<b>$level</b>, dr=<b>$dr</b>, ext=<b>$ext</b>";

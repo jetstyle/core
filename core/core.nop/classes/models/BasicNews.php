@@ -1,4 +1,4 @@
-<?
+<?php
 $this->UseClass("models/DBModel");
 
 class BasicNews extends DBModel

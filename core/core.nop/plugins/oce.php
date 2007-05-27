@@ -1,13 +1,12 @@
 <?php
+$rh->OCE = array(
+		"texts"=>"do/Texts/form?id=::id::&",
+		"news"=>"do/News/form?id=::id::&",
+		"content"=>"do/Content/form?id=::id::&",
+  );
 
-	if(      $rh->principal->Security("noguests") 
-/*
-			$rh->toolbar && 
-			$rh->toolbar->ShowToolbar() && 
-			($_COOKIE["oce"]=="on" || $_GET["oce"]=="on") && 
-			$_GET["oce"]!="off" 
-        */
-	)
+
+	if($rh->principal->isAuth())
     {
 
   	//$tpl =& $rh->tpl;
@@ -28,7 +27,7 @@
   	$tpl->set('_module',$module);		
   	$tpl->set('_id',$id);		
     //echo ('cms_url='.$rh->cms_url);
-  	$tpl->set('_href', ( ($rh->cms_url[0]!="/"&&(strpos($rh->cms_url, "http://") !== 0)) ? "/" : "" ).$rh->cms_url.str_replace('::id::',$id,$rh->OCE[$module]).'hide_toolbar=1&popup=1' );
+  	$tpl->set('_href', $rh->cms_url.str_replace('::id::',$id,$rh->OCE[$module]).'hide_toolbar=1&popup=1' );
   	$tpl->set('_width', $params['width'] ? $params['width'] : 300 );		
   	$tpl->set('_height', $params['height'] ? $params['height'] : 400 );		
   	$tpl->set('_title', $params['title'] ? $params['title'] : 'редактировать' );		

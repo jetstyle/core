@@ -54,7 +54,7 @@ class DBModel extends Model
 
 		$this->_fields_info = array();
 		$fields_info =& $this->_fields_info;
-
+						
 		if (isset($this->fields_info))
 		{
 			foreach ($this->fields_info as $v)
@@ -83,6 +83,7 @@ class DBModel extends Model
 				$fields_info[$field_name] = $v;
 			}
 		}
+					
 		$fields = array();
 		foreach ($this->fields as $field_name)
 		{
@@ -114,7 +115,7 @@ class DBModel extends Model
 		// теперь здесь только БД'шные поля
 		// остальные -- в $this->foreign_fields
 		$this->fields = $fields;
-
+		
 		return $parent_status && True;
 	}
 	function load($where=NULL, $limit=NULL, $offset=NULL)
@@ -149,7 +150,6 @@ class DBModel extends Model
 		$fk = $info[$type]['fk'];
 		$pk = $info[$type]['pk'];
 		$self_name = $info[$type]['name'];
-
 
 		$model =& $this->$field_name;
 		if (!isset($model)) return;

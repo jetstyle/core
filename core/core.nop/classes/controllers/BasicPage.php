@@ -174,6 +174,7 @@ class BasicPage extends Controller
 
 		if (is_array($this->params_map)) foreach ($this->params_map as $v)
 		{
+			$matches = array();
 			list($action, $pattern) = $v;
 			if (True === $this->_match_url($this->rh->params, $pattern, &$matches))
 			{

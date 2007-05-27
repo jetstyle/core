@@ -14,7 +14,6 @@ class BasicContentPage extends BasicPage
 
 		parent::handle();
 
-
 		$this->rh->tpl->set('*', $this->config);
 		$this->rh->tpl->parse('_texts/textT.html', '_body');
 		$this->rh->site_map_path = 'inner';

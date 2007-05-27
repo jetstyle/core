@@ -199,12 +199,17 @@ class BasicRequestHandler extends ConfigProcessor {
 		$this->debug =& new Debug();
 
 		$this->debug->Trace("RH: creating DBAL");
+		
 		if ($this->db_al)
 		{
 			$this->UseClass("DBAL");
 			$this->db =& new DBAL( $this );
+			if($this->db_set_encoding)
+			{
+				$this->db->Query("SET CHARACTER SET ".$this->db_set_encoding);
+			}
 		}
-
+		
 		// ВЫКЛЮЧАЕМ tpl И msg если что
 		if ($this->tpl_disable===true){
 			$this->debug->Trace("RH: creating TPL : DISABLED");
@@ -284,16 +289,11 @@ class BasicRequestHandler extends ConfigProcessor {
 	//Инициализация принципала.
 	function &InitPrincipal()
 	{
-		$this->UseClass("Principal");
-		$this->principal = &new Principal( $this, $this->principal_storage_model, 
-			$this->principal_security_models );
+		$this->UseClass("PrincipalDB");
+		$this->principal = &new PrincipalDB( $this );
 
-		if ($this->principal->Identify() > PRINCIPAL_AUTH) 
-		{
-			// инициализация гостем "по-умолчанию"
-			$this->principal->Guest();
-		}
-
+		$this->principal->Authorise();
+		
 		return $this->principal;
 	}
 
