@@ -483,6 +483,12 @@ class RequestHandler extends BasicRequestHandler
 	{
 		set_error_handler(array(&$this, 'debugErrorHandler'));
 		parent::BasicRequestHandler($config_path);
+
+		$this->useClass('models/DBConfig');
+		$c =& new DBConfig();
+		$c->initialize($this);
+		$c->load();
+		config_joinConfigs($this, $c->data);
 	}
 
   function useFixture($type, $name)
