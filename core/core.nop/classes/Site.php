@@ -138,6 +138,7 @@ class Site
 			{
 				$app_dir = $ctx->app_dir;
 				$cls = ucfirst($app_name) . 'RequestHandler';
+								
 				require_once 'RequestHandler.php'; // HACK: lucky
 				require_once $app_dir.'/classes/controllers/'.$cls.'.php';
 			}

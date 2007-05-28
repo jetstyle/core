@@ -601,6 +601,7 @@ class RequestHandler extends BasicRequestHandler
 		$cls = strtolower($criteria['class']);
 		$url = $criteria['url'];
 
+		
 		if (isset($url) && isset($this->url2page[$url]))
 			return $this->url2page[$url];
 
