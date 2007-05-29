@@ -41,13 +41,13 @@ class BasicPageDomain
 	var $url = NULL;
 	var $config = array();
 
-	function BasicPageDomain() 
-	{ 
+	function BasicPageDomain()
+	{
 	}
 
-	function initialize(&$ctx, $config=NULL) 
-	{ 
-		$this->rh =& $ctx; 
+	function initialize(&$ctx, $config=NULL)
+	{
+		$this->rh =& $ctx;
 		if (isset($config)) $this->config = array_merge($this->config, $config);
 	}
 
@@ -55,7 +55,7 @@ class BasicPageDomain
 
 	function getPossiblePaths($url)
 	{
-		if (!isset($this->possible_paths)) 
+		if (!isset($this->possible_paths))
 		{
 			$this->possible_paths =& $this->buildPossiblePaths($url);
 		}
@@ -71,8 +71,8 @@ class BasicPageDomain
 	{
 		$url_parts = explode("/", rtrim($url, "/"));
 		$max_path = array();
-		do 
-			$max_path[] = implode ("/", $url_parts);
+		do
+		$max_path[] = implode ("/", $url_parts);
 		while (array_pop($url_parts) && $url_parts);
 		return $max_path;
 	}
@@ -112,9 +112,9 @@ class ContentPageDomain extends BasicPageDomain
 
 	function getPageClassByMode($mode)
 	{
-		return isset($this->rh->mode_map[$mode]) 
-			? $this->rh->mode_map[$mode]
-			: (($mode ? implode('', array_map(ucfirst, explode('_', $mode))) : "Content" ) .  "Page");
+		return isset($this->rh->mode_map[$mode])
+		? $this->rh->mode_map[$mode]
+		: (($mode ? implode('', array_map(ucfirst, explode('_', $mode))) : "Content" ) .  "Page");
 	}
 	function getModeByPageClass($cls)
 	{
@@ -150,10 +150,10 @@ class ContentPageDomain extends BasicPageDomain
 		{
 			$page_cls = $this->getPageClassByMode($data['mode']);
 			$config = array (
-				'class' => $page_cls,
-				'config' => $data,
-				'path' => $data['_path'],
-				'url' => $url,
+			'class' => $page_cls,
+			'config' => $data,
+			'path' => $data['_path'],
+			'url' => $url,
 			);
 			if ($this->rh->FindScript("classes/controllers", $page_cls))
 			{
@@ -175,9 +175,9 @@ class ModuleContentPageDomain extends BasicPageDomain
 
 	function getPageClassByMode($mode)
 	{
-		return isset($this->rh->mode_map[$mode]) 
-			? $this->rh->mode_map[$mode]
-			: (($mode ? implode('', array_map(ucfirst, explode('_', $mode))) : "Content" ) .  "Page");
+		return isset($this->rh->mode_map[$mode])
+		? $this->rh->mode_map[$mode]
+		: (($mode ? implode('', array_map(ucfirst, explode('_', $mode))) : "Content" ) .  "Page");
 	}
 	function getModeByPageClass($cls)
 	{
@@ -213,9 +213,9 @@ class ModuleContentPageDomain extends BasicPageDomain
 		{
 			$page_cls = $this->getPageClassByMode($data['mode']);
 			$config = array (
-				'config' => $data,
-				'path' => $data['_path'],
-				'url' => $url,
+			'config' => $data,
+			'path' => $data['_path'],
+			'url' => $url,
 			);
 			if ($config['page'] =& $this->rh->useModule('pages/'.$page_cls))
 			{
@@ -257,8 +257,8 @@ class HanlderDomain extends BasicPageDomain
 
 		if (!isset($criteria['url'])) return False;
 
-		if (isset($criteria['url'])) 
-			$url = $criteria['url'];
+		if (isset($criteria['url']))
+		$url = $criteria['url'];
 
 		$possible_paths = $this->getPossiblePaths($url);
 
@@ -266,7 +266,7 @@ class HanlderDomain extends BasicPageDomain
 		{
 			if (isset($this->handlers_map[$up]) || isset($this->handlers_map[$up."/"]))
 			{
-				//если найдено точно соответсвие 
+				//если найдено точно соответсвие
 				if (isset($this->handlers_map[$up]))
 				{
 					$_handler = $this->handlers_map[$up];
@@ -283,20 +283,20 @@ class HanlderDomain extends BasicPageDomain
 				}
 
 				/*
-				 * Проверка наличия контроллера на диске
-				 */
+				* Проверка наличия контроллера на диске
+				*/
 				if ($this->rh->FindScript("handlers", $_handler ))
 				{
 					$page_cls = 'HandlerPage';
 					if ($this->rh->FindScript("classes/controllers", $page_cls))
 					{
 						$config = array (
-							'class' => $page_cls,
-							'config' => array (
-								'handler'=>$_handler,
-							),
-							'path' => $data['_path'],
-							'url' => $url,
+						'class' => $page_cls,
+						'config' => array (
+						'handler'=>$_handler,
+						),
+						'path' => $data['_path'],
+						'url' => $url,
 						);
 						$this->rh->UseClass("controllers/".$page_cls);
 						if ($this->handler = &$this->buildPage($config))
@@ -323,22 +323,22 @@ class SitemapDomain extends BasicPageDomain
 		if (empty($criteria)) return False;
 
 		if (!isset($criteria['url'])) return False;
-		if (isset($criteria['url'])) 
-			$url = rtrim($criteria['url'], '/');
+		if (isset($criteria['url']))
+		$url = rtrim($criteria['url'], '/');
 
 		/*
-		 * Проверка наличия контроллера на диске
-		 */
+		* Проверка наличия контроллера на диске
+		*/
 		if (isset($this->rh->site_map[$url]))
 		{
 			$page_cls = 'SiteMapPage';
 			if ($this->rh->FindScript("classes/controllers", $page_cls))
 			{
 				$config = array (
-					'class' => $page_cls,
-					'config' => array (),
-					'path' => '',
-					'url' => '/'.$url,
+				'class' => $page_cls,
+				'config' => array (),
+				'path' => '',
+				'url' => '/'.$url,
 				);
 				$this->rh->UseClass("controllers/".$page_cls);
 				if ($this->handler = &$this->buildPage($config))
@@ -367,7 +367,7 @@ class HanlderPageDomain extends BasicPageDomain
 		{
 			if (isset($this->handlers_map[$up]) || isset($this->handlers_map[$up."/"]))
 			{
-				//если найдено точно соответсвие 
+				//если найдено точно соответсвие
 				if (isset($this->handlers_map[$up]))
 				{
 					$_handler = $this->handlers_map[$up];
@@ -384,16 +384,16 @@ class HanlderPageDomain extends BasicPageDomain
 				}
 
 				/*
-				 * Проверка наличия контроллера на диске
-				 */
+				* Проверка наличия контроллера на диске
+				*/
 				if (!empty($_handler))
 				{
 					$page_cls = $_handler;
 					$config = array (
-						'class' => $page_cls,
-						'config' => array (),
-						'path' => $up,
-						'url' => $url,
+					'class' => $page_cls,
+					'config' => array (),
+					'path' => $up,
+					'url' => $url,
 					);
 					if ($this->rh->FindScript("classes/controllers", $page_cls))
 					{
@@ -412,15 +412,136 @@ class HanlderPageDomain extends BasicPageDomain
 	function findByClass($page_cls)
 	{
 		/*
-		 * Проверка наличия контроллера на диске
-		 */
+		* Проверка наличия контроллера на диске
+		*/
 		if (!empty($page_cls))
 		{
 			$config = array (
-				'class' => $page_cls,
-				'config' => array (),
-				'path' => $this->rh->url,
-				'url' => $this->rh->url,
+			'class' => $page_cls,
+			'config' => array (),
+			'path' => $this->rh->url,
+			'url' => $this->rh->url,
+			);
+			if ($this->rh->FindScript("classes/controllers", $page_cls))
+			{
+				$this->rh->UseClass("controllers/".$page_cls);
+				if ($this->handler = &$this->buildPage($config))
+				{
+					return True;
+				}
+			}
+		}
+		return False;
+	}
+
+	function &find($criteria)
+	{
+		if (empty($criteria)) return False;
+
+		if (isset($criteria['url'])) return $this->findByUrl($criteria['url']);
+		if (isset($criteria['class'])) return $this->findByClass($criteria['class']);
+		return False;
+	}
+
+}
+
+
+
+class ModuleHanlderPageDomain extends BasicPageDomain
+{
+
+	function findByUrl($url)
+	{
+		$possible_paths = $this->getPossiblePaths($url);
+
+		foreach ($possible_paths as $up)
+		{
+			if (isset($this->handlers_map[$up]) || isset($this->handlers_map[$up."/"]))
+			{
+				//если найдено точно соответсвие
+				if (isset($this->handlers_map[$up]))
+				{
+					$_handler = $this->handlers_map[$up];
+				}
+				//если мап многие ко многим
+				else if ($this->handlers_map[$up."/"][strlen($this->handlers_map[$up."/"])-1]=="*")
+				{
+					$_handler = $url;
+				}
+				//каталог мапится на один хендлер (многие к одному)
+				elseif ($this->handlers_map[$up."/"])
+				{
+					$_handler = $this->handlers_map[$up."/"];
+				}
+
+				/*
+				* Проверка наличия контроллера на диске
+				*/
+				if (!empty($_handler))
+				{
+					$page_cls = $_handler;
+					$config = array (
+						'class' => $page_cls,
+						'config' => array (),
+						'path' => $up,
+						'url' => $url,
+					);
+
+/*					$config = array (
+						
+						'config' => $data,
+						'path' => $data['_path'],
+						'url' => $url,
+					);*/
+					if ($config['page'] =& $this->rh->useModule('pages/'.$page_cls))
+					{
+						if ($this->handler = &$this->buildPage($config))
+						{
+							//var_dump($this->handler->plugins);
+							return True;
+						}
+					}
+
+
+					/*if ($this->rh->FindScript("classes/controllers", $page_cls))
+					{
+						$this->rh->UseClass("controllers/".$page_cls);
+						if ($this->handler = &$this->buildPage($config))
+						{
+							return True;
+						}
+					}*/
+				}
+			}
+		}
+		return False;
+	}
+
+	function &buildPage($config)
+	{
+		$page =& $config['page'];
+		$page->domain =& $this;
+		$page->url = $config['url'];
+		$page->path = $config['path'];
+		$page->params = $this->getParams($page->url, $page->path);
+		$this->rh->_onCreatePage($page,$config);
+		$page->initialize($this->rh, $config['config']);
+
+		return $page;
+	}
+	
+	function findByClass($page_cls)
+	{
+		/*
+		* Проверка наличия контроллера на диске
+		*/
+		if (!empty($page_cls))
+		{
+			$config = array (
+			'class' => $page_cls,
+			'config' => array (),
+			'path' => $this->rh->url,
+			'url' => $this->rh->url,
 			);
 			if ($this->rh->FindScript("classes/controllers", $page_cls))
 			{
@@ -447,7 +568,7 @@ class HanlderPageDomain extends BasicPageDomain
 
 require_once dirname(__FILE__).'/ConfigProcessor.php';
 require_once dirname(__FILE__).'/BasicRequestHandler.php';
-class RequestHandler extends BasicRequestHandler 
+class RequestHandler extends BasicRequestHandler
 {
 	var $fixtures = array();
 	var $use_fixtures = False;
@@ -463,18 +584,18 @@ class RequestHandler extends BasicRequestHandler
 		{
 			switch($errno)
 			{
-			default:
-				$dump = debug_backtrace();
-				array_shift($dump);
-				echo sprintf('<div><b>Error: %s</b></div>', $errstr);
-				echo sprintf('<div>%s:%s</div>', $errfile, $errline);
-				echo sprintf('<p><b>backtrace</b></p>', $errfile, $errline);
-				foreach ($dump as $k=>$v)
-				{
-					echo sprintf('<p>%s%s%s</p>', $v['class'], $v['type'], $v['function']);
-					echo sprintf('<p>%s:%s</p>', $v['file'], $v['line']);
-				}
-				die();
+				default:
+					$dump = debug_backtrace();
+					array_shift($dump);
+					echo sprintf('<div><b>Error: %s</b></div>', $errstr);
+					echo sprintf('<div>%s:%s</div>', $errfile, $errline);
+					echo sprintf('<p><b>backtrace</b></p>', $errfile, $errline);
+					foreach ($dump as $k=>$v)
+					{
+						echo sprintf('<p>%s%s%s</p>', $v['class'], $v['type'], $v['function']);
+						echo sprintf('<p>%s:%s</p>', $v['file'], $v['line']);
+					}
+					die();
 			}
 		}
 	}
@@ -491,31 +612,31 @@ class RequestHandler extends BasicRequestHandler
 		config_joinConfigs($this, $c->data);
 	}
 
-  function useFixture($type, $name)
-  {
+	function useFixture($type, $name)
+	{
 
-	  if (!array_key_exists($name, $this->fixtures)) 
-	  {
-		  if ($s = $this->FindScript( $type, $name, false, -1, 'yml'))
-		  {
+		if (!array_key_exists($name, $this->fixtures))
+		{
+			if ($s = $this->FindScript( $type, $name, false, -1, 'yml'))
+			{
 				if (!class_exists('Spyc')) $this->useLib('spyc');
 				$this->fixtures[$name] = Spyc::YAMLLoad($s);
-		  }
-		  else
-		  if ($s = $this->FindScript( $type, $name, false, -1, 'php'))
-		  {
-			  $tpl =& $this->tpl;
-			  $this->fixtures[$name] = include $s;
-		  }
-		  else
-		  {
-			  $this->fixtures[$name] = NULL;
-		  }
-	  }
-	  return isset($this->fixtures[$name])
-		  ? $this->fixtures : NULL;
+			}
+			else
+			if ($s = $this->FindScript( $type, $name, false, -1, 'php'))
+			{
+				$tpl =& $this->tpl;
+				$this->fixtures[$name] = include $s;
+			}
+			else
+			{
+				$this->fixtures[$name] = NULL;
+			}
+		}
+		return isset($this->fixtures[$name])
+		? $this->fixtures : NULL;
 
-  }
+	}
 
 	function useModule($name, $type=NULL)
 	{
@@ -527,7 +648,7 @@ class RequestHandler extends BasicRequestHandler
 	}
 
 	function _onCreatePage(&$page)
-	{ 
+	{
 	}
 
 	function &getPageDomains()
@@ -536,38 +657,38 @@ class RequestHandler extends BasicRequestHandler
 		{
 			$this->page_domains = array();
 			/*
-			 * Пытаемся найти узел в Page-хендлерах
-			 */
+			* Пытаемся найти узел в Page-хендлерах
+			*/
 			$hpc =& new HanlderPageDomain();
 			$hpc->initialize($this);
 			$hpc->handlers_map =& $this->handlers_map;
 			$this->page_domains[] =& $hpc;
 
 			/*
-			 * Пытаемся найти узел в хендлерах
-			 */
+			* Пытаемся найти узел в хендлерах
+			*/
 			$hc =& new HanlderDomain();
 			$hc->initialize($this);
 			$hc->handlers_map =& $this->handlers_map;
 			$this->page_domains[] =& $hc;
 
 			/*
-			 * Пытаемся найти модуль в таблице контент
-			 */
+			* Пытаемся найти модуль в таблице контент
+			*/
 			$mpc =& new ModuleContentPageDomain();
 			$mpc->initialize($this);
 			$this->page_domains[] =& $mpc;
 
 			/*
-			 * Пытаемся найти узел в таблице контент
-			 */
+			* Пытаемся найти узел в таблице контент
+			*/
 			$cpc =& new ContentPageDomain();
 			$cpc->initialize($this);
 			$this->page_domains[] =& $cpc;
 
 			/*
-			 * Пытаемся найти узел в таблице контент
-			 */
+			* Пытаемся найти узел в таблице контент
+			*/
 			$smc =& new SitemapDomain();
 			$smc->initialize($this);
 			$this->page_domains[] =& $smc;
@@ -603,7 +724,7 @@ class RequestHandler extends BasicRequestHandler
 
 		
 		if (isset($url) && isset($this->url2page[$url]))
-			return $this->url2page[$url];
+		return $this->url2page[$url];
 
 		if (isset($cls) && isset($this->cls2page[$cls]))
 		{
@@ -642,9 +763,9 @@ class RequestHandler extends BasicRequestHandler
 	}
 
 	/* перегружаем Execute
-	 *
-	 * @params $this->handler -   класс контроллера страницы которому делаем хандл
-	 */
+	*
+	* @params $this->handler -   класс контроллера страницы которому делаем хандл
+	*/
 	function Execute( $handler="", $type="" )
 	{
 		$this->UseClass("Upload");
@@ -671,9 +792,9 @@ class RequestHandler extends BasicRequestHandler
 	function finalize() { return $this->End(); }
 
 	/*
-	 * Отработать по ключу сайтмапа
-	 * TODO: А не дело ли это View ??
-	 */
+	* Отработать по ключу сайтмапа
+	* TODO: А не дело ли это View ??
+	*/
 	function showSiteMap()
 	{
 		if($this->debug_show)	{
@@ -691,20 +812,20 @@ class RequestHandler extends BasicRequestHandler
 				{
 					$_v = "";
 					foreach($v as $v1)
-						$_v .= $this->_ConstructValue($v1);
+					$_v .= $this->_ConstructValue($v1);
 					$this->tpl->set( $k, $_v );
 				}else
-					//значение переменной
-					$this->tpl->set( $k, $this->_ConstructValue($v) );
+				//значение переменной
+				$this->tpl->set( $k, $this->_ConstructValue($v) );
 			}
 		}
 		if ($this->ri->get('print'))
-			$this->tpl->set('html:print', '1');
+		$this->tpl->set('html:print', '1');
 	}
 
 	/*
-	 * Вспомогательная функция для сайтмапа (this->End())
-	 */
+	* Вспомогательная функция для сайтмапа (this->End())
+	*/
 	function _ConstructValue( $v )
 	{
 		if( $v[0]=="@" )     //отпарсить шаблон
@@ -716,18 +837,18 @@ class RequestHandler extends BasicRequestHandler
 			return $this->tpl->get( substr(substr($v,2), 0, -2) );
 		}
 		else    //вставить текст
-			return $v;
+		return $v;
 	}
 
 	function PrepareResult( $after_execute )
 	{
-	 /*
-	 На этом уровне проверяем, нужно ли оборачивать результат в html.html
-	 Для дополнительной пост-обработки окружения перегружать этот метод в наследниках.
-	  */
-		$template = isset($this->page->template) 
-			? $this->page->template
-			: 'html.html';
+		/*
+		На этом уровне проверяем, нужно ли оборачивать результат в html.html
+		Для дополнительной пост-обработки окружения перегружать этот метод в наследниках.
+		*/
+		$template = isset($this->page->template)
+		? $this->page->template
+		: 'html.html';
 
 		$tpl =& $this->tpl;
 		if( !$tpl->Is("HTML:html") )
@@ -736,9 +857,9 @@ class RequestHandler extends BasicRequestHandler
 			return $tpl->Parse( $template );
 		}
 		else
-			return $tpl->get("HTML:html");
+		return $tpl->get("HTML:html");
 	}
 
-} 
+}
 
 ?>
