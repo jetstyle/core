@@ -1,0 +1,36 @@
+{{TPL:body}}
+{{!connect "swfobject.js"}}
+
+{{?generate_container}}
+  <div id="{{container}}">
+  </div>
+{{/?}}
+<script type="text/javascript">
+//<![CDATA[
+   var so = new SWFObject("{{images}}flash/{{src}}", "{{id}}","{{width}}",
+                       "{{height}}","{{version}}","{{bgcolor}}",
+                       '{{quality}}',
+                       '{{xiRedirectUrl}}',
+                       '{{redirectUrl}}',
+                       '{{detectKey}}');
+   so.useExpressInstall('{{images}}flash/expressinstall.swf');
+   {{?transparent}}
+     so.addParam("wmode", "transparent");
+   {{/?}}
+
+
+   so.addParam("scale",  "{{scale}}");
+   so.addParam("salign", "{{salign}}");
+   so.addParam("menu",   "{{menu}}");
+
+   {{flashvars}}
+
+   so.write("{{container}}");
+   
+//]]>
+</script>
+{{/TPL:body}}
+
+ {{TPL:Variable_Item}}   
+   so.addVariable('{{var_key}}','{{var_value}}');
+ {{/TPL:Variable_Item}}   
