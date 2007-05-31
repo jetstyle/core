@@ -77,7 +77,7 @@ class Model
 	function initialize(&$ctx, $config=NULL) 
 	{ 
 		$this->rh =& $ctx; 
-		if (isset($config)) 
+		if (is_array($config) && is_array($this->config)) 
 			$this->config = array_merge($this->config, $config);
 		return True;
 	}

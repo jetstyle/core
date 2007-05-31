@@ -289,12 +289,17 @@ class BasicRequestHandler extends ConfigProcessor {
 	//Инициализация принципала.
 	function &InitPrincipal()
 	{
-		$this->UseClass("PrincipalDB");
-		$this->principal = &new PrincipalDB( $this );
 
-		$this->principal->Authorise();
-		
+		$this->UseClass("Principal");
+		$this->principal = &new Principal( $this, $this->principal_storage_model, 
+			$this->principal_security_models );
+
+		if ($this->principal->Identify() > PRINCIPAL_AUTH) 
+		{
+			$this->principal->Guest();
+		}
 		return $this->principal;
+
 	}
 
 	//Выбор обработчика на основе строки запроса и карты обработчиков.
