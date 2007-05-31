@@ -241,8 +241,14 @@ class BasicPage extends Controller
 		// (первого из элементов)
 		$this->rh->tpl->set('PAGE', $this);
 		$this->rh->tpl->set('name', $this->title);
-		$this->rh->tpl->set('meta_keywords', $this->meta_keywords);
-		$this->rh->tpl->set('meta_description', $this->meta_description);
+		if(!$this->rh->tpl->get('meta_keywords'))
+		{
+			$this->rh->tpl->set('meta_keywords', $this->meta_keywords);
+		}
+		if(!$this->rh->tpl->get('meta_description'))
+		{
+			$this->rh->tpl->set('meta_description', $this->meta_description);
+		}
 		$this->notifyOnRend();
 	}
 
