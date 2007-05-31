@@ -154,7 +154,7 @@
         // 5.1 <wbr> после дефисов
         if ($this->settings["dashwbr"])
         {
-          $data = preg_replace( "/([a-zа-€ј-я0-9]+)\-([a-zа-€ј-я0-9]+)/i", "\\1-<wbr>\\2", $data );
+          $data = preg_replace( "/([a-zа-€ј-я0-9]+)\-([a-zа-€ј-я0-9]+)/i", "\\1-<wbr />\\2", $data );
         }
 
         // 6. ћакросы
