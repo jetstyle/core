@@ -507,7 +507,11 @@ class TreeControl extends DBDataEditTree  {
     	$_title = $node->title_short ? $node->title_short : $node->title;
     	$_title = $_title ? $_title : 'node_'.$node->id;
 
-    	if ($node->_state > 0)
+    	if ($node->_state == 1)
+    	{
+            $_title = $_title  .' [скрыт]';
+    	}
+	elseif ($node->_state > 1)
     	{
             $_title = $_title  .' [удален]';
     	}
