@@ -92,6 +92,7 @@ class CyrDate
 		'M'=>'months_str',
 		'N'=>'month_str',
 		'd'=>'day',
+		'j'=>'day_short',
 		'H'=>'hour',
 		'i'=>'minute',
 		's'=>'second',
@@ -281,6 +282,7 @@ class CyrDate
 	function year() { return sprintf('%04d', $this->year); }
 	function month() { return sprintf('%02d', $this->month); }
 	function day() { return sprintf('%02d', $this->day); }
+	function day_short() { return sprintf('%d', $this->day); }
 	function hour() { return sprintf('%02d', $this->hour); }
 	function minute() { return sprintf('%02d', $this->minute); }
 	function second() { return sprintf('%02d', $this->second); }
