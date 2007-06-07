@@ -386,6 +386,8 @@ class DBModel extends Model
 		list($sql, $sql1) = $sql_parts;
 		if ($is_load) $this->sql = $sql1;
 		$data = $this->rh->db->query($sql);
+//		echo '<pre>';
+//		var_dump($sql);
 		$this->loadForeignFields($data);
 		return $data;
 	}
