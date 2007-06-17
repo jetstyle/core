@@ -1,7 +1,7 @@
-<?
-  $this->UseClass('Principal');
+<?php
+  $this->UseClass('PrincipalCms');
   
-class PrincipalDB extends Principal 
+class PrincipalDB extends PrincipalCms
 {
  	var $id_field="user_id";
     var $SELECT_FIELDS = array("user_id","roles","login","password");
@@ -66,7 +66,7 @@ var $ROLES_REVERT = array(
 
   function PrincipalDB(&$rh)
   {
-    Principal::Principal($rh);
+    PrincipalCms::PrincipalCms($rh);
     $this->cookie_prefix = $rh->project_name.'_';
     $prp =& $this;    
     $this->users_table = $rh->db_prefix.$this->users_table;
