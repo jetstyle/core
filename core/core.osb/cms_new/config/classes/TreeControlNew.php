@@ -140,13 +140,18 @@ class TreeControlNew extends TreeControl
 		{
 			$node = (object)$root;
 			//$str .= str_repeat(" ",$node->_level)."<item text=\"".($this->_getTitle($node))."\" ".$this->_getAction($node->id, count($this->CHILDREN[$node->id]), true)." id=\"".$node->id."\" open='1' db_state=\"".$node->_state."\" >\n";
-			$xml_attrs =  array_merge(
-				array(
+			$arr = array(
 					'text',		 $this->_getTitle($node),
 					'id',			 $node->id,
 					'open',		 1,
 					'db_state',	 $node->_state,
-				),
+				);
+			if($current->id == 1)
+			{
+				array_push($arr, 'select', 'true');
+			}
+			$xml_attrs =  array_merge(
+				$arr,
 				$this->_getAction($node->id, count($this->CHILDREN[$node->id]), true)
 			);
 			$str .= str_repeat(" ",$node->_level) . $this->xmlOpenTag('item', $xml_attrs)."\n";
@@ -241,7 +246,7 @@ class TreeControlNew extends TreeControl
 				(title, title_short, _parent)
 				VALUES
 				('new', 'new', '".$parent."')
-				");
+			");
 
 			$this->loaded = false;
 			$this->Load();
@@ -272,6 +277,7 @@ class TreeControlNew extends TreeControl
 		elseif($rh->getVar('change'))	
 		{
 			$itemId = intval($rh->getVar('id'));
+			$this->id = $itemId;
 			$targetId = intval($rh->getVar('target'));
 			$beforeId = intval($rh->getVar('before'));
 
@@ -305,7 +311,11 @@ class TreeControlNew extends TreeControl
 			$this->loaded = false;
 			$this->Load();
 			$this->Restore();
-
+			
+			$this->table_name = $this->config->table_name;
+			
+			include( $rh->FindScript('handlers','_update_tree_pathes') );
+			
 			return '1';
 		}
 		return '0';
