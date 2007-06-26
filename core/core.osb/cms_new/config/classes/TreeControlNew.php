@@ -192,6 +192,7 @@ class TreeControlNew extends TreeControl
 					array('text',			$title),
 					array("id",				$node->id),
 					array('db_state',		$node->_state),
+					array('style',		$node->_state == 1 ? 'background-color: pink;' : ''),
 			);
 			if ($t = $this->_getOpen($node)) 
 				$xml_attrs[] = array('open', $t);
