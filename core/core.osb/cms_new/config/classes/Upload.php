@@ -1,4 +1,4 @@
-<?
+<?php
 
 /*
 Upload -- типизированная работа с файлами
@@ -129,7 +129,15 @@ class Upload {
 		return true;
 	}
 
-	function UploadFile( $_file, $file_name, $is_full_name=false, $resize = NULL ){
+	function parseSizeParam($val)
+	{
+		$pattern = '/(<|>|>=|<=|=|)(\d+)/';
+		preg_match($pattern, $val, $matches);
+		return array($matches[1], $matches[2]);
+	}
+
+	function UploadFile( $_file, $file_name, $is_full_name=false, $params = NULL ){
+			
 		if(!is_array($_file))	{
 			$_file = $_FILES[ $_file ];
 		}
@@ -149,18 +157,57 @@ class Upload {
 			$this->DelFile($file_name);         //if($del_prev) ...
 			$file_name_ext = $file_name.".".$ext;
 			$file_name_full = ( $is_full_name )? $file_name : $this->dir.$file_name_ext;
-			if(is_array($resize) && $resize[0] > 0 && $resize[1] > 0)
+			
+			if(is_array($params['size']) && (strlen($params['size'][0]) > 0 && strlen($params['size'][1]) > 0))
 			{
-				$img = $this->CreateThumb($uploaded_file, array('x' => $resize[0], 'y' => $resize[1]), 1, $resize[2]);
-				if($img['error']) return false;
-				$file = fopen($file_name_full, 'w');
-				fwrite($file, $img['data']);
-				fclose($file);
+				$x = $this->parseSizeParam($params['size'][0]);
+				$y = $this->parseSizeParam($params['size'][1]);
+				
+				if($x[0] == '' && $y[0] == '') // resize
+				{
+					$img = $this->CreateThumb($uploaded_file, array('x' => $x[1], 'y' => $y[1]), 1, $params['crop']);
+					if($img['error']) return false;
+					$file = fopen($file_name_full, 'w');
+					fwrite($file, $img['data']);
+					fclose($file);
+				}
+				else
+				{
+					$A = getimagesize($uploaded_file);
+					$x[0] = $x[0] == '=' ? '==' : $x[0];
+					$y[0] = $y[0] == '=' ? '==' : $y[0];
+					
+					eval('$_x = ('.$A[0].$x[0].$x[1].');');
+					eval('$_y = ('.$A[1].$y[0].$y[1].');');
+					
+					if($_x && $_y)
+					{
+						move_uploaded_file($uploaded_file,$file_name_full);
+					}
+					else
+					{
+						@unlink($uploaded_file);
+						return false;
+					}
+				}
 			}
 			else
 			{
 				move_uploaded_file($uploaded_file,$file_name_full);
 			}
+			
+//			if(is_array($resize) && $resize[0] > 0 && $resize[1] > 0)
+//			{
+//				$img = $this->CreateThumb($uploaded_file, array('x' => $resize[0], 'y' => $resize[1]), 1, $resize[2]);
+//				if($img['error']) return false;
+//				$file = fopen($file_name_full, 'w');
+//				fwrite($file, $img['data']);
+//				fclose($file);
+//			}
+//			else
+//			{
+//				move_uploaded_file($uploaded_file,$file_name_full);
+//			}
 
 			chmod($file_name_full,$this->chmod);
 			$this->_Current($file_name,$ext);

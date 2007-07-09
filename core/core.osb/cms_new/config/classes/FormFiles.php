@@ -59,7 +59,7 @@ class FormFiles extends FormSimple  {
 		{
 			$this->_renderFilesOld();
 		}
-		elseif(is_array($this->config->_FILES))
+		elseif(is_array($config->_FILES))
 		{
 			$this->_renderFiles();
 		}
@@ -289,13 +289,22 @@ class FormFiles extends FormSimple  {
 					if ($me_too = $this->_shouldTakeFromIfEmpty($field_file))
 					{
 						$vvv = $this->take_to;
-						$upload->UploadFile($this->prefix.$field_file, str_replace('*', $this->id, $vvv['filename']), false, array($vvv['size'][0], $vvv['size'][1], $vvv['crop']));
+						$upload->UploadFile($this->prefix.$field_file, str_replace('*', $this->id, $vvv['filename']), false, $this->buildParams($vvv));
 					}
 
-					$upload->UploadFile($this->prefix.$field_file, str_replace('*', $this->id, $vv['filename']), false, array($vv['size'][0], $vv['size'][1], $vv['crop']));
+					$upload->UploadFile($this->prefix.$field_file, str_replace('*', $this->id, $vv['filename']), false, $this->buildParams($vv));
 				}
 			}
 		}
+	}
+
+	function buildParams($d)
+	{
+		return array(
+				'size' => $d['size'],
+				'crop' => $d['crop'],
+				'base' => $d['base'],				
+			);
 	}
 
 	function Delete(){

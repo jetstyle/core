@@ -87,6 +87,7 @@ class DBDataEdit extends DBDataView {
   	$sql .= " WHERE ".$this->SELECT_FIELDS[0]."='$id'".(($where)? " AND ".$where : "" );
 	
   	$db->execute($sql);
+  	
 		return true;
   }
 	
