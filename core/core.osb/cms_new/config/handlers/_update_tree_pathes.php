@@ -31,7 +31,7 @@
     					$STACK[] = $_id;
     			//модифицируем узел
     			$r = $tree->ITEMS[$id];
-                if ($r['_parent'] == 0)
+                if ($r['_parent'] == 0 && $parent_id !== 0)
                 {
                     $r['_path'] = '';
                     $r['_supertag'] = '';
