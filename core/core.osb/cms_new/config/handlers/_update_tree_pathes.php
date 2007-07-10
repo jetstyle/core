@@ -1,5 +1,7 @@
 <?
-		//вызывать внутри Form*::Update
+	$parent_id = isset($parent_id) ? $parent_id : 1; 	
+
+	//вызывать внутри Form*::Update
 		//меняем пути у всего поддерева
 		
 		//грузим этот узел
@@ -35,7 +37,7 @@
                     $r['_supertag'] = '';
                 }
                 else
-        			$r['_path'] = $tree->ITEMS[ $r['_parent'] ]['_path'].( $r['_parent']!=1 ? '/' : '').$r["_supertag"];
+        			$r['_path'] = $tree->ITEMS[ $r['_parent'] ]['_path'].( $r['_parent']!=$parent_id ? '/' : '').$r["_supertag"];
     			$db->execute("UPDATE ".$this->table_name." SET _supertag='".$r["_supertag"]."',_path='".$r['_path']."' WHERE id='".$r['id']."'");            
     			$tree->ITEMS[$id] = $r;
     		}
