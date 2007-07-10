@@ -137,7 +137,7 @@ class Upload {
 	}
 
 	function UploadFile( $_file, $file_name, $is_full_name=false, $params = NULL ){
-			
+				
 		if(!is_array($_file))	{
 			$_file = $_FILES[ $_file ];
 		}
@@ -158,6 +158,34 @@ class Upload {
 			$file_name_ext = $file_name.".".$ext;
 			$file_name_full = ( $is_full_name )? $file_name : $this->dir.$file_name_ext;
 			
+			$A = getimagesize($uploaded_file);
+			$B = filesize($uploaded_file);
+			
+			if($params['filesize'])
+			{
+				$kill = false;
+				$size = $this->parseSizeParam($params['filesize']);
+					
+				if($size[0] == '')
+				{
+					if($B != $size[1])
+					{
+						$kill = true;
+					}
+				}
+				else
+				{
+					eval('$kill = ('.$size[1].$size[0].$B.');');
+				}
+
+				if($kill)
+				{
+					@unlink($uploaded_file);
+					return false;
+				}
+				
+			}
+			
 			if(is_array($params['size']) && (strlen($params['size'][0]) > 0 && strlen($params['size'][1]) > 0))
 			{
 				$x = $this->parseSizeParam($params['size'][0]);
@@ -173,7 +201,6 @@ class Upload {
 				}
 				else
 				{
-					$A = getimagesize($uploaded_file);
 					$x[0] = $x[0] == '=' ? '==' : $x[0];
 					$y[0] = $y[0] == '=' ? '==' : $y[0];
 					

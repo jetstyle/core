@@ -302,6 +302,7 @@ class FormFiles extends FormSimple  {
 	{
 		return array(
 				'size' => $d['size'],
+				'filesize' => $d['filesize'],
 				'crop' => $d['crop'],
 				'base' => $d['base'],				
 			);
