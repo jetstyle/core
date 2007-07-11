@@ -15,7 +15,7 @@ class Link
 	{
 		foreach($this->allowed_proto AS $r)
 		{
-			if(!(strpos($val, $r) === false))
+			if($r && !(strpos($val, $r) === false))
 			{
 				return $val;
 			}
