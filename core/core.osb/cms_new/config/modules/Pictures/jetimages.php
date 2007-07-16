@@ -38,7 +38,7 @@
 		//постраничный рубрикатор
 		$rh->UseClass('Arrows');
 		$arrows = new Arrows( $rh );
-		$arrows->outpice = 9;
+		$arrows->outpice = 15;
 		$arrows->mega_outpice = 5;
 		$arrows->SetupSum( $res[0]['total'] );
 		$arrows->Set($rh->state);
