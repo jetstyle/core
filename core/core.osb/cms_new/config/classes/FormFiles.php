@@ -248,7 +248,7 @@ class FormFiles extends FormSimple  {
 		{
 			foreach($result_arrays AS $vv)
 			{
-				if ($vv['take_from_if_empty'][0]==$from_field_file)
+				if ($vv['take_from_if_empty'][0]==$from_field_file && !is_uploaded_file($_FILES[$this->prefix.$field_file]['tmp_name']))
 				{
 					$this->take_to = $vv;
 					return $field_file;
