@@ -1,6 +1,6 @@
 <?
 	
-	$this->UseClass('FormSimple',1);
+	$this->UseClass('FormSimple');
 	
 class TextsForm extends FormSimple {
   
