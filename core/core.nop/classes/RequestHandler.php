@@ -820,7 +820,9 @@ class RequestHandler extends BasicRequestHandler
 			}
 		}
 		if ($this->ri->get('print'))
-		$this->tpl->set('html:print', '1');
+		{
+			$this->tpl->set('html:print', '1');
+		}
 	}
 
 	/*
