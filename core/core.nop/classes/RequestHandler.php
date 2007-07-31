@@ -797,6 +797,8 @@ class RequestHandler extends BasicRequestHandler
 	*/
 	function showSiteMap()
 	{
+		$this->tpl->set('print_href', $this->ri->hrefPlus('', array('print' => 1)));		
+		
 		if($this->debug_show)	{
 			$this->tpl->Set('DEBUG', $this->debug->getHtml());
 		}
