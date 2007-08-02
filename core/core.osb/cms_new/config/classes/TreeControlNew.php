@@ -282,11 +282,11 @@ class TreeControlNew extends TreeControl
 			$targetId = intval($rh->getVar('target'));
 			$beforeId = intval($rh->getVar('before'));
 
-			$db->query("
-				UPDATE ". $this->config->table_name ."
-				SET _parent = '".$targetId."'
-				WHERE id = '".$itemId."'
-				");
+//			$db->query("
+//				UPDATE ". $this->config->table_name ."
+//				SET _parent = '".$targetId."'
+//				WHERE id = '".$itemId."'
+//				");
 
 			if($beforeId)
 			{
@@ -302,12 +302,26 @@ class TreeControlNew extends TreeControl
 					WHERE _order >= " . $node['_order'] . " AND _parent = '" . $node['_parent'] . "'
 					");
 
-				$db->query("
-					UPDATE ". $this->config->table_name ."
-					SET _order = " . $node['_order'] . "
-					WHERE id = " . $itemId  . "
-					");
+//				$db->query("
+//					UPDATE ". $this->config->table_name ."
+//					SET _order = " . $node['_order'] . ", _parent = '".$targetId."'
+//					WHERE id = " . $itemId  . "
+//				");
 			}
+			else
+			{
+				$node = $db->queryOne("
+					SELECT (MAX(_order) + 1) AS _order
+					FROM ". $this->config->table_name ."
+					WHERE _parent = '".$targetId."'
+				");
+			}
+
+			$db->query("
+				UPDATE ". $this->config->table_name ."
+				SET _order = " . $node['_order'] . ", _parent = '".$targetId."'
+				WHERE id = " . $itemId  . "
+			");
 
 			$this->loaded = false;
 			$this->Load();
