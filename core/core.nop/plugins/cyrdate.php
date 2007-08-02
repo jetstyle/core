@@ -26,7 +26,15 @@ else
 if (isset($d))
 {
 	$d->ctx =& $rh;
-	echo $d->format($ofmt);
+	if($params['ucfirst'])
+	{
+		echo ucfirst($d->format($ofmt));
+	}
+	else
+	{
+		echo $d->format($ofmt);
+	}
+	
 }
 else
 	echo $date;
