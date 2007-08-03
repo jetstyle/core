@@ -15,6 +15,16 @@ class FormIframe extends FormFiles {
     //добавляем iframe с редактированием вопросов
     if( $this->item['id'] )
     {
+        
+      $wid = $this->item['id'];
+      
+      $vis =  isset($_COOKIE["cf".$wid]) ? $_COOKIE["cf".$wid] : !$this->config->closed_iframe;
+      
+      //var_dump( $vis );
+      $tpl->assign('_id', $wid);
+      $tpl->assign('_class_name_1', ($vis=="true" || $vis===true)  ? "visible" : "invisible" );
+      $tpl->assign('_class_name_2', ($vis=="false"|| $vis===false) ? "visible" : "invisible" );
+
       $tpl->Assign('prefix',$this->prefix);
       $tpl->Assign( '__url', $this->rh->path_rel.$this->config->href_for_iframe.$this->id.'&hide_toolbar=1' );
       //die($this->rh->path_rel.$this->config->href_for_iframe.$this->id.'&hide_toolbar=1' );

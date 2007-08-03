@@ -8,9 +8,13 @@ function ResizeIFrame(id,what,step){
     f.height = f.height*( 1.0 + step );
 }
 
-function SwapIframes( id1, id2 ){
+function SwapIframes( id1, id2 )
+{
   document.getElementById(id1).style.display = "none";
   document.getElementById(id2).style.display = "block";
+  
+  document.cookie = "cf"+{{_id}}+"=" + ("iframe_opened"==id2);
+
 }
 
 function ReloadFrame(id){
@@ -20,11 +24,10 @@ function ReloadFrame(id){
 
 //-->
 </script>
-
 <div class="cms-wrapper">
 
 <!-- Развёрнутый модуль -->
-<div 
+<div class="{{_class_name_1}}"
   id="iframe_opened"
   onmouseover="//document.getElementById('iframe_table_opened').className='module-title- m-over-'; return false;"
   onmouseout="//document.getElementById('iframe_table_opened').className='module-title- m-opened-'; return true;"
@@ -53,11 +56,11 @@ function ReloadFrame(id){
 </div>
 
 <!-- Развёрнутый модуль -->
-<div 
+<div class="{{_class_name_2}}"
   id="iframe_closed"
   onmouseover="//document.getElementById('iframe_table_closed').className='module-title- m-over-'; return false;"
   onmouseout="//document.getElementById('iframe_table_closed').className='module-title- m-opened-'; return true;"
-  style="display:none"
+  
 >
 <table width="100%" cellspacing="0" cellpadding="0" class="module-title- m-opened-" id="iframe_table_closed">
   <tr>
