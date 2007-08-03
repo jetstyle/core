@@ -107,7 +107,7 @@ class Upload {
 		$this->current->name_full = $file_name_full;
 		$this->current->name_short = $file_name_ext;
 		$this->current->ext = strtolower($ext);
-		$this->current->format = $this->TYPES[$ext][1];
+		$this->current->format = ($this->TYPES[$ext][1] ? $this->TYPES[$ext][1] : strtolower($ext));
 		$this->current->_format = $this->TYPES[$ext][0];
 		$this->current->size = floor(100.0*@filesize($file_name_full)/1024)/100;
 		$this->current->link = $this->dir.$this->current->name_short;
@@ -255,8 +255,9 @@ class Upload {
 		//указано не полное имя - ищем расширение
 		if($ext=='')
 		{
-			$A = array_keys($this->TYPES);
-			foreach($A as $ext)
+//			$A = array_keys($this->TYPES);
+			
+			foreach($this->ALLOW as $ext)
 			{
 				//echo $this->dir.$file_name.'.'.$ext.'('.var_export(file_exists($this->dir.$file_name.'.'.$ext), true).")<br>\n";
 				if(@file_exists($this->dir.$file_name.'.'.$ext))
@@ -274,8 +275,9 @@ class Upload {
 	function DelFile( $file_name,  $is_full_name=false  ){
 		if( $is_full_name ) @unlink($file_name);
 		else{
-			$A = array_keys($this->TYPES);
-			foreach($A as $ext){
+//			$A = array_keys($this->TYPES);
+	
+			foreach($this->ALLOW as $ext){
 				$file_name_full = $this->dir.$file_name.".".$ext;
 				if(@file_exists($file_name_full)) unlink($file_name_full);
 			}

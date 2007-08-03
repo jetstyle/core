@@ -84,8 +84,17 @@ class FormFiles extends FormSimple  {
 				{
 					if($vv['show'])
 					{
+						if ($vv['exts'])
+						{
+							$upload->ALLOW = $vv['exts'];
+						}
+						elseif ($vv['graphics'])
+						{
+							$upload->ALLOW = array_intersect($upload->ALLOW, $this->GRAPHICS);
+						}
+												
 						$file = $upload->GetFile(str_replace('*', $this->id, $vv['filename']));
-						//var_dump($file);
+												
 						if($file->name_full && in_array($file->ext, $this->GRAPHICS ) )
 						{
 							$this->item[$field_file] = '<img src="'.$this->rh->front_end->path_rel.'files/'.($this->config->upload_dir ? $this->config->upload_dir."/" : "").$file->name_short.'" />';
