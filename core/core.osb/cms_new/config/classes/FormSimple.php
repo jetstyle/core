@@ -229,7 +229,9 @@ class FormSimple extends DBDataEdit  {
         $this->_Filters();
         DBDataEdit::Update( $this->id );
         $this->rh->logs->Put( 'Форма: модификация', $this->id, $this->config->module_title, $this->item[$this->SELECT_FIELDS[1]], $this->_redirect );
-      }else{
+      }
+      else if (!$this->config->dont_insert)
+      {
         $this->_Filters( $this->new_suffix );
         $this->id = $this->new_id = $this->AddNew();
         $this->rh->logs->Put( 'Форма: добавление', $this->new_id, $this->config->module_title, $this->rh->GetVar( $this->prefix.$this->SELECT_FIELDS[1].$this->suffix.$this->new_suffix ), $this->_redirect.'&'.$this->id_get_var.'='.$this->new_id );
