@@ -37,14 +37,24 @@ if (isset($class) && !is_scalar($class))
 
 if (!isset($class))
 {
-	// lucky: FIXME -- $item не факт что массив
-	if (isset($item['href'])) 
-	{
-		$url = $item['href'];
-	} else 
-	if (isset($item['ContentType']))
-	{
-		$class = $item['ContentType'];
+	if (is_object($item)) {
+		if (isset($item->link)) 
+		{
+			$url = $item->link;
+		} else 
+		if (isset($item->content_type))
+		{
+			$class = $item->content_type;
+		}
+	} else {
+		if (isset($item['href'])) 
+		{
+			$url = $item['href'];
+		} else 
+		if (isset($item['ContentType']))
+		{
+			$class = $item['ContentType'];
+		}
 	}
 }
 
