@@ -7,6 +7,7 @@ class View
 {
 
 	var $models = array();
+	var $config = array();
 
 	function View()
 	{
