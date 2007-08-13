@@ -613,6 +613,17 @@ unset($_z);
 	  {
 		  $parts = explode($this->rh->tpl_construct_object{1},$f);
 		  $k = array_shift($parts);
+          
+          /**
+           * nop@jetstyle
+           * хочу штуки типа {{?place_photos.count==1}}
+           */
+          if (preg_match("/(.*)(==|<=|=>|=<|>=|>|<)(.*)/i", $k, $matches)) //  
+          {
+            $k = $matches[1];
+            $condition = $matches[2];
+            $value = $matches[3];
+          }
 		  /* lucky:
 			* если $_ массив: возвращаем значение по ключу $_[$k]
 			* если $_ объект:
@@ -621,16 +632,39 @@ unset($_z);
 			*/
 		  $method = (!empty($this->rh->tpl_construct_standard_getter_prefix)
 			  ? $this->rh->tpl_construct_standard_getter_prefix .'_'.$k // get_$k
-			  : $k);
+			  : $k );
+
 		  if ($this->rh->tpl_construct_standard_camelCase)
 			  $method = implode('', array_map('ucfirst', explode('_', $method))); // GetSomeValue
-		  $res = '(is_array($_)?$_["'.$k.'"]:'
+
+          /**
+           * nop@jetstyle: я хочу такой хак
+           * 1. {{array.count()}}    - в случае если ключ count занят в $_
+           * 2. {{array.count}}      - короткий вариант в случае если нет ключа count
+           */
+
+          //жеский вариант, с проверкой в компиленном шаблоне
+          //$check_for_count = ($k=="count" || $k=="count()") ? ' ("'.$k.'"=="count()" || "'.$k.'"=="count" && !isset($_["'.$k.'"]) ) ? count($_) :' : '';
+
+          //помягче, без проверки, если это ничего не ломает
+          $check_for_count = ($k=="count" || $k=="count()") ? ' true ? count($_) :' : '';
+
+		  $res = '(is_array($_) ? '. ( $check_for_count ). ' $_["'.$k.'"] :'      
 			  . ($use_methods && (preg_match ('#^[A-Za-z_][A-Za-z0-9_]*$#', $method)) 
 			  ?  '(method_exists($_,"'.$method.'")?$_->'.$method.'():'
 			  .(preg_match('#^[A-Za-z_]+$#', $k) ? '($_->'.$k.')' : 'NULL')
 			  .'))'
 			  : 'NULL)');
 			  ;
+
+
+          if ($condition)
+          {
+              $res = "(".$res.") ".$condition.$value; 
+              //echo '<hr>';
+              //var_dump($res);
+          }
+          
 		  return (empty($parts)
 			  ? $res 
 			  /* lucky: я обожаю этот язык Ж), но тут требуют lvalue 
