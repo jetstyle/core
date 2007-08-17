@@ -31,11 +31,12 @@ function ReloadFrame(id){
   id="iframe_opened"
   onmouseover="//document.getElementById('iframe_table_opened').className='module-title- m-over-'; return false;"
   onmouseout="//document.getElementById('iframe_table_opened').className='module-title- m-opened-'; return true;"
+  
 >
 <table width="100%" cellspacing="0" cellpadding="0" class="module-title- m-opened-" id="iframe_table_opened">
   <tr>
     <td class="w100">
-      Вертикаль: 
+      <span onclick="SwapIframes('iframe_opened','iframe_closed')">Вертикаль: </span>
       <a href="" onclick="ResizeIFrame('{{prefix}}iframe','height',0.1);return false;">увеличить</a> |
       <a href="" onclick="ResizeIFrame('{{prefix}}iframe','height',-0.1);return false;">уменьшить</a> |
       &nbsp;&nbsp;
@@ -65,7 +66,7 @@ function ReloadFrame(id){
 <table width="100%" cellspacing="0" cellpadding="0" class="module-title- m-opened-" id="iframe_table_closed">
   <tr>
     <td class="w100">
-      Вертикаль: 
+      <span onclick="SwapIframes('iframe_closed','iframe_opened')">Вертикаль: </span>
       <strong>увеличить</strong> |
       <strong>уменьшить</strong>
     </td>
