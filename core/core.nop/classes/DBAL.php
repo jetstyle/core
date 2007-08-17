@@ -1,4 +1,5 @@
 <?php
+
 /*
   Абстракция от конкретной СУБД:
   * упрощение вызова sql-запросов
@@ -65,204 +66,263 @@
 
 class DBAL
 {
-  var $rh;        // use: $this->rh->debug->Trace (..->Error)
-  var $lowlevel;
+	var $rh; // use: $this->rh->debug->Trace (..->Error)
+	var $lowlevel;
 
-  /*
-  // NB: не реализовано в первой версии (ForR2, ?????)
-  var $active_from = "active=1";        // из чего и во что превращать статус "видимости"
-  var $active_to   = "active=active";   // чего-то в БД для неавторизованного пользователя
-  var $active_role = "editor";          // для какой "роли" это следует делать (пока задел на будущее)
-  */
+	/*
+	// NB: не реализовано в первой версии (ForR2, ?????)
+	var $active_from = "active=1";        // из чего и во что превращать статус "видимости"
+	var $active_to   = "active=active";   // чего-то в БД для неавторизованного пользователя
+	var $active_role = "editor";          // для какой "роли" это следует делать (пока задел на будущее)
+	*/
 
+	function DBAL(& $rh, $connect = true)
+	{
+		$this->rh = & $rh;
+		$this->prefix = $rh->db_prefix;
 
-  function DBAL( &$rh, $connect=true )
-  {
-    $this->rh = &$rh;
-    $this->prefix = $rh->db_prefix;
+		// создать низкоуровневый дбал
+		require_once (dirname(__FILE__) . "/DBAL_" . $rh->db_al . ".php");
+		$lowlevel_name = "DBAL_" . $rh->db_al;
+		$lowlevel = & new $lowlevel_name ($this);
+		$this->lowlevel = & $lowlevel;
 
-    // создать низкоуровневый дбал
-    require_once( dirname(__FILE__)."/DBAL_".$rh->db_al.".php" );
-    $lowlevel_name = "DBAL_".$rh->db_al;
-    $lowlevel =& new $lowlevel_name( $this );
-    $this->lowlevel = &$lowlevel;
-    
-    // connection, if any
-    if ($connect) $this->_Connect();
-  }
+		// connection, if any
+		if ($connect)
+			$this->_Connect();
+	}
 
-  function _Connect()
-  { $this->lowlevel->Connect(); }
+	function _Connect()
+	{
+		$this->lowlevel->Connect();
+	}
 
-  function Close() 
-  {  $this->lowlevel->Close(); }
+	function Close()
+	{
+		$this->lowlevel->Close();
+	}
 
-  // Защита строкового значения кавычками
-  function Quote( $value ) 
-  { return $this->lowlevel->Quote( $value ); }
+	// Защита строкового значения кавычками
+	function Quote($value)
+	{
+		return $this->lowlevel->Quote($value);
+	}
 
-  // Упрощение вызовов SQL с возвратом в виде хэшей
-  function Query( $sql, $limit=0, $offset=0 ) 
-  {
-    // #1. patch sql for active
-    // не реализовано в первой версии (ForR2, ?????)
-    // #2. query
-    return $this->_Query( $sql, $limit, $offset );
-  }
-  
-  function _Query( $sql, $limit=0, $offset=0 ) 
-  {
-   $data = array();
-   
-   //плейсхолдер для префикса
-   $sql = str_replace ("??", $this->prefix, $sql);
-   
-   if ($r = $this->lowlevel->Query($sql, $limit, $offset))
-   {
-     while ($row = $this->lowlevel->FetchAssoc($r)) $data[] = $row;
-     $this->lowlevel->FreeResult($r);
-   }
-   return $data;
-  }
+	// Упрощение вызовов SQL с возвратом в виде хэшей
+	function Query($sql, $limit = 0, $offset = 0)
+	{
+		// #1. patch sql for active
+		// не реализовано в первой версии (ForR2, ?????)
+		// #2. query
+		return $this->_Query($sql, $limit, $offset);
+	}
 
-  function _Error( $error_msg )
-  {
-    $error_msg = "DBAL [".$this->rh->db_al."] Error: ".$error_msg;
-    if ($this->rh->debug)
-        echo '<hr>'.$error_msg;
-      //$this->rh->Error($error_msg);
-    else
-    {
-      ob_end_clean();
-      die($error_msg);
-    }
+	function _Query($sql, $limit = 0, $offset = 0)
+	{
+		$this->rh->debug->mark('q');
+		
+		$data = array ();
+		//плейсхолдер для префикса
+		$sql = str_replace("??", $this->prefix, $sql);
 
-  }
+		if ($r = $this->lowlevel->Query($sql, $limit, $offset))
+		{
+			while ($row = $this->lowlevel->FetchAssoc($r))
+			{
+				$data[] = $row;
+			}
+			$this->lowlevel->FreeResult($r);
+		}
+		
+		if($this->rh->enable_debug && $this->rh->explain_queries)	
+		{
+			if(!(strpos(strtolower($sql), 'select') === false))	
+			{
+				$_data = array();
+				if ($r = $this->lowlevel->Query("EXPLAIN ".$sql, $limit, $offset))
+				{
+					while ($row = $this->lowlevel->FetchAssoc($r)) 
+					{
+						$_data[] = $row;
+					}
+					$this->lowlevel->FreeResult($r);
+				}
+				if(is_array($_data) && !empty($_data))	
+				{
+					foreach($_data AS $i => $r)	
+					{
+						if($i == 0)	
+						{
+							$head = array_keys($r);
+							foreach($head AS $rr)	
+							{
+								$out .= "<td>".$rr."</td>";
+							}
+							$out = "<tr>".$out."</tr>";
+						}
 
-  function QueryOne( $sql ) 
-  {
-    // #1. launch Query
-    $res = $this->Query( $sql, 1 );
-    // #2. get 1st
-    if (sizeof($res)) return $res[0];
-    else              return false;
-  }
+						foreach($r AS $rr)	
+						{
+							$row .= "<td>".$rr."</td>";
+						}
+						$out .= "<tr>".$row."</tr>";
+						$row = '';
+					}
+					
+					$out = "<table class=\'debug_table\'>".$out."</table>";
+				}
+				$this->rh->debug->trace("<b><a href=\"#\" onclick=\"debug_popup('".$out."', this); return false;\">QUERY</a>".($limit == 1 ? " ONE: " : ": ")."</b> ".$sql, 'q');
+			}
+			else
+			{
+				$this->rh->debug->trace("<b>QUERY".($limit == 1 ? " ONE: " : ": ")."</b> ".$sql, 'q');
+			}			
+		}
+		else
+		{
+			$this->rh->debug->trace("<b>QUERY".($limit == 1 ? " ONE: " : ": ")."</b> ".$sql, 'q');
+		}
+		
+		return $data;
+	}
 
-  function Insert( $sql )
-  {
-    $res = $this->lowlevel->Query($sql);
-    return $this->lowlevel->InsertId();
-  }
+	function _Error($error_msg)
+	{
+		$error_msg = "DBAL [" . $this->rh->db_al . "] Error: " . $error_msg;
+		if ($this->rh->debug)
+			echo '<hr>' . $error_msg;
+		//$this->rh->Error($error_msg);
+		else
+		{
+			ob_end_clean();
+			die($error_msg);
+		}
 
-  function AffectedRows()	{
-    return $this->lowlevel->AffectedRows();
-  }
+	}
 
-  // Возврат кол-ва записей в запросе
-  function RecordCount( $sql ) 
-  {
-    // ????? take a look on regexp pls.
-    $sql = preg_replace( "/^select.*?((\s|\().*?(\s|\)))from/i", "select count(*) as _row_number from ", $sql );
-    $res = $this->QueryOne($sql);
-    if ($res) return $res["_row_number"];
-    else return 0;
-  }
+	function QueryOne($sql)
+	{
+		// #1. launch Query
+		$res = $this->Query($sql, 1);
+		// #2. get 1st
+		if (sizeof($res))
+			return $res[0];
+		else
+			return false;
+	}
 
-  /**
-   *  выполняет запрос, запоминает ссылку на результат
-   *  подразумевается для использования getRow, getObject, getArray
-   */
-  function Execute($sql, $limit=0, $offset=0 )
-  {
-  	  //типа такой плейсхолдер
-  	  $sql = str_replace ("??", $this->prefix, $sql);
+	function Insert($sql)
+	{
+		$res = $this->lowlevel->Query($sql);
+		return $this->lowlevel->InsertId();
+	}
 
-  	  $this->handle = $this->lowlevel->Query($sql, $limit, $offset);
-  	  
-  	  if ($this->handle)
-   	  {
-     	
-     	$this->numRows = $this->lowlevel->getNumRows($this->handle);
-		$this->currentRow = 0;
-     	return $this->numRows; //$this->handle;
-      }
-      
-      return null;
-  }
-  
-  /**
-   * возвращает строчку объектом нужного класса
-   */
-  function getObject($class_name=null)
-  {
-  	 if ($this->handle && $this->currentRow < $this->numRows)
-  	 {
-  		$ret = $this->lowlevel->FetchObject($this->handle, $class_name);
-  		$this->currentRow++;
-  	 }
-  	 else
-  	 {
-  	 	$this->lowlevel->FreeResult($this->handle);	 
-  	 	$ret = null;
-  	 }
-  	 return $ret;
-  }
-  
-  
-  /**
-   * возвращает строчку массивом
-   */
-  function getRow()
-  {
-  	 if ($this->handle && $this->currentRow < $this->numRows)
-  	 {
-  		$ret = $this->lowlevel->FetchAssoc($this->handle);
-  		$this->currentRow++;
-  	 }
-  	 else
-  	 {
-  	 	$this->lowlevel->FreeResult($this->handle);	 
-  	 	$ret = null;
-  	 }
-  	 return $ret;
-  }
+	function AffectedRows()
+	{
+		return $this->lowlevel->AffectedRows();
+	}
 
-  /**
-   * возвращает все строчки результата массом
-   * вообще-то хак для билдера
-   */
-  function getArray()
-  {
-      //var_dump($this->handle);  
+	// Возврат кол-ва записей в запросе
+	function RecordCount($sql)
+	{
+		// ????? take a look on regexp pls.
+		$sql = preg_replace("/^select.*?((\s|\().*?(\s|\)))from/i", "select count(*) as _row_number from ", $sql);
+		$res = $this->QueryOne($sql);
+		if ($res)
+			return $res["_row_number"];
+		else
+			return 0;
+	}
 
-      if ($this->handle)
-      {
-          while ($row = $this->getRow())
-          {
-            //echo '<hr>';
-           // var_dump($row);  
-              $ret[] = $row;
-          }
-          
-          
-          return $ret;      
-      }
-  }
+	/**
+	 *  выполняет запрос, запоминает ссылку на результат
+	 *  подразумевается для использования getRow, getObject, getArray
+	 */
+	function Execute($sql, $limit = 0, $offset = 0)
+	{
+		//типа такой плейсхолдер
+		$sql = str_replace("??", $this->prefix, $sql);
 
-  /**
-   * for osb
-   */
-  function insert_id()
-  {
-      return $this->lowlevel->InsertId();
-  }
-  
-  function SelectLimit($sql, $limit, $offset)
-  {
-    return $this->execute($sql, $limit, $offset);   
-  }
-// EOC{ DBAL } 
+		$this->handle = $this->lowlevel->Query($sql, $limit, $offset);
+
+		if ($this->handle)
+		{
+
+			$this->numRows = $this->lowlevel->getNumRows($this->handle);
+			$this->currentRow = 0;
+			return $this->numRows; //$this->handle;
+		}
+
+		return null;
+	}
+
+	/**
+	 * возвращает строчку объектом нужного класса
+	 */
+	function getObject($class_name = null)
+	{
+		if ($this->handle && $this->currentRow < $this->numRows)
+		{
+			$ret = $this->lowlevel->FetchObject($this->handle, $class_name);
+			$this->currentRow++;
+		} else
+		{
+			$this->lowlevel->FreeResult($this->handle);
+			$ret = null;
+		}
+		return $ret;
+	}
+
+	/**
+	 * возвращает строчку массивом
+	 */
+	function getRow()
+	{
+		if ($this->handle && $this->currentRow < $this->numRows)
+		{
+			$ret = $this->lowlevel->FetchAssoc($this->handle);
+			$this->currentRow++;
+		} else
+		{
+			$this->lowlevel->FreeResult($this->handle);
+			$ret = null;
+		}
+		return $ret;
+	}
+
+	/**
+	 * возвращает все строчки результата массом
+	 * вообще-то хак для билдера
+	 */
+	function getArray()
+	{
+		//var_dump($this->handle);  
+
+		if ($this->handle)
+		{
+			while ($row = $this->getRow())
+			{
+				//echo '<hr>';
+				// var_dump($row);  
+				$ret[] = $row;
+			}
+
+			return $ret;
+		}
+	}
+
+	/**
+	 * for osb
+	 */
+	function insert_id()
+	{
+		return $this->lowlevel->InsertId();
+	}
+
+	function SelectLimit($sql, $limit, $offset)
+	{
+		return $this->execute($sql, $limit, $offset);
+	}
+	// EOC{ DBAL } 
 }
-
-
 ?>

@@ -195,9 +195,16 @@ class BasicRequestHandler extends ConfigProcessor {
 		$this->onAfterLoadConfig();
 
 		//инициализируем базовые объекты
-		$this->UseClass("Debug");
+		if($this->enable_debug)
+		{
+			$this->UseClass("DebugJet");
+		}
+		else
+		{
+			$this->UseClass("DebugDummy");
+		}
+		
 		$this->debug =& new Debug();
-
 		$this->debug->Trace("RH: creating DBAL");
 		
 		if ($this->db_al)

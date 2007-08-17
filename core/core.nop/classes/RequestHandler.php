@@ -699,7 +699,7 @@ class RequestHandler extends BasicRequestHandler
 
 	function MapHandler($url)
 	{
-		$this->debug->MileStone();
+//		$this->debug->MileStone();
 
 		if ($page = &$this->findPage(array('url'=>$url)))
 		{
@@ -799,7 +799,7 @@ class RequestHandler extends BasicRequestHandler
 	{
 		$this->tpl->set('print_href', $this->ri->hrefPlus('', array('print' => 1)));		
 		
-		if($this->debug_show)	{
+		if($this->enable_debug)	{
 			$this->tpl->Set('DEBUG', $this->debug->getHtml());
 		}
 
