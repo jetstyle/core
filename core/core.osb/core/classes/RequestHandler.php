@@ -91,7 +91,10 @@ class RequestHandler extends ConfigProcessor {
     $dir_name = str_replace( "\\", "/", dirname($PHP_SELF) );
     $this->path_rel = $dir_name.( $dir_name!='/' ? '/' : '' );
     $this->path_full = $_SERVER["DOCUMENT_ROOT"].$this->path_rel;
+    
     $this->host_name = preg_replace('/:.*/','',$_SERVER["HTTP_HOST"]);
+    $this->host_name = $_SERVER["HTTP_HOST"];
+    //die($this->host_name);
     $this->url_ = "http://".$this->host_name;
     $this->url = $this->url_.$this->path_rel;
     if($this->path_rel!='/')
