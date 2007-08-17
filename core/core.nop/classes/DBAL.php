@@ -119,7 +119,10 @@ class DBAL
 
 	function _Query($sql, $limit = 0, $offset = 0)
 	{
-		$this->rh->debug->mark('q');
+		if(method_exists($this->rh->debug, 'mark'))
+		{
+			$this->rh->debug->mark('q');
+		}
 		
 		$data = array ();
 		//плейсхолдер для префикса
