@@ -28,7 +28,7 @@ function ReloadFrame(id){
 
 <!-- Развёрнутый модуль -->
 <div class="{{_class_name_1}}"
-  id="iframe_opened"
+  id="iframe_opened{{_iframe_number}}"
   onmouseover="//document.getElementById('iframe_table_opened').className='module-title- m-over-'; return false;"
   onmouseout="//document.getElementById('iframe_table_opened').className='module-title- m-opened-'; return true;"
   
@@ -36,14 +36,14 @@ function ReloadFrame(id){
 <table width="100%" cellspacing="0" cellpadding="0" class="module-title- m-opened-" id="iframe_table_opened">
   <tr>
     <td class="w100">
-      <span onclick="SwapIframes('iframe_opened','iframe_closed')">Вертикаль: </span>
+      <span onclick="SwapIframes('iframe_opened{{_iframe_number}}','iframe_closed{{_iframe_number}}')">Вертикаль: </span>
       <a href="" onclick="ResizeIFrame('{{prefix}}iframe','height',0.1);return false;">увеличить</a> |
       <a href="" onclick="ResizeIFrame('{{prefix}}iframe','height',-0.1);return false;">уменьшить</a> |
       &nbsp;&nbsp;
       <a href="" onclick="ReloadFrame('{{prefix}}iframe');return false;">обновить</a>
     </td>
     <td><a href="javascript:;"
-      onclick="SwapIframes('iframe_opened','iframe_closed')"
+      onclick="SwapIframes('iframe_opened{{_iframe_number}}','iframe_closed{{_iframe_number}}')"
     /><img src="{{images}}hide.gif" width="12" height="12" alt="-" align="top" title="Свернуть группу" /></a></td>
   </tr>
 </table>
@@ -58,7 +58,7 @@ function ReloadFrame(id){
 
 <!-- Развёрнутый модуль -->
 <div class="{{_class_name_2}}"
-  id="iframe_closed"
+  id="iframe_closed{{_iframe_number}}"
   onmouseover="//document.getElementById('iframe_table_closed').className='module-title- m-over-'; return false;"
   onmouseout="//document.getElementById('iframe_table_closed').className='module-title- m-opened-'; return true;"
   
@@ -66,12 +66,12 @@ function ReloadFrame(id){
 <table width="100%" cellspacing="0" cellpadding="0" class="module-title- m-opened-" id="iframe_table_closed">
   <tr>
     <td class="w100">
-      <span onclick="SwapIframes('iframe_closed','iframe_opened')">Вертикаль: </span>
+      <span onclick="SwapIframes('iframe_closed{{_iframe_number}}','iframe_opened{{_iframe_number}}')">Вертикаль: </span>
       <strong>увеличить</strong> |
       <strong>уменьшить</strong>
     </td>
     <td><a href="javascript:;"
-      onclick="SwapIframes('iframe_closed','iframe_opened')"
+      onclick="SwapIframes('iframe_closed{{_iframe_number}}','iframe_opened{{_iframe_number}}')"
     /><img src="{{images}}show.gif" width="12" height="12" alt="-" align="top" title="Свернуть группу" /></a></td>
   </tr>
 </table>

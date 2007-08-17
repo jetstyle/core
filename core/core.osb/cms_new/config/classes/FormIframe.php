@@ -15,7 +15,28 @@ class FormIframe extends FormFiles {
     //добавляем iframe с редактированием вопросов
     if( $this->item['id'] )
     {
-        
+      if (is_array($this->config->href_for_iframe))
+      {
+          foreach ($this->config->href_for_iframe as $k=> $href_for_iframe)
+          {
+              $tpl->assign("_iframe_number", $k);
+              $this->_parseIframe($href_for_iframe);
+          }
+      }
+      else
+      {
+        $this->_parseIframe($this->config->href_for_iframe);
+      }
+    }else
+      $tpl->Assign('_iframe','<br />');
+    
+    //по этапу
+    FormFiles::Handle();
+  }
+  
+  function _parseIframe($href_for_iframe)
+  {
+      $tpl =& $this->rh->tpl;
       $wid = $this->item['id'];
       
       $vis =  isset($_COOKIE["cf".$wid]) ? $_COOKIE["cf".$wid] : !$this->config->closed_iframe;
@@ -26,15 +47,10 @@ class FormIframe extends FormFiles {
       $tpl->assign('_class_name_2', ($vis=="false"|| $vis===false) ? "visible" : "invisible" );
 
       $tpl->Assign('prefix',$this->prefix);
-      $tpl->Assign( '__url', $this->rh->path_rel.$this->config->href_for_iframe.$this->id.'&hide_toolbar=1' );
+      $tpl->Assign( '__url', $this->rh->path_rel.$href_for_iframe.$this->id.'&hide_toolbar=1' );
       //die($this->rh->path_rel.$this->config->href_for_iframe.$this->id.'&hide_toolbar=1' );
-      $tpl->Parse( 'iframe.html', '_iframe' );
-
-    }else
-      $tpl->Assign('_iframe','<br />');
-    
-    //по этапу
-    FormFiles::Handle();
+      $tpl->Parse( 'iframe.html', '_iframe', 1 );
+  
   }
   
   function Update(){

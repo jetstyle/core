@@ -1,17 +1,21 @@
 <?
   
   //debug
-  if(!$this->show_logs) $this->show_logs = $this->GetVar('logs')=='show';
-  if( $this->show_logs ){
-    $this->UseClass("Debug");
-    $this->debug =& new Debug();
+  //if(!$this->show_logs) $this->show_logs = $this->GetVar('logs')=='show';
+  if( $this->enable_debug )
+  {
+    $this->UseClass("DebugJet");
+    
   //  $this->old_error_handler = set_error_handler( array($this->debug,"ErrorHandler") ); 
     //возможно, скрываем сообщения об ошибках
   //  if($this->hide_errors) error_reporting (FATAL | ERROR | WARNING); 
-  }else{
-    $this->UseClass("DebugDummy");
-    $this->debug =& new DebugDummy();
   }
+  else
+  {
+    $this->UseClass("DebugDummy");
+    
+  }
+  $this->debug =& new Debug();
   $GLOBALS['debug_hook'] =& $this->debug;
   
   //state set
