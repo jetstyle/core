@@ -69,7 +69,10 @@ class Debug
 		$this->mark['auto'] = $m;
 	}
 
-	function trace_r() {}
+	function trace_r() 
+	{
+		$this->trace('Debug::trace_r not implemented');
+	}
 
 	function mark($label = 'auto')	{
 		$this->mark[$label] = $this->_getmicrotime();
