@@ -69,6 +69,8 @@ class Debug
 		$this->mark['auto'] = $m;
 	}
 
+	function trace_r() {}
+
 	function mark($label = 'auto')	{
 		$this->mark[$label] = $this->_getmicrotime();
 	}

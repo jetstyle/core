@@ -8,6 +8,7 @@ class Debug
    function halt() {  } 
    function mark() {  } 
    function error() {  } 
+   function trace_r() {}
 }
 
 ?>
