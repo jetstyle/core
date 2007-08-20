@@ -100,13 +100,13 @@ class TemplateEngineCompiler
           ")/si";
     
     $this->single_regexp = 
-         "/^".$this->rh->tpl_prefix."(.+?)".$this->rh->tpl_postfix."$/i";
+         "/^".$this->rh->tpl_prefix."(.+?)".$this->rh->tpl_postfix."$/ims";
     $this->double_regexp = 
          "/^".$this->rh->tpl_prefix.$this->rh->tpl_construct_action2.
               "(.+?)".$this->rh->tpl_postfix.
               "(.*?)".
               $this->rh->tpl_prefix."\/".$this->rh->tpl_construct_action2.
-              "(\\1)?".$this->rh->tpl_postfix."$/si";
+              "(\\1)?".$this->rh->tpl_postfix."$/ims";
     // single regexps
     $this->object_regexp = 
          "/^".$this->rh->tpl_construct_object{0}."([^".$this->rh->tpl_construct_object{1}."]+)".
@@ -321,7 +321,8 @@ class TemplateEngineCompiler
     {
       // 1. rip {{..}}
       preg_match($this->single_regexp, $thing, $matches);
-      $thing = $matches[1];
+      #$thing = $matches[1];
+      $thing = preg_replace('#[\\n\\r]#', '', $matches[1]);
 
       // 2. shortcuts
       foreach( $this->rh->shortcuts as $shortcut=>$replacement )
