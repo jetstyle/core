@@ -103,10 +103,10 @@ class TreeControl extends DBDataEditTree  {
 			case 'xml':
 				// XML  xloadtree  
 				//    ,   -   .
-				if( $rh->GetVar('logs')!='show' ){
+				/*if( $rh->GetVar('logs')!='show' ){
 					$rh->UseClass("DebugDummy");
 					$rh->debug =& new DebugDummy();
-				}
+				}*/
 				// ,   XML
 				$rh->HeadersNoCache();
 				header("Content-type: text/xml; charset=".$this->xml_encoding);
