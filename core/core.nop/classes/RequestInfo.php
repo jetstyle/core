@@ -256,7 +256,10 @@ class RequestInfo
       if (!isset($key[$k]) && $v!='')
       {
          if ($f) $data.=$this->s; else $f=1;
-         $data .= $k."=".urlencode($v);
+         if(!is_array($v))
+         {
+         	$data .= $k."=".urlencode($v);
+         }
       }
      if ($_bonus != "") 
       if ($data != "") $data= $this->q . $data . $this->s . $_bonus;
