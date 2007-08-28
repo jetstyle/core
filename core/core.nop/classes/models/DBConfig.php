@@ -10,7 +10,8 @@ class DBConfig extends DBModel
 		'value',
 	); 
 
-	var $where = '1 = 1 ';
+// lunatic: зачем это тут ?
+//	var $where = '1 = 1 '; 
 
 	function load($where=NULL, $limit=NULL, $offset=NULL)
 	{

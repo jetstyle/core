@@ -75,17 +75,25 @@ class Upload {
 		$this->table_name = $table_name ? $table_name : $rh->db_prefix.'upload';
 		$this->chmod = 0744;
 		
-		$RES = $rh->db->QueryOne("SELECT value FROM ".$rh->db_prefix."config WHERE name = 'upload_ext'");
-		$RES = explode(',', $RES['value']);
-		foreach( $RES as $r)
+		if($this->rh->upload_ext)
 		{
-			$r = trim($r);
-			$this->TYPES[ $r ] = array('application/octet-stream',$r);
+			$RES = explode(',', $this->rh->upload_ext);
 		}
-		//читаем базу знаний
-//    	$RES = $rh->db->Query("SELECT * FROM ".$this->table_name);
-//    	foreach( $RES as $r)
-//      		$this->TYPES[ $r['ext'] ] = array($r['type'],$r['title']);
+		// try to load from DB
+		else
+		{
+			$RES = $rh->db->QueryOne("SELECT value FROM ".$rh->db_prefix."config WHERE name = 'upload_ext'");
+			$RES = explode(',', $RES['value']);
+		}		
+		
+		if(is_array($RES) && !empty($RES))
+		{
+			foreach( $RES as $r)
+			{
+				$r = trim($r);
+				$this->TYPES[ $r ] = array('application/octet-stream',$r);
+			}
+		}
 	}
 	
 	function _Current($file_name,$ext){
