@@ -13,15 +13,18 @@
 *	$this->YEAR = 'public';	 - поле, из которого будет браться год для добавления в базу
 *	$this->MONTH = 'public'; - поле, из которого будет браться месяц для добавления в базу
 *	$this->DAY = 'public';   - поле, из которого будет браться день для добавления в базу
+*
+*	$this->USE_TIME - использовать дату + время (по умолчанию = true)
 */
 
 $this->UseClass('FormFiles');
 
 class FormCalendar extends FormFiles	{
 
-	var $date_format = 'd.m.Y';												// формат даты, подставляемый по умолчанию (т.е. когда нету Id)
+	var $date_format = 'd.m.Y';											// формат даты, подставляемый по умолчанию (т.е. когда нету Id)
 	var $r_mysql = '/(\d+)\-(\d+)\-(\d+) (\d+):(\d+):(\d+)/i';			// формат даты, получаемой из mysql
-	var $r_date_out = '$3.$2.$1';											// преобразование даты, полученной из mysql
+	var $r_mysql_without_time = '/(\d+)\-(\d+)\-(\d+)/i';			// формат даты, получаемой из mysql
+	var $r_date_out = '$3.$2.$1';										// преобразование даты, полученной из mysql
 	var $r_time_out = '$4:$5';
 	var $r_date_out_mysql = '$3-$2-$1';								// преобразование даты, добавляемой в mysql
 
@@ -31,8 +34,14 @@ class FormCalendar extends FormFiles	{
 	var $r_month = '$2';															// месяц
 	var $r_day = '$1';																// день
 
+	var $USE_TIME = true;
+
 	function FormCalendar( &$config ){
 		parent::FormFiles($config);
+		if($this->config->USE_TIME === false)
+		{
+			$this->USE_TIME = false;
+		}
 	}
 
 	function Handle()	{
@@ -47,7 +56,7 @@ class FormCalendar extends FormFiles	{
 			foreach($this->CALENDAR_FIELDS AS $field)	
 			{
 				$this->rh->tpl->Assign('_'.$field, date($this->date_format));
-				if($this->config->USE_TIME)
+				if($this->USE_TIME)
 				{
 					$this->rh->tpl->Assign('_'.$field.'_time', date('H:i'));
 				}
@@ -57,11 +66,15 @@ class FormCalendar extends FormFiles	{
 		{
 			foreach($this->CALENDAR_FIELDS AS $field)	
 			{
-				if($this->config->USE_TIME)
+				if($this->USE_TIME)
 				{
 					$this->item[$field.'_time'] = preg_replace($this->r_mysql, $this->r_time_out, $this->item[$field]);
+					$this->item[$field] = preg_replace($this->r_mysql, $this->r_date_out, $this->item[$field]);
 				}
-				$this->item[$field] = preg_replace($this->r_mysql, $this->r_date_out, $this->item[$field]);
+				else
+				{
+					$this->item[$field] = preg_replace($this->r_mysql_without_time, $this->r_date_out, $this->item[$field]);
+				}
 			}
 		}
 
@@ -93,15 +106,23 @@ class FormCalendar extends FormFiles	{
 			
 			foreach($this->CALENDAR_FIELDS AS $field)	
 			{
-				if($this->config->USE_TIME)
+				if($this->USE_TIME)
 				{
-					$time = $rh->GetVar($this->prefix.$field.'_time').':00';
+					if($time = $rh->GetVar($this->prefix.$field.'_time'))
+					{
+						$time = $time.':00';
+					}
+					else
+					{
+						$time = date('H:i:s', time());
+					}
+					$date = preg_replace($this->r_date_in, $this->r_date_out_mysql, $rh->GetVar($this->prefix.$field)).' '.$time;
 				}
 				else
 				{
-					$time = date('H:i:s', time());
+					$date = preg_replace($this->r_date_in, $this->r_date_out_mysql, $rh->GetVar($this->prefix.$field));
 				}
-				$rh->GLOBALS[$this->prefix.$field] =preg_replace($this->r_date_in, $this->r_date_out_mysql, $rh->GetVar($this->prefix.$field)).' '.$time; 
+				$rh->GLOBALS[$this->prefix.$field] = $date; 
 			}
 		}
 		
@@ -109,6 +130,5 @@ class FormCalendar extends FormFiles	{
 	}
 
 }
-
 
 ?>
