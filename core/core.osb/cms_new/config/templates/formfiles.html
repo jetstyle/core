@@ -5,6 +5,27 @@
 {{TPL:file_video}}
 {{&js:swfobject}}
 {{&js:player}}
-	({{#file->filesize}} kb, {{#file->format}}, <a href="{{#file->src}}">скачать</a>, <a href="#" onclick="playVideo('{{fe_images}}flash/player.swf', '{{#file->src}}', 'flash-video'); return false;">посмотреть</a>)
-	<div id="flash-video"></div>
+	({{#file->filesize}} kb, {{#file->format}}, <a href="{{#file->src}}">скачать</a>, <a href="#" onclick="playVideo('{{fe_images}}flash/player.swf', '{{#file->src}}', 'flash-video-{{#file->name_short}}'); return false;">посмотреть</a>)
+	<div id="flash-video-{{#file->name_short}}"></div>
 {{/TPL:file_video}}
+
+{{TPL:file_flash}}
+{{&js:swfobject}}
+{{&js:player}}
+	({{#file->filesize}} kb, {{#file->format}}, <a href="{{#file->src}}">скачать</a>, <a href="#" onclick="playFlash('{{#file->src}}', 'flash-video-{{#file->name_short}}'); return false;">посмотреть</a>)
+	<div id="flash-video-{{#file->name_short}}"></div>
+{{/TPL:file_flash}}
+
+{{TPL:image}}
+<img src="{{#file->src}}" />
+{{/TPL:image}}
+
+{{TPL:image_with_link}}
+<a title="Открыть оригинал изображения" href="{{#file->src_original}}" onclick="popup_image(this.href, '{{#file->width}}', '{{#file->height}}'); return false;">
+	<img src="{{#file->src}}" />
+</a>
+<br />
+<a title="Открыть оригинал изображения" href="{{#file->src_original}}" onclick="popup_image(this.href, '{{#file->width}}', '{{#file->height}}'); return false;">
+	{{#file->width}}x{{#file->height}}px
+</a>
+{{/TPL:image_with_link}}

@@ -99,7 +99,10 @@ class FormFiles extends FormSimple  {
 												
 						if($file->name_full && in_array($file->ext, $this->GRAPHICS ) )
 						{
-							$this->item[$field_file] = '<img src="'.$this->rh->front_end->path_rel.'files/'.($this->config->upload_dir ? $this->config->upload_dir."/" : "").$file->name_short.'" />';
+							$r = array(
+								'src' => $this->rh->front_end->path_rel.'files/'.($this->config->upload_dir ? $this->config->upload_dir."/" : "").$file->name_short,
+							);
+							
 							if($vv['link_to'])
 							{
 								foreach($this->config->_FILES[$vv['link_to']] AS $_vv)
@@ -111,10 +114,20 @@ class FormFiles extends FormSimple  {
 										if($file->name_full && in_array($file->ext, $this->GRAPHICS ) )
 										{
 											$A = getimagesize($file->name_full);
-											$this->item[$field_file] = '<a title="Открыть оригинал изображения" href="'.$this->rh->front_end->path_rel.'files/'.($this->config->upload_dir ? $this->config->upload_dir."/" : "").$file->name_short.'?popup=1" onclick="popup_image(this.href, \''.$A[0].'\', \''.$A[1].'\'); return false;">'.$this->item[$field_file].'</a><br /><a title="Открыть оригинал изображения" href="'.$this->rh->front_end->path_rel.'files/'.($this->config->upload_dir ? $this->config->upload_dir."/" : "").$file->name_short.'?popup=1" onclick="popup_image(this.href, \''.$A[0].'\', \''.$A[1].'\'); return false;">'.$A[0].'x'.$A[1].'px</a>';
+											$r['width'] = $A[0];
+											$r['height'] = $A[1];
+											$r['src_original'] = $this->rh->front_end->path_rel.'files/'.($this->config->upload_dir ? $this->config->upload_dir."/" : "").$file->name_short.'?popup=1';
+											$this->rh->tpl->assignRef('file', $r);
+											$this->item[$field_file] = $this->rh->tpl->parse($this->template_files.':image_with_link');
 										}
 									}
 								}
+							}
+							
+							if(!$this->item[$field_file])
+							{
+								$this->rh->tpl->assignRef('file', $r);
+								$this->item[$field_file] = $this->rh->tpl->parse($this->template_files.':image');
 							}
 						}
 						else if ($file->name_full)
@@ -122,7 +135,8 @@ class FormFiles extends FormSimple  {
 							$r = array(
 								'filesize' => $file->size,
 								'format'   => $file->format,
-								'src'      => $this->rh->front_end->path_rel.'files/'.($this->config->upload_dir ? $this->config->upload_dir."/" : "").$file->name_short, 
+								'src'      => $this->rh->front_end->path_rel.'files/'.($this->config->upload_dir ? $this->config->upload_dir."/" : "").$file->name_short,
+								'name_short' =>  $file->name_short,
 							);
 							
 							$this->rh->tpl->assignRef('file', $r);
@@ -130,6 +144,10 @@ class FormFiles extends FormSimple  {
 							if($file->ext == 'flv')
 							{
 								$this->item[$field_file] = $this->rh->tpl->parse($this->template_files.':file_video');
+							}
+							elseif($file->ext == 'swf')
+							{
+								$this->item[$field_file] = $this->rh->tpl->parse($this->template_files.':file_flash');
 							}
 							else
 							{
