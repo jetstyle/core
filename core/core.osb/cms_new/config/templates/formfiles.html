@@ -1,0 +1,10 @@
+{{TPL:file}}
+	({{#file->filesize}} kb, {{#file->format}}, <a href="{{#file->src}}">скачать</a>)
+{{/TPL:file}}
+
+{{TPL:file_video}}
+{{&js:swfobject}}
+{{&js:player}}
+	({{#file->filesize}} kb, {{#file->format}}, <a href="{{#file->src}}">скачать</a>, <a href="#" onclick="playVideo('{{fe_images}}flash/player.swf', '{{#file->src}}', 'flash-video'); return false;">посмотреть</a>)
+	<div id="flash-video"></div>
+{{/TPL:file_video}}

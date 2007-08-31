@@ -1,4 +1,4 @@
-<?
+<?php
 /*
 ¬ конфиге должно быть:
 ---------------------
@@ -14,13 +14,15 @@ class FormFiles extends FormSimple  {
 
 	var $upload;
 	var $GRAPHICS = array('gif','jpg','png','bmp','jpeg'); //какие форматы показывать как картинки
-	//var $max_file_size = 2097152; //максимальный размер файла дл€ загрузки
+
 	var $max_file_size = 55242880; //максимальный размер файла дл€ загрузки
 
 	//ƒо каких размеров картинки показывать просто, а больше - через превью и попап?
 	var $view_width_max = 300;
 	var $view_height_max = 300;
 	var $field_file = "file";
+
+	var $template_files = 'formfiles.html';
 
 	function FormFiles( &$config )
 	{
@@ -51,7 +53,7 @@ class FormFiles extends FormSimple  {
 
 		$rh =& $this->rh;
 		$tpl =& $rh->tpl;
-		$upload =& $this->upload;
+//		$upload =& $this->upload;
 		$config =& $this->config;
 
 		//рендерим файлы
@@ -117,9 +119,24 @@ class FormFiles extends FormSimple  {
 						}
 						else if ($file->name_full)
 						{
-							$this->item[$field_file] = '('.$file->size.'kb, '.$file->format.", <a href='".$this->rh->front_end->path_rel.'files/'.($this->config->upload_dir ? $this->config->upload_dir."/" : "").$file->name_short."'>скачать</a>)";
+							$r = array(
+								'filesize' => $file->size,
+								'format'   => $file->format,
+								'src'      => $this->rh->front_end->path_rel.'files/'.($this->config->upload_dir ? $this->config->upload_dir."/" : "").$file->name_short, 
+							);
+							
+							$this->rh->tpl->assignRef('file', $r);
+													
+							if($file->ext == 'flv')
+							{
+								$this->item[$field_file] = $this->rh->tpl->parse($this->template_files.':file_video');
+							}
+							else
+							{
+								$this->item[$field_file] = $this->rh->tpl->parse($this->template_files.':file');
+							}
+							
                             $this->item[$field_file."_down"] =& $this->item[$field_file];
-							//    $tpl->Assign( 'file_'.$row[1], '('.$file->size.'kb, '.$file->format.", <a href='".$_href."'>скачать</a>)" );
 						}
                         $this->file = $file;
 					}
@@ -173,18 +190,6 @@ class FormFiles extends FormSimple  {
 
 	function Update()
 	{
-		$fields = array('text', 'lead', 'blog_descr', 'down_descr');
-		foreach ($fields as $field)
-		{
-			if (strpos($this->rh->GLOBALS[$this->prefix.$field.$this->suffix], "<div class=\"text\">")!==false)
-			{
-				$post = str_replace("<div class=\"text\">", "", $this->rh->GLOBALS[$this->prefix.$field.$this->suffix]);
-				$post = substr($post, 0, -6);
-
-				$post = preg_replace("/<div(.*)>\s+<\/div>/", "", $post);
-				$this->rh->GLOBALS[$this->prefix.$field.$this->suffix] = $post;
-			}
-		}
 		if( FormSimple::Update() )
 		{
 			$rh =& $this->rh;
@@ -241,14 +246,12 @@ class FormFiles extends FormSimple  {
 						$this->_handleUpload($field_file, $result_arrays);
 					}
 				}
-				//die();
 			}
 
 			return true;
 		}
 		else
 		{
-			//die('22');
 			return false;
 		}
 	}

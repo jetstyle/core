@@ -20,9 +20,9 @@
 		
   //шаблонные переменные для вставки htmlarea
 	$this->tpl->assign('fe_/',$this->front_end->path_rel);
-	$this->tpl->assign('fe_images',$this->front_end->path_rel.$this->front_end->skin.'/images/');
-	$this->tpl->assign('fe_css',$this->front_end->path_rel.'css/');
-	$this->tpl->assign('fe_js',$this->front_end->path_rel.'js/');
+	$this->tpl->assign('fe_images',$this->front_end->path_rel.$this->project_name.'/'.$this->front_end->skin.'/images/');
+	$this->tpl->assign('fe_css',$this->front_end->path_rel.$this->project_name.'/css/');
+	$this->tpl->assign('fe_js',$this->front_end->path_rel.$this->project_name.'/js/');
 	
 	//логирование
 	if( $this->trace_logs )
