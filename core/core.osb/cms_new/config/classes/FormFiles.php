@@ -145,6 +145,10 @@ class FormFiles extends FormSimple  {
 							{
 								$this->item[$field_file] = $this->rh->tpl->parse($this->template_files.':file_video');
 							}
+							elseif($file->ext == 'mp3')
+							{
+								$this->item[$field_file] = $this->rh->tpl->parse($this->template_files.':file_mp3');
+							}
 							elseif($file->ext == 'swf')
 							{
 								$this->item[$field_file] = $this->rh->tpl->parse($this->template_files.':file_flash');
