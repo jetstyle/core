@@ -142,8 +142,8 @@ class ListNews extends ListSimple  {
         $this->month = date('n');
     }
     $this->date_where = "year='".$this->year."' AND month='".$this->month."'";
-    $this->state->Set('year',$this->year);
-    $this->state->Set('month',$this->month);
+    $this->rh->state->Set('year',$this->year);
+    $this->rh->state->Set('month',$this->month);
   }
 }
   
