@@ -186,7 +186,7 @@ class TemplateEngineCompiler
     return true;
   }
 
-  function _TemplateRead( $tpl_name, $file_name ) // -- возвращает array( name => content ), умолчательная передаётся через "@"=>...
+  function _TemplateRead( /*ru:UNUSED*/$tpl_name, $file_name ) // -- возвращает array( name => content ), умолчательная передаётся через "@"=>...
   {
     // 0. get contents
     $contents = @file($file_name);
@@ -200,13 +200,13 @@ class TemplateEngineCompiler
     // -- .html templates
     $pi = pathinfo( $file_name );
     if ($pi["extension"] != "html") 
-     $this->rh->debug->Error("TPL::_TemplateRead: [mooing duck alert] not .html template found @ $file_name!");
+      $this->rh->debug->Error("TPL::_TemplateRead: [mooing duck alert] not .html template found @ $file_name!");
     // {{/TPL}}
     
     if (preg_match( "/".$this->rh->tpl_prefix."\/".
                         $this->rh->tpl_construct_tplt.
                         $this->rh->tpl_postfix."/si", $contents, $matches))
-     $this->rh->debug->Error("TPL::_TemplateRead: [mooing duck alert] {{/TPL}} found!");
+      $this->rh->debug->Error("TPL::_TemplateRead: [mooing duck alert] {{/TPL}} found!");
 
 
     // B. typo correcting {{?/}} => {{/?}}
@@ -235,7 +235,23 @@ class TemplateEngineCompiler
     
     //zharik: protect ourselfs from '<?' in templates
     $contents = str_replace( "<?", "<<?php ; ?>?", $contents );
-                              
+
+    // lucky: наследование шаблонов
+    // {{#inherit @path/to/base.html}}
+    $is_inherited = NULL;
+    $re = $this->rh->tpl_prefix.'#inherit'.'\s+@(.+?)\\.html\s*'.$this->rh->tpl_postfix;
+    if (preg_match('/'. $re .'/i', $contents, $matches))
+    {
+      $is_inherited = TRUE;
+      $res = $this->_TemplateRead($tpl_name, $this->tpl->_FindTemplate($matches[1]));
+      $contents = str_replace( $matches[0], '', $contents ); 
+    }
+    else
+    {
+      $is_inherited = FALSE;
+      $res = array();
+    }
+
     // 2. grep all {{TPL:..}} & replace `em by !includes
     //$include_prefix = $this->rh->tpl_prefix.$this->rh->tpl_construct_action."include ";
     $stack     = array( $contents );
@@ -243,9 +259,8 @@ class TemplateEngineCompiler
     $stackargs = array( '' );
     $stackpos = 0;
 
-	 // lucky: aka итребитель копипастов
-	 /* ru@jetstyle скопипастил чтобы шаблоны можно было метить облегчённо */
-	 $tpl_construct_tplt_re = '('.$this->rh->tpl_construct_tplt.'|'.$this->rh->tpl_construct_tplt2.')';
+    /* ru@jetstyle чтобы шаблоны можно было метить облегчённо */
+    $tpl_construct_tplt_re = '('.$this->rh->tpl_construct_tplt.'|'.$this->rh->tpl_construct_tplt2.')';
     //разрезаем на подшаблоны
     while ($stackpos < sizeof($stack) )
     { 
@@ -261,29 +276,47 @@ class TemplateEngineCompiler
                           $data, $matches, PREG_SET_ORDER  );
       foreach( $matches as $match )
       {
-        $sub = $tpl_name.".html:".$match[1];
+        //$sub = $tpl_name.".html:".$match[1];
         //$data = str_replace( $match[0], $include_prefix.$sub.$this->rh->tpl_postfix, $data );
         $data = str_replace( $match[0], '', $data ); // ru@jetstyle
 
-        $stack[] = $match[4];
-        $stackname[] = $match[2];
-        $stackargs[] = $match[3];
+        $stack[]     = $match[4]; // контент внутри шаблона
+        $stackname[] = $match[2]; // имя шаблона
+        $stackargs[] = $match[3]; // аргументы шаблона
+        // lucky: наследование: override'им родительские определения подшаблонов
+        if ($is_inherited /*&& isset($res[$match[2]])*/) {
+          unset($res[$match[2]]);
+        }
       }
 
       $stack[$stackpos] = $data;
       $stackpos++;
     }
 
+    if ($is_inherited)
+    {
+      // lucky: что использовать в качестве основного шаблона: себя или родителя?
+      //   если в шаблоне остался неразобранный текст 
+      //   используем себя
+      if (trim($stack[0]) !== '')
+      {
+        unset($res['@']);
+      }
+      else
+      {
+        // иначе используем родителя $res['@'] (себя херим)
+        unset($stack[0], $stackname[0], $stackargs[0]);
+      }
+    }
+
     // pack results
     $res = array();
     foreach( $stack as $k=>$v )
     {
-         $res[ $stackname[$k] ][] = array($stackargs[$k], $v);
+      $res[ $stackname[$k] ][] = array($stackargs[$k], $v);
     }
 
-
     return $res;
-    
   }
 
   function _TemplateCompile( $content, $instant = false ) // -- компилирует "контент" одного шаблона
