@@ -237,18 +237,18 @@ class TemplateEngineCompiler
     $contents = str_replace( "<?", "<<?php ; ?>?", $contents );
 
     // lucky: наследование шаблонов
-    // {{#inherit @path/to/base.html}}
-    $is_inherited = NULL;
-    $re = $this->rh->tpl_prefix.'#inherit'.'\s+@(.+?)\\.html\s*'.$this->rh->tpl_postfix;
+    // {{#extends @path/to/base.html}}
+    $is_extends = NULL;
+    $re = $this->rh->tpl_prefix.'#extends'.'\s+@(.+?)\\.html\s*'.$this->rh->tpl_postfix;
     if (preg_match('/'. $re .'/i', $contents, $matches))
     {
-      $is_inherited = TRUE;
+      $is_extends = TRUE;
       $res = $this->_TemplateRead($tpl_name, $this->tpl->_FindTemplate($matches[1]));
       $contents = str_replace( $matches[0], '', $contents ); 
     }
     else
     {
-      $is_inherited = FALSE;
+      $is_extends = FALSE;
       $res = array();
     }
 
@@ -284,7 +284,7 @@ class TemplateEngineCompiler
         $stackname[] = $match[2]; // имя шаблона
         $stackargs[] = $match[3]; // аргументы шаблона
         // lucky: наследование: override'им родительские определения подшаблонов
-        if ($is_inherited /*&& isset($res[$match[2]])*/) {
+        if ($is_extends /*&& isset($res[$match[2]])*/) {
           unset($res[$match[2]]);
         }
       }
@@ -293,7 +293,7 @@ class TemplateEngineCompiler
       $stackpos++;
     }
 
-    if ($is_inherited)
+    if ($is_extends)
     {
       // lucky: что использовать в качестве основного шаблона: себя или родителя?
       //   если в шаблоне остался неразобранный текст 
