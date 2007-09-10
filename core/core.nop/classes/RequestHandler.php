@@ -721,7 +721,6 @@ class RequestHandler extends BasicRequestHandler
 		$page = NULL;
 		$cls = strtolower($criteria['class']);
 		$url = $criteria['url'];
-
 		
 		if (isset($url) && isset($this->url2page[$url]))
 		return $this->url2page[$url];
@@ -749,10 +748,11 @@ class RequestHandler extends BasicRequestHandler
 		}
 		if (isset($page))
 		{
-			$cls = substr(get_class($page), 0, -strlen('Page'));
+			$cls = strtolower(substr(get_class($page), 0, -strlen('Page')));
 			$this->cls2page[$cls] =& $page;
 			$this->url2page[$page->url] =& $page;
 		}
+		
 		return $page;
 	}
 
@@ -798,10 +798,6 @@ class RequestHandler extends BasicRequestHandler
 	function showSiteMap()
 	{
 		$this->tpl->set('print_href', $this->ri->hrefPlus('', array('print' => 1)));		
-		
-		if($this->enable_debug)	{
-			$this->tpl->Set('DEBUG', $this->debug->getHtml());
-		}
 
 		$conf = $this->site_map[ $this->site_map_path ];
 

@@ -68,6 +68,7 @@ class DBAL
 {
 	var $rh; // use: $this->rh->debug->Trace (..->Error)
 	var $lowlevel;
+	var $queryCount = 0;
 
 	/*
 	// NB: не реализовано в первой версии (ForR2, ?????)
@@ -123,6 +124,7 @@ class DBAL
 		{
 			$this->rh->debug->mark('q');
 		}
+		$this->queryCount++;
 		
 		$data = array ();
 		//плейсхолдер для префикса
