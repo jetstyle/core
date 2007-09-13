@@ -1,4 +1,4 @@
-<?
+<?php
 $this->UseClass("TreeControl");
 class TreeControlNew extends TreeControl 
 {
@@ -45,60 +45,59 @@ class TreeControlNew extends TreeControl
 		$action = $rh->getVar('action');
 		switch($action)
 		{
-		case 'update':
-			$title = $rh->getVar('title');
-			$id    = $rh->getVar('itemId');
-
-			if (!empty($title))
-			{
-				$res = $this->saveTitle($id, $title);
-			}
-			else
-			{    
-				$res = $this->UpdateTreeStruct();
-			}
-			echo $res;
-			die();
+			case 'update':
+				$title = $rh->getVar('title');
+				$id    = $rh->getVar('itemId');
+				if (!empty($title))
+				{
+					$res = $this->saveTitle($id, $title);
+				}
+				else
+				{    
+					$res = $this->UpdateTreeStruct();
+				}
+				echo $res;
+				die();
 			break;
 
-		case 'xml':
-			header("Content-type: text/xml; charset=".$this->xml_encoding);
-			echo $this->ToXML();
-			die();
-			$rh->End();
+			case 'xml':
+				header("Content-type: text/xml; charset=".$this->xml_encoding);
+				echo $this->ToXML();
+				die();
+				$rh->End();
 			break;
-
-		default:
-			$show_trash = $this->rh->state->Get('_show_trash');
-
-			//$this->_href_template = $this->rh->path_rel."do/".$this->config->module_name."?";
-			$rh->state->free('_show_trash');
-			$tpl->set( '_href', $this->_href_to_module.'?'.$rh->state->state().(!$show_trash ? '_show_trash='.!$show_trash : '' ) );
-			$tpl->Parse( $show_trash ? $this->template_trash_hide : $this->template_trash_show, '__trash_switch' );
-
-
-
-			$tpl->set( '_href', $this->_href_to_module.'?' );
-			$this->_href_actions = $this->rh->path_rel."do/".$this->config->module_name."/tree?";
-			$_href = str_replace('&amp;','&',$this->_href_actions);
-
-			$tpl->set( '_url_connect', $_href.'&action=update&_show_trash='.$show_trash.'&' );
-			$tpl->set( '_url_xml', $_href."action=xml&".$this->id_get_var.'='.$this->id.'&_show_trash='.$show_trash.'&' );
-
-			$tpl->set( '_behavior', $this->tree_behavior );
-			$tpl->set( '_cur_id', $this->id );
-			$tpl->set( '_level_limit', 3 );
-
-				/*
-				$xml_string = $this->toXML();
-					 $xml_string = str_replace('"', "'", $xml_string);
-				$tpl->set( 'xml_string', $xml_string );
-				 */
-			if ($_COOKIE['tree_control_btns'] == 'true')
-				$tpl->set("toggleEditTreeClass", "class='toggleEditTreeClass-Sel'");
-			$tpl->Parse( $this->template_control, '__tree' );
-
-			return $tpl->Parse( $this->template, $this->store_to, true );
+	
+			default:
+				$show_trash = $this->rh->state->Get('_show_trash');
+	
+				//$this->_href_template = $this->rh->path_rel."do/".$this->config->module_name."?";
+				$rh->state->free('_show_trash');
+				$tpl->set( '_href', $this->_href_to_module.'?'.$rh->state->state().(!$show_trash ? '_show_trash='.!$show_trash : '' ) );
+				$tpl->Parse( $show_trash ? $this->template_trash_hide : $this->template_trash_show, '__trash_switch' );
+	
+	
+	
+				$tpl->set( '_href', $this->_href_to_module.'?' );
+				$this->_href_actions = $this->rh->path_rel."do/".$this->config->module_name."/tree?";
+				$_href = str_replace('&amp;','&',$this->_href_actions);
+	
+				$tpl->set( '_url_connect', $_href.'&action=update&_show_trash='.$show_trash.'&' );
+				$tpl->set( '_url_xml', $_href."action=xml&".$this->id_get_var.'='.$this->id.'&_show_trash='.$show_trash.'&' );
+	
+				$tpl->set( '_behavior', $this->tree_behavior );
+				$tpl->set( '_cur_id', $this->id );
+				$tpl->set( '_level_limit', 3 );
+	
+					/*
+					$xml_string = $this->toXML();
+						 $xml_string = str_replace('"', "'", $xml_string);
+					$tpl->set( 'xml_string', $xml_string );
+					 */
+				if ($_COOKIE['tree_control_btns'] == 'true')
+					$tpl->set("toggleEditTreeClass", "class='toggleEditTreeClass-Sel'");
+				$tpl->Parse( $this->template_control, '__tree' );
+	
+				return $tpl->Parse( $this->template, $this->store_to, true );
 
 			break;
 		}
@@ -241,12 +240,39 @@ class TreeControlNew extends TreeControl
 
 		if( $rh->getVar('add') )
 		{
-			$parent = intval($rh->getVar('parent'));
+			$rh->UseClass('Translit');
+      		$translit =& new Translit();
+      		
+      		$node = array();
+      		
+			$node['title'] = iconv("UTF-8", "CP1251", $rh->getVar('newtitle'));
+			if(strlen($node['title']) == 0)
+			{
+				$node['title'] = 'new';
+			}
+			
+			$node['parent'] = intval($rh->getVar('parent'));
+			$node['supertag'] = $translit->TranslateLink($node['title'], 100);  
+			
+			$parentNode = $db->queryOne("
+				SELECT _path
+				FROM ". $this->config->table_name ."
+				WHERE id = '".$node['parent']."'
+			");
+			
+			$node['_path'] = $parentNode['_path'] ? $parentNode['_path'].'/'.$node['supertag'] : $node['supertag'];
+			
+			$order = $db->queryOne("
+				SELECT (MAX(_order) + 1) AS _max
+				FROM ". $this->config->table_name ."
+				WHERE _parent = '".$node['parent']."'
+			");		
+			
 			$id = $db->insert("
 				INSERT INTO ". $this->config->table_name ."
-				(title, title_short, _parent)
+				(title, _parent, _supertag, _path, _order)
 				VALUES
-				('new', 'new', '".$parent."')
+				('".addslashes($node['title'])."', '".addslashes($node['parent'])."', '".addslashes($node['supertag'])."', '".addslashes($node['_path'])."', '".$order['_max']."')
 			");
 
 			$this->loaded = false;
