@@ -310,7 +310,6 @@ class TemplateEngineCompiler
     }
 
     // pack results
-    $res = array();
     foreach( $stack as $k=>$v )
     {
       $res[ $stackname[$k] ][] = array($stackargs[$k], $v);
