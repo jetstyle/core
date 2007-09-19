@@ -340,7 +340,8 @@ class FormFiles extends FormSimple  {
 				'size' => $d['size'],
 				'filesize' => $d['filesize'],
 				'crop' => $d['crop'],
-				'base' => $d['base'],				
+				'base' => $d['base'],
+				'to_flv' => $d['convert_to_flv'],			
 			);
 	}
 

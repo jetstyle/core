@@ -223,23 +223,21 @@ class Upload {
 				move_uploaded_file($uploaded_file,$file_name_full);
 			}
 			
-//			if(is_array($resize) && $resize[0] > 0 && $resize[1] > 0)
-//			{
-//				$img = $this->CreateThumb($uploaded_file, array('x' => $resize[0], 'y' => $resize[1]), 1, $resize[2]);
-//				if($img['error']) return false;
-//				$file = fopen($file_name_full, 'w');
-//				fwrite($file, $img['data']);
-//				fclose($file);
-//			}
-//			else
-//			{
-//				move_uploaded_file($uploaded_file,$file_name_full);
-//			}
-
+			if($params['to_flv'] && $ext != 'flv')
+			{
+				$this->convertToFlv($file_name_full, $this->dir.$file_name.".flv");
+				@unlink($file_name_full);
+			}
+			
 			chmod($file_name_full,$this->chmod);
 			$this->_Current($file_name,$ext);
 			return $this->current;
 		}
+	}
+
+	function convertToFlv($fn, $ft)
+	{
+		exec("ffmpeg -i " . $fn . " -ar 22050 -ab 32 -f flv -s 320x240 ".$ft);
 	}
 
 	function GetFile( $file_name, $is_full_name=false )
