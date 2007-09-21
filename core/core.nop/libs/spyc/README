@@ -1,162 +1,954 @@
-#
-#    S P Y C
-#      a simple php yaml class
-#   v0.2(.5)
-#
-# Load this README!
-# >> $readme = Spyc::YAMLLoad('README');
-#
---- %YAML:1.1
-title: Spyc -- a Simple PHP YAML Class
-version: 0.2.5
-author: [chris wanstrath, chris@ozmm.org]
-websites: [http://www.yaml.org, http://spyc.sourceforge.net]
-license: [MIT License, http://www.opensource.org/licenses/mit-license.php]
-copyright: (c) 2005-2006 Chris Wanstrath
-tested on: [php 4.3.11, php 5.0.4]
+Spyc 3.0 (svn rev 12) + patch
+http://spyc.sourceforge.net
 
-installation: >
-  Copy spyc.php to a directory you can
-  access with your YAML-ready PHP script.
 
-  That's it!
-
-about: >
-  From www.yaml.org:
-
-  "YAML(tm) (rhymes with 'camel') is a human-friendly, cross language,
-  Unicode based data serialization language designed around the common
-  native data structures of agile programming languages. It is broadly
-  useful for programming needs ranging from configuration files to
-  Internet messaging to object persistence to data auditing. Together
-  with the Unicode standard for characters, the YAML specification provides
-  all the information necessary to understand YAML Version 1.1 and to
-  creating programs that process YAML information.
-
-  YAML(tm) is a balance of the following design goals:
-    - YAML documents are very readable by humans.
-    - YAML interacts well with scripting languages.
-    - YAML uses host languages' native data structures.
-    - YAML has a consistent information model.
-    - YAML enables stream-based processing.
-    - YAML is expressive and extensible.
-    - YAML is easy to implement."
-
-  YAML makes a lot of sense.  It's easy to use, easy to learn, and cool.
-  As the lucky stiff named why once said, "YAML is a beacon of light."
-
-  If you're new to YAML, may we suggest YAML In Five Minutes:
-    - http://yaml.kwiki.org/?YamlInFiveMinutes
-
-  If you don't have five minutes, realize that this README is a completely
-  valid YAML document.  Dig in, load this or any YAML file into an array
-  with Spyc and see how easy it is to translate friendly text into usable
-  data.
-
-  The purpose of Spyc is to provide a pure PHP alternative to Syck, a
-  simple API for loading and dumping YAML documents, a YAML loader which
-  understands a usable subset of the YAML spec, and to further spread
-  the glory of YAML to the PHP masses.
-
-  If you're at all hesitant ("usable subset of YAML?!"), navigate
-  http://yaml.org/start.html.  Spyc completely understands the YAML
-  document shown there, a document which has features way beyond the
-  scope of what normal config files might require.  Try it for yourself,
-  and then start enjoying the peace of mind YAML brings to your life.
-
-meat and a few potatoes:
-  - concept: Loading a YAML document into PHP
-    brief: >
-      $yaml will become an array of all the data in wicked.yaml
-    code: |
-
-      include('spyc.php');
-
-      $yaml = Spyc::YAMLLoad('wicked.yaml');
-
-  - concept: Loading a YAML string into PHP
-    brief: >
-      $array will look like this:
-        array('A YAML','document in a','string')
-    code: |
-
-      include('spyc.php');
-
-      $yaml  = '- A YAML\n- document in a\n- string.';
-      $array = Spyc::YAMLLoad($yaml);
-
-  - concept: Dumping a PHP array to YAML
-    brief: >
-      $yaml will become a string of a YAML document created from
-      $array.
-    code: |
-
-      include('spyc.php');
-
-      $array['name']  = 'chris';
-      $array['sport'] = 'curbing';
-
-      $yaml = Spyc::YAMLDump($array);
-
-prior art:
-  - who: [Brian Ingerson, Clark Evans, Oren Ben-Kiki]
-    why?: >
-      The YAML spec is really a piece of work, and these guys
-      did a great job on it.  A simple and elegant language like
-      YAML was a long time coming and it's refreshing to know
-      such able minded individuals took the task to heart and
-      executed it with cunning and strength.  In addition to
-      their various noteworthy contributions to YAML parsers
-      and related projects, YAML.pm's README is a treasure trove
-      of information for knowledge seekers.  Thanks, guys.
-
-  - who: why the lucky stiff
-    why?: >
-      As the author of Syck, the code used in Ruby for the language's
-      YAML class and methods, why is indirectly (directly?) responsible
-      for my first exposure to YAML (as a config file in a Ruby web-app)
-      and the countless hours I spent playing with this sheik new data
-      format afterwards.  Syck's README is a YAML file and thus the
-      inspiration for this file and, even, this very piece of software.
-
-  - who: Steve Howell
-    why?: >
-      Python's YAML implementation.  PyYAML's README file is also YAML,
-      so it too inspired the YAML format of this README file.
-
-  - who: [Rasmus Lerdorf, Zeev Suraski, Andi Gutmans, et al]
-    why?: >
-      PHP is great at what it does best.  It's also paid a lot of my bills.
-      Thanks.
-
-bugs:
-  report: >
-    Please see Spyc's Sourceforge project page for information on reporting bugs.
-  speed: >
-    This implementation was not designed for speed.  Rather, it
-    was designed for those who need a pure PHP implementation of
-    a YAML parser and who are not overly concerned with performance.
-    If you want speed, check out Syck.
-  depth: >
-    This parser is by no means a comprehensive YAML parser.  For supported
-    features and future plans, check the website.
-  unicode: >
-    YAML is supposed to be unicode, but for now we're just using ASCII.
-    PHP has crappy unicode support but who knows what the future holds.
-
-resources:
-  - http://www.yaml.org
-  - http://www.yaml.org/spec/
-  - http://yaml.kwiki.org/?YamlInFiveMinutes
-  - http://www.whytheluckystiff.net/syck/
-  - http://yaml4r.sourceforge.net/cookbook/
-  - http://www.sourceforge.net/projects/spyc/
-  - http://spyc.sourceforge.net/
-
-thanks:
-  - Adam Wood
-  - Daniel Ferreira
-  - Aaron Jensen
-  - Mike Thornton
-  - Fabien Potencier
-  - Mustafa Kumas
+Index: spyc.php
+===================================================================
+--- spyc.php	(revision 12)
++++ spyc.php	(working copy)
+@@ -42,9 +42,9 @@
+   var $_containsGroupAlias = false;
+   var $path;
+   var $result;
+-  var $LiteralBlockMarkers = array ('>', '|');
+-  var $LiteralPlaceHolder = '___YAML_Literal_Block___';
+   var $SavedGroups = array();
++  var $emptyValue = ""; /* Just set to NULL for http://yaml.org/type/null.html */
++  var $eol = NULL;      /* End Of Line will be autodetected */
+ 
+   /**#@+
+   * @access public
+@@ -267,31 +267,26 @@
+     $this->path = array();
+     $this->result = array();
+ 
++    // detect End Of line
++    if    (substr($Source[0], -2, 2) === "\r\n") $this->eol = "\r\n";
++    else  $this->eol = substr($Source[0], -1, 1);
+ 
+-    for ($i = 0; $i < count($Source); $i++) {
+-      $line = $Source[$i];
+-      $lineIndent = $this->_getIndent($line);
+-      $this->path = $this->getParentPathByIndent($lineIndent);
++    // let's go
++    $this->Source = $Source;
++    $this->line   = -1;
++
++    while (false !== ($line = $this->nextLine())) {
++      $this->lineIndent = $lineIndent = $this->_getIndent($line);
+       $line = $this->stripIndent($line, $lineIndent);
++
+       if ($this->isComment($line)) continue;
+ 
+-      if ($literalBlockStyle = $this->startsLiteralBlock($line)) {
+-        $line = rtrim ($line, $literalBlockStyle . "\n");
+-        $literalBlock = '';
+-        $line .= $this->LiteralPlaceHolder;
++      $this->path = $this->getParentPathByIndent($lineIndent);
++      $lineArray = $this->_parseLine($line); // can eat more than one line
+ 
+-        while (++$i < count($Source) && $this->literalBlockContinues($Source[$i], $lineIndent)) {
+-          $literalBlock = $this->addLiteralLine($literalBlock, $Source[$i], $literalBlockStyle);
+-        }
+-        $i--;
+-      }
+-      $lineArray = $this->_parseLine($line);
+-      
+-      if ($literalBlockStyle)
+-      $lineArray = $this->revertLiteralPlaceHolder ($lineArray, $literalBlock);
+-
+       $this->addArray($lineArray, $lineIndent);
+     }
++
+     return $this->result;
+   }
+ 
+@@ -306,6 +301,11 @@
+     return $foo;
+   }
+ 
++  function nextLine ()
++  {
++    return ($this->line + 1 < count($this->Source)) ? $this->Source[++$this->line]: false;
++  }
++
+   /**
+      * Finds and returns the indentation of a YAML line
+      * @access private
+@@ -330,7 +330,7 @@
+     if (!$line) return array();
+     $array = array();
+ 
+-    if ($group = $this->nodeContainsGroup($line)) {
++    if ($group = $this->nodeContainsGroupAnchor($line)) {
+       $this->addGroup($line, $group);
+       $line = $this->stripGroup ($line, $group);
+     }
+@@ -359,62 +359,76 @@
+      * @param string $value
+      * @return mixed
+      */
+-  function _toType($value) {
++  function _toType($value, $inline=false) {
+ 
++    $symbolsForReference = 'A-z0-9_\-';
++
+     if (strpos($value, '#') !== false)
+       $value = trim(preg_replace('/#(.+)$/','',$value));
+ 
+     if (preg_match('/^("(.*)"|\'(.*)\')/',$value,$matches)) {
+       $value = (string)preg_replace('/(\'\'|\\\\\')/',"'",end($matches));
+       $value = preg_replace('/\\\\"/','"',$value);
+-    } elseif (preg_match('/^\\[(.+)\\]$/',$value,$matches)) {
++    } elseif (preg_match('/^\\[(.*)\\]$/',$value,$matches)) {
+       // Inline Sequence
+-
++      $thing = trim($matches[1]);
++      // Propagate value array
++      $value  = array();
+       // Take out strings sequences and mappings
+-      $explode = $this->_inlineEscape($matches[1]);
++      if ($thing !== '') {
++        $explode = $this->_inlineEscape($thing);
+ 
+-      // Propagate value array
+-      $value  = array();
+-      foreach ($explode as $v) {
+-        $value[] = $this->_toType($v);
++        foreach ($explode as $v) {
++          $value[] = $this->_toType($v);
++        }
+       }
+-    } elseif (strpos($value,': ')!==false && !preg_match('/^{(.+)/',$value)) {
++    } elseif (preg_match('/^\*(['.$symbolsForReference.']+)/', $value, $matches)) {
++      // It's a alias
++      do {
++        $groupAlias = $matches[1];
++        if (!isset($this->SavedGroups[$groupAlias])) { echo "Bad group name: $groupAlias."; break; }
++        $groupPath = $this->SavedGroups[$groupAlias];
++        eval ('$value = $this->result' . Spyc::flatten ($groupPath) . ';');
++      } while (false);
++    } elseif (!$inline && ($_p = strpos($value,': '))!==false && !preg_match('/^{(.*)/',$value)) {
+       // It's a map
+-      $array = explode(': ',$value);
+-      $key   = trim($array[0]);
+-      array_shift($array);
+-      $value = trim(implode(': ',$array));
+-      $value = $this->_toType($value);
++      $key   = trim(substr($value, 0, $_p));
++      $value = trim(substr($value, $_p+2 )); unset($_p);
++      $value = $this->_toType($value, true);
+       $value = array($key => $value);
+-    } elseif (preg_match("/{(.+)}$/",$value,$matches)) {
++    } elseif (preg_match("/^{(.*)}$/",$value,$matches)) {
+       // Inline Mapping
+-
+-      // Take out strings sequences and mappings
+-      $explode = $this->_inlineEscape($matches[1]);
+-
++      $thing = trim($matches[1]);
+       // Propogate value array
+       $array = array();
+-      foreach ($explode as $v) {
+-        $SubArr = $this->_toType($v);
+-        if (empty($SubArr)) continue;
+-        if (is_array ($SubArr)) {
+-          $array[key($SubArr)] = $SubArr[key($SubArr)]; continue;
++      if ($thing !== '') {
++        // Take out strings sequences and mappings
++        $explode = $this->_inlineEscape($thing);
++
++        foreach ($explode as $v) {
++          $SubArr = $this->_toType($v);
++          if (empty($SubArr)) continue;
++          if (is_array ($SubArr)) {
++            $array[key($SubArr)] = $SubArr[key($SubArr)]; continue;
++          }
++          $array[] = $SubArr;
+         }
+-        $array[] = $SubArr;
+       }
+       $value = $array;
+-    } elseif (strtolower($value) == 'null' or $value == '' or $value == '~') {
++    } elseif (strtolower($value) == 'null' or $value == '~') {
+       $value = null;
++    } elseif ($value == '') {
++      $value = $this->emptyValue;
+     } elseif (preg_match ('/^[0-9]+$/', $value)) {
+       $value = (int)$value;
+-    } elseif (in_array(strtolower($value),
+-    array('true', 'on', '+', 'yes', 'y'))) {
++    } elseif (in_array(strtolower($value), array('true', 'on', '+', 'yes', 'y'))) {
+       $value = true;
+-    } elseif (in_array(strtolower($value),
+-    array('false', 'off', '-', 'no', 'n'))) {
++    } elseif (in_array(strtolower($value), array('false', 'off', '-', 'no', 'n'))) {
+       $value = false;
+     } elseif (is_numeric($value)) {
+       $value = (float)$value;
++    } elseif ($sbinfo = $this->startsBlockScalar($value)) {
++      $value = $this->returnBlockScalar($value, $sbinfo);
+     } else {
+       // Just a normal string, right?
+ 
+@@ -447,14 +461,14 @@
+     unset($regex);
+ 
+     // Check for sequences
+-    if (preg_match_all('/\[(.+)\]/U',$inline,$seqs)) {
+-      $inline = preg_replace('/\[(.+)\]/U','YAMLSeq',$inline);
++    if (preg_match_all('/\\[(.*)\\]/U',$inline,$seqs)) {
++      $inline = preg_replace('/\\[(.*)\\]/U','YAMLSeq',$inline);
+       $seqs   = $seqs[0];
+     }
+ 
+     // Check for mappings
+-    if (preg_match_all('/{(.+)}/U',$inline,$maps)) {
+-      $inline = preg_replace('/{(.+)}/U','YAMLMap',$inline);
++    if (preg_match_all('/{(.*)}/U',$inline,$maps)) {
++      $inline = preg_replace('/{(.*)}/U','YAMLMap',$inline);
+       $maps   = $maps[0];
+     }
+ 
+@@ -499,12 +513,6 @@
+     return $explode;
+   }
+ 
+-  function literalBlockContinues ($line, $lineIndent) {
+-    if (!trim($line)) return true;
+-    if ($this->_getIndent($line) > $lineIndent) return true;
+-    return false;
+-  }
+-
+   function addArrayInline ($array, $indent) {
+       $CommonGroupPath = $this->path;
+       if (empty ($array)) return false;
+@@ -520,11 +528,10 @@
+     if (count ($array) > 1)
+       return $this->addArrayInline ($array, $indent);
+     
+-
+     $key = key ($array);
+-    if (!isset ($array[$key])) return false;
+-    if ($array[$key] === array()) { $array[$key] = ''; };
++    
+     $value = $array[$key];
++    $isMergeKey = $this->isMergeKey($key);
+ 
+     // Unfolding inner array tree as defined in $this->_arrpath.
+     //$_arr = $this->result; $_tree[0] = $_arr; $i = 1;
+@@ -533,27 +540,23 @@
+     eval ('$_arr = $this->result' . $tempPath . ';');
+ 
+ 
+-    if ($this->_containsGroupAlias) {
+-      do {
+-        if (!isset($this->SavedGroups[$this->_containsGroupAlias])) { echo "Bad group name: $this->_containsGroupAlias."; break; }
+-        $groupPath = $this->SavedGroups[$this->_containsGroupAlias];
+-        eval ('$value = $this->result' . Spyc::flatten ($groupPath) . ';');
+-      } while (false);
+-      $this->_containsGroupAlias = false;
+-    }
+-
+-
+     // Adding string or numeric key to the innermost level or $this->arr.
+     if ($key)
+-    $_arr[$key] = $value;
++    {
++      if ($isMergeKey) {
++        if (is_array ($_arr)) { $_arr = array_merge($_arr, $value); } 
++        else { $_arr = $value; }
++      } else {
++        $_arr[$key] = $value;
++      }
++    }
+     else {
+       if (!is_array ($_arr)) { $_arr = array ($value); $key = 0; }
+       else { $_arr[] = $value; end ($_arr); $key = key ($_arr); }
+ 
+     }
+ 
+-    $this->path[$indent] = $key;
+-
++    if (!$isMergeKey) $this->path[$indent] = $key;
+     eval ('$this->result' . $tempPath . ' = $_arr;');
+ 
+     if ($this->_containsGroupAnchor) {
+@@ -579,41 +582,101 @@
+   }
+ 
+ 
++  function startsBlockScalar($line) {
++    if (strlen($line) === 0) return false;
++    if ($line{0} !== '|' && $line{0} !== '>') return false;
+ 
+-  function startsLiteralBlock ($line) {
+-    $lastChar = substr (trim($line), -1);
+-    if (in_array ($lastChar, $this->LiteralBlockMarkers))
+-    return $lastChar;
++    $sbinfo = false;
++    if (preg_match ('/^([|>])([0-9]+)?([+-])?$/', $line, $matches)) {
++    // >2+
++      $sbinfo = array();
++      $sbinfo['_']        = $matches[0];
++      $sbinfo['type']     = $matches[1];
++      $sbinfo['indent']   = isset($matches[2]) && $matches[2] !== '' ? $matches[2] : NULL;
++      $sbinfo['chomping'] = isset($matches[3]) && $matches[3] !== '' ? $matches[3] : '';
++    } elseif (preg_match ('/^([|>])([+-])?([0-9]+)?$/', $line, $matches)) {
++    // >+2
++      $sbinfo = array();
++      $sbinfo['_']        = $matches[0];
++      $sbinfo['type']     = $matches[1];
++      $sbinfo['indent']   = isset($matches[3]) && $matches[3] !== '' ? $matches[3] : NULL;
++      $sbinfo['chomping'] = isset($matches[2]) && $matches[2] !== '' ? $matches[2] : '';
++    }
++    return $sbinfo;
++  }
++
++  function blockScalarContinues ($line, $sbinfo) {
++    if (trim($line, " \r\n") === '') return true;
++    if ($this->_getIndent($line) >= $sbinfo['indent']) return true;
+     return false;
+   }
+ 
+-  function addLiteralLine ($literalBlock, $line, $literalBlockStyle) {
+-    $line = $this->stripIndent($line);
+-    $line = str_replace ("\r\n", "\n", $line);
++  function returnBlockScalar ($line, $sbinfo) {
++    $line = rtrim ($line, $sbinfo['_'] . "\n");
+ 
+-    if ($literalBlockStyle == '|') {
+-      return $literalBlock . $line;
++    // FIXME : 2007-09-15 : lucky
++    // here is look ahead for lines. move it to returnLiteralBlock()
++    if (!isset($sbinfo['indent'])) {
++      // set block indentation from first non empty line
++      $i = $this->line; $c = count($this->Source);
++      while (++$i < $c  && trim($this->Source[$i], " \r\n") === '') {}
++      $sbinfo['indent'] = $i < $c ? $this->_getIndent($this->Source[$i]) : NULL;
+     }
+-    if (strlen($line) == 0) return $literalBlock . "\n";
++    if ($sbinfo['indent'] > $this->lineIndent) { // it's ok
++      $lines = $this->returnLiteralBlock($line, $sbinfo);
++    } else {
++      // this block contains only empty lines, and i can't to detect indent
++      $this->line = $i - 1;
++      $lines      = array($this->Source[$this->line]);
++    }
+ 
+-   // echo "|$line|";
+-    if ($line != "\n")
+-      $line = trim ($line, "\r\n ") . " ";
++    $eol = $this->eol;
++    $i = count($lines);
++    // tail comments
++    while (--$i > 0 && $this->isComment(trim($lines[$i]))) { }
++    if ($sbinfo['chomping'] === '-') {
++      $lines = array_slice($lines, 0, $i + 1);
++      if ($i >= 0) $lines[$i] = rtrim($lines[$i], $eol);
++    } elseif ($sbinfo['chomping'] === '') {
++      $lines = array_slice($lines, 0, $i + 1);
++    } /* else $sbinfo['chomping'] == '+' */
+ 
+-    return $literalBlock . $line;
++    // fold
++    if ($sbinfo['type'] === '>') {
++      $i++; // count of lines to fold
++      while (--$i > 0) { 
++        $_line = $lines[$i];
++        if (strlen($_line) === 0 || $_line === $eol) { 
++          $lines[$i] = ''; 
++        } else {
++          $_prevline = $lines[$i - 1];
++          if ($_line{0} !== ' ' && strlen($_prevline) > 0 && $_prevline !== $eol && $_prevline{0} !== ' ') {
++            $lines[$i - 1] = rtrim($_prevline, $eol) . ' ' . $_line;
++            $lines[$i] = '';
++          }
++        }
++      }
++    }
++
++    return $line . implode('', $lines);
+   }
+ 
+-  function revertLiteralPlaceHolder ($lineArray, $literalBlock) {
+-
+-    foreach ($lineArray as $k => $_) {
+-      if (substr($_, -1 * strlen ($this->LiteralPlaceHolder)) == $this->LiteralPlaceHolder)
+-      $lineArray[$k] = rtrim ($literalBlock, " \r\n");
++  function returnLiteralBlock ($line, $sbinfo) {
++    $lines = array();
++    while (false !== ($textline = $this->nextLine()) && $this->blockScalarContinues($textline, $sbinfo)) {
++      $_line = $this->stripIndent($textline, $sbinfo['indent']);
++      // HACK : 2007-09-15 : lucky
++      // we must take (wrong indented) empty lines too
++      $lines[] = ($_line === false) ? $this->eol : $_line;
+     }
+-    return $lineArray;
++    if ($textline !== false) $this->line--;
++    return $lines;
+   }
+ 
++
+   function stripIndent ($line, $indent = -1) {
+     if ($indent == -1) $indent = $this->_getIndent($line);
++    if ($indent === 0) return $line;
+     return substr ($line, $indent);
+   }
+ 
+@@ -644,9 +707,15 @@
+   }
+ 
+ 
++  function isMergeKey ($key) {
++    if (preg_match('/^<</', $key)) return true;
++    return false;
++  }
++
+   function isComment ($line) {
+     if (preg_match('/^#/', $line)) return true;
+-    if (trim($line, " \r\n\t") == '---') return true;
++    $s = trim($line, " \r\n\t");
++    if ($s === '' || $s === '---') return true;
+     return false;
+   }
+ 
+@@ -688,7 +757,7 @@
+   function returnMappedValue ($line) {
+     $array = array();
+     $key         = trim(substr($line,0,-1));
+-    $array[$key] = '';
++    $array[$key] = $this->emptyValue;
+     return $array;
+   }
+ 
+@@ -697,7 +766,7 @@
+   }
+   
+   function isPlainArray ($line) {
+-    if (preg_match('/^\[(.*)\]$/', $line)) return true;
++    if (preg_match('/^\\[(.*)\\]$/', $line)) return true;
+     return false;
+   }
+   
+@@ -724,7 +793,7 @@
+       }
+ 
+       // Set the type of the value.  Int, string, etc
+-      $value = $this->_toType($value);
++      $value = $this->_toType($value, true);
+       if (empty($key)) {
+         $array[]     = $value;
+       } else {
+@@ -738,28 +807,26 @@
+ 
+ 
+   function returnArrayElement ($line) {
+-     if (strlen($line) <= 1) return array(array()); // Weird %)
+-     $array = array();
+-     $value   = trim(substr($line,1));
+-     $value   = $this->_toType($value);
+-     $array[] = $value;
+-     return $array;
++    if (strlen($line) <= 1) 
++      return array($this->emptyValue); // Just a speed optimization for empty element
++    $array = array();
++    $value   = trim(substr($line,1));
++    $value   = $this->_toType($value);
++    $array[] = $value;
++    return $array;
+   }
+ 
+ 
+-  function nodeContainsGroup ($line) {
++  function nodeContainsGroupAnchor ($line) {
+     $symbolsForReference = 'A-z0-9_\-';
+-    if (strpos($line, '&') === false && strpos($line, '*') === false) return false; // Please die fast ;-)
++    if (strpos($line, '&') === false) return false; // Please die fast ;-)
+     if (preg_match('/^(&['.$symbolsForReference.']+)/', $line, $matches)) return $matches[1];
+-    if (preg_match('/^(\*['.$symbolsForReference.']+)/', $line, $matches)) return $matches[1];
+     if (preg_match('/(&['.$symbolsForReference.']+$)/', $line, $matches)) return $matches[1];
+-    if (preg_match('/(\*['.$symbolsForReference.']+$)/', $line, $matches)) return $matches[1];
+     return false;
+   }
+ 
+   function addGroup ($line, $group) {
+     if (substr ($group, 0, 1) == '&') $this->_containsGroupAnchor = substr ($group, 1);
+-    if (substr ($group, 0, 1) == '*') $this->_containsGroupAlias = substr ($group, 1);
+     //print_r ($this->path);
+   }
+ 
+Index: spyc.php5
+===================================================================
+--- spyc.php5	(revision 12)
++++ spyc.php5	(working copy)
+@@ -42,9 +42,9 @@
+   private $_containsGroupAlias = false;
+   private $path;
+   private $result;
+-  private $LiteralBlockMarkers = array ('>', '|');
+-  private $LiteralPlaceHolder = '___YAML_Literal_Block___';
+   private $SavedGroups = array();
++  private $emptyValue = ""; /* Just set to NULL for http://yaml.org/type/null.html */
++  private $eol = NULL;      /* End Of Line will be autodetected */
+ 
+   /**#@+
+   * @access public
+@@ -267,31 +267,26 @@
+     $this->path = array();
+     $this->result = array();
+ 
++    // detect End Of line
++    if    (substr($Source[0], -2, 2) === "\r\n") $this->eol = "\r\n";
++    else  $this->eol = substr($Source[0], -1, 1);
+ 
+-    for ($i = 0; $i < count($Source); $i++) {
+-      $line = $Source[$i];
+-      
+-      $lineIndent = $this->_getIndent($line);
+-      $this->path = $this->getParentPathByIndent($lineIndent);
++    // let's go
++    $this->Source = $Source;
++    $this->line   = -1;
++
++    while (false !== ($line = $this->nextLine())) {
++      $this->lineIndent = $lineIndent = $this->_getIndent($line);
+       $line = $this->stripIndent($line, $lineIndent);
++
+       if ($this->isComment($line)) continue;
+ 
+-      if ($literalBlockStyle = $this->startsLiteralBlock($line)) {
+-        $line = rtrim ($line, $literalBlockStyle . "\n");
+-        $literalBlock = '';
+-        $line .= $this->LiteralPlaceHolder;
++      $this->path = $this->getParentPathByIndent($lineIndent);
++      $lineArray = $this->_parseLine($line); // can eat more than one line
+ 
+-        while (++$i < count($Source) && $this->literalBlockContinues($Source[$i], $lineIndent)) {
+-          $literalBlock = $this->addLiteralLine($literalBlock, $Source[$i], $literalBlockStyle);
+-        }
+-        $i--;
+-      }
+-      $lineArray = $this->_parseLine($line);
+-      if ($literalBlockStyle)
+-      $lineArray = $this->revertLiteralPlaceHolder ($lineArray, $literalBlock);
+-
+       $this->addArray($lineArray, $lineIndent);
+     }
++
+     return $this->result;
+   }
+ 
+@@ -306,6 +301,11 @@
+     return $foo;
+   }
+ 
++  private function nextLine ()
++  {
++    return ($this->line + 1 < count($this->Source)) ? $this->Source[++$this->line]: false;
++  }
++
+   /**
+      * Finds and returns the indentation of a YAML line
+      * @access private
+@@ -330,7 +330,7 @@
+     if (!$line) return array();
+     $array = array();
+ 
+-    if ($group = $this->nodeContainsGroup($line)) {
++    if ($group = $this->nodeContainsGroupAnchor($line)) {
+       $this->addGroup($line, $group);
+       $line = $this->stripGroup ($line, $group);
+     }
+@@ -358,62 +358,76 @@
+      * @param string $value
+      * @return mixed
+      */
+-  private function _toType($value) {
++  private function _toType($value, $inline=false) {
+ 
++    $symbolsForReference = 'A-z0-9_\-';
++
+     if (strpos($value, '#') !== false)
+       $value = trim(preg_replace('/#(.+)$/','',$value));
+ 
+     if (preg_match('/^("(.*)"|\'(.*)\')/',$value,$matches)) {
+       $value = (string)preg_replace('/(\'\'|\\\\\')/',"'",end($matches));
+       $value = preg_replace('/\\\\"/','"',$value);
+-    } elseif (preg_match('/^\\[(.+)\\]$/',$value,$matches)) {
++    } elseif (preg_match('/^\\[(.*)\\]$/',$value,$matches)) {
+       // Inline Sequence
+-
++      $thing = trim($matches[1]);
++      // Propagate value array
++      $value  = array();
+       // Take out strings sequences and mappings
+-      $explode = $this->_inlineEscape($matches[1]);
++      if ($thing !== '') {
++        $explode = $this->_inlineEscape($thing);
+ 
+-      // Propagate value array
+-      $value  = array();
+-      foreach ($explode as $v) {
+-        $value[] = $this->_toType($v);
++        foreach ($explode as $v) {
++          $value[] = $this->_toType($v);
++        }
+       }
+-    } elseif (strpos($value,': ')!==false && !preg_match('/^{(.+)/',$value)) {
++    } elseif (preg_match('/^\*(['.$symbolsForReference.']+)/', $value, $matches)) {
++      // It's a alias
++      do {
++        $groupAlias = $matches[1];
++        if (!isset($this->SavedGroups[$groupAlias])) { echo "Bad group name: $groupAlias."; break; }
++        $groupPath = $this->SavedGroups[$groupAlias];
++        eval ('$value = $this->result' . Spyc::flatten ($groupPath) . ';');
++      } while (false);
++    } elseif (!$inline && ($_p = strpos($value,': '))!==false && !preg_match('/^{(.*)/',$value)) {
+       // It's a map
+-      $array = explode(': ',$value);
+-      $key   = trim($array[0]);
+-      array_shift($array);
+-      $value = trim(implode(': ',$array));
+-      $value = $this->_toType($value);
++      $key   = trim(substr($value, 0, $_p));
++      $value = trim(substr($value, $_p+2 )); unset($_p);
++      $value = $this->_toType($value, true);
+       $value = array($key => $value);
+-    } elseif (preg_match("/{(.+)}$/",$value,$matches)) {
++    } elseif (preg_match("/^{(.*)}$/",$value,$matches)) {
+       // Inline Mapping
+-
+-      // Take out strings sequences and mappings
+-      $explode = $this->_inlineEscape($matches[1]);
+-
++      $thing = trim($matches[1]);
+       // Propogate value array
+       $array = array();
+-      foreach ($explode as $v) {
+-        $SubArr = $this->_toType($v);
+-        if (empty($SubArr)) continue;
+-        if (is_array ($SubArr)) {
+-          $array[key($SubArr)] = $SubArr[key($SubArr)]; continue;
++      if ($thing !== '') {
++        // Take out strings sequences and mappings
++        $explode = $this->_inlineEscape($thing);
++
++        foreach ($explode as $v) {
++          $SubArr = $this->_toType($v);
++          if (empty($SubArr)) continue;
++          if (is_array ($SubArr)) {
++            $array[key($SubArr)] = $SubArr[key($SubArr)]; continue;
++          }
++          $array[] = $SubArr;
+         }
+-        $array[] = $SubArr;
+       }
+       $value = $array;
+-    } elseif (strtolower($value) == 'null' or $value == '' or $value == '~') {
++    } elseif (strtolower($value) == 'null' or $value == '~') {
+       $value = null;
++    } elseif ($value == '') {
++      $value = $this->emptyValue;
+     } elseif (preg_match ('/^[0-9]+$/', $value)) {
+       $value = (int)$value;
+-    } elseif (in_array(strtolower($value),
+-    array('true', 'on', '+', 'yes', 'y'))) {
++    } elseif (in_array(strtolower($value), array('true', 'on', '+', 'yes', 'y'))) {
+       $value = true;
+-    } elseif (in_array(strtolower($value),
+-    array('false', 'off', '-', 'no', 'n'))) {
++    } elseif (in_array(strtolower($value), array('false', 'off', '-', 'no', 'n'))) {
+       $value = false;
+     } elseif (is_numeric($value)) {
+       $value = (float)$value;
++    } elseif ($sbinfo = $this->startsBlockScalar($value)) {
++      $value = $this->returnBlockScalar($value, $sbinfo);
+     } else {
+       // Just a normal string, right?
+ 
+@@ -446,14 +460,14 @@
+     unset($regex);
+ 
+     // Check for sequences
+-    if (preg_match_all('/\[(.+)\]/U',$inline,$seqs)) {
+-      $inline = preg_replace('/\[(.+)\]/U','YAMLSeq',$inline);
++    if (preg_match_all('/\\[(.*)\\]/U',$inline,$seqs)) {
++      $inline = preg_replace('/\\[(.*)\\]/U','YAMLSeq',$inline);
+       $seqs   = $seqs[0];
+     }
+ 
+     // Check for mappings
+-    if (preg_match_all('/{(.+)}/U',$inline,$maps)) {
+-      $inline = preg_replace('/{(.+)}/U','YAMLMap',$inline);
++    if (preg_match_all('/{(.*)}/U',$inline,$maps)) {
++      $inline = preg_replace('/{(.*)}/U','YAMLMap',$inline);
+       $maps   = $maps[0];
+     }
+ 
+@@ -498,12 +512,6 @@
+     return $explode;
+   }
+ 
+-  private function literalBlockContinues ($line, $lineIndent) {
+-    if (!trim($line)) return true;
+-    if ($this->_getIndent($line) > $lineIndent) return true;
+-    return false;
+-  }
+-
+   private function addArrayInline ($array, $indent) {
+       $CommonGroupPath = $this->path;
+       if (empty ($array)) return false;
+@@ -522,9 +530,8 @@
+     
+     $key = key ($array);
+     
+-    if (!isset ($array[$key])) return false;
+-    if ($array[$key] === array()) { $array[$key] = ''; };
+     $value = $array[$key];
++    $isMergeKey = $this->isMergeKey($key);
+ 
+     // Unfolding inner array tree as defined in $this->_arrpath.
+     //$_arr = $this->result; $_tree[0] = $_arr; $i = 1;
+@@ -533,27 +540,23 @@
+     eval ('$_arr = $this->result' . $tempPath . ';');
+ 
+ 
+-    if ($this->_containsGroupAlias) {
+-      do {
+-        if (!isset($this->SavedGroups[$this->_containsGroupAlias])) { echo "Bad group name: $this->_containsGroupAlias."; break; }
+-        $groupPath = $this->SavedGroups[$this->_containsGroupAlias];
+-        eval ('$value = $this->result' . Spyc::flatten ($groupPath) . ';');
+-      } while (false);
+-      $this->_containsGroupAlias = false;
+-    }
+-
+-
+     // Adding string or numeric key to the innermost level or $this->arr.
+     if ($key)
+-    $_arr[$key] = $value;
++    {
++      if ($isMergeKey) {
++        if (is_array ($_arr)) { $_arr = array_merge($_arr, $value); } 
++        else { $_arr = $value; }
++      } else {
++        $_arr[$key] = $value;
++      }
++    }
+     else {
+       if (!is_array ($_arr)) { $_arr = array ($value); $key = 0; }
+       else { $_arr[] = $value; end ($_arr); $key = key ($_arr); }
+ 
+     }
+ 
+-    $this->path[$indent] = $key;
+-
++    if (!$isMergeKey) $this->path[$indent] = $key;
+     eval ('$this->result' . $tempPath . ' = $_arr;');
+ 
+     if ($this->_containsGroupAnchor) {
+@@ -579,41 +582,101 @@
+   }
+ 
+ 
++  private function startsBlockScalar($line) {
++    if (strlen($line) === 0) return false;
++    if ($line{0} !== '|' && $line{0} !== '>') return false;
+ 
+-  private function startsLiteralBlock ($line) {
+-    $lastChar = substr (trim($line), -1);
+-    if (in_array ($lastChar, $this->LiteralBlockMarkers))
+-    return $lastChar;
++    $sbinfo = false;
++    if (preg_match ('/^([|>])([0-9]+)?([+-])?$/', $line, $matches)) {
++    // >2+
++      $sbinfo = array();
++      $sbinfo['_']        = $matches[0];
++      $sbinfo['type']     = $matches[1];
++      $sbinfo['indent']   = isset($matches[2]) && $matches[2] !== '' ? $matches[2] : NULL;
++      $sbinfo['chomping'] = isset($matches[3]) && $matches[3] !== '' ? $matches[3] : '';
++    } elseif (preg_match ('/^([|>])([+-])?([0-9]+)?$/', $line, $matches)) {
++    // >+2
++      $sbinfo = array();
++      $sbinfo['_']        = $matches[0];
++      $sbinfo['type']     = $matches[1];
++      $sbinfo['indent']   = isset($matches[3]) && $matches[3] !== '' ? $matches[3] : NULL;
++      $sbinfo['chomping'] = isset($matches[2]) && $matches[2] !== '' ? $matches[2] : '';
++    }
++    return $sbinfo;
++  }
++
++  private function blockScalarContinues ($line, $sbinfo) {
++    if (trim($line, " \r\n") === '') return true;
++    if ($this->_getIndent($line) >= $sbinfo['indent']) return true;
+     return false;
+   }
+ 
+-  private function addLiteralLine ($literalBlock, $line, $literalBlockStyle) {
+-    $line = $this->stripIndent($line);
+-    $line = str_replace ("\r\n", "\n", $line);
++  private function returnBlockScalar ($line, $sbinfo) {
++    $line = rtrim ($line, $sbinfo['_'] . "\n");
+ 
+-    if ($literalBlockStyle == '|') {
+-      return $literalBlock . $line;
++    // FIXME : 2007-09-15 : lucky
++    // here is look ahead for lines. move it to returnLiteralBlock()
++    if (!isset($sbinfo['indent'])) {
++      // set block indentation from first non empty line
++      $i = $this->line; $c = count($this->Source);
++      while (++$i < $c  && trim($this->Source[$i], " \r\n") === '') {}
++      $sbinfo['indent'] = $i < $c ? $this->_getIndent($this->Source[$i]) : NULL;
+     }
+-    if (strlen($line) == 0) return $literalBlock . "\n";
++    if ($sbinfo['indent'] > $this->lineIndent) { // it's ok
++      $lines = $this->returnLiteralBlock($line, $sbinfo);
++    } else {
++      // this block contains only empty lines, and i can't to detect indent
++      $this->line = $i - 1;
++      $lines      = array($this->Source[$this->line]);
++    }
+ 
+-   // echo "|$line|";
+-    if ($line != "\n")
+-      $line = trim ($line, "\r\n ") . " ";
++    $eol = $this->eol;
++    $i = count($lines);
++    // tail comments
++    while (--$i >= 0 && $this->isComment(trim($lines[$i]))) { }
++    if ($sbinfo['chomping'] === '-') {
++      $lines = array_slice($lines, 0, $i + 1);
++      if ($i >= 0) $lines[$i] = rtrim($lines[$i], $eol);
++    } elseif ($sbinfo['chomping'] === '') {
++      $lines = array_slice($lines, 0, $i + 1);
++    } /* else $sbinfo['chomping'] == '+' */
+ 
+-    return $literalBlock . $line;
++    // fold
++    if ($sbinfo['type'] === '>') {
++      $i++; // count of lines to fold
++      while (--$i > 0) { 
++        $_line = $lines[$i];
++        if (strlen($_line) === 0 || $_line === $eol) { 
++          $lines[$i] = ''; 
++        } else {
++          $_prevline = $lines[$i - 1];
++          if ($_line{0} !== ' ' && strlen($_prevline) > 0 && $_prevline !== $eol && $_prevline{0} !== ' ') {
++            $lines[$i - 1] = rtrim($_prevline, $eol) . ' ' . $_line;
++            $lines[$i] = '';
++          }
++        }
++      }
++    }
++
++    return $line . implode('', $lines);
+   }
+ 
+-  private function revertLiteralPlaceHolder ($lineArray, $literalBlock) {
+-
+-    foreach ($lineArray as $k => $_) {
+-      if (substr($_, -1 * strlen ($this->LiteralPlaceHolder)) == $this->LiteralPlaceHolder)
+-      $lineArray[$k] = rtrim ($literalBlock, " \r\n");
++  private function returnLiteralBlock ($line, $sbinfo) {
++    $lines = array();
++    while (false !== ($textline = $this->nextLine()) && $this->blockScalarContinues($textline, $sbinfo)) {
++      $_line = $this->stripIndent($textline, $sbinfo['indent']);
++      // HACK : 2007-09-15 : lucky
++      // we must take (wrong indented) empty lines too
++      $lines[] = ($_line === false) ? $this->eol : $_line;
+     }
+-    return $lineArray;
++    if ($textline !== false) $this->line--;
++    return $lines;
+   }
+ 
++
+   private function stripIndent ($line, $indent = -1) {
+     if ($indent == -1) $indent = $this->_getIndent($line);
++    if ($indent === 0) return $line;
+     return substr ($line, $indent);
+   }
+ 
+@@ -644,9 +707,15 @@
+   }
+ 
+ 
++  private function isMergeKey ($key) {
++    if (preg_match('/^<</', $key)) return true;
++    return false;
++  }
++
+   private function isComment ($line) {
+     if (preg_match('/^#/', $line)) return true;
+-    if (trim($line, " \r\n\t") == '---') return true;
++    $s = trim($line, " \r\n\t");
++    if ($s === '' || $s === '---') return true;
+     return false;
+   }
+ 
+@@ -688,7 +757,7 @@
+   private function returnMappedValue ($line) {
+     $array = array();
+     $key         = trim(substr($line,0,-1));
+-    $array[$key] = '';
++    $array[$key] = $this->emptyValue;
+     return $array;
+   }
+ 
+@@ -697,7 +766,7 @@
+   }
+   
+   private function isPlainArray ($line) {
+-    if (preg_match('/^\[(.*)\]$/', $line)) return true;
++    if (preg_match('/^\\[(.*)\\]$/', $line)) return true;
+     return false;
+   }
+   
+@@ -724,7 +793,7 @@
+       }
+ 
+       // Set the type of the value.  Int, string, etc
+-      $value = $this->_toType($value);
++      $value = $this->_toType($value, true);
+       if (empty($key)) {
+         $array[]     = $value;
+       } else {
+@@ -738,29 +807,26 @@
+ 
+ 
+   private function returnArrayElement ($line) {
+-     if (strlen($line) <= 1) return array(array()); // Weird %)
+-     $array = array();
+-     $value   = trim(substr($line,1));
+-     $value   = $this->_toType($value);
+-     $array[] = $value;
+-     return $array;
++    if (strlen($line) <= 1) 
++      return array($this->emptyValue); // Just a speed optimization for empty element
++    $array = array();
++    $value   = trim(substr($line,1));
++    $value   = $this->_toType($value);
++    $array[] = $value;
++    return $array;
+   }
+ 
+ 
+-  private function nodeContainsGroup ($line) {    
++  private function nodeContainsGroupAnchor ($line) {
+     $symbolsForReference = 'A-z0-9_\-';
+-    if (strpos($line, '&') === false && strpos($line, '*') === false) return false; // Please die fast ;-)
++    if (strpos($line, '&') === false) return false; // Please die fast ;-)
+     if (preg_match('/^(&['.$symbolsForReference.']+)/', $line, $matches)) return $matches[1];
+-    if (preg_match('/^(\*['.$symbolsForReference.']+)/', $line, $matches)) return $matches[1];
+     if (preg_match('/(&['.$symbolsForReference.']+$)/', $line, $matches)) return $matches[1];
+-    if (preg_match('/(\*['.$symbolsForReference.']+$)/', $line, $matches)) return $matches[1];
+     return false;
+-
+   }
+ 
+   private function addGroup ($line, $group) {
+     if (substr ($group, 0, 1) == '&') $this->_containsGroupAnchor = substr ($group, 1);
+-    if (substr ($group, 0, 1) == '*') $this->_containsGroupAlias = substr ($group, 1);
+     //print_r ($this->path);
+   }
+ 
