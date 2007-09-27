@@ -59,7 +59,7 @@ class ArrowsMore extends Arrows
 
      // adjust positions
      $this->_pageno = $this->current_page; 
-     if ($this->_pageno == 0) $this->_pageno = 1;
+     if ($this->_pageno <= 0) $this->_pageno = 1;
      if ($this->_pageno > $this->_pagecount) $this->_pageno = $this->_pagecount;
      if ($this->_pageframesize)
       $this->_pageframeno = floor(($this->_pageno-1) / $this->_pageframesize +1);
@@ -172,6 +172,40 @@ class ArrowsMore extends Arrows
      return  $tpl->parse( $template, $store_to, $append );
      
    }
+
+	function getTplData()
+	{
+		$t = array();
+		$t['page'] = $this->_GetPageNo();
+		$t['page_count'] = $this->_GetPageCount();
+		$t['page_size'] = $this->_GetPageSize();
+		$t['item_count'] = $this->_GetItemCount();
+		$t['item'] = $this->Offset() + 1;
+		$t['item_last'] = $this->Offset() + $t['page_size'];
+
+		if ($t['page_count'] > $t['page'])
+		{
+			$t['page_next'] = $t['have_next'] = $t['page'] + 1;
+			$t['next_href'] =  $this->rh->ri->HrefPlus('', array($this->varname => $t['page_next']) );
+		}
+		
+		if ($t['page'] > 1)
+		{
+			$t['page_prev'] = $t['have_prev'] = $t['page'] - 1;
+			$t['prev_href'] =
+			  $this->rh->ri->HrefPlus('', array( $this->varname => $t['page_prev']) );
+		}
+
+		foreach (range(1, $t['page_count']) as $i)
+		{
+			$p = array();
+			$p['page'] = $i;
+			$p['href'] = $this->rh->ri->HrefPlus('', array( $this->varname => $p['page']) );
+			if ($i == $t['page']) $p['selected'] = True;
+			$t['pages'][$i] = $p; 
+		}
+		return $t;
+	}
 
 }
 
