@@ -270,9 +270,9 @@ class TreeControlNew extends TreeControl
 			
 			$id = $db->insert("
 				INSERT INTO ". $this->config->table_name ."
-				(title, _parent, _supertag, _path, _order)
+				(title, title_pre, _parent, _supertag, _path, _order)
 				VALUES
-				('".addslashes($node['title'])."', '".addslashes($node['parent'])."', '".addslashes($node['supertag'])."', '".addslashes($node['_path'])."', '".$order['_max']."')
+				('".addslashes($node['title'])."', '".addslashes($this->rh->tpl->action('typografica', $node['title']))."', '".addslashes($node['parent'])."', '".addslashes($node['supertag'])."', '".addslashes($node['_path'])."', '".$order['_max']."')
 			");
 
 			$this->loaded = false;
