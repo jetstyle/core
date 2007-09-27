@@ -50,8 +50,14 @@ class ArrowsMore extends Arrows
      // set counts
      if ($this->_itemcount && $this->_pagesize)
      {
-       if ($this->_itemcount > $this->_pagesize)      
+       if ($this->_itemcount > $this->_pagesize)
+       {   
          $this->_pagecount = ceil( $this->_itemcount / $this->_pagesize );
+       }
+       else
+       {
+       	 $this->_pagecount = 1;
+       }
        if ($this->_pageframesize)
        if ($this->_pagecount > $this->_pageframesize) 
          $this->_pageframecount = ceil( $this->_pagecount / $this->_pageframesize );
@@ -59,6 +65,7 @@ class ArrowsMore extends Arrows
 
      // adjust positions
      $this->_pageno = $this->current_page; 
+    
      if ($this->_pageno <= 0) $this->_pageno = 1;
      if ($this->_pageno > $this->_pagecount) $this->_pageno = $this->_pagecount;
      if ($this->_pageframesize)
@@ -66,7 +73,7 @@ class ArrowsMore extends Arrows
      else 
       $this->_pageframeno = 1;
      if ($this->_pageframesize)
-     if ($this->_pageframeno > $this->_pageframesize) $this->_pageframeno = $this->_pageframesize;
+     if ($this->_pageframeno > $this->_pageframesize) $this->_pageframeno = $this->_pageframesize;     
    }
 
    // вспомогательные функции
