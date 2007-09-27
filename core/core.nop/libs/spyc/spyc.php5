@@ -268,8 +268,10 @@ class Spyc {
     $this->result = array();
 
     // detect End Of line
-    if    (substr($Source[0], -2, 2) === "\r\n") $this->eol = "\r\n";
-    else  $this->eol = substr($Source[0], -1, 1);
+    if (!isset($this->eol)) {
+      if    (substr($Source[0], -2, 2) === "\r\n") $this->eol = "\r\n";
+      else  $this->eol = substr($Source[0], -1, 1);
+    }
 
     // let's go
     $this->Source = $Source;

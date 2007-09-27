@@ -18,13 +18,15 @@ Index: spyc.php
  
    /**#@+
    * @access public
-@@ -267,31 +267,26 @@
+@@ -267,31 +267,28 @@
      $this->path = array();
      $this->result = array();
  
 +    // detect End Of line
-+    if    (substr($Source[0], -2, 2) === "\r\n") $this->eol = "\r\n";
-+    else  $this->eol = substr($Source[0], -1, 1);
++    if (!isset($this->eol)) {
++      if    (substr($Source[0], -2, 2) === "\r\n") $this->eol = "\r\n";
++      else  $this->eol = substr($Source[0], -1, 1);
++    }
  
 -    for ($i = 0; $i < count($Source); $i++) {
 -      $line = $Source[$i];
@@ -63,7 +65,7 @@ Index: spyc.php
      return $this->result;
    }
  
-@@ -306,6 +301,11 @@
+@@ -306,6 +303,11 @@
      return $foo;
    }
  
@@ -75,7 +77,7 @@ Index: spyc.php
    /**
       * Finds and returns the indentation of a YAML line
       * @access private
-@@ -330,7 +330,7 @@
+@@ -330,7 +332,7 @@
      if (!$line) return array();
      $array = array();
  
@@ -84,7 +86,7 @@ Index: spyc.php
        $this->addGroup($line, $group);
        $line = $this->stripGroup ($line, $group);
      }
-@@ -359,62 +359,76 @@
+@@ -359,62 +361,76 @@
       * @param string $value
       * @return mixed
       */
@@ -191,7 +193,7 @@ Index: spyc.php
      } else {
        // Just a normal string, right?
  
-@@ -447,14 +461,14 @@
+@@ -447,14 +463,14 @@
      unset($regex);
  
      // Check for sequences
@@ -210,7 +212,7 @@ Index: spyc.php
        $maps   = $maps[0];
      }
  
-@@ -499,12 +513,6 @@
+@@ -499,12 +515,6 @@
      return $explode;
    }
  
@@ -223,7 +225,7 @@ Index: spyc.php
    function addArrayInline ($array, $indent) {
        $CommonGroupPath = $this->path;
        if (empty ($array)) return false;
-@@ -520,11 +528,10 @@
+@@ -520,11 +530,10 @@
      if (count ($array) > 1)
        return $this->addArrayInline ($array, $indent);
      
@@ -237,7 +239,7 @@ Index: spyc.php
  
      // Unfolding inner array tree as defined in $this->_arrpath.
      //$_arr = $this->result; $_tree[0] = $_arr; $i = 1;
-@@ -533,27 +540,23 @@
+@@ -533,27 +542,23 @@
      eval ('$_arr = $this->result' . $tempPath . ';');
  
  
@@ -274,7 +276,7 @@ Index: spyc.php
      eval ('$this->result' . $tempPath . ' = $_arr;');
  
      if ($this->_containsGroupAnchor) {
-@@ -579,41 +582,101 @@
+@@ -579,41 +584,101 @@
    }
  
  
@@ -396,7 +398,7 @@ Index: spyc.php
      return substr ($line, $indent);
    }
  
-@@ -644,9 +707,15 @@
+@@ -644,9 +709,15 @@
    }
  
  
@@ -413,7 +415,7 @@ Index: spyc.php
      return false;
    }
  
-@@ -688,7 +757,7 @@
+@@ -688,7 +759,7 @@
    function returnMappedValue ($line) {
      $array = array();
      $key         = trim(substr($line,0,-1));
@@ -422,7 +424,7 @@ Index: spyc.php
      return $array;
    }
  
-@@ -697,7 +766,7 @@
+@@ -697,7 +768,7 @@
    }
    
    function isPlainArray ($line) {
@@ -431,7 +433,7 @@ Index: spyc.php
      return false;
    }
    
-@@ -724,7 +793,7 @@
+@@ -724,7 +795,7 @@
        }
  
        // Set the type of the value.  Int, string, etc
@@ -440,7 +442,7 @@ Index: spyc.php
        if (empty($key)) {
          $array[]     = $value;
        } else {
-@@ -738,28 +807,26 @@
+@@ -738,28 +809,26 @@
  
  
    function returnArrayElement ($line) {
@@ -494,13 +496,15 @@ Index: spyc.php5
  
    /**#@+
    * @access public
-@@ -267,31 +267,26 @@
+@@ -267,31 +267,28 @@
      $this->path = array();
      $this->result = array();
  
 +    // detect End Of line
-+    if    (substr($Source[0], -2, 2) === "\r\n") $this->eol = "\r\n";
-+    else  $this->eol = substr($Source[0], -1, 1);
++    if (!isset($this->eol)) {
++      if    (substr($Source[0], -2, 2) === "\r\n") $this->eol = "\r\n";
++      else  $this->eol = substr($Source[0], -1, 1);
++    }
  
 -    for ($i = 0; $i < count($Source); $i++) {
 -      $line = $Source[$i];
@@ -539,7 +543,7 @@ Index: spyc.php5
      return $this->result;
    }
  
-@@ -306,6 +301,11 @@
+@@ -306,6 +303,11 @@
      return $foo;
    }
  
@@ -551,7 +555,7 @@ Index: spyc.php5
    /**
       * Finds and returns the indentation of a YAML line
       * @access private
-@@ -330,7 +330,7 @@
+@@ -330,7 +332,7 @@
      if (!$line) return array();
      $array = array();
  
@@ -560,7 +564,7 @@ Index: spyc.php5
        $this->addGroup($line, $group);
        $line = $this->stripGroup ($line, $group);
      }
-@@ -358,62 +358,76 @@
+@@ -358,62 +360,76 @@
       * @param string $value
       * @return mixed
       */
@@ -667,7 +671,7 @@ Index: spyc.php5
      } else {
        // Just a normal string, right?
  
-@@ -446,14 +460,14 @@
+@@ -446,14 +462,14 @@
      unset($regex);
  
      // Check for sequences
@@ -686,7 +690,7 @@ Index: spyc.php5
        $maps   = $maps[0];
      }
  
-@@ -498,12 +512,6 @@
+@@ -498,12 +514,6 @@
      return $explode;
    }
  
@@ -699,7 +703,7 @@ Index: spyc.php5
    private function addArrayInline ($array, $indent) {
        $CommonGroupPath = $this->path;
        if (empty ($array)) return false;
-@@ -522,9 +530,8 @@
+@@ -522,9 +532,8 @@
      
      $key = key ($array);
      
@@ -710,7 +714,7 @@ Index: spyc.php5
  
      // Unfolding inner array tree as defined in $this->_arrpath.
      //$_arr = $this->result; $_tree[0] = $_arr; $i = 1;
-@@ -533,27 +540,23 @@
+@@ -533,27 +542,23 @@
      eval ('$_arr = $this->result' . $tempPath . ';');
  
  
@@ -747,7 +751,7 @@ Index: spyc.php5
      eval ('$this->result' . $tempPath . ' = $_arr;');
  
      if ($this->_containsGroupAnchor) {
-@@ -579,41 +582,101 @@
+@@ -579,41 +584,101 @@
    }
  
  
@@ -869,7 +873,7 @@ Index: spyc.php5
      return substr ($line, $indent);
    }
  
-@@ -644,9 +707,15 @@
+@@ -644,9 +709,15 @@
    }
  
  
@@ -886,7 +890,7 @@ Index: spyc.php5
      return false;
    }
  
-@@ -688,7 +757,7 @@
+@@ -688,7 +759,7 @@
    private function returnMappedValue ($line) {
      $array = array();
      $key         = trim(substr($line,0,-1));
@@ -895,7 +899,7 @@ Index: spyc.php5
      return $array;
    }
  
-@@ -697,7 +766,7 @@
+@@ -697,7 +768,7 @@
    }
    
    private function isPlainArray ($line) {
@@ -904,7 +908,7 @@ Index: spyc.php5
      return false;
    }
    
-@@ -724,7 +793,7 @@
+@@ -724,7 +795,7 @@
        }
  
        // Set the type of the value.  Int, string, etc
@@ -913,7 +917,7 @@ Index: spyc.php5
        if (empty($key)) {
          $array[]     = $value;
        } else {
-@@ -738,29 +807,26 @@
+@@ -738,29 +809,26 @@
  
  
    private function returnArrayElement ($line) {
