@@ -17,9 +17,9 @@
 *	$this->USE_TIME - использовать дату + время (по умолчанию = true)
 */
 
-$this->UseClass('FormFiles');
+$this->UseClass('FormIframe');
 
-class FormCalendar extends FormFiles	{
+class FormCalendar extends FormIframe	{
 
 	var $date_format = 'd.m.Y';											// формат даты, подставляемый по умолчанию (т.е. когда нету Id)
 	var $r_mysql = '/(\d+)\-(\d+)\-(\d+) (\d+):(\d+):(\d+)/i';			// формат даты, получаемой из mysql
@@ -37,7 +37,7 @@ class FormCalendar extends FormFiles	{
 	var $USE_TIME = true;
 
 	function FormCalendar( &$config ){
-		parent::FormFiles($config);
+		parent::FormIframe($config);
 		if($this->config->USE_TIME === false)
 		{
 			$this->USE_TIME = false;
