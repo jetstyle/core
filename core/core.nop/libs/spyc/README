@@ -2,6 +2,117 @@ Spyc 3.0 (svn rev 12) + patch
 http://spyc.sourceforge.net
 
 
+Index: spyc.yaml
+===================================================================
+--- spyc.yaml	(revision 12)
++++ spyc.yaml	(working copy)
+@@ -49,7 +49,7 @@
+ no time: >
+   There isn't any time
+   for your tricks!
+-
++  
+   Do you understand?
+ 
+ # A literal block as a mapped value
+@@ -113,4 +113,95 @@
+   javascripts:     [dom1.js, dom.js]
+ 
+ # Added in .2
+-1040: Ooo, a numeric key! # And working comments? Wow! Colons in comments: a menace (0.3).
+\ No newline at end of file
++1040: Ooo, a numeric key! # And working comments? Wow! Colons in comments: a menace (0.3).
++
++map with colons:
++  one : 'foo bar: bar baz'
++  two : { foo bar: bar baz }
++    three : foo bar: bar baz
++  date: 20070101 22:59:24
++  four: foo - {bar}
++
++list of maps:
++  - name : chris
++    age  : young
++    brand: lucky strike
++  - compiled languages: *CLANGS
++    all languages list: [*CLANGS, *DLANGS]
++    all languages map : {compiled: *CLANGS, interpreted: *DLANGS}
++
++
++more compiled languages:
++  - Haskell
++  <<: *CLANGS
++
++full languages list:
++  <<: [Haskell, E]
++  <<: *DLANGS
++  <<: *CLANGS
++
++stupid map:
++  i: am
++  <<: {another: example, of: the}
++  key: merging
++
++stupid map:
++  i: am
++  <<: {another: example, of: the}
++  key: merging
++
++empty lines:
++  # comment
++  # commetn
++  - PHP Class
++  
++  - Basic YAML Loader
++
++  - Very Basic YAML Dumper # comment
++
++empty inlines:
++  list:
++    - {}
++    - []
++  empty string:
++  map:
++    list: []
++    map: {}
++
++strip: |-
++  text
++clip: |
++  text
++keep: |+
++  text
++
++- |
++ detected
++- >+
++
++  
++  # detected
++- |1
++  explicit
++- >
++ 	
++ detected
++strip: |-
++  text
++clip: |
++  text
++keep: |+
++  text
++foor:
++  strip empty: >-
++
++  clip empty: >
++ 
++  keep empty: >+
++ 
++strip empty: >-
++ 
++keep empty: >+
++
++clip empty: >
++ 
 Index: spyc.php
 ===================================================================
 --- spyc.php	(revision 12)
@@ -86,7 +197,7 @@ Index: spyc.php
        $this->addGroup($line, $group);
        $line = $this->stripGroup ($line, $group);
      }
-@@ -359,62 +361,76 @@
+@@ -359,62 +361,75 @@
       * @param string $value
       * @return mixed
       */
@@ -144,33 +255,34 @@ Index: spyc.php
 -    } elseif (preg_match("/{(.+)}$/",$value,$matches)) {
 +    } elseif (preg_match("/^{(.*)}$/",$value,$matches)) {
        // Inline Mapping
--
++      $thing = trim($matches[1]);
++      // Propogate value array
++      $value = array();
++      if ($thing !== '') {
++        // Take out strings sequences and mappings
++        $explode = $this->_inlineEscape($thing);
+ 
 -      // Take out strings sequences and mappings
 -      $explode = $this->_inlineEscape($matches[1]);
 -
-+      $thing = trim($matches[1]);
-       // Propogate value array
-       $array = array();
+-      // Propogate value array
+-      $array = array();
 -      foreach ($explode as $v) {
 -        $SubArr = $this->_toType($v);
 -        if (empty($SubArr)) continue;
 -        if (is_array ($SubArr)) {
 -          $array[key($SubArr)] = $SubArr[key($SubArr)]; continue;
-+      if ($thing !== '') {
-+        // Take out strings sequences and mappings
-+        $explode = $this->_inlineEscape($thing);
-+
 +        foreach ($explode as $v) {
 +          $SubArr = $this->_toType($v);
 +          if (empty($SubArr)) continue;
 +          if (is_array ($SubArr)) {
-+            $array[key($SubArr)] = $SubArr[key($SubArr)]; continue;
++            $value[key($SubArr)] = $SubArr[key($SubArr)]; continue;
 +          }
-+          $array[] = $SubArr;
++          $value[] = $SubArr;
          }
 -        $array[] = $SubArr;
        }
-       $value = $array;
+-      $value = $array;
 -    } elseif (strtolower($value) == 'null' or $value == '' or $value == '~') {
 +    } elseif (strtolower($value) == 'null' or $value == '~') {
        $value = null;
@@ -193,7 +305,7 @@ Index: spyc.php
      } else {
        // Just a normal string, right?
  
-@@ -447,14 +463,14 @@
+@@ -447,14 +462,14 @@
      unset($regex);
  
      // Check for sequences
@@ -212,7 +324,7 @@ Index: spyc.php
        $maps   = $maps[0];
      }
  
-@@ -499,12 +515,6 @@
+@@ -499,61 +514,48 @@
      return $explode;
    }
  
@@ -220,29 +332,49 @@ Index: spyc.php
 -    if (!trim($line)) return true;
 -    if ($this->_getIndent($line) > $lineIndent) return true;
 -    return false;
++  function addArrayInline ($array, $indent) {
++    if (empty ($array)) return false;
++    $CommonGroupPath = $this->path;
++
++    foreach ($array as $k => $_) {
++      $this->addArray(array($k => $_), $indent);
++      $this->path = $CommonGroupPath;
++    }
++    return true;
+   }
+ 
+-  function addArrayInline ($array, $indent) {
+-      $CommonGroupPath = $this->path;
+-      if (empty ($array)) return false;
+-      
+-      foreach ($array as $k => $_) {
+-        $this->addArray(array($k => $_), $indent);
+-        $this->path = $CommonGroupPath;
+-      }
+-      return true;
 -  }
--
-   function addArrayInline ($array, $indent) {
-       $CommonGroupPath = $this->path;
-       if (empty ($array)) return false;
-@@ -520,11 +530,10 @@
+-  
+   function addArray ($array, $indent) {
++
      if (count ($array) > 1)
        return $this->addArrayInline ($array, $indent);
-     
--
+-    
++    if (empty ($array))
++      return false;
+ 
      $key = key ($array);
 -    if (!isset ($array[$key])) return false;
 -    if ($array[$key] === array()) { $array[$key] = ''; };
-+    
      $value = $array[$key];
+ 
+-    // Unfolding inner array tree as defined in $this->_arrpath.
+-    //$_arr = $this->result; $_tree[0] = $_arr; $i = 1;
 +    $isMergeKey = $this->isMergeKey($key);
  
-     // Unfolding inner array tree as defined in $this->_arrpath.
-     //$_arr = $this->result; $_tree[0] = $_arr; $i = 1;
-@@ -533,27 +542,23 @@
+     $tempPath = Spyc::flatten ($this->path);
      eval ('$_arr = $this->result' . $tempPath . ';');
  
- 
+-
 -    if ($this->_containsGroupAlias) {
 -      do {
 -        if (!isset($this->SavedGroups[$this->_containsGroupAlias])) { echo "Bad group name: $this->_containsGroupAlias."; break; }
@@ -267,7 +399,7 @@ Index: spyc.php
      else {
        if (!is_array ($_arr)) { $_arr = array ($value); $key = 0; }
        else { $_arr[] = $value; end ($_arr); $key = key ($_arr); }
- 
+-
      }
  
 -    $this->path[$indent] = $key;
@@ -276,7 +408,16 @@ Index: spyc.php
      eval ('$this->result' . $tempPath . ' = $_arr;');
  
      if ($this->_containsGroupAnchor) {
-@@ -579,41 +584,101 @@
+@@ -561,7 +563,7 @@
+       $this->_containsGroupAnchor = false;
+     }
+ 
+-
++    return true;
+   }
+ 
+ 
+@@ -579,41 +581,101 @@
    }
  
  
@@ -398,7 +539,7 @@ Index: spyc.php
      return substr ($line, $indent);
    }
  
-@@ -644,9 +709,15 @@
+@@ -644,9 +706,15 @@
    }
  
  
@@ -415,7 +556,7 @@ Index: spyc.php
      return false;
    }
  
-@@ -688,7 +759,7 @@
+@@ -688,7 +756,7 @@
    function returnMappedValue ($line) {
      $array = array();
      $key         = trim(substr($line,0,-1));
@@ -424,7 +565,7 @@ Index: spyc.php
      return $array;
    }
  
-@@ -697,7 +768,7 @@
+@@ -697,7 +765,7 @@
    }
    
    function isPlainArray ($line) {
@@ -433,7 +574,7 @@ Index: spyc.php
      return false;
    }
    
-@@ -724,7 +795,7 @@
+@@ -724,7 +792,7 @@
        }
  
        // Set the type of the value.  Int, string, etc
@@ -442,7 +583,7 @@ Index: spyc.php
        if (empty($key)) {
          $array[]     = $value;
        } else {
-@@ -738,28 +809,26 @@
+@@ -738,28 +806,26 @@
  
  
    function returnArrayElement ($line) {
@@ -480,6 +621,108 @@ Index: spyc.php
      //print_r ($this->path);
    }
  
+Index: test.php
+===================================================================
+--- test.php	(revision 12)
++++ test.php	(working copy)
+@@ -81,11 +81,11 @@
+ 	die('Sequence 5 failed');
+ 
+ # A folded block as a mapped value
+-if ($yaml['no time'] != "There isn't any time for your tricks! \nDo you understand?")
++if ($yaml['no time'] != "There isn't any time for your tricks!\nDo you understand?\n")
+ 	die("Key: 'no time' failed");
+ 
+ # A literal block as a mapped value
+-if ($yaml['some time'] != "There is nothing but time\nfor your tricks.")
++if ($yaml['some time'] != "There is nothing but time\nfor your tricks.\n")
+ 	die("Key: 'some time' failed");
+ 
+ # Crazy combinations
+@@ -153,8 +153,61 @@
+ if ($yaml[16] != array( 0 => "a", 1 => array (0 => 1, 1 => 2), 2 => "b"))
+ 	die("Sequence 16 failed.");
+ 
++if ($yaml['map with colons'] != array( 
++																			'one'  => "foo bar: bar baz",
++																			'two'  => array(
++																				              'foo bar' => 'bar baz',
++																				              'three'   => 'foo bar: bar baz',
++																			          ),
++	                                    'date' => "20070101 22:59:24", 
++	                                    'four' => "foo - {bar}",
++))
++	print_r($yaml['map with colons']) && die("Sequence 'map with colons' failed.");
+ 
++if ($yaml['list of maps'] != array(
++	                                 array('name' => 'chris', 'age' => 'young', 'brand' => 'lucky strike'),
++																	 array('compiled languages' => array('C/C++', 'Java'), 
++																				 'all languages list' => array(
++																																			array('C/C++', 'Java'),
++																																			array('Perl', 'Python', 'PHP', 'Ruby'),
++																				 ),
++																				 'all languages map'  => array(
++																																			'compiled'    => array('C/C++', 'Java'),
++																																			'interpreted' => array('Perl', 'Python', 'PHP', 'Ruby'),
++																				 ),
++																	 ),
++))
++	print_r($yaml['list of maps']) && die("Key: 'list of maps' failed");
+ 
++if ($yaml['more compiled languages'] != array('Haskell', 'C/C++', 'Java'))
++	print_r($yaml['more compiled languages']) && die("Key: 'more compiled languages' failed");
++  
++if ($yaml['full languages list'] != array('Haskell', 'E', 'Perl', 'Python', 'PHP', 'Ruby', 'C/C++', 'Java'))
++	print_r($yaml['full languages list']) && die("Key: 'full languages list' failed");
++
++if ($yaml['stupid map'] != array('i' => 'am', 'another' => 'example', 'of' => 'the', 'key' => 'merging'))
++	print_r($yaml['stupid map']) && die("Key: 'stupid map' failed");
++
++if ($yaml['empty lines'] != array(
++	'PHP Class', 'Basic YAML Loader', 'Very Basic YAML Dumper'
++	))
++	print_r($yaml['empty lines']) && die("Key: 'empty lines' failed");
++
++if ($yaml['empty inlines'] != array(
++																		'list' => array(
++																										array(),
++																										array(),
++																			),
++																		'empty string' =>  '',
++																		'map'  => array(
++																										'list' => array(),
++																										'map' => array(),
++																		),
++	))
++	print_r($yaml['empty inlines']) && die("Key: 'empty inlines' failed");
++
++
++
+ print "spyc.yaml parsed correctly\n";
+ 
+-?>
+\ No newline at end of file
++?>
+Index: CHANGES
+===================================================================
+--- CHANGES	(revision 12)
++++ CHANGES	(working copy)
+@@ -25,6 +25,15 @@
+     - Some more bugs in the engine are fixed.
+     - Only alphanumeric characters are now allowed in reference names.
+     - Fixed a bug with inline arrays (thanks Tobiah for pointing it out).
++    - lucky@jetstyle.ru:
++        - Merge keys "<<" are now allowed.
++        - Fixed a bug causing "- arr1: *reference" to not parse correctly.
++        - Fixed a bug 1755793 causing "{}" "[]" to not parse correctly. Now they're empty arrays.
++        - Fixed a bug 1747071 causing ":" "-" not parse correctly in the literal mode.
++        - Fixed a bug 1736736. Empty lines should be considered as comments.
++        - More complete YAML block scalar support (>, |) including chomping and block identation indicators.
++        - Internal support for emptyValue. That can be "-\n" produce "array(Null)" instead of "array('')".
++	- Trim spaces around brackets when parsing inlines "[ foo ]".
+     
+   0.2.5:
+     - All .yml file extensions changed to .yaml (see recommendation: http://yaml.org/faq.html)
 Index: spyc.php5
 ===================================================================
 --- spyc.php5	(revision 12)
@@ -564,7 +807,7 @@ Index: spyc.php5
        $this->addGroup($line, $group);
        $line = $this->stripGroup ($line, $group);
      }
-@@ -358,62 +360,76 @@
+@@ -358,62 +360,75 @@
       * @param string $value
       * @return mixed
       */
@@ -622,33 +865,34 @@ Index: spyc.php5
 -    } elseif (preg_match("/{(.+)}$/",$value,$matches)) {
 +    } elseif (preg_match("/^{(.*)}$/",$value,$matches)) {
        // Inline Mapping
--
++      $thing = trim($matches[1]);
++      // Propogate value array
++      $value = array();
++      if ($thing !== '') {
++        // Take out strings sequences and mappings
++        $explode = $this->_inlineEscape($thing);
+ 
 -      // Take out strings sequences and mappings
 -      $explode = $this->_inlineEscape($matches[1]);
 -
-+      $thing = trim($matches[1]);
-       // Propogate value array
-       $array = array();
+-      // Propogate value array
+-      $array = array();
 -      foreach ($explode as $v) {
 -        $SubArr = $this->_toType($v);
 -        if (empty($SubArr)) continue;
 -        if (is_array ($SubArr)) {
 -          $array[key($SubArr)] = $SubArr[key($SubArr)]; continue;
-+      if ($thing !== '') {
-+        // Take out strings sequences and mappings
-+        $explode = $this->_inlineEscape($thing);
-+
 +        foreach ($explode as $v) {
 +          $SubArr = $this->_toType($v);
 +          if (empty($SubArr)) continue;
 +          if (is_array ($SubArr)) {
-+            $array[key($SubArr)] = $SubArr[key($SubArr)]; continue;
++            $value[key($SubArr)] = $SubArr[key($SubArr)]; continue;
 +          }
-+          $array[] = $SubArr;
++          $value[] = $SubArr;
          }
 -        $array[] = $SubArr;
        }
-       $value = $array;
+-      $value = $array;
 -    } elseif (strtolower($value) == 'null' or $value == '' or $value == '~') {
 +    } elseif (strtolower($value) == 'null' or $value == '~') {
        $value = null;
@@ -671,7 +915,7 @@ Index: spyc.php5
      } else {
        // Just a normal string, right?
  
-@@ -446,14 +462,14 @@
+@@ -446,14 +461,14 @@
      unset($regex);
  
      // Check for sequences
@@ -690,7 +934,7 @@ Index: spyc.php5
        $maps   = $maps[0];
      }
  
-@@ -498,12 +514,6 @@
+@@ -498,62 +513,48 @@
      return $explode;
    }
  
@@ -698,26 +942,50 @@ Index: spyc.php5
 -    if (!trim($line)) return true;
 -    if ($this->_getIndent($line) > $lineIndent) return true;
 -    return false;
++  private function addArrayInline ($array, $indent) {
++    if (empty ($array)) return false;
++    $CommonGroupPath = $this->path;
++
++    foreach ($array as $k => $_) {
++      $this->addArray(array($k => $_), $indent);
++      $this->path = $CommonGroupPath;
++    }
++    return true;
+   }
+ 
+-  private function addArrayInline ($array, $indent) {
+-      $CommonGroupPath = $this->path;
+-      if (empty ($array)) return false;
+-      
+-      foreach ($array as $k => $_) {
+-        $this->addArray(array($k => $_), $indent);
+-        $this->path = $CommonGroupPath;
+-      }
+-      return true;
 -  }
--
-   private function addArrayInline ($array, $indent) {
-       $CommonGroupPath = $this->path;
-       if (empty ($array)) return false;
-@@ -522,9 +532,8 @@
-     
+-  
+   private function addArray ($array, $indent) {
+ 
+     if (count ($array) > 1)
+       return $this->addArrayInline ($array, $indent);
+-    
++    if (empty ($array))
++      return false;
++
      $key = key ($array);
-     
+-    
 -    if (!isset ($array[$key])) return false;
 -    if ($array[$key] === array()) { $array[$key] = ''; };
      $value = $array[$key];
+ 
+-    // Unfolding inner array tree as defined in $this->_arrpath.
+-    //$_arr = $this->result; $_tree[0] = $_arr; $i = 1;
 +    $isMergeKey = $this->isMergeKey($key);
  
-     // Unfolding inner array tree as defined in $this->_arrpath.
-     //$_arr = $this->result; $_tree[0] = $_arr; $i = 1;
-@@ -533,27 +542,23 @@
+     $tempPath = Spyc::flatten ($this->path);
      eval ('$_arr = $this->result' . $tempPath . ';');
  
- 
+-
 -    if ($this->_containsGroupAlias) {
 -      do {
 -        if (!isset($this->SavedGroups[$this->_containsGroupAlias])) { echo "Bad group name: $this->_containsGroupAlias."; break; }
@@ -742,7 +1010,7 @@ Index: spyc.php5
      else {
        if (!is_array ($_arr)) { $_arr = array ($value); $key = 0; }
        else { $_arr[] = $value; end ($_arr); $key = key ($_arr); }
- 
+-
      }
  
 -    $this->path[$indent] = $key;
@@ -751,7 +1019,16 @@ Index: spyc.php5
      eval ('$this->result' . $tempPath . ' = $_arr;');
  
      if ($this->_containsGroupAnchor) {
-@@ -579,41 +584,101 @@
+@@ -561,7 +562,7 @@
+       $this->_containsGroupAnchor = false;
+     }
+ 
+-
++    return true;
+   }
+ 
+ 
+@@ -579,41 +580,101 @@
    }
  
  
@@ -873,7 +1150,7 @@ Index: spyc.php5
      return substr ($line, $indent);
    }
  
-@@ -644,9 +709,15 @@
+@@ -644,9 +705,15 @@
    }
  
  
@@ -890,7 +1167,7 @@ Index: spyc.php5
      return false;
    }
  
-@@ -688,7 +759,7 @@
+@@ -688,7 +755,7 @@
    private function returnMappedValue ($line) {
      $array = array();
      $key         = trim(substr($line,0,-1));
@@ -899,7 +1176,7 @@ Index: spyc.php5
      return $array;
    }
  
-@@ -697,7 +768,7 @@
+@@ -697,7 +764,7 @@
    }
    
    private function isPlainArray ($line) {
@@ -908,7 +1185,7 @@ Index: spyc.php5
      return false;
    }
    
-@@ -724,7 +795,7 @@
+@@ -724,7 +791,7 @@
        }
  
        // Set the type of the value.  Int, string, etc
@@ -917,7 +1194,7 @@ Index: spyc.php5
        if (empty($key)) {
          $array[]     = $value;
        } else {
-@@ -738,29 +809,26 @@
+@@ -738,29 +805,26 @@
  
  
    private function returnArrayElement ($line) {
@@ -956,3 +1233,99 @@ Index: spyc.php5
      //print_r ($this->path);
    }
  
+Index: test.php5
+===================================================================
+--- test.php5	(revision 12)
++++ test.php5	(working copy)
+@@ -81,11 +81,11 @@
+ 	die('Sequence 5 failed');
+ 
+ # A folded block as a mapped value
+-if ($yaml['no time'] != "There isn't any time for your tricks! \nDo you understand?")
++if ($yaml['no time'] != "There isn't any time for your tricks!\nDo you understand?\n")
+ 	die("Key: 'no time' failed");
+ 
+ # A literal block as a mapped value
+-if ($yaml['some time'] != "There is nothing but time\nfor your tricks.")
++if ($yaml['some time'] != "There is nothing but time\nfor your tricks.\n")
+ 	die("Key: 'some time' failed");
+ 
+ # Crazy combinations
+@@ -153,8 +153,77 @@
+ if ($yaml[16] != array( 0 => "a", 1 => array (0 => 1, 1 => 2), 2 => "b"))
+ 	die("Sequence 16 failed.");
+ 
++if ($yaml['map with colons'] != array( 
++																			'one'  => "foo bar: bar baz",
++																			'two'  => array(
++																				              'foo bar' => 'bar baz',
++																				              'three'   => 'foo bar: bar baz',
++																			          ),
++	                                    'date' => "20070101 22:59:24", 
++	                                    'four' => "foo - {bar}", 
++))
++	print_r($yaml['map with colons']) && die("Sequence 'map with colons' failed.");
+ 
++if ($yaml['list of maps'] != array(
++	                                 array('name' => 'chris', 'age' => 'young', 'brand' => 'lucky strike'),
++																	 array('compiled languages' => array('C/C++', 'Java'), 
++																				 'all languages list' => array(
++																																			array('C/C++', 'Java'),
++																																			array('Perl', 'Python', 'PHP', 'Ruby'),
++																				 ),
++																				 'all languages map'  => array(
++																																			'compiled'    => array('C/C++', 'Java'),
++																																			'interpreted' => array('Perl', 'Python', 'PHP', 'Ruby'),
++																				 ),
++																	 ),
++))
++	print_r($yaml['list of maps']) && die("Key: 'list of maps' failed");
+ 
++if ($yaml['more compiled languages'] != array('Haskell', 'C/C++', 'Java'))
++	print_r($yaml['more compiled languages']) && die("Key: 'more compiled languages' failed");
++  
++if ($yaml['full languages list'] != array('Haskell', 'E', 'Perl', 'Python', 'PHP', 'Ruby', 'C/C++', 'Java'))
++	print_r($yaml['full languages list']) && die("Key: 'full languages list' failed");
++
++if ($yaml['stupid map'] != array('i' => 'am', 'another' => 'example', 'of' => 'the', 'key' => 'merging'))
++	print_r($yaml['stupid map']) && die("Key: 'stupid map' failed");
++
++if ($yaml['empty lines'] != array(
++	'PHP Class', 'Basic YAML Loader', 'Very Basic YAML Dumper'
++	))
++	print_r($yaml['empty lines']) && die("Key: 'empty lines' failed");
++
++if ($yaml['empty inlines'] != array(
++																		'list' => array(
++																										array(),
++																										array(),
++																			),
++																		'empty string' =>  '',
++																		'map'  => array(
++																										'list' => array(),
++																										'map' => array(),
++																		),
++	))
++	print_r($yaml['empty inlines']) && die("Key: 'empty inlines' failed");
++
++if ($yaml['strip'] != "text")
++	var_dump($yaml['strip']) && die("Key: 'strip' failed");
++
++if ($yaml['clip'] != "text\n")
++	var_dump($yaml['clip']) && die("Key: 'clip' failed");
++ 
++if ($yaml['keep'] != "text\n")
++	var_dump($yaml['keep']) || die("Key: 'keep' failed");
++
++if ($yaml['strip empty'] != "")
++	var_dump($yaml['strip empty']) || die("Key: 'strip empty' failed");
++
++if ($yaml['clip empty'] != "")
++	var_dump($yaml['clip empty']) || die("Key: 'clip empty' failed");
++ 
++if ($yaml['keep empty'] != "\n")
++	var_dump($yaml['keep empty']) || die("Key: 'keep empty' failed");
++
+ print "spyc.yaml parsed correctly\n";
+ 
+ ?>

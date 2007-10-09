@@ -402,7 +402,7 @@ class Spyc {
       // Inline Mapping
       $thing = trim($matches[1]);
       // Propogate value array
-      $array = array();
+      $value = array();
       if ($thing !== '') {
         // Take out strings sequences and mappings
         $explode = $this->_inlineEscape($thing);
@@ -411,12 +411,11 @@ class Spyc {
           $SubArr = $this->_toType($v);
           if (empty($SubArr)) continue;
           if (is_array ($SubArr)) {
-            $array[key($SubArr)] = $SubArr[key($SubArr)]; continue;
+            $value[key($SubArr)] = $SubArr[key($SubArr)]; continue;
           }
-          $array[] = $SubArr;
+          $value[] = $SubArr;
         }
       }
-      $value = $array;
     } elseif (strtolower($value) == 'null' or $value == '~') {
       $value = null;
     } elseif ($value == '') {
@@ -516,31 +515,30 @@ class Spyc {
   }
 
   function addArrayInline ($array, $indent) {
-      $CommonGroupPath = $this->path;
-      if (empty ($array)) return false;
-      
-      foreach ($array as $k => $_) {
-        $this->addArray(array($k => $_), $indent);
-        $this->path = $CommonGroupPath;
-      }
-      return true;
+    if (empty ($array)) return false;
+    $CommonGroupPath = $this->path;
+
+    foreach ($array as $k => $_) {
+      $this->addArray(array($k => $_), $indent);
+      $this->path = $CommonGroupPath;
+    }
+    return true;
   }
-  
+
   function addArray ($array, $indent) {
+
     if (count ($array) > 1)
       return $this->addArrayInline ($array, $indent);
-    
-    $key = key ($array);
-    
-    $value = $array[$key];
-    $isMergeKey = $this->isMergeKey($key);
+    if (empty ($array))
+      return false;
 
-    // Unfolding inner array tree as defined in $this->_arrpath.
-    //$_arr = $this->result; $_tree[0] = $_arr; $i = 1;
+    $key = key ($array);
+    $value = $array[$key];
+
+    $isMergeKey = $this->isMergeKey($key);
 
     $tempPath = Spyc::flatten ($this->path);
     eval ('$_arr = $this->result' . $tempPath . ';');
-
 
     // Adding string or numeric key to the innermost level or $this->arr.
     if ($key)
@@ -555,7 +553,6 @@ class Spyc {
     else {
       if (!is_array ($_arr)) { $_arr = array ($value); $key = 0; }
       else { $_arr[] = $value; end ($_arr); $key = key ($_arr); }
-
     }
 
     if (!$isMergeKey) $this->path[$indent] = $key;
@@ -566,7 +563,7 @@ class Spyc {
       $this->_containsGroupAnchor = false;
     }
 
-
+    return true;
   }
 
 
