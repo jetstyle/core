@@ -57,8 +57,9 @@ class FormIframe extends FormFiles {
     $rh =& $this->rh;
     $db =& $rh->db;
     
-    if( $rh->GLOBALS[ $this->prefix.'_supertag'.$this->suffix ]=='' )
-      $this->config->supertag = 'title';
+    
+//    if( $rh->GLOBALS[ $this->prefix.'_supertag'.$this->suffix ]=='' )
+//      $this->config->supertag = 'title';
     
     if( $this->config->update_tree ){
       if( !FormSimple::Update() ) return false;
