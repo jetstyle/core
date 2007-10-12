@@ -213,7 +213,7 @@ class BasicRequestHandler extends ConfigProcessor {
 			$this->db =& new DBAL( $this );
 			if($this->db_set_encoding)
 			{
-				$this->db->Query("SET CHARACTER SET ".$this->db_set_encoding);
+				$this->db->Query("SET NAMES ".$this->db_set_encoding);
 			}
 		}
 		
