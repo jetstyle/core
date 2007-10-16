@@ -110,7 +110,7 @@ class Site
 				$cache->addSource($source);
 
 			unset($ctx->ctx);
-			$str = "return '".serialize($ctx)."';";
+			$str = "return '".str_replace("'", "\\'", serialize($ctx))."';";
 			$cache->save($str);
 			$ctx->ctx =& $ctx;
 		}
