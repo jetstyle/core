@@ -15,7 +15,7 @@ Index: spyc.yaml
    Do you understand?
  
  # A literal block as a mapped value
-@@ -113,4 +113,95 @@
+@@ -113,4 +113,101 @@
    javascripts:     [dom1.js, dom.js]
  
  # Added in .2
@@ -113,6 +113,12 @@ Index: spyc.yaml
 +
 +clip empty: >
 + 
++quoted keys: 
++  "": foo
++  "bar": "string"
++  "1": "one"
++  2: "two"
++
 Index: spyc.php
 ===================================================================
 --- spyc.php	(revision 12)
@@ -188,7 +194,7 @@ Index: spyc.php
    /**
       * Finds and returns the indentation of a YAML line
       * @access private
-@@ -330,7 +332,7 @@
+@@ -330,14 +332,11 @@
      if (!$line) return array();
      $array = array();
  
@@ -197,7 +203,49 @@ Index: spyc.php
        $this->addGroup($line, $group);
        $line = $this->stripGroup ($line, $group);
      }
-@@ -359,62 +361,75 @@
+ 
+-    if ($this->startsMappedSequence($line))
+-      return $this->returnMappedSequence($line);
+-
+     if ($this->startsMappedValue($line))
+       return $this->returnMappedValue($line);
+ 
+@@ -354,67 +353,111 @@
+ 
+ 
+   /**
++     * Finds the type of the passed key, returns the key as the new type.
++     * @access private
++     * @param string $value
++     * @return mixed
++     */
++  function _toTypeKey($value) {
++
++    if (strpos($value, '#') !== false)
++      $value = trim(preg_replace('/#(.+)$/','',$value));
++
++    if (preg_match('/^("(.*)"|\'(.*)\')$/',$value,$matches)) {
++      $value = (string)preg_replace('/(\'\'|\\\\\')/',"'",end($matches));
++      $value = preg_replace('/\\\\"/','"',$value);
++    } elseif (strtolower($value) == 'null' or $value == '~') {
++      $value = null;
++    } elseif (preg_match ('/^[0-9]+$/', $value)) {
++      $value = (int)$value;
++    } elseif (is_numeric($value)) {
++      $value = (float)$value;
++    } else {
++      // Just a normal string, right?
++
++    }
++
++
++    //  print_r ($value);
++    return $value;
++  }
++
++  /**
+      * Finds the type of the passed value, returns the value as the new type.
+      * @access private
       * @param string $value
       * @return mixed
       */
@@ -209,7 +257,8 @@ Index: spyc.php
      if (strpos($value, '#') !== false)
        $value = trim(preg_replace('/#(.+)$/','',$value));
  
-     if (preg_match('/^("(.*)"|\'(.*)\')/',$value,$matches)) {
+-    if (preg_match('/^("(.*)"|\'(.*)\')/',$value,$matches)) {
++    if (preg_match('/^("(.*)"|\'(.*)\')$/',$value,$matches)) {
        $value = (string)preg_replace('/(\'\'|\\\\\')/',"'",end($matches));
        $value = preg_replace('/\\\\"/','"',$value);
 -    } elseif (preg_match('/^\\[(.+)\\]$/',$value,$matches)) {
@@ -241,7 +290,7 @@ Index: spyc.php
 +        $groupPath = $this->SavedGroups[$groupAlias];
 +        eval ('$value = $this->result' . Spyc::flatten ($groupPath) . ';');
 +      } while (false);
-+    } elseif (!$inline && ($_p = strpos($value,': '))!==false && !preg_match('/^{(.*)/',$value)) {
++    } elseif (!$inline && substr($value, 0, 1) !== '{' && ($_p = strpos($value,': '))!==false) {
        // It's a map
 -      $array = explode(': ',$value);
 -      $key   = trim($array[0]);
@@ -249,6 +298,7 @@ Index: spyc.php
 -      $value = trim(implode(': ',$array));
 -      $value = $this->_toType($value);
 +      $key   = trim(substr($value, 0, $_p));
++      $key   = $this->_toTypeKey($key);
 +      $value = trim(substr($value, $_p+2 )); unset($_p);
 +      $value = $this->_toType($value, true);
        $value = array($key => $value);
@@ -305,7 +355,7 @@ Index: spyc.php
      } else {
        // Just a normal string, right?
  
-@@ -447,14 +462,14 @@
+@@ -447,14 +490,14 @@
      unset($regex);
  
      // Check for sequences
@@ -324,7 +374,7 @@ Index: spyc.php
        $maps   = $maps[0];
      }
  
-@@ -499,61 +514,48 @@
+@@ -499,61 +542,48 @@
      return $explode;
    }
  
@@ -382,12 +432,8 @@ Index: spyc.php
 -        eval ('$value = $this->result' . Spyc::flatten ($groupPath) . ';');
 -      } while (false);
 -      $this->_containsGroupAlias = false;
--    }
--
--
-     // Adding string or numeric key to the innermost level or $this->arr.
-     if ($key)
--    $_arr[$key] = $value;
++    // Adding string or numeric key to the innermost level or $this->arr.
++    if ($key || is_string($key))
 +    {
 +      if ($isMergeKey) {
 +        if (is_array ($_arr)) { $_arr = array_merge($_arr, $value); } 
@@ -395,7 +441,12 @@ Index: spyc.php
 +      } else {
 +        $_arr[$key] = $value;
 +      }
-+    }
+     }
+-
+-
+-    // Adding string or numeric key to the innermost level or $this->arr.
+-    if ($key)
+-    $_arr[$key] = $value;
      else {
        if (!is_array ($_arr)) { $_arr = array ($value); $key = 0; }
        else { $_arr[] = $value; end ($_arr); $key = key ($_arr); }
@@ -408,7 +459,7 @@ Index: spyc.php
      eval ('$this->result' . $tempPath . ' = $_arr;');
  
      if ($this->_containsGroupAnchor) {
-@@ -561,7 +563,7 @@
+@@ -561,7 +591,7 @@
        $this->_containsGroupAnchor = false;
      }
  
@@ -417,7 +468,7 @@ Index: spyc.php
    }
  
  
-@@ -579,41 +581,101 @@
+@@ -579,41 +609,101 @@
    }
  
  
@@ -539,7 +590,7 @@ Index: spyc.php
      return substr ($line, $indent);
    }
  
-@@ -644,9 +706,15 @@
+@@ -644,9 +734,15 @@
    }
  
  
@@ -556,16 +607,31 @@ Index: spyc.php
      return false;
    }
  
-@@ -688,7 +756,7 @@
+@@ -674,21 +770,11 @@
+   }
+ 
+ 
+-  function startsMappedSequence ($line) {
+-    if (preg_match('/^-(.*):$/',$line)) return true;
+-  }
+-
+-  function returnMappedSequence ($line) {
+-    $array = array();
+-    $key         = trim(substr(substr($line,1),0,-1));
+-    $array[$key] = '';
+-    return $array;
+-  }
+-
    function returnMappedValue ($line) {
      $array = array();
      $key         = trim(substr($line,0,-1));
 -    $array[$key] = '';
++    $key         = $this->_toTypeKey($key);
 +    $array[$key] = $this->emptyValue;
      return $array;
    }
  
-@@ -697,7 +765,7 @@
+@@ -697,7 +783,7 @@
    }
    
    function isPlainArray ($line) {
@@ -574,16 +640,36 @@ Index: spyc.php
      return false;
    }
    
-@@ -724,7 +792,7 @@
+@@ -712,9 +798,9 @@
+     if (preg_match('/^(.+):/',$line,$key)) {
+       // It's a key/value pair most likely
+       // If the key is in double quotes pull it out
+-      if (preg_match('/^(["\'](.*)["\'](\s)*:)/',$line,$matches)) {
+-        $value = trim(str_replace($matches[1],'',$line));
+-        $key   = $matches[2];
++      if (preg_match('/^((["\']).*\\2)\s*:/',$line,$matches)) {
++        $value = trim(str_replace($matches[0],'',$line));
++        $key   = $matches[1];
+       } else {
+         // Do some guesswork as to the key and the value
+         $explode = explode(':',$line);
+@@ -724,12 +810,9 @@
        }
  
        // Set the type of the value.  Int, string, etc
 -      $value = $this->_toType($value);
+-      if (empty($key)) {
+-        $array[]     = $value;
+-      } else {
+-        $array[$key] = $value;
+-      }
++      $key = $this->_toTypeKey($key);
 +      $value = $this->_toType($value, true);
-       if (empty($key)) {
-         $array[]     = $value;
-       } else {
-@@ -738,28 +806,26 @@
++      $array[$key] = $value;
+     }
+ 
+     return $array;
+@@ -738,28 +821,26 @@
  
  
    function returnArrayElement ($line) {
@@ -639,7 +725,7 @@ Index: test.php
  	die("Key: 'some time' failed");
  
  # Crazy combinations
-@@ -153,8 +153,61 @@
+@@ -153,8 +153,68 @@
  if ($yaml[16] != array( 0 => "a", 1 => array (0 => 1, 1 => 2), 2 => "b"))
  	die("Sequence 16 failed.");
  
@@ -696,6 +782,13 @@ Index: test.php
 +	))
 +	print_r($yaml['empty inlines']) && die("Key: 'empty inlines' failed");
 +
++if ($yaml['quoted keys'] != array(
++																		'' => 'foo',
++																		'bar' => 'string',
++																		'1' => 'one',
++																		2 => 'two',
++	))
++	var_dump($yaml['quoted keys']) || die("Key: 'quoted keys' failed");
 +
 +
  print "spyc.yaml parsed correctly\n";
@@ -798,7 +891,7 @@ Index: spyc.php5
    /**
       * Finds and returns the indentation of a YAML line
       * @access private
-@@ -330,7 +332,7 @@
+@@ -330,14 +332,11 @@
      if (!$line) return array();
      $array = array();
  
@@ -807,7 +900,49 @@ Index: spyc.php5
        $this->addGroup($line, $group);
        $line = $this->stripGroup ($line, $group);
      }
-@@ -358,62 +360,75 @@
+ 
+-    if ($this->startsMappedSequence($line))
+-      return $this->returnMappedSequence($line);
+-
+     if ($this->startsMappedValue($line))
+       return $this->returnMappedValue($line);
+ 
+@@ -353,67 +352,111 @@
+   }
+ 
+   /**
++     * Finds the type of the passed key, returns the key as the new type.
++     * @access private
++     * @param string $value
++     * @return mixed
++     */
++  private function _toTypeKey($value) {
++
++    if (strpos($value, '#') !== false)
++      $value = trim(preg_replace('/#(.+)$/','',$value));
++
++    if (preg_match('/^("(.*)"|\'(.*)\')$/',$value,$matches)) {
++      $value = (string)preg_replace('/(\'\'|\\\\\')/',"'",end($matches));
++      $value = preg_replace('/\\\\"/','"',$value);
++    } elseif (strtolower($value) == 'null' or $value == '~') {
++      $value = null;
++    } elseif (preg_match ('/^[0-9]+$/', $value)) {
++      $value = (int)$value;
++    } elseif (is_numeric($value)) {
++      $value = (float)$value;
++    } else {
++      // Just a normal string, right?
++
++    }
++
++
++    //  print_r ($value);
++    return $value;
++  }
++
++  /**
+      * Finds the type of the passed value, returns the value as the new type.
+      * @access private
       * @param string $value
       * @return mixed
       */
@@ -819,7 +954,8 @@ Index: spyc.php5
      if (strpos($value, '#') !== false)
        $value = trim(preg_replace('/#(.+)$/','',$value));
  
-     if (preg_match('/^("(.*)"|\'(.*)\')/',$value,$matches)) {
+-    if (preg_match('/^("(.*)"|\'(.*)\')/',$value,$matches)) {
++    if (preg_match('/^("(.*)"|\'(.*)\')$/',$value,$matches)) {
        $value = (string)preg_replace('/(\'\'|\\\\\')/',"'",end($matches));
        $value = preg_replace('/\\\\"/','"',$value);
 -    } elseif (preg_match('/^\\[(.+)\\]$/',$value,$matches)) {
@@ -851,7 +987,7 @@ Index: spyc.php5
 +        $groupPath = $this->SavedGroups[$groupAlias];
 +        eval ('$value = $this->result' . Spyc::flatten ($groupPath) . ';');
 +      } while (false);
-+    } elseif (!$inline && ($_p = strpos($value,': '))!==false && !preg_match('/^{(.*)/',$value)) {
++    } elseif (!$inline && substr($value, 0, 1) !== '{' && ($_p = strpos($value,': '))!==false) {
        // It's a map
 -      $array = explode(': ',$value);
 -      $key   = trim($array[0]);
@@ -859,6 +995,7 @@ Index: spyc.php5
 -      $value = trim(implode(': ',$array));
 -      $value = $this->_toType($value);
 +      $key   = trim(substr($value, 0, $_p));
++      $key   = $this->_toTypeKey($key);
 +      $value = trim(substr($value, $_p+2 )); unset($_p);
 +      $value = $this->_toType($value, true);
        $value = array($key => $value);
@@ -915,7 +1052,7 @@ Index: spyc.php5
      } else {
        // Just a normal string, right?
  
-@@ -446,14 +461,14 @@
+@@ -446,14 +489,14 @@
      unset($regex);
  
      // Check for sequences
@@ -934,7 +1071,7 @@ Index: spyc.php5
        $maps   = $maps[0];
      }
  
-@@ -498,62 +513,48 @@
+@@ -498,62 +541,48 @@
      return $explode;
    }
  
@@ -993,12 +1130,8 @@ Index: spyc.php5
 -        eval ('$value = $this->result' . Spyc::flatten ($groupPath) . ';');
 -      } while (false);
 -      $this->_containsGroupAlias = false;
--    }
--
--
-     // Adding string or numeric key to the innermost level or $this->arr.
-     if ($key)
--    $_arr[$key] = $value;
++    // Adding string or numeric key to the innermost level or $this->arr.
++    if ($key || is_string($key))
 +    {
 +      if ($isMergeKey) {
 +        if (is_array ($_arr)) { $_arr = array_merge($_arr, $value); } 
@@ -1006,7 +1139,12 @@ Index: spyc.php5
 +      } else {
 +        $_arr[$key] = $value;
 +      }
-+    }
+     }
+-
+-
+-    // Adding string or numeric key to the innermost level or $this->arr.
+-    if ($key)
+-    $_arr[$key] = $value;
      else {
        if (!is_array ($_arr)) { $_arr = array ($value); $key = 0; }
        else { $_arr[] = $value; end ($_arr); $key = key ($_arr); }
@@ -1019,7 +1157,7 @@ Index: spyc.php5
      eval ('$this->result' . $tempPath . ' = $_arr;');
  
      if ($this->_containsGroupAnchor) {
-@@ -561,7 +562,7 @@
+@@ -561,7 +590,7 @@
        $this->_containsGroupAnchor = false;
      }
  
@@ -1028,7 +1166,7 @@ Index: spyc.php5
    }
  
  
-@@ -579,41 +580,101 @@
+@@ -579,41 +608,101 @@
    }
  
  
@@ -1150,7 +1288,7 @@ Index: spyc.php5
      return substr ($line, $indent);
    }
  
-@@ -644,9 +705,15 @@
+@@ -644,9 +733,15 @@
    }
  
  
@@ -1167,16 +1305,31 @@ Index: spyc.php5
      return false;
    }
  
-@@ -688,7 +755,7 @@
+@@ -674,21 +769,11 @@
+   }
+ 
+ 
+-  private function startsMappedSequence ($line) {
+-    if (preg_match('/^-(.*):$/',$line)) return true;
+-  }
+-
+-  private function returnMappedSequence ($line) {
+-    $array = array();
+-    $key         = trim(substr(substr($line,1),0,-1));
+-    $array[$key] = '';
+-    return $array;
+-  }
+-
    private function returnMappedValue ($line) {
      $array = array();
      $key         = trim(substr($line,0,-1));
 -    $array[$key] = '';
++    $key         = $this->_toTypeKey($key);
 +    $array[$key] = $this->emptyValue;
      return $array;
    }
  
-@@ -697,7 +764,7 @@
+@@ -697,7 +782,7 @@
    }
    
    private function isPlainArray ($line) {
@@ -1185,16 +1338,36 @@ Index: spyc.php5
      return false;
    }
    
-@@ -724,7 +791,7 @@
+@@ -712,9 +797,9 @@
+     if (preg_match('/^(.+):/',$line,$key)) {
+       // It's a key/value pair most likely
+       // If the key is in double quotes pull it out
+-      if (preg_match('/^(["\'](.*)["\'](\s)*:)/',$line,$matches)) {
+-        $value = trim(str_replace($matches[1],'',$line));
+-        $key   = $matches[2];
++      if (preg_match('/^((["\']).*\\2)\s*:/',$line,$matches)) {
++        $value = trim(str_replace($matches[0],'',$line));
++        $key   = $matches[1];
+       } else {
+         // Do some guesswork as to the key and the value
+         $explode = explode(':',$line);
+@@ -724,12 +809,9 @@
        }
  
        // Set the type of the value.  Int, string, etc
 -      $value = $this->_toType($value);
+-      if (empty($key)) {
+-        $array[]     = $value;
+-      } else {
+-        $array[$key] = $value;
+-      }
++      $key = $this->_toTypeKey($key);
 +      $value = $this->_toType($value, true);
-       if (empty($key)) {
-         $array[]     = $value;
-       } else {
-@@ -738,29 +805,26 @@
++      $array[$key] = $value;
+     }
+ 
+     return $array;
+@@ -738,29 +820,26 @@
  
  
    private function returnArrayElement ($line) {
@@ -1251,7 +1424,7 @@ Index: test.php5
  	die("Key: 'some time' failed");
  
  # Crazy combinations
-@@ -153,8 +153,77 @@
+@@ -153,8 +153,86 @@
  if ($yaml[16] != array( 0 => "a", 1 => array (0 => 1, 1 => 2), 2 => "b"))
  	die("Sequence 16 failed.");
  
@@ -1325,6 +1498,15 @@ Index: test.php5
 + 
 +if ($yaml['keep empty'] != "\n")
 +	var_dump($yaml['keep empty']) || die("Key: 'keep empty' failed");
++
++if ($yaml['quoted keys'] != array(
++																		'' => 'foo',
++																		'bar' => 'string',
++																		'1' => 'one',
++																		2 => 'two',
++	))
++	var_dump($yaml['quoted keys']) || die("Key: 'quoted keys' failed");
++
 +
  print "spyc.yaml parsed correctly\n";
  

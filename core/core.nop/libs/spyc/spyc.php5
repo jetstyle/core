@@ -337,9 +337,6 @@ class Spyc {
       $line = $this->stripGroup ($line, $group);
     }
 
-    if ($this->startsMappedSequence($line))
-      return $this->returnMappedSequence($line);
-
     if ($this->startsMappedValue($line))
       return $this->returnMappedValue($line);
 
@@ -355,6 +352,36 @@ class Spyc {
   }
 
   /**
+     * Finds the type of the passed key, returns the key as the new type.
+     * @access private
+     * @param string $value
+     * @return mixed
+     */
+  private function _toTypeKey($value) {
+
+    if (strpos($value, '#') !== false)
+      $value = trim(preg_replace('/#(.+)$/','',$value));
+
+    if (preg_match('/^("(.*)"|\'(.*)\')$/',$value,$matches)) {
+      $value = (string)preg_replace('/(\'\'|\\\\\')/',"'",end($matches));
+      $value = preg_replace('/\\\\"/','"',$value);
+    } elseif (strtolower($value) == 'null' or $value == '~') {
+      $value = null;
+    } elseif (preg_match ('/^[0-9]+$/', $value)) {
+      $value = (int)$value;
+    } elseif (is_numeric($value)) {
+      $value = (float)$value;
+    } else {
+      // Just a normal string, right?
+
+    }
+
+
+    //  print_r ($value);
+    return $value;
+  }
+
+  /**
      * Finds the type of the passed value, returns the value as the new type.
      * @access private
      * @param string $value
@@ -367,7 +394,7 @@ class Spyc {
     if (strpos($value, '#') !== false)
       $value = trim(preg_replace('/#(.+)$/','',$value));
 
-    if (preg_match('/^("(.*)"|\'(.*)\')/',$value,$matches)) {
+    if (preg_match('/^("(.*)"|\'(.*)\')$/',$value,$matches)) {
       $value = (string)preg_replace('/(\'\'|\\\\\')/',"'",end($matches));
       $value = preg_replace('/\\\\"/','"',$value);
     } elseif (preg_match('/^\\[(.*)\\]$/',$value,$matches)) {
@@ -391,9 +418,10 @@ class Spyc {
         $groupPath = $this->SavedGroups[$groupAlias];
         eval ('$value = $this->result' . Spyc::flatten ($groupPath) . ';');
       } while (false);
-    } elseif (!$inline && ($_p = strpos($value,': '))!==false && !preg_match('/^{(.*)/',$value)) {
+    } elseif (!$inline && substr($value, 0, 1) !== '{' && ($_p = strpos($value,': '))!==false) {
       // It's a map
       $key   = trim(substr($value, 0, $_p));
+      $key   = $this->_toTypeKey($key);
       $value = trim(substr($value, $_p+2 )); unset($_p);
       $value = $this->_toType($value, true);
       $value = array($key => $value);
@@ -540,7 +568,7 @@ class Spyc {
     eval ('$_arr = $this->result' . $tempPath . ';');
 
     // Adding string or numeric key to the innermost level or $this->arr.
-    if ($key)
+    if ($key || is_string($key))
     {
       if ($isMergeKey) {
         if (is_array ($_arr)) { $_arr = array_merge($_arr, $value); } 
@@ -741,20 +769,10 @@ class Spyc {
   }
 
 
-  private function startsMappedSequence ($line) {
-    if (preg_match('/^-(.*):$/',$line)) return true;
-  }
-
-  private function returnMappedSequence ($line) {
-    $array = array();
-    $key         = trim(substr(substr($line,1),0,-1));
-    $array[$key] = '';
-    return $array;
-  }
-
   private function returnMappedValue ($line) {
     $array = array();
     $key         = trim(substr($line,0,-1));
+    $key         = $this->_toTypeKey($key);
     $array[$key] = $this->emptyValue;
     return $array;
   }
@@ -779,9 +797,9 @@ class Spyc {
     if (preg_match('/^(.+):/',$line,$key)) {
       // It's a key/value pair most likely
       // If the key is in double quotes pull it out
-      if (preg_match('/^(["\'](.*)["\'](\s)*:)/',$line,$matches)) {
-        $value = trim(str_replace($matches[1],'',$line));
-        $key   = $matches[2];
+      if (preg_match('/^((["\']).*\\2)\s*:/',$line,$matches)) {
+        $value = trim(str_replace($matches[0],'',$line));
+        $key   = $matches[1];
       } else {
         // Do some guesswork as to the key and the value
         $explode = explode(':',$line);
@@ -791,12 +809,9 @@ class Spyc {
       }
 
       // Set the type of the value.  Int, string, etc
+      $key = $this->_toTypeKey($key);
       $value = $this->_toType($value, true);
-      if (empty($key)) {
-        $array[]     = $value;
-      } else {
-        $array[$key] = $value;
-      }
+      $array[$key] = $value;
     }
 
     return $array;
