@@ -2,30 +2,30 @@
 {{!connect "swfobject.js"}}
 
 {{?generate_container}}
-  <div id="{{container}}">
+  <div id="{{#f.container}}">
   </div>
 {{/?}}
 <script type="text/javascript">
 //<![CDATA[
-   var so = new SWFObject("{{images}}flash/{{src}}", "{{id}}","{{width}}",
-                       "{{height}}","{{version}}","{{bgcolor}}",
-                       '{{quality}}',
-                       '{{xiRedirectUrl}}',
-                       '{{redirectUrl}}',
-                       '{{detectKey}}');
+   var so = new SWFObject("{{images}}flash/{{#f.src}}", "{{#f.id}}","{{#f.width}}",
+                       "{{#f.height}}","{{#f.version}}","{{#f.bgcolor}}",
+                       '{{#f.quality}}',
+                       '{{#f.xiRedirectUrl}}',
+                       '{{#f.redirectUrl}}',
+                       '{{#f.detectKey}}');
    so.useExpressInstall('{{images}}flash/expressinstall.swf');
-   {{?transparent}}
+   {{?#f.transparent}}
      so.addParam("wmode", "transparent");
    {{/?}}
 
 
-   so.addParam("scale",  "{{scale}}");
-   so.addParam("salign", "{{salign}}");
-   so.addParam("menu",   "{{menu}}");
+   so.addParam("scale",  "{{#f.scale}}");
+   so.addParam("salign", "{{#f.salign}}");
+   so.addParam("menu",   "{{#f.menu}}");
 
-   {{flashvars}}
+   {{#f.flashvars}}
 
-   so.write("{{container}}");
+   so.write("{{#f.container}}");
    
 //]]>
 </script>
