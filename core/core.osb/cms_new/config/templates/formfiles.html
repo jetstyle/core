@@ -19,8 +19,9 @@
 {{TPL:file_flash}}
 {{&js:swfobject}}
 {{&js:player}}
-	({{#file->filesize}} kb, {{#file->format}}, <a href="{{#file->src}}">скачать</a>, <a href="#" onclick="playFlash('{{#file->src}}', 'flash-video-{{#file->name_short}}'); return false;">посмотреть</a>)
+	({{#file->filesize}} kb, {{#file->format}}, <a href="{{#file->src}}">скачать</a>, <a href="{{#file->src}}" onclick="playFlash('{{#file->src}}', 'flash-video-{{#file->name_short}}', '{{$x}}', '{{$y}}'); return false;">посмотреть</a>)
 	<div id="flash-video-{{#file->name_short}}"></div>
+
 {{/TPL:file_flash}}
 
 {{TPL:image}}
