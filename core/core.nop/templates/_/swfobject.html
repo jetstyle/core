@@ -1,7 +1,7 @@
 {{TPL:body}}
 {{!connect "swfobject.js"}}
 
-{{?generate_container}}
+{{?#f.generate_container}}
   <div id="{{#f.container}}">
   </div>
 {{/?}}
@@ -17,7 +17,6 @@
    {{?#f.transparent}}
      so.addParam("wmode", "transparent");
    {{/?}}
-
 
    so.addParam("scale",  "{{#f.scale}}");
    so.addParam("salign", "{{#f.salign}}");
