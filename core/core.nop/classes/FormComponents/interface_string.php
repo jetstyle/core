@@ -35,7 +35,6 @@ class FormComponent_interface_string extends FormComponent_abstract
    {
      $_data = $this->field->model->Model_GetDataValue();
      $data  = $this->field->interface->Interface_SafeDataValue($_data);
-     $this->field->rh->debug->Trace_R( $this->field->form->config );
 
      $this->field->tpl->Set( "interface_data", $data );
      

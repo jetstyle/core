@@ -34,7 +34,7 @@ class FormComponent_options_sql extends FormComponent_options
      $options = $this->field->rh->db->Query( $this->field->config["options_sql"] ); 
      $data = array();
      foreach( $options as $k=>$v ) $data[ $v["id"] ] = $v["name"];
-     $this->field->config["options"] = $data;
+     $this->field->config["options"] = isset($this->field->config["options"]) ? $this->field->config["options"] + $data : $data;
    }
 
    // INTERFACE ==============================================================================

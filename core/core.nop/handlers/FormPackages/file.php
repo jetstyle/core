@@ -1,17 +1,16 @@
 <?php
-
 $config = array(
-	'model'					=> 'file',
-	'model_data_name'		=> '',
-	'model_data_dir'		=> '',
+                "model"           => "file",
+                "validator"       => "file",
+                "view"            => "view_plain",
+                "interface"       => "file",
+                "interface_tpl"   => "file.html:File",
 
-	'validator' 				=> 'file',
-	'validator_params'	=> array(),
+                "file_size" => "100",
+                "file_ext"  => array( "zip", "rar", "ppt", "doc", "xls",
+                                      "swf", "gif", "jpg", "png" ),
+                "file_chmod" => "775",
 
-	'interface_tpl'			=> 'file.html:One',
-	'wrapper_title'			=> 'Τΰιλ',
-    "wrapper_tpl"   => "wrapper.html:DivFile",
-//	'wrapper_tpl'				=> 'wrapper.html:Row',
+                // "file_dir"   => "[always supply this]",
 );
-
 ?>

@@ -31,7 +31,9 @@ class FormComponent_view_plain extends FormComponent_abstract
      else
        $data = $this->field->model->Model_GetDataValue();
 
-     if ($this->field->config["view_tpl"])
+     $this->Interface_Parse(); // parse to get use of "interface_tpl_params"
+
+     if (isset($this->field->config["view_tpl"])) 
      {
        $this->field->tpl->Set( "view_prefix",  isset($this->field->config["view_prefix"]) ? $this->field->config["view_prefix"] : "" );
        $this->field->tpl->Set( "view_postfix", isset($this->field->config["view_postfix"]) ? $this->field->config["view_postfix"] : "" );
@@ -42,9 +44,9 @@ class FormComponent_view_plain extends FormComponent_abstract
      }
      else // вариант для бедных
      {
-       if ($this->field->config["view_prefix"])
+       if (isset($this->field->config["view_prefix"]))
          $data= $this->field->config["view_prefix"].$data;
-       if ($this->field->config["view_postfix"])
+       if (isset($this->field->config["view_postfix"])) 
          $data= $this->field->config["view_postfix"].$data;
      }
      return $data;

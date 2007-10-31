@@ -1,88 +1,199 @@
 <?php
+/*
 
-class FormComponent_file extends FormComponent_abstract
+  Форм-процессор
+  * see http://in.jetstyle.ru/rocket/rocketforms
+
+  FormComponent_file( &$config )
+      - $field -- $field->config instance-a поля  
+
+  -------------------
+
+  * model       : наследуем из него: сохранение файла в файловую систему и запись его имени в БД
+  * interface   : вывод поля загрузки файла
+  * validator   : нормальный ли размер файла? формат файла?
+
+  -------------------
+
+  Опции в конфиге
+
+  * file_size = "8" -- max size in Kilobytes
+  * file_ext  = array( "gif", "jpg", etc. )
+  * file_dir  = -- путь, куда класть файлы.
+  * file_random_name = false (true)
+
+  -------------------
+
+  // Модель. Операции с данными и хранилищем
+  * Model_DbInsert( &$fields, &$values )
+  * Model_DbUpdate( $data_id, &$fields, &$values )
+
+  // Валидатор
+  * Validate()
+
+  // Интерфейс (парсинг и обработка данных)
+  * Interface_Parse()
+  * Interface_PostToArray( $post_data )
+
+================================================================== v.0 (kuso@npj)
+*/
+$this->UseClass( "FormComponents/model_plain" );
+
+class FormComponent_file extends FormComponent_model_plain
 {
-  function Model_UploadFile($data_id)
-  {
-
-    $this->field->rh->UseClass('Upload');
-    $file =& new Upload($this->field->rh, $this->field->config['model_data_dir'] ? $this->field->config['model_data_dir'] : 'files/');
-    
-//print_r($this->field->config);die($this->field->config['model_data_dir'] ? $this->field->config['model_data_dir'] : 'files/');
-    // валидация
-    if (isset($this->field->config['validator_params']['allow']))
-      $file->ALLOW = $this->field->config['validator_params']['allow'];
-    if (isset($this->field->config['validator_params']['deny']))
-      $file->DENY = $this->field->config['validator_params']['deny'];
-// загружаем файл
-    $filename = $this->field->config['model_data_name'] ? $this->Model_GetDataName($data_id) : $data_id;
-    
-    $file->UploadFile('_'.$this->field->name, $filename);
-  }
-  
-  /*
-   * аплоад с ресайзом
-   */  
-  function Model_UploadFileResize($data_id)
-  {
-    $this->field->rh->UseClass('Upload');
-    //die($this->field->config['model_data_dir'] ? $this->field->config['model_data_dir'] : 'files/');
-    $file =& new Upload($this->field->rh, $this->field->config['model_data_dir'] ? $this->field->config['model_data_dir'] : 'files/');
-    $filename = ($this->field->config['model_data_name'] ? $this->Model_GetDataName($data_id) : $data_id)."_".$this->field->config['model_data_resize'][0]."x".$this->field->config['model_data_resize'][1];
-    $file->UploadFile('_'.$this->field->name, $filename, false, $this->field->config['model_data_resize'], true, false);
-  }
-  
-  function Model_GetDataName($data_id)
-  {
-    $str = str_replace("*", $data_id, $this->field->config['model_data_name']);
-    return  str_replace ("%id%", $data_id, $str);
-  }
-
-  function Model_DbAfterInsert( $data_id )
-  { $this->Model_UploadFile($data_id); }
-  function Model_DbAfterUpdate( $data_id )
-  { 
-    //делаем ресайз картинки, если надо
-    if (is_array($this->field->config['model_data_resize']))
-    {
-        $this->Model_UploadFileResize($data_id);
-    }
-    //аплодим оригинал
-    $this->Model_UploadFile($data_id); 
-  }
-
-  function Model_GetDataValue()
-  {
-     return $this->model_data;
-  }
-
-   // ---- работа с БД ----
-   function Model_DbLoad( $db_row )
-   { 
-     if(isset($db_row['id']))
-       $this->model_data = $db_row['id']; //$this->field->name
-     else
-      $this->Model_SetDefault();
+   // MODEL ==============================================================================
+   function Model_DbInsert( &$fields, &$values )
+   {
+     if ($this->file_uploaded)
+     {
+       $fields[] = $this->field->name;
+       $values[] = $this->model_data;
+     }
    }
-   
    function Model_DbUpdate( $data_id, &$fields, &$values )
    {
-     if ($_POST['_'.$this->field->name.'_del']==="1")
-     {
-            $this->field->rh->UseClass('Upload');
-            $upload =& new Upload($this->field->rh, $this->field->config['model_data_dir'] ? $this->field->config['model_data_dir'] : 'files/');
-
-            
-            //$fname = $data_id . ($this->field->config['model_data_name'] == "*_preview" ? "_preview" : "");
-            $fname = $data_id . (!empty($this->field->config['model_data_name']) ? str_replace('*', '', $this->field->config['model_data_name']) : '');
-            if ($upload->GetFile($fname))
-            {
-                unlink( $upload->current->name_full );
-            }
-
-     }
      return $this->Model_DbInsert( $fields, $values );
    }
+  
+   // VALIDATOR ==============================================================================
+   function Validate()
+   {
+     parent::Validate();
+
+     if (!$this->valid) return $this->valid; // ==== strip one
+
+     if ($this->file_size)
+       if (isset( $this->field->config["file_size"]))
+         if ($this->file_size > $this->field->config["file_size"]*1024)
+           $this->_Invalidate( "file_size", "Слишком большой файл" );
+
+     if ($this->file_ext)
+       if (isset( $this->field->config["file_ext"]))
+         if (!in_array($this->file_ext,$this->field->config["file_ext"]))
+           $this->_Invalidate( "file_ext", "Недопустимый тип файла" );
+
+     if ($this->file_size)
+       if (@$this->field->config["validator_func"]) {
+         if ($result = call_user_func( $this->field->config["validator_func"], 
+                                       $this->field->model->Model_GetDataValue(),
+                                       $this->field->config ))
+           $this->_Invalidate( "func", $result );
+
+        }
+
+     return $this->valid;
+   }
+   // quick pre-validation
+   function _CheckExtSize( $ext, $size )
+   {
+     if (isset( $this->field->config["file_size"]))
+       if ($size > $this->field->config["file_size"]*1024)
+         return false;
+     if (isset( $this->field->config["file_ext"]))
+       if (!in_array($ext,$this->field->config["file_ext"]))
+         return false;
+     return true;
+   } 
+  
+   // INTERFACE ==============================================================================
+   // парсинг полей интерфейса
+   function Interface_Parse()
+   { 
+     parent::Interface_Parse();
+
+     $name = $this->field->model->Model_GetDataValue();
+     $file_size = $this->_GetSize( $name );
+     if ($file_size === false)
+     {
+       $this->field->tpl->Set("interface_file", false);
+     }
+     else
+     {
+       $this->field->tpl->Set("interface_file", $name );
+       $this->field->tpl->Set("interface_size_Kb", floor(($file_size+512)/1024));
+     }
+
+     return $this->field->tpl->Parse( $this->field->form->config["template_prefix_interface"].
+                                      $this->field->config["interface_tpl"] );
+   }
+   // преобразование из поста в массив для загрузки моделью
+   function Interface_PostToArray( $post_data )
+   {
+     // @todo: загрузить файл, положить его свойства в себя, а имя в массив
+     $value = $this->_UploadFile($post_data);
+
+     if ($value === false) return array(); // no data here
+
+     $a = array( 
+          $this->field->name           => $value,
+               );
+
+     return $a; 
+   }
+
+   // ---------------------------------------------------------------------------
+   // UPLOAD specific handlers
+   function _GetSize( $file_name )
+   {
+     $full_name = $this->field->config["file_dir"].$file_name;
+     if (file_exists($full_name))
+       return filesize($full_name);
+     else return false;
+   }
+   function _UploadFile( $post_data )
+   {
+    $uploaded_file = @$_FILES[ '_'.$this->field->name ]["tmp_name"]; 
+    if(is_uploaded_file($uploaded_file))
+    {
+      //клиентские данные
+      $type = $_FILES[ '_'.$this->field->name ]['type'];
+      $size = $_FILES[ '_'.$this->field->name ]['size'];
+      $ext = explode(".",$_FILES[ '_'.$this->field->name ]['name']);
+      $ext = strtolower(end($ext)); 
+
+      $this->file_size = $size;
+      $this->file_ext  = $ext;
+      $this->file_type = $type;
+      $this->file_uploaded = true;
+
+      if ($this->_CheckExtSize($ext, $size))
+      {
+        $this->field->rh->UseLib( "Translit", "php/translit" );
+
+        if (isset($this->field->config["file_random_name"]) && $this->field->config["file_random_name"])
+        {
+          $name = substr( md5(time()), 0, 6 );
+        }
+        else
+        {
+          $name = basename( $_FILES[ '_'.$this->field->name ]['name'] );
+          $name = substr($name, 0, strlen($name)-strlen($ext)-1 );
+          $name = Translit::Supertag( $name, TR_NO_SLASHES);
+        }
+
+        $count=1; $_name = $name;
+        while (file_exists($this->field->config["file_dir"].$name.".".$ext))
+        {
+          if ($name === $_name) $name = $_name.$count;
+          else $name = $_name.(++$count);
+        }
+        $file_name = $name.".".$ext;
+        $full_name = $this->field->config["file_dir"].$file_name;
+        move_uploaded_file($uploaded_file,$full_name);
+        chmod($full_name,$this->field->config["file_chmod"]);
+        $this->file_name = $file_name;
+        return $file_name;
+      }
+      else return "[error]";
+    }
+    else 
+    {
+      $this->file_uploaded = false;
+      return false;
+    }
+   }
+
+
 }
 
 ?>

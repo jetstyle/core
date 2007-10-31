@@ -13,6 +13,6 @@
             "wrapper"   => "wrapper_group",
             "wrapper_tpl"     => "wrapper.html:Collapsable",
             "wrapper_title" => "[group title]",
-            "wrapper_desc"  => "[group desc]",
+        //  "wrapper_desc"  => "[group desc]",
   );
 ?>

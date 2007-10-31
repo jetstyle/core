@@ -70,7 +70,7 @@ class FormComponent_abstract
 
    function FormComponent_abstract( &$config )
    {
-     if (sizeof($this->default_config) > 0) 
+     if (!empty($this->default_config))
        Form::StaticDefaults($this->default_config, $config);
    }
 
@@ -91,12 +91,15 @@ class FormComponent_abstract
    // сброс значения в "значение по-умолчанию"
    function Model_SetDefault()
    { /* abstract */ }
+   // изменение значения в виде "шифра" или "ключа"
+   function Model_SetDataValue($model_value)
+   { /* abstract */ }
    // возврат значения в виде "шифра" или "ключа"
    function Model_GetDataValue()
    { /* abstract */ }
    // dbg purposes: dump
    function Model_Dump()
-   { /* abstract */ }
+   { return $this->model_data; } // simpliest known form
    // ---- сессия ----
    function Model_ToSession( &$session_storage )
    { /* abstract */ }
@@ -128,7 +131,7 @@ class FormComponent_abstract
    function Validate()
    {
      $this->valid = true;
-     $this->validator_params = $this->field->config["validator_params"];
+     $this->validator_params = @$this->field->config["validator_params"];
      $this->validator_messages = array();
      // ПРИМЕР: что делать, если невалидно?
      // ПРИМЕР: $this->_Invalidate( "empty", "Поле обязательно для заполнения" );
@@ -139,6 +142,20 @@ class FormComponent_abstract
    function _Invalidate( $reason, $msg="there is no custom message" )
    {
      $this->valid=false;
+
+		 // shumkov: Либо всегда проверять, либо добавить в функцию доп. параметр.
+		 //          Но наилучший вариант который я вижу - как-то проверять, что вызывался
+		 //          именно EasyFormI18n и в том случае смотреть месаджсеты. Например в
+		 //          конструктор EasyFormI18n добавить $this->form->i18n_prefix = $this->i18n_prefix;
+		 //          и здесь уже проверять.
+		 //          Я не уверен только что EasyFormI18n место в ядре, либо сразу приучить From и EasyFrom
+		 //          к работе с месаджсетами, что считаю более правильным.
+     // kuso: my practice with always-messageset oriented programming shows
+     //       that is a great burden for single-language sites which are common
+
+     $value = $this->field->rh->tpl->msg->Get( 'Form:Validator/'.$reason );
+     if (!empty($value) && $value != 'Form:Validator/'.$reason) $msg = $value;
+     
      $this->validator_messages[$reason] = $msg;
    }
 
@@ -150,7 +167,7 @@ class FormComponent_abstract
 
    // VIEW ==============================================================================
    // парсинг readonly значения
-   function View_Parse()
+   function View_Parse( $plain_data = NULL )
    { return ""; }
 
    // INTERFACE ==============================================================================
@@ -161,6 +178,7 @@ class FormComponent_abstract
    function Interface_Parse()
    { 
      $this->field->tpl->Set( "field", "_".$this->field->name );
+     $this->field->tpl->Set( "field_id", "id_".$this->form->name."_".$this->field->name );
      if (isset($this->field->config["interface_tpl_params"]) && is_array($this->field->config["interface_tpl_params"]))
      {
        foreach( $this->field->config["interface_tpl_params"] as $param=>$value )

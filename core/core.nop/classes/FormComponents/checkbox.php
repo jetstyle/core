@@ -40,7 +40,7 @@ class FormComponent_checkbox extends FormComponent_abstract
   // преобразование из поста в массив для загрузки моделью
   function Interface_PostToArray($post_data)
   {
-    return array($this->field->name => rtrim($post_data['_'.$this->field->name]));
+    return array($this->field->name => @rtrim($post_data['_'.$this->field->name]));
   }
 }
 

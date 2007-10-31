@@ -32,6 +32,9 @@
       - $ignore_* -- игнорировать те или иные этапы сценария процессинга
       - false, если результат -- не отпарсенная форма (иными словами, если нет редиректа, но событие произошло
 
+  * ProcessEvent( $event_code ) -- proceed event as we hit one of the buttons
+                                   useful for programmatical control
+
   * _ExecEventHandler($event,$event_handler) - выполняет хэндлер в отдельно зоне видимости
       - $event -- текущее событие
       - $event_handler -- полный путь до файла хэндлера
@@ -85,6 +88,7 @@ define( "FORM_EVENT_AUTO",   "auto");   // insert/update based on $data_id
 
 class Form
 {
+   var $name; // имя формы
    var $form_present_var = "__form_present";
    var $data_id_var = "__form_data_id";
    var $data_id=0;      // строка, ассоциированная с формой. 0 -- значит нет такой
@@ -119,6 +123,7 @@ class Form
            "fieldname_edited_datetime"  => "_edited_datetime",
            // [optional] "success_url" => 
            // [optional] "cancel_url" =>
+           // [optional] "on_before_event", "on_after_event"
                               );
 
    function Form( &$rh, $form_config=NULL )
@@ -126,6 +131,7 @@ class Form
      $this->rh  = &$rh;
      $this->tpl = &$rh->tpl; // чтобы потом можно было отстроиться от "текущего" шаблонного движка.
                              // очень полезная фича
+     
      $this->rh->UseClass("FormField"); // он нам стопудово понадобится
      
      $this->action = $rh->ri->url;
@@ -141,7 +147,7 @@ class Form
        if (isset($form_config[$v]) && !is_array($form_config[$v]))
        {
          $this->config[$v] = array();
-         $this->config[$v][] = &$form_config[$v];
+         $this->config[$v][] = $form_config[$v];
        }
    }
 
@@ -184,8 +190,22 @@ class Form
      if (!$this->data_id || $ignore_load) $this->Reset(); // устанавливаем default-значения
      if (!$ignore_session) $this->FromSession();
 
+     // присваиваем идетификатор форме
+     $uid = 0;
+     do
+     {
+        //zharik@gmail.com: $_name should be initilazed before usage
+        $_name = $this->config['db_table']? $this->config['db_table'] : 'form';
+        if (!$uid) $this->name = $_name;
+        else $this->name = $_name.'_'.$uid;
+			 $uid++;
+     }
+     while (isset($this->rh->forms) && in_array($this->name, $this->rh->forms));
+     $this->rh->forms[] = $this->name;
+
+//     die(var_dump($_POST));
      //пробуем обработать пост
-     if (isset($_POST[$this->form_present_var]) && $_POST[$this->form_present_var] && !$ignore_post)
+     if (isset($_POST[$this->form_present_var]) && ($_POST[$this->form_present_var] == 'form_'.$this->name) && !$ignore_post)
      {
        $this->LoadFromPost( $_POST );
 
@@ -197,6 +217,8 @@ class Form
 
        if (!$event) $event = $this->config["default_event"];
 
+       if (!is_array($event)) $event = array( "event" => $event );
+
        if ($ignore_validator 
            || ($event["event"] == FORM_EVENT_CANCEL)
            || ($event["event"] == FORM_EVENT_RESET)
@@ -207,14 +229,7 @@ class Form
          $processed = 1;
          if (!$ignore_session) $this->ToSession();
 
-         // before
-         $this->_ChooseEventHandler( "on_before_event", "OnBeforeEventForm" );
-
-         // event
-         $this->HandleEvent( $event );
-
-         // after
-         $this->_ChooseEventHandler( "on_after_event", "OnAfterEventForm" );
+         $this->_ProcessEvent( $event );
          
          // redirect
          // cancel
@@ -223,18 +238,40 @@ class Form
          // success
          if ($this->processed && $this->success && isset($this->config["success_url"])) 
             $this->rh->Redirect( $this->config["success_url"] );
-
+       }
      }
-     }
-
      if (!$processed)
        $result = $this->Parse();
      else $result = false;
+
           return $result;
    }
 
+   function ProcessEvent( $event_code )
+   {
+     $event = false;
+     foreach( $this->buttons as $k=>$v )
+       if ($v["event"] == $event_code) { $event = $v; break; }
+
+     if (!$event && ($event_code != $this->config["default_event"]))
+       return $this->ProcessEvent( $event_code );
+
+     return $this->_ProcessEvent( $event ); 
+   }
+   function _ProcessEvent( $event )
+   {
+     // before
+     $this->_ChooseEventHandler( $event, "on_before_event", "OnBeforeEventForm" );
+
+     // event
+     $this->HandleEvent( $event );
+
+     // after
+     $this->_ChooseEventHandler( $event, "on_after_event", "OnAfterEventForm" );
+   }
+
    //выбираем, какой обработчик события запускать
-   function _ChooseEventHandler( $handler, $default_method )
+   function _ChooseEventHandler( $event, $handler, $default_method )
    {
       if (isset($this->config[$handler])){
         foreach($this->config[$handler] as $k=>$v){
@@ -298,23 +335,21 @@ class Form
    // парсить всякое окружение: кнопки там, прочее
    function _ParseWrapper( $content )
    {
-     // todo: add "multipart"
-
-     $form_name = isset($this->config["form_name"]) ? $this->config["form_name"] : 'form_'.$this->config["db_table"];
+     $form_name = isset($this->config["form_name"]) ? $this->config["form_name"] : 'form_'.$this->name;
      $this->tpl->Set( "form", 
       $this->rh->ri->Form( 
-        $this->action, METHOD_POST, ' id="'.$form_name.'" name="'.$form_name.'" enctype="multipart/form-data" '    //IVAN
+        $this->action, METHOD_POST, ' id="'.$form_name.'" name="'.$form_name.'" enctype="multipart/form-data" '
       )
      );
-     $this->tpl->Set( "form_name", 'form_'.$this->config["db_table"] );
+     $this->tpl->Set( "form_name", 'form_'.$this->name );
      $this->tpl->Set( "form_present", $this->form_present_var );
      $this->tpl->Set( "form_data_id", $this->data_id_var );
      $this->tpl->Set( "form_data_id_value", $this->data_id );
      $this->tpl->Set( "content", $content );
      $this->tpl->Set( "data_id", $this->data_id );
      $this->tpl->Set( "buttons", $this->_ParseButtons() );
-
      return $this->tpl->Parse( $this->config["template_prefix"].$this->config["template_form"]);
+     
    }
 
    // парсинг кнопок
@@ -501,7 +536,7 @@ class Form
    }
    function _DbAuto( &$fields, &$values, $is_insert=false )
    {
-      $user = $this->rh->principal->data["user_id"];
+      $user = $this->rh->principal->id;
       $dt = date("Y-m-d H:i:s");
       if ($this->config["auto_user_id"])
       {

@@ -73,7 +73,7 @@ class FormField
    {
      foreach( $this->components as $c )
      {
-       $c_name = $this->config[$c];
+       $c_name = &$this->config[$c];
        if (is_object($c_name)) // direct link to existing foreign object
        {
          $c_instance = &$c_name;
@@ -84,8 +84,8 @@ class FormField
          $c_instance = &$this->components_hash[ $c_name ];
        else // independent object, need to create
        {
-         $this->rh->UseClass( "FormComponents/abstract" );
-         $this->rh->UseClass( "FormComponents/".$c_name );
+         $this->rh->useClass( "FormComponents/abstract" );
+         $this->rh->useClass( "FormComponents/".$c_name );
          $class_name = 'FormComponent_'.$c_name;
          $c_instance =& new $class_name( $this->config );
          $c_instance->LinkToField( $this );
@@ -140,14 +140,14 @@ class FormField
    // распознавание данных из поста
    function LoadFromPost( $post_data )           
    {
-     if (@$this->config["readonly"]) return; //IVAN
+     if (@$this->config["readonly"]) return;
      return $this->model->Model_LoadFromArray(
                 $this->interface->Interface_PostToArray( $post_data )
                                              );
    }
    function LoadFromArray( $a )           
    {
-     if (@$this->config["readonly"]) return; //IVAN
+     if (@$this->config["readonly"]) return;
      return $this->model->Model_LoadFromArray( $a );
    }
    
@@ -160,12 +160,12 @@ class FormField
    // сессия
    function ToSession( &$session_storage )
    {
-     if (@$this->config["readonly"]) return; //IVAN
+     if (@$this->config["readonly"]) return;
      $this->model->Model_ToSession( $session_storage );
    }
    function FromSession( &$session_storage )
    {
-     if (@$this->config["readonly"]) return; //IVAN
+     if (@$this->config["readonly"]) return;
      $this->model->Model_FromSession( $session_storage );
    }
 
@@ -178,33 +178,32 @@ class FormField
    // сохранение в БД
    function DbInsert( &$fields, &$values )
    {
-   	   
-   	 if (@!$this->config["db_ignore"]) //IVAN
+     if (@!$this->config["db_ignore"])
        return $this->model->Model_DbInsert( $fields, $values );
    }
    function DbAfterInsert( $data_id )
    {
-     if (@!$this->config["db_ignore"]) //IVAN
+     if (@!$this->config["db_ignore"])
        return $this->model->Model_DbAfterInsert( $data_id );
    }
    function DbUpdate( $data_id, &$fields, &$values )
    {
-     if (@!$this->config["db_ignore"]) //IVAN
+     if (@!$this->config["db_ignore"])
        return $this->model->Model_DbUpdate( $data_id, $fields, $values );
    }
    function DbAfterUpdate( $data_id )
    {
-     if (@!$this->config["db_ignore"]) //IVAN
+     if (@!$this->config["db_ignore"])
        return $this->model->Model_DbAfterUpdate( $data_id );
    }
    function DbLoad( $data_id )
    {
-     if (@!$this->config["db_ignore"]) //IVAN
+     if (@!$this->config["db_ignore"])
        return $this->model->Model_DbLoad( $data_id );
    }
    function DbDelete( $data_id )
    {
-     if (@!$this->config["db_ignore"]) //IVAN
+     if (@!$this->config["db_ignore"])
        return $this->model->Model_DbDelete( $data_id );
    }
 

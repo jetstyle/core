@@ -57,8 +57,10 @@ class EasyForm{
     Если вариация не найдена, поле выводится с прописанным в пакете враппером.
   */
   var $wrapper_tpl = array(
-    "number,radio,select,string,password,checkbox" => array( "wrapper.html:Div", "wrapper.html:Row" ),
-    "textarea,htmlarea"                            => array( "wrapper.html:Div", "wrapper.html:RowSpan" ),
+    "label,number,radio,select,string,password,checkbox" => array( "wrapper.html:Div", "wrapper.html:Row" ),
+    "file,image"             => array( "wrapper.html:Div", "wrapper.html:Row" ),
+    "date,date_optional"     => array( "wrapper.html:Div", "wrapper.html:Row" ),
+    "textarea,htmlarea"      => array( "wrapper.html:Div", "wrapper.html:RowSpan" ),
   );
   
   //конструктор
@@ -75,10 +77,17 @@ class EasyForm{
   //построение формы, обработка формы
   function Handle( $config,
                     $ignore_post     =false,  $ignore_load   =false, 
-                    $ignore_validator=false,  $ignore_session=false ){
+                    $ignore_validator=false,  $ignore_session=false )
+  {
+    $this->CreateForm( $config );
+    //поехали!
+    return $this->form->Handle( $ignore_post, $ignore_load, $ignore_validator, $ignore_session );
+  }
     
+  function CreateForm( $config )
+  {
     if(!is_array($config))
-      $this->rh->error("EasyForm::Handle -- \$config should be an array, now it is: <strong>[$config]</strong>");
+      $this->rh->Error("EasyForm::Handle -- \$config should be an array, now it is: <strong>[$config]</strong>");
     
     //инициализируем форму
     $class_name = isset($config["form"]["class"]) ? $config["form"]["class"] : "Form";
@@ -93,17 +102,11 @@ class EasyForm{
       if( $id = isset($_REQUEST[ $this->id_var_name ]) ? $_REQUEST[ $this->id_var_name ] : false )
         $form->AssignId( $id );
     
-	if (isset($config['form_present_var']))
-		$form->form_present_var = $config['form_present_var'];
-
     //добавляем поля
     $this->AddFields( $form, $config["fields"] );
     
     //добавляем кнопки
     $this->AddButtons( $form, $config["buttons"] );
-    
-    //поехали!
-    return $form->Handle( $ignore_post, $ignore_load, $ignore_validator, $ignore_session );
   }
   
   //добавляем поля к форме или группе
@@ -131,17 +134,18 @@ class EasyForm{
         $pack_name = $rec;
         $conf = array();
       }
-
       //определяем wrapper_tpl
       if( !isset($conf["wrapper_tpl"]) )
-        foreach( $this->wrapper_tpl as $k=>$v){
-          if( in_array($pack_name, explode(",",$k) ) ){
+        foreach( $this->wrapper_tpl as $k=>$v)
+        {
+          if( in_array($pack_name, explode(",",$k) ) )
+          {
             $conf["wrapper_tpl"] = $v[ $is_field ? 1 : 0 ];
             break;
           }
         }
       //генерируем конфиг для поля
-      $conf = $this->ConstructConfig( $pack_name, $conf );
+      $conf = $this->ConstructConfig( $pack_name, $conf, false, $name );
       //создаём поле
       if($is_field)
         $field =& $form->model->Model_AddField( $name, $conf );
@@ -160,26 +164,51 @@ class EasyForm{
       $this->rh->error("EasyForm::AddButtons -- \$config should be an array, now it is: <strong>[$config]</strong>");
     
     //тут добавляем кнопки
-    foreach($config as $rec){
+    foreach($config as $rec)
+    {
       //формируем конфиг для кнопки
+      $rec_cfg = false;
       if( is_array($rec) )
-        $conf = $this->ConstructConfig( "button_".$rec[0], $rec[1] );
-      else
-        $conf = $this->ConstructConfig( "button_".$rec );
+      {
+        $rec_cfg = $rec[1];
+        $rec = $rec[0];
+      }
+
+      $conf = $this->ConstructConfig( "button_".$rec, $rec_cfg, $rec );
+
       //создаём кнопку
       $field =& $form->AddButton( $conf );
     }
   }
   
   //формирует конфиг на основе пакета
-  function ConstructConfig( $conf_name, $_config=false ){
+  function ConstructConfig( $conf_name, $_config=false, $is_btn=false, $field_name="" ){
     
     //конструируем конфиг
     $config = array();
     include( $this->rh->FindScript_("handlers","FormPackages/".$conf_name) );
     
+    if (isset($_config["easyform_override"]))
+      foreach( $_config["easyform_override"] as $v )
+        unset($config[$v]);
+    
     //возвращаем смесь из пакета и твиков
-    return is_array($_config) ? array_merge($config,$_config) : $config ;
+    if (is_array($_config))
+      $config = $this->_MergeConfig($config, $_config);
+
+    return $config;
+  }
+
+  // рекурсивная функция перекрывающая пакет твиком
+  function _MergeConfig($config, $_config)
+  {
+    foreach( $_config as $k=>$v )
+    {
+      if (is_array($v) && isset($config[$k])) $config[$k] = $this->_MergeConfig($config[$k], $v);
+      else $config[$k] = $v;
+    }
+
+    return $config;
   }
 }
 

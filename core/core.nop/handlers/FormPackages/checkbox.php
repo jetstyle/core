@@ -1,10 +1,10 @@
 <?php
 $config = array(
-								'interface'				=> 'checkbox',
-								'interface_tpl'		=> 'checkbox.html',
-								'checkbox_value'	=> 1,
+                "interface"       => "checkbox",
+                "interface_tpl"   => "checkbox.html:Checkbox",
+                "checkbox_value"  => 1,
+                "wrapper_tpl"     => "checkbox.html:Wrapper",
 
-//    "wrapper_tpl"   => "wrapper.html:Div",
 //    "wrapper_title" => "[string title]",
 //    "wrapper_desc"  => "[string desc]",
 );

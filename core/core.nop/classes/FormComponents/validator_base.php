@@ -29,11 +29,11 @@ class FormComponent_validator_base extends FormComponent_abstract
    {
      FormComponent_abstract::Validate();
 
-     if ($this->validator_params["not_empty"])
+     if (@$this->validator_params["not_empty"]) 
        if ($this->field->model->Model_GetDataValue() == "")
          $this->_Invalidate( "empty", "Поле обязательно для заполнения" );
 
-     if ($this->field->config["validator_func"])
+     if (@$this->field->config["validator_func"])  
        if ($result = call_user_func( $this->field->config["validator_func"], 
                                      $this->field->model->Model_GetDataValue(),
                                      $this->field->config ))

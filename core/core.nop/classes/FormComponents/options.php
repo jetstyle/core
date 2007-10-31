@@ -55,7 +55,7 @@ class FormComponent_options extends FormComponent_view_plain
    function Interface_PostToArray( $post_data )
    {
       return array(
-                $this->field->name => rtrim($post_data["_".$this->field->name]),
+                $this->field->name => rtrim(@$post_data["_".$this->field->name]), //IVAN
                    );
    }
 

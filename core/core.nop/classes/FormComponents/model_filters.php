@@ -20,7 +20,7 @@
   * Model_DbInsert( &$fields, &$values )
   * Model_DbUpdate( $data_id, &$fields, &$values )
 
-================================================================== v.0 (kuso@npj)
+================================================================== v.1 (kuso@npj)
 */
 $this->UseClass( "FormComponents/model_plain" );
 
@@ -53,7 +53,13 @@ class FormComponent_model_filters extends FormComponent_model_plain
      $params = array();
      foreach( $this->field->config["model_filters"] as $k=>$v )
      {
+       // разветвление. Можно брать не из предыдущего, а из любого фильтра
+       if (isset($this->field->config["model_filters_from"]) &&
+           isset($this->field->config["model_filters_from"][$k]))
+         $params["_"] = $filtered[ $this->field->config["model_filters_from"][$k] ];
+       else
        $params["_"] = $data;
+
        $filtered[$k] = $data = $this->field->tpl->Action( $v, $params );
      }
 

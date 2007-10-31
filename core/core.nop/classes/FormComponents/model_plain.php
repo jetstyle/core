@@ -48,6 +48,11 @@ class FormComponent_model_plain extends FormComponent_abstract
    {
      return $this->model_data;
    }
+   // изменение значения в виде "шифра" или "ключа"
+   function Model_SetDataValue($model_value)
+   { 
+     $this->model_data = $model_value;
+   }
    // dbg purposes: dump
    function Model_Dump()
    {
