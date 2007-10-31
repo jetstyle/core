@@ -73,9 +73,11 @@ class ListObject {
 		//tpl vars
 		$this->tpl_root       = $tpl_root;
 		$this->tpl_empty      = $this->tpl_root."_Empty";
-		if (!isset($this->tpl_item)) $this->tpl_item       = $this->tpl_root."_Item";
-		$this->tpl_separator  = $this->tpl_root."_Sep";
 
+		//very, very impressive
+		//if (!isset($this->tpl_item)) $this->tpl_item       = $this->tpl_root."_Item";
+		$this->tpl_item = $this->tpl_root."_Item";
+		$this->tpl_separator  = $this->tpl_root."_Sep";
 		//ItemCount
 		$this->loop_total = count($this->ITEMS);
 		$tpl->set( '_ItemCount', $this->loop_total );
