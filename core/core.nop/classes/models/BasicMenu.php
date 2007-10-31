@@ -28,6 +28,8 @@ class BasicMenu extends Model
 		if (isset($this->left)) $where .= ' AND  _left > ' . $m->quote($this->left);
 		if (isset($this->right)) $where .= ' AND  _right < ' . $m->quote($this->right);
 
+		$this->where = $where;
+
 		$m->load($where, $limit, $offset);
 
 		$this->data = $m->data;
