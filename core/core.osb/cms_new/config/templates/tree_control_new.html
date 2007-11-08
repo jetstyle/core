@@ -15,14 +15,14 @@
 {{&js:dhtmlXTree}}
 
 {{&js:jquery_latest}}
-	<div id="treeBox" style="width:300px; height:400px; "></div> 
-	
-	<script language="javascript">  
+	<div id="treeBox" style="float: left; width: 100%; height:400px; overflow: auto"></div>
+
+	<script language="javascript">
 		var tc = new treeControl('{{_url_connect}}', "{{_url_xml}}", "{{images}}tree/", "{{_href}}");
 		tc.load();
 
 	</script>
-	
+
 {{/TPL:Control}}
 
 {{TPL:content}}
