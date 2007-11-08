@@ -115,10 +115,13 @@ class Trash {
     //читаем запись из таблицы мусора
     $r = $this->_ReadTrashRecord($table_name, $item_id);
     //удаляем запись в исходной таблице
-    if($r->table_name)
-      $db->execute("DELETE FROM ".$r->table_name." WHERE ".$this->table_id_field."='".$r->item_id."'");
-    //удаляем запись из таблицы мусора
-    $db->execute("DELETE FROM ".$this->table_trash." WHERE id='".$r->trash_id."'");
+    $db->execute("DELETE FROM ".$table_name." WHERE ".$this->table_id_field."='".$item_id."'");
+
+	if($r->trash_id)
+	{
+	   //удаляем запись из таблицы мусора
+    	$db->execute("DELETE FROM ".$this->table_trash." WHERE id='".$r->trash_id."'");
+	}
   }
   
   function _ReadTrashRecord( $table_name, $item_id ){
@@ -126,8 +129,8 @@ class Trash {
     $sql .= " FROM ".$this->table_trash." as tr, ".$this->table_trash_tables." as tb ";
     $sql .= " WHERE tb.id=tr.table_id AND tr.item_id='$item_id' AND tb.table_name='$table_name'";
     $rs = $this->rh->db->execute($sql);
-    //die($sql);
-    //var_dump($this->rh->db->getRow());
+//    die($sql);
+//    var_dump($this->rh->db->getRow());
     return $this->rh->db->getObject();
   }
 }
