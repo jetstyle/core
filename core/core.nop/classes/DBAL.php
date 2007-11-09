@@ -124,12 +124,11 @@ class DBAL
 		{
 			$this->rh->debug->mark('q');
 		}
-		$this->queryCount++;
 		
 		$data = array ();
 		//плейсхолдер для префикса
 		$sql = str_replace("??", $this->prefix, $sql);
-
+		
 		if ($r = $this->lowlevel->Query($sql, $limit, $offset))
 		{
 			while ($row = $this->lowlevel->FetchAssoc($r))
@@ -138,6 +137,14 @@ class DBAL
 			}
 			$this->lowlevel->FreeResult($r);
 		}
+				
+		$this->logQuery($sql, $limit, $offset);
+		return $data;
+	}
+
+	function logQuery($sql, $limit = 0, $offset = 0)
+	{
+		$this->queryCount++;
 		
 		if($this->rh->enable_debug && $this->rh->explain_queries)	
 		{
@@ -176,19 +183,16 @@ class DBAL
 					
 					$out = "<table class=\'debug_table\'>".$out."</table>";
 				}
-				$this->rh->debug->trace("<b><a href=\"#\" onclick=\"debug_popup('".$out."', this); return false;\">QUERY</a>".($limit == 1 ? " ONE: " : ": ")."</b> ".$sql, 'q');
+				$bad = 0;
+				if(!(stripos($out, 'filesort') === false) || !(stripos($out, 'temporary') === false))	{
+					$bad = 1;
+				}
+				$this->rh->debug->trace("<b><a href=\"#\" ".($bad ? "style='color: red;'" : "")." onclick=\"debug_popup('".$out."', this); return false;\">QUERY</a>".($limit == 1 ? " ONE: " : ": ")."</b> ".$sql, 'q');
+				return;
 			}
-			else
-			{
-				$this->rh->debug->trace("<b>QUERY".($limit == 1 ? " ONE: " : ": ")."</b> ".$sql, 'q');
-			}			
 		}
-		else
-		{
-			$this->rh->debug->trace("<b>QUERY".($limit == 1 ? " ONE: " : ": ")."</b> ".$sql, 'q');
-		}
-		
-		return $data;
+
+		$this->rh->debug->trace("<b>QUERY".($limit == 1 ? " ONE: " : ": ")."</b> ".$sql, 'q');
 	}
 
 	function _Error($error_msg)
@@ -247,12 +251,18 @@ class DBAL
 	{
 		//типа такой плейсхолдер
 		$sql = str_replace("??", $this->prefix, $sql);
-
+		
+		if(method_exists($this->rh->debug, 'mark'))
+		{
+			$this->rh->debug->mark('q');
+		}
+		
 		$this->handle = $this->lowlevel->Query($sql, $limit, $offset);
+
+		$this->logQuery($sql, $limit, $offset);
 
 		if ($this->handle)
 		{
-
 			$this->numRows = $this->lowlevel->getNumRows($this->handle);
 			$this->currentRow = 0;
 			return $this->numRows; //$this->handle;
