@@ -26,7 +26,7 @@ $upload =& new Upload($rh, $rh->front_end->file_dir);
 	$res = $rh->db->query("
 			SELECT COUNT(id) AS total
 			FROM ".$rh->project_name."_picfiles
-			".($rubric ? "WHERE topic_id =".$rh->db->quote($rubric) : "")."
+			WHERE _state = 0 ".($rubric ? " AND topic_id =".$rh->db->quote($rubric) : "")."
 	");
 
 	if($res[0]['total'])
@@ -49,7 +49,7 @@ $upload =& new Upload($rh, $rh->front_end->file_dir);
 		$res = $rh->db->query("
 			SELECT id, title
 			FROM ".$rh->project_name."_picfiles
-			".($rubric ? "WHERE topic_id =".$rh->db->quote($rubric) : "")."
+			WHERE _state = 0 ".($rubric ? " AND topic_id =".$rh->db->quote($rubric) : "")."
 			LIMIT ".$limit[0].",".$limit[1]."			
 		");
 	
