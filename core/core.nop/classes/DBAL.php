@@ -265,7 +265,7 @@ class DBAL
 		{
 			$this->numRows = $this->lowlevel->getNumRows($this->handle);
 			$this->currentRow = 0;
-			return $this->numRows; //$this->handle;
+			return $this->handle; //;$this->numRows
 		}
 
 		return null;
@@ -291,18 +291,17 @@ class DBAL
 	/**
 	 * возвращает строчку массивом
 	 */
-	function getRow()
+	function getRow($resultId = null)
 	{
-		if ($this->handle && $this->currentRow < $this->numRows)
+		if($row = $this->lowlevel->FetchAssoc($resultId ? $resultId : $this->handle))
 		{
-			$ret = $this->lowlevel->FetchAssoc($this->handle);
-			$this->currentRow++;
-		} else
-		{
-			$this->lowlevel->FreeResult($this->handle);
-			$ret = null;
+			return $row;
 		}
-		return $ret;
+		else
+		{
+			$this->lowlevel->FreeResult($resultId ? $resultId : $this->handle);
+			return false;
+		}
 	}
 
 	/**
