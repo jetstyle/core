@@ -217,7 +217,9 @@ class TreeControlNew extends TreeControl
 
 		//end XML
 		if (!$this->config->old_style)
+		{
 			$str .= $this->xmlCloseTag('item')."\n";
+		}
 		$str .= $this->xmlCloseTag('tree')."\n";
 
 		return $str;
@@ -233,47 +235,93 @@ class TreeControlNew extends TreeControl
 		return $ret;
 	}
 
-	function UpdateTreeStruct()
+        function addNode()
+	{
+		$rh =& $this->rh;
+		$db =& $rh->db;
+		
+		$rh->UseClass('Translit');
+  		$translit =& new Translit();
+  		
+  		$node = array();
+  		
+		$node['title'] = iconv("UTF-8", "CP1251", $rh->getVar('newtitle'));
+		if(strlen($node['title']) == 0)
+		{
+			$node['title'] = 'new';
+		}
+		
+		$node['title_pre'] = $this->rh->tpl->action('typografica', $node['title']);
+		$node['parent'] = intval($rh->getVar('parent'));
+		$node['supertag'] = $translit->TranslateLink($node['title'], 100);  
+		
+		$parentNode = $db->queryOne("
+			SELECT _path
+			FROM ". $this->config->table_name ."
+			WHERE id = '".$node['parent']."'
+		");
+		
+		$node['_path'] = $parentNode['_path'] ? $parentNode['_path'].'/'.$node['supertag'] : $node['supertag'];
+		
+		$order = $db->queryOne("
+			SELECT (MAX(_order) + 1) AS _max
+			FROM ". $this->config->table_name ."
+			WHERE _parent = '".$node['parent']."'
+		");		
+		
+		$id = $db->insert("
+			INSERT INTO ". $this->config->table_name ."
+			(title, title_pre, _parent, _supertag, _path, _order)
+			VALUES
+			('".addslashes($node['title'])."', '".addslashes($node['title_pre'])."', '".addslashes($node['parent'])."', '".addslashes($node['supertag'])."', '".addslashes($node['_path'])."', '".$order['_max']."')
+		");
+		
+		return $id;
+	}
+
+        function deleteNode($node_id)
+	{
+		$rh =& $this->rh;
+		$db =& $rh->db;
+		
+		$node = $db->queryOne("
+			SELECT id, _left, _right, _state
+			FROM ". $this->config->table_name ."
+			WHERE id = '".$node_id."'
+			");
+
+		if(is_array($node) && !empty($node))	
+		{
+			// удаляем совсем
+			if($node['_state'] == 2)
+			{
+				$db->query("
+					DELETE FROM ". $this->config->table_name ."
+					WHERE _left >= ".$node['_left']." AND _right <= ".$node['_right']."
+				");
+			}
+			// метим
+			else
+			{
+				$db->query("
+					UPDATE ". $this->config->table_name ."
+					SET _state = 2
+					WHERE _left >= ".$node['_left']." AND _right <= ".$node['_right']."
+				");
+			}
+		}
+		
+		return $node;
+	}	
+
+        function UpdateTreeStruct()
 	{
 		$rh =& $this->rh;
 		$db =& $rh->db;
 
 		if( $rh->getVar('add') )
 		{
-			$rh->UseClass('Translit');
-      		$translit =& new Translit();
-      		
-      		$node = array();
-      		
-			$node['title'] = iconv("UTF-8", "CP1251", $rh->getVar('newtitle'));
-			if(strlen($node['title']) == 0)
-			{
-				$node['title'] = 'new';
-			}
-			
-			$node['parent'] = intval($rh->getVar('parent'));
-			$node['supertag'] = $translit->TranslateLink($node['title'], 100);  
-			
-			$parentNode = $db->queryOne("
-				SELECT _path
-				FROM ". $this->config->table_name ."
-				WHERE id = '".$node['parent']."'
-			");
-			
-			$node['_path'] = $parentNode['_path'] ? $parentNode['_path'].'/'.$node['supertag'] : $node['supertag'];
-			
-			$order = $db->queryOne("
-				SELECT (MAX(_order) + 1) AS _max
-				FROM ". $this->config->table_name ."
-				WHERE _parent = '".$node['parent']."'
-			");		
-			
-			$id = $db->insert("
-				INSERT INTO ". $this->config->table_name ."
-				(title, title_pre, _parent, _supertag, _path, _order)
-				VALUES
-				('".addslashes($node['title'])."', '".addslashes($this->rh->tpl->action('typografica', $node['title']))."', '".addslashes($node['parent'])."', '".addslashes($node['supertag'])."', '".addslashes($node['_path'])."', '".$order['_max']."')
-			");
+			$id = $this->addNode();
 
 			$this->loaded = false;
 			$this->Load();
@@ -282,24 +330,19 @@ class TreeControlNew extends TreeControl
 		}
 		elseif($delete = intval($rh->getVar('delete')))	
 		{
+			$node = $this->deleteNode($delete);
 
-			$res = $db->queryOne("
-				SELECT _left, _right
-				FROM ". $this->config->table_name ."
-				WHERE id = '".$delete."'
-				");
-
-			if(is_array($res) && !empty($res))	{
-				$db->query("
-					UPDATE ". $this->config->table_name ."
-					SET _state = 2
-					WHERE _left >= ".$res['_left']." AND _right <= ".$res['_right']."
-					");
-			}
+			if($node['id'])
+			{
 			$this->loaded = false;
 			$this->Load();
 			$this->Restore();
 			return '1';
+		}
+			else
+			{
+				return '0';
+			}			
 		}
 		elseif($rh->getVar('change'))	
 		{
@@ -307,12 +350,6 @@ class TreeControlNew extends TreeControl
 			$this->id = $itemId;
 			$targetId = intval($rh->getVar('target'));
 			$beforeId = intval($rh->getVar('before'));
-
-//			$db->query("
-//				UPDATE ". $this->config->table_name ."
-//				SET _parent = '".$targetId."'
-//				WHERE id = '".$itemId."'
-//				");
 
 			if($beforeId)
 			{
@@ -327,12 +364,6 @@ class TreeControlNew extends TreeControl
 					SET _order = _order + 1
 					WHERE _order >= " . $node['_order'] . " AND _parent = '" . $node['_parent'] . "'
 					");
-
-//				$db->query("
-//					UPDATE ". $this->config->table_name ."
-//					SET _order = " . $node['_order'] . ", _parent = '".$targetId."'
-//					WHERE id = " . $itemId  . "
-//				");
 			}
 			else
 			{
@@ -361,8 +392,5 @@ class TreeControlNew extends TreeControl
 		}
 		return '0';
 	}
-
-
 }
-
 ?>
