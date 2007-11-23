@@ -376,7 +376,7 @@ class TreeControlNew extends TreeControl
 
 			$db->query("
 				UPDATE ". $this->config->table_name ."
-				SET _order = " . $node['_order'] . ", _parent = '".$targetId."'
+				SET _order = " . intval($node['_order']) . ", _parent = '".$targetId."'
 				WHERE id = " . $itemId  . "
 			");
 
