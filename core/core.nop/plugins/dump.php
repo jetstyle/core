@@ -10,7 +10,7 @@
  */
 /* если массива news нету в шаблонном дамайне, то возьмём из фикстур :P */
 
-$item = $params['item']?$params['item']:$params[0]; // ключ
+$item = $params['item']?$params['item']:( $params['_'] ? $params['_'] : $params[0]); // ключ
 //можно {{!url_to News #NewsItem}}	     
 
 
