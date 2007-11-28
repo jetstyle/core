@@ -445,7 +445,7 @@ class Upload {
 
 		if ($size[2]==2)
 		{
-			imagejpeg ($thumbnail);
+			imagejpeg ($thumbnail, null, 96);
 		}
 		elseif ($size[2]==1)
 		{
@@ -453,7 +453,7 @@ class Upload {
 		}
 		elseif ($size[2]==3)
 		{
-			imagepng($thumbnail);
+			imagepng($thumbnail, null, 0);
 		}
 
 		imagedestroy($thumbnail);
