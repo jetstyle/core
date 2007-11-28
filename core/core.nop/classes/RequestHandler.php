@@ -593,7 +593,9 @@ class RequestHandler extends BasicRequestHandler
 					foreach ($dump as $k=>$v)
 					{
 						echo sprintf('<p>%s%s%s</p>', $v['class'], $v['type'], $v['function']);
-						echo sprintf('<p>%s:%s</p>', $v['file'], $v['line']);
+						$args = var_export($v['args'], true);
+						echo sprintf('<p>%s:%s <pre>%s</pre></p>', $v['file'], $v['line'], $args);
+						echo '<br />';
 					}
 					die();
 			}
@@ -863,3 +865,4 @@ class RequestHandler extends BasicRequestHandler
 }
 
 ?>
+
