@@ -10,7 +10,8 @@
 	$rh->tpl->Assign('/node', $rh->url.'jetimages');
 
 	$rubric = $rh->getVar('rubric', 'integer');
-
+	$rh->state->set('rubric', $rubric);
+		
 	$res = $rh->db->query("
 			SELECT id, title
 			FROM ".$rh->project_name."_pictures_topics
