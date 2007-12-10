@@ -188,11 +188,12 @@ class DBAL
 					$bad = 1;
 				}
 				$this->rh->debug->trace("<b><a href=\"#\" ".($bad ? "style='color: red;'" : "")." onclick=\"debug_popup('".$out."', this); return false;\">QUERY</a>".($limit == 1 ? " ONE: " : ": ")."</b> ".$sql, 'q');
+				//$this->rh->debug->trace("<b>QUERY".($limit == 1 ? " ONE: " : ": ")."</b> ".$sql, 'q');
 				return;
 			}
 		}
 
-		$this->rh->debug->trace("<b>QUERY".($limit == 1 ? " ONE: " : ": ")."</b> ".$sql, 'q');
+		
 	}
 
 	function _Error($error_msg)
