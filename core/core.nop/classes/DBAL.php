@@ -136,7 +136,7 @@ class DBAL
 				$data[] = $row;
 			}
 			$this->lowlevel->FreeResult($r);
-		}
+		} 
 				
 		$this->logQuery($sql, $limit, $offset);
 		return $data;
@@ -193,15 +193,15 @@ class DBAL
 			}
 		}
 
-		
+		$this->rh->debug->trace("<b>QUERY".($limit == 1 ? " ONE: " : ": ")."</b> ".$sql, 'q');
 	}
 
 	function _Error($error_msg)
 	{
 		$error_msg = "DBAL [" . $this->rh->db_al . "] Error: " . $error_msg;
 		if ($this->rh->debug)
-			echo '<hr>' . $error_msg;
-		//$this->rh->Error($error_msg);
+			//echo '<hr>' . $error_msg;
+			$this->rh->Error($error_msg);
 		else
 		{
 			ob_end_clean();
