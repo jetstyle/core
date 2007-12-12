@@ -199,12 +199,14 @@ class DBAL
 	function _Error($error_msg)
 	{
 		$error_msg = "DBAL [" . $this->rh->db_al . "] Error: " . $error_msg;
-		if ($this->rh->debug)
-			//echo '<hr>' . $error_msg;
+		if ($this->rh->debug && function_exists(array($this->rh, 'Error')))
+		{
+//			echo '<hr>' . $error_msg;
 			$this->rh->Error($error_msg);
+		}
 		else
 		{
-			ob_end_clean();
+//			ob_end_clean();
 			die($error_msg);
 		}
 
