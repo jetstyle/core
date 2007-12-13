@@ -1,12 +1,12 @@
-<?
+<?php
 
 /**
- *  DEPRECATED
- *  DO NOT USE THIS CLASS
+ * nop:  Вот этот класс надо использовать для работы с деревом
  *
  */
 
-class TreeControl {
+
+class TreeControlTrue {
 
 	var $rh; //  $rh
 	var $config; //    ModuleConfig
@@ -34,7 +34,7 @@ class TreeControl {
 
 	var $table_name = "jetsite_content";
 
-	function TreeControl( &$rh ){
+	function TreeControlTrue( &$rh ){
 		//base modules binds
 		$this->rh =& $rh;
 		$this->config =& $rh->config;
@@ -85,11 +85,15 @@ class TreeControl {
 		$rh =& $this->rh;
 		$tpl =& $rh->tpl;
 
-		$action = $rh->ri->get('action');
+		$action = $_GET['action'];
+		var_dump($this->rh->ri->get('add'));
+		die('====');
+		//die('zxcv '.var_export($_POST, true) );
 		switch($action){
 
 		case 'update':
-			//    
+
+      //    
 			//				$rh->HeadersNoCache();
 			if( $new_id = $this->UpdateTreeStruct() )
 				$tpl->set('_new_id',$new_id);
@@ -106,6 +110,7 @@ class TreeControl {
 			// XML  xloadtree  
 			//    ,   -   .
 			//$rh->HeadersNoCache();
+			ob_end_clean();
 			header("Content-type: text/xml; charset=utf-8");//windows-1251
 			echo $this->ToXML();
 			die();
@@ -119,7 +124,6 @@ class TreeControl {
 			//render trash switcher
 
 			$tpl->set( '_href', $this->_href_template );
-			//				$tpl->Parse( $this->template_trash_hide : $this->template_trash_show, '__trash_switch' );
 
 			$_href = str_replace('&amp;','&',$this->_href_template);
 			$tpl->set( '_url_connect', $_href.'&action=update&_show_trash='.$show_trash.'&' );
@@ -128,8 +132,12 @@ class TreeControl {
 			$tpl->set( '_behavior', $this->tree_behavior );
 			$tpl->set( '_cur_id', $this->id );
 			$tpl->set( '_level_limit', 3 );
+
+
+
 			$tpl->Parse( $this->template_head, 'html_head', true );
 			$tpl->Parse( $this->template_control, '__tree' );
+
 			return $tpl->Parse( $this->template, $this->store_to, true );
 
 
@@ -265,7 +273,7 @@ class TreeControl {
 	function ToXML(){  //$iconv=true
 		//start XML
 		$str = "<?xml version=\"1.0\"?>\n\n";
-		$str .= "<tree>\n";
+		$str .= "<tree id=\"0\" >\n";
 
 		//  ?
 		$root_id = (int)$this->rh->ri->get("display_root");
@@ -315,7 +323,7 @@ class TreeControl {
 			//  
 			$_title = str_replace('"','\'',$_title);
 			//    utf
-			$str .= str_repeat(" ",$node->_level)."<tree text=\"".iconv("CP1251","UTF-8", $_title ? $_title : 'node_'.$node->id )."\" ".$action_src." db_id=\"".$node->id."\" db_selected=\"".( $node->id==$this->id ? "1" : "" )."\" db_state=\"".$node->_state."\" ".(($is_folder)?">":"/>")."\n";
+			$str .= str_repeat(" ",$node->_level)."<item text=\"".iconv("CP1251","UTF-8", $_title ? $_title : 'node_'.$node->id )."\" ".$action_src." id=\"".$node->id."\" db_selected=\"".( $node->id==$this->id ? "1" : "" )."\" db_state=\"".$node->_state."\" ".(($is_folder)?">":"/>")."\n";
 
 			//			$str .= str_repeat(" ",$node->_level)."<tree text=\"text\" ".(($is_folder)?">":"/>")."\n";
 			//    
@@ -326,7 +334,7 @@ class TreeControl {
 				$cparent = $node->id;
 			}
 		}
-		for( $i=(integer)$root["_level"] ; $i<$this->ITEMS[$cparent]['_level']; $i++ ) $str .= "</tree>\n";
+		for( $i=(integer)$root["_level"] ; $i<$this->ITEMS[$cparent]['_level']; $i++ ) $str .= "</item>\n";
 
 		//end XML
 		$str .= "</tree>\n";
