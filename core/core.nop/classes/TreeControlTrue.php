@@ -85,25 +85,22 @@ class TreeControlTrue {
 		$rh =& $this->rh;
 		$tpl =& $rh->tpl;
 
-		$action = $_GET['action'];
-		var_dump($this->rh->ri->get('add'));
-		die('====');
-		//die('zxcv '.var_export($_POST, true) );
+		$action = $this->rh->ri->get('action');
 		switch($action){
 
-		case 'update':
-
-      //    
-			//				$rh->HeadersNoCache();
-			if( $new_id = $this->UpdateTreeStruct() )
-				$tpl->set('_new_id',$new_id);
-			$tpl->set('_new_action',$this->_href_template.$this->id_get_var."=".$new_id);
-			//				$tpl->Parse( $this->template_response, 'html_body', true );
-			//				return $tpl->Parse( $this->template_response, 'html_body', true );
-			$tpl->Parse( $this->template_response, 'HTML:body', true );
-			$res = $tpl->parse('html.html');
-			echo $res;
-			die('1');
+			case 'update':
+				$title = $rh->ri->get('title');
+				$id    = $rh->ri->get('itemId');
+				if (!empty($title))
+				{
+					$res = $this->saveTitle($id, $title);
+				}
+				else
+				{
+					$res = $this->UpdateTreeStruct();
+				}
+				echo $res;
+				die();
 			break;
 
 		case 'xml':
@@ -165,111 +162,85 @@ class TreeControlTrue {
 
 	function _Handle(){}
 
-	function AddNew( $FIELDS=array() )
+  function UpdateTreeStruct()
 	{
-		//aliaces
-		$db =& $this->rh->db;
-		$rh =& $this->rh;
-		//function
-		$VALUES = array();
-		//base values
-		for($i=0;$i<count($this->UPDATE_FIELDS);$i++){
-			$_field = $this->UPDATE_FIELDS[$i];
-			$VALUES[$_field] = $rh->ri->get( $this->prefix.$_field.$this->suffix.$this->new_suffix );
-		}
-		//manual values may be
-		if(!is_array($FIELDS)) $FIELDS = array();
-		$VALUES = array_merge($VALUES,$FIELDS);
-		//execute
-		reset($VALUES);
-		$sql1 = $sql2 = "";
-		foreach($VALUES as $field=>$value){
-			$sql1 .= (($sql1)?",":"").$field;
-			$sql2 .= (($sql2)?",":"").$db->Quote( $VALUES[$field] );
-		}
-
-		$sql = "INSERT INTO ".$this->table_name."($sql1) VALUES($sql2)";
-		$id = $db->insert($sql);
-		return $id;
-	}
-
-	function UpdateTreeStruct(){
 		$rh =& $this->rh;
 		$db =& $rh->db;
-		$ids = $rh->ri->get('ids');
-		if( $n = count($ids) ){
-			//   ,      
-			$this->loaded = false;
-			//  
-			$mode = $this->rh->ri->get('mode');
-			$_href = $this->rh->url.'do/DualInner'.( $mode ? '/'.$mode : '' );//.'?'.$this->state->State();
-			//  
-			if( $rh->ri->get('add') )
-			{
-				$rh->ri->get('parent');
-				if( $brother_id = (int)$rh->ri->get('brother') )
-				{
-					$rs = $db->queryOne("SELECT _parent FROM ".$this->table_name." WHERE id='$brother_id'");
-					$parent_id = $rs["_parent"];
-					$add_brother_mode = true;
-				}
-				else
-					$parent_id = (int)$rh->ri->get('parent');
-				//
-				$new_id = $this->AddNew(array(
-					'_parent'=>$parent_id,
-				));
-			}
-			else
-				//set _created,_order
-				$db->query("UPDATE ".$this->table_name." SET _created=NULL,_order=id WHERE id='$new_id'");
 
-			for($i=0;$i<$n;$i++){
-				if( $children = $rh->ri->get('children_'.$ids[$i]) ){
-					$chids = explode(':',$children);
-					$m = count($chids);
-					for($j=0;$j<$m;$j++){
-						$sql = "UPDATE ".$this->table_name." SET _order='".$j."',_parent='".$ids[$i]."' WHERE id='".$chids[$j]."'";
-						//						echo $sql.'<br>';
-						$db->query($sql);
-					}
-				}
-			}
-			//  
+		if( $rh->ri->get('add') )
+		{
+			$id = $this->addNode();
+
+			$this->loaded = false;
 			$this->Load();
 			$this->Restore();
-			$this->_KillOutsiders();
-
-			if( $add_brother_mode && $new_id )
-			{
-				// 
-				$BRS = $db->query("SELECT id,_order FROM ".$this->table_name." WHERE _parent='$parent_id' AND _state<2 ORDER BY _order ASC");
-				//        $BRS = $rs->GetArray();
-				//        print_r($BRS);
-				// 
-				$m = count($BRS);
-				for( $i=0; $i<$m; $i++ )
-					if( $BRS[$i]["id"]==$brother_id )
-						break;
-				//  -      ,   
-				$i++;
-				for( $j=$i; $j<$m-1; $j++ ){
-					$a = $BRS[$j]["_order"];
-					$BRS[$j]["_order"] = $BRS[$j+1]["_order"];
-					$BRS[$j+1]["_order"] = $a;
-				}
-				// 
-				for(;$i<$m;$i++)
-					$db->query("UPDATE ".$this->table_name." SET _order='".$BRS[$i]["_order"]."' WHERE id='".$BRS[$i]["id"]."'");
-				//          print("UPDATE ".$this->config->table_name." SET _order='".$BRS[$i]["_order"]."' WHERE id='".$BRS[$i]["id"]."'<br>\n");
-			}
-			//    ID  
-
-			return $new_id ? $new_id : true;
+			return $id;
 		}
-		return false;
-	}
+		elseif($delete = intval($rh->ri->get('delete')))
+		{
+			$node = $this->deleteNode($delete);
 
+			if($node['id'])
+			{
+			$this->loaded = false;
+			$this->Load();
+			$this->Restore();
+			return '1';
+		}
+			else
+			{
+				return '0';
+			}
+		}
+		elseif($rh->ri->get('change'))
+		{
+			$itemId = intval($rh->ri->get('id'));
+			$this->id = $itemId;
+			$targetId = intval($rh->ri->get('target'));
+			$beforeId = intval($rh->ri->get('before'));
+
+			if($beforeId)
+			{
+				$node = $db->queryOne("
+					SELECT _parent, _order
+					FROM ". $this->table_name ."
+					WHERE id = '".$beforeId."'
+					");
+
+				$db->query("
+					UPDATE ". $this->config->table_name ."
+					SET _order = _order + 1
+					WHERE _order >= " . $node['_order'] . " AND _parent = '" . $node['_parent'] . "'
+					");
+			}
+			else
+			{
+				$node = $db->queryOne("
+					SELECT (MAX(_order) + 1) AS _order
+					FROM ". $this->table_name ."
+					WHERE _parent = '".$targetId."'
+				");
+			}
+
+			$db->query("
+				UPDATE ". $this->config->table_name ."
+				SET _order = " . intval($node['_order']) . ", _parent = '".$targetId."'
+				WHERE id = " . $itemId  . "
+			");
+
+			$this->loaded = false;
+			$this->Load();
+			$this->Restore();
+
+			$this->table_name = $this->config->table_name;
+
+			include( $rh->FindScript('handlers','_update_tree_pathes') );
+
+			return '1';
+		}
+		return '0';
+	}
+	
 	function ToXML(){  //$iconv=true
 		//start XML
 		$str = "<?xml version=\"1.0\"?>\n\n";
@@ -412,7 +383,59 @@ class TreeControlTrue {
 		return $right + 1;
 	}
 
+  function addNode()
+	{
+		$rh =& $this->rh;
+		$db =& $rh->db;
+
+		//$rh->UseClass('Translit');
+  		//$translit =& new Translit();
+
+  		$node = array();
+
+    $title = iconv("UTF-8", "CP1251", $rh->ri->get('newtitle'));
+		$node['title'] = $title;
+		if(strlen($node['title']) == 0)
+		{
+			$node['title'] = 'new';
+		}
+    
+    $pre = $this->rh->tpl->action('typografica', $title);
+ 		$node['title_pre'] = $pre;
+		$node['parent'] = intval($rh->ri->get('parent'));
+		//$node['supertag'] = $translit->TranslateLink($node['title'], 100);
+
+
+		$parentNode = $db->queryOne("
+			SELECT _path
+			FROM ". $this->table_name ."
+			WHERE id = '".$node['parent']."'
+		");
+
+		$node['_path'] = $parentNode['_path'] ? $parentNode['_path'].'/'.$node['supertag'] : $node['supertag'];
+
+		$order = $this->_getOrder($node['parent']);
+
+		$sql = "INSERT INTO ". $this->table_name ."
+      			(title, title_pre, _parent, _supertag, _path, _order)
+		        VALUES (".$db->quote($node['title']).", ".$db->quote($node['title_pre']).", ".$db->quote( $node['parent'] ).", ".$db->quote($node['supertag']).", ".$db->quote($node['_path']).", ".$db->quote($order['_max']).")";
+    //die($sql);
+		$id = $db->insert($sql);
+
+		return $id;
+	}
+	
+  /**
+   *  Максимальный _order ветки
+   */
+	function _getOrder($parent)
+	{
+  	 $order = $db->queryOne("
+  			SELECT (MAX(_order) + 1) AS _max
+  			FROM ". $this->table_name ."
+  			WHERE _parent = ".$db->quote($parent)."
+  		");
+	}
 }
 
 ?>
-
