@@ -11,6 +11,7 @@ class BasicSiteMapPage extends BasicPage
 	function handle()
 	{
         //например так
+        $this->rh->tpl->set('tpl', 'tpl');
         $this->rh->site_map_path= rtrim(implode("/", $this->params), "/");
 	}
 

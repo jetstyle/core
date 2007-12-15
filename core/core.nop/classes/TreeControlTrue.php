@@ -1,7 +1,7 @@
 <?php
 
 /**
- * nop:  ¬от этот класс надо использовать дл€ работы с деревом
+ * nop:          
  *
  */
 
@@ -32,6 +32,7 @@ class TreeControlTrue {
 	var $fields = array("id","title","_parent","_left","_right","_state","_level");
 	var $pk_field = "id";
 
+  var $update_path = true;
 	var $table_name = "jetsite_content";
 
 	function TreeControlTrue( &$rh ){
@@ -201,17 +202,19 @@ class TreeControlTrue {
 
 			if($beforeId)
 			{
-				$node = $db->queryOne("
-					SELECT _parent, _order
+        $sql1 = "
+					SELECT _parent, _order as _order
 					FROM ". $this->table_name ."
 					WHERE id = '".$beforeId."'
-					");
+					"     ;
+				$node = $db->queryOne($sql1);
 
-				$db->query("
-					UPDATE ". $this->config->table_name ."
+        $sql2 = "
+					UPDATE ". $this->table_name ."
 					SET _order = _order + 1
 					WHERE _order >= " . $node['_order'] . " AND _parent = '" . $node['_parent'] . "'
-					");
+					"     ;
+				$db->query($sql);
 			}
 			else
 			{
@@ -222,19 +225,21 @@ class TreeControlTrue {
 				");
 			}
 
-			$db->query("
-				UPDATE ". $this->config->table_name ."
-				SET _order = " . intval($node['_order']) . ", _parent = '".$targetId."'
-				WHERE id = " . $itemId  . "
-			");
+      $sql = "UPDATE ". $this->table_name ."
+      				SET _order = " . intval($node['_order']) . ", _parent = '".$targetId."'
+			       	WHERE id = " . $itemId;
+			       	
+
+			$db->query($sql);
 
 			$this->loaded = false;
 			$this->Load();
 			$this->Restore();
 
-			$this->table_name = $this->config->table_name;
+			$this->table_name = $this->table_name;
 
-			include( $rh->FindScript('handlers','_update_tree_pathes') );
+      if ($this->update_path)
+  			include( $rh->FindScript('handlers','_update_tree_pathes') );
 
 			return '1';
 		}
@@ -281,7 +286,7 @@ class TreeControlTrue {
 
 			//close subtrees
 			if($node->_parent!=$cparent){
-				for($i=0;$i<( $this->ITEMS[$cparent]['_level'] - $this->ITEMS[$node->_parent]['_level'] );$i++) $str .= "</tree>\n";
+				for($i=0;$i<( $this->ITEMS[$cparent]['_level'] - $this->ITEMS[$node->_parent]['_level'] );$i++) $str .= "</item>\n";
 				$cparent = $node->_parent;
 			}
 			//write node
@@ -294,7 +299,10 @@ class TreeControlTrue {
 			//  
 			$_title = str_replace('"','\'',$_title);
 			//    utf
-			$str .= str_repeat(" ",$node->_level)."<item text=\"".iconv("CP1251","UTF-8", $_title ? $_title : 'node_'.$node->id )."\" ".$action_src." id=\"".$node->id."\" db_selected=\"".( $node->id==$this->id ? "1" : "" )."\" db_state=\"".$node->_state."\" ".(($is_folder)?">":"/>")."\n";
+			$_title = $_title ? $_title : 'node_'.$node->id ;
+			//$_title = iconv("CP1251","UTF-8", $_title);
+			
+			$str .= str_repeat(" ",$node->_level)."<item text=\"".$_title."\" ".$action_src." id=\"".$node->id."\" db_selected=\"".( $node->id==$this->id ? "1" : "" )."\" db_state=\"".$node->_state."\" ".(($is_folder)?">":"/>")."\n";
 
 			//			$str .= str_repeat(" ",$node->_level)."<tree text=\"text\" ".(($is_folder)?">":"/>")."\n";
 			//    
@@ -405,7 +413,6 @@ class TreeControlTrue {
 		$node['parent'] = intval($rh->ri->get('parent'));
 		//$node['supertag'] = $translit->TranslateLink($node['title'], 100);
 
-
 		$parentNode = $db->queryOne("
 			SELECT _path
 			FROM ". $this->table_name ."
@@ -413,7 +420,6 @@ class TreeControlTrue {
 		");
 
 		$node['_path'] = $parentNode['_path'] ? $parentNode['_path'].'/'.$node['supertag'] : $node['supertag'];
-
 		$order = $this->_getOrder($node['parent']);
 
 		$sql = "INSERT INTO ". $this->table_name ."
@@ -424,18 +430,70 @@ class TreeControlTrue {
 
 		return $id;
 	}
+
+	function deleteNode($node_id)
+	{
+		$rh =& $this->rh;
+		$db =& $rh->db;
+
+		$node = $db->queryOne("
+			SELECT id, _left, _right, _state
+			FROM ". $this->table_name ."
+			WHERE id = '".$node_id."'
+			");
+
+		if(is_array($node) && !empty($node))
+		{
+			//  
+			if($node['_state'] == 2)
+			{
+				$db->query("
+					DELETE FROM ". $this->table_name ."
+					WHERE _left >= ".$node['_left']." AND _right <= ".$node['_right']."
+				");
+			}
+			// 
+			else
+			{
+				$db->query("
+					UPDATE ". $this->table_name ."
+					SET _state = 2
+					WHERE _left >= ".$node['_left']." AND _right <= ".$node['_right']."
+				");
+			}
+		}
+
+		return $node;
+	}
+
+
 	
   /**
-   *  ћаксимальный _order ветки
+   *   _order 
    */
 	function _getOrder($parent)
 	{
-  	 $order = $db->queryOne("
+  	 $order = $this->rh->db->queryOne("
   			SELECT (MAX(_order) + 1) AS _max
   			FROM ". $this->table_name ."
-  			WHERE _parent = ".$db->quote($parent)."
+  			WHERE _parent = ".$this->rh->db->quote($parent)."
   		");
+
+  		return $order['_max'];
 	}
+	
+
+    /**
+     *    
+     */
+  	function saveTitle($id, $title)
+  	{
+  		$title = iconv("UTF-8", "CP1251", $title);
+
+  		$sql = "UPDATE ".$this->table_name." SET title_short=".$this->rh->db->quote($title)." WHERE id=".$this->rh->db->quote($id);
+  		$this->rh->db->execute($sql);
+  		return $sql;
+  	}
 }
 
 ?>

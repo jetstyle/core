@@ -24,7 +24,10 @@
     $rh->UseLib("typografica", "classes/typografica");
 
     $typo = &new typografica( $rh );
-    echo $typo->correct($text);
+
+    $ret = $typo->correct($text);
+    
+    echo $ret;
 
 
 ?>
