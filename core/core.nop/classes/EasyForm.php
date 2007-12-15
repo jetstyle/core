@@ -187,10 +187,14 @@ class EasyForm{
     //конструируем конфиг
     $config = array();
     
-    if ($this->rh->FindScript_("classes","FormPackages/".$conf_name))
-    	include( $this->rh->FindScript_("classes","FormPackages/".$conf_name) );
+    if ($filename = $this->rh->FindScript("classes","FormPackages/".$conf_name))
+    {
+    	include( $filename );
+    }
     else
+    {
     	include( $this->rh->FindScript_("handlers","FormPackages/".$conf_name) );
+    }
     
     if (isset($_config["easyform_override"]))
       foreach( $_config["easyform_override"] as $v )
