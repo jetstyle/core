@@ -43,7 +43,6 @@ class PrincipalStorage_db extends PrincipalStorage
    }
    function LoadByLogin($login, $realm="") 
    { 
-   	  
      $sql = "select * from ".$this->db_table.
             " where active=1 ".
             " and login=".$this->rh->db->Quote($login).
