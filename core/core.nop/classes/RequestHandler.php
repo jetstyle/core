@@ -604,7 +604,7 @@ class RequestHandler extends BasicRequestHandler
 
 	function RequestHandler($config_path='')
 	{
-		set_error_handler(array(&$this, 'debugErrorHandler'));
+//		set_error_handler(array(&$this, 'debugErrorHandler'));
 		parent::BasicRequestHandler($config_path);
 
 		$this->useClass('models/DBConfig');
