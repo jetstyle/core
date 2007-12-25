@@ -64,7 +64,10 @@ class TreeControlTrue {
 			//			$cache =& $this->rh->cache;
 			$object_class = 'trees';
 
-			$sql = "SELECT " . implode(",", $this->fields) . " FROM " . $this->rh->db_prefix . "content ORDER BY _order";
+			// lunatic: replace table_name 
+			//$sql = "SELECT " . implode(",", $this->fields) . " FROM " . $this->rh->db_prefix . "content ORDER BY _order";
+			$sql = "SELECT " . implode(",", $this->fields) . " FROM " . $this->table_name . " ORDER BY _order";
+			
 			$res = $this->rh->db->query($sql);
 
 			foreach ($res as $r)
