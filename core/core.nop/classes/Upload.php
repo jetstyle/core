@@ -126,21 +126,30 @@ class Upload {
 	
   function UploadFile( $field_name, $file_name, $is_full_name=false, $resize = NULL, $crop=false  )
   {
-
-  	$uploaded_file = $_FILES[ $field_name ]['tmp_name'];
+	if(is_array($field_name))
+	{
+		$_file = $field_name;
+	}
+	else
+	{
+		$_file = $_FILES[ $field_name ];
+	}
+  	$uploaded_file = $_file['tmp_name'];
    
   	if(is_uploaded_file($uploaded_file))
     {
 	  	$this->current = false;
 			//клиентские данные
-    	$type = $_FILES[ $field_name ]['type'];
-			$ext = explode(".",$_FILES[ $field_name ]['name']);
+    	$type = $_file['type'];
+			$ext = explode(".",$_file['name']);
 			$ext = $ext[ count($ext)-1 ];
 			//проверка на допуск
 			if( !$this->IsAllowed($ext) ) return false;
 			//какое имя файла использовать?
 			if( $file_name=='' )
-				$file_name = str_replace( '/', '__', basename($_FILES[ $field_name ]['name'],'.'.$ext) );
+			{
+				$file_name = str_replace( '/', '__', basename($_file['name'],'.'.$ext));
+			}
 			//грузим
 			$this->_CheckExt($ext,$type);
 			//$this->DelFile($file_name);    			//if($del_prev) ...
