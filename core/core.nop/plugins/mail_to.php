@@ -24,16 +24,24 @@ if (!function_exists('pregtrim'))
 		return true;//$mail;
 	}
 }
-$out = "";
-$email = $params['_']  ? $params['_'] : $params[0]; // тип
+$out = array();
+$email_str = $params['_']  ? $params['_'] : $params[0]; // тип
 
-if (checkmail($email))
+$email_parts = preg_split("/\s|,/", $email_str);
+
+foreach ($email_parts as $email)
 {
-	$email=trim(pregtrim($email));
-	$out = "<a href='mailto:".$email."'>".$email."</a>";
+    if (checkmail($email))
+    {
+    	$email=trim(pregtrim($email));
+    	$out[] = "<a href='mailto:".$email."'>".$email."</a>";
+    }
 }
 
-echo $out;
-
+if ( !empty($out) )
+{
+    $out_str = implode(", ", $out);
+    echo $out_str;
+}
 
 ?>
