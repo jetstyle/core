@@ -51,7 +51,7 @@ class PrincipalDB extends Principal
   }
   
   function GetByLogin($login){
-    return $this->_GetBy("login='".$login."'");
+    return $this->_GetBy("login=".$this->rh->db->quote($login));
   }
   
   /*** работа с сессиями ***/
