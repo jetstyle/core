@@ -24,6 +24,8 @@ class TreeControlTrue {
 	var $store_to = "";
 	var $_href_template; //   
 
+	var $level_limit = 3;
+
 	var $id_get_var = 'id';
 	var $tree_behavior = 'explorer';//''classic
 
@@ -277,11 +279,15 @@ class TreeControlTrue {
 			//   ?
 			//    ?
 			if( $node->_left<=$c_parent->_left && $node->_right>=$c_parent->_right )
+			{
 				$display_children = true;
+			}
 			else
+			{
 				//    
 				//   	    $display_children = !($this->config->display_limit>0 && $level[ $node->id ] >= $this->config->display_limit);
-				$display_children = !(3>0 && $level[ $node->id ] >= 3);
+				$display_children = !($level[ $node->id ] >= $this->level_limit);
+			}
 
 			// -   xloadtree?
 			$_is_folder = count($this->CHILDREN[$node->id]);
@@ -306,11 +312,11 @@ class TreeControlTrue {
 			//$_title = iconv("CP1251","UTF-8", $_title);
 			
 			$str .= str_repeat(" ",$node->_level)."<item text=\"".$_title."\" ".$action_src." id=\"".$node->id."\" db_selected=\"".( $node->id==$this->id ? "1" : "" )."\" db_state=\"".$node->_state."\" ".(($is_folder)?">":"/>")."\n";
-
-			//			$str .= str_repeat(" ",$node->_level)."<tree text=\"text\" ".(($is_folder)?">":"/>")."\n";
-			//    
+			//$str .= str_repeat(" ",$node->_level)."<tree text=\"text\" ".(($is_folder)?">":"/>")."\n";
+			//
 			//put children
-			if($is_folder){
+			if($is_folder)
+			{
 				$arr = $this->CHILDREN[$node->id];
 				for($i=count($arr)-1;$i>=0;$i--) $stack[] = $arr[$i];
 				$cparent = $node->id;
