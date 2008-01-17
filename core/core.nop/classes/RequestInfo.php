@@ -298,13 +298,27 @@ class RequestInfo
        $this->_compiled[METHOD_GET ] = "";
        $this->_compiled[METHOD_POST] = "";
 
+/*
+        echo '<pre>';
+        var_dump($this->values);
+        die();
+        */
        $f=0;
        foreach($this->values as $k=>$v)
         if( $v!='' )
         if (($only == "") || (strpos($k, $only) === 0))
         {
-           $v0 = htmlspecialchars($v); 
-           $v1 = urlencode($v);        
+           if (is_array($v))
+           {
+            $v0 = array_map(htmlspecialchars, $v);   
+            $v1 = array_map(urlencode, $v);        
+           }
+           else
+           {
+            $v0 = htmlspecialchars($v); 
+            $v1 = urlencode($v);        
+           }
+           
            if ($f) $this->_compiled[METHOD_GET ].=$this->s; else $f=1;
            $this->_compiled[METHOD_GET ] .= $k."=".$v1;
            $this->_compiled[METHOD_POST] .= "<input type='hidden' name='".$k."' value='".$v0."' />\n";
