@@ -133,7 +133,11 @@ class DBAL
 		{
 			while ($row = $this->lowlevel->FetchAssoc($r))
 			{
-				$data[] = $row;
+				//$data[] = $row;
+				if (is_string($limit))
+                    $data[$row[$limit]] = $row;
+                else
+                    $data[] = $row;
 			}
 			$this->lowlevel->FreeResult($r);
 		} 
