@@ -210,7 +210,8 @@ class BasicRequestHandler extends ConfigProcessor {
 		if ($this->db_al)
 		{
 			$this->UseClass("DBAL");
-			$this->db =& new DBAL( $this );
+//			$this->db =& new DBAL( $this );
+			$this->db =& DBAL::getInstance( $this );
 			if($this->db_set_encoding)
 			{
 				$this->db->Query("SET NAMES ".$this->db_set_encoding);

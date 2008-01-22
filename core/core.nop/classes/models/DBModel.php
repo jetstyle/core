@@ -385,7 +385,8 @@ class DBModel extends Model
 	{
 		list($sql, $sql1) = $sql_parts;
 		if ($is_load) $this->sql = $sql1;
-		$data = $this->rh->db->query($sql);
+//		$data = $this->rh->db->query($sql);
+		$data = DBAL::getInstance()->query($sql);
 		
 //		echo $sql."<br /><br />";
 		

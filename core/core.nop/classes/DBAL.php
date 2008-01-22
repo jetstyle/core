@@ -66,7 +66,18 @@
 
 class DBAL
 {
+	function &getInstance(& $rh = null, $connect = true) //реализация одиночества
+	{
+		static $instance = null;
+		if (null === $instance) 
+		{
+			$instance = new DBAL($rh, $connect); 
+		}
+		return $instance;
+	}
+
 	var $rh; // use: $this->rh->debug->Trace (..->Error)
+
 	var $lowlevel;
 	var $queryCount = 0;
 
@@ -77,7 +88,7 @@ class DBAL
 	var $active_role = "editor";          // для какой "роли" это следует делать (пока задел на будущее)
 	*/
 
-	function DBAL(& $rh, $connect = true)
+	function &DBAL(& $rh, $connect = true)
 	{
 		$this->rh = & $rh;
 		$this->prefix = $rh->db_prefix;
