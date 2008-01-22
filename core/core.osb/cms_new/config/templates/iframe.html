@@ -1,0 +1,80 @@
+<script language='javascript'>
+<!--keep
+function ResizeIFrame(id,what,step){
+  var f = document.getElementById(id);
+  if(what=='width')
+    f.width = f.width*( 1.0 + step );
+  else
+    f.height = f.height*( 1.0 + step );
+}
+
+function SwapIframes( id1, id2 )
+{
+  document.getElementById(id1).style.display = "none";
+  document.getElementById(id2).style.display = "block";
+  
+  document.cookie = "cf"+{{_id}}+"=" + ("iframe_opened"==id2);
+
+}
+
+function ReloadFrame(id){
+  var f = document.getElementById(id);
+  f.src = f.src;
+}
+
+//-->
+</script>
+<div class="cms-wrapper">
+
+<!-- Развёрнутый модуль -->
+<div class="{{_class_name_1}}"
+  id="iframe_opened{{_iframe_number}}"
+  onmouseover="//document.getElementById('iframe_table_opened').className='module-title- m-over-'; return false;"
+  onmouseout="//document.getElementById('iframe_table_opened').className='module-title- m-opened-'; return true;"
+  
+>
+<table width="100%" cellspacing="0" cellpadding="0" class="module-title- m-opened-" id="iframe_table_opened">
+  <tr>
+    <td class="w100">
+      <span onclick="SwapIframes('iframe_opened{{_iframe_number}}','iframe_closed{{_iframe_number}}')">Вертикаль: </span>
+      <a href="" onclick="ResizeIFrame('{{prefix}}iframe','height',0.1);return false;">увеличить</a> |
+      <a href="" onclick="ResizeIFrame('{{prefix}}iframe','height',-0.1);return false;">уменьшить</a> |
+      &nbsp;&nbsp;
+      <a href="" onclick="ReloadFrame('{{prefix}}iframe');return false;">обновить</a>
+    </td>
+    <td><a href="javascript:;"
+      onclick="SwapIframes('iframe_opened{{_iframe_number}}','iframe_closed{{_iframe_number}}')"
+    /><img src="{{images}}hide.gif" width="12" height="12" alt="-" align="top" title="Свернуть группу" /></a></td>
+  </tr>
+</table>
+<table cellspacing="0" cellpadding="0" class="w100 content-">
+  <tr>
+    <td class="w100">
+      <IFRAME id='{{prefix}}iframe' SRC="{{__url}}" width="100%" height="450" frameborder="0"><strong>{{__url}}</strong></IFRAME>
+    </td>
+  </tr>
+</table>
+</div>
+
+<!-- Развёрнутый модуль -->
+<div class="{{_class_name_2}}"
+  id="iframe_closed{{_iframe_number}}"
+  onmouseover="//document.getElementById('iframe_table_closed').className='module-title- m-over-'; return false;"
+  onmouseout="//document.getElementById('iframe_table_closed').className='module-title- m-opened-'; return true;"
+  
+>
+<table width="100%" cellspacing="0" cellpadding="0" class="module-title- m-opened-" id="iframe_table_closed">
+  <tr>
+    <td class="w100">
+      <span onclick="SwapIframes('iframe_closed{{_iframe_number}}','iframe_opened{{_iframe_number}}')">Вертикаль: </span>
+      <strong>увеличить</strong> |
+      <strong>уменьшить</strong>
+    </td>
+    <td><a href="javascript:;"
+      onclick="SwapIframes('iframe_closed{{_iframe_number}}','iframe_opened{{_iframe_number}}')"
+    /><img src="{{images}}show.gif" width="12" height="12" alt="-" align="top" title="Свернуть группу" /></a></td>
+  </tr>
+</table>
+</div>
+
+</div>

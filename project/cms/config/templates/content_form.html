@@ -1,0 +1,66 @@
+<table cellspacing="0" cellpadding="0" class="cms-simple-form w100">
+<tr>
+  <td width="20%">заголовок</td>
+  <td><input type="text" name="{{$prefix}}title" value="{{$*title|escape}}" class="w100"></td>
+</tr>
+<tr>
+  <td>URL-им€</td>
+  <td><input type="text" name="{{$prefix}}_supertag" value="{{*_supertag|escape}}" class="w100"></td>
+</tr>
+<tr>
+  <td>адрес&nbsp;на&nbsp;сайте&nbsp;</td>
+  <td><a href='{{fe_/}}{{*_path}}' target='_blank'><strong>{{*_path}}</strong></a></td>
+</tr>
+<tr>
+  <td>режим&nbsp;отображени€&nbsp;</td>
+  <td>
+    <select name='{{prefix}}mode' onchange="changeType();" id="mode"> <!-- onchange="OSFormSend('{{__form_name}}')"; -->
+    {{options_mode}}
+    </select>
+  </td>
+</tr>
+<tr>
+  <td>DESCRIPTION</td>
+  <td><input type="text" name="{{$prefix}}meta_description" class="w100" value="{{*meta_description|escape}}"></td>
+</tr>
+<tr>
+  <td>KEYWORDS</td>
+  <td><input type="text" name="{{$prefix}}meta_keywords" class="w100" value="{{*meta_keywords|escape}}"></td>
+</tr>
+<tr>
+  <td>Ѕаннер 1:</td>
+  <td>
+    <select name="{{prefix}}announce_id1">
+      <option value="0">- не выбрано -</option>
+    {{options_announce_id1}}
+    </select>
+  </td>
+</tr>
+<tr>
+  <td>Ѕаннер 2:</td>
+  <td>
+    <select name="{{prefix}}announce_id2">
+      <option value="0">- не выбрано -</option>
+    {{options_announce_id2}}
+    </select>
+  </td>
+</tr>
+
+
+<!--tr>
+  <td>анонс</td>
+  <td>
+    <textarea name='{{prefix}}lead' cols ="40" rows="8">{{*lead|escape}}</textarea>
+  </td>
+</tr-->
+{{TPL:wide}}
+<tr>
+  <td colspan="2">{{!!fck input_name=text tpl_prefix=prefix}}{{*text}}{{/!!fck}}</td>
+</tr>
+{{/TPL:wide}}
+{{_wide}}
+<tr>
+  <td><label for="{{$prefix}}_state">скрыть</label></td>
+  <td><input type="checkbox" name="{{$prefix}}_state" id="{{$prefix}}_state" value="1" {{checkbox__state}}></td>
+</tr>
+</table>

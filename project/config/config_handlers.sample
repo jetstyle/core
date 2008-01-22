@@ -1,0 +1,10 @@
+<?php
+$this->handlers_map = array(
+	"/"	    => "HomePage",
+	"login"	    => "LoginPage",
+	"logout"    => "LogoutPage",
+	"tpl"	    => "SiteMapPage",
+	"picture"   => "PicturePage"
+
+	);	
+?>

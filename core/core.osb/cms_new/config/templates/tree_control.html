@@ -1,0 +1,83 @@
+{{TPL:Response}}
+<script for='body' action='onload'>
+<!--keep
+window.parent.webFXTreeConfig.control.connect.new_id = '{{_new_id}}';
+window.parent.webFXTreeConfig.control.connect.new_action = '{{_new_action}}';
+window.parent.webFXTreeConfig.control.connect.Receive();
+//-->
+</script>
+{{/TPL:Response}}
+
+{{TPL:Head}}
+<script type="text/javascript" src="{{/}}xloadtree/js/xtree.js"></script>
+<script type="text/javascript" src="{{/}}xloadtree/js/xmlextras.js"></script>
+<script type="text/javascript" src="{{/}}xloadtree/js/xloadtree.js"></script>
+<script type="text/javascript" src="{{/}}xloadtree/js/tree_control.js"></script>
+<link type="text/css" rel="stylesheet" href="{{/}}xloadtree/xtree.css" />
+{{/TPL:Head}}
+
+{{TPL:Control}}
+<script type="text/javascript">
+
+/// XP Look
+webFXTreeConfig.rootIcon    = "{{images}}z.gif";
+webFXTreeConfig.openRootIcon  = "{{/}}xloadtree/images/xp/openfolder.png";
+
+webFXTreeConfig.lMinusRootIcon    = "{{/}}xloadtree/images/xp/Lminus_root.png";
+webFXTreeConfig.lPlusRootIcon   = "{{/}}xloadtree/images/xp/Lplus_root.png";
+
+webFXTreeConfig.folderIcon    = "{{/}}xloadtree/images/xp/folder.png";
+webFXTreeConfig.openFolderIcon  = "{{/}}xloadtree/images/xp/openfolder.png";
+webFXTreeConfig.fileIcon    = "{{/}}xloadtree/images/xp/file.png";
+webFXTreeConfig.lMinusIcon    = "{{/}}xloadtree/images/xp/Lminus.png";
+webFXTreeConfig.lPlusIcon   = "{{/}}xloadtree/images/xp/Lplus.png";
+webFXTreeConfig.tMinusIcon    = "{{/}}xloadtree/images/xp/Tminus.png";
+webFXTreeConfig.tPlusIcon   = "{{/}}xloadtree/images/xp/Tplus.png";
+webFXTreeConfig.iIcon     = "{{/}}xloadtree/images/xp/I.png";
+webFXTreeConfig.lIcon     = "{{/}}xloadtree/images/xp/L.png";
+webFXTreeConfig.tIcon     = "{{/}}xloadtree/images/xp/T.png";
+webFXTreeConfig.blankIcon     = "{{/}}xloadtree/images/blank.png";
+
+//дл€ OSTreeControl
+webFXTreeConfig.Control1Icon    = "{{/}}xloadtree/images/xp/TC_1.png";
+webFXTreeConfig.Control2Icon    = "{{/}}xloadtree/images/xp/TC_2.png";
+webFXTreeConfig.Control3Icon    = "{{/}}xloadtree/images/xp/TC_3.png";
+webFXTreeConfig.Control4Icon    = "{{/}}xloadtree/images/xp/TC_4.png";
+webFXTreeConfig.Control5Icon    = "{{/}}xloadtree/images/xp/TC_5.png";
+webFXTreeConfig.Control6Icon    = "{{/}}xloadtree/images/xp/TC_6.png";
+
+//дл€ OSTreeConnect
+webFXTreeConfig.url_connect   = "{{_url_connect}}";
+
+//бан-листы на сервисные кнопки дл€ узлов
+webFXTreeConfig.ban_all_buttons   = '{{_ban_all_buttons}}';
+webFXTreeConfig.buttons_ban   = new Array();
+{{TPL:buttons_ban}}
+webFXTreeConfig.buttons_ban[{{_id}}]    = new Array({{_array}});
+{{/TPL:buttons_ban}}
+//webFXTreeConfig.buttons_ban[4]    = new Array(false,true,false);
+
+//дл€ выделени€ текущего
+webFXTreeConfig.cur_db_id   = {{_cur_id}};
+
+//дл€ ограничени€ глубины дерева
+webFXTreeConfig.level_limit   = 1*'{{_level_limit}}';
+
+var root_id = {{root_id}};
+
+var tree = new WebFXLoadTree("root","{{_url_xml}}");
+tree.setBehavior("{{_behavior}}");
+
+var tree_control = new OSTreeControl (tree);
+document.write(tree);
+</script>
+{{/TPL:Control}}
+
+
+<div class="cms-list-advanced">
+{{__trash_switch}}
+{{__logs}}
+<img class="block" src="{{images}}z.gif" width="1" height="10" align="top" alt="" />
+{{__tree}}
+</div>
+
