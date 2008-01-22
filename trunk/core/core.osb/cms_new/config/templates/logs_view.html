@@ -1,0 +1,40 @@
+<table cellspacing="0" cellpadding="0" class="cms-simple-form w100">
+
+{{TPL:Item_Item}}
+<tr bgcolor='{{_bgcolor}}'>
+  <td style="padding:5px 10px;">{{_inserted}}</td>
+  <td style="background:#ffffff;"><img class="block" src="{{images}}z.gif" width="1" height="1" align="top" alt="" /></td>
+  <td style="padding:5px 10px;">{{_action}}</td>
+  <td style="background:#ffffff;"><img class="block" src="{{images}}z.gif" width="1" height="1" align="top" alt="" /></td>
+  <td style="padding:5px 10px;"><a href='{{/}}do/Users?id={{_user_id}}' target='_blank'>{{_username}}</a></td>
+</tr>
+{{/TPL:Item_Item}}
+
+{{TPL:Item_Empty}}
+<tr>
+  <td>записей не найдено</td>
+</tr>
+{{/TPL:Item_Empty}}
+
+{{TPL:User_Item}}
+<tr bgcolor='{{_bgcolor}}'>
+  <td style="padding:5px 10px;">{{_inserted}}</td>
+  <td style="background:#ffffff;"><img class="block" src="{{images}}z.gif" width="1" height="1" align="top" alt="" /></td>
+  <td style="padding:5px 10px;">{{_action}}</td>
+  <td style="background:#ffffff;"><img class="block" src="{{images}}z.gif" width="1" height="1" align="top" alt="" /></td>
+  <td style="padding:5px 10px;">{{_class}}</td>
+  <td style="padding:5px 10px;"><a href='{{/}}{{_link}}' target='_blank'>{{_title}}</a></td>
+</tr>
+{{/TPL:User_Item}}
+
+{{TPL:User_Empty}}
+<tr>
+  <td>записей не найдено</td>
+</tr>
+{{/TPL:User_Empty}}
+
+{{_list}}
+
+</table>
+
+{{_logs}}

@@ -1,0 +1,55 @@
+{{TPL:Tree_Empty}}<div class="cms-nodata-">нет данных</div>{{/TPL:Tree_Empty}}
+
+{{TPL:Tree_Item}}
+<li>
+<nobr>
+<img src="images/0.gif" width="{{$_width}}" height="1" border="0" alt="" title="">
+<a href="{{$_href}}">{{$_title}}</a>
+ {{TPL:exchange}}| <a href="" onclick="{{prefix}}picker.Pick({{$_id}},2);return false;">&lt;&gt;</a> {{/TPL:exchange}}
+ {{TPL:move_under}}| <a href="" onclick="{{prefix}}picker.Pick({{$_id}},1);return false;">^</a> {{/TPL:move_under}}
+ {{TPL:add_new}}| <a href="{{_add_href}}">+</a>{{/TPL:add_new}}
+ {{_controls}}
+ </nobr>
+</li>
+{{/TPL:Tree_Item}}
+
+{{TPL:Tree_Item_sel}}
+<li>
+<nobr>
+<img src="images/0.gif" width="{{$_width}}" height="1" border="0" alt="" title="">
+<b>{{$_title}}</b>
+{{_controls}}
+</nobr>
+</li>
+{{/TPL:Tree_Item_sel}}
+
+{{TPL:Tree_Item_freezed}}
+<li>
+<nobr>
+<img src="images/0.gif" width="{{$_width}}" height="1" border="0" alt="" title="">
+<nobr>{{$_title}}</nobr>
+</li>
+{{/TPL:Tree_Item_freezed}}
+
+{{TPL:Tree_Engine}}
+<script language="javascript" src="{{$/}}js/nodepicker.js"></script>
+<script language="javascript"><!--keep
+var {{prefix}}picker = new NodePicker("{{$prefix}}form");
+//--></script>
+<form id="{{$prefix}}form" action="{{$/}}index.php" method="get">
+{{$POST_STATE}}
+<input type="hidden" name="action" value="">
+<input type="hidden" name="id1" value="">
+<input type="hidden" name="id2" value="">
+</form>
+{{/TPL:Tree_Engine}}
+
+{{TPL:add_new}}<a href="{{_add_new_href}}">+</a>{{/TPL:add_new}}
+
+{{__trash_switch}}
+{{__picker}}
+{{__logs}}
+{{__add_new}}
+{{__tree}}
+
+

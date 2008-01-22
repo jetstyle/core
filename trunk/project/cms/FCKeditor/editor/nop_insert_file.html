@@ -1,0 +1,198 @@
+
+<script type="text/javascript">
+//window.resizeTo(400, 250);
+function insertFile( param, tpl_pict ) 
+{    
+
+      tpl_pict = tpl_pict.replace(/\[ID\]/g,		Math.floor(1000000*Math.random()) );
+      tpl_pict = tpl_pict.replace(/\[HREF\]/g, 	param[0]);
+      tpl_pict = tpl_pict.replace(/\[TITLE\]/g,	param[1]);
+      tpl_pict = tpl_pict.replace(/\[FORMAT\]/g,	param[2]);
+	  tpl_pict = tpl_pict.replace(/\[DESCR\]/g,	param[3]);
+      return tpl_pict;
+/*
+      if( param['f_url_big']!='' )
+      {
+        tpl_name = tpl_preview;
+        tpl_name = tpl_name.replace(/\[HREF\]/g, param['f_url_big']);
+        tpl_name = tpl_name.replace(/\[ONCLICK\]/g,"popup_image('"+param['f_url_big']+"', '"+param['f_big_width']+"', '"+param['f_big_height']+"');");
+      }else{
+        tpl_name = tpl_pict;
+        tpl_name = tpl_name.replace(/\[HREF\]/g,'');
+        tpl_name = tpl_name.replace(/\[ONCLICK\]/g,'');
+      }
+
+      tpl_name = tpl_name.replace(/\[IMAGE\]/g,	param['f_url']);
+      tpl_name = tpl_name.replace(/\[ALIGN\]/g,	param['f_align']);
+      tpl_name = tpl_name.replace(/\[ALT\]/g,	param['f_alt']);
+      tpl_name = tpl_name.replace(/\[WIDTH\]/g,	param['f_width']);
+      tpl_name = tpl_name.replace(/\[HEIGHT\]/g,param['f_height']);
+//      tpl.Assign('CLASS', param['f_align']=="right" ? "image-right-" : "image-" );      
+      tpl_name = tpl_name.replace(/\[ID\]/g, Math.floor(1000000*Math.random()) );
+      return tpl_name;
+*/
+}
+
+{{TPL:onOk_1}}
+function onOK() 
+{
+alert ('it never can happen nop_isert_file.html:onOK()');
+  var param = new Object();
+	var ImgList = document.getElementById("ImgList");
+	var arr = arrrv[ ImgList.options[ImgList.selectedIndex].value ];
+	param['f_url'] = arr[0];
+	param['f_title'] = arr[1];
+	param['f_format'] = arr[2];
+	param['f_descr'] = arr[3];
+  __dlg_close(param);
+  return false;
+};
+{{/TPL:onOk_1}}
+
+{{TPL:onOk_2}}
+function onOK() {
+	// rewriten by Zharik
+	//  
+  var param = new Object();
+	var ImgList = document.getElementById("TopicsList");
+	param['f_arr'] = arrrvt[ ImgList.options[ImgList.selectedIndex].value ];
+  __dlg_close(param);
+  return false;
+};
+{{/TPL:onOk_2}}
+
+{{onOk}}
+
+function onCancel() {
+  __dlg_close(null);
+  return false;
+};
+</script>
+
+<style type="text/css">
+
+table {
+  font: 11px Tahoma,Verdana,sans-serif;
+}
+form p {
+  margin-top: 5px;
+  margin-bottom: 5px;
+}
+.fl { width: 9em; float: left; padding: 2px 5px; text-align: right; }
+.fr { width: 6em; float: left; padding: 2px 5px; text-align: right; }
+fieldset { padding: 0px 10px 5px 5px; }
+select, input, button { font: 11px Tahoma,Verdana,sans-serif; }
+button { width: 70px; }
+.space { padding: 2px; }
+
+.title { background: #ddf; color: #000; font-weight: bold; font-size: 120%; padding: 3px 10px; margin-bottom: 10px;
+border-bottom: 1px solid black; letter-spacing: 2px;
+}
+form { padding: 0px; margin: 0px; }
+</style>
+
+<form id="form1" name="form1" action="" method="get">
+<!--    --->
+<SCRIPT LANGUAGE="JavaScript">
+<!--keep
+
+var arrt =  Array();
+{{TITLES}}
+
+var arrv =  Array();
+{{VALUES}}
+
+var arrrv = Array();
+{{RETURN_VALUES}}
+
+var arrrvt = Array();
+{{TOPICS_RETURN_VALUES}}
+
+var st = 0;
+var mrk = 0;
+function chst() {
+  o = document.form1.TopicsList.options;
+  s = document.form1.ImgList;
+  i=0;
+  while (i<o.length && o.item(i).selected != true) {
+  i++;
+  };
+  if (o.item(i).selected) {
+   var q=o.item(i).value;
+   s.options.length=0;
+   if (document.all && document.all.item) {
+     j=arrt[q].length-1;
+     while (j>=0) {
+       var o = document.createElement("OPTION");
+       o.text = arrt[q][j];
+       o.value = arrv[q][j];
+       if (st==arrv[q][j]) mrk=j;
+       s.add(o,0);//.options
+       j--;
+     };
+     s.selectedIndex=mrk;
+    } else {
+     j=0;
+     while (j<arrt[q].length) {
+       var o = document.createElement("OPTION");
+       o.text= arrt[q][j];
+       o.value=arrv[q][j];
+       if (st==arrv[q][j]) mrk=j;
+       s.add(o,null);
+       j++;
+     };
+     s.selectedIndex=mrk;
+   }
+	 selectImage();
+  }
+}
+//-->
+</SCRIPT>
+<SCRIPT Language="JavaScript">
+<!--keep
+function selectImage(){
+	var ImgList = document.getElementById("ImgList");
+	var iprev = document.getElementById("ipreview");
+	var pt = ImgList.options[ImgList.selectedIndex].value;
+	if( pt>0 ){
+		//document.getElementById("ok").disabled = false;
+		
+		iprev.innerHTML = arrrv[pt][2] +", <a href='"+arrrv[pt][0]+"'></a>";
+	}
+	
+}
+//-->
+</SCRIPT>
+<table border='0' width='100%'>
+<tr><td>
+<SELECT size="5" id="TopicsList" onchange='chst()' style="width: 100%; margin: 0">
+	{{TOPICS}}
+</SELECT>
+</td><td>
+<SELECT size="5" id="ImgList" onchange="selectImage();" style="width: 100%; margin: 0">
+	<option value='-1'> выберите файл
+</SELECT>
+</td></tr>
+</table>
+
+<!-- /    --->
+
+<!--- new stuff --->
+
+<div class="space"></div>
+
+</fieldset>
+
+<br clear="all" />
+<table width="100%" style="margin-bottom: 0.2em">
+ <tr>
+  <td valign="bottom">
+    Формат файла : <div id='ipreview'></div>
+  </td>
+  <!--td valign="bottom" style="text-align: right">
+    <button type="button" name="ok" id="ok" disabled="true" onclick="return onOK();">OK</button><br>
+    <button type="button" name="cancel" onclick="return onCancel();"></button>
+  </td-->
+ </tr>
+</table>
+</form>

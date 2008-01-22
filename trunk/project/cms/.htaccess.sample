@@ -1,0 +1,8 @@
+php_value upload_max_filesize 40485760
+
+RewriteEngine on
+RewriteCond    %{REQUEST_FILENAME}  -d
+RewriteRule ^(.*/[^\./]*[^/])$ $1/
+RewriteRule ^pict\.php$ pict.php [QSA,L]
+RewriteRule ^(.*)$ index.php [QSA,L]
+php_value mmcache.filter "!*.php"

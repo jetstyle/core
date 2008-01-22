@@ -1,0 +1,39 @@
+<table class="quick-simple-form w100">
+<tr>
+	<td class="right">{{*file_small}}</td>
+	<td class="desc"><input type="text" name="{{$prefix}}title" value="{{$*title|escape}}" size="50"><br>
+          Название изображения, выводится на сайте в качестве альтернативного текста для загруженного изображения, 
+          если у посетителя отключен вывод изображений. 
+	</td>
+</tr>
+<!--tr>
+	<td>описание</td>
+	<td><input type="text" name="{{$prefix}}descr" value="{{$*descr|escape}}" size="50"></td>
+</tr-->
+<tr>
+	<td class="right">Иллюстрация:</td>
+	<td class="desc">
+          <input type="file" name="{{$prefix}}file"><br>
+          {{*file_exts_graphics}}<br>
+          Нажмите кнопку <dfn>Обзор</dfn> и выберите иллюстрацию со своего компьютера.
+          <br>
+          <!--{{*file}}<br>
+          <input type="checkbox" id="{{$prefix}}file_del" name="{{$prefix}}file_del" value='1'>&nbsp;<label for="{{$prefix}}file_del" class="warning">удалить изображение</label>-->
+	</td>
+</tr>
+<tr>
+	<td class="right">Уменьшенное изображение:</td>
+	<td class="desc">
+          <input type="file" name="{{$prefix}}file_small"><br>
+          {{*file_exts_graphics}}<br>
+          Уменьшеная копия (<dfn>{{_strict}} {{max_width}}x{{max_height}}</dfn>) изображения, обычно используется для вывода в списках или анонсах.
+          Будет уменьшено автоматически, если вы его не загрузите.<br>
+          <!--{{*file_small}}<br>
+          <input type="checkbox" id="{{$prefix}}file_small_del" name="{{$prefix}}file_small_del" value='1'>&nbsp;<label for="{{$prefix}}file_small_del" class="warning">удалить изображение</label>-->
+	</td>
+</tr>
+<!--tr>
+	<td class="right">Скрыть:</td>
+	<td class="desc"><input type="checkbox" name="{{$prefix}}_state" value="1" {{checkbox__state}}></td>
+</tr-->
+</table>
