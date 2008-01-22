@@ -1,9 +1,0 @@
-<?php
-
-$this->base_url			= "/";						// корневой URL проекта на сайте
-$this->project_name		= 'fury';					// tag проекта
-$this->project_title		= 'Fury project';			// заголовок проекта
-$this->tpl_skin			= "skin";					// шкура по-умолчанию
-$this->admin_email		= "nop@jetstyle.ru";		// email админа сайта
-
-?>
