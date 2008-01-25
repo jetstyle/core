@@ -37,7 +37,7 @@ class ConfigProcessor {
   var $DIRS = array(); //информация о корневых директориях для каждого уровня
   
   //Ищет скрипт по уровням проектов.
-  function FindScript( $type, $name, $level=0, $dr=1, $ext = 'php' )
+  function FindScript( $type, $name, $level=0, $dr=1, $ext = 'php', $withSubDirs = false )
   {
     //проверяем входные данные
     if($type==''){
@@ -64,6 +64,12 @@ class ConfigProcessor {
 //        echo $fname.'<br />';
         if(@file_exists($fname))
           return $fname;
+
+        if ($withSubDirs)
+        {
+          if ($file = $this->recursiveFind((is_array($dir) ? $dir[0] : $dir).$type."/", $name . "." . $ext))
+		return $file;
+	}
       }
       //если искать только на одном уровне - сразу выходим
       if($dr==0)
@@ -73,7 +79,50 @@ class ConfigProcessor {
     //ничего не нашли
     return false;
   }
+
+  private function recursiveFind($dir, $name)
+  {
+    if ($handle = @opendir($dir)) 
+    {
+      while (false !== ($file = readdir($handle))) 
+      {
+        if ($file == "." || $file == "..")
+          continue ;  
+        if ($file == $name)
+          return $dir . "/" . $file;
+        if (is_dir($dir . $file))
+        {
+          if ($res = $this->recursiveFind($dir . $file, $name))
+          {
+            closedir($handle);
+            return $res;
+          }
+        }
+      }
+      closedir($handle);
+    }
+    return false;
+  }
   
+  //newschool
+  //Тоже, что и FindScript(), но в случае не обнаружения файла вываливается с ошибкой
+  function FindScript_( $type, $name, $level=false, $dr=-1, $ext = 'php', $withSubDirs = false ){
+    try
+    {
+      if (!$fname = $this->FindScript($type,$name,$level,$dr,$ext,$withSubDirs))
+        throw new FileNotFoundException("FindScript: <b>not found</b>, type=<b>$type</b>, name=<b>$name</b>, level=<b>$level</b>, dr=<b>$dr</b>, ext=<b>$ext</b>");
+      else
+        return $fname;
+    }
+    catch (FileNotFoundException $e)
+    {
+      $exceptionHandler = ExceptionHandler::getInstance();
+      $exceptionHandler->process($e);
+    }
+  }
+
+/* 
+  //oldschool
   //Тоже, что и FindScript(), но в случае не обнаружения файла вываливается с ошибкой
   function FindScript_( $type, $name, $level=false, $dr=-1, $ext = 'php' ){
     $fname = $this->FindScript($type,$name,$level,$dr,$ext);
@@ -88,10 +137,10 @@ class ConfigProcessor {
         die($error);
     }
   }
-  
+*/  
   //Тоже, что и FindScript_(), но кроме того инклюдим найденный скрипт
-  function UseScript( $type, $name, $level=false, $dr=-1, $ext = 'php' ){
-    $this->_useScript( $this->FindScript_($type,$name,$level,$dr,$ext) );
+  function UseScript( $type, $name, $level=false, $dr=-1, $ext = 'php', $withSubDirs = false ){
+    $this->_useScript( $this->FindScript_($type,$name,$level,$dr,$ext,$withSubDirs) );
   }
   
   // Грузит скрипт в контексте меня

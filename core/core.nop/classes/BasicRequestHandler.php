@@ -421,9 +421,9 @@ class BasicRequestHandler extends ConfigProcessor {
 
 
 	// Алиасы, специфичные для RH
-	function UseClass( $name, $level=0, $dr=1, $ext = 'php' )
+	function UseClass( $name, $level=0, $dr=1, $ext = 'php', $withSubDirs = false )
 	{
-		$this->UseScript("classes",$name,$level,$dr,$ext);
+		$this->UseScript("classes",$name,$level,$dr,$ext,$withSubDirs);
 	}
 
 	function UseLib( $library_name, $file_name="" )

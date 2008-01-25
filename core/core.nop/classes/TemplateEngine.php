@@ -216,7 +216,7 @@ class TemplateEngine extends ConfigProcessor
   function _FindTemplate( $tpl_filename ) // -- возвращает уровень и полный путь к кэш-файлу
   {
     // 2. launch parent
-    return ConfigProcessor::FindScript( "templates", $tpl_filename, false, -1, "html" );
+    return ConfigProcessor::FindScript_( "templates", $tpl_filename, false, -1, "html" );
   }
 
   function ParseInstant( $template_content ) // -- "отпарсить" контент, данный как параметр (а не брать из файла)
@@ -291,7 +291,16 @@ class TemplateEngine extends ConfigProcessor
       ob_end_clean();
     } else {
       //$this->rh->debug->Error( "Subtemplate ".$tpl_name." is not exists" );      
-      return false;
+      //return false;
+	  try
+	  {
+        throw new TplException("Func_name=<b>" . $func_name . "</b>, Sub_tpl_name=<b>" . $_name . "</b>, Sub_tpl_source=<b>" . $file_source . "</b>, Tpl=<b>" . implode("\n", file($file_source)) . "</b>");
+      }
+      catch (TplException $e)
+      {
+        $exceptionHandler = ExceptionHandler::getInstance();
+        $exceptionHandler->process($e);
+      }
     }
     
     //6. $dummy
@@ -343,8 +352,16 @@ class TemplateEngine extends ConfigProcessor
       $recompile = $recompile || !file_exists( $file_cached );
       if ($recompile)
       {
-        $file_source = $this->FindScript_( "plugins", $action_name, $level, $direction );
-        
+	    try
+	    {
+          if (!$file_source = $this->FindScript( "plugins", $action_name, $level, $direction ))
+            throw new TplException("Func_name=<b>" . $func_name . "</b>, Action_name=<b>" . $action_name . "</b>, Tpl_name=<b>" . $params["_caller"] . "</b>, Tpl_source=<b>" . $this->_FindTemplate( $params["_caller"] ) . "</b>, Tpl=<b>" . implode("\n", file($this->_FindTemplate($params["_caller"]))) . "</b>", 1);
+        }
+        catch (TplException $e)
+        {
+          $exceptionHandler = ExceptionHandler::getInstance();
+          $exceptionHandler->process($e);
+        }
         $this->rh->debug->Trace( $file_source );
         $this->rh->debug->Trace( $file_cached );
         

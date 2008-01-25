@@ -58,11 +58,31 @@ class DBAL_mysql
 	function Connect()
 	{
 		if(!extension_loaded("mysql")) dl("mysql.so");
-		$this->dblink = mysql_connect($this->rh->db_host, 
-			$this->rh->db_user,
-			$this->rh->db_password
-		);
-		mysql_select_db($this->rh->db_name, $this->dblink);
+		try 
+		{
+			if (!$this->dblink = @mysql_connect($this->rh->db_host, 
+				$this->rh->db_user,
+				$this->rh->db_password
+				)
+			)
+				throw new DbException("Mysql connect error. Host=<b>" . $this->rh->db_host . "</b>, User=<b>" . $this->rh->db_user . "</b>, Password=<b>" . $this->rh->db_password . "</b>", 1);
+		}
+		catch (DbException $e)
+		{
+			$exceptionHandler = ExceptionHandler::getInstance();
+			$exceptionHandler->process($e);
+		}
+
+		try
+		{
+			if (!mysql_select_db($this->rh->db_name, $this->dblink))
+				throw new DbException("Mysql database \"" . $this->rh->db_name . "\" select error", 2);
+		}
+		catch (DbException $e)
+		{
+			$exceptionHandler = ExceptionHandler::getInstance();
+			$exceptionHandler->process($e);
+		}
 	}
 
 	function Close() { /* в нашем случае ничего */ }
@@ -93,8 +113,17 @@ class DBAL_mysql
 			if ($offset > 0) $sql.= " LIMIT $offset, -1";
 
 		// 1. execute
-		if (!$result = mysql_query($sql, $this->dblink))
-			return $this->dbal->_Error( "Query failed: ".$sql." (".mysql_error().")" );
+		try
+		{
+			if (!$result = mysql_query($sql, $this->dblink))
+				throw new DbException("Mysql query \"" . $sql . "\" error");
+//				return $this->dbal->_Error( "Query failed: ".$sql." (".mysql_error().")" );
+		}
+		catch (DbException $e)
+		{
+			$exceptionHandler = ExceptionHandler::getInstance();
+			$exceptionHandler->process($e);
+		}
 
 		if (!is_resource($result)) $result = FALSE;
 

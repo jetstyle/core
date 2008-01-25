@@ -58,11 +58,31 @@ class DBAL_mssql
   function Connect()
   {
     if(!extension_loaded("mssql")) dl("php_mssql.dll");
-    $this->dblink = mssql_connect($this->rh->db_host, 
-                                  $this->rh->db_user,
-                                  $this->rh->db_password
-                                  );
-    mssql_select_db($this->rh->db_name, $this->dblink);
+	try
+	{
+		if (!$this->dblink = @mssql_connect($this->rh->db_host, 
+									  $this->rh->db_user,
+									  $this->rh->db_password
+									)
+			)
+			throw new DbException("Mssql connect error. Host=<b>" . $this->rh->db_host . "</b>, User=<b>" . $this->rh->db_user . "</b>, Password=<b>" . $this->rh->db_password . "</b>", 1);
+	}
+	catch (DbException $e)
+	{
+		$exceptionHandler = ExceptionHandler::getInstance();
+		$exceptionHandler->process($e);
+	}
+
+	try
+	{
+		if (!mysql_select_db($this->rh->db_name, $this->dblink))
+			throw new DbException("Mssql database \"" . $this->rh->db_name . "\" select error", 2);
+	}
+	catch (DbException $e)
+	{
+		$exceptionHandler = ExceptionHandler::getInstance();
+		$exceptionHandler->process($e);
+	}
   }
 
   function Close() { /* в нашем случае ничего */ }
@@ -88,8 +108,17 @@ class DBAL_mssql
       return $this->dbal->_Error( "MSSQL [offset] not implemented =(" );
 
     // 1. execute
-    if (!$result = mssql_query($sql, $this->dblink))
-     return $this->dbal->_Error( "Query failed: ".$sql." (".mssql_get_last_message().")" );
+	try
+	{
+		if (!$result = mssql_query($sql, $this->dblink))
+			throw new DbException("Mssql query \"" . $sql . "\" error");
+	//     return $this->dbal->_Error( "Query failed: ".$sql." (".mssql_get_last_message().")" );
+	}
+	catch (DbException $e)
+	{
+		$exceptionHandler = ExceptionHandler::getInstance();
+		$exceptionHandler->process($e);
+	}
     return $result;
   }
   
