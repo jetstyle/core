@@ -138,9 +138,31 @@ class ConfigProcessor {
     }
   }
 */  
+  function FindDir($name)
+  {
+    //определ€ем начальный уровень поиска
+    $n = count($this->DIRS);
+    $level = $n - 1;
+    $i = $level>=0 ? $level : $n - $level;
+
+    //ищем
+    for( ; $i>=0 && $i<$n; $i-=1 )
+    {
+      //разбор каждого уровн€ тут
+      $dir =& $this->DIRS[$i];
+	  if (is_dir($dir . $name))
+		  return true;
+    }
+    
+    //ничего не нашли
+    return false;
+  }
+
   //“оже, что и FindScript_(), но кроме того инклюдим найденный скрипт
-  function UseScript( $type, $name, $level=false, $dr=-1, $ext = 'php', $withSubDirs = false ){
-    $this->_useScript( $this->FindScript_($type,$name,$level,$dr,$ext,$withSubDirs) );
+  function UseScript( $type, $name, $level=false, $dr=-1, $ext = 'php', $withSubDirs = false, $hideExc = false ){
+    $method = ($hideExc) ? "FindScript" : "FindScript_";
+    if ($path = $this->$method($type,$name,$level,$dr,$ext,$withSubDirs))
+      $this->_useScript( $path );
   }
   
   // √рузит скрипт в контексте мен€
