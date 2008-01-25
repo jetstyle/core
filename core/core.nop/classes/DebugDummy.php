@@ -1,14 +1,10 @@
 <?php
-
 class Debug
 {
-   function init() {  }
-   function getHtml() {  }
-   function trace() {  }
-   function halt() {  } 
-   function mark() {  } 
-   function error() {  } 
-   function trace_r() {}
+   static public function init() {  }
+   static public function getHtml() {  }
+   static public function trace() {  }
+   static public function halt() {  } 
+   static public function mark() {  } 
 }
-
 ?>

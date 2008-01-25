@@ -27,7 +27,9 @@ class DBQueryParser extends Configurable
 		$sql = preg_replace_callback('#(?=[^\\\\])\\?#', $fn_args, $sql);
 		// если отпарсили параметров больше или меньше чем передали
 		if (count($this->params) !== $this->param_idx)
-			$this->rh->debug->Error('Query compilation failed: wrong params count');
+		{
+			throw new Exception('Query compilation failed: wrong params count');
+		}
 		return $sql;
 	}
 

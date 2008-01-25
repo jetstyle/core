@@ -126,8 +126,6 @@ class TemplateEngine extends ConfigProcessor
   {
     $this->domain = array();
     $this->rh     = &$rh;
-    if ( $rh->debug )
-      $this->debug =& $rh->debug;
 
     // изначальный стек шкур на основе стека RH
     $this->DIRS = $rh->DIRS;
@@ -241,7 +239,7 @@ class TemplateEngine extends ConfigProcessor
     // им€ готовое дл€ кэшировани€
     $tname = str_replace("/",$this->rh->tpl_template_sepfix, $name); 
 
-    $this->rh->debug->Trace("Parsing: ".$tpl_name);
+    Debug::trace("Parsing: ".$tpl_name, 'tpl');
 
     // ????? kuso@npj: здесь уместно проверить, нет ли у нас уже такой функции.
     //       надо бы написать тест-кейс дл€ этого
@@ -255,7 +253,7 @@ class TemplateEngine extends ConfigProcessor
                    $tname.".php";
     
     
-    $this->rh->debug->Trace("Should be cached as: ".$file_cached);
+    Debug::trace("Should be cached as: ".$file_cached, 'tpl');
 
     // 3. проверка наличи€ в кэше/необходимости рекомпил€ции
     $recompile = $this->rh->tpl_compile != TPL_COMPILE_NEVER;
@@ -264,8 +262,8 @@ class TemplateEngine extends ConfigProcessor
     {
       $file_source = $this->_FindTemplate( $name );
                                                        
-      $this->rh->debug->Trace( "source:".$file_source ."($name)" );
-      $this->rh->debug->Trace( "cache to:".$file_cached. "($tname)" );
+      Debug::trace( "source:".$file_source ."($name)", 'tpl' );
+      Debug::trace( "cache to:".$file_cached. "($tname)", 'tpl' );
 
       if ($file_source && ($this->rh->tpl_compile != TPL_COMPILE_ALWAYS))
         if (@filemtime($file_cached) >= @filemtime($file_source)) $recompile = false;
@@ -362,8 +360,8 @@ class TemplateEngine extends ConfigProcessor
           $exceptionHandler = ExceptionHandler::getInstance();
           $exceptionHandler->process($e);
         }
-        $this->rh->debug->Trace( $file_source );
-        $this->rh->debug->Trace( $file_cached );
+        Debug::trace( $file_source, 'tpl' );
+        Debug::trace( $file_cached, 'tpl' );
         
         if ($file_source && ($this->rh->tpl_compile != TPL_COMPILE_ALWAYS))
           if (@filemtime($file_cached) >= @filemtime($file_source)) $recompile = false;
@@ -397,8 +395,14 @@ class TemplateEngine extends ConfigProcessor
   }
   function _Text( $tag )
   {
-    if ($this->rh->db) $this->rh->debug->Error("Rockette::_Text -> Db not implemented");
-    else return $this->_Message( $tag );
+    if ($this->rh->db) 
+    {
+    	throw new Exception("Rockette::_Text -> Db not implemented");
+    }
+    else 
+    {
+    	return $this->_Message( $tag );
+    }
   }
 
 
@@ -460,10 +464,17 @@ class TemplateEngine extends ConfigProcessor
     if ($this->msg) return $this->msg->Get( $msgid );
     else return $msgid;
   }
-  function action_text( &$params ){
+  function action_text( &$params )
+  {
     $msgid = $params["_"] ? $params["_"] : $params[0];
-    if ($this->rh->db) $this->rh->debug->Error("Rockette::action_Text -> Db not implemented");
-    else return $this->_Message( $msgid );
+    if (!$this->rh->db) 
+    {
+    	throw new Exception("Rockette::action_Text -> Db not implemented");
+    }
+    else 
+    {
+    	return $this->_Message( $msgid );
+    }
   }
   
   //св€зь с ListObject

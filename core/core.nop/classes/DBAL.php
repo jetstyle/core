@@ -77,7 +77,6 @@ class DBAL
 	}
 
 	var $rh; // use: $this->rh->debug->Trace (..->Error)
-
 	var $lowlevel;
 	var $queryCount = 0;
 
@@ -131,11 +130,8 @@ class DBAL
 
 	function _Query($sql, $limit = 0, $offset = 0)
 	{
-		if(method_exists($this->rh->debug, 'mark'))
-		{
-			$this->rh->debug->mark('q');
-		}
-		
+		Debug::mark('q');
+
 		$data = array ();
 		//плейсхолдер для префикса
 		$sql = str_replace("??", $this->prefix, $sql);
@@ -196,19 +192,19 @@ class DBAL
 						$row = '';
 					}
 					
-					$out = "<table class=\'debug_table\'>".$out."</table>";
+					$out = "<table>".$out."</table>";
 				}
 				$bad = 0;
-				if(!(stripos($out, 'filesort') === false) || !(stripos($out, 'temporary') === false))	{
+				if(!(stripos($out, 'filesort') === false) || !(stripos($out, 'temporary') === false))	
+				{
 					$bad = 1;
 				}
-				$this->rh->debug->trace("<b><a href=\"#\" ".($bad ? "style='color: red;'" : "")." onclick=\"debug_popup('".$out."', this); return false;\">QUERY</a>".($limit == 1 ? " ONE: " : ": ")."</b> ".$sql, 'q');
-				//$this->rh->debug->trace("<b>QUERY".($limit == 1 ? " ONE: " : ": ")."</b> ".$sql, 'q');
+				Debug::trace("<b><span ".($bad ? "style='color: red;'" : "").">QUERY</span>".($limit == 1 ? " ONE: " : ": ")."</b> ".$sql, 'db', 'q', $out);
 				return;
 			}
 		}
 
-		$this->rh->debug->trace("<b>QUERY".($limit == 1 ? " ONE: " : ": ")."</b> ".$sql, 'q');
+		Debug::trace("<b>QUERY".($limit == 1 ? " ONE: " : ": ")."</b> ".$sql, 'db', 'q');
 	}
 
 	function _Error($error_msg)
@@ -269,14 +265,9 @@ class DBAL
 	{
 		//типа такой плейсхолдер
 		$sql = str_replace("??", $this->prefix, $sql);
-		
-		if(method_exists($this->rh->debug, 'mark'))
-		{
-			$this->rh->debug->mark('q');
-		}
+		Debug::mark('q');
 		
 		$this->handle = $this->lowlevel->Query($sql, $limit, $offset);
-
 		$this->logQuery($sql, $limit, $offset);
 
 		if ($this->handle)

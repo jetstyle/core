@@ -83,7 +83,7 @@ class FormComponent_abstract
    // регистрация в форме
    function Event_Register()
    {
-     $this->field->rh->debug->Trace( "event_register for: { ".$this->field->name." } ");
+     Debug::trace( "event_register for: { ".$this->field->name." } ", 'form');
      $this->field->form->hash[ $this->field->name ] = &$this->field;
    }
 

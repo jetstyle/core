@@ -68,7 +68,7 @@ class ListObject {
 	function Parse( $tpl_root, $store_to=false, $append=false ){
 		$tpl =& $this->tpl;
 
-		$this->rh->debug->Trace( 'ListObject::Parse $tpl_root='.$tpl_root );
+		Debug::trace( 'ListObject::Parse $tpl_root='.$tpl_root );
 
 		//tpl vars
 		$this->tpl_root       = $tpl_root;

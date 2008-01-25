@@ -16,13 +16,20 @@ $rh->OCE = array(
   	$id = (integer)$params['id'];
     
 		if( !isset($rh->OCE[$module]) )
-			$rh->debug->Error("OCE: module not found, module=$module, id=$id, var=$var");
+		{
+//			$rh->debug->Error("OCE: module not found, module=$module, id=$id, var=$var");
+			Debug::trace("<span style='color: red; font-weight: bold;'>OCE: module not found, module=$module, id=$id, var=$var</span>");
+			return '';
+		}
   	
   	if($var)
   		$id = (integer)$tpl->GetValue($var);
     
 		if( !$id )
-			$rh->debug->Error("OCE: id not found, module=$module, id=$id, var=$var");
+		{
+			Debug::trace("<span style='color: red; font-weight: bold;'>OCE: id not found, module=$module, id=$id, var=$var</span>");
+//			$rh->debug->Error("OCE: id not found, module=$module, id=$id, var=$var");
+		}
   	
   	$tpl->set('_module',$module);		
   	$tpl->set('_id',$id);		

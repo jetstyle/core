@@ -101,7 +101,7 @@ class ArrowsMore extends Arrows
    function Parse( $template, $store_to="", $append=false )
    {
      $this->_Restore();
-     $this->rh->debug->Trace('Arrows::Parse - $current_page='.$this->current_page.', $record_count='.$this->record_count);
+     Debug::trace('Arrows::Parse - $current_page='.$this->current_page.', $record_count='.$this->record_count);
 
      $tpl = &$this->tpl;
  

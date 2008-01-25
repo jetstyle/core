@@ -60,7 +60,7 @@ class PrincipalCms {
   //или пытаемся залогиниться
   function Authorise()
   {
-    $this->rh->debug->Trace("Principal::Authorise() - ...");
+    Debug::trace("Principal::Authorise() - ...", 'prp');
     
     //пытаемемся восстановить из сессии
     if( $this->SessionRestore() )
@@ -80,7 +80,7 @@ class PrincipalCms {
     if( !($this->user = $this->GetByLogin($login)) ){
       $this->user = $this->GetByID(0);
       $this->state = PRINCIPAL_WRONG_LOGIN;
-      $this->rh->debug->Trace("<font color='red'>Principal::Login('$login','$password') - неверный логин</font> ");
+      Debug::trace("<font color='red'>Principal::Login('$login','$password') - неверный логин</font>", 'prp');
       return false;
     }
 
@@ -89,11 +89,11 @@ class PrincipalCms {
     {
       $this->user = $this->GetByID(0);
       $this->state = PRINCIPAL_WRONG_PWD;
-      $this->rh->debug->Trace("<font color='red'>Principal::Login('$login','$password') - неверный пароль</font>");
+      Debug::trace("<font color='red'>Principal::Login('$login','$password') - неверный пароль</font>", 'prp');
       return false;
     }
     //сохраняем пользователя в сессии
-    $this->rh->debug->Trace("<font color='green'>Principal::Login('$login','$password') - OK</font>");
+    Debug::trace("<font color='green'>Principal::Login('$login','$password') - OK</font>", 'prp');
     $this->SessionStore();
     $this->state = PRINCIPAL_AUTH;
     
@@ -126,7 +126,7 @@ class PrincipalCms {
     $ACL =& $this->ACL;
     $N = count($A);
     
-    $this->rh->debug->Trace("Principal::IsGrantedTo() - location = [$location] ...");
+    Debug::trace("Principal::IsGrantedTo() - location = [$location] ...", 'prp');
     
     //бежим по всему ACL
     $granted = false;
@@ -135,7 +135,7 @@ class PrincipalCms {
     $str = $this->getUserRole();
     $str1 = '!'.$this->getUserRole();
 
-    $this->rh->debug->Trace("Principal::IsGrantedTo() - ищем [$str] [$str1]");
+    Debug::trace("Principal::IsGrantedTo() - ищем [$str] [$str1]", 'prp');
     
     
     foreach($ACL as $loc=>$roles)
@@ -156,33 +156,31 @@ class PrincipalCms {
         {
           
           $this->granted_state = PRINCIPAL_ACL_NEGATIVE;
-          $this->rh->debug->Trace("Principal::IsGrantedTo() - <font color='red'>denied</font>");
+          Debug::trace("Principal::IsGrantedTo() - <font color='red'>denied</font>", 'prp');
           return false;
         }
 
-//$this->rh->debug->trace_r($roles);
-//$this->rh->debug->trace($str);
         //нашли строку, которая позволяет?
         if( in_array($str,$roles,true) )
         {
            
           $granted = true;
-          $this->rh->debug->Trace("Principal::IsGrantedTo() - <font color='green'>granted</font>");
+          Debug::trace("Principal::IsGrantedTo() - <font color='green'>granted</font>", 'prp');
         }
       }else
-        $this->rh->debug->Trace("<font color='grey'>Principal::IsGrantedTo() - строка loc = $loc</font>");
+        Debug::trace("<font color='grey'>Principal::IsGrantedTo() - строка loc = $loc</font>", 'prp');
 //      $this->rh->debug->Trace("Principal::IsGrantedTo() - ***");
     }
     //в конце концов, нашли строку, которая позволяет?
     if( $granted ){
       $this->granted_state = PRINCIPAL_ACL_GRANTED;
-      $this->rh->debug->Trace("Principal::IsGrantedTo() - <font color='green'>granted</font>");
+      Debug::trace("Principal::IsGrantedTo() - <font color='green'>granted</font>", 'prp');
       return true;
     }
     
     //ничего не нашли
     $this->granted_state = PRINCIPAL_ACL_NOT_FOUND;
-    $this->rh->debug->Trace("Principal::IsGrantedTo() - <font color='red'>not found</font>");
+    Debug::trace("Principal::IsGrantedTo() - <font color='red'>not found</font>", 'prp');
     return $this->is_granted_default;
   }
   

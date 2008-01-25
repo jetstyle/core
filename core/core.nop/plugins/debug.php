@@ -7,6 +7,6 @@
 if($rh->enable_debug)	
 {
 	echo '<div style="clear: both; font-size: 14px;">Total Queries: <b>'.$rh->db->queryCount.'</b></div>';
-	echo $rh->debug->getHtml();
+	echo Debug::getHtml();
 } 
 ?>

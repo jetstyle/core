@@ -124,7 +124,17 @@ class TemplateEngineCompiler
   function TemplateCompile( $skin_name, $tpl_name, $tpl_name_for_cache, $file_from, $file_to ) // -- возвращает true, если удачно
   {
     if (!file_exists($file_from))
-      $this->rh->debug->Error( "TPL::TemplateCompile: file_from *".$file_from."* not found" );
+    {
+      try
+      {
+     	 throw new TplException("TPL::TemplateCompile: file_from *".$file_from."* not found");
+      }
+      catch (TplException $e)
+      {
+        $exceptionHandler = ExceptionHandler::getInstance();
+        $exceptionHandler->process($e);
+      }
+    }
 
     // 1. разобрать файл на кусочки
     if (!$pieces = $this->_TemplateRead( $tpl_name_for_cache, $file_from ))
@@ -191,7 +201,15 @@ class TemplateEngineCompiler
     // 0. get contents
     $contents = @file($file_name);
     if (!$contents){
-      $this->rh->debug->Error("File $file_name not found, sorry");
+      try
+      {
+      	throw new TplException("File $file_name not found, sorry");
+      }
+      catch (TplException $e)
+      {
+        $exceptionHandler = ExceptionHandler::getInstance();
+        $exceptionHandler->process($e);
+      }
       return false;
     }
     $contents = implode("",$contents); 
@@ -200,13 +218,35 @@ class TemplateEngineCompiler
     // -- .html templates
     $pi = pathinfo( $file_name );
     if ($pi["extension"] != "html") 
-      $this->rh->debug->Error("TPL::_TemplateRead: [mooing duck alert] not .html template found @ $file_name!");
+    {
+      try
+      {
+      	throw new TplException("TPL::_TemplateRead: [mooing duck alert] not .html template found @ $file_name!");
+      }
+      catch (TplException $e)
+      {
+        $exceptionHandler = ExceptionHandler::getInstance();
+        $exceptionHandler->process($e);
+      }
+      return false;
+    }
     // {{/TPL}}
     
     if (preg_match( "/".$this->rh->tpl_prefix."\/".
                         $this->rh->tpl_construct_tplt.
                         $this->rh->tpl_postfix."/si", $contents, $matches))
-      $this->rh->debug->Error("TPL::_TemplateRead: [mooing duck alert] {{/TPL}} found!");
+   {
+      try
+      {
+      	throw new TplException("TPL::_TemplateRead: [mooing duck alert] {{/TPL}} found!");
+      }
+      catch (TplException $e)
+      {
+        $exceptionHandler = ExceptionHandler::getInstance();
+        $exceptionHandler->process($e);
+      }
+      return false;
+   }
 
 
     // B. typo correcting {{?/}} => {{/?}}

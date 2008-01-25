@@ -107,15 +107,6 @@
 
   * UseLib( $library_name, $file_name="" ) -- Подключить библиотеку из каталога /lib/
 
-  //методы завершения
-  Функции формируют стандартную сообщения в определённых ситуациях.
-  Собственно завершения работы производится на уровне обработчика.
-  zharik: У меня появились большие сомнения в необходимости этих функций в такой постановке.
-			 Имхо, их нужно либо убрать, либо изменить концепцию.
-  kuso@npj: расскажи мне об этих сомнениях?
-				я в этих методах реализовывал вызов htcron, вывод потока debug->trace
-				при определённых настройках конфигурации
-
   * End() -- штатное завершение работы
 
   * Redirect( $href ) -- редирект на эту страницу
@@ -197,15 +188,15 @@ class BasicRequestHandler extends ConfigProcessor {
 		//инициализируем базовые объекты
 		if($this->enable_debug)
 		{
-			$this->UseClass("DebugJet");
+			$this->useClass("Debug");
+			Debug::init();
 		}
 		else
 		{
-			$this->UseClass("DebugDummy");
+			$this->useClass("DebugDummy");
 		}
 		
-		$this->debug =& new Debug();
-		$this->debug->Trace("RH: creating DBAL");
+		Debug::trace("RH: creating DBAL");
 		
 		if ($this->db_al)
 		{
@@ -219,25 +210,28 @@ class BasicRequestHandler extends ConfigProcessor {
 		}
 		
 		// ВЫКЛЮЧАЕМ tpl И msg если что
-		if ($this->tpl_disable===true){
-			$this->debug->Trace("RH: creating TPL : DISABLED");
-		} else {
-			$this->debug->Trace("RH: creating TPL");
+		if ($this->tpl_disable===true)
+		{
+			Debug::trace("RH: creating TPL : DISABLED");
+		} else 
+		{
+			Debug::trace("RH: creating TPL");
 			$this->UseClass("TemplateEngine");
 			$this->tpl =& new TemplateEngine( $this );
 			$this->tpl->set( '/', $this->base_url );
 		}
-		if ($this->msg_disable===true){
-			$this->debug->Trace("RH: creating MSG : DISABLED");
-		} else {
-			$this->debug->Trace("RH: creating MSG");
+		
+		if ($this->msg_disable===true)
+		{
+			Debug::trace("RH: creating MSG : DISABLED");
+		} else 
+		{
+			Debug::trace("RH: creating MSG");
 			$this->UseClass("MessageSet");
 			$this->msg =& new MessageSet( $this );
 			$this->tpl->msg =& $this->msg;
 		}
-		$this->debug->Trace("RH: constructor done");
-
-
+		Debug::trace("RH: constructor done");
 	}
 
 	function onAfterLoadConfig()
@@ -395,7 +389,11 @@ class BasicRequestHandler extends ConfigProcessor {
 		//Запуск выбранного обработчика на исполнение.
 		ob_start();
 		$result = include( $this->handler_full );
-		if ($result===false) $this->debug->Error("Problems (file: ".__FILE__.", line: ".__LINE__."): ".ob_get_contents());
+		if ($result===false) 
+		{
+			throw new Exception("Problems (file: ".__FILE__.", line: ".__LINE__."): ".ob_get_contents());
+		}
+//		$this->debug->Error("Problems (file: ".__FILE__.", line: ".__LINE__."): ".ob_get_contents());
 		if (($result===NULL) || ($result===1)) $result = ob_get_contents(); 
 		// ===1 <--- подозрительно.
 		ob_end_clean();

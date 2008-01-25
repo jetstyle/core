@@ -113,7 +113,9 @@ class EasyForm{
   function AddFields( &$form, $config, $is_field=false ){
     
     if(!is_array($config))
-      $this->rh->debug->Error("EasyForm::AddFields -- \$config should be an array, now it is: <strong>[$config]</strong>");
+    {
+      throw new Exception("EasyForm::AddFields -- \$config should be an array, now it is: <strong>[$config]</strong>");
+    }
     
     //тут добавляем поля
     foreach($config as $name=>$rec)

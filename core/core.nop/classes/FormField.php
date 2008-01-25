@@ -119,7 +119,7 @@ class FormField
    // парсинг поля формы
    function Parse( $is_readonly=false )
    {
-     $this->rh->debug->Trace("FormField: <b>Parsing field: { ".$this->name." } </b>");
+     Debug::trace("FormField: <b>Parsing field: { ".$this->name." } </b>", 'form');
 
      if ($is_readonly || 
      		(isset($this->config["readonly"]) && $this->config["readonly"]) || 
@@ -132,7 +132,7 @@ class FormField
      else
        $result = $this->interface->Interface_Parse();
 
-     $this->rh->debug->Trace("FormField: interface parsed");
+     Debug::trace("FormField: interface parsed", 'form');
 
      return $this->wrapper->Wrapper_Parse( $result );
    }

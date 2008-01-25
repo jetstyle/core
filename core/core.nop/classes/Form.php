@@ -390,8 +390,15 @@ class Form
      foreach( $this->fields as $k=>$field )
       $dump_hash[ $field->name ] = $field->_Dump();
 
-     if ($is_error) $this->rh->debug->Error_R( $dump_hash );
-     else           $this->rh->debug->Trace_R( $dump_hash );
+     if ($is_error) 
+     {
+		throw new Exception($dump_hash);
+//     	$this->rh->debug->Error_R( $dump_hash );
+     }
+     else
+     {
+//     	$this->rh->debug->Trace_R( $dump_hash );
+     }           
    }
 
    // работа в сессии
@@ -476,9 +483,17 @@ class Form
    // вставка в БД
    function DbInsert()
    {
-      if (!$this->config["db_table"]) 
-        if ($this->config["db_ignore"]) return;
-        else $this->rh->debug->Error("[Form]: *db_table* form config option is not set.");
+      if (!$this->config["db_table"])
+     {
+       if ($this->config["db_ignore"]) 
+       {
+       	return;
+       }
+       else 
+       {
+       	 throw new Exception("[Form]: *db_table* form config option is not set.");
+       }
+     }
 
       $fields = array();
       $values = array();
@@ -503,15 +518,24 @@ class Form
    function DbUpdate( $data_id = NULL )
    {
       if (!$this->config["db_table"]) 
-        if ($this->config["db_ignore"]) return;
-        else $this->rh->debug->Error("[Form]: *db_table* form config option is not set.");
-
+      {
+        if ($this->config["db_ignore"]) 
+        {
+        	return;
+        }
+        else 
+        {
+        	throw new Exception("[Form]: *db_table* form config option is not set.");
+        }
+      }
       if ($data_id == NULL) $data_id = $this->data_id;
 
       $fields = array(); 
       $values = array();
       foreach($this->fields as $k=>$v)
+      {
         $this->fields[$k]->DbUpdate( $data_id, $fields, $values );
+      }
 
       $this->_DbAuto( $fields, $values );
 
@@ -564,8 +588,16 @@ class Form
    function Load( $data_id = NULL )  
    {
      if (!$this->config["db_table"])
-       if ($this->config["db_ignore"]) return;
-       else $this->rh->debug->Error("[Form]: *db_table* form config option is not set.");
+     {
+       if ($this->config["db_ignore"]) 
+       {
+       	return;
+       }
+       else 
+       {
+       	 throw new Exception("[Form]: *db_table* form config option is not set.");
+       }
+     }
 
      if ($data_id == NULL) $data_id = $this->data_id;
      $sql = "select * from ".$this->config["db_table"]." where ".
@@ -583,9 +615,17 @@ class Form
    // удаление из БД
    function DbDelete( $data_id = NULL )
    {
-     if (!$this->config["db_table"]) 
-       if ($this->config["db_ignore"]) return;
-       else $this->rh->debug->Error("[Form]: *db_table* form config option is not set.");
+     if (!$this->config["db_table"])
+     {
+       if ($this->config["db_ignore"]) 
+       {
+       	return;
+       }
+       else 
+       {
+       	 throw new Exception("[Form]: *db_table* form config option is not set.");
+       }
+     }
 
      if ($data_id == NULL) $data_id = $this->data_id;
      foreach($this->fields as $k=>$v)

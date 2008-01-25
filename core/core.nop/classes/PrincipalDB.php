@@ -42,7 +42,7 @@ var $ROLES_REVERT = array(
             if( !($this->user = $this->GetByLogin($login)) ){
               $this->user = $this->GetByID(0);
               $this->state = PRINCIPAL_WRONG_LOGIN;
-              $this->rh->debug->Trace("<font color='red'>Principal::Login('$login','$password') - неверный логин</font> ");
+              Debug::trace("<font color='red'>Principal::Login('$login','$password') - неверный логин</font> ", 'prp');
               return false;
             }
 
@@ -51,13 +51,13 @@ var $ROLES_REVERT = array(
             {
               $this->user = $this->GetByID(0);
               $this->state = PRINCIPAL_WRONG_PWD;
-              $this->rh->debug->Trace("<font color='red'>Principal::Login('$login','$password') - неверный пароль</font>");
+              Debug::trace("<font color='red'>Principal::Login('$login','$password') - неверный пароль</font>", 'prp');
               return false;
             }
 
 
             //сохраняем пользователя в сессии
-            $this->rh->debug->Trace("<font color='green'>Principal::Login('$login','$password') - OK</font>");
+            Debug::trace("<font color='green'>Principal::Login('$login','$password') - OK</font>", 'prp');
             $this->SessionStore();
             $this->state = PRINCIPAL_AUTH;
 
@@ -76,20 +76,19 @@ var $ROLES_REVERT = array(
   /*** изымание юзера из БД ***/
   
   function _GetBy($where){
-    $this->rh->debug->Trace("PrincipalDB::_GetBy() - [$where] ...");
+    Debug::trace("PrincipalDB::_GetBy() - [$where] ...", 'prp');
     $db =& $this->rh->db;
     $user = $db->queryOne('SELECT '.implode(",",$this->SELECT_FIELDS).' FROM '.$this->users_table.' WHERE '.$this->users_where.' AND '.$where);
 
     if( $user[$this->id_field] )
     {
-      $this->rh->debug->Trace("PrincipalDB::_GetBy() - OK");
-      $this->rh->debug->Trace_R($user,0,'PrincipalDB::user');
+      Debug::trace("PrincipalDB::_GetBy() - OK", 'prp');
       $this->USERS[ $user[$this->id_field] ] = $user;
       return $user;
     }
     else
     {
-      $this->rh->debug->Trace("PrincipalDB::_GetBy() - не найден");
+      Debug::trace("PrincipalDB::_GetBy() - не найден", 'prp');
       return false;
     }
   }
@@ -106,11 +105,11 @@ var $ROLES_REVERT = array(
   /*** работа с сессиями ***/
   
   function _Session(){
-    $this->rh->debug->Trace("PrincipalDB::_Session() - ...");
+    Debug::trace("PrincipalDB::_Session() - ...", 'prp');
     $db =& $this->rh->db;
     if( !$this->session['id'] )
     {
-      $this->rh->debug->Trace("PrincipalDB::_Session() - сессии пока нет");
+      Debug::trace("PrincipalDB::_Session() - сессии пока нет", 'prp');
       //прибиваем старые сессии - брошенные на час и больше
       $db->execute('DELETE FROM '.$this->sessions_table.' WHERE time<'.(time()-3600));
       //пытаемся загрузить сессию
@@ -119,7 +118,7 @@ var $ROLES_REVERT = array(
         //помечаем текущую сессию как используемую
 
         $db->execute('UPDATE '.$this->sessions_table.' SET time='.time()." WHERE id='".$session['id']."'");
-        $this->rh->debug->Trace("PrincipalDB::_Session() - восстановлена через куки [".$session['id']."]");
+        Debug::trace("PrincipalDB::_Session() - восстановлена через куки [".$session['id']."]", 'prp');
       }
       else
       {
@@ -135,18 +134,18 @@ var $ROLES_REVERT = array(
         $db->execute('INSERT DELAYED INTO '.$this->sessions_table.'(id,ip,time) VALUES('.$sessid.',\''.$ip.'\','.time().')');
         //грузим новую запись
         $session = $db->queryOne('SELECT * FROM '.$this->sessions_table.' WHERE id='.$sessid);
-        $this->rh->debug->Trace("PrincipalDB::_Session() - вставили новую [".$sessid."]");
+        Debug::trace("PrincipalDB::_Session() - вставили новую [".$sessid."]", 'prp');
       }
       //сохраняем sessid
       $this->session = $session;
       setcookie($this->cookie_prefix.'_sessid',$session['id'],0,"/");
     }
-    $this->rh->debug->Trace_R($this->session,0,'PrincipalDB::session');
   }
   
   //сохраняем в сессию
-  function SessionStore(){
-    $this->rh->debug->Trace("PrincipalDB::SessionStore()");
+  function SessionStore()
+  {
+    Debug::trace("PrincipalDB::SessionStore()");
     $this->_Session();
     $this->rh->db->execute('UPDATE '.$this->sessions_table." SET user_id='".$this->user[$this->id_field]."' WHERE id='".$this->session['id']."'");
     $this->session['user_id'] = $this->user['id'];
@@ -155,8 +154,7 @@ var $ROLES_REVERT = array(
   //восстанавливаем из сессии
   function SessionRestore()
   {
-      
-    $this->rh->debug->Trace("PrincipalDB::SessionRestore()");
+    Debug::trace("PrincipalDB::SessionRestore()", 'prp');
     $this->_Session();
     
     return $this->user = $this->GetById($this->session['user_id']);
@@ -164,7 +162,7 @@ var $ROLES_REVERT = array(
   
   //убиваем сессию
   function SessionDestroy(){
-    $this->rh->debug->Trace("PrincipalDB::SessionDestroy()");
+    Debug::trace("PrincipalDB::SessionDestroy()", 'prp');
     $this->rh->db->execute('DELETE FROM '.$this->sessions_table." WHERE id='".$this->session['id']."'");
     $this->session = array();
     setcookie( $this->cookie_prefix.'_sessid', "", 0, "/" );
