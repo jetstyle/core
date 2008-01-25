@@ -170,7 +170,7 @@ class ConfigProcessor {
   {
     include_once( $source );
   }
-  
+
 }
 
 ?>

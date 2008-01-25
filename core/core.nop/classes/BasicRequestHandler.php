@@ -440,6 +440,15 @@ class BasicRequestHandler extends ConfigProcessor {
 		$this->UseScript( $this->lib_dir, $library_name."/".$file_name, $level, $direction, $ext);
 	}
 
+	function getPluralizeDir($classname)
+	{
+		$this->UseClass("Inflector");
+		$words = preg_split('/[A-Z]/', $classname);
+		$last_word = substr($className, -strlen($words[count($words)-1])-1);
+		$last_word = strtolower($last_word);
+		return Inflector::pluralize($last_word);
+	}
+  
   /*
   лерндш гюбепьемхъ
 	*/
