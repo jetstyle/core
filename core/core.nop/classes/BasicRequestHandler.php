@@ -444,7 +444,7 @@ class BasicRequestHandler extends ConfigProcessor {
 	{
 		$this->UseClass("Inflector");
 		$words = preg_split('/[A-Z]/', $classname);
-		$last_word = substr($className, -strlen($words[count($words)-1])-1);
+		$last_word = substr($classname, -strlen($words[count($words)-1])-1);
 		$last_word = strtolower($last_word);
 		return Inflector::pluralize($last_word);
 	}
