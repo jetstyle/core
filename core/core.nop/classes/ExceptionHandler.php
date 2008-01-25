@@ -18,7 +18,7 @@ class ExceptionHandler
 	                                EXCEPTION_SHOW   => "show",
                                    );
 
-	private $silentDieMsg =  "К сожалению произошла ошибка.";
+	private $silentDieMsg =  "К сожалению, произошла ошибка.";
 
 	static public function getInstance()
 	{
