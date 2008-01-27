@@ -42,7 +42,7 @@ class UnitTester extends Configurable
 				$unit = $matches[1];
 				if (empty($this->tests) || in_array($unit, $this->tests))
 				{
-					$this->ctx->useClass($path.$unit);
+//					$this->ctx->useClass($path.$unit."Test");
 					$this->test->addTestFile($full_path.$entry);
 				}
 			}
@@ -71,7 +71,7 @@ class UnitTester extends Configurable
 		if (is_array($ctx->tests)) 
 			config_replace($this, 'tests', &$ctx->tests);
 
-		foreach ($ctx->DIRS as $dir)
+/*		foreach ($ctx->DIRS as $dir)
 		{
 			foreach ($this->namespaces as $namespace)
 			{
@@ -81,7 +81,7 @@ class UnitTester extends Configurable
 					$this->addTests('', $this->recursive);
 			}
 		}
-	}
+*/	}
 
 	function run()
 	{
