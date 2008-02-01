@@ -293,7 +293,14 @@ class TreeControl extends DBDataEditTree  {
 
     function getRootId()
     {
-        return $this->rh->GetVar("display_root","integer") ? $this->rh->GetVar("display_root","integer") : ($this->config->old_style ? 0 : 1)  ;
+    		$rs = $this->rh->db->queryOne("
+						SELECT id
+						FROM ".$this->config->table_name."
+						ORDER BY _level ASC, _order ASC
+					");
+			$id = $rs['id'];
+			
+        return $this->rh->GetVar("display_root","integer") ? $this->rh->GetVar("display_root","integer") : ($this->config->old_style ? 0 : $id)  ;
     }
 
 	function ToXML(){  //$iconv=true
