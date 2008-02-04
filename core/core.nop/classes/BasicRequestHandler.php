@@ -424,6 +424,12 @@ class BasicRequestHandler extends ConfigProcessor {
 		$this->UseScript("classes",$name,$level,$dr,$ext,$withSubDirs,$hideExc);
 	}
 
+	// Алиасы, специфичные для RH
+	function UseModelClass( $name, $level=0, $dr=1, $ext = 'php', $withSubDirs = false, $hideExc = false )
+	{
+		$this->UseScript("classes/models",$name,$level,$dr,$ext,$withSubDirs,$hideExc);
+	}
+
 	function UseLib( $library_name, $file_name="" )
 	{
 		// library is near core, library have no levels

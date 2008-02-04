@@ -3,7 +3,7 @@ $this->UseClass("models/DBModel");
 
 class BasicNews extends DBModel
 {
-	var $table = 'news';
+//	var $table = 'news';
 	var $fields = array('id', 
 		'title_pre', 'lead_pre', 
 		'text_pre', 
@@ -65,8 +65,9 @@ class BasicNews extends DBModel
 
 	);
 
-	var $where = '_state=0';
-	var $order = array('inserted');
+	var $where = 'news._state=0';
+	var $order = array('inserted'=>'DESC', 'id'=>'DESC');
+//	var $order = array('inserted', 'id');
 
 	function loadYearsRange($where=NULL, $limit=NULL, $offset=NULL)
 	{

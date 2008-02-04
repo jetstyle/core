@@ -37,9 +37,9 @@ class BasicContent extends DBTreeModel
 		array( 'name' => 'text_pre',		 'source' => 'eng_text_pre',		'lang' => 'en',),
 
 	);
-	var $table = 'content';
+//	var $table = 'content';
 	var $where = '_state = 0';
-	var $order = array('_level');
+	var $order = array('_level'=>'DESC'/*,'id'=>'DESC'*/);
 
 }
 

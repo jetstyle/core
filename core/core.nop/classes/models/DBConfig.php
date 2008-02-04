@@ -10,6 +10,8 @@ class DBConfig extends DBModel
 		'value',
 	); 
 
+	var $order = '';
+
 // lunatic: зачем это тут ?
 //	var $where = '1 = 1 '; 
 
