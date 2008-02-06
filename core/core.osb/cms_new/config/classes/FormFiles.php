@@ -29,7 +29,10 @@ class FormFiles extends FormSimple  {
 		FormSimple::FormSimple($config);
 		//upload
 		$this->rh->UseClass('Upload');
-		$this->upload =& new Upload( $this->rh, $config->upload_dir ? $this->rh->front_end->file_dir.$config->upload_dir."/" : $this->rh->front_end->file_dir );
+		$dir = $config->upload_dir ? $this->rh->front_end->file_dir.$config->upload_dir."/" : $this->rh->front_end->file_dir ;
+		if (!file_exists($dir))
+			@mkdir($dir ,0774, true);
+		$this->upload =& new Upload( $this->rh, $dir );
 	}
 
 	function Handle(){
