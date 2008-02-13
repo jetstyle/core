@@ -1,5 +1,11 @@
 <?php
 
+//интерфейс получения даных от объекта. используется в array_merge_ext. (с) dz
+interface DataContainer
+{
+	public function &getData();
+}
+
 /**
  * Класс DBModel - базовый класс моделек, хранящих чего-то в БД
  *
@@ -7,10 +13,11 @@
  * 
  */
 $this->useClass('models/Model');
+$this->useClass('models/ResultSet');
 $this->useClass('DBQueryParser');
 $this->useClass("Inflector");
 
-class DBModel extends Model implements IteratorAggregate, ArrayAccess, Countable
+class DBModel extends Model implements IteratorAggregate, ArrayAccess, Countable, DataContainer
 {
 	/** имя таблицы */
 	var $table=NULL;
@@ -33,9 +40,12 @@ class DBModel extends Model implements IteratorAggregate, ArrayAccess, Countable
 	 * который использовался для загрузки (load()) данных */
 	var $sql = NULL;
 	var $has_one = NULL; 
+	var $is_initialized = false;
 
 	function initialize(&$ctx, $config=NULL)
 	{
+		$this->is_initialized = true; //иногда создаем объект, а потом делаем "initialize"
+
 		$parent_status = parent::initialize($ctx, $config);
 
 		if (is_null($this->table))
@@ -57,7 +67,8 @@ class DBModel extends Model implements IteratorAggregate, ArrayAccess, Countable
 		//		array('name', 'source', alias'),
 		//		);
 
-		$this->makeHasOneConfig();
+//		$this->makeHasOneConfig();
+		$this->makeForeignsConfig();
 
 		$this->_fields_info = array();
 		$fields_info =& $this->_fields_info;
@@ -90,7 +101,6 @@ class DBModel extends Model implements IteratorAggregate, ArrayAccess, Countable
 				$fields_info[$field_name] = $v;
 			}
 		}
-
 		$fields = array();
 		foreach ($this->fields as $field_name)
 		{
@@ -118,11 +128,11 @@ class DBModel extends Model implements IteratorAggregate, ArrayAccess, Countable
 				$fields[] = $field_name;
 			}
 		}
-		//$this->_fields_info = $fields_info;
+
+		$this->_fields_info = $fields_info;
 		// теперь здесь только БД'шные поля
 		// остальные -- в $this->foreign_fields
 		$this->fields = $fields;
-		
 		return $parent_status && True;
 	}
 	function autoDefineTable()
@@ -133,7 +143,8 @@ class DBModel extends Model implements IteratorAggregate, ArrayAccess, Countable
 	function load($where=NULL, $limit=NULL, $offset=NULL)
 	{
 		$this->notify('before_load', array(&$this));
-		$this->data = $this->select($where, $limit, $offset, true);
+//		$this->data = $this->select($where, $limit, $offset, true);
+		$this->setData($this->select($where, $limit, $offset, true));
 		$this->notify('load', array(&$this));
 	}
 	function loadSql($sql)
@@ -148,6 +159,22 @@ class DBModel extends Model implements IteratorAggregate, ArrayAccess, Countable
 		$this->data = $data;
 		$this->notify('load', array(&$this));
 	}
+
+	private function setData(&$data)
+	{
+		$this->data = array();
+		if (is_array($data) || (is_object($data) && $data instanceof IteratorAggregate))
+		{
+			foreach ($data as $row)
+			{
+				$item = new ResultSet();
+				$item->init($this, $row);
+				$this->data[] = $item;
+				unset($item);
+			}
+		}
+	}
+
 	// relations
 	/**
 	 * Один-ко-многим или Многие-ко-многим
@@ -155,7 +182,7 @@ class DBModel extends Model implements IteratorAggregate, ArrayAccess, Countable
 	 * например)
 	 * $info -- инфа о field
 	 */
-	function mapHasMany(&$data, $info)
+	function mapHasMany(&$data, $info, $one = false)
 	{
 		$type = 'HasMany';
 		if (isset($info[$type]['through'])) 
@@ -168,30 +195,43 @@ class DBModel extends Model implements IteratorAggregate, ArrayAccess, Countable
 		$pk = $info[$type]['pk'];
 		$self_name = $info[$type]['name'];
 
-		$model =& $this->$field_name;
+//		$model =& $this->$field_name;
+		$model = $this->getInitModel($field_name);
 		if (!isset($model)) return;
 
 		if (1)
 		{
 
-		foreach ($data as $k=>$v)
+		if (!$one)
 		{
-			//  lucky: этот load можно вынести "за скобки", и делать выборку для всех
-			//  $pk из $data одним запросом. 
-			//  тогда цикл можно сделать по результату $model->load
-			//  lucky: done (см. ниже)
-			//
-			//  lucky: oups... так делать нельзя.
-			//		 в $model могут быть специфичные ограничения (скажем $limit)
-			//		 тогда результат будет неправильным
-			$where = ' AND '.$model->quoteField($fk) .'='.$model->quote($v[$pk]);
-			$model->load($where);
+			foreach ($data as $k=>$v)
+			{
+				//  lucky: этот load можно вынести "за скобки", и делать выборку для всех
+				//  $pk из $data одним запросом. 
+				//  тогда цикл можно сделать по результату $model->load
+				//  lucky: done (см. ниже)
+				//
+				//  lucky: oups... так делать нельзя.
+				//		 в $model могут быть специфичные ограничения (скажем $limit)
+				//		 тогда результат будет неправильным
+				$where = ' AND '.$model->quoteField($fk) .'='.$model->quote($v[$pk]);
+				$model->load($where);
 
-			$item = $model->data;
-			foreach($item as $kk=>$vv) $item[$kk][$self_name] =& $data[$k];
-			$data[$k][$field_name] = $item;
+				$item = $model->data;
+//				foreach($item as $kk=>$vv) $item[$kk][$self_name] =& $data[$k];
+				$data[$k][$field_name] = $item;
+			}
 		}
+		else
+		{
+				//дублирование (shit), надо убрать. как? (c) dz
+				$where = ' AND '.$model->quoteField($fk) .'='.$model->quote($data[$pk]);
+				$model->load($where);
 
+				$item = $model->data;
+//				foreach($item as $kk=>$vv) $item[$kk][$self_name] =& $data;
+				$data[$field_name] = $item;
+		}
 
 		}
 			/* lucky: нах. см. выше %)
@@ -248,7 +288,8 @@ class DBModel extends Model implements IteratorAggregate, ArrayAccess, Countable
 				$t_pk = $info[$type]['through']['pk'];
 				$t_fk = $info[$type]['through']['fk'];
 */
-				$f_model = $this->$field_name;
+//				$f_model = $this->$field_name;
+				$f_model = $this->getInitModel($field_name);
 
 				if ($type == "HasOne")
 				{
@@ -281,7 +322,8 @@ class DBModel extends Model implements IteratorAggregate, ArrayAccess, Countable
 		$pk = $info[$type]['pk'];
 		$self_name = $info[$type]['name'];
 
-		$model =& $this->$field_name;
+//		$model =& $this->$field_name;
+		$model = $this->getInitModel($field_name);
 		if (!isset($model)) return;
 
 
@@ -329,7 +371,7 @@ class DBModel extends Model implements IteratorAggregate, ArrayAccess, Countable
 	}
 
 
-	function mapHasOne(&$data, $info)
+	function mapHasOne(&$data, $info, $one = false)
 	{
 		$type = 'HasOne';
 		$field_name = $info['name'];
@@ -337,21 +379,34 @@ class DBModel extends Model implements IteratorAggregate, ArrayAccess, Countable
 		$pk = $info[$type]['pk'];
 		$self_name = $info[$type]['name'];
 
-		$model =& $this->$field_name;
+//		$model =& $this->$field_name;
+		$model = $this->getInitModel($field_name);
 		if (!isset($model)) return;
 
-		foreach ($data as $k=>$v)
+		if (!$one)
 		{
-			$where = ' AND '.$model->quoteField($pk) .'='.$model->quote($v[$fk]);
+			foreach ($data as $k=>$v)
+			{
+				$where = ' AND '.$model->quoteField($pk) .'='.$model->quote($v[$fk]);
+				$f_row_model = clone $model;
+				$f_row_model->load($where);
+				$item = $f_row_model;
+				if ($item)
+				{
+					$data[$k][$field_name] = $item;
+				}
+			}
+		}
+		else
+		{
+			//дублирование (shit), надо убрать. как? (c) dz
+			$where = ' AND '.$model->quoteField($pk) .'='.$model->quote($data[$fk]);
 			$f_row_model = clone $model;
-//			$model->load($where);
 			$f_row_model->load($where);
-//			$item = $model->data[0];
 			$item = $f_row_model;
 			if ($item)
 			{
-//				$item[$kk][$self_name] =& $data[$k];
-				$data[$k][$field_name] = $item;
+				$data[$field_name] = $item;
 			}
 		}
 	}
@@ -426,6 +481,7 @@ class DBModel extends Model implements IteratorAggregate, ArrayAccess, Countable
 //		echo $sql."<br /><br />";
 		
 		$this->loadForeignFields($data);
+
 		return $data;
 	}
 
@@ -439,9 +495,11 @@ class DBModel extends Model implements IteratorAggregate, ArrayAccess, Countable
 			{
 				if (in_array($info["type"], array('HasOne')) && !$this->isLazyLoadMode($v))
 				{
+					die('loadForeignFields && !lazy');
 					$f_fields = array();
 					$field_name = $info['name'];
-					$f_model = $this->$field_name;
+//					$f_model = $this->$field_name;
+					$f_model = $this->getInitModel($field_name);
 
 					foreach ($f_model->fields as $field)
 					{
@@ -468,14 +526,26 @@ class DBModel extends Model implements IteratorAggregate, ArrayAccess, Countable
 					}
 					unset($f_fields);
 				}
-				else
-				{
-					$method_name = 'map'.$info['type'];
-					$this->$method_name($data, $info);
-				}
+//				else
+//				{
+//					$method_name = 'map'.$info['type'];
+//					$this->$method_name($data, $info);
+//				}
 			}
 		}
 
+	}
+
+	//author dz. реализуем ленивую загрузку.
+	function loadForeignField($field, &$data = null)
+	{
+//			$info = $this->foreign_fields[$field];
+			$info = $this->_fields_info[$field];
+			$method_name = 'map'.$info['type'];
+			if (is_null($data))
+				$this->$method_name($this->data, $info);
+			else
+				$this->$method_name($data, $info, true);
 	}
 /*
 	//напамять
@@ -824,9 +894,17 @@ class DBModel extends Model implements IteratorAggregate, ArrayAccess, Countable
 		return $sql;
 	}
 
-	//autrho dz: подготавливаем $this->has_one. умолчания наше все.
+	//author dz: $this->has_one, $this->has_many, $this->many_to_many
+	function makeForeignsConfig()
+	{
+		$this->makeForeignConfig('has_one');
+		$this->makeForeignConfig('has_many');
+	}
+/*
+	//author dz: подготавливаем $this->has_one. умолчания наше все.
 	function makeHasOneConfig()
 	{
+		die('2');
 		if (!isset($this->has_one))
 			return ;
 
@@ -860,7 +938,7 @@ class DBModel extends Model implements IteratorAggregate, ArrayAccess, Countable
 
 			//сейчас уж точно получили поле
 			if (!$field)
-				$field = Inflector::underscore($className);
+				$field = Inflector::many_singularize_for_underscope(Inflector::underscore($className));
 
 			//получили объект модели
 			if (!isset($this->$field))
@@ -879,7 +957,7 @@ class DBModel extends Model implements IteratorAggregate, ArrayAccess, Countable
 			if (is_array($config) && isset($config["fk"]))
 				$fk = $config["fk"];
 			else
-				$fk = Inflector::underscore($className) . "_id";
+				$fk = Inflector::many_singularize_for_underscope(Inflector::underscore($className)) . "_id";
 
 			//pk
 			if (is_array($config) && isset($config["pk"]))
@@ -893,9 +971,103 @@ class DBModel extends Model implements IteratorAggregate, ArrayAccess, Countable
 			$res["name"] = $field;
 			$res["type"] = "HasOne";
 			$res["HasOne"] = array("pk" => $pk, "fk" => $fk);
+			echo "<pre>";
+			var_dump($res);
+			die('lalalala!!');
 			$this->fields_info[] = $res;
 			unset($res);
 		}
+	}
+*/
+	//type in 'has_one', 'has_many', 'many_to_many'
+	function makeForeignConfig($type)
+	{
+		if (!isset($this->$type))
+			return ;
+
+		if (!is_array($this->$type))
+			$this->$type = array($this->$type);
+
+		foreach ($this->$type as $key => $config)
+		{
+			$res = array();
+
+			$field = null;
+			//получили поле
+			if (!is_numeric($key))
+				$field = $key;
+
+			//получили имя класса
+			if ($field && isset($this->$field))
+				$className = get_class($this->$field);
+			elseif (!is_array($config))
+				$className = $config;
+			elseif (isset($config["name"]))
+			{
+				if (Inflector::camelize($config["name"]) == $config["name"])
+					$className = $config["name"];
+				else
+					Inflector::underscore($config["name"]);
+			}
+
+			//сейчас уж точно получили поле
+			if (!$field)
+			{
+				//1
+				if ($type == 'has_one')
+//					$field = Inflector::many_singularize_for_underscope(Inflector::underscore($className));
+					$field = Inflector::underscore($className);
+				else
+					$field = Inflector::underscore($className);
+			}
+
+			//получили объект модели
+			if (!isset($this->$field))
+			{
+				if (is_array($config) && isset($config["model"]) && is_obj($config["model"]))
+					$this->$field = $config["model"];
+				else
+				{
+					$this->rh->UseModelClass($className);
+					$this->$field = new $className();
+//					$this->$field->initialize($this->rh);
+				}
+			}
+
+			//fk
+			if (is_array($config) && isset($config["fk"]))
+				$fk = $config["fk"];
+			else
+			{
+				//2
+				if ($type == "has_one")
+//					$fk = Inflector::many_singularize_for_underscope(Inflector::underscore($className)) . "_id";
+					$fk = Inflector::underscore($className) . "_id";
+				elseif ($type == "has_many")
+					$fk = Inflector::many_singularize_for_underscope(Inflector::underscore(get_class($this))) . "_id";
+			}
+
+			//pk
+			if (is_array($config) && isset($config["pk"]))
+				$pk = $config["pk"];
+			//3
+			elseif ($type == "has_many" && isset($this->pk))
+				$pk = $this->pk;
+			elseif ($type == "has_one" && isset($this->$field->pk))
+				$pk = $this->$field->pk;
+			else
+				$pk = "id";
+
+			$res = array();
+			$res["name"] = $field;
+			//4
+//			$res["type"] = "HasMany";
+			$res["type"] = $camel = Inflector::camelize($type);
+			$res[$camel] = array("pk" => $pk, "fk" => $fk);
+			$this->fields_info[] = $res;
+			unset($res);
+		}
+
 	}
 
 	//author dz: проверяем ленивый ли режим загрузки foreign'а
@@ -905,6 +1077,27 @@ class DBModel extends Model implements IteratorAggregate, ArrayAccess, Countable
 			return $field_config["lazy_load"];
 		else
 			return true;
+	}
+
+	//ленивая инициализация моделей. сначала храним не инициализированную модель. при обращении инитим. по-моему супер. (c) dz
+	function getInitModel($field_name)
+	{
+		if (!isset($this->$field_name))
+			return null;
+		if (!$this->$field_name->is_initialized)
+			$this->$field_name->initialize($this->rh);
+
+		return $this->$field_name;
+	}
+
+	function isForeignField($field)
+	{
+		return in_array($field, $this->foreign_fields);
+	}
+
+	public function &getData()
+	{
+		return $this->data;
 	}
 
 	/*
@@ -922,7 +1115,16 @@ class DBModel extends Model implements IteratorAggregate, ArrayAccess, Countable
 	//implements ArrayAccess
 	public function offsetExists($key) { return isset($this->data[$key]); }
 	
-	public function offsetGet($key) { return $this->data[$key]; }
+	public function offsetGet($key)
+	{ 
+		if (isset($this->data[$key]))
+			return $this->data[$key]; 
+		elseif (in_array($key, $this->foreign_fields))
+		{
+			$this->loadForeignField($key);
+			return $this->data[$key];
+		}
+	}
 
 	public function offsetSet($key, $value) { $this->data[$key] = $value; }
 
@@ -930,7 +1132,6 @@ class DBModel extends Model implements IteratorAggregate, ArrayAccess, Countable
 
 	//implements Countable
 	public function count() { return (!empty($this->data)) ? count($this->data) : 0; }
-	
 }  
 
 ?>

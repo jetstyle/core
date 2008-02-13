@@ -82,6 +82,15 @@ class Inflector {
         return $word;
     }
 
+	function many_singularize_for_underscope($lower_case_and_underscored_word)
+	{
+		$words = explode("_", $lower_case_and_underscored_word);
+		$res = array();
+		foreach ($words as $w)
+			$res[] = self::singularize($w);
+		return implode("_", $res);
+	}
+
     /**
      *  Capitalize a word making it all lower case with first letter uppercase 
      *
