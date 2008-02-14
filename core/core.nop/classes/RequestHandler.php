@@ -130,17 +130,18 @@ class ContentPageDomain extends BasicPageDomain
 		$content =& new Content();
 		$content->initialize($this->rh);
 
-		$where = '';
+		$where = array();
 		if (isset($criteria['url']))
 		{
 			$url = $criteria['url'];
 			$possible_paths = $this->getPossiblePaths($url);
-			$where .= ' AND _path IN ('.$content->buildValues($possible_paths). ')';
+			$where[] = '_path IN ('.$content->buildValues($possible_paths). ')';
 		}
 		if (isset($criteria['class']))
 		{
-			$where .= ' AND mode='.$content->quote($this->getModeByPageClass($criteria['class']));
+			$where[] = 'mode='.$content->quote($this->getModeByPageClass($criteria['class']));
 		}
+		$where = implode(" AND ", $where);
 
 		$content->load($where);
 		$data = $content->data[0];
@@ -193,17 +194,18 @@ class ModuleContentPageDomain extends BasicPageDomain
 		$content =& new Content();
 		$content->initialize($this->rh);
 
-		$where = '';
+		$where = array();
 		if (isset($criteria['url']))
 		{
 			$url = $criteria['url'];
 			$possible_paths = $this->getPossiblePaths($url);
-			$where .= ' AND _path IN ('.$content->buildValues($possible_paths). ')';
+			$where[] = '_path IN ('.$content->buildValues($possible_paths). ')';
 		}
 		if (isset($criteria['class']))
 		{
-			$where .= ' AND mode='.$content->quote($this->getModeByPageClass($criteria['class']));
+			$where[] = 'mode='.$content->quote($this->getModeByPageClass($criteria['class']));
 		}
+		$where = implode(" AND ", $where);
 
 		$content->load($where);
 		$data = $content->data[0];

@@ -16,7 +16,7 @@ class BasicBread extends Model
 
 		// FIXME: lucky: как еще можно узнать реальный путь до страницы?
 		$where = 
-			' AND _left <= '.$m->quote($this->rh->data['_left'])
+			'_left <= '.$m->quote($this->rh->data['_left'])
 			.' AND _right >= '.$m->quote($this->rh->data['_right']);
 		$m->load($where);
 

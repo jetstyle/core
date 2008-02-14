@@ -48,6 +48,25 @@ class ResultSet implements IteratorAggregate, ArrayAccess, Countable, DataContai
 
 	//implements Countable
 	public function count() { return (!empty($this->data)) ? count($this->data) : 0; }
+
+	public function __toString() 
+	{
+		$res = "<br />object of " . get_class($this) . " values:";
+		foreach ($this->data as $k=>$item)
+		{
+			$res .= "<br />" . $k . " => ";
+			if (is_object($item))
+				$res .= $item->__toString();
+			else
+			{
+				if (strlen($item) > 255)
+					$item = substr(htmlentities($item), 0, 255) . "<font color='green'>&hellip;</font>";
+				$res .=  $item;
+			}
+		}
+
+		return $res;
+	}
 }
 
 ?>

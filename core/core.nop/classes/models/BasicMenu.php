@@ -21,16 +21,16 @@ class BasicMenu extends Model
 		if (isset($this->fields)) $m->fields = $this->fields;
 		if (isset($this->order)) $m->order = $this->order;
 		$m->initialize($this->rh);
-		if (!isset($where)) $where = '';
-		$where .= ' AND (_level >= '.$m->quote($this->level)
+		if (!isset($where)) $where = array();
+		$where[] = '(_level >= '.$m->quote($this->level)
 			. ' AND _level <'.$m->quote($this->level + $this->depth) 
 			.')';
-		if (isset($this->left)) $where .= ' AND  _left > ' . $m->quote($this->left);
-		if (isset($this->right)) $where .= ' AND  _right < ' . $m->quote($this->right);
+		if (isset($this->left)) $where[] = '_left > ' . $m->quote($this->left);
+		if (isset($this->right)) $where[] = '_right < ' . $m->quote($this->right);
 
-		$this->where = $where;
+		$this->where = implode(" AND ", $where);
 
-		$m->load($where, $limit, $offset);
+		$m->load($this->where, $limit, $offset);
 
 		$this->data = $m->data;
 	}

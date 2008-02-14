@@ -22,8 +22,12 @@ class DBTreeModel extends DBModel
 
 		if (!isset($where)) $where = '';
 		if ($use_parent)
+		{
+			if ($where)
+				$where .= ' AND ';
 			$where .= 
-				' AND ('.$ta.'._left >= parent._left AND '.$ta.'._right <= parent._right) ';
+				'('.$ta.'._left >= parent._left AND '.$ta.'._right <= parent._right) ';
+		}
 		$sql1 =  ' SELECT ' . $this->buildFieldAliases($this->fields)
 			. ' FROM '   . $this->buildTableNameAlias($this->table)
 			. ($use_parent ? ' ,' . $this->buildTableNameAlias($this->table, 'parent') : '')
