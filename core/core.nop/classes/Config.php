@@ -213,8 +213,7 @@ class ConfigLoader
 		$ctx =& config_get($self, 'ctx');
 		if (!class_exists('Spyc'))
 		{
-			$project_dir = $ctx->project_dir;
-			require_once $project_dir.'core.nop/libs/spyc/spyc.php';
+			require_once JS_CORE_DIR.'libs/spyc/spyc.php';
 		}
 		$data = Spyc::YAMLLoad($source);
 

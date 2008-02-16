@@ -137,12 +137,13 @@ class RequestHandler extends ConfigProcessor {
 	}
 
 	function EndError($str = "") {
-		if (isset ($this->debug) && is_a($this->debug, "Debug"))
-			$this->debug->Error($str);
-		else {
-			echo "<font color='red'>" . $str . "</font>";
-			$this->End();
-		}
+//		if (isset ($this->debug) && is_a($this->debug, "Debug"))
+//			$this->debug->Error($str);
+//		else {
+//			echo "<font color='red'>" . $str . "</font>";
+//			$this->End();
+//		}
+		throw new Exception("<font color='red'>" . $str . "</font>");
 	}
 
 	function & GetVar($name, $type = "") {
@@ -177,7 +178,7 @@ class RequestHandler extends ConfigProcessor {
 		$fname = $this->FindScript("handlers", $this->page);
 		if (!$fname) 
 		{
-			$this->debug->Trace("Handler <b>" . $this->page . "</b> not found, get default <b>" . $this->default_page . "</b>.");
+			Debug::trace("Handler <b>" . $this->page . "</b> not found, get default <b>" . $this->default_page . "</b>.");
 			$this->page = $this->default_page;
 			$fname = $this->FindScript("handlers", $this->page);
 		}

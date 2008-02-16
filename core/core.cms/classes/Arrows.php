@@ -56,8 +56,8 @@ class Arrows extends StateSet {
 
   function SetupSum($sum){
     if(!is_numeric($sum)){
-      $this->rh->debug->trace_r($sum);
-      $this->rh->debug->error("Arrows::SetupSum() - \$sum is not a number.");
+      Debug::trace($sum);
+      throw new Exception("Arrows::SetupSum() - \$sum is not a number.");
     }
     $this->sum = $sum;
     $this->mega_sum = ceil($this->sum/$this->outpice);

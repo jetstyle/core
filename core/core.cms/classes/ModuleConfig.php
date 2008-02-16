@@ -12,13 +12,13 @@ class ModuleConfig {
 		$this->rh =& $rh;
 		if( !$module_name )
 		{
-			$this->rh->debug->Error('ModuleConfig: не указано module_name.');
+			throw new Exception('ModuleConfig: не указано module_name.');
 		}
 		
 		//проеряем права
 		if( !$rh->prp->IsGrantedTo('do/'.$module_name ) )
 		{
-			$rh->debug->Trace_R( $rh->prp, 1, 'Principal' );
+//			Debug::trace( $rh->prp, 1, 'Principal' );
 			echo $rh->tpl->parse('access_denied.html');
 			$rh->End();
 		}
@@ -31,7 +31,7 @@ class ModuleConfig {
 	{
 		if( $what=="" )
 		{
-			$this->rh->debug->Trace('ModuleConfig::Read - $what пусто');
+			Debug::trace('ModuleConfig::Read - $what пусто');
 			return;
 		}
 		
@@ -46,7 +46,7 @@ class ModuleConfig {
 		//в конфиге д.б. инструкции типа $this->name = "Jhonson";
 
 		include( $this->rh->findScript( $this->handlers_type, $this->module_name.'/'.$what ) );
-		$this->rh->debug->Trace('ModuleConfig::Read - '.$this->module_name.'/'.$what );		
+		Debug::trace('ModuleConfig::Read - '.$this->module_name.'/'.$what );		
 
 		//проверяем
 		$this->Check($what);
@@ -61,23 +61,23 @@ class ModuleConfig {
 			
 			case 'defs':
 				if( $this->module_title=='' )
-					$this->rh->debug->Error('ModuleConfig/'.$this->module_name.'/defs: module_title пусто.');
+					throw new Exception('ModuleConfig/'.$this->module_name.'/defs: module_title пусто.');
 				if( $this->class_name=='' )
-					$this->rh->debug->Error('ModuleConfig/'.$this->module_name.'/defs: class_name пусто.');
+					throw new Exception('ModuleConfig/'.$this->module_name.'/defs: class_name пусто.');
 			break;
 			
 			case 'list':
 				if( $this->table_name=='' )
-					$this->rh->debug->Error('ModuleConfig/'.$this->module_name.'/list: table_name пусто.');
+					throw new Exception('ModuleConfig/'.$this->module_name.'/list: table_name пусто.');
 				if( count($this->SELECT_FIELDS)<=0 )
-					$this->rh->debug->Error('ModuleConfig/'.$this->module_name.'/list: SELECT_FIELDS пусто.');
+					throw new Exception('ModuleConfig/'.$this->module_name.'/list: SELECT_FIELDS пусто.');
 			break;
 			
 			case 'form':
 				if( $this->table_name=='' )
-					$this->rh->debug->Error('ModuleConfig/'.$this->module_name.'/form: table_name пусто.');
+					throw new Exception('ModuleConfig/'.$this->module_name.'/form: table_name пусто.');
 				if( count($this->SELECT_FIELDS)<=0 )
-					$this->rh->debug->Error('ModuleConfig/'.$this->module_name.'/form: SELECT_FIELDS пусто.');
+					throw new Exception('ModuleConfig/'.$this->module_name.'/form: SELECT_FIELDS пусто.');
 			break;
 		}
 	}
@@ -90,12 +90,12 @@ class ModuleConfig {
 		{
 			require_once( $this->rh->FindScript( $this->handlers_type, $this->module_name.'/'.$this->class_name ) );
 			$this->get_class_here = false;
-			$this->rh->debug->Trace('ModuleConfig::InitModule - '.$this->module_name.'/'.$this->class_name );
+			Debug::trace('ModuleConfig::InitModule - '.$this->module_name.'/'.$this->class_name );
 		}
 		else
 		{
 			$this->rh->UseClass( $this->class_name );
-			$this->rh->debug->Trace('ModuleConfig::InitModule - '.$this->module_name.'/'.$this->class_name );
+			Debug::trace('ModuleConfig::InitModule - '.$this->module_name.'/'.$this->class_name );
 		}
 		
 		//создаём объект и возвращаем ссылку

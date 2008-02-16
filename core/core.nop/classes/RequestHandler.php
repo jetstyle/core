@@ -579,33 +579,8 @@ class RequestHandler extends BasicRequestHandler
 		trigger_error($msg, E_USER_ERROR);
 	}
 
-	function debugErrorHandler($errno, $errstr, $errfile, $errline, $errcontext=NULL, $error_types=NULL)
-	{
-		if ($errno & error_reporting())
-		{
-			switch($errno)
-			{
-				default:
-					$dump = debug_backtrace();
-					array_shift($dump);
-					echo sprintf('<div><b>Error: %s</b></div>', $errstr);
-					echo sprintf('<div>%s:%s</div>', $errfile, $errline);
-					echo sprintf('<p><b>backtrace</b></p>', $errfile, $errline);
-					foreach ($dump as $k=>$v)
-					{
-						echo sprintf('<p>%s%s%s</p>', $v['class'], $v['type'], $v['function']);
-						$args = var_export($v['args'], true);
-						echo sprintf('<p>%s:%s <pre>%s</pre></p>', $v['file'], $v['line'], $args);
-						echo '<br />';
-					}
-					die();
-			}
-		}
-	}
-
 	function RequestHandler($config_path='')
 	{
-//		set_error_handler(array(&$this, 'debugErrorHandler'));
 		parent::BasicRequestHandler($config_path);
 
 		$this->useClass('models/DBConfig');

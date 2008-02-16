@@ -2,14 +2,13 @@
 //debug
 if ($this->enable_debug) 
 {
-	$this->UseClass("DebugJet"); 
+	$this->UseClass("Debug"); 
+	Debug::init();
 } 
 else 
 {
 	$this->UseClass("DebugDummy");
 }
-
-$this->debug = & new Debug();
 
 //state set
 $this->UseClass("StateSet");
@@ -19,10 +18,11 @@ $this->state = & new StateSet($this);
 $this->UseClass("Module");
 
 //libs
-$this->debug->Trace("DBAL: before");
+Debug::trace("DBAL: before");
 
 $this->UseClass("DBAL");
-$this->db = & new DBAL($this, true);
+//$this->db = & new DBAL($this, true);
+$this->db =& DBAL::getInstance( $this );
 if ($this->db_set_encoding) 
 {
 	$this->db->query("SET CHARACTER SET " . $this->db_set_encoding);

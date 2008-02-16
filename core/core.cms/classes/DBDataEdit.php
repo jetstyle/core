@@ -70,7 +70,7 @@ class DBDataEdit extends DBDataView {
 		if($this->UPDATE_FIELDS=='none') 
             return false;
 		if( !count($this->UPDATE_FIELDS) ){
-			$this->rh->debug->Error('DBDataEdit::Update - $UPDATE_FIELDS пусто, $table_name='.$this->table_name);
+			throw new Exception('DBDataEdit::Update - $UPDATE_FIELDS пусто, $table_name='.$this->table_name);
 			return false;
 		}
   	//aliaces

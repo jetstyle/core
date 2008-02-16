@@ -95,12 +95,15 @@ class ExceptionHandler
 		echo "<br /><br /><b>Backtrace</b>:<br />";
 
 		ob_start();
-		debug_print_backtrace();
+//		debug_print_backtrace();
+		print_r($exceptionObj->getTrace());
 		$_ = ob_get_contents();
 		ob_end_clean();
 		$_ = preg_replace("/\[db\_password\] \=>[^\,]+\,/", "", $_);
 		$_ = preg_replace("/\[db\_user\] \=>[^\,]+\,/", "", $_);
+		echo '<pre>';
 		echo $_;
+		echo '</pre>';
 	}
 
 }

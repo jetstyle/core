@@ -121,14 +121,14 @@ class DBDataEditTree extends DBDataEdit {
   
   function MoveUnder( $item_id, $folder_id ){
     if( $item_id==$folder_id || !$item_id )
-      $this->rh->debug->Error('DBDataTree: $item_id==$folder_id || !$item_id');
+      throw new Exception('DBDataTree: $item_id==$folder_id || !$item_id');
     //shortcuts
     $item = (object)$this->ITEMS[$item_id];
     $folder = (object)$this->ITEMS[$folder_id];
     //check, if folder is subling of item
     if( $item->_left <= $folder->_left && $item->_right >= $folder->_right ) return;
     //update this item
-    $this->rh->db->Execute("UPDATE ".$this->table_name." SET _parent='".$folder->id."' WHERE id='".$item->id."'");
+    $this->rh->db->execute("UPDATE ".$this->table_name." SET _parent='".$folder->id."' WHERE id='".$item->id."'");
     //restore tree
     $this->Load();
     $this->Restore();

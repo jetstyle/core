@@ -237,9 +237,15 @@ class TemplateEngine extends ConfigProcessor
     $_pos = strrpos($tpl_name, ".");
     $name = $_pos ? substr($name0, 0, $_pos) : $name0; 
     // имя готовое для кэширования
-    $tname = str_replace("/",$this->rh->tpl_template_sepfix, $name); 
+    $tname=preg_replace("/[^\w\x7F-\xFF\s]/", $this->rh->tpl_template_sepfix, $name);
 
     Debug::trace("Parsing: ".$tpl_name, 'tpl');
+
+$func_name = $this->rh->tpl_template_prefix.$this->_skin.
+                    $this->rh->tpl_template_sepfix.$tname.
+                 $this->rh->tpl_template_sepfix.$_name;
+
+	
 
     // ????? kuso@npj: здесь уместно проверить, нет ли у нас уже такой функции.
     //       надо бы написать тест-кейс для этого
@@ -260,7 +266,16 @@ class TemplateEngine extends ConfigProcessor
     $recompile = $recompile || !file_exists( $file_cached );
     if ($recompile)
     {
+      // hack 
+      // $name can be full path to template
+      if(file_exists($name.'.html'))
+      {
+      	$file_source = $name.'.html';
+      }
+      else
+      {
       $file_source = $this->_FindTemplate( $name );
+      }
                                                        
       Debug::trace( "source:".$file_source ."($name)", 'tpl' );
       Debug::trace( "cache to:".$file_cached. "($tname)", 'tpl' );
