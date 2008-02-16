@@ -1,0 +1,46 @@
+<ul class="mainmenu">
+	{{!for menu do=@:item}}
+</ul>
+<br class="clearer">
+
+{{!for menu_submenu do=@:subitem}}
+
+{{:subitem}}
+<ul class="submenu" id="submenu_{{*id}}" style="display: none;">
+	{{!for *childs do=@:subitem_item}}
+</ul>
+{{/:subitem}}
+
+<br class="clearer">
+
+{{:item}}
+	<li><a href="{{/}}{{*href}}" item_id="{{*id}}" onclick="return switchMenu(this);">{{*title}}</a></li>
+{{/:item}}
+
+{{:subitem_item}}
+	<li><a href="{{/}}{{*href}}">{{*title}}</a></li>
+{{/:subitem_item}}
+
+<script language="javascript">
+
+var selectedMenuId = 0;
+
+function switchMenu(el)
+{
+	if(subEl = document.getElementById('submenu_' + el.getAttribute('item_id')))
+	{
+		if(selectedMenuId)
+		{
+			document.getElementById('submenu_' + selectedMenuId).style.display = 'none';
+		}
+		subEl.style.display = '';
+		selectedMenuId = el.getAttribute('item_id');
+		return false;
+	}
+	else
+	{
+		return true;
+	}
+}
+
+</script>
