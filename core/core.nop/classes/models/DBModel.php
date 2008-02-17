@@ -832,7 +832,7 @@ class DBModel extends Model implements IteratorAggregate, ArrayAccess, Countable
 					$this->$field = $config["model"];
 				else
 				{
-					$this->rh->UseModelClass($className);
+					$this->rh->UseModel($className);
 					$this->$field = new $className();
 				}
 			}

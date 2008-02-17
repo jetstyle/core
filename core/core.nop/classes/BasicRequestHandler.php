@@ -182,10 +182,25 @@ class BasicRequestHandler extends ConfigProcessor {
 			$this->_FuckQuotes($_COOKIE);
 			$this->_FuckQuotes($_REQUEST);
 		}
-
-		$this->onAfterLoadConfig();
-
-		//инициализируем базовые объекты
+		
+		//базовые объекты фреймворка
+    //TODO: все они синглтоны
+    $this->init();
+	}
+	
+	private function init()
+	{
+    $this->initDebug();
+    $this->initDBAL();
+    $this->initTPL();
+    $this->initMessageSet();
+    
+		Debug::trace("RH: constructor done");
+	}
+	
+  private function initDebug()
+  {
+    //инициализируем базовые объекты
 		if($this->enable_debug)
 		{
 			$this->useClass("Debug");
@@ -195,9 +210,12 @@ class BasicRequestHandler extends ConfigProcessor {
 		{
 			$this->useClass("DebugDummy");
 		}
-		
+	}
+	
+	private function initDBAL()
+  {
 		Debug::trace("RH: creating DBAL");
-		
+
 		if ($this->db_al)
 		{
 			$this->UseClass("DBAL");
@@ -208,35 +226,40 @@ class BasicRequestHandler extends ConfigProcessor {
 				$this->db->Query("SET NAMES ".$this->db_set_encoding);
 			}
 		}
-		
-		// ВЫКЛЮЧАЕМ tpl И msg если что
+  }
+
+  /**
+   *  Создание шаблонизатора
+   *  TODO: всякие шаблонные переменные не должны здесь устанавливаться
+   */
+  private function initTPL()
+  {
+    // ВЫКЛЮЧАЕМ tpl И msg если что
 		if ($this->tpl_disable===true)
 		{
 			Debug::trace("RH: creating TPL : DISABLED");
-		} else 
+		} else
 		{
 			Debug::trace("RH: creating TPL");
 			$this->UseClass("TemplateEngine");
 			$this->tpl =& new TemplateEngine( $this );
 			$this->tpl->set( '/', $this->base_url );
 		}
-		
-		if ($this->msg_disable===true)
+  }
+  
+  private function initMessageSet()
+  {
+    if ($this->msg_disable===true)
 		{
 			Debug::trace("RH: creating MSG : DISABLED");
-		} else 
+		} else
 		{
 			Debug::trace("RH: creating MSG");
 			$this->UseClass("MessageSet");
 			$this->msg =& new MessageSet( $this );
 			$this->tpl->msg =& $this->msg;
 		}
-		Debug::trace("RH: constructor done");
-	}
-
-	function onAfterLoadConfig()
-	{
-	}
+  }
 
 	// функция, заполняющая поля *_domain, чтобы помогать кукам и вообще всем
 	function _SetDomains()
@@ -425,7 +448,7 @@ class BasicRequestHandler extends ConfigProcessor {
 	}
 
 	// Алиасы, специфичные для RH
-	function UseModelClass( $name, $level=0, $dr=1, $ext = 'php', $withSubDirs = false, $hideExc = false )
+	function UseModel( $name, $level=0, $dr=1, $ext = 'php', $withSubDirs = false, $hideExc = false )
 	{
 		$this->UseScript("classes/models",$name,$level,$dr,$ext,$withSubDirs,$hideExc);
 	}
@@ -495,3 +518,4 @@ class BasicRequestHandler extends ConfigProcessor {
 }
 
 ?>
+
