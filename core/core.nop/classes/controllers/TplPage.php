@@ -4,8 +4,8 @@
  *  
  */
 
-$this->UseClass("controllers/BasicSiteMapPage");
-class SiteMapPage extends BasicSiteMapPage
+$this->UseClass("controllers/BasicTplPage");
+class TplPage extends BasicTplPage
 {
 }	
 

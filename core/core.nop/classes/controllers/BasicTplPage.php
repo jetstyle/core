@@ -5,7 +5,7 @@
  */
 
 $this->UseClass("controllers/BasicPage");
-class BasicSiteMapPage extends BasicPage
+class BasicTplPage extends BasicPage
 {
 
 	function handle()
