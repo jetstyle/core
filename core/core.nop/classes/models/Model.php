@@ -70,15 +70,23 @@ class Model
 	var $observers = array();
 	var $config = array();
 
-	function Model()
+	function Model(&$rh=null)
 	{
+		//специально для Луната
+		$this->rh=& $rh;
+		if ($rh)
+			$this->initialize($rh);
 	}
 
 	function initialize(&$ctx, $config=NULL) 
 	{ 
-		$this->rh =& $ctx; 
-		if (is_array($config) && is_array($this->config)) 
-			$this->config = array_merge($this->config, $config);
+		if (!$this->rh)
+		{
+			$this->rh =& $ctx; 
+			
+			if (is_array($config) && is_array($this->config)) 
+				$this->config = array_merge($this->config, $config);
+		}
 		return True;
 	}
 
