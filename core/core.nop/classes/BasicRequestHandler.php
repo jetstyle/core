@@ -287,13 +287,6 @@ class BasicRequestHandler extends ConfigProcessor {
 			$this->UseScript('classes','RequestInfo');
 			$this->ri =& new RequestInfo($this); // kuso@npj: default RI должен быть с одним параметром имхо
 		}
-
-		//$ri возвращает информацию о строке запроса "внутри сайта"
-		//идея такая: http://www.mysite.ru/[$this->url]
-		//zharik: не уверен, что ->url удачное имя переменной. Имхо, лучше ->site_url
-		//kuso@npj: вообще говоря, мне он не нужен, я планировал пользоваться $ri->url.
-		//          можно вообще забить на $rh->*url, если тебе не кажется это зачем-то нужным.
-		//          а почему именно "site_" -- я не понял.
 		$this->url = $this->ri->GetUrl();
 
 		//инициализация принципала
@@ -305,11 +298,9 @@ class BasicRequestHandler extends ConfigProcessor {
 		$this->InitEnvironment();
 
 		//выполнение обработчика
-		$after_execute = $this->Execute();
-
-		//пост-обработка запроса и возвращение результата
-		return $this->PrepareResult( $after_execute );
-	} 
+		$this->Execute();
+		return $this->tpl->Parse( "html.html" );
+	}
 
 	//Инициализация принципала.
 	function &InitPrincipal()
@@ -327,60 +318,6 @@ class BasicRequestHandler extends ConfigProcessor {
 
 	}
 
-	//Выбор обработчика на основе строки запроса и карты обработчиков.
-	function MapHandler($url)
-	{
-		if( $url!='' )
-		{
-			$A = explode('/',rtrim($url,'/'));
-			//ищем в карте сообщений
-			//ищем самое длинное вхождение
-			$s = '';
-			foreach($A as $i=>$a)
-			{
-				$s .= ($s ? '/' : '').$a;
-				if (isset($this->handlers_map[$s]))
-				{
-					$_handler = $this->handlers_map[$s];
-					$this->handler = $_handler;
-					$j = $i+1;
-				}
-			}
-			//если нашли хоть что-то - заканчиваем
-			if ( $this->handler ) return $this->_UrlTrail($A,$j);
-			//ищем файлы на диске
-			if ( $this->url_allow_direct_handling ) 
-			{
-				$s = '';
-				foreach($A as $i=>$a)
-				{
-					$s .= ($s ? "/" : "").$a;
-					if ( $this->handler_full = $this->FindScript("handlers",$s) )
-						return $this->_UrlTrail($A,++$i);
-				}
-			}
-		}
-		//не нашли обработччик? пытаемся взять обработчик по умолчанию
-		if($this->default_handler){
-			$this->handler = $this->default_handler;
-			return true;
-		}
-		//всё же не нашли обработчик? Запускаем 404.
-		//Должен быть такой системынй обработчик
-		$this->handler = '404';
-		return true;
-	}
-	//формирует информацию об остатке адреса для обработчика
-	function _UrlTrail(&$A,$i)
-	{
-		if( $i<count($A) )
-		{
-			$this->params = array_slice($A,$i);
-			$this->params_string = implode('/',$this->params);
-		}
-		return true;
-	}
-
 	//Построение стандартного окружения.
 	function InitEnvironment()
 	{
@@ -390,67 +327,6 @@ class BasicRequestHandler extends ConfigProcessor {
 		$this->tpl->Set( "lib", $this->ri->Href($this->lib_href_part)."/" );
 		$this->tpl->SetRef( "SITE", $this);
 	}
-
-	//Запуск выбранного обработчика на исполнение.
-
-  /**
-   *  nop: DEPRECTED
-   *  этот метод все равно перегружен в RequestHandler
-   */
-	function Execute( $handler='', $type="handlers" )
-	{
-		//так какой же обработчик брать?
-		if( $handler ){
-			//пользователь мог указать явно
-			$this->handler_full = false;
-			$this->handler = $handler;
-		}
-		if( !$this->handler_full )
-			//обработчик могли взять из класс-мапа
-			$this->handler_full = $this->FindScript_($type,$this->handler);
-
-		//создаём алиасы для обработчика
-		$rh =& $this;
-		include( $this->FindScript("handlers","_enviroment") );
-
-		//Запуск выбранного обработчика на исполнение.
-		ob_start();
-		$result = include( $this->handler_full );
-		if ($result===false) 
-		{
-			throw new Exception("Problems (file: ".__FILE__.", line: ".__LINE__."): ".ob_get_contents());
-		}
-//		$this->debug->Error("Problems (file: ".__FILE__.", line: ".__LINE__."): ".ob_get_contents());
-		if (($result===NULL) || ($result===1)) $result = ob_get_contents(); 
-		// ===1 <--- подозрительно.
-		ob_end_clean();
-
-		return $result;
-	}
-
-
-  /* Пост-обработка результатов работы.
-   *
-   * nop: imho, бесполезный метод, если не надо оборачивать,
-   * то обычно делается die в контроллере
-   *
-   */
-	function PrepareResult( $after_execute )
-	{
-	 /*
-	 На этом уровне проверяем, нужно ли оборачивать результат в html.html
-	 Для дополнительной пост-обработки окружения перегружать этот метод в наследниках.
-	  */
-		$tpl =& $this->tpl;
-		if( !$tpl->Is("HTML:html") )
-		{
-			if (!$tpl->Is("HTML:body")) $tpl->Set("HTML:body", $after_execute);
-			return $tpl->Parse( "html.html" );
-		}
-		else
-			return $tpl->get("HTML:html");
-	}
-
 
 	// Алиасы, специфичные для RH
 	function UseClass( $name, $level=0, $dr=1, $ext = 'php', $withSubDirs = false, $hideExc = false )
@@ -496,11 +372,6 @@ class BasicRequestHandler extends ConfigProcessor {
 		exit;
 	}
 
-	function Error($msg)
-	{
-		echo '<hr>'.$msg;   
-	}
-
   /*
   ВНУТРЕННИЕ МЕТОДЫ
 	*/
@@ -518,4 +389,3 @@ class BasicRequestHandler extends ConfigProcessor {
 }
 
 ?>
-
