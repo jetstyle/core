@@ -393,6 +393,10 @@ class BasicRequestHandler extends ConfigProcessor {
 
 	//Запуск выбранного обработчика на исполнение.
 
+  /**
+   *  nop: DEPRECTED
+   *  этот метод все равно перегружен в RequestHandler
+   */
 	function Execute( $handler='', $type="handlers" )
 	{
 		//так какой же обработчик брать?
@@ -423,7 +427,14 @@ class BasicRequestHandler extends ConfigProcessor {
 
 		return $result;
 	}
-	//Пост-обработка результатов работы.
+
+
+  /* Пост-обработка результатов работы.
+   *
+   * nop: imho, бесполезный метод, если не надо оборачивать,
+   * то обычно делается die в контроллере
+   *
+   */
 	function PrepareResult( $after_execute )
 	{
 	 /*
@@ -474,17 +485,6 @@ class BasicRequestHandler extends ConfigProcessor {
 		$last_word = substr($classname, -strlen($words[count($words)-1])-1);
 		$last_word = strtolower($last_word);
 		return Inflector::pluralize($last_word);
-	}
-  
-  /*
-  МЕТОДЫ ЗАВЕРШЕНИЯ
-	*/
-
-	function End()
-	{
-	 /*
-	 Штатное завершение работы.
-	  */
 	}
 
 	function Redirect( $href )

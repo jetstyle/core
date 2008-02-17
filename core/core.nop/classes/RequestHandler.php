@@ -756,8 +756,6 @@ class RequestHandler extends BasicRequestHandler
 		return BasicRequestHandler::Execute($handler);
 	}
 
-	function finalize() { return $this->End(); }
-
 	/*
 	* Отработать по ключу сайтмапа
 	* TODO: А не дело ли это View ??
