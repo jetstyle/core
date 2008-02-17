@@ -803,7 +803,10 @@ unset($_z);
 	  case TE_TYPE_VARIABLE: $res = $this->_ConstructGetValueScript($param[TE_VALUE]); break;
 	  case TE_TYPE_TEMPLATE: $res = $this->_phpString('@'.$param[TE_VALUE]); break;
 	  case TE_TYPE_PHP_SCRIPT: $res = $param[TE_VALUE]; break;
-	  default: $this->rh->error('Unknown type'); break;
+	  default: 
+	  		throw new TplException("TemplateEngineCompiler::_compileParam() - undefined param type");
+
+	  break;
 	  }
 	  return $res;
   }

@@ -117,7 +117,6 @@ class DBAL_mysql
 		{
 			if (!$result = mysql_query($sql, $this->dblink))
 				throw new DbException("Mysql query \"" . $sql . "\" error");
-//				return $this->dbal->_Error( "Query failed: ".$sql." (".mysql_error().")" );
 		}
 		catch (DbException $e)
 		{

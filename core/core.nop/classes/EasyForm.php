@@ -87,7 +87,9 @@ class EasyForm{
   function CreateForm( $config )
   {
     if(!is_array($config))
-      $this->rh->Error("EasyForm::Handle -- \$config should be an array, now it is: <strong>[$config]</strong>");
+    {
+      throw new Exception("EasyForm::CreateForm -- \$config should be an array, now it is: <strong>[$config]</strong>");
+    }
     
     //инициализируем форму
     $class_name = isset($config["form"]["class"]) ? $config["form"]["class"] : "Form";
