@@ -477,7 +477,9 @@ class TemplateEngineCompiler
 
 			$result = ' $_z = '.$key .";\n";
 			$result .= '
-if(is_array($_z) && !empty($_z))
+//by dz
+if((is_array($_z) && !empty($_z)) || (is_object($_z) && $_z instanceof ArrayAccess && count($_z)>0))
+//if(is_array($_z) && !empty($_z))
 {
 	$sep = $tpl->parse('.$sep_tpl.');
 	// надо чтобы его могло и не быть
