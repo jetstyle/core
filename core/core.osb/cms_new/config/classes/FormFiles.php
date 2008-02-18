@@ -85,8 +85,30 @@ class FormFiles extends FormSimple  {
 			if(is_array($v))
 			{
 				unset($exts);
+				$file_js_resize = null;
+				$file_original = null;
+				$file_js_dim = null;
+				
 				foreach($v AS $vv)
 				{
+					if($vv['js_resize'])
+					{
+						$file_js_resize = str_replace('*', $this->id, $vv['filename']);
+						$file_js_dim = $vv['size'];
+					}
+					if($vv['original'])
+					{
+						$file_original = str_replace('*', $this->id, $vv['filename']);
+						if($file = $upload->GetFile($file_original))
+						{
+							$file_original_dim = getimagesize($file->name_full);
+						}
+						else
+						{
+							$file_original = null;
+						}
+					}
+					
 					if($vv['show'])
 					{
 						if ($vv['exts'])
@@ -166,6 +188,12 @@ class FormFiles extends FormSimple  {
                         $this->file = $file;
 					}
 				}
+				
+				if($file_js_resize && $file_original)
+				{
+					$this->item[$field_file."_js_resize"] = '<a href="'.$this->rh->cms_url.'resize_v1?ff='.$file_original.'&tf='.$file_js_resize.'&tx='.$file_js_dim[0].'&ty='.$file_js_dim[1].'&ud='.$this->config->upload_dir.'" onclick="popup_image(this.href, '.$file_original_dim[0].', '.$file_original_dim[1].'); return false;">Создать уменьшенное изображение</a>';
+				}
+				
 				if (isset($vv['exts']))
 				{
 					$exts = $vv['exts'];
