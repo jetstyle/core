@@ -96,6 +96,11 @@ class FormFiles extends FormSimple  {
 						$file_js_resize = str_replace('*', $this->id, $vv['filename']);
 						$file_js_dim = $vv['size'];
 					}
+					if($vv['js_auto'])
+					{
+						$file_js_auto = str_replace('*', $this->id, $vv['filename']);
+						$file_js_auto_dim = $vv['size'];
+					}
 					if($vv['original'])
 					{
 						$file_original = str_replace('*', $this->id, $vv['filename']);
@@ -191,7 +196,7 @@ class FormFiles extends FormSimple  {
 				
 				if($file_js_resize && $file_original)
 				{
-					$this->item[$field_file."_js_resize"] = '<a href="'.$this->rh->cms_url.'resize_v1?ff='.$file_original.'&tf='.$file_js_resize.'&tx='.$file_js_dim[0].'&ty='.$file_js_dim[1].'&ud='.$this->config->upload_dir.'" onclick="popup_image(this.href, '.$file_original_dim[0].', '.$file_original_dim[1].'); return false;">Создать уменьшенное изображение</a>';
+					$this->item[$field_file."_js_resize"] = '<a href="'.$this->rh->cms_url.'resize_v1?ff='.$file_original.'&tf='.$file_js_resize.'&tx='.$file_js_dim[0].'&ty='.$file_js_dim[1].'&ud='.$this->config->upload_dir.'&ax='.$file_js_auto_dim[0].'&ay='.$file_js_auto_dim[1].'&af='.$file_js_auto.'" onclick="popup_image(this.href, '.$file_original_dim[0].', '.$file_original_dim[1].'); return false;">Создать уменьшенное изображение</a>';
 				}
 				
 				if (isset($vv['exts']))
