@@ -894,7 +894,10 @@ class DBModel extends Model implements IteratorAggregate, ArrayAccess, Countable
 
 	function isForeignField($field)
 	{
-		return in_array($field, $this->foreign_fields);
+		if ($field)
+			return in_array($field, $this->foreign_fields);
+		else
+			return false;
 	}
 
 	public function &getData()
@@ -921,7 +924,8 @@ class DBModel extends Model implements IteratorAggregate, ArrayAccess, Countable
 	{ 
 		if (isset($this->data[$key]))
 			return $this->data[$key]; 
-		elseif (in_array($key, $this->foreign_fields))
+//		elseif (in_array($key, $this->foreign_fields))
+		elseif ($this->isForeignField($key))
 		{
 			$this->loadForeignField($key);
 			return $this->data[$key];
