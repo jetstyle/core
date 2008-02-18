@@ -42,6 +42,8 @@ class DBModel extends Model implements IteratorAggregate, ArrayAccess, Countable
 	var $has_one = NULL; 
 	var $is_initialized = false;
 
+	var $data = NULL;
+
 	function initialize(&$ctx, $config=NULL)
 	{
 		$this->is_initialized = true; //иногда создаем объект, а потом делаем "initialize"
@@ -164,9 +166,10 @@ class DBModel extends Model implements IteratorAggregate, ArrayAccess, Countable
 
 	private function setData(&$data)
 	{
-		$this->data = array();
+
 		if (is_array($data) || (is_object($data) && $data instanceof IteratorAggregate))
 		{
+			$this->data = array();
 			foreach ($data as $row)
 			{
 				$item = new ResultSet();
@@ -175,6 +178,8 @@ class DBModel extends Model implements IteratorAggregate, ArrayAccess, Countable
 				unset($item);
 			}
 		}
+		else
+			$this->data = null;
 	}
 
 	// relations
@@ -911,6 +916,8 @@ class DBModel extends Model implements IteratorAggregate, ArrayAccess, Countable
 	 *
 	 */
 
+	function haveData() { return is_array($this->data); }
+
 	//implements IteratorAggregate
 	public function getIterator() 
 	{
@@ -918,10 +925,12 @@ class DBModel extends Model implements IteratorAggregate, ArrayAccess, Countable
 	}
 
 	//implements ArrayAccess
-	public function offsetExists($key) { return isset($this->data[$key]); }
+	public function offsetExists($key) { return $this->haveData() && isset($this->data[$key]); }
 	
 	public function offsetGet($key)
 	{ 
+		if (!$this->haveData())
+			return null;
 		if (isset($this->data[$key]))
 			return $this->data[$key]; 
 //		elseif (in_array($key, $this->foreign_fields))
@@ -937,21 +946,24 @@ class DBModel extends Model implements IteratorAggregate, ArrayAccess, Countable
 	public function offsetUnset($key) { unset($this->data[$key]); }
 
 	//implements Countable
-	public function count() { return (!empty($this->data)) ? count($this->data) : 0; }
+	public function count() { return ($this->haveData() && !empty($this->data)) ? count($this->data) : 0; }
 
 	public function __toString() 
 	{
 		$res = "<br />object of " . get_class($this) . " values:";
-		foreach ($this->data as $k=>$item)
+		if ($this->haveData())
 		{
-			$res .= "<br />" . $k . " => ";
-			if (is_object($item))
-				$res .= $item->__toString();
-			else
+			foreach ($this->data as $k=>$item)
 			{
-				if (strlen($item) > 255)
-					$item = substr(htmlentities($item), 0, 255) . "<font color='green'>&hellip;</font>";
-				$res .= $item;
+				$res .= "<br />" . $k . " => ";
+				if (is_object($item))
+					$res .= $item->__toString();
+				else
+				{
+					if (strlen($item) > 255)
+						$item = substr(htmlentities($item), 0, 255) . "<font color='green'>&hellip;</font>";
+					$res .= $item;
+				}
 			}
 		}
 
