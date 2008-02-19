@@ -4,7 +4,7 @@ $rh =& $this->rh;
 $rh->UseClass('Upload');
 $upload =& new Upload($rh, $rh->front_end->file_dir);
 
-	$rh->tpl->Assign('/node', $rh->url.'jetfiles');
+	$rh->tpl->set('/node', $rh->url.'jetfiles');
 
 	$rubric = $rh->getVar('rubric', 'integer');
 
@@ -20,7 +20,7 @@ $upload =& new Upload($rh, $rh->front_end->file_dir);
 		{
 			$options .= '<option value="'.$r['id'].'" '.($r['id'] == $rubric ? 'selected="selected"' : "").' >'.$r['title'].'</option>';
 		}
-		$rh->tpl->Assign('rubrics', $options);
+		$rh->tpl->set('rubrics', $options);
 	}
 
 	$res = $rh->db->query("
@@ -75,7 +75,7 @@ $upload =& new Upload($rh, $rh->front_end->file_dir);
 						'size' => $file->size,
 						'ext' => $file->ext,
 					);
-					$rh->tpl->AssignRef('*', $data);
+					$rh->tpl->setRef('*', $data);
 					$rh->tpl->parse('jetfiles.html:item', '_data', 1);
 				}
 			}

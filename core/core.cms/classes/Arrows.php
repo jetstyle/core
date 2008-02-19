@@ -95,7 +95,7 @@ class Arrows extends StateSet {
     
     //down href
     if($mega_start>0){
-      $tpl->Assign( '_href', $this->href_prefix.$this->State()."&".$this->prefix."p=".($mega_start*$this->mega_outpice - 1) );
+      $tpl->set( '_href', $this->href_prefix.$this->State()."&".$this->prefix."p=".($mega_start*$this->mega_outpice - 1) );
       $tpl->Parse( $template.':down', '_down' );
     }else $tpl->Parse( $template.':down_plain', '_down' );
     
@@ -109,9 +109,9 @@ class Arrows extends StateSet {
       $b = $a + $this->outpice - 1; 
       $tstr = ($this->linksall_mode)? $tmp+1 : $a."-".$b;           
       //parse
-      $tpl->Assign( '_string', $this->linksall_mode==1 ? $tmp+1 : $a.'-'.$b );
+      $tpl->set( '_string', $this->linksall_mode==1 ? $tmp+1 : $a.'-'.$b );
       if($mega_start*$this->mega_outpice + $i != $this->start){
-        $tpl->Assign( '_href', $this->href_prefix.$this->State().$this->prefix.'p='.($mega_start*$this->mega_outpice+$i).$this->href_suffix );
+        $tpl->set( '_href', $this->href_prefix.$this->State().$this->prefix.'p='.($mega_start*$this->mega_outpice+$i).$this->href_suffix );
         $tpl->Parse( $template_item, '_items', true );
       }else $tpl->Parse( $template_item.'_sel', '_items', true );
       //separator
@@ -121,7 +121,7 @@ class Arrows extends StateSet {
     
     //up href
     if( ($mega_start+1)*$this->mega_outpice<$this->mega_sum ){
-      $tpl->Assign( '_href', $this->href_prefix.$this->State()."&".$this->prefix."p=".(($mega_start + 1)*$this->mega_outpice) );
+      $tpl->set( '_href', $this->href_prefix.$this->State()."&".$this->prefix."p=".(($mega_start + 1)*$this->mega_outpice) );
       $tpl->Parse( $template.':up', '_up' );
     }else $tpl->Parse( $template.':up_plain', '_up' );
     

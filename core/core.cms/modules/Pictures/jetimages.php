@@ -7,7 +7,7 @@
     $upload =& new Upload($rh, $rh->front_end->file_dir."pictures/");
 
 
-	$rh->tpl->Assign('/node', $rh->url.'jetimages');
+	$rh->tpl->set('/node', $rh->url.'jetimages');
 
 	$rubric = $rh->getVar('rubric', 'integer');
 
@@ -23,7 +23,7 @@
 		{
 			$options .= '<option value="'.$r['id'].'" '.($r['id'] == $rubric ? 'selected="selected"' : "").' >'.$r['title'].'</option>';
 		}
-		$rh->tpl->Assign('rubrics', $options);
+		$rh->tpl->set('rubrics', $options);
 	}
 
 	$res = $rh->db->query("
@@ -89,7 +89,7 @@
 							'width_small' => $A1[0],
 							'height_small' => $A1[1],
 						);
-						$rh->tpl->AssignRef('*', $data);
+						$rh->tpl->setRef('*', $data);
 						$rh->tpl->parse('jetimages.html:item', '_data', 1);
 					}
                     else

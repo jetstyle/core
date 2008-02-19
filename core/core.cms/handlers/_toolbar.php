@@ -15,7 +15,7 @@ if( $rh->render_toolbar )
       $tpl->parse( 'blocks/menu.html:auth', 'user_part' );
     }else{
       //форма авторизации
-      $tpl->assign('POST_STATE',$state->State(1));
+      $tpl->set('POST_STATE',$state->State(1));
       $tpl->parse( 'blocks/menu.html:not_auth', 'user_part' );
     }
 	

@@ -7,7 +7,7 @@ if( !$prp->IsAuth() )
 	$rh->redirect( $rh->url.'login' );
 }
 
-$rh->tpl->Assign('url_rel', $rh->url_rel);
+$rh->tpl->set('url_rel', $rh->url_rel);
 $rh->cm_mode = intval($rh->getVar('cm'));
 
 $rh->modes['news'] = 1;

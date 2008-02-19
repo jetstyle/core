@@ -27,14 +27,7 @@
   $module =& $config->InitModule();
   $module->store_to = "html_body";
   $module->Handle();
-  //одна форма? оборачиваем в popup.html
- /*
-  if( $mode=="form" )
-  {
-    $tpl->parse( "popup.html", "html_body" );
-  }
-  */
-//  echo $tpl->Assigned( $module->store_to );
+
   
   $tpl->set('page_title',$config->module_title);
   

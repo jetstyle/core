@@ -58,7 +58,7 @@ class Logs {
 		$tpl =& $this->rh->tpl;
 		$class_id = $this->PutClass( $class_title, false );
 		if(!$class_id) return '';
-		$tpl->Assign( '_logs_href', $this->rh->url.'do/Logs?class_id='.$class_id.'&item_id='.$item_id.'&hide_toolbar=1' );
+		$tpl->set( '_logs_href', $this->rh->url.'do/Logs?class_id='.$class_id.'&item_id='.$item_id.'&hide_toolbar=1' );
 		return $tpl->Parse( $this->template, $store_to, $append );
 	}
 	
