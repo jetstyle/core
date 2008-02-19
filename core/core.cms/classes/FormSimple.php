@@ -285,7 +285,6 @@ class FormSimple extends DBDataEdit  {
           $field_pre = $field.'_pre';
           //пререндеринг содержимого поля
           $var = isset($GLOBALS1[ $this->prefix.$field_pre.$suffix ]) ? $GLOBALS1[ $this->prefix.$field_pre.$suffix ] : $GLOBALS1[ $this->prefix.$field.$suffix ];
-          
           $GLOBALS1[ $this->prefix.$field_pre.$suffix ] = $tpl->Action( $filter, $var, false, -1);
           $this->item[$field_pre] = $GLOBALS1[ $this->prefix.$field_pre.$suffix ];
           //добавляем поле в список для сохранения
@@ -293,7 +292,6 @@ class FormSimple extends DBDataEdit  {
         }
       }
     }
-    
     //supertag
     if( $this->config->supertag ){
       if( is_array($this->config->supertag) ){

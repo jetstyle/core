@@ -7,5 +7,5 @@ if(!isset($rh->typo))
 	$rh->typo->settings["dashwbr"] = true;
 }	
 
-return $rh->typo->correct( $params['_'], false );
+return $rh->typo->correct( $params, false );
 ?>

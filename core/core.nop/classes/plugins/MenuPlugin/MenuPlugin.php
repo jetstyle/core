@@ -1,56 +1,161 @@
 <?php
-
 $this->useClass('controllers/Plugin');
 
 class MenuPlugin extends RenderablePlugin
 {
-	var $config_vars = array('template', 'store_to', 'level', 'depth', 'view', 'mode');
+	var $config_vars = array (
+		'template',
+		'store_to',
+		'level',
+		'depth',
+		'view',
+		'mode'
+	);
 	var $view = 'main';
 	var $mode = 'normal';
 	var $level = 1;
 	var $depth = 2;
+	var $parents = array ();
 
 	function getParentNodeByLevel($level)
 	{
 		$data = $this->rh->page->config;
-		$sql = 'SELECT _path, _level, _left, _right FROM '. $this->rh->db_prefix .'content 
-				WHERE _level = ' .$level 
-				. ' AND ( '
-				. '			(_left <= '.$data['_left'] . ' AND _right >= '.$data['_right'] .')'
-				#. '	   OR (_right >= '.$data['_right'] .  ' AND _level = ' .$level .'))';
-				. ')';
+		$sql = 'SELECT id, _path, _level, _left, _right FROM ' . $this->rh->db_prefix . 'content 
+					WHERE _state = 0 AND _level = ' . $level . ' AND ( ' . '			(_left <= ' . $data['_left'] . ' AND _right >= ' . $data['_right'] . ')' . ')';
 		$rs = $this->rh->db->queryOne($sql);
 		return $rs;
 	}
 
-	function initialize(&$ctx, $config=NULL)
+	function getParentNodes()
 	{
-		parent::initialize($ctx, $config);
+		if (!empty ($this->parents))
+		{
+			return $this->parents;
+		}
+
+		$data = $this->rh->page->config;
+
+		if (!$data['id'])
+			return;
+
+		$sql = 'SELECT id FROM ' . $this->rh->db_prefix . 'content 
+					WHERE _state = 0 AND _left < ' . $data['_left'] . ' AND _right >= ' . $data['_right'] . '';
+		$rs = $this->rh->db->query($sql);
+		if (is_array($rs))
+		{
+			foreach ($rs AS $r)
+			{
+				$this->parents[$r['id']] = 1;
+			}
+		}
+
+		return $this->parents;
+	}
+
+	function initialize(& $ctx, $config = NULL)
+	{
+		parent :: initialize($ctx, $config);
 		/*
 		 * загрузим модель меню
 		 * с условием на where
 		 */
 		$this->rh->UseClass("models/Menu");
-		$menu =& new Menu();
-		switch($this->mode)
+		$menu = & new Menu();
+
+		$current = $this->rh->page->config;
+		$parents = $this->getParentNodes();
+
+		switch ($this->mode)
 		{
-		case 'submenu':
-			$parent = $this->getParentNodeByLevel($this->level - 1);
-			$menu->level = $this->level;
-			$menu->depth = $this->depth;
-			$menu->left = $parent['_left'];
-			$menu->right = $parent['_right'];
-			$menu->initialize($this->rh);
-			$menu->load();
+			case 'submenu' :
+				
+				$parent = $this->getParentNodeByLevel($this->level - 1);
+				if (!$parent['id'])
+				{
+					$this->models['menu']->data = array ();
+					return;
+				}
+				$menu->level = $this->level;
+				$menu->depth = $this->depth;
+				$menu->left = $parent['_left'];
+				$menu->right = $parent['_right'];
+				$menu->initialize($this->rh);
+				
+//				$menu->load(' AND hide_from_menu = 0');
+				$menu->load();
+				
 			break;
-		default:
-			$menu->level = $this->level;
-			$menu->depth = $this->depth;
-			$menu->initialize($this->rh);
-			$menu->load();
+			
+			default :
+			
+				$menu->level = $this->level;
+				$menu->depth = $this->depth;
+				$menu->initialize($this->rh);
+//				$menu->load(' AND hide_from_menu = 0');
+				$menu->load();
 		}
 
-		$this->models['menu'] =& $menu;
+		$this->rh->useClass('Link');
+		$link = new Link($this->rh);
+		$this->items = array ();
+
+		if (is_array($menu->data))
+		{
+			foreach ($menu->data AS $i => $r)
+			{
+				if ($i == 0)
+				{
+					$root_id = $r['_parent'];
+				}
+
+				if ($r['_level'] == 2)
+				{
+					$last_id = $r['id'];
+				}
+
+				if ($parents[$r['id']])
+				{
+					$r['selected'] = 1;
+				}
+				elseif ($r['id'] == $current['id'])
+				{
+					$r['current'] = 1;
+				}
+
+				if ($r['mode'] == 'link')
+				{
+					$r['is_link'] = true;
+					if ($r['link_direct'])
+					{
+						$r['link'] = $link->formatLink($r['link']);
+					}
+				}
+				
+				$this->childs[$r['_parent']][] = $r['id'];
+				$this->items[$r['id']] = $r;
+			}
+		}
+		$this->items[$last_id]['last'] = 1;
+
+		$menu->data = $this->prepare($root_id);
+
+		unset ($this->items, $this->link, $this->childs);
+
+		$this->models['menu'] = & $menu;
+	}
+
+	function prepare($id)
+	{
+		$childs = array ();
+		if (is_array($this->childs[$id]))
+		{
+			foreach ($this->childs[$id] AS $r)
+			{
+				$this->items[$r]['childs'] = $this->prepare($r);
+				$childs[] = $this->items[$r];
+			}
+		}
+		return $childs;
 	}
 
 	function addItem($item)
@@ -58,32 +163,40 @@ class MenuPlugin extends RenderablePlugin
 		$this->models['menu']->data[] = $item;
 	}
 
-	function rend(&$ctx)
+	function rend(& $ctx)
 	{
-		//вывод блока меню
-		switch($this->view)
-		{
-		case 'tree':
-			$this->rh->UseClass("plugins/MenuPlugin/MenuView");
-			$v =& new MenuTreeView();
-			$v->initialize($this->rh);
-			break;
-		case 'list':
-			$this->rh->UseClass("plugins/MenuPlugin/MenuView");
-			$v =& new MenuListView();
-			$v->initialize($this->rh);
-			break;
-		default:
-			$this->rh->UseClass("plugins/MenuPlugin/MenuView");
-			$v =& new MenuView();
-			$v->initialize($this->rh);
-		}
-		$v->store_to = $this->store_to;
-		$v->template = $this->template;
-		$v->addModel($this->models['menu'], 'menu');
-		$v->handle();
+		$this->rh->tpl->set($this->store_to, $this->models['menu']->data);
 	}
-
+	
+	function &getData()
+	{
+		return $this->models['menu']->data;
+	}
+	
+	function &findElementById($id)
+	{
+		$item = &$this->_findElementById($this->models['menu']->data, $id);
+		return $item;
+	}
+	
+	function &_findElementById(&$data, $id)
+	{
+		if(is_array($data))
+		{
+			foreach($data AS &$d)
+			if($d['id'] == $id)
+			{
+				return $d;
+			}
+			elseif(is_array($d['childs']))
+			{
+				if($item = &$this->_findElementById($d['childs'], $id))
+				{
+					return $item;
+				}
+			}
+		}
+		return false;
+	}
 }
-
 ?>

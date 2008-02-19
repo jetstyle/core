@@ -26,6 +26,7 @@ class BreadPlugin extends RenderablePlugin
 
 	function addItem($path, $title, $hide = 0)
 	{
+//		$title = $this->smartTrim($title);
 		$this->models['bread']->addItem(array('href'=>$path, 'title_short'=>$title, 'hide' => $hide));
 	}
 
@@ -39,6 +40,17 @@ class BreadPlugin extends RenderablePlugin
 	{
 		$this->models['bread']->data[count($this->models['bread']->data) - 1]['last'] = true;
 		$this->rh->tpl->set($this->store_to, $this->models['bread']->data);
+	}
+	
+	function smartTrim($txt)
+	{
+		$txt = trim($txt);
+		if(strlen($txt) <= 35)
+		{
+			return $txt;
+		}
+		$_txt = substr($txt, 0, 35);
+		return trim(substr($_txt, 0, strrpos($_txt, ' '))).'...';
 	}
 
 }
