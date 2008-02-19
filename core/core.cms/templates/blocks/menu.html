@@ -1,46 +1,45 @@
-<ul class="mainmenu">
-	{{!for menu do=@:item}}
-</ul>
-<br class="clearer">
+{{?show_toolbar}}
+<div class="cms-toolbar"><img class="block" src="{{images}}z.gif" width="1" height="4" align="top" alt="" /></div>
+
+<table cellspacing="0" cellpadding="0" class="cms-toolbar w100">
+<tr>
+  <td nowrap="nowrap">{{user_part}}</td>
+  <td class="sep-"><img class="block" src="{{images}}seporate.gif" width="2" height="20" align="top" alt="" /></td>
+  <td>Меню:</td>
+  	{{!for menu do=@:item}}
+  </td>
+  <td class="w100">{{@dummy.html}}</td>
+  <td class="sep-"><img class="block" src="{{images}}seporate.gif" width="2" height="20" align="top" alt="" /></td>
+  <td nowrap="nowrap">
+    <a href="{{/}}start">основное меню</a> | 
+    <a href="{{fe_/}}">на сайт</a> | 
+    <a href="{{/}}login?logout=1" onclick="return confirm('Вы действительно желаете выйти?');">выход</a>
+  </td>
+</tr>
+</table>
 
 {{!for menu_submenu do=@:subitem}}
 
-{{:subitem}}
-<ul class="submenu" id="submenu_{{*id}}" style="display: none;">
-	{{!for *childs do=@:subitem_item}}
-</ul>
-{{/:subitem}}
-
-{{:subitem_sep}}{{/:subitem_sep}}
-
-<br class="clearer">
-
-{{:item}}
-	<li><a href="{{/}}{{*href}}" item_id="{{*id}}" onclick="return switchMenu(this);">{{*title}}</a></li>
-{{/:item}}
-
-{{:item_sep}}{{/:item_sep}}
-
-{{:subitem_item}}
-	<li><a href="{{/}}{{*href}}">{{*title}}</a></li>
-{{/:subitem_item}}
-
-{{:subitem_item_sep}}{{/:subitem_item_sep}}
-
 <script language="javascript">
 
-var selectedMenuId = 0;
+var selectedNode = {{?menu_selected}}document.getElementById('menu_selected_{{menu_selected}}'){{?:}}null{{/?}};
 
 function switchMenu(el)
 {
 	if(subEl = document.getElementById('submenu_' + el.getAttribute('item_id')))
 	{
-		if(selectedMenuId)
+		if(selectedNode)
 		{
-			document.getElementById('submenu_' + selectedMenuId).style.display = 'none';
+			var old_el 
+			if(old_el = document.getElementById('submenu_' + selectedNode.getAttribute('item_id')))
+			{
+				old_el.style.display = 'none';
+			}
+			selectedNode.parentNode.className = 'item-';
 		}
 		subEl.style.display = '';
-		selectedMenuId = el.getAttribute('item_id');
+		el.parentNode.className = 'selected-';
+		selectedNode = el;
 		return false;
 	}
 	else
@@ -50,3 +49,71 @@ function switchMenu(el)
 }
 
 </script>
+
+
+{{/?}}
+
+
+{{:subitem}}
+<div class="cms-toolbar-sub" id="submenu_{{*id}}" {{?!*selected}}style="display: none;"{{/?}}>
+	{{!for *childs do=@:subitem_item}}
+</div>
+{{/:subitem}}
+
+{{:subitem_sep}}{{/:subitem_sep}}
+
+<br class="clearer">
+
+{{:item *selected}}
+	<td class="selected-" nowrap="nowrap"><a href="{{/}}{{*href}}" id="menu_selected_{{*id}}" item_id="{{*id}}" onclick="return switchMenu(this);">{{*title}}</a></td>
+{{/:item}}
+
+{{:item}}
+	<td class="item-" nowrap="nowrap"><a href="{{/}}{{*href}}" item_id="{{*id}}" onclick="return switchMenu(this);">{{*title}}</a></td>
+{{/:item}}
+
+{{:item_sep}}
+	<td class="seporate-" nowrap="nowrap">|</td>
+{{/:item_sep}}
+
+{{:subitem_item *selected}}
+	<h1>{{*title}}</h1>
+{{/:subitem_item}}
+
+{{:subitem_item}}
+	<a href="{{/}}{{*href}}">{{*title}}</a>
+{{/:subitem_item}}
+
+{{:subitem_item_sep}}&nbsp;|&nbsp;{{/:subitem_item_sep}}
+
+{{:not_auth}}
+<form action='{{/}}' method='post'>
+<input type='hidden' name='page' value='login'>
+<table cellspacing="0" cellpadding="0" class="cms-login w100">
+  <tr>
+    <td class="middle">
+      <table cellspacing="0" cellpadding="2" align="center">
+        <tr>
+          <td class="text-">Имя пользователя:</td>
+          <td><input type='text' name='login'></td>
+        </tr>
+        <tr>
+          <td class="text-">Пароль:</td>
+          <td><input type='password' name='password'></td>
+        </tr>
+        <tr>
+          <td>{{@dummy.html}}</td>
+          <td>
+            <input type="submit" value="войти">
+          </td>
+        </tr>
+      </table>
+    </td>
+  </tr>
+</table>
+</form>
+{{/:not_auth}}
+
+{{:auth}}
+Вы &mdash; <strong>{{login}}</strong>: {{role}}
+{{/:auth}}
