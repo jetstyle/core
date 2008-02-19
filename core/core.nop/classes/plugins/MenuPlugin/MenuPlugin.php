@@ -103,16 +103,6 @@ class MenuPlugin extends RenderablePlugin
 		{
 			foreach ($menu->data AS $i => $r)
 			{
-				if ($i == 0)
-				{
-					$root_id = $r['_parent'];
-				}
-
-				if ($r['_level'] == 2)
-				{
-					$last_id = $r['id'];
-				}
-
 				if ($parents[$r['id']])
 				{
 					$r['selected'] = 1;
@@ -135,9 +125,8 @@ class MenuPlugin extends RenderablePlugin
 				$this->items[$r['id']] = $r;
 			}
 		}
-		$this->items[$last_id]['last'] = 1;
-
-		$menu->data = $this->prepare($root_id);
+		
+		$menu->data = $this->prepare(key($this->childs));
 
 		unset ($this->items, $this->link, $this->childs);
 
@@ -155,6 +144,8 @@ class MenuPlugin extends RenderablePlugin
 				$childs[] = $this->items[$r];
 			}
 		}
+		$childs[0]['is_first'] = true;
+		$childs[count($childs) - 1]['is_last'] = true;
 		return $childs;
 	}
 
