@@ -60,6 +60,7 @@ class Debug
 	 * Добавление записи в лог
 	 *
 	 * @param string $what
+	 * @param string $category категория записи
 	 * @param string $label отметка, поставленная функцией mark(), от нее будет считаться время выполнения
 	 */
 	static public function trace( $what, $category = null, $label = null)
