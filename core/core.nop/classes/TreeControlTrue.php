@@ -311,7 +311,7 @@ class TreeControlTrue {
 			$_title = $_title ? $_title : 'node_'.$node->id ;
 			//$_title = iconv("CP1251","UTF-8", $_title);
 			
-			$str .= str_repeat(" ",$node->_level)."<item text=\"".$_title."\" ".$action_src." id=\"".$node->id."\" db_selected=\"".( $node->id==$this->id ? "1" : "" )."\" db_state=\"".$node->_state."\" ".(($is_folder)?">":"/>")."\n";
+			$str .= str_repeat("  ",$node->_level)."<item text=\"".$_title."\" ".$action_src." id=\"".$node->id."\" db_selected=\"".( $node->id==$this->id ? "1" : "" )."\" db_state=\"".$node->_state."\" ".(($is_folder)?">":"/>")."\n";
 			//$str .= str_repeat(" ",$node->_level)."<tree text=\"text\" ".(($is_folder)?">":"/>")."\n";
 			//
 			//put children
@@ -393,8 +393,8 @@ class TreeControlTrue {
 		$node['_right'] = $right;
 
 		//store in DB
-		//    print("UPDATE ".$this->table_name." SET _level='".$node['_level']."', _left='".$node['_left']."', _right='".$node['_right']."' WHERE id='".$node['id']."'<br>\n");
-		$this->rh->db->query("UPDATE ".$this->table_name." SET _level='".$node['_level']."', _left='".$node['_left']."', _right='".$node['_right']."' WHERE id='".$node['id']."'");
+		$sql = "UPDATE ".$this->table_name." SET _level='".$node['_level']."', _left='".$node['_left']."', _right='".$node['_right']."' WHERE id='".$node['id']."'";
+		$this->rh->db->query($sql);
 
 		// return the right value of this node + 1
 		return $right + 1;
@@ -410,14 +410,14 @@ class TreeControlTrue {
 
   		$node = array();
 
-    $title = iconv("UTF-8", "CP1251", $rh->ri->get('newtitle'));
+    	$title = iconv("UTF-8", "CP1251", $rh->ri->get('newtitle'));
 		$node['title'] = $title;
 		if(strlen($node['title']) == 0)
 		{
 			$node['title'] = 'new';
 		}
     
-    $pre = $this->rh->tpl->action('typografica', $title);
+    	$pre = $this->rh->tpl->action('typografica', $title);
  		$node['title_pre'] = $pre;
 		$node['parent'] = intval($rh->ri->get('parent'));
 		//$node['supertag'] = $translit->TranslateLink($node['title'], 100);
