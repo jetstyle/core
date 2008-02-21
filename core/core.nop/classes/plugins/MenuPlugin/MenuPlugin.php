@@ -126,8 +126,10 @@ class MenuPlugin extends RenderablePlugin
 			}
 		}
 		
-		$menu->data = $this->prepare(key($this->childs));
-
+		if(is_array($this->childs))
+		{
+			$menu->data = $this->prepare(key($this->childs));
+		}
 		unset ($this->items, $this->link, $this->childs);
 
 		$this->models['menu'] = & $menu;
