@@ -53,15 +53,6 @@ class ListNews extends ListSimple  {
     $rh =& $this->rh;
     $tpl =& $rh->tpl;
     
-    //ссылка на новое
-    if( !$this->config->HIDE_CONTROLS['add_new'] ){
-	    $this->_add_new_href = $this->url.'?'.$this->state->State(0,array( $this->id_get_var ));
-	    $tpl->Assign( '_add_new_href', $this->_add_new_href );
-	    $tpl->Assign( '_add_new_title', $this->config->add_new_title ? $this->config->add_new_title : 'создать новый элемент' );
-	
-	    $tpl->Parse( $this->template_new, '__add_new' );
-    }
-    
     //assign some
     $tpl->Assign('prefix',$this->prefix);
     $tpl->Assign( 'POST_STATE', $this->state->State(1) );
@@ -102,8 +93,18 @@ class ListNews extends ListSimple  {
     $this->_href_template .= $this->arrows->State();
     
     //ссылка на новое
-    $tpl->Assign( '_add_new_href', $this->_href_template );
-    $tpl->Parse( $this->template_new, '__add_new' );
+//    
+//    $tpl->Parse( $this->template_new, '__add_new' );
+    
+    //ссылка на новое
+    if( !$this->config->HIDE_CONTROLS['add_new'] ){
+	    $this->_add_new_href = $this->url.'?'.$this->state->State(0,array( $this->id_get_var ));
+	    $tpl->Assign( '_add_new_href', $this->_add_new_href );
+//	    $tpl->Assign( '_add_new_href', $this->_href_template );
+	    $tpl->Assign( '_add_new_title', $this->config->add_new_title ? $this->config->add_new_title : 'создать новый элемент' );
+	
+	    $tpl->Parse( $this->template_new, '__add_new' );
+    }
     
     //по этапу
     ListSimple::Handle();
