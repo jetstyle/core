@@ -72,8 +72,8 @@ if (isset($class))
 		$item_cls = NULL;
 	}
 
-	$p =& $rh->getPageByContentType($page_cls);
-	if ($p)
+	$pageDomain =& $rh->getPageDomain();
+	if ($p = $pageDomain->findPageByClass($page_cls))
 	{
 		$url = $p->url_to($item_cls, $item);
 	}
@@ -81,5 +81,4 @@ if (isset($class))
 
 if (isset($url)) echo $url;
 else echo '__page_not_found';
-
 ?>

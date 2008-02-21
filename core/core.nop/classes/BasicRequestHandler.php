@@ -292,7 +292,7 @@ class BasicRequestHandler extends ConfigProcessor {
 		//инициализация принципала
 		$this->InitPrincipal();
 		//определение обработчика
-		$this->MapHandler($this->url);
+		$this->mapHandler($this->url);
 
 		//построение окружения
 		$this->InitEnvironment();
