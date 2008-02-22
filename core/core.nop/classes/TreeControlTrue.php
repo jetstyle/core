@@ -219,7 +219,7 @@ class TreeControlTrue {
 					SET _order = _order + 1
 					WHERE _order >= " . $node['_order'] . " AND _parent = '" . $node['_parent'] . "'
 					"     ;
-				$db->query($sql);
+				$db->query($sql2);
 			}
 			else
 			{
