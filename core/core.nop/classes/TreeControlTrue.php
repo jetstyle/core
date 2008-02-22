@@ -207,19 +207,20 @@ class TreeControlTrue {
 
 			if($beforeId)
 			{
-        $sql1 = "
+        		$sql1 = "
 					SELECT _parent, _order as _order
 					FROM ". $this->table_name ."
 					WHERE id = '".$beforeId."'
 					"     ;
 				$node = $db->queryOne($sql1);
 
-        $sql2 = "
+       		    $sql2 = "
 					UPDATE ". $this->table_name ."
 					SET _order = _order + 1
 					WHERE _order >= " . $node['_order'] . " AND _parent = '" . $node['_parent'] . "'
 					"     ;
-				$db->query($sql);
+				
+				$db->query($sql2);
 			}
 			else
 			{
@@ -230,11 +231,11 @@ class TreeControlTrue {
 				");
 			}
 
-      $sql = "UPDATE ". $this->table_name ."
+      		$sql = "UPDATE ". $this->table_name ."
       				SET _order = " . intval($node['_order']) . ", _parent = '".$targetId."'
 			       	WHERE id = " . $itemId;
 			       	
-
+			//echo $sql;
 			$db->query($sql);
 
 			$this->loaded = false;
@@ -311,6 +312,8 @@ class TreeControlTrue {
 			$_title = $_title ? $_title : 'node_'.$node->id ;
 			//$_title = iconv("CP1251","UTF-8", $_title);
 			
+			if ($_SERVER['REMOTE_ADDR']=='89.106.255.165')
+				$_title = $node->id." - ".$_title;
 			$str .= str_repeat("  ",$node->_level)."<item text=\"".$_title."\" ".$action_src." id=\"".$node->id."\" db_selected=\"".( $node->id==$this->id ? "1" : "" )."\" db_state=\"".$node->_state."\" ".(($is_folder)?">":"/>")."\n";
 			//$str .= str_repeat(" ",$node->_level)."<tree text=\"text\" ".(($is_folder)?">":"/>")."\n";
 			//
