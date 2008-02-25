@@ -92,20 +92,41 @@ class ExceptionHandler
 	private function show($exceptionObj)
 	{
 		echo $exceptionObj;
+		var_dump(ini_get("memory_limit"));
 		echo "<br /><br /><b>Backtrace</b>:<br />";
 
 		ob_start();
 //		debug_print_backtrace();
-		print_r($exceptionObj->getTrace());
+//		print_r($exceptionObj->getTrace());
+//		is_array($exceptionObj->getTrace()));
+
+//$this->_getTrace($exceptionObj->getTrace());
+		echo "<pre>";
+		print_r($this->getTrace($exceptionObj->getTrace()));
+		echo "</pre>";
 		$_ = ob_get_contents();
 		ob_end_clean();
 		$_ = preg_replace("/\[db\_password\] \=>[^\,]+\,/", "", $_);
 		$_ = preg_replace("/\[db\_user\] \=>[^\,]+\,/", "", $_);
-		echo '<pre>';
+//		echo '<pre>';
 		echo $_;
-		echo '</pre>';
+//		echo '</pre>';
 	}
 
+	function getTrace($data)
+	{
+		$res = array();
+		foreach ($data as $key => $value)
+		{
+			if (is_array($value))
+				$res[$key] = $this->getTrace($value);
+			elseif (is_object($value))
+				$res[$key] = "Is Object '" . get_class($value) . "'";
+			else
+				$res[$key] = $value;
+		}
+		return $res;
+	}
 }
 
 ?>
