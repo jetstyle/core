@@ -479,10 +479,10 @@ class TemplateEngineCompiler
 			$result .= '
 //by dz
 if((is_array($_z) && !empty($_z)) || (is_object($_z) && $_z instanceof ArrayAccess && count($_z)>0))
-//if(is_array($_z) && !empty($_z))
 {
 	$sep = $tpl->parse('.$sep_tpl.');
-	// םאהמ קעמבû ודמ למדכמ ט םו בûעü
+	// םאהמ קעמבû ודמ למדכמ ט םו בûעü. 
+	// nop: ‎עמ הוכאועסÿ ג parse קונוח soft_subtpls
 
 	$old_ref =& $tpl->Get("*");
 	$old__ =& $tpl->Get("_");

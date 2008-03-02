@@ -41,9 +41,11 @@ class ExceptionHandler
 		if (!isset($this->config[$className]))
 		{
 			$method = $this->methodsByConst[EXCEPTION_SILENT];
+			
 			$this->$method($exceptionObj);
 			die();
 		}
+		
 
 		$actions = array();
 		foreach ($this->methodsByConst as $action=>$method)
@@ -92,7 +94,7 @@ class ExceptionHandler
 	private function show($exceptionObj)
 	{
 		echo $exceptionObj;
-		var_dump(ini_get("memory_limit"));
+//		var_dump(ini_get("memory_limit"));
 		echo "<br /><br /><b>Backtrace</b>:<br />";
 
 		ob_start();

@@ -121,6 +121,7 @@ class TemplateEngine extends ConfigProcessor
   var $domain;
 
   var $CONNECT = array();
+  var $soft_subtpls = array('item_sep');
 
   function TemplateEngine( &$rh )
   {
@@ -302,17 +303,26 @@ $func_name = $this->rh->tpl_template_prefix.$this->_skin.
       $func_name($this);
       $res = trim(ob_get_contents());
       ob_end_clean();
-    } else {
-      //$this->rh->debug->Error( "Subtemplate ".$tpl_name." is not exists" );      
-      //return false;
+    } 
+    else if (!@in_array($_name, $this->soft_subtpls))
+    {
 	  try
 	  {
-        throw new TplException("Func_name=<b>" . $func_name . "</b>, Sub_tpl_name=<b>" . $_name . "</b>, Sub_tpl_source=<b>" . $file_source . "</b>, Tpl=<b>" . implode("\n", file($file_source)) . "</b>");
+	  	$id = ++$this->rh->exception_id;
+	  	$out = "<br /> <p>
+	  		 	<div style='background-color:#DDDDDD'>
+	  			Func_name=<b>" . $func_name . "</b>
+	  			<br /> Sub_tpl_name=<b>" . $_name . "</b>";
+	  	$out .= "<br /> Sub_tpl_source=<b>".$file_source."</b> ";
+	  	$out .= "<a href='#' onclick='document.getElementById(\"exc_".$id."\").style.display= (document.getElementById(\"exc_".$id."\").style.display==\"\" ? \"none\" : \"\" ); document.getElementById(\"exc_".$id."\").style.backgroundColor=\"#EEEEEE\"; return false;'>(click to show)</a></div>";
+	  	$out .= "<div style='display:none' id=\"exc_".$id."\">" . nl2br(implode("\n", file($file_source))) . "</div></p>";
+	  	
+        throw new TplException($out);
       }
       catch (TplException $e)
       {
         $exceptionHandler = ExceptionHandler::getInstance();
-        $exceptionHandler->process($e);
+        $exceptionHandler->process($e);        
       }
     }
     
