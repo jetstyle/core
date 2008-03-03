@@ -8,12 +8,12 @@ class Debug
 	static protected $log = array();
 	static protected $_milestone;
 	static protected $milestone;
-	static protected $prefix = "<div class='debug-div' id='debug-div'>Trace log:<ul><li>";
-	static protected $separator = "</li><li>";
-	static protected $postfix = "</li></ul></div><div class='debug-cont' id='debug-cont'></div>";
+	static protected $prefix = "<div class='debug-div' id='debug-div'>Trace log:";
+	static protected $postfix = "</div><div class='debug-cont' id='debug-cont'></div>";
 	static protected $canGetMemoryUsage = false;
 	static protected $mark = array();
 	static protected $inc = 1;
+	static protected $categories = array();
 	
 	/**
     * Инициализация
@@ -48,19 +48,31 @@ class Debug
     */
 	static public function getHtml()
 	{
-		$out = '';
 		self::trace( "<b>log flushed</b>");
+		
+		$out = '';
 		$out .= self::getStyles();
 		$out .= self::$prefix;
 		
+		// parse categories
+		$out .= '<div class="debug-categories">';
+		$out .= '<span class="selected-" id="debug-category-all" onclick="JSDebug.showCategory(this, \'all\');">All</span>';
+		foreach(self::$categories AS $title => $count)
+		{
+			$out .= '<span class="debug-clickable" onclick="JSDebug.showCategory(this, \''.str_replace("'", "\'", $title).'\');" >'.$title.'</span>';
+		}
+		$out .= '</div>';
+		
+		$out .= '<ul id="debug-all">';
 		foreach (self::$log AS $item)
 		{
 			$out .= self::constructHtmlItem($item);
-			$out .= self::$separator;
 		}
+		$out .= '</ul>';
 		
 		$out .= self::$postfix;
 		$out .= self::getJavascript();
+		
 		self::$log = array();
 		return $out;
 	}
@@ -96,9 +108,14 @@ class Debug
 			'time' => $diff,
 			'diffTime' => $diff1,
 			'memory' => $memory,
+			'category' => $category, 
 			'title' => $title,
 			'text' => $text,
 		);
+		if($category)
+		{
+			self::$categories[$category]++;
+		}
 		self::$mark['auto'] = $m;
 	}
 
@@ -121,22 +138,7 @@ class Debug
 		if ($flush) echo self::$getHtml();
 		die("К сожалению, произошла ошибка.");
 	}
-	
-	static public function setPrefix($d)
-	{
-		self::$prefix = $d;
-	}
-	
-	static public function setSeparator($d)
-	{
-		self::$separator = $d;
-	}
-	
-	static public function setPostfix($d)
-	{
-		self::$postfix($d);
-	}
-	
+		
 	static protected function constructHtmlItem($item)
 	{
 		$out = '';
@@ -159,8 +161,8 @@ class Debug
 		{
 			$out .= $item['title'];
 		}
-		
-		return $out;
+				
+		return '<li type="'.$item['category'].'">'.$out.'</li>';
 	}
 	
 	static protected function getId()
@@ -175,6 +177,9 @@ class Debug
 			.debug-clickable {cursor: pointer; }
 			.debug-cont {position: absolute; background-color: #CACACA; border: 1px solid black; padding: 5px; font-size: 150%;}
 			.debug-cont td {border-right: 1px solid grey; border-bottom: 1px solid grey; padding: 3px;}
+			.debug-categories {padding: 5px;}
+			.debug-categories span {padding: 2px; margin: 2px;}
+			.debug-categories span.selected- {background-color: #CACACA;} 
 		</style>';
 		
 		return $txt;
@@ -185,7 +190,9 @@ class Debug
 		$txt = '<script language="javascript">
 					JSDebug = function(){
 						this.cont = document.getElementById("debug-cont");
+						this.allItems = document.getElementById("debug-all");
 						this.selectedId = null;
+						this.selectedCategory = document.getElementById("debug-category-all");
 					}
 					JSDebug.prototype.show = function(el)
 					{
@@ -224,6 +231,34 @@ class Debug
 						top  += e.offsetTop  + (e.currentStyle?(parseInt(e.currentStyle.borderTopWidth)).NaN0():0);
 				
 						return {x:left, y:top};
+					}
+					JSDebug.prototype.showCategory = function(el, t)
+					{
+						if(JSDebug.selectedCategory)
+						{
+							JSDebug.selectedCategory.className = "debug-clickable";
+						}
+						el.className = "selected-";
+						JSDebug.selectedCategory = el;
+						
+						for(var i=0; i < JSDebug.allItems.childNodes.length; i++)
+						{
+							if(t == "all")
+							{
+								JSDebug.allItems.childNodes[i].style.display = "";
+							}
+							else
+							{
+								if(JSDebug.allItems.childNodes[i].type == t)
+								{
+									JSDebug.allItems.childNodes[i].style.display = "";
+								}
+								else
+								{
+									JSDebug.allItems.childNodes[i].style.display = "none";
+								}
+							}
+						}
 					}
 					var JSDebug = new JSDebug();
 				</script>';
