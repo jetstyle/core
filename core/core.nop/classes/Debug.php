@@ -173,9 +173,9 @@ class Debug
 	static protected function getStyles()
 	{
 		$txt = '<style type="text/css">
-			.debug-div {font-size: 150%;}
+			.debug-div {font-size: 16px;}
 			.debug-clickable {cursor: pointer; }
-			.debug-cont {position: absolute; background-color: #CACACA; border: 1px solid black; padding: 5px; font-size: 150%;}
+			.debug-cont {position: absolute; background-color: #CACACA; border: 1px solid black; padding: 5px; font-size: 16px;}
 			.debug-cont td {border-right: 1px solid grey; border-bottom: 1px solid grey; padding: 3px;}
 			.debug-categories {padding: 5px;}
 			.debug-categories span {padding: 2px; margin: 2px;}
