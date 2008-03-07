@@ -2,7 +2,7 @@
 
 class ResultSet implements IteratorAggregate, ArrayAccess, Countable, DataContainer
 {
-	private $model;
+	protected $model;
 	private $data;
 
 	public function	init($model, $data)

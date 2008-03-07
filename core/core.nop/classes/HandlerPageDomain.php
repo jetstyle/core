@@ -8,9 +8,13 @@
  
 class HandlerPageDomain extends BasicPageDomain
 {
+	private $handlers_map = array();
+	
 	function findByUrl($url)
 	{
 		$possible_paths = $this->getPossiblePaths($url);
+
+		$this->handlers_map = $this->rh->handlers_map;
 
 		foreach ($possible_paths as $up)
 		{

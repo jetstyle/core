@@ -41,12 +41,10 @@ class ExceptionHandler
 		if (!isset($this->config[$className]))
 		{
 			$method = $this->methodsByConst[EXCEPTION_SILENT];
-			
 			$this->$method($exceptionObj);
 			die();
 		}
 		
-
 		$actions = array();
 		foreach ($this->methodsByConst as $action=>$method)
 		{

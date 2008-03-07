@@ -231,6 +231,13 @@ class TemplateEngine extends ConfigProcessor
   	  
     // 1. split tplname by :
     $a = explode( ":", $tpl_name );
+    //если windows, то правильно надо обрабатывать полные пути вида c:\dir\to\project\template_name.html:sub
+    if (strlen($a[0]) == 1)
+    {
+    	$_temp = $a[0];
+    	$a = array_slice($a, 1);
+    	$a[0] = $_temp . ":" . $a[0];
+    }
     $name0 = $a[0]; // имя файла
     if (sizeof($a) > 1) $_name = $a[1]; // имя подшаблона
     else                $_name = "";

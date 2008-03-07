@@ -260,9 +260,6 @@ class RequestHandler extends ConfigProcessor {
 		exit;
 	}
 	
-	
-	
-
 	protected function execute() {
 		$this->page->handle();
 		$this->page->rend();

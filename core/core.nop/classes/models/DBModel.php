@@ -44,6 +44,8 @@ class DBModel extends Model implements IteratorAggregate, ArrayAccess, Countable
 
 	var $data = NULL;
 
+	var $resultSetFactory = NULL;
+
 	function initialize(&$ctx, $config=NULL)
 	{
 		$this->is_initialized = true; //иногда создаем объект, а потом делаем "initialize"
@@ -139,7 +141,10 @@ class DBModel extends Model implements IteratorAggregate, ArrayAccess, Countable
 	}
 	function autoDefineTable()
 	{
-		return Inflector::underscore(get_class($this));
+		$class_name = get_class($this);
+		$class_name = str_replace("Model", "", $class_name);
+		$class_name = str_replace("Basic", "", $class_name);
+		return Inflector::underscore($class_name);
 	}
 
 	function load($where=NULL, $limit=NULL, $offset=NULL)
@@ -166,14 +171,18 @@ class DBModel extends Model implements IteratorAggregate, ArrayAccess, Countable
 
 	private function setData(&$data)
 	{
-
 		if (is_array($data) || (is_object($data) && $data instanceof IteratorAggregate))
 		{
 			$this->data = array();
 			foreach ($data as $row)
 			{
+				if (@$this->resultSetFactory)
+					$item = call_user_func($this->resultSetFactory, $this, $row); //factory сам делаем init
+				else
+				{
 				$item = new ResultSet();
 				$item->init($this, $row);
+				}
 				$this->data[] = $item;
 				unset($item);
 			}
