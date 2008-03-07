@@ -54,7 +54,7 @@ class ResultSet implements IteratorAggregate, ArrayAccess, Countable, DataContai
 		$res = "<br />object of " . get_class($this) . " values:";
 		foreach ($this->data as $k=>$item)
 		{
-			$res .= "<br />" . $k . " => ";
+			$res .= "<br />&nbsp;&nbsp;&nbsp;&nbsp;" . $k . " => ";
 			if (is_object($item))
 				$res .= $item->__toString();
 			else
