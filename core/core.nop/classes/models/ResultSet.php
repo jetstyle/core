@@ -1,5 +1,7 @@
 <?php
 
+$this->useClass("models/DbModel"); //здесь DataContainer
+
 class ResultSet implements IteratorAggregate, ArrayAccess, Countable, DataContainer
 {
 	protected $model;
