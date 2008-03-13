@@ -1,7 +1,7 @@
 <?php
 $this->UseClass("models/DBModel");
 
-class BasicMenu extends Model
+class BasicMenu extends DBModel
 {
 	// lucky@npj:
 	// уровень, до которого подгружать меню

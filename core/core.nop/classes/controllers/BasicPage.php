@@ -166,6 +166,11 @@ class BasicPage extends Controller
 		return $parent_status && True;
 	}
 
+	function pre_handle()
+	{
+		
+	}
+
 	function handle()
 	{
 		$status = True;
@@ -176,6 +181,8 @@ class BasicPage extends Controller
 		{
 			$matches = array();
 			list($action, $pattern) = $v;
+			$this->pre_handle();
+
 			if (True === $this->_match_url($this->rh->params, $pattern, &$matches))
 			{
 				$status = call_user_func_array(
