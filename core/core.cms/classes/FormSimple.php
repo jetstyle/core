@@ -292,8 +292,10 @@ class FormSimple extends DBDataEdit  {
         }
       }
     }
+    
     //supertag
-    if( $this->config->supertag ){
+    if( $this->config->supertag )
+    {
       if( is_array($this->config->supertag) ){
         $field = $this->config->supertag[0];
         $limit = $this->config->supertag[1];
@@ -315,6 +317,12 @@ class FormSimple extends DBDataEdit  {
          }
       }
       $this->UPDATE_FIELDS[] = '_supertag';
+    }
+    else if ($this->config->allow_empty_supertag)
+    { 
+    	//$rh->GLOBALS[ $this->prefix.'_supertag'.$suffix ] = "";
+    	
+    	$this->UPDATE_FIELDS[] = '_supertag';
     }
   }
   
