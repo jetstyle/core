@@ -107,7 +107,12 @@ class ConfigProcessor {
     try
     {
       if (!$fname = $this->FindScript($type,$name,$level,$dr,$ext,$withSubDirs))
-        throw new FileNotFoundException("FindScript: <b>not found</b>, type=<b>$type</b>, name=<b>$name</b>, level=<b>$level</b>, dr=<b>$dr</b>, ext=<b>$ext</b>");
+      {
+	   	if ($type=="templates")
+	   		throw new FileNotFoundException("<b>$name</b>", $type=="templates", $name, $this->rh);
+	   	else
+	   		throw new FileNotFoundException("FindScript: <b>not found</b>, type=<b>$type</b>, name=<b>$name</b>, level=<b>$level</b>, dr=<b>$dr</b>, ext=<b>$ext</b>");
+      }
       else
         return $fname;
     }
@@ -118,23 +123,6 @@ class ConfigProcessor {
     }
   }
 
-/* 
-  //oldschool
-  //Тоже, что и FindScript(), но в случае не обнаружения файла вываливается с ошибкой
-  function FindScript_( $type, $name, $level=false, $dr=-1, $ext = 'php' ){
-    $fname = $this->FindScript($type,$name,$level,$dr,$ext);
-    if($fname)
-      return $fname;
-    else
-    {
-      $error = "FindScript: <b>not found</b>, type=<b>$type</b>, name=<b>$name</b>, level=<b>$level</b>, dr=<b>$dr</b>, ext=<b>$ext</b>";
-      if( $this->debug )
-        $this->debug->Error($error);
-      else
-        die($error);
-    }
-  }
-*/  
   function FindDir($name)
   {
     //определяем начальный уровень поиска

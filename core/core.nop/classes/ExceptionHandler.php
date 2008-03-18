@@ -93,8 +93,10 @@ class ExceptionHandler
 	{
 		echo $exceptionObj;
 //		var_dump(ini_get("memory_limit"));
-		echo "<br /><br /><b>Backtrace</b>:<br />";
 
+		if ($exceptionObj->no_trace) return;
+		echo "<br /><br /><b>Backtrace</b>:<br />";
+		
 		ob_start();
 //		debug_print_backtrace();
 //		print_r($exceptionObj->getTrace());
