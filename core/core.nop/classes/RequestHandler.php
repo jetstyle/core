@@ -411,29 +411,49 @@ class RequestHandler extends ConfigProcessor {
 	public function _onCreatePage(& $page) {
 	}
 
-	protected function showSiteMap() {
+	protected function showSiteMap() 
+	{
+		//TODO: extract and document setting of print params
+		//nop
 		$this->tpl->set('print_href', $this->ri->hrefPlus('', array (
 			'print' => 1
 		)));
 
 		$conf = $this->site_map[$this->site_map_path];
 
-		if (is_array($conf)) {
-			foreach ($conf as $k => $v) {
+		$this->_showSiteMapPath($conf);
+		
+		//nop: again print params
+		if ($this->ri->get('print')) 
+		{
+			$this->tpl->set('html:print', '1');
+		}
+	}
+	
+	/**
+	 * ѕостроить один массив сайтмапа
+	 * вообще этому пора делать extract class
+	 * nop
+	 */
+	public function _showSiteMapPath($conf=array())
+	{
+		if (!empty($conf)) 
+		{
+			foreach ($conf as $k => $v) 
+			{
 				//массив с шаблонами/значени€ми/инстркуци€ми
-				if (is_array($v)) {
+				if (is_array($v)) 
+				{
 					$_v = "";
 					foreach ($v as $v1)
 						$_v .= $this->_constructValue($v1);
 					$this->tpl->set($k, $_v);
-				} else
+				} 
+				else
 					//значение переменной
 					$this->tpl->set($k, $this->_constructValue($v));
 			}
-		}
-		if ($this->ri->get('print')) {
-			$this->tpl->set('html:print', '1');
-		}
+		}	
 	}
 
 	/*
