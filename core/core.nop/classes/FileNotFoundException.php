@@ -38,10 +38,11 @@ class FileNotFoundException extends Exception
 					
 					//не выводить бэктрейс
 					$this->no_trace = true;
-					$from = $trace['file'];
+					
 					$from = $traces[$k]['args'][0];
 					
-					$file_source = $this->rh->tpl_root_dir.$this->rh->tpl_skin."/templates/".$from;
+					
+					$file_source = $this->rh->tpl_root_dir.$this->rh->tpl_skin."/templates/".preg_replace("/\.html:.*/", ".html", $from);
 					$contents = file($file_source);
 					$contents = str_replace($needle, "<font color='red'>".$needle."</font>", $contents);
 
