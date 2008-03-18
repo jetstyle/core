@@ -26,25 +26,31 @@ class FileNotFoundException extends Exception
 		{
 			$traces = $this->getTrace();
 
-			$needle = '@'.$this->file_name.".html";
+			$needle = $this->file_name;
+			
 			foreach ($traces as $k=>$trace)
 			{
-				if ($can_seek)
+				
+				if ($can_seek && ( $trace['function']=='Parse' || $trace['function']=='_constructValue' ) && !$this->in_args($needle, $trace['args']) )
 				{
+					//echo '<hr>';
+					//var_dump($traces[$k]);
+					
+					//не выводить бэктрейс
 					$this->no_trace = true;
 					$from = $trace['file'];
-					$from = $traces[$k+2]['args'][0];
+					$from = $traces[$k]['args'][0];
 					
 					$file_source = $this->rh->tpl_root_dir.$this->rh->tpl_skin."/templates/".$from;
 					$contents = file($file_source);
 					$contents = str_replace($needle, "<font color='red'>".$needle."</font>", $contents);
 
-				  	$ret .= "<br><div style='background-color:#DDDDDD'> ";
-				  	$ret .= "<span style='float:left'><b>Parsed from: <a href='#' onclick='document.getElementById(\"exc_".$k."\").style.display= (document.getElementById(\"exc_".$k."\").style.display==\"\" ? \"none\" : \"\" ); document.getElementById(\"exc_".$k."\").style.backgroundColor=\"#EEEEEE\"; return false;'>".$from."</a></b></span>
+				  	$pret = "<br><div style='background-color:#DDDDDD'> ";
+				  	$pret .= "<span style='float:left'><b>Parsed from: <a href='#' onclick='document.getElementById(\"exc_".$k."\").style.display= (document.getElementById(\"exc_".$k."\").style.display==\"\" ? \"none\" : \"\" ); document.getElementById(\"exc_".$k."\").style.backgroundColor=\"#EEEEEE\"; return false;'>".$from."</a></b></span>
 				  	<span style='float:right'>".$file_source."</span>
 				  	</div>";
-				  	$ret .= "<div style='display:none' id=\"exc_".$k."\"><br>" . nl2br(implode("\n", $contents)) . "</div></p>";
-
+				  	$pret .= "<div style='display:none' id=\"exc_".$k."\"><br>" . nl2br(implode("\n", $contents)) . "</div></p>";
+					
 					break;
 				}
 				
@@ -55,8 +61,26 @@ class FileNotFoundException extends Exception
 			} 
 			
 		}
-			
-		return $ret;
+		
+		/**
+		 * На случай если в site_map.php в HTML:body указывает на несуществующий шаблон
+		 */
+		if(empty($files) && $this->html_body)
+		{
+			//не выводить бектрейс
+			$this->no_trace = true;
+			$file_source = $this->rh->tpl_root_dir.$this->rh->tpl_skin."/site_map.php";
+			$contents = file($file_source);
+			$contents = str_replace($needle, "<font color='red'>".$needle."</font>", $contents);
+			$from = "site_map";
+		  	$pret = "<br><div style='background-color:#DDDDDD'> ";
+		  	$pret .= "<span style='float:left'><b>Sitemapped from: <a href='#' onclick='document.getElementById(\"exc_".$k."\").style.display= (document.getElementById(\"exc_".$k."\").style.display==\"\" ? \"none\" : \"\" ); document.getElementById(\"exc_".$k."\").style.backgroundColor=\"#EEEEEE\"; return false;'>".$from."</a></b></span>
+		  	<span style='float:right'>".$file_source."</span>
+		  	</div>";
+		  	$pret .= "<div style='display:none' id=\"exc_".$k."\"><br>" . nl2br(implode("\n", $contents)) . "</div></p>";
+		}
+
+		return $ret . $pret;
 	}
 	
 	protected function in_args($needle, $args)
@@ -66,22 +90,39 @@ class FileNotFoundException extends Exception
 		{
 			if (is_array($arg))
 			{
-				foreach ($arg as $ar)
+				foreach ($arg as $ar_key=>$ar)
 				{
-					if ($ar==$needle)
+					if ($this->equalTemplates($needle, $ar))
 					{
 						$ret = true;	
+						if ($ar_key == "HTML:body")
+							$this->html_body=true;
 						break;		
 					}
 				}
 			}
-			else if ($arg==$needle)
+			else if ($this->equalTemplates($needle, $arg))
 			{
 				$ret = true;	
 				break;	
 			}
 		}
 		return $ret;
+	}
+	
+	protected function equalTemplates($needle, $compare, $dump=false)
+	{
+		$ret = false;
+		$c1 = strcmp($needle, $compare);
+		$c2 = strcmp('@'.$needle.'.html', $compare);
+		$c3 = strcmp($needle.'.html', $compare);
+		$ret = $c1==0 || $c2==0 || $c3==0;
+		/*
+		if ($dump)
+			echo '<br>['.($c1.' || '.$c2.' || '.$c3.' ('.$ret.')');
+			*/
+			
+		return $ret;	
 	}
 }
 
