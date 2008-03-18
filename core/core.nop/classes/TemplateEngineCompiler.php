@@ -693,7 +693,7 @@ unset($_z);
            * nop@jetstyle
            * хочу штуки типа {{?place_photos.count==1}}
            */
-          if (preg_match("/(.*)(==|<=|=>|=<|>=|>|<)(.*)/i", $k, $matches)) //  
+          if (preg_match("/(.*)(==|!=|<=|=>|=<|>=|>|<)(.*)/i", $k, $matches)) //  
           {
             $k = $matches[1];
             $condition = $matches[2];
