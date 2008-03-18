@@ -73,6 +73,9 @@ if (isset($class))
 	}
 
 	$pageDomain =& $rh->getPageDomain();
+	
+	if ($pageDomain==null)	return;
+
 	if ($p = $pageDomain->findPageByClass($page_cls))
 	{
 		$url = $p->url_to($item_cls, $item);
