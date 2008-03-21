@@ -9,10 +9,10 @@
 
   ---------
 
-  NB: вместо $rh можно передавать любой объект, содержащий свойства $this->db_* 
+  NB: вместо $rh можно передавать любой объект, содержащий свойства $this->db_*
       и опционально $this->debug (объект класса Debug)
 
-  Этот класс -- верхний уровень абстракции от СУБД. 
+  Этот класс -- верхний уровень абстракции от СУБД.
   Для конкретных СУБД реализован нижний уровень -- DBAL_****, через $rh->db_al="****"
   Файлы должны лежать в одном каталоге.
 
@@ -21,7 +21,7 @@
   // Защита строкового значения кавычками
 
   * Quote( $value ) -- обквочивает значение, делая его безопасным для SQL
-      - возвращает что-то вроде '13' или 'строка' 
+      - возвращает что-то вроде '13' или 'строка'
         (вместе с правильными кавычками, которые вокруг добавлять уже не надо)
 
   // Упрощение вызовов SQL с возвратом в виде хэшей
@@ -124,11 +124,11 @@ class DBAL
 		{
 			$this->rh->debug->mark('q');
 		}
-		
+
 		$data = array ();
 		//плейсхолдер для префикса
 		$sql = str_replace("??", $this->prefix, $sql);
-		
+
 		if ($r = $this->lowlevel->Query($sql, $limit, $offset))
 		{
 			while ($row = $this->lowlevel->FetchAssoc($r))
@@ -140,8 +140,8 @@ class DBAL
                     $data[] = $row;
 			}
 			$this->lowlevel->FreeResult($r);
-		} 
-				
+		}
+
 		$this->logQuery($sql, $limit, $offset);
 		return $data;
 	}
@@ -149,42 +149,42 @@ class DBAL
 	function logQuery($sql, $limit = 0, $offset = 0)
 	{
 		$this->queryCount++;
-		
-		if($this->rh->enable_debug && $this->rh->explain_queries)	
+
+		if($this->rh->enable_debug && $this->rh->explain_queries)
 		{
-			if(!(strpos(strtolower($sql), 'select') === false))	
+			if(!(strpos(strtolower($sql), 'select') === false))
 			{
 				$_data = array();
 				if ($r = $this->lowlevel->Query("EXPLAIN ".$sql, $limit, $offset))
 				{
-					while ($row = $this->lowlevel->FetchAssoc($r)) 
+					while ($row = $this->lowlevel->FetchAssoc($r))
 					{
 						$_data[] = $row;
 					}
 					$this->lowlevel->FreeResult($r);
 				}
-				if(is_array($_data) && !empty($_data))	
+				if(is_array($_data) && !empty($_data))
 				{
-					foreach($_data AS $i => $r)	
+					foreach($_data AS $i => $r)
 					{
-						if($i == 0)	
+						if($i == 0)
 						{
 							$head = array_keys($r);
-							foreach($head AS $rr)	
+							foreach($head AS $rr)
 							{
 								$out .= "<td>".$rr."</td>";
 							}
 							$out = "<tr>".$out."</tr>";
 						}
 
-						foreach($r AS $rr)	
+						foreach($r AS $rr)
 						{
 							$row .= "<td>".$rr."</td>";
 						}
 						$out .= "<tr>".$row."</tr>";
 						$row = '';
 					}
-					
+
 					$out = "<table class=\'debug_table\'>".$out."</table>";
 				}
 				$bad = 0;
@@ -197,7 +197,7 @@ class DBAL
 			}
 		}
 
-		$this->rh->debug->trace("<b>QUERY".($limit == 1 ? " ONE: " : ": ")."</b> ".$sql, 'q');
+	//	$this->rh->debug->trace("<b>QUERY".($limit == 1 ? " ONE: " : ": ")."</b> ".$sql, 'q');
 	}
 
 	function _Error($error_msg)
@@ -258,12 +258,12 @@ class DBAL
 	{
 		//типа такой плейсхолдер
 		$sql = str_replace("??", $this->prefix, $sql);
-		
+
 		if(method_exists($this->rh->debug, 'mark'))
 		{
 			$this->rh->debug->mark('q');
 		}
-		
+
 		$this->handle = $this->lowlevel->Query($sql, $limit, $offset);
 
 		$this->logQuery($sql, $limit, $offset);
@@ -317,14 +317,14 @@ class DBAL
 	 */
 	function getArray()
 	{
-		//var_dump($this->handle);  
+		//var_dump($this->handle);
 
 		if ($this->handle)
 		{
 			while ($row = $this->getRow())
 			{
 				//echo '<hr>';
-				// var_dump($row);  
+				// var_dump($row);
 				$ret[] = $row;
 			}
 
@@ -344,6 +344,6 @@ class DBAL
 	{
 		return $this->execute($sql, $limit, $offset);
 	}
-	// EOC{ DBAL } 
+	// EOC{ DBAL }
 }
 ?>
