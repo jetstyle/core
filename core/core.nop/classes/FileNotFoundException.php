@@ -4,7 +4,7 @@ class FileNotFoundException extends Exception
 {
 	private $codes_names = array("0" => "File not found", "1" => "Tpl file not found");
 
-	public function __construct($msg, $code, $file_name="", &$rh=null) 
+	public function __construct($msg, $code=0, $file_name="", &$rh=null) 
 	{
 		$this->file_name = $file_name;
 		$this->rh =& $rh;
