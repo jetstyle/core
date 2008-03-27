@@ -389,11 +389,10 @@ class DBModel extends Model implements IteratorAggregate, ArrayAccess, Countable
 		if ($is_load) $this->sql = $sql1;
 //		$data = $this->rh->db->query($sql);
 		$data = DBAL::getInstance()->query($sql);
-
+//	if (get_class($this) == "NewsModel" || get_class($this) == "Tags2SubstancesModel")
 //		echo $sql."<br /><br />";
 		
 		$this->loadForeignFields($data);
-
 		return $data;
 	}
 
@@ -880,6 +879,8 @@ class DBModel extends Model implements IteratorAggregate, ArrayAccess, Countable
 			//4
 			$res["type"] = $camel = Inflector::camelize($type);
 			$res[$camel] = array("pk" => $pk, "fk" => $fk);
+			if (isset($config["where"]))
+				$res["where"] = $config["where"];
 			$this->fields_info[] = $res;
 			unset($res);
 		}
