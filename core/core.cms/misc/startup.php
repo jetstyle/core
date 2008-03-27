@@ -28,7 +28,7 @@ if ($this->db_set_encoding)
 	$this->db->query("SET CHARACTER SET " . $this->db_set_encoding);
 }
 
-
+$this->tpl_skin = '';
 //template engine
 $this->UseClass("TemplateEngine");
 $this->tpl = & new TemplateEngine($this);

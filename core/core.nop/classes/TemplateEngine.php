@@ -133,7 +133,7 @@ class TemplateEngine extends ConfigProcessor
 
     // выбрать шкуру
     $this->Skin( $rh->tpl_skin );
-
+    
     // настроить конфигуратор
     $this->skin_names = array(); // имена шкур
   }
@@ -176,10 +176,14 @@ class TemplateEngine extends ConfigProcessor
 
   function Skin( $skin_name="" ) // -- переключить систему в другую шкуру (увеличив глубину стека)
   {
-    // запомнить каталог для FindScript
+    if($skin_name == "")
+    {
+    	return false;
+    }
+  	// запомнить каталог для FindScript
     $dir = $this->rh->tpl_root_dir.$skin_name;
     if ($skin_name != "") $dir.="/";
-    $this->DIRS[] = $dir;
+    array_unshift($this->DIRS, $dir);
     // запомнить имя шкуры
     $this->skin_names[] = $skin_name;
     // установить шкуру
@@ -188,7 +192,7 @@ class TemplateEngine extends ConfigProcessor
 
   function UnSkin() // -- вернуться к предыдущей шкуре
   {
-    array_pop( $this->DIRS );
+    array_shift( $this->DIRS );
     array_pop( $this->skin_names );
     return $this->_SetSkin( $this->skin_names[ sizeof($this->DIRS)-1 ] );
   }
@@ -215,7 +219,7 @@ class TemplateEngine extends ConfigProcessor
   function _FindTemplate( $tpl_filename ) // -- возвращает уровень и полный путь к кэш-файлу
   {
     // 2. launch parent
-    return ConfigProcessor::FindScript_( "templates", $tpl_filename, false, -1, "html" );
+    return ConfigProcessor::FindScript_( "templates", $tpl_filename, 0, 1, "html" );
   }
 
   function ParseInstant( $template_content ) // -- "отпарсить" контент, данный как параметр (а не брать из файла)

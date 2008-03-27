@@ -77,7 +77,7 @@ class RequestHandler extends ConfigProcessor {
 			die("Cannot read local configurations.");
 		}
 		
-		$this->DIRS = array_reverse($this->DIRS);
+//		$this->DIRS = array_reverse($this->DIRS);
 
 		//константы путей
 		$PHP_SELF = $_SERVER["PHP_SELF"];
@@ -215,7 +215,7 @@ class RequestHandler extends ConfigProcessor {
 		return include ($this->FindScript('handlers', $handler));
 	}
 
-	function UseClass($name, $level = false, $direction = -1) 
+	function UseClass($name, $level = 0, $direction = 1) 
 	{
 		if (!$this->CLASSES[$name]) 
 		{
@@ -225,7 +225,7 @@ class RequestHandler extends ConfigProcessor {
 		}
 	}
 
-	function UseLib($name, $level = CURRENT_LEVEL, $direction = SEARCH_DOWN) {
+	function UseLib($name, $level = 0, $direction = 1) {
 		if (!$this->LIBS[$name]) {
 			$fname = $this->FindScript("libs", $name, $level, $direction);
 			require_once ($fname);
@@ -233,7 +233,7 @@ class RequestHandler extends ConfigProcessor {
 		}
 	}
 
-	function & UseModule($name, $new_instance = false, $level = false, $direction = -1) {
+	function & UseModule($name, $new_instance = false, $level = 0, $direction = 1) {
 
 		$class_name = "Module_" . $name;
 

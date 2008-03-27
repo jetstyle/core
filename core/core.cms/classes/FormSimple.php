@@ -45,7 +45,7 @@ class FormSimple extends DBDataEdit  {
     
     if( !$this->template_item )
     {
-      $this->template_item = $this->rh->findScript_( $config->handlers_type, $this->config->module_name.'/'.($config->_template_item ? $config->_template_item : $this->_template_item), false, -1, 'html' );
+      $this->template_item = $this->rh->findScript_( $config->handlers_type, $this->config->module_name.'/'.($config->_template_item ? $config->_template_item : $this->_template_item), 0, 1, 'html' );
     }
     //StateSet
     $this->state =& new StateSet($this->rh);

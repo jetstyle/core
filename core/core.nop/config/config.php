@@ -123,7 +123,7 @@ config_set($self, 'output_encoding',  'windows-1251');
 // информация о корневой директории уровня, relative to which we look for classes
 $DIRS[] = $_app_dir;
 //for templates FindScripting
-$DIRS[] = $_app_dir.'skins/'.$self->tpl_skin."/";
+//$DIRS[] = $_app_dir.'skins/'.$self->tpl_skin."/";
 // информация о корневой директории уровня
 $DIRS[] = $_core_dir;
 
