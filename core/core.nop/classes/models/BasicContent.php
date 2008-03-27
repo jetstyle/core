@@ -6,9 +6,6 @@ class BasicContent extends DBTreeModel
 	var $fields = array('id', 
 		'mode',
 		'title', 'title_pre', 
-		/*
-		'lead', 'lead_pre', 
-		 */
 
 		'text', 'text_pre', 
 		'_path', '_parent', '_level', '_left', '_right');
