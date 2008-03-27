@@ -6,7 +6,8 @@ class DbException extends Exception
 
 	public function __toString() 
 	{
-		return __CLASS__ . ": " . $this->codes_names[$this->code] . ": {$this->message}\n";
+		return __CLASS__ . ": " . $this->codes_names[$this->code] . ": {$this->message}\n".
+		"<br><b>".mysql_error()."</b>";
 	}
 	
 }
