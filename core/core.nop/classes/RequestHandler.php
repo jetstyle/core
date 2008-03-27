@@ -361,8 +361,8 @@ class RequestHandler extends ConfigProcessor {
 
 	protected function mapHandler($url) {
 		$this->pageDomain = new PageDomain($this);
-
-		if ($page = & $this->pageDomain->findPageByUrl($url)) {
+		if ($page = & $this->pageDomain->findPageByUrl($url)) 
+		{
 			$this->page = & $page;
 			$this->data = $page->config;
 			$this->params = $page->params;

@@ -32,16 +32,16 @@ class ContentPageDomain extends BasicPageDomain
 		$content->initialize($this->rh);
 
 		$where = array();
-		if (isset($criteria['url']))
+		if (!isset($criteria['class']) && $criteria['url']=="")
+			$where[] = "mode='home'";
+		elseif (isset($criteria['url']))
 		{
 			$url = $criteria['url'];
 			$possible_paths = $this->getPossiblePaths($url);
 			$where[] = '_path IN ('.$content->buildValues($possible_paths). ')';
 		}
-		if (isset($criteria['class']))
-		{
+		elseif (isset($criteria['class']))
 			$where[] = 'mode='.$content->quote($this->getModeByPageClass($criteria['class']));
-		}
 		$where = implode(" AND ", $where);
 
 		$content->load($where);
