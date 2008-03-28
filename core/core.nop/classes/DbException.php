@@ -2,7 +2,7 @@
 
 class DbException extends Exception
 {
-	private $codes_names = array("0" => "Sql error", "1" => "Db connect error", "2" => "Database select error");
+	private $codes_names = array("0" => "DB SQL error", "1" => "DB Connect Error", "2" => "DB Select Error", "3"=>"DBModel Error");
 
 	public function __toString() 
 	{

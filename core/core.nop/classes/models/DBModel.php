@@ -591,7 +591,7 @@ class DBModel extends Model implements IteratorAggregate, ArrayAccess, Countable
 
 	function buildFieldAliases($fields)
 	{
-		$fields_sql = implode(',', array_map(array(&$this, 'quoteFieldAlias'), $fields));
+		$fields_sql = implode(',', @array_map(array(&$this, 'quoteFieldAlias'), $fields));
 		return $fields_sql;
 	}
 	function buildJoinFieldAliases($model)
@@ -733,6 +733,12 @@ class DBModel extends Model implements IteratorAggregate, ArrayAccess, Countable
 	function quoteFieldAlias($name)
 	{
 		$info =& $this->_fields_info[$name];
+		if(!$this->is_initialized)
+		{
+			throw new DbException("<b>".get_class($this)."</b> was not initialized", 3);
+		
+		}
+		
 		if (!isset($info)) return NULL;
 
 		return isset($info['alias']) 
