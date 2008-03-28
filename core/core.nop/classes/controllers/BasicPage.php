@@ -177,18 +177,42 @@ class BasicPage extends Controller
 
 		$this->loadPlugins();
 
-		if (is_array($this->params_map)) foreach ($this->params_map as $v)
+		if (is_array($this->params_map)) 
+		{
+			foreach ($this->params_map as $v)
 		{
 			$matches = array();
+				
 			list($action, $pattern) = $v;
 			$this->pre_handle();
 
 			if (True === $this->_match_url($this->rh->params, $pattern, &$matches))
 			{
+					$action_parts = explode("::", $action);
+
+					if (count($action_parts)==2)
+					{
+						$this->rh->UseClass('controllers/'.$action_parts[0]);
+						$controller = new $action_parts[0];
+						
+						$method = 'handle_'.$action_parts[1];
+						if (method_exists($controller, $method))
+						{
+							$controller->initialize($this->rh);
+							$status = call_user_func_array(
+								array(&$controller, $method), 
+								array($matches));
+							break;
+						}
+					}
+					else
+					{
 				$status = call_user_func_array(
 					array(&$this, 'handle_'.$action), 
 					array($matches));
 				break;
+			}
+		}
 			}
 		}
 
