@@ -27,7 +27,7 @@
          *    by a web browser.
          *    @access public
          */
-        function HtmlReporter($character_set = 'ISO-8859-1') {
+        function HtmlReporter($character_set = 'cp1251') {
             $this->SimpleReporter();
             $this->_character_set = $character_set;
         }

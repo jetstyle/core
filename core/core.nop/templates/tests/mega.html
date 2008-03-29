@@ -1,0 +1,46 @@
+Шаблонная переменная varname: {{varname}}
+
+<h2>Массив array:</h2> 
+Его поле array['title']: {{array.title}}
+
+Его поле array['href']: {{array.href}}
+
+
+<h2>Объект object</h2>
+Его поле object->title: {{object.title}}
+
+Его поле object->href: {{object.href}}
+
+Вызов метода object->method(): {{object.method}}
+
+
+{{!connect "jquery.js"}}
+
+{{!connect "test.css"}}
+
+
+<h2>Инклуды</h2>
+
+Инклуд tests/include.html: {{@tests/include.html}}
+
+Инклуд подшаблона tests/include_tpls.html:subtpl: {{@tests/include_tpls.html:subtpl}}
+
+Инклуд подшаблона из текущего файла: {{@:subtpl}}
+
+
+<h2>Условные конструкции</h2>
+{{?condition}}
+Если condition==true <a href='{{condition_href}}'>выключить</a>
+{{?:}}
+Иначе если condition!=true <a href='{{condition_href}}'>включить</a>
+{{/?}}
+
+
+<h2>*-синтаксис</h2>
+
+
+{{TPL:subtpl}}
+	Здесь использована старая версия определения подшаблона через { {TPL:tplname} } . 
+	Можно делать проще { {:tplname} }
+	Пример в файле tests/include_tpls.html:subtpl
+{{/TPL:subtpl}}
