@@ -124,7 +124,14 @@ class FormSimple extends DBDataEdit  {
     $tpl->set( 'prefix', $this->prefix );
     $tpl->set( 'POST_STATE', $this->state->State(1) );
     $tpl->set( '__form_name', $this->prefix.'_simple_form' );
-    $tpl->set( '__delete_title', $item->_state!=2 ? 'удалить в корзину' : 'удалить окончательно'  );
+    if($this->delete_title)
+    {
+    	$tpl->set('__delete_title', $this->delete_title);
+    }
+    else
+    {
+    	$tpl->set( '__delete_title', $item->_state!=2 ? 'удалить в корзину' : 'удалить окончательно'  );
+    }
     
     $tpl->Parse( $this->template_item, '___form');
         
