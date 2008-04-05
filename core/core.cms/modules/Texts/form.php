@@ -6,10 +6,10 @@
 		array('_state','checkbox'),
 		array('type','select', array('текст с оформлением','плоский текст') ),
 	);
-	/*
+	
 	$this->PRE_FILTERS = array(
-		'typo_outlink' => array('title','text'),
+		'typografica' => array('title','text'),
 	);
-	*/
+	
 	
 ?>
