@@ -34,7 +34,8 @@
 		$custom = array('table'=>$db->prefix.'texts', 'module'=>'texts', 'field'=>'text_pre', 'add_fields'=>',type');
 
     //грузим текст по супертагу 
-    $r = $db->queryOne("SELECT id,".$custom['field'].$custom['add_fields']." FROM ".$custom['table']." WHERE _supertag='$supertag' AND _state=0");
+    $sql = "SELECT id,".$custom['field'].$custom['add_fields']." FROM ".$custom['table']." WHERE _supertag='$supertag' AND _state=0";
+    $r = $db->queryOne($sql);
     //$r = $rs->fields;
 
     //если такой записи нет - создаём её
