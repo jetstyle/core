@@ -86,7 +86,7 @@ class TreeControlNew extends TreeControl
 	
 				$tpl->set( '_behavior', $this->tree_behavior );
 				$tpl->set( '_cur_id', $this->id );
-				$tpl->set( '_level_limit', 3 );
+				$tpl->set( '_level_limit', 4 );
 	
 					/*
 					$xml_string = $this->toXML();
@@ -171,7 +171,7 @@ class TreeControlNew extends TreeControl
 			if( $node->_left<=$c_parent->_left && $node->_right>=$c_parent->_right )
 				$display_children = true;
 			else
-				$display_children = !(3>0 && $level[ $node->id ] >= 3);
+				$display_children = !(3>0 && $level[ $node->id ] >= $this->config->display_limit); //меня вадик зовут, а тебя? (c) dz. 2008.04.03
 
 			// -   xloadtree?
 			$_is_folder = count($this->CHILDREN[$node->id]);

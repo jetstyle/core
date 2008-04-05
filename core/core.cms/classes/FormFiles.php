@@ -65,7 +65,6 @@ class FormFiles extends FormSimple  {
 		{
 			$this->_renderFiles();
 		}
-
 		$tpl->set( '__max_file_size', $config->max_file_size ? $config->max_file_size : $this->max_file_size );
 		$this->files_rendered = true;
 	}
