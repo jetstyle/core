@@ -1,5 +1,4 @@
-<?
-	
+<?php
 	//module config
 	$this->module_title = "Изображения";
 	$this->class_name = "TreeForm";

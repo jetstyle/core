@@ -13,8 +13,6 @@ $this->UseClass('FormSimple');
 class FormFiles extends FormSimple  {
 
 	var $upload;
-	var $GRAPHICS = array('gif','jpg','png','bmp','jpeg'); //какие форматы показывать как картинки
-
 	var $max_file_size = 55242880; //максимальный размер файла для загрузки
 
 	//До каких размеров картинки показывать просто, а больше - через превью и попап?
@@ -65,6 +63,7 @@ class FormFiles extends FormSimple  {
 		{
 			$this->_renderFiles();
 		}
+
 		$tpl->set( '__max_file_size', $config->max_file_size ? $config->max_file_size : $this->max_file_size );
 		$this->files_rendered = true;
 	}
@@ -91,12 +90,12 @@ class FormFiles extends FormSimple  {
 						}
 						elseif ($vv['graphics'])
 						{
-							$upload->ALLOW = array_intersect($upload->ALLOW, $this->GRAPHICS);
+							$upload->ALLOW = array_intersect($upload->ALLOW, $upload->GRAPHICS);
 						}
 												
 						$file = $upload->GetFile(str_replace('*', $this->id, $vv['filename']));
 												
-						if($file->name_full && in_array($file->ext, $this->GRAPHICS ) )
+						if($file->name_full && in_array($file->ext, $upload->GRAPHICS ) )
 						{
 							$r = array(
 								'src' => $this->rh->front_end->path_rel.'files/'.($this->config->upload_dir ? $this->config->upload_dir."/" : "").$file->name_short,
@@ -110,7 +109,7 @@ class FormFiles extends FormSimple  {
 									{
 										$file = $upload->GetFile(str_replace('*', $this->id, $_vv['filename']));
 
-										if($file->name_full && in_array($file->ext, $this->GRAPHICS ) )
+										if($file->name_full && in_array($file->ext, $upload->GRAPHICS ) )
 										{
 											$A = getimagesize($file->name_full);
 											$r['width'] = $A[0];
@@ -186,7 +185,7 @@ class FormFiles extends FormSimple  {
 			$exts = array_keys($this->upload->TYPES);
 		}
 
-		return array("all" => "(".implode(", ",$exts).")", "graphics" => "(".implode(", ", array_intersect($exts, $this->GRAPHICS)).")");
+		return array("all" => "(".implode(", ",$exts).")", "graphics" => "(".implode(", ", array_intersect($exts, $this->upload->GRAPHICS)).")");
 	}
 
 	function _renderFilesOld()
@@ -317,7 +316,7 @@ class FormFiles extends FormSimple  {
 					}
 					elseif ($vv['graphics'])
 					{
-						$upload->ALLOW = array_intersect($upload->ALLOW, $this->GRAPHICS);
+						$upload->ALLOW = array_intersect($upload->ALLOW, $upload->GRAPHICS);
 					}
 					
 					//нужно сохранить превью?
@@ -326,7 +325,7 @@ class FormFiles extends FormSimple  {
 						$vvv = $this->take_to;
 						$upload->UploadFile($this->prefix.$field_file, str_replace('*', $this->id, $vvv['filename']), false, $this->buildParams($vvv));
 					}
-
+					
 					$upload->UploadFile($this->prefix.$field_file, str_replace('*', $this->id, $vv['filename']), false, $this->buildParams($vv));
 				}
 			}
