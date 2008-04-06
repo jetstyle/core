@@ -3,18 +3,22 @@
 class FileNotFoundException extends Exception
 {
 	private $codes_names = array("0" => "File not found", "1" => "Tpl file not found");
-
-	public function __construct($msg, $code=0, $file_name="", &$rh=null) 
+	protected $searchHistory = array();
+	
+	public function __construct($msg, $code=0, $file_name="", &$rh=null, $searchHistory = array()) 
 	{
 		$this->file_name = $file_name;
 		$this->rh =& $rh;
-
+		$this->searchHistory = $searchHistory;
+		
 		return parent::__construct($msg, $code);
 	}
 
 	public function __toString() 
 	{
 		$ret = __CLASS__ . ": " . $this->codes_names[$this->code] . ": {$this->message}\n";
+		
+		$ret .= $this->buildSearchHistory();
 		
 		/**
 		 * Для шаблонов хотим показать откуда был вызов
@@ -40,10 +44,15 @@ class FileNotFoundException extends Exception
 					$this->no_trace = true;
 					
 					$from = $traces[$k]['args'][0];
-					
-					
 					$file_source = $this->rh->tpl_root_dir.$this->rh->tpl_skin."/templates/".preg_replace("/\.html:.*/", ".html", $from);
-					$contents = file($file_source);
+					if(file_exists($file_source))
+					{
+						$contents = file($file_source);
+					}
+					else
+					{
+						$contents = array();
+					}
 					$contents = str_replace($needle, "<font color='red'>".$needle."</font>", $contents);
 
 				  	$pret = "<br><div style='background-color:#DDDDDD'> ";
@@ -125,6 +134,26 @@ class FileNotFoundException extends Exception
 			
 		return $ret;	
 	}
+	
+	protected function buildSearchHistory()
+	{
+		if(empty($this->searchHistory))
+		{
+			return '';
+		}
+		
+		$out = '<div style="margin-top: 15px;"><b>Search history:</b></div>';
+		$out .= '<div class="search-history">';
+
+		foreach($this->searchHistory AS $k => $v)
+		{
+			$out .= '<div>'.$k.' - '.str_replace($this->rh->project_dir, '', $v).'</div>';
+		}
+		
+		$out .= '</div>';
+		return $out;
+	}
+	
 }
 
 ?>
