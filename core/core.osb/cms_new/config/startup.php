@@ -7,7 +7,7 @@
 	$this->UseClass('Trash');
 	$this->trash =& new Trash($this);
 			
-	$res = $this->db->query('SELECT name, value FROM '.$this->project_name.'_config WHERE name IN("project_title", "admin_email")');
+	$res = $this->db->query('SELECT name, value FROM '.$this->project_name.'_config');
 	if(is_array($res) && !empty($res))
 	{
 		foreach($res AS $r)
