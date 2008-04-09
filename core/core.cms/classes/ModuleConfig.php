@@ -25,6 +25,11 @@ class ModuleConfig {
 		
 		//всё ОК
 		$this->module_name = $module_name;
+		
+		// add module dir to DIRS stack
+		$module_dir = $this->rh->DIRS[0].$this->handlers_type.'/'.$this->module_name.'/';
+		array_unshift($this->rh->DIRS, $module_dir);
+		array_unshift($this->rh->tpl->DIRS, $module_dir);
 	}
 	
 	function Read( $what )
@@ -86,13 +91,7 @@ class ModuleConfig {
 	{
 		$rh =& $this->rh;
 		//грузим класс
-		$first_dir_parts = explode("/", $this->rh->DIRS[0]);
 
-		//чтобы не добавлять по нескольку раз, тк мы здесь оказываемся 3 раза
-		$module_dir = $this->rh->DIRS[0].$this->handlers_type.'/'.$this->module_name.'/';
-		if ( $this->module_name != $first_dir_parts[ count($first_dir_parts)-2 ] )
-			 array_unshift($this->rh->DIRS, $module_dir);
-		
 		if( $this->get_class_here )
 		{
 			require_once( $this->rh->FindScript( $this->handlers_type, $this->module_name.'/'.$this->class_name ) );

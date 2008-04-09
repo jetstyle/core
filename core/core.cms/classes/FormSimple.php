@@ -44,20 +44,7 @@ class FormSimple extends DBDataEdit  {
 		$this->template_item = $config->template_item;
     }
     
-    // first search for template in templates folder in module
-    if($this->template_item)
-    {
-		if(substr($this->template_item, -5) == '.html')
-		{
-			$this->template_item = substr($this->template_item, 0, -5);
-		}
-		
-    	if($tpl = $this->rh->findScript_('templates', $this->template_item, 0, 1, 'html'))
-		{
-			$this->template_item = $tpl;
-		}
-    }
-    else
+    if(!$this->template_item)
     {
 		$this->template_item = $this->rh->findScript_( $config->handlers_type, $this->config->module_name.'/'.($config->_template_item ? $config->_template_item : $this->_template_item), 0, 1, 'html' );
     }
