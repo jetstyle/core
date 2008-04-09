@@ -1,0 +1,50 @@
+{{!connect "jquery_latest.js"}}
+{{!connect "utils.js"}}
+{{!connect "events.js"}}
+{{!connect "gallery.js"}}
+
+{{!connect "gallery.css"}}
+
+{{!connect "drag/core.js"}}
+{{!connect "drag/events.js"}}
+{{!connect "drag/css.js"}}
+{{!connect "drag/coordinates.js"}}
+{{!connect "drag/drag.js"}}
+{{!connect "drag/dragsort.js"}}
+{{!connect "drag/cookies.js"}}
+
+<input type="hidden" id="{{prefix}}rubric" name="{{prefix}}rubric" value="{{_rubric_id}}" />
+
+<table cellspacing="0" cellpadding="0" class="quick-simple-form w100">
+<tr>
+  <td width="20%" class="right"><label for="file">Новый файл:</label></td>
+  <td class="desc">
+	<input type="file" id="file" name="file" /><input type="button" name="upload" value="upload" id="uploadButton" /><input type="button" id="deleteButton" name="delete" value="delete" />
+  </td>
+</tr>
+</table>
+
+<div id="msg_cont" style="display: none; text-align: center;"><img src="{{images}}ajax-loader-arrows.gif" /></div>
+
+<div id="images_cont"></div>
+
+<script language="javascript">
+var dragsort = null;
+var gallery = null;
+
+window.onload = function()
+{
+	dragsort = ToolMan.dragsort();
+
+	gallery = new Gallery({'imgCont' : 'images_cont', 'url' : '{{ajax_url}}', 'uploadButtonId' : 'uploadButton', 'deleteButtonId' : 'deleteButton', 'inputFileId' : 'file', 'msgCont' : 'msg_cont', 'editUrl' : '{{edit_url}}'});
+
+	var sel = document.getElementById('{{prefix}}rubric');
+	gallery.setRubricId(sel.value);
+	gallery.load({});
+};
+
+function afterResize(data)
+{
+	gallery.changeImg(data);
+}
+</script>
