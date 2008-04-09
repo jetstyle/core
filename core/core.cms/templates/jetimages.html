@@ -36,15 +36,22 @@ ids[{{*i}}] = '{{*id}}';
 	
 	if(image_c )
 	{
+	
 		max_height = 0
-		for(i=0; i<_height_small.length; i++)
-		  max_height = Math.max(max_height,_height_small[i])
-
+//		for(i=0; i<_height_small.length; i++)
+		for (var i in _height_small)
+		{
+//		  if (_height_small[i] != undefined)
+		    max_height = Math.max(max_height,_height_small[i])
+		}
+		  
 		max_width = 0
-		for(i=0; i<_width_small.length; i++)
+//		for(i=0; i<_width_small.length; i++)
+		for (var i in _width_small)
 		  max_width = Math.max(max_width,_width_small[i])
 		
-		for(i=0; i<src_small.length; i++)
+//		for(i=0; i<src_small.length; i++)
+		for (var i in src_small)
 		{
 			var div = document.createElement('div');
 			var frame = document.createElement('div');
