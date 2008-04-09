@@ -7,7 +7,7 @@
 </div>
 {{/TPL:List_Item}}
 
-{{TPL:List_Item_Exchange}} | <a href="" onclick="{{prefix}}picker.Pick({{$_id}},2);return false;">&lt;&gt;</a>{{/TPL:List_Item_Exchange}}
+{{TPL:List_Item_Exchange}} | <a href="" onclick="{{prefix}}picker.Pick({{_id}},2);return false;">&lt;&gt;</a>{{/TPL:List_Item_Exchange}}
 
 {{TPL:List_Item_sel}}<div class="element-s-"><img src="{{images}}element_s.gif" width="16" height="12" align="bottom" alt="" title="" 
 />&nbsp;{{*_title}} 
@@ -46,8 +46,8 @@
   </div>
 {{/TPL:add_new}}
 
-{{TPL:TrashShow}}<div class="trash-"><a href="{{$_href}}">показать удалённые</a></div>{{/TPL:TrashShow}}
-{{TPL:TrashHide}}<div class="trash-"><a href="{{$_href}}">спрятать удалённые</a></div>{{/TPL:TrashHide}}
+{{TPL:TrashShow}}<div class="trash-"><a href="{{_href}}">показать удалённые</a></div>{{/TPL:TrashShow}}
+{{TPL:TrashHide}}<div class="trash-"><a href="{{_href}}">спрятать удалённые</a></div>{{/TPL:TrashHide}}
 
 {{TPL:main}}
 <div class="cms-list-advanced">
