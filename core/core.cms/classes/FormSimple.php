@@ -38,15 +38,30 @@ class FormSimple extends DBDataEdit  {
     $this->new_suffix = "";
     //настройки шаблонов
     $this->store_to = "form_".$config->module_name;
+    
     if( $config->template_item ) 
-    {
-    	$this->template_item = $config->template_item;
+    {	    	
+		$this->template_item = $config->template_item;
     }
     
-    if( !$this->template_item )
+    // first search for template in templates folder in module
+    if($this->template_item)
     {
-      $this->template_item = $this->rh->findScript_( $config->handlers_type, $this->config->module_name.'/'.($config->_template_item ? $config->_template_item : $this->_template_item), 0, 1, 'html' );
+		if(substr($this->template_item, -5) == '.html')
+		{
+			$this->template_item = substr($this->template_item, 0, -5);
+		}
+		
+    	if($tpl = $this->rh->findScript_('templates', $this->template_item, 0, 1, 'html'))
+		{
+			$this->template_item = $tpl;
+		}
     }
+    else
+    {
+		$this->template_item = $this->rh->findScript_( $config->handlers_type, $this->config->module_name.'/'.($config->_template_item ? $config->_template_item : $this->_template_item), 0, 1, 'html' );
+    }
+    
     //StateSet
     $this->state =& new StateSet($this->rh);
     $this->state->Set($this->rh->state);
