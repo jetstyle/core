@@ -90,6 +90,7 @@ class TreeControlTrue {
 
 		$rh =& $this->rh;
 		$tpl =& $rh->tpl;
+		ini_set('max_execution_time', 120);
 
 		$action = $this->rh->ri->get('action');
 		switch($action){
@@ -382,7 +383,8 @@ class TreeControlTrue {
 		// get all children of this node
 		$A =& $this->CHILDREN[$parent_id];
 		$n = count($A); 
-		for($i=0;$i<$n;$i++){
+		for($i=0;$i<$n;$i++)
+		{
 			// recursive execution of this function for each
 			// child of this node
 			// $right is the current right value, which is

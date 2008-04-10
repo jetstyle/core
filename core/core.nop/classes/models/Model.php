@@ -70,8 +70,11 @@ class Model
 	var $observers = array();
 	var $config = array();
 
-	function Model()
+	function Model(&$rh=null)
 	{
+		$this->rh=& $rh;
+		if ($rh)
+			$this->initialize($rh);
 	}
 
 	function initialize(&$ctx, $config=NULL) 
