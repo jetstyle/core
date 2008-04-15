@@ -228,7 +228,8 @@ class FormFiles extends FormSimple  {
 					if( is_array($row[2]) && count($row[2]) && !in_array( $file->ext, $row[2]) )
 					$kill = true;
 					//проверяем ограничение на линейные размеры
-					if(is_array($row[3])){
+					if(is_array($row[3]))
+					{
 						$A = @getimagesize( $file->name_full );
 						if(
 						$row[3][2] && ( $row[3][0] && $A[0]!=$row[3][0] || $row[3][1] && $A[1]!=$row[3][1]) || //строгие размеры
@@ -326,7 +327,7 @@ class FormFiles extends FormSimple  {
 						$upload->UploadFile($this->prefix.$field_file, str_replace('*', $this->id, $vvv['filename']), false, $this->buildParams($vvv));
 					}
 					
-					$upload->UploadFile($this->prefix.$field_file, str_replace('*', $this->id, $vv['filename']), false, $this->buildParams($vv));
+					$this->current_file = $upload->UploadFile($this->prefix.$field_file, str_replace('*', $this->id, $vv['filename']), false, $this->buildParams($vv));
 				}
 			}
 		}
