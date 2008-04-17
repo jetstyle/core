@@ -145,9 +145,9 @@ class MenuPlugin extends RenderablePlugin
 				$this->items[$r]['childs'] = $this->prepare($r);
 				$childs[] = $this->items[$r];
 			}
+			$childs[0]['is_first'] = true;
+			$childs[count($childs) - 1]['is_last'] = true;
 		}
-		$childs[0]['is_first'] = true;
-		$childs[count($childs) - 1]['is_last'] = true;
 		return $childs;
 	}
 
