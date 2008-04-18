@@ -419,6 +419,18 @@ class RequestHandler extends ConfigProcessor {
 			'print' => 1
 		)));
 
+        //умолчательный ключ сайтмапа = controller/method, например news/item
+        if (!isset( $this->site_map_path ))
+        {
+            $ss = str_replace("Page", "", get_class($this->page)); 
+                        
+            if ($this->page->method!="default" || ( $this->page->method == "default" && isset( $this->site_map[ strtolower( $ss.'/'.$this->page->method ) ]  ) ))
+                $k = strtolower($ss.'/'.$this->page->method);
+            else 
+                $k = strtolower($ss);
+                
+            $this->site_map_path = $k;
+        }
 		$conf = $this->site_map[$this->site_map_path];
 
 		$this->_showSiteMapPath($conf);

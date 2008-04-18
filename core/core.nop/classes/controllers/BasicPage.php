@@ -198,6 +198,7 @@ class BasicPage extends Controller
 						$method = 'handle_'.$action_parts[1];
 						if (method_exists($controller, $method))
 						{
+                            $this->method = $method;
 							$controller->initialize($this->rh);
 							$status = call_user_func_array(
 								array(&$controller, $method), 
@@ -207,6 +208,7 @@ class BasicPage extends Controller
 					}
 					else
 					{
+                        $this->method = $action; 
 				$status = call_user_func_array(
 					array(&$this, 'handle_'.$action), 
 					array($matches));
