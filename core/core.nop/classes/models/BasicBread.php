@@ -7,8 +7,8 @@ class BasicBread extends Model
 
     function load()
     {
-		$this->rh->useClass('models/Content');
-		$m =& new Content();
+		$this->rh->useClass('models/ContentModel');
+		$m =& new ContentModel();
 		if (isset($this->fields)) $m->fields = $this->fields;
 		if (isset($this->fields_info)) $m->fields_info = $this->fields_info;
 		$m->order = '_left ASC';

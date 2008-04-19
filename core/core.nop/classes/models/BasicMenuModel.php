@@ -15,8 +15,8 @@ class BasicMenuModel extends DBModel
 
 	function load($where=NULL, $limit=NULL, $offset=NULL)
 	{
-		$this->rh->useClass('models/Content');
-		$m =& new Content();
+		$this->rh->useClass('models/ContentModel');
+		$m =& new ContentModel();
 		if (isset($this->fields_info)) $m->fields_info = $this->fields_info;
 		if (isset($this->fields)) $m->fields = $this->fields;
 		if (isset($this->order)) $m->order = $this->order;
