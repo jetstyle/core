@@ -1,7 +1,7 @@
 <?php
 $this->UseClass("models/DBModel");
 
-class BasicNews extends DBModel
+class BasicNewsModel extends DBModel
 {
 //	var $table = 'news';
 	var $fields = array('id', 
