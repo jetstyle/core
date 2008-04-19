@@ -81,7 +81,7 @@ class PageDomain
 	{
 		if (empty($this->pageDomains))
 		{
-			$this->rh->useClass('BasicPageDomain');
+			$this->rh->useClass('domains/BasicPageDomain');
 			foreach($this->domains AS $domain)
 			{
 				$className = ucfirst($domain).'PageDomain';

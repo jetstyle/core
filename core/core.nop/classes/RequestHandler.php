@@ -359,7 +359,9 @@ class RequestHandler extends ConfigProcessor {
 		session_set_cookie_params(0, "/", $this->cookie_domain);
 	}
 
-	protected function mapHandler($url) {
+	protected function mapHandler($url) 
+	{
+		$this->useClass("domains/PageDomain");
 		$this->pageDomain = new PageDomain($this);
 		if ($page = & $this->pageDomain->findPageByUrl($url)) 
 		{

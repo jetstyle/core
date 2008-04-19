@@ -27,8 +27,8 @@ class ContentPageDomain extends BasicPageDomain
 	{
 		if (empty($criteria)) return False; // FIXME: lucky@npj -- вернуть все страницы?
 
-		$this->rh->useClass('models/Content');
-		$content =& new Content();
+		$this->rh->useClass('models/ContentModel');
+		$content =& new ContentModel();
 		$content->initialize($this->rh);
 
 		$where = array();
