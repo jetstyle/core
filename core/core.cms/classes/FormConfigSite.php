@@ -16,7 +16,10 @@ class FormConfigSite extends FormFiles
 		foreach ($this->ITEMS as $r)
 		{
 			$tpl->setRef('*', $r);
-			$tpl->parse($this->template_item.":Row", "rows", 1);
+			if ($r["type"] == "2")
+				$tpl->parse($this->template_item.":TextRow", "rows", 1);
+			else
+				$tpl->parse($this->template_item.":Row", "rows", 1);
 		}
 
 		if($this->config->admin_password)
