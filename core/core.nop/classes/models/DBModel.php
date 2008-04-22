@@ -329,38 +329,21 @@ class DBModel extends Model implements IteratorAggregate, ArrayAccess, Countable
 	 *			нужно править класс
 	 */
 	function mapUpload(&$data, $info)
-	{
-		$type = 'Upload';
-		$field_name = $info['name'];
-		$dir = $info[$type]['dir'];
-		$name = $info[$type]['source'];
+	{	
 		$model =& $this->rh->upload;
 		if (!isset($model)) return;
 
-		if (isset($info[$type]['path']))
-		{
-			$pattern = $info[$type]['path']; 
-		}
-		else
-		if (isset($info[$type]['dir']) && isset($info[$type]['file']))
-		{
-			$pattern = $info[$type]['dir'] .'/'.$info[$type]['file'];
-		}
+		$fname = str_replace('*', $data['id'], $info['path']);
 
-		$pattern = str_replace('*', '%s', $info[$type]['path']);
-
-		foreach ($data as $k=>$v)
+		$file = $model->getFile($fname);
+		if ($file) 
 		{
-			$fname = sprintf($pattern, $v['id']);
-			$file = $this->rh->upload->getFile($fname);
-			if ($file) 
-			{
-				list($width, $height, $type, $attr) = getimagesize($file->name_full);
-				$file->height = $height;
-				$file->width = $width;
-			}
-			$data[$k][$field_name] = $file;
+			list($width, $height, $type, $attr) = getimagesize($file->name_full);
+			$file->height = $height;
+			$file->width = $width;
 		}
+		
+		$data[$info['name']] = $file;
 	}
 
 	function getSelectSql($where=NULL, $limit=NULL, $offset=NULL)

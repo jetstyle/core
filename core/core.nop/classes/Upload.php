@@ -72,6 +72,7 @@ class Upload {
 	{
 		$this->rh =& $rh;
 		$this->dir = $dir;//with trailing '/'
+		$this->webDir = $this->rh->base_url.str_replace($this->rh->project_dir, '', $this->dir);
 		$this->table_name = $table_name ? $table_name : $rh->project_name.'_upload';
 		$this->init();
 	}
@@ -111,7 +112,7 @@ class Upload {
 		$this->current->format = ($this->TYPES[$ext][1] ? $this->TYPES[$ext][1] : strtolower($ext));
 		$this->current->_format = $this->TYPES[$ext][0];
 		$this->current->size = floor(100.0*@filesize($file_name_full)/1024)/100;
-		$this->current->link = $this->dir.$this->current->name_short;
+		$this->current->link = $this->webDir.$this->current->name_short;
 	}
 
 	/*
