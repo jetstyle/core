@@ -1,5 +1,5 @@
-<?
-	$this->class_name = 'TextsForm';
+<?php
+	$this->class_name = 'FormTexts';
 	$this->table_name = $this->rh->project_name.'_texts';
 	$this->SELECT_FIELDS = array('id','title','text','_state','_supertag','type');
 	$this->RENDER = array(
@@ -10,6 +10,4 @@
 	$this->PRE_FILTERS = array(
 		'typografica' => array('title','text'),
 	);
-	
-	
 ?>

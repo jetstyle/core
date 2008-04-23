@@ -66,8 +66,7 @@ class BasicNewsModel extends DBModel
 	);
 
 	var $where = 'news._state=0';
-	var $order = array('inserted'=>'DESC', 'id'=>'DESC');
-//	var $order = array('inserted', 'id');
+	var $order = array('inserted'=>'DESC');
 
 	function loadYearsRange($where=NULL, $limit=NULL, $offset=NULL)
 	{

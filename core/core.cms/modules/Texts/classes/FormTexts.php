@@ -1,8 +1,7 @@
-<?
+<?php
+$this->useClass('FormSimple');
 	
-	$this->UseClass('FormSimple');
-	
-class TextsForm extends FormSimple {
+class FormTexts extends FormSimple {
   
   var $template_item = 'texts_form.html';
   
@@ -19,7 +18,7 @@ class TextsForm extends FormSimple {
     else
       $tpl->parse( $this->template_item.':text_rich', 'text' );
     
-    FormSimple::Handle();
+    parent::Handle();
   }
 	
 	function Update(){
@@ -28,7 +27,7 @@ class TextsForm extends FormSimple {
 		if( $rh->GLOBALS[ $this->prefix.'_supertag'.$this->suffix ]=='' )
 			$this->config->supertag = 'title';
     
-		return FormSimple::Update();
+		return parent::Update();
 	}
 	
 }

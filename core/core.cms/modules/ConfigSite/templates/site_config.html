@@ -1,0 +1,32 @@
+{{&js:default}}
+{{&js:jquery_latest}}
+{{&js:utils}}
+{{&js:validator}}
+
+<table border='0'>
+	{{rows}}
+
+<tr>
+ <td>Прайс:</td>
+  <td class="desc">
+    <input type="file" name="{{$prefix}}file"><br>
+    <input type="checkbox" id="{{$prefix}}file_del" name="{{$prefix}}file_del" value='1'>&nbsp;<label for="{{$prefix}}file_del" class="warning">удалить</label>
+    <br>{{*file}}
+  </td>
+</tr>
+
+</table>
+
+{{TPL:Row}}
+<tr>
+<td id="td_{{*name}}">{{*title}}</td>
+<td>
+	<input type="text" size="100" name="{{prefix}}{{*name}}" value="{{*value}}" id="in_{{*name}}" validate="{{*validate}}" validate_params="{{*validate_params}}">
+	<input type="hidden" size="10" name="{{prefix}}{{*name}}_type" value="{{*type}}" id="ch_{{*name}}_type">
+</td>
+</tr>
+{{/TPL:Row}}
+
+<script language="javascript">
+	var v = new Validator('{{__form_name}}', false);
+</script>

@@ -28,8 +28,9 @@ class ModuleConfig {
 		
 		// add module dir to DIRS stack
 		$module_dir = $this->rh->DIRS[0].$this->handlers_type.'/'.$this->module_name.'/';
-		array_unshift($this->rh->DIRS, $module_dir);
-		array_unshift($this->rh->tpl->DIRS, $module_dir);
+		$module_dir_core = $this->rh->DIRS[1].$this->handlers_type.'/'.$this->module_name.'/';
+		array_unshift($this->rh->DIRS, $module_dir, $module_dir_core);
+		array_unshift($this->rh->tpl->DIRS, $module_dir, $module_dir_core);
 	}
 	
 	function Read( $what )
