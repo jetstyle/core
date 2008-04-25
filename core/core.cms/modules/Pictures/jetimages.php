@@ -60,8 +60,8 @@
 	    
 		if(is_array($res) && !empty($res))
 		{
-            //die(dirname(__FILE__)."/_files.php");
-            include(dirname(__FILE__)."/_files.php");
+            include($this->rh->findScript('modules', $this->module_name.'/_files'));
+            
             $preview_filename = $this->_FILES['file_small'][0]['filename'];
             
 			foreach($res AS $i => $r)

@@ -6,7 +6,8 @@
   $this->SELECT_FIELDS = array('id','title','descr','_state');
   $this->INSERT_FIELDS = array( 'topic_id'=>$this->rh->state->Keep( 'topic_id', 'integer') );
 
-  include("_files.php");
+  include($this->rh->findScript('modules', $this->module_name.'/_files'));
+  
   $this->RENDER = array( array('_state','checkbox') );
 
 //  $rh->tpl->set('max_width',$rh->pictures->max_width);

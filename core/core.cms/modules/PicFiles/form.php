@@ -8,6 +8,5 @@
 	$this->RENDER = array( array('_state','checkbox') );
     $this->max_file_size = $this->rh->max_file_size;
 
-    include(dirname(__FILE__)."/_files.php");
-
+    include($this->rh->findScript('modules', $this->module_name.'/_files'));
 ?>

@@ -55,7 +55,7 @@ $upload =& new Upload($rh, $rh->front_end->file_dir);
 	
 		if(is_array($res) && !empty($res))
 		{
-    		include(dirname(__FILE__)."/_files.php");
+    		include($this->rh->findScript('modules', $this->module_name.'/_files'));
             $filename = $this->_FILES['file'][0]['filename'];
 
             $upload->dir .= $this->upload_dir.'/';
