@@ -178,10 +178,17 @@ class RequestHandler extends ConfigProcessor {
 			$this->_fuckQuotes($_COOKIE);
 			$this->_fuckQuotes($_REQUEST);
 		}
-
+		
 		//базовые объекты фреймворка
 		//TODO: все они синглтоны
 		$this->init();
+		
+		// config from DB
+		$this->useClass('models/DBConfig');
+		$c =& new DBConfig();
+		$c->initialize($this);
+		$c->load();
+		config_joinConfigs($this, $c->data);
 	}
 
 	public function & getPageDomain() {
