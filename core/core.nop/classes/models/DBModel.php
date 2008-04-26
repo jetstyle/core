@@ -373,6 +373,7 @@ class DBModel extends Model implements IteratorAggregate, ArrayAccess, Countable
 //		$data = $this->rh->db->query($sql);
 		$data = DBAL::getInstance()->query($sql);
 //	if ($_GET["debug"] && get_class($this) == "CommentsModel")
+//	if (get_class($this) == "EventsModel")
 //		echo $sql."<br /><br />";
 		
 		$this->loadForeignFields($data);
@@ -444,6 +445,7 @@ class DBModel extends Model implements IteratorAggregate, ArrayAccess, Countable
 	function select($where=NULL, $limit=NULL, $offset=NULL, $is_load=false)
 	{
 		$sql = $this->getSelectSql($where, $limit, $offset, $is_load);
+		
 		return $this->selectSql($sql, $is_load);
 	}
 	function onBeforeInsert(&$row)

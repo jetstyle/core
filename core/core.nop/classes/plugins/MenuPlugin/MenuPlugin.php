@@ -59,8 +59,8 @@ class MenuPlugin extends RenderablePlugin
 		 * загрузим модель меню
 		 * с условием на where
 		 */
-		$this->rh->UseClass("models/MenuModel");
-		$menu = & new MenuModel();
+		$this->rh->UseClass("models/Menu");
+		$menu = & new Menu();
 
 		$current = $this->rh->page->config;
 		$parents = $this->getParentNodes();
@@ -132,8 +132,6 @@ class MenuPlugin extends RenderablePlugin
 		}
 		unset ($this->items, $this->link, $this->childs);
 
-		//echo($menu);
-
 		$this->models['menu'] = & $menu;
 	}
 
@@ -147,9 +145,12 @@ class MenuPlugin extends RenderablePlugin
 				$this->items[$r]['childs'] = $this->prepare($r);
 				$childs[] = $this->items[$r];
 			}
-			$childs[0]['is_first'] = true;
-			$childs[count($childs) - 1]['is_last'] = true;
 		}
+//		$keys = array_keys($childs);
+//		$childs[$keys[0]]['is_first'] = true;
+//		$childs[$keys[count($keys) - 1]]['is_last'] = true;
+		$childs[0]['is_first'] = true;
+		$childs[count($keys) - 1]['is_last'] = true;
 		return $childs;
 	}
 
