@@ -59,8 +59,8 @@ class MenuPlugin extends RenderablePlugin
 		 * загрузим модель меню
 		 * с условием на where
 		 */
-		$this->rh->UseClass("models/Menu");
-		$menu = & new Menu();
+		$this->rh->UseClass("models/MenuModel");
+		$menu = & new MenuModel();
 
 		$current = $this->rh->page->config;
 		$parents = $this->getParentNodes();
