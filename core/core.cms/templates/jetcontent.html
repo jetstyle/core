@@ -4,7 +4,7 @@
 <head>
 <title>{{TITLE}}</title>
   <meta http-equiv="Content-Type" content="text/html; charset=windows-1251">
-  <script type="text/javascript" src="{{/}}libs/tinymce/tiny_mce_popup_mod.js"></script>
+  <script type="text/javascript" src="{{/}}libs/tinymce/tiny_mce_popup_simple.js"></script>
   <script src="{{js}}utils.js" type="text/javascript"></script>
   <script src="{{js}}cookie.js" type="text/javascript"></script>
   <script src="{{js}}dhtmlXCommon.js" type="text/javascript"></script>
@@ -24,7 +24,7 @@
 <div class="form">
 <div class="buttons-">
 <input type="button" name="Вставить" value="Вставить" onclick="Ok();" id="submit" />
-<input type="button" name="Закрыть" value="Закрыть" onclick="window.close();" />
+<input type="button" name="Закрыть" value="Закрыть" onclick="tinyMCEPopup.close();" />
 </div>
 </div>
 <script language="javascript">
@@ -45,15 +45,14 @@
 		var item = tree._globalIdStorageFind(itemId);
 		if(item)
 		{
-			var selectedText = tinyMCE.selectedInstance.selection.getSelectedHTML();
-			txt = (selectedText.length > 0) ? selectedText : /*item.label*/ item.userData['t_title_ins'];
+			var selectedText = tinyMCE.activeEditor.selection.getContent();
+			txt = (selectedText.length > 0) ? selectedText : item.userData['t_title_ins'];
 			
-			tinyMCE.selectedInstance.execCommand('mceInsertContent', false, '<a href="'+item.userData['t_link']+'">'+txt+'</a>');
+			tinyMCEPopup.execCommand('mceInsertContent', false, '<a href="'+item.userData['t_link']+'">'+txt+'</a>');
 		}
 		tinyMCEPopup.close();		
 	}
 
-  //tree.setOnClickHandler(Ok);	
 	tree.setXMLAutoLoading(tinyMCE.jetcontent); 
 	tree.loadXML(tinyMCE.jetcontent + "?id=content-1");
 </script>

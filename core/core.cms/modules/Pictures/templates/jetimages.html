@@ -117,7 +117,7 @@ ids[{{*i}}] = '{{*id}}';
 			var h = '<img src="'+src_big[id]+'" mode="'+mode+'" title="'+_title[id]+'" width="'+_width[id]+'" height="'+_height[id]+'" />';
 		}			
 						
-		tinyMCE.selectedInstance.execCommand('mceInsertContent', false, h);
+		tinyMCEPopup.execCommand('mceInsertContent', false, h);
 		tinyMCEPopup.close();
 	}
 	
@@ -131,7 +131,7 @@ ids[{{*i}}] = '{{*id}}';
 <head>
 <title>{{TITLE}}</title>
   <meta http-equiv="Content-Type" content="text/html; charset=windows-1251">
-  <script type="text/javascript" src="{{/}}libs/tinymce/tiny_mce_popup_mod.js"></script>
+  <script type="text/javascript" src="{{/}}libs/tinymce/tiny_mce_popup_simple.js"></script>
 	<link rel="stylesheet" href="{{css}}all.css" media="all" type="text/css" />
 	<link rel="stylesheet" href="{{css}}popup.css" media="all" type="text/css" />
 </head>
