@@ -14,13 +14,6 @@
   	$names = $names ? $names.','.$params['tpl_prefix'] . $params['input_name'] : $params['tpl_prefix'] . $params['input_name'];
   	$rh->tpl->set('rich_editors', $names);
   	
-  	if($params['light'])
-  	{
-  		$names = $rh->tpl->get('light_editors');
-  		$names = $names ? $names.',"'.$params['tpl_prefix'] . $params['input_name'] . '"' : '"' . $params['tpl_prefix'] . $params['input_name'] . '"';
-  		$rh->tpl->set('light_editors', $names);
-  	}
-  	
     $out = $rh->tpl->parse($params['template'].':instance');
   }
 
