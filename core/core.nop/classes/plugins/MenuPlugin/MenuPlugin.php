@@ -145,12 +145,12 @@ class MenuPlugin extends RenderablePlugin
 				$this->items[$r]['childs'] = $this->prepare($r);
 				$childs[] = $this->items[$r];
 			}
+			$childs[0]['is_first'] = true;
+			$childs[count($keys) - 1]['is_last'] = true;
 		}
 //		$keys = array_keys($childs);
 //		$childs[$keys[0]]['is_first'] = true;
 //		$childs[$keys[count($keys) - 1]]['is_last'] = true;
-		$childs[0]['is_first'] = true;
-		$childs[count($keys) - 1]['is_last'] = true;
 		return $childs;
 	}
 
