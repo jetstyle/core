@@ -348,7 +348,9 @@ class FormFiles extends FormSimple  {
 		$upload =& $this->upload;
 
 		$res = FormSimple::Delete();
-		if( $res ==2 ){
+		if( $res ==2 )
+		{
+			if (!empty($this->config->_FILES))
 			foreach($this->config->_FILES AS $field_file => $v)
 			{
 				if(is_array($v))
