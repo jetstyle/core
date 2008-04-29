@@ -73,9 +73,9 @@ if ($result = $this->db->execute('SELECT name, value FROM ' . $this->project_nam
 
 //шаблонные переменные для редактора
 $this->tpl->set('fe_/', $this->front_end->path_rel);
-$this->tpl->set('fe_images', $this->front_end->path_rel . $this->project_name . '/' . $this->front_end->skin . '/images/');
-$this->tpl->set('fe_css', $this->front_end->path_rel . $this->project_name . '/css/');
-$this->tpl->set('fe_js', $this->front_end->path_rel . $this->project_name . '/js/');
+$this->tpl->set('fe_images', $this->front_end->path_rel . 'app/' . $this->front_end->skin . '/images/');
+//$this->tpl->set('fe_css', $this->front_end->path_rel . $this->project_name . '/css/');
+//$this->tpl->set('fe_js', $this->front_end->path_rel . $this->project_name . '/js/');
 
 //логирование
 if ($this->trace_logs) 
