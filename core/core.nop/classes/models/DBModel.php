@@ -638,12 +638,21 @@ class DBModel extends Model implements IteratorAggregate, ArrayAccess, Countable
 		if (empty($fields))
 			$sql = '';
 		else
+		{
 			$sql = ' GROUP BY '. (
 				is_array($fields)
 				? implode(',',array_map(array(&$this, 'quoteField'), $fields))
 				:	$fields)
 				;
+			$sql .= $this->buildHaving();
+		}
 		return $sql;
+	}
+
+	private function buildHaving()
+	{
+		if ($this->having)
+			return " HAVING " . $this->having;
 	}
 
 	//dz: теперь конфиг для order лежить только в $this->order, не в $this->fields_info (@ 2008.02.04)
