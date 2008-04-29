@@ -27,6 +27,16 @@
 </tr>
 {{/TPL:Row}}
 
+{{TPL:TextRow}}
+<tr>
+<td id="td_{{*name}}">{{*title}}</td>
+<td>
+	<textarea cols="60" rows="10" name="{{prefix}}{{*name}}" id="in_{{*name}}" validate="{{*validate}}" validate_params="{{*validate_params}}">{{*value}}</textarea>
+	<input type="hidden" size="10" name="{{prefix}}{{*name}}_type" value="{{*type}}" id="ch_{{*name}}_type">
+</td>
+</tr>
+{{/TPL:TextRow}}
+
 <script language="javascript">
 	var v = new Validator('{{__form_name}}', false);
 </script>
