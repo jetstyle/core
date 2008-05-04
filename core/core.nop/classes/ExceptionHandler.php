@@ -82,37 +82,34 @@ class ExceptionHandler
 		$headers .= "Reply-To: =?windows-1251?b?" . base64_encode("Exception robot") . "?= <".$fromaddress.">\r\n";
 		$headers .= "Content-Type: text/html; charset=\"windows-1251\"";
 		$headers .= "Content-Transfer-Encoding: 8bit";
-
-		//var_dump($headers);
-		//echo $text;
-//		$res = mail("dzjuck@gmail.com", $subj, $text, $headers);
-		//var_dump($res);
 	}
 
 	private function show($exceptionObj)
 	{
-		echo $exceptionObj;
-//		var_dump(ini_get("memory_limit"));
+		if ("Exception" == get_class($exceptionObj))
+		{
+			echo $exceptionObj->getMessage();
+		}
+		else
+		{
+			echo $exceptionObj;
+		}		
 
 		if ($exceptionObj->no_trace) return;
 		echo "<br /><br /><b>Backtrace</b>:<br />";
 		
 		ob_start();
-//		debug_print_backtrace();
-//		print_r($exceptionObj->getTrace());
-//		is_array($exceptionObj->getTrace()));
-
-//$this->_getTrace($exceptionObj->getTrace());
 		echo "<pre>";
 		print_r($this->getTrace($exceptionObj->getTrace()));
 		echo "</pre>";
 		$_ = ob_get_contents();
 		ob_end_clean();
+
 		$_ = preg_replace("/\[db\_password\] \=>[^\,]+\,/", "", $_);
 		$_ = preg_replace("/\[db\_user\] \=>[^\,]+\,/", "", $_);
-//		echo '<pre>';
+
 		echo $_;
-//		echo '</pre>';
+
 	}
 
 	function getTrace($data)

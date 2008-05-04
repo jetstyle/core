@@ -192,7 +192,21 @@ class Upload {
 				}
 
 			}
-				
+			
+			// check directory
+			$dirname = dirname($file_name_full);
+			if (!is_dir($dirname))
+			{
+				if (!$this->createDir($dirname))
+				{
+					throw new Exception("Upload: can't create directory ".str_replace($this->rh->project_dir, '', $dirname));
+				}
+			}
+			elseif (!is_writable($dirname))
+			{
+				throw new Exception("Upload: directory ".str_replace($this->rh->project_dir, '', $dirname)." is not writable");
+			}
+					
 			if(is_array($params['size']) && (strlen($params['size'][0]) > 0 && strlen($params['size'][1]) > 0))
 			{
 				$A = getimagesize($uploaded_file);
@@ -242,6 +256,10 @@ class Upload {
 			$this->_current($file_name, $ext);
 			return $this->current;
 		}
+		else
+		{
+			return false;
+		}
 	}
 
 	protected function convertToFlv($fn, $ft)
@@ -249,6 +267,18 @@ class Upload {
 		exec("ffmpeg -i " . $fn . " -ar 22050 -ab 32 -f flv -s 320x240 ".$ft);
 	}
 
+	protected function createDir($dirname)
+	{
+		if (@mkdir($dirname, 0775, true))
+		{
+			return true;
+		}
+		else
+		{
+			return false;
+		}
+	}
+	
 	public function getFile( $file_name, $is_full_name=false )
 	{
 		$this->current = false;
