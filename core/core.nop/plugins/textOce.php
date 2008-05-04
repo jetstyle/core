@@ -31,16 +31,23 @@
 	if ($type == 'banners')
 		$custom = array('table'=>$db->prefix.'banners', 'module'=>'banners', 'field'=>'text', 'add_fields'=>'');
 	else
-		$custom = array('table'=>$db->prefix.'texts', 'module'=>'texts', 'field'=>'text_pre', 'add_fields'=>',type');
+		$custom = array('table'=>$db->prefix.'texts', 'module'=>'texts', 'field'=>'text_pre', 'add_fields'=>',type,title');
 
     //грузим текст по супертагу 
-    $sql = "SELECT id,".$custom['field'].$custom['add_fields']." FROM ".$custom['table']." WHERE _supertag='$supertag' AND _state=0";
-    $r = $db->queryOne($sql);
-    //$r = $rs->fields;
+	if ($rh->TEXTS[$supertag])
+	{
+		$r = $rh->TEXTS[$supertag];
+	}
+	else
+	{
+	    $sql = "SELECT id,".$custom['field'].$custom['add_fields']." FROM ".$custom['table']." WHERE _supertag='$supertag' AND _state=0";
+	    $r = $db->queryOne($sql);
 
-    //если такой записи нет - создаём её
-    if(!$r["id"])
-    	$r["id"] = $db->insert("INSERT INTO ".$custom['table']."(title,_supertag,_created,_modified) VALUES('$supertag','$supertag',NULL,NULL)");
+	    //если такой записи нет - создаём её
+	    if(!$r["id"])
+	    	$r["id"] = $db->insert("INSERT INTO ".$custom['table']."(title,_supertag,_created,_modified) VALUES('$supertag','$supertag',NULL,NULL)");
+	}
+    $rh->TEXTS[$supertag] = $r;
 
     //пририсовываем OCE
     $para = array( 
@@ -50,11 +57,12 @@
           'height'=> $r['type']==1 ? 500 : '600',
          ) ;
 
-	  echo $r[$custom['field']];  
+//var_dump($params);
+	  echo ( $params['field'] && isset( $r[$params['field']] ) ) ? $r[$params['field']] : $r[$custom['field']];  
   }
 
   
-	if ($good)
+	if ($good && !isset( $params["noedit"] ) )
 	    echo $rh->tpl->Action( 'oce', $para );
 	
 ?>
