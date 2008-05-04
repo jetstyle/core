@@ -7,7 +7,8 @@ $upload =& new Upload($rh, $rh->front_end->file_dir);
 	$rh->tpl->set('/node', $rh->url.'jetfiles');
 
 	$rubric = $rh->getVar('rubric', 'integer');
-
+	$rh->state->keep('rubric');
+	
 	$res = $rh->db->query("
 			SELECT id, title
 			FROM ".$rh->project_name."_picfiles_topics

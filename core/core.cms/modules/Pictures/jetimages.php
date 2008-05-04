@@ -1,8 +1,6 @@
 <?php
     $rh =& $this->rh;
 
-    
-
     $rh->UseClass('Upload');
     $upload =& new Upload($rh, $rh->front_end->file_dir."pictures/");
 
@@ -10,7 +8,8 @@
 	$rh->tpl->set('/node', $rh->url.'jetimages');
 
 	$rubric = $rh->getVar('rubric', 'integer');
-
+	$rh->state->keep('rubric');
+	
 	$res = $rh->db->query("
 			SELECT id, title
 			FROM ".$rh->project_name."_pictures_topics
