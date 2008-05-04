@@ -2,7 +2,7 @@
 
 {{TPL:List_Item}}
 <div class="element-">
-	<img src="{{images}}element.gif" width="16" height="12" align="bottom" alt="" title="" />&nbsp;<a href="{{*_href}}">{{*_title}}</a>
+	<img src="{{images}}element.gif" width="16" height="12" align="bottom" alt="" title="" />&nbsp;<a href="{{*_href}}">{{*_title|strip_scape}}</a>
 {{*_controls}}
 </div>
 {{/TPL:List_Item}}
@@ -10,7 +10,7 @@
 {{TPL:List_Item_Exchange}} | <a href="" onclick="{{prefix}}picker.Pick({{_id}},2);return false;">&lt;&gt;</a>{{/TPL:List_Item_Exchange}}
 
 {{TPL:List_Item_sel}}<div class="element-s-"><img src="{{images}}element_s.gif" width="16" height="12" align="bottom" alt="" title="" 
-/>&nbsp;{{*_title}} 
+/>&nbsp;{{*_title|strip_scape}} 
 {{*_controls}}</div>
 {{/TPL:List_Item_sel}}
 
