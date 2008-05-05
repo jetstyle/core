@@ -35,8 +35,30 @@
 Иначе если condition!=true <a href='{{condition_href}}'>включить</a>
 {{/?}}
 
+Смотрите в шаблон tests/mega.html для всяких интересных вариантов.
 
-<h2>*-синтаксис</h2>
+{{?condition==1}}
+condition==1
+{{/?}}
+
+{{?condition>1}}
+condition>1
+{{/?}}
+
+{{?condition!=1}}
+condition!=1
+{{/?}}
+
+{{?condition||1}}
+condition||1
+{{/?}}
+
+
+Все возможные операторы: == != <= => =< >= >  < ||
+
+
+<h2>Циклы</h2>
+{{@tests/fors.html}}
 
 
 {{TPL:subtpl}}

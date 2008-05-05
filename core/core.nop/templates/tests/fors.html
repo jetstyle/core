@@ -6,12 +6,24 @@ Assignation2: {{Assignation2}}<br>
 
 {{!for Items do=@:item assigned=Assignation}}
 
-{{:item}}
-id: {{*id}}<br>
-*assigned: {{*assigned}} <br>
-assigned: {{assigned}} <br>
-<hr>
+
+{{:item *assigned}}
+Пример условного подшаблона, чтобы он заработал, ассигн в !for должен быть *assigned=... Либо изменить условие на {:item assigned}<br>
+
+	id: {{*id}}<br>
+	*assigned: {{*assigned}} <br>
+	assigned: {{assigned}} <br>
+	<hr>
 {{/:item}}
+
+{{:item}}
+	id: {{*id}}<br>
+	*assigned: {{*assigned}} <br>
+	assigned: {{assigned}} <br>
+	<hr>
+{{/:item}}
+
 <!--
+Есть бага в инклуде, что *= работает, а *field= не работает.
 {{@tests/subtpl.html *=Assignation}}
 -->
