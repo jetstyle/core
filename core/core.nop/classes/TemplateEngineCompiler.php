@@ -438,13 +438,46 @@ class TemplateEngineCompiler
 		{
 			$params = $this->_ParseActionParams( $matches[1] );
 
+#            var_dump($matches[1]);
+#            var_dump($params);
 			$key = $params['each']?$params['each']:$params[0]; // ключ
 			//можно без each= а сразу, {{!for news do=test.html:news}}	     
 			$alias = $params['as']?$params['as']:NULL; // алиас
 			//можно {{!for news as news_item do=test.html:news}}	     
 			$template_name = $params['do']?$params['do']:$params['use']; // ключ
 
+            /**  
+            * @desc ѕримерно так делаетс€ в include, но тогда мы не сможем юзать класненький ассижн типа *varname=blabal,
+            * а сможем только varname=blabla либо *=blabla (как в инклуде и есть)
+            * 
+            *            $__ = $this->_ImplodeActionParams($params);
+            *            var_dump($__);
+            *
+            */
+            $parsed = $this->_parseParam($thing);
+            preg_match('#(.*)(do=)(.*)\s((.*)=(.*))#', $thing, $parsed);
+#            var_dump($parsed);
+            
+            $paramka = $parsed[4];
+            $assigned_key = $parsed[5];
+#            var_dump($paramka);   
 
+
+            $assignation = $this->_parseParams($paramka);
+            //var_dump( $assignation );   
+            
+            $assigned_compiled =  $this->_compileParam($assignation[$assigned_key]);
+            if (strpos($assigned_key,"*")===false)
+            {
+                $ass_key_noref = true;
+            }
+            else 
+            {
+                $assigned_key = str_replace("*","",$assigned_key);
+            }            
+#            var_dump($assigned_compiled);
+#            var_dump($key);
+#            die();
 			$key = $this->_compileParam($key);
 
 
@@ -480,6 +513,15 @@ class TemplateEngineCompiler
 //by dz
 if((is_array($_z) && !empty($_z)) || (is_object($_z) && $_z instanceof ArrayAccess && count($_z)>0))
 {
+    '.( $assigned_compiled && $ass_key_noref
+          ?
+           '$tpl->set("'.$assigned_key.'", '.$assigned_compiled.');'
+          :
+           ''
+          )
+        
+    .'
+   
 	$sep = $tpl->parse('.$sep_tpl.');
 	// надо чтобы его могло и не быть. 
 	// nop: это делаетс€ в parse через soft_subtpls
@@ -499,6 +541,14 @@ if((is_array($_z) && !empty($_z)) || (is_object($_z) && $_z instanceof ArrayAcce
 		$num++;
 		$for["odd"] = $num % 2;
 		$for["even"] = !$for["odd"];
+        '.( $assigned_compiled && !$ass_key_noref
+          ?
+           '$r["'.$assigned_key.'"]='.$assigned_compiled.';'
+          :
+           ''
+          )
+        
+        .'
 		$tpl->SetRef('.$item_store_to.', $r);
 
 		if (True===$first) 
@@ -534,8 +584,11 @@ unset($_z);
       // {{!action param}}
       if (preg_match($this->action_regexp, $thing, $matches))
       {
+          
         $params = $this->_ParseActionParams( $matches[1] );
-
+#        var_dump($matches[1]);
+#        var_dump($params);
+#        die();
         // let`s make it instant!
 		  if (in_array($params["_name"][TE_VALUE], $this->rh->tpl_instant_plugins) 
 			  // lucky: hint in template
@@ -546,6 +599,7 @@ unset($_z);
 
 		  $result = '';
         $param_contents = $this->_ImplodeActionParams( $params );
+#          var_dump($param_contents);
 		  $result .= ' $_='.$param_contents.';';
 		  $result .= ' $_r = $tpl->Action('
 			  .$this->_compileParam($params['_name']).', $_ ); ';
