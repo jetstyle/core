@@ -264,7 +264,8 @@ class DBModel extends Model implements IteratorAggregate, ArrayAccess, Countable
 
 				if ($type == "HasOne")
 				{
-					$where = "(" . $this->quoteField($fk)." = ".$f_model->quoteField($pk) . ")";
+//					$where = "(" . $this->quoteField($fk)." = ".$f_model->quoteField($pk) . ")";
+					$where = "(" . $this->_quoteField($fk, $this->table)." = ".$f_model->_quoteField($pk, $f_model->table) . ")";
 					if ($info["where"])
 						$where .= " AND (" . $info["where"] . ")";
 					if ($f_model->where)
