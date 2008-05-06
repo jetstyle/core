@@ -1,0 +1,28 @@
+<?xml version="1" encoding="windows-1251"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="ru" lang="ru">
+  <head>
+    <!--{{!Meta}}-->
+    <title>{{!PageTitle}}</title>
+    <link rel="stylesheet" href="{{css}}default.css" media="all" type="text/css" />
+    <link rel="stylesheet" href="{{css}}custom.css" media="all" type="text/css" />
+    {{!connect compile=css}}
+    <link rel="stylesheet" href="{{css}}print.css" 
+          media="{{?html:print}}all{{?:}}print{{/?}}" type="text/css" />
+
+    <script type="text/javascript" src="{{js}}default.js"></script>
+    <script type="text/javascript" src="{{js}}custom.js"></script>
+    {{!connect compile=js}}
+
+    {{!inline compile=head}}
+  </head>
+  
+<body id='idBody' onload="{{!inline compile=onload}}">
+<a id='top' name='top'></a>
+{{AUTH.PANEL}}<!-- cms tail. ????? take a look -->
+
+{{HTML:body}}
+
+{{!debug}}
+</body>
+</html>
