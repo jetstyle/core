@@ -1,0 +1,146 @@
+{{TPL:item}}files[{{*id}}] = {'src' : '{{*src}}', 'ext' : '{{*ext}}', 'size' : '{{*size}}', 'title' : '{{*title}}'};{{/TPL:item}}
+
+{{TPL:main}}
+<ul id="files"></ul>
+<script language="javascript">
+	var files = new Array();
+	var file_c = document.getElementById('files');
+	{{_data}}
+	
+	if(file_c)
+	{
+		var _html = '';
+		
+		for(var i in files)
+		{
+			_html = _html + '<li id="'+i+'"><input id="check_'+i+'" type="checkbox" fileid="'+i+'" name="filecheck" /><label for="check_'+i+'"> ' +files[i].title+'</label><span>, <small>.' + files[i].ext + ', ' + files[i].size + ' kb</small></span></li>';
+
+			/*
+
+			ненавижу IE.
+
+			*/
+
+			/*
+			var div = document.createElement('li');
+			var link = document.createElement('label');
+			var info = document.createElement('span');
+			var inp = document.createElement('input');
+			
+			inp.setAttribute('type', 'checkbox');
+			inp.id = 'check_' + i;
+			inp.setAttribute('id', 'check_' + i);
+			inp.fileid = i;
+			inp.setAttribute('fileid', i);
+			inp.name = 'filecheck';
+			inp.setAttribute('name', 'filecheck');
+			
+			link.innerHTML = ' '+files[i].title;
+			//link.for = 'check_' + i;
+			link.setAttribute('for', 'check_' + i);
+			
+			info.innerHTML = ', <small>.' + files[i].ext + ', ' + files[i].size + ' kb</small>';
+
+			div.appendChild(inp);
+			div.appendChild(link);
+			div.appendChild(info);
+			
+			div.id = i;
+			div.setAttribute('id', i);
+
+			file_c.appendChild(div);
+			*/
+		}
+
+		file_c.innerHTML = _html;
+	}
+	
+	function getHtml(id)
+	{
+		return '<a mode="file" href="'+files[id].src+'" fileparams="'+files[id].size+'|'+files[id].ext+'">'+files[id].title+'</a>';
+	}
+	
+	function insertFiles()
+	{
+		var els = document.getElementsByName('filecheck');
+		var ids = new Array();
+		var content = '';
+		
+		for(var i = 0; i < els.length; i++)
+		{
+			if(els[i].checked)
+			{
+				ids.push(els[i].getAttribute('fileid'));
+			}
+		}
+		
+		if(ids.length == 0)
+		{
+			return false;
+		}
+		else if(ids.length == 1)
+		{
+			content = getHtml(ids[0]);
+		}
+		else
+		{
+			content = '<ul class="files-">';
+			for(var i in ids)
+			{
+				content += '<li>' + getHtml(ids[i]) + '</li>';
+			}
+			content += '</ul>';
+		}
+		
+		tinyMCE.selectedInstance.execCommand('mceInsertContent', false, content);
+		tinyMCEPopup.close();
+		
+	}
+	
+</script>
+
+{{/TPL:main}}
+
+{{TPL:html}}
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html>
+<head>
+<title>{{TITLE}}</title>
+<meta http-equiv="Content-Type" content="text/html; charset=windows-1251">
+  <script type="text/javascript" src="{{/}}libs/tinymce/tiny_mce_popup_simple.js"></script>
+	<link rel="stylesheet" href="{{css}}all.css" media="all" type="text/css" />
+	<link rel="stylesheet" href="{{css}}popup.css" media="all" type="text/css" />
+</head>
+
+<body>
+
+<div class="form">
+
+	<form name="rubric" method="get" action="">
+	  <h2 style="margin-top: 0">
+	  <label for="rubric-select">Файлы из рубрики:</label>
+		<select name="rubric" id="rubric-select" onchange="document.forms['rubric'].submit()">
+			{{rubrics}}
+		</select>
+		</h2>
+	</form>		
+
+	<div>
+		{{pages}}		
+	</div>
+
+<div class="files">
+{{_files}}
+</div>
+
+  <div class="buttons-">
+
+  <input type="button" name="insert_files" value="Вставить" onclick="insertFiles();" id="submit" />
+  <input type="button" name="Закрыть" value="Закрыть" onclick="window.close();" />
+
+  </div>
+
+</div>
+</body>
+</html>
+{{/TPL:html}}
