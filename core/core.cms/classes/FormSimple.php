@@ -408,6 +408,7 @@ class FormSimple extends DBDataEdit  {
 		//set _created,_order
 		$this->rh->db->Execute("UPDATE ".$this->table_name." SET ".$this->created_field."=NULL,_order=".$this->SELECT_FIELDS[0]." WHERE ".$this->SELECT_FIELDS[0]."='$id'");
 		//return $id
+		$this->id = $id;
 		return $id;
 	}
 }
