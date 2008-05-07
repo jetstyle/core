@@ -64,8 +64,8 @@
             //die(dirname(__FILE__)."/_files.php");
             include(dirname(__FILE__)."/_files.php");
             $preview_filename = $this->_FILES['file_small'][0]['filename'];
-            
-			foreach($res AS $i => $r)
+            $i = 0;
+			foreach($res AS $r)
 			{
                 //echo '<hr>'.'picture_'.$r['id'].'_preview';
                 
@@ -81,7 +81,7 @@
 						$A1 = @getimagesize($file->name_full);
 						$data = array(
 							'id' => $r['id'],
-							'i' => $i,
+							'i' => $i++,
 							'title' => str_replace("'", "\'", $r['title']),
 							'src_small' => $rh->front_end->path_rel.'files/'.$this->upload_dir.'/'.$file->name_short,
 							'src_big' => $rh->front_end->path_rel.'files/'.$this->upload_dir.'/'.$file_big->name_short,
