@@ -133,6 +133,46 @@
 {{_files}}
 </div>
 
+<div id="uploader" class="uploader-hidden"> 
+    <h4><a href="javascript:alert('при нажатии убирать из всего блока #uploader класс .uploader-hidden, при повторном нажатии включать обратно.')" class="dynalink">Загрузить файл</a></h4>
+    <form action="" method="post">
+        <table>
+        	<tr>
+        	    <td class="label-"><label for="file-file">Файл:</label></td>
+        	    <td class="control-">
+                    <input type="file" name="file" id="file-file" />
+        	    </td>
+        	    <td class="label-"><label for="file-rubric-select">В рубрику:</label></td>
+        	    <td class="control-">
+                    <select name="rubric" id="file-rubric-select">
+            			{{rubrics}}
+            		</select>
+        	    </td>
+        	</tr>
+        	<tr>
+        	    <td class="label-"><label for="input-name">Заголовок:</label></td>
+        	    <td class="control-" colspan="3">
+                    <input type="text" name="name" id="input-name" />
+        	    </td>
+        	</tr>
+        	<tr>
+        	    <td class="label-" ><label for="textarea-description">Описание:</label></td>
+        	    <td class="control-" colspan="3">
+                    <textarea name="name" id="textarea-description"></textarea>
+        	    </td>
+        	</tr>
+        	<tr>
+        	    <td class="label-" ></td>
+        	    <td class="button-" colspan="3">
+                    <input class="submit" type="submit" value="Загрузить" />
+                    <input type="button" value="Отменить" />
+        	    </td>
+        	</tr>
+        </table>	    
+        
+    </form>
+</div>
+
   <div class="buttons-">
 
   <input type="button" name="insert_files" value="Вставить" onclick="insertFiles();" id="submit" />
