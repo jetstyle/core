@@ -8,6 +8,10 @@
     $rh->End();
   }
   
+  if ($rh->db_host=="localhost")
+  {
+  	$tpl->set('localhost', 1);
+  }
   include( $rh->FindScript("handlers","_toolbar") );
  
   //собираем все разделы для главной страницы

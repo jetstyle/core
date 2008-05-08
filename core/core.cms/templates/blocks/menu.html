@@ -1,7 +1,7 @@
 {{?show_toolbar}}
-<div class="cms-toolbar"><img class="block" src="{{images}}z.gif" width="1" height="4" align="top" alt="" /></div>
+<div class="{{?localhost}}cms-toolbar-localhost{{?:}}cms-toolbar{{/?}}"><img class="block" src="{{images}}z.gif" width="1" height="4" align="top" alt="" /></div>
 
-<table cellspacing="0" cellpadding="0" class="cms-toolbar w100">
+<table cellspacing="0" cellpadding="0" class="{{?localhost}}cms-toolbar-localhost{{?:}}cms-toolbar{{/?}} w100">
 <tr>
   <td nowrap="nowrap">{{user_part}}</td>
   <td class="sep-"><img class="block" src="{{images}}seporate.gif" width="2" height="20" align="top" alt="" /></td>
