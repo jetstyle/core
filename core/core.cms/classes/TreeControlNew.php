@@ -83,7 +83,7 @@ class TreeControlNew extends TreeControl
 	
 				$tpl->set( '_url_connect', $_href.'&action=update&_show_trash='.$show_trash.'&' );
 				$tpl->set( '_url_xml', $_href."action=xml&".$this->id_get_var.'='.$this->id.'&_show_trash='.$show_trash.'&' );
-	
+
 				$tpl->set( '_behavior', $this->tree_behavior );
 				$tpl->set( '_cur_id', $this->id );
 				$tpl->set( '_level_limit', 4 );
@@ -145,7 +145,7 @@ class TreeControlNew extends TreeControl
 					'open',		 1,
 					'db_state',	 $node->_state,
 				);
-			if($current->id == 1)
+			if($current->id == $root_id)
 			{
 				array_push($arr, 'select', 'true');
 			}
