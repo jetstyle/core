@@ -7,8 +7,7 @@
     echo $tpl->Parse('access_denied.html');
     $rh->End();
   }
-  
-  if ($rh->db_host=="localhost")
+  if ($rh->db_host=="localhost" && $_SERVER['REMOTE_ADDR']=='SERVER_ADDR')
   {
   	$tpl->set('localhost', 1);
   }
