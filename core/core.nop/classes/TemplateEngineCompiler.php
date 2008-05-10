@@ -493,7 +493,8 @@ if(is_array($_z) && !empty($_z))
 	$for = array(
 			"num"=>&$num,
 		);
-   $tpl->setRef("For", $for);
+    $tpl->setRef("For", $for);
+    $assigned_value = '.$assigned_compiled.';
 	foreach($_z AS $r)
 	{
 		$num++;
@@ -501,7 +502,7 @@ if(is_array($_z) && !empty($_z))
 		$for["even"] = !$for["odd"];
         '.( $assigned_compiled && !$ass_key_noref
           ?
-           '$r["'.$assigned_key.'"]='.$assigned_compiled.';'
+           '$r["'.$assigned_key.'"]= $assigned_value;'
           :
            ''
           )
