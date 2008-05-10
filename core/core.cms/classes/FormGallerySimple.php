@@ -56,7 +56,7 @@ class FormGallerySimple
 		$tpl->set('POST_STATE', $this->state->State(1));
 		$tpl->set('__form_name', $this->prefix . '_simple_form');
 
-		$tpl->set('_rubric_id', intval($this->rh->getVar($this->config->rubric_var ? $this->config->rubric_var : 'topic_id')));
+		$tpl->set('_rubric_id', intval($this->rh->ri->get($this->config->rubric_var ? $this->config->rubric_var : 'topic_id')));
 
 //		$res = $this->rh->db->Query("SELECT id, title FROM ".$this->rh->project_name."_gallery_rubrics WHERE _state = 0 ORDER BY _order ASC");
 //		$rubrics = array();
@@ -194,8 +194,8 @@ class FormGallerySimple
 
 	function handleUpload()
 	{
-		$id = intval($this->rh->getVar('picid'));
-		$rubric_id = intval($this->rh->getVar($this->prefix . 'rubric'));
+		$id = intval($this->rh->ri->get('picid'));
+		$rubric_id = intval($this->rh->ri->get($this->prefix . 'rubric'));
 		
 		$this->rubric_id = $rubric_id; 
 		

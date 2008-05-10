@@ -1,34 +1,24 @@
 <?php
-/*
- * Created on 30.11.2007
- *
+/**
+ * @author lunatic lunatic@jetstyle.ru
+ *  
+ * @modified 09.05.2008
  */
  
  class Toolbar
  {
  	protected $rh;
- 	protected $items = array();		// first level
- 	protected $subItems = array();	// second level
+ 	protected $items = array('main' => array(), 'submenu' => array());
  	
  	public function __construct(&$rh)
  	{
  		$this->rh = &$rh;
  	}
- 	
- 	public function handle()
+ 	 	
+ 	public function getData()
  	{
- 		if(!$this->rh->getVar('hide_toolbar'))
- 		{
- 			$this->load();
- 			$this->rh->tpl->set('menu', $this->items);
- 			$this->rh->tpl->set('menu_submenu', $this->subItems);
- 			$this->rh->tpl->set('show_toolbar', true);
- 		}
- 		else
- 		{
- 			$this->rh->state->Set('hide_toolbar',1);
- 			$this->rh->tpl->set('show_toolbar', false);
- 		}
+ 		$this->load();
+ 		return $this->items;
  	}
  	
  	/**
@@ -51,15 +41,16 @@
  	
  	protected function constructResult($result)
  	{
- 		$module_name = 'do/'.$this->rh->getVar('module');
+ 		$moduleName = 'do/'.$this->rh->params[0];
+
  		while($r = $this->rh->db->getRow($result))
  		{
- 			$r['granted'] = $this->rh->prp->isGrantedTo($r['href']);
+ 			$r['granted'] = $this->rh->principal->isGrantedTo($r['href']);
  			
  			
  			if($r['_level'] == 1)
  			{
- 				$this->items[$r['id']] = $r;
+ 				$this->items['main'][$r['id']] = $r;
  			}
  			else
  			{
@@ -67,39 +58,39 @@
  				{
  					continue;
  				}
- 				elseif($r['granted'] && $this->items[$r['_parent']])
+ 				elseif($r['granted'] && $this->items['main'][$r['_parent']])
  				{
- 					$this->items[$r['_parent']]['granted'] = true;
+ 					$this->items['main'][$r['_parent']]['granted'] = true;
  				}
  				
- 				if(!isset($this->subItems[$r['_parent']]))
+ 				if(!isset($this->items['submenu'][$r['_parent']]))
  				{
- 					$this->subItems[$r['_parent']] = array('id' => $r['_parent'], 'childs' => array());
+ 					$this->items['submenu'][$r['_parent']] = array('id' => $r['_parent'], 'childs' => array());
  				}
- 				$this->subItems[$r['_parent']]['childs'][$r['id']] = $r;
+ 				$this->items['submenu'][$r['_parent']]['childs'][$r['id']] = $r;
  			}
- 			if($module_name == $r['href'])
+ 			if($moduleName == $r['href'])
  			{
- 				if($this->items[$r['id']])
+ 				if($this->items['main'][$r['id']])
  				{
- 					$this->items[$r['id']]['selected'] = true;
+ 					$this->items['main'][$r['id']]['selected'] = true;
  					$this->rh->tpl->set('menu_selected', $r['id']);
  				}
  				else
  				{
- 					$this->subItems[$r['_parent']]['childs'][$r['id']]['selected'] = true;
- 					$this->subItems[$r['_parent']]['selected'] = true;
- 					$this->items[$r['_parent']]['selected'] = true;
+ 					$this->items['submenu'][$r['_parent']]['childs'][$r['id']]['selected'] = true;
+ 					$this->items['submenu'][$r['_parent']]['selected'] = true;
+ 					$this->items['main'][$r['_parent']]['selected'] = true;
  					$this->rh->tpl->set('menu_selected', $r['_parent']);
  				}
  			}
  		}
  		
- 		foreach($this->items AS $k => $item)
+ 		foreach($this->items['main'] AS $k => $item)
  		{
  			if(!$item['granted'])
  			{
- 				unset($this->subItems[$item['id']], $this->items[$k]);
+ 				unset($this->items['submenu'][$item['id']], $this->items['main'][$k]);
  			}
  		}
  	}

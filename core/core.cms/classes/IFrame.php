@@ -2,26 +2,26 @@
 	
 class IFrame  
 {	
-	var $rh; //ссылка на $rh
-	var $config; //ссылка на объект класса ModuleConfig
+	protected $rh; //ссылка на $rh
+	protected $config; //ссылка на объект класса ModuleConfig
 	
 	//for rendering
-	var $template = "iframe.html";
-	var $store_to = "";
-	
-	function IFrame( &$config ){
+	protected $template = "iframe.html";
+
+	public function __construct( &$config ){
 		//base modules binds
 		$this->config =& $config;
 		$this->rh =& $config->rh;
-		//куда класть?
-		$this->store_to = "iframe_".$config->module_name;
 	}
 	
-	function Handle(){
-		$tpl =& $this->rh->tpl;
-		$tpl->set( '__url', $this->config->url );
-		$tpl->Parse( $this->template, $this->store_to, true );
-		
+	public function handle()
+	{
+		$this->rh->tpl->set( '__url', $this->config->url );
+	}
+	
+	public function getHtml()
+	{
+		return $this->rh->tpl->parse( $this->template );
 	}
 }	
 ?>

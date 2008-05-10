@@ -1,26 +1,23 @@
-<?
-    
-    if ($this->rh->getVar('id'))
-    {
-		$this->class_name = 'IFrame';
-		$this->url = $this->rh->url.'do/'.$this->module_name.'/pictures?topic_id='.$this->rh->GetVar('id','integer').'&hide_toolbar=1';
+<?php
+$id = intval($this->rh->ri->get('id'));
+if(!$id)
+{
+	if(!$_REQUEST['_new'])
+	{
+		$res = $this->rh->db->queryOne("
+			SELECT id FROM ??pictures_topics
+			ORDER BY _order ASC
+		");
+		if($res['id'])
+		{
+			$this->rh->redirect($this->rh->ri->hrefPlus('', array('id' => $res['id'])));
+		}
 	}
-    else
-    {
-    	if(!$this->rh->getVar('_new'))
-    	{
-			$res = $this->rh->db->queryOne("
-				SELECT id FROM ".$this->rh->project_name."_pictures_topics
-				ORDER BY _order ASC
-			");
-			
-			if($res['id'])
-			{
-				$this->rh->redirect($this->rh->url.'do/'.$this->module_name.'?id='.$res['id']);
-				die();
-			}
-    	}
-
-		$this->class_name="Dummy";
-    }
+	$this->class_name = 'Dummy';
+}
+else 
+{
+	$this->class_name = 'IFrame';
+	$this->url = $this->rh->base_url.'do/'.$this->moduleName.'/pictures?topic_id='.$id.'&hide_toolbar=1';
+}
 ?>

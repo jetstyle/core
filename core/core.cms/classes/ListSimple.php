@@ -1,89 +1,222 @@
 <?php
 
-$this->useClass("DBDataEdit");
+class ListSimple 
+{
+	protected $rh; //ссылка на $rh
+	protected $config; //ссылка на объект класса ModuleConfig
+	protected $items;
+	protected $pager;
 	
-class ListSimple extends DBDataEdit  {
+	private $model;
 	
-	var $rh; //ссылка на $rh
-	var $config; //ссылка на объект класса ModuleConfig
-	var $loaded = false; //грузили или нет данные?
-	var $id_get_var = 'id';
+	protected $loaded = false; //грузили или нет данные?
+	protected $idGetVar = 'id';
+	protected $idField = "id";
+
+	protected $template = "list_simple.html"; //шаблон результата
+	protected $template_list = "list_simple.html:List"; //откуда брать шаблоны элементов списка
+
+	protected $template_trash_show = "list_simple.html:TrashShow";
+	protected $template_trash_hide = "list_simple.html:TrashHide";
 	
-	//for ListObject
-	var $template = "list_simple.html"; //шаблон результата
-	var $template_list = "list_advanced.html:List"; //откуда брать шаблоны элементов списка
-	var $store_to = "";
-	var $_href_template; //шаблон для формирования ссылки
-	var $template_trash_show = "list_simple.html:TrashShow";
-	var $template_trash_hide = "list_simple.html:TrashHide";
+	protected $template_new = 'list_simple.html:add_new';
+	protected $template_arrows = 'blocks/pager.html';
 	
-	function ListSimple( &$config ){
-		//base modules binds
+	protected $storeTo = "";
+
+	protected $pageVar = 'p';
+	protected $perPage = 20;
+	protected $frameSize = 7;
+	
+	protected $prefix;
+	
+	protected $html;
+	
+	public function __construct( &$config )
+	{
 		$this->config =& $config;
-		//DBDataEdit
-//		$config->Read("list");
-		$config->SELECT_FIELDS[] = ($config->state_field) ? $config->state_field . " as '_state'" : '_state';
-//	    	$where = $config->where.( $config->rh->GetVar('_show_trash') ? '' : ($config->where ? ' AND ' : '') . ( $config->state_field ? $config->state_field : "_state" ) . /*_state*/'<>2' );
-	    	$where = ( $config->rh->GetVar('_show_trash') ? '_state>=0' : ( $config->state_field ? $config->state_field : "_state" ) . '<>2' ) . ($config->where ? ' AND ' . $config->where : '') ;
-
-		DBDataEdit::DBDataEdit( $config->rh, $config->table_name, $config->SELECT_FIELDS, $where, $config->order_by, $config->limit );
-		//for ListObject
-		$this->store_to = "list_".$config->module_name;
-		$this->_href_template = $config->_href_template ? $config->_href_template : $this->rh->path_rel."do/".$config->module_name."/form?".$this->rh->state->State();
-		//для отслеживания текущего
-		$this->id = $this->rh->GetVar('id');
-		//запоминаем фильтр на корзину
-		$this->rh->state->Keep('_show_trash');
-	}
-	
-	function Handle(){
-		$tpl =& $this->rh->tpl;
+		$this->rh = &$config->rh;
 		
-		$this->Load();
+		if ($this->config->perPage)
+		{
+			$this->perPage = $this->config->perPage;
+		}
+		
+		$config->SELECT_FIELDS[] = ($config->order_field) ? $config->order_field . " as '_order'" : '_order';
+		$config->SELECT_FIELDS[] = ($config->state_field) ? $config->state_field . " as '_state'" : '_state';
+		
+		$this->storeTo = "list_".$config->getModuleName();
+		$this->id = intval($this->rh->ri->get($this->idGetVar));
+		
+		$this->prefix = $config->moduleName.'_list_';
+	}
 
-		//render trash switcher
-        if (!$this->config->HIDE_CONTROLS['show_trash'])
-        {
-    		$show_trash = $this->rh->state->Get('_show_trash');
-    		$tpl->set( '_href', $this->_href_template.'&_show_trash='.(!$show_trash) );
-    		$tpl->Parse( $show_trash ? $this->template_trash_hide : $this->template_trash_show, '__trash_switch' );
-        }
+	public function handle()
+	{
+		if( $this->updateListStruct() )
+		{
+			$this->rh->redirect( $this->rh->ri->hrefPlus('', array()));
+		}
+		 
+		$tpl =& $this->rh->tpl;
+				
+		$this->load();
+
+		$this->renderTrash();
+		$this->renderAddNew();
+		
 		//render list
-		$this->rh->UseClass("ListObject");
-
-		$list =& new ListObject( $this->rh, $this->ITEMS );
+		$this->rh->useClass("ListObject");
+		$list =& new ListObject( $this->rh, $this->items );
 		$list->ASSIGN_FIELDS = $this->SELECT_FIELDS;
 		$list->EVOLUTORS = $this->EVOLUTORS; //потомки могут добавить своего
 		$list->EVOLUTORS["href"] = array( &$this, "_href" );
 		$list->EVOLUTORS["title"] = array( &$this, "_title" );
+		$list->EVOLUTORS['controls'] = array( &$this, '_controls' );
 		$list->issel_function = array( &$this, '_current' );
-		$list->Parse( $this->template_list, '__list' );
-				
-		$tpl->Parse( $this->template, $this->store_to, true );
+		$list->parse( $this->template_list, '__list' );
+
+		$this->renderPager();
 	}
 	
-	function Load( $where='' ){
-		//load data
-		if( !$this->loaded ){
-			DBDataEdit::Load( $where );
-
+	public function setStoreTo($value)
+	{
+		$this->storeTo = $value;
+	}
+	
+	public function load( $where = '' )
+	{
+		if( !$this->loaded )
+		{
+			$total = $this->getTotal($where);
+			
+			if ($total > 0)
+			{
+				$this->pager($total);
+				
+				$model = &$this->getModel();
+				$model->load( $where, $this->pager->getLimit(), $this->pager->getOffset());
+				$this->items = &$model->getData();
+			}
+						
 			$this->loaded = true;
 		}
 	}
 	
-	function _href(&$list){
-		return $this->_href_template.$this->id_get_var.'='.$list->ITEMS[ $list->loop_index ]['id'].'&';
+	public function getTotal($where)
+	{
+		return $this->getModel()->get_count($where);
 	}
 	
-	function _title(&$list){
+	public function _href(&$list)
+	{
+		return $this->rh->ri->hrefPlus('', array($this->idGetVar => $list->ITEMS[ $list->loop_index ][$this->idField]));
+	}
+
+	public function _title(&$list)
+	{
 		$r = &$list->ITEMS[ $list->loop_index ];
-		return ( ($r['title'])? $r['title'] : "[".$r['id']."]" );
+		return ( ($r['title'])? $r['title'] : "[".$r[$this->idField]."]" );
+	}
+
+	public function _current(&$list)
+	{
+		$r = &$list->ITEMS[ $list->loop_index ];
+		return ($this->id == $r[$this->idGetVar] ? '_sel' : '').($r['_state']==1 ? '_hidden' : '').($r['_state']==2 ? '_del' : '');
+	}
+
+	public function _controls(&$list)
+	{
+		$tpl =& $this->rh->tpl;
+		if( !$this->config->HIDE_CONTROLS['exchange'] )
+		{
+			return $tpl->parse( $list->tpl_item.'_Exchange' );
+		}
+		return '';
 	}
 	
-	function _current(&$list){
-		$r = (object)$list->ITEMS[ $list->loop_index ];
-		return ($this->id == $r->id ? '_sel' : '').($r->_state==1 ? '_hidden' : '').($r->_state==2 ? '_del' : '');
+	public function getHtml()
+	{
+		return $this->rh->tpl->parse( $this->template); 
+	}
+	
+	protected function renderTrash()
+	{
+		//render trash switcher
+		if (!$this->config->HIDE_CONTROLS['show_trash'])
+		{
+			$show_trash = $_GET['_show_trash'];
+			$this->rh->tpl->set( '_href', $this->rh->ri->hrefPlus('', array('_show_trash' => !$show_trash)));
+			$this->rh->tpl->parse( $show_trash ? $this->template_trash_hide : $this->template_trash_show, '__trash_switch' );
+		}
+	}
+	
+	protected function renderAddNew()
+	{
+		if (!$this->config->HIDE_CONTROLS['add_new'])
+		{
+			//ссылка на новое
+			$this->rh->tpl->set( '_add_new_href', $this->rh->ri->hrefPlus('', array($this->idGetVar => '', '_new' => 1)));
+			$this->rh->tpl->set( '_add_new_title', $this->config->get('add_new_title') ? $this->config->get('add_new_title') : 'создать новый элемент' );
+			$this->rh->tpl->Parse( $this->template_new, '__add_new' );
+		}
+	}
+	
+	protected function &getModel()
+	{
+		if (!$this->model)
+		{
+			$this->rh->useModel('DBModel');
+			$this->model = new DBModel();
+			$this->model->setTable($this->config->table_name);
+			$this->model->setFields($this->config->SELECT_FIELDS);
+			$this->model->where = ( $_GET['_show_trash'] ? '_state>=0' : "_state <>2 " ) . ($this->config->where ? ' AND ' . $this->config->where : '') ;
+			$this->model->order = $this->config->order_by;
+			$this->model->initialize($this->rh);
+		}
+		
+		return $this->model;
+	}
+	
+	protected function updateListStruct()
+	{
+		$rh =& $this->rh;
+		//params
+		$id1 = intval($_POST['id1']);
+		$id2 = intval($_POST['id2']);
+		$action = $_POST['action'];
+		
+		$return = false;
+		switch($action)
+		{
+			case 'exchange':
+				$this->result_mode = 1;
+
+				DBDataView::load("(".$this->SELECT_FIELDS[0]."='".$id1."' OR ".$this->SELECT_FIELDS[0]."='".$id2."')");
+				$this->exchange( $id1, $id2 );
+				
+				//возвращаем
+				$return = true;
+				break;
+		}
+		return $return;
+	}
+	
+	protected function pager($total)
+	{
+		$this->rh->useClass('Pager');
+		$this->pager = new Pager($this->rh);
+		$this->pager->set(intval($this->rh->ri->get($this->pageVar)), $total, $this->perPage, $this->frameSize);
+	}
+	
+	protected function renderPager()
+	{
+		if ($this->pager)
+		{
+			$this->rh->tpl->set('pager', $this->pager->getPages());
+			$this->rh->tpl->parse('blocks/pager.html', '__arrows');
+		}
 	}
 }
-	
+
 ?>

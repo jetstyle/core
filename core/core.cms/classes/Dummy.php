@@ -1,17 +1,19 @@
-<?
+<?php
 /*
   Замещать инстансы модулей незаметно для врапперов
 */
   
-class Dummy {
+class Dummy 
+{
+  protected $config;
   
-  var $config;
-  
-  function Dummy( &$config ){
+  public function __construct( &$config ){
     $this->config =& $config;
   }
   
-  function Handle(){}
+  public function getHtml(){}
+  
+  public function handle(){}
   
 } 
 ?>

@@ -5,9 +5,9 @@
     <title>{{project_title}} {{Page_TITLE}}</title>
     <meta http-equiv="Content-Type" content="text/html; charset=windows-1251" />
     {{!connect compile="css"}}
-    <link rel="stylesheet" href="{{/}}css/cms.css" media="all" type="text/css" />
+    <link rel="stylesheet" href="{{css}}cms.css" media="all" type="text/css" />
     
-    <script type="text/javascript" src="{{/}}js/wrapper.js"></script>
+    <script type="text/javascript" src="{{js}}wrapper.js"></script>
     
     {{!connect compile="js"}}
     
@@ -16,7 +16,7 @@
   
 <body onload="{{html_onload}}" {{body_class}}>
 
-{{html_body}}
+{{HTML:body}}
 
 {{!debug}}
 </body>

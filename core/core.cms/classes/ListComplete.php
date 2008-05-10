@@ -1,94 +1,104 @@
 <?php
-$this->UseClass('ListAdvanced');
+$this->useClass('ListSimple');
 
-class ListComplete extends ListAdvanced {
-
+class ListComplete extends ListSimple 
+{
 	//шаблон мелкой формочки
-	var $template_form = "list_advanced.html:Form";
-	var $template_form_delete = "list_advanced.html:delete";
+	protected $template_form = "list_complete.html:Form";
+	protected $template_form_delete = "list_complete.html:delete";
 
-	function Handle() {
+	public function handle() 
+	{
 		$tpl = & $this->rh->tpl;
-
-		//запоминаем ID "текущей" записи
-		$this->id = $this->state->Keep($this->id_get_var, 'integer');
-
-		//куда делать редирект?
-		$this->_redirect = $this->url . '?' . $this->state->State(0, array (), true);
-
+		
 		//грузим данные
-		$this->Load();
+		$this->load();
 
 		//возможно, операции с формой
-		if ($this->UpdateForm())
-			$this->rh->Redirect($this->_redirect);
+		if ($this->updateForm())
+		{
+			$this->rh->redirect($this->rh->ri->hrefPlus('', array('rnd' => mt_rand(1, 255))));
+		}
 
 		//рендерим форму
 		//очень похоже на то, что делается в FormSimple::Handle()
-		$tpl->set('_title', $this->item[$this->SELECT_FIELDS[1]]);
+		$tpl->set('_title', $this->item[$this->config->SELECT_FIELDS[1]]);
 		$tpl->set('_save_string', $this->item ? 'сохранить' : 'добавить');
 		$tpl->set('prefix', $this->prefix);
-		$tpl->set('POST_STATE', $this->state->State(1));
+
 		if ($this->id) 
 		{
-			$tpl->Parse($this->template_form_delete, '__delete');
+			$tpl->parse($this->template_form_delete, '__delete');
 		}
+		
 		$tpl->set('__form_name', $this->prefix . '_list_form');
-		$tpl->Parse($this->template_form, '__form');
+		$tpl->parse($this->template_form, '__form');
 
-		//ссылка на просмотр логов
-		if ($this->id)
-			$this->rh->logs->ParseLink($this->config->module_name, $this->id, '__logs');
-
-		//по эатпу
-		ListAdvanced :: Handle();
+		parent :: handle();
 	}
 
-	function Load() {
-		if (!$this->loaded) {
-			ListAdvanced :: Load();
-			//найдём одну для редактирования
-			$this->item = $this->FindById($this->id);
+	public function load() 
+	{
+		if (!$this->loaded)
+		{
+			parent::load();
+			foreach ($this->items AS &$item)
+			{
+				if ($item[$this->idField] == $this->id)
+				{
+					$this->item = &$item;
+					break;
+				}
+			}
 		}
 	}
 
-	function _Delete() {
-		DBDataEdit :: Delete($this->id);
-		$this->rh->logs->Put("Список: удаление", $this->id, $this->config->module_title, $this->item[$this->SELECT_FIELDS[1]], $this->_redirect);
+	protected function _delete() 
+	{
+		$model = &$this->getModel();
+		$model->delete($model->quoteFieldShort($this->idField).'='.$model->quote($this->id));
 	}
 
-	function UpdateForm() {
+	protected function updateForm() {
 		//delete
-		if ($this->rh->GetVar($this->prefix . 'delete')) {
-			$this->_Delete();
+		if ($_POST[$this->prefix . 'delete']) 
+		{
+			$this->_delete();
+			$this->rh->ri->free($this->idGetVar);
 			return true;
 		}
 		//update
-		if ($this->rh->GetVar($this->prefix . 'update')) {
-			$this->UPDATE_FIELDS = array (
-				$this->SELECT_FIELDS[1]
-			);
-			if ($this->id) {
-				DBDataEdit :: Update($this->id);
-				$this->rh->logs->Put('Список: модификация', $this->id, $this->config->module_title, $this->item[$this->SELECT_FIELDS[1]], $this->_redirect);
-			} else
-				$this->AddNew();
+		elseif ($_POST[$this->prefix . 'update']) 
+		{
+			if ($this->id) 
+			{
+				$data = array($this->config->SELECT_FIELDS[1] => $_POST[$this->prefix . $this->config->SELECT_FIELDS[1]]);
+				$model = &$this->getModel();
+				$model->update($data, $model->quoteFieldShort($this->idField).'='.$model->quote($this->id));
+			} 
+			else
+			{
+				$this->insert();
+				$this->rh->ri->set($this->idGetVar, $this->id);
+			}
 			return true;
-		} else
+		} 
+		else
+		{
 			return false;
+		}
 	}
 
-	function AddNew() {
-		//add new
-		$this->new_suffix = '';
-		$id = DBDataEdit :: AddNew($this->config->INSERT_FIELDS);
-		//set _created,_order
-		$this->rh->db->Execute("UPDATE " . $this->table_name . " SET _created=NULL,_order=id WHERE id='$id'");
-		//пишем в логи
-		$this->rh->logs->Put('Список: добавление', $id, $this->config->module_title, $this->rh->GetVar($this->prefix . $this->SELECT_FIELDS[1] . $this->suffix . $this->new_suffix), $this->_redirect . '&' . $this->id_get_var . '=' . $id);
-		//return $id
-		return $id;
+	protected function insert() 
+	{
+		$model = &$this->getModel();
+		
+		$data = array('title' => $_POST[$this->prefix.'title'], '_created' => date('Y-m-d H:i:s'));
+		$this->id = $model->insert($data);
+		
+		// update order
+		$data = array('_order' => $this->id);
+		$model->update($data, $model->quoteFieldShort($this->idField).'='.$model->quote($this->id));
 	}
-
 }
 ?>

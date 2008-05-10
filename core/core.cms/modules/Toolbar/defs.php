@@ -1,9 +1,6 @@
-<?
-	
+<?php
 	//module config
-	$this->module_title = 'Òóëáàð';
-	$this->class_name = 'TreeForm';
+	$this->module_title = 'Ìåíþ êìñ';
 	$this->WRAPPED = array('tree','form');
 	$this->template = "tree_form.html";
-	
 ?>

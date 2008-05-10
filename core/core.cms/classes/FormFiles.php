@@ -1,57 +1,44 @@
 <?php
-/*
-В конфиге должно быть:
----------------------
-$this->FILES = array(
-array( file_name, input_name [, array('doc','rtf',...), array(max_width,max_height,strict)] ),
-...
-);
-*/
 
-$this->UseClass('FormSimple');
+$this->useClass('FormSimple');
 
-class FormFiles extends FormSimple  {
-
-	var $upload;
-	var $max_file_size = 55242880; //максимальный размер файла для загрузки
-
+class FormFiles extends FormSimple  
+{
+	protected $upload;
+	protected $max_file_size = 55242880; //максимальный размер файла для загрузки
+	protected $template_files = 'formfiles.html';
+	
 	//До каких размеров картинки показывать просто, а больше - через превью и попап?
 	var $view_width_max = 300;
 	var $view_height_max = 300;
 	var $field_file = "file";
 
-	var $template_files = 'formfiles.html';
-
-	function FormFiles( &$config )
+	function __construct( &$config )
 	{
-		FormSimple::FormSimple($config);
+		parent::__construct($config);
+
 		//upload
-		$this->rh->UseClass('Upload');
-		$this->upload =& new Upload( $this->rh, $config->upload_dir ? $this->rh->front_end->file_dir.$config->upload_dir."/" : $this->rh->front_end->file_dir );
+		$this->upload = &$this->rh->upload;
+		$this->upload->dir = $config->upload_dir ? $this->rh->front_end->file_dir.$config->upload_dir."/" : $this->rh->front_end->file_dir;
 	}
 
-	function Handle(){
-		$rh =& $this->rh;
-		$tpl =& $rh->tpl;
-		$upload =& $this->upload;
-		$config =& $this->config;
-
+	public function handle()
+	{
 		//грузим форму
-		$this->Load();
+		$this->load();
 
-		$this->RenderFiles();
+		$this->renderFiles();
 
 		//по этапу
-		FormSimple::Handle();
+		parent::handle();
 	}
 
-	function RenderFiles()
+	function renderFiles()
 	{
-		if( $this->files_rendred ) return;
+		if( $this->filesRendred ) return;
 
 		$rh =& $this->rh;
 		$tpl =& $rh->tpl;
-//		$upload =& $this->upload;
 		$config =& $this->config;
 
 		//рендерим файлы
@@ -93,7 +80,7 @@ class FormFiles extends FormSimple  {
 							$upload->ALLOW = array_intersect($upload->ALLOW, $upload->GRAPHICS);
 						}
 												
-						$file = $upload->GetFile(str_replace('*', $this->id, $vv['filename']));
+						$file = $upload->getFile(str_replace('*', $this->id, $vv['filename']));
 												
 						if($file->name_full && in_array($file->ext, $upload->GRAPHICS ) )
 						{
@@ -156,7 +143,7 @@ class FormFiles extends FormSimple  {
 								$this->item[$field_file] = $this->rh->tpl->parse($this->template_files.':file');
 							}
 							
-                            $this->item[$field_file."_down"] =& $this->item[$field_file];
+                            $this->item[$field_file."_down"] = $this->item[$field_file];
 						}
                         $this->file = $file;
 					}
@@ -208,9 +195,9 @@ class FormFiles extends FormSimple  {
 		}
 	}
 
-	function Update()
+	function update()
 	{
-		if( FormSimple::Update() )
+		if( parent :: update() )
 		{
 			$rh =& $this->rh;
 			//загружаем и удаляем файлы
@@ -239,7 +226,7 @@ class FormFiles extends FormSimple  {
 						$kill = true;
 					}
 					//удаляем файл, если нужно
-					if( $rh->GetVar($this->prefix.$row[1].'_del') ){
+					if( $_POST[$this->prefix.$row[1].'_del'] ){
 						if( !$file ) $file = $upload->GetFile($fname);
 						$kill = true;
 						//            @unlink( $file->name_full );
@@ -262,7 +249,7 @@ class FormFiles extends FormSimple  {
 					/**
              		* не засунули в инпут ничего, да еще и галочку удалить включили
              		*/
-					elseif($this->rh->GetVar($this->prefix.$field_file.'_del'))
+					elseif($_POST[$this->prefix.$field_file.'_del'])
 					{
 						$this->_handleUpload($field_file, $result_arrays);
 					}
@@ -344,11 +331,12 @@ class FormFiles extends FormSimple  {
 			);
 	}
 
-	function Delete(){
+	function delete()
+	{
 		$upload =& $this->upload;
 
-		$res = FormSimple::Delete();
-		if( $res ==2 )
+		$res = parent :: delete();
+		if( 2 == $res )
 		{
 			if (!empty($this->config->_FILES))
 			foreach($this->config->_FILES AS $field_file => $v)

@@ -1,6 +1,6 @@
 <?php
 	$this->class_name = 'FormTexts';
-	$this->table_name = $this->rh->project_name.'_texts';
+	$this->table_name = 'texts';
 	$this->SELECT_FIELDS = array('id','title','text','_state','_supertag','type');
 	$this->RENDER = array(
 		array('_state','checkbox'),

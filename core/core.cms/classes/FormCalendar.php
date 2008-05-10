@@ -3,7 +3,7 @@
 *
 * @author: lunatic
 * @email:  lunatic@jetstyle.ru
-* @last_modified: 15:29 08.02.2006
+* @modified: 15:29 08.02.2006
 *
 */
 
@@ -17,40 +17,43 @@
 *	$this->USE_TIME - использовать дату + время (по умолчанию = true)
 */
 
-$this->UseClass('FormIframe');
+$this->useClass('FormIframe');
 
-class FormCalendar extends FormIframe	{
+class FormCalendar extends FormIframe	
+{
+	protected $date_format = 'd.m.Y';											// формат даты, подставляемый по умолчанию (т.е. когда нету Id)
+	protected $r_mysql = '/(\d+)\-(\d+)\-(\d+) (\d+):(\d+):(\d+)/i';			// формат даты, получаемой из mysql
+	protected $r_mysql_without_time = '/(\d+)\-(\d+)\-(\d+)/i';			// формат даты, получаемой из mysql
+	protected $r_date_out = '$3.$2.$1';										// преобразование даты, полученной из mysql
+	protected $r_time_out = '$4:$5';
+	protected $r_date_out_mysql = '$3-$2-$1';								// преобразование даты, добавляемой в mysql
 
-	var $date_format = 'd.m.Y';											// формат даты, подставляемый по умолчанию (т.е. когда нету Id)
-	var $r_mysql = '/(\d+)\-(\d+)\-(\d+) (\d+):(\d+):(\d+)/i';			// формат даты, получаемой из mysql
-	var $r_mysql_without_time = '/(\d+)\-(\d+)\-(\d+)/i';			// формат даты, получаемой из mysql
-	var $r_date_out = '$3.$2.$1';										// преобразование даты, полученной из mysql
-	var $r_time_out = '$4:$5';
-	var $r_date_out_mysql = '$3-$2-$1';								// преобразование даты, добавляемой в mysql
+	protected $r_date_in = '/(\d+)\.(\d+)\.(\d+)(.*)/i';		// формат даты, полученной из формы
 
-	var $r_date_in = '/(\d+)\.(\d+)\.(\d+)(.*)/i';		// формат даты, полученной из формы
+	protected $r_year = '$3';																// год
+	protected $r_month = '$2';															// месяц
+	protected $r_day = '$1';																// день
 
-	var $r_year = '$3';																// год
-	var $r_month = '$2';															// месяц
-	var $r_day = '$1';																// день
+	protected $USE_TIME = true;
 
-	var $USE_TIME = true;
-
-	function FormCalendar( &$config ){
-		parent::FormIframe($config);
+	public function __construct( &$config )
+	{
+		parent::__construct($config);
+		
 		if($this->config->USE_TIME === false)
 		{
 			$this->USE_TIME = false;
 		}
 	}
 
-	function Handle()	{
+	function handle()	
+	{
 		$this->YEAR = $this->config->YEAR;
 		$this->MONTH = $this->config->MONTH;
 		$this->DAY = $this->config->DAY;
 		$this->CALENDAR_FIELDS = $this->config->CALENDAR_FIELDS ? $this->config->CALENDAR_FIELDS : array();
 
-		$this->Load();
+		$this->load();
 		if( !$this->id )
 		{
 			foreach($this->CALENDAR_FIELDS AS $field)	
@@ -79,54 +82,52 @@ class FormCalendar extends FormIframe	{
 		}
 
 		//по этапу
-		parent::Handle();
+		parent::handle();
 	}
 
-	function Update(){
-
+	function update()
+	{
 		$rh =& $this->rh;
 		
-		if($this->needUpdate())
+		if($this->YEAR)
 		{
-			if($this->YEAR)
+			$this->postData['year'] = preg_replace($this->r_date_in, $this->r_year, $_POST[$this->prefix.$this->YEAR]);
+			$this->UPDATE_FIELDS[] = 'year'; 
+		}
+		if($this->MONTH)
+		{
+			$this->postData['month'] = preg_replace($this->r_date_in, $this->r_month, $_POST[$this->prefix.$this->MONTH]);
+			$this->UPDATE_FIELDS[] = 'month'; 
+		}
+		if($this->DAY)
+		{
+			$this->postData['day'] = preg_replace($this->r_date_in, $this->r_day, $_POST[$this->prefix.$this->DAY]);
+			$this->UPDATE_FIELDS[] = 'day'; 
+		}
+		
+		foreach($this->CALENDAR_FIELDS AS $field)	
+		{
+			if($this->USE_TIME)
 			{
-				$rh->GLOBALS[$this->prefix.'year'] = preg_replace($this->r_date_in, $this->r_year, $rh->GetVar($this->prefix.$this->YEAR));
-				$this->UPDATE_FIELDS[] = 'year'; 
-			}
-			if($this->MONTH)
-			{
-				$rh->GLOBALS[$this->prefix.'month'] = preg_replace($this->r_date_in, $this->r_month, $rh->GetVar($this->prefix.$this->MONTH));
-				$this->UPDATE_FIELDS[] = 'month'; 
-			}
-			if($this->DAY)
-			{
-				$rh->GLOBALS[$this->prefix.'day'] = preg_replace($this->r_date_in, $this->r_day, $rh->GetVar($this->prefix.$this->DAY));
-				$this->UPDATE_FIELDS[] = 'day'; 
-			}
-			
-			foreach($this->CALENDAR_FIELDS AS $field)	
-			{
-				if($this->USE_TIME)
+				if($time = $_POST[$this->prefix.$field.'_time'])
 				{
-					if($time = $rh->GetVar($this->prefix.$field.'_time'))
-					{
-						$time = $time.':00';
-					}
-					else
-					{
-						$time = date('H:i:s', time());
-					}
-					$date = preg_replace($this->r_date_in, $this->r_date_out_mysql, $rh->GetVar($this->prefix.$field)).' '.$time;
+					$time = $time.':00';
 				}
 				else
 				{
-					$date = preg_replace($this->r_date_in, $this->r_date_out_mysql, $rh->GetVar($this->prefix.$field));
+					$time = date('H:i:s', time());
 				}
-				$rh->GLOBALS[$this->prefix.$field] = $date; 
+				$date = preg_replace($this->r_date_in, $this->r_date_out_mysql, $_POST[$this->prefix.$field]).' '.$time;
 			}
+			else
+			{
+				$date = preg_replace($this->r_date_in, $this->r_date_out_mysql, $_POST[$this->prefix.$field]);
+			}
+			
+			$this->postData[$field] = $date; 
 		}
 		
-		return parent::Update();
+		return parent::update();
 	}
 
 }

@@ -1,4 +1,5 @@
-{{?show_toolbar}}
+{{?toolbar}}
+
 <div class="cms-toolbar"><img class="block" src="{{images}}z.gif" width="1" height="4" align="top" alt="" /></div>
 
 <table cellspacing="0" cellpadding="0" class="cms-toolbar w100">
@@ -6,7 +7,7 @@
   <td nowrap="nowrap">{{user_part}}</td>
   <td class="sep-"><img class="block" src="{{images}}seporate.gif" width="2" height="20" align="top" alt="" /></td>
   <td>Μενώ:</td>
-  	{{!for menu do=@:item}}
+  	{{!for toolbar.main do=@:item}}
   </td>
   <td class="w100">{{@dummy.html}}</td>
   <td class="sep-"><img class="block" src="{{images}}seporate.gif" width="2" height="20" align="top" alt="" /></td>
@@ -18,7 +19,7 @@
 </tr>
 </table>
 
-{{!for menu_submenu do=@:subitem}}
+{{!for toolbar.submenu do=@:subitem}}
 
 <script language="javascript">
 
