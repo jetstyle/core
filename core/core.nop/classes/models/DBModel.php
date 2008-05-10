@@ -20,9 +20,9 @@ $this->useClass("Inflector");
 class DBModel extends Model implements IteratorAggregate, ArrayAccess, Countable, DataContainer
 {
 	/** имя таблицы */
-	var $table=NULL;
+	protected $table=NULL;
 	/** список полей таблицы */
-	var $fields = array('*');
+	protected $fields = array('*');
 	/** список внешних полей */
 	var $foreign_fields = array();
 	var $fields_info= array();
@@ -177,11 +177,14 @@ class DBModel extends Model implements IteratorAggregate, ArrayAccess, Countable
 			foreach ($data as $row)
 			{
 				if (@$this->resultSetFactory)
+				{
 					$item = call_user_func($this->resultSetFactory, $this, $row); //factory сам делаем init
+				}
 				else
 				{
-				$item = new ResultSet();
-				$item->init($this, $row);
+					
+					$item = new ResultSet();
+					$item->init($this, $row);
 				}
 				$this->data[] = $item;
 				unset($item);
@@ -372,7 +375,9 @@ class DBModel extends Model implements IteratorAggregate, ArrayAccess, Countable
 		list($sql, $sql1) = $sql_parts;
 		if ($is_load) $this->sql = $sql1;
 //		$data = $this->rh->db->query($sql);
+
 		$data = DBAL::getInstance()->query($sql);
+
 //	if ($_GET["debug"] && get_class($this) == "CommentsModel")
 //	if (get_class($this) == "EventsModel")
 //		echo $sql."<br /><br />";
@@ -446,7 +451,6 @@ class DBModel extends Model implements IteratorAggregate, ArrayAccess, Countable
 	function select($where=NULL, $limit=NULL, $offset=NULL, $is_load=false)
 	{
 		$sql = $this->getSelectSql($where, $limit, $offset, $is_load);
-		
 		return $this->selectSql($sql, $is_load);
 	}
 	function onBeforeInsert(&$row)
@@ -483,6 +487,7 @@ class DBModel extends Model implements IteratorAggregate, ArrayAccess, Countable
 			$where = implode(' AND ', $_where);
 			unset($_where);
 		}
+		
 		$this->onBeforeUpdate($row);
 		$this->buildFieldsValuesSet($row, $fields_sql);
 		$sql = ' UPDATE '.$this->buildTableName($this->table)
@@ -511,7 +516,7 @@ class DBModel extends Model implements IteratorAggregate, ArrayAccess, Countable
 		}
 
 		$sql = 'DELETE FROM '.$this->buildTableName($this->table)
-			.$this->buildWhere(' AND '.$where_sql);
+			.$this->buildWhere($where_sql);
 		return $this->rh->db->query($sql);
 	}
 
@@ -562,8 +567,12 @@ class DBModel extends Model implements IteratorAggregate, ArrayAccess, Countable
 		// lucky: FIXME: filter row
 		$t = array();
 		foreach ($data as $k=>$v)
-			if (array_key_exists($k, $this->_fields_info)) 
+		{
+//			if (array_key_exists($k, $this->_fields_info))
+//			{ 
 				$t[$k] = $v;
+//			}
+		}
 		$fields_sql = $this->buildFieldsShort(array_keys($t));
 		$values_sql = $this->buildValues(array_values($t));
 	}
@@ -619,19 +628,27 @@ class DBModel extends Model implements IteratorAggregate, ArrayAccess, Countable
 	}
 	function buildWhere($where)
 	{
-		if (isset($this->where)) 
+		if (isset($this->where))
+		{ 
 			$where_sql = $this->where;
+		}
 		else
+		{
 			$where_sql = '';
+		}
 
 		if ($where || $where_sql)
 		{
 			if ($where && $where_sql)
+			{
 				$where = " AND (" . $where . ")";
+			}
 			$where_sql = ' WHERE ' . $where_sql . $where;
 		}
 		else
+		{
 			$where_sql = '';
+		}
 		return $where_sql;
 	}
 	function buildGroupBy($fields)
@@ -717,7 +734,10 @@ class DBModel extends Model implements IteratorAggregate, ArrayAccess, Countable
 	function quoteFieldShort($name)
 	{
 		$info =& $this->_fields_info[$name];
-		if (!isset($info)) return NULL;
+		if (!isset($info)) 
+		{
+			return $name;
+		}
 
 		return $info['source'];
 	}
@@ -979,6 +999,30 @@ class DBModel extends Model implements IteratorAggregate, ArrayAccess, Countable
 		}
 
 		return $res;
+	}
+	
+	public function setTable($value)
+	{
+		$this->table = $value;
+	}
+	
+	public function setFields($fields)
+	{
+		if (!is_array($fields))
+		{
+			return false;
+		}
+		
+		$this->fields = array();
+		foreach ($fields AS $field)
+		{
+			$this->addField($field);
+		}
+	}
+	
+	public function addField($fieldName)
+	{
+		$this->fields[] = $fieldName;
 	}
 }  
 

@@ -31,6 +31,11 @@ class PageDomain
 		return $page;
 	}
 	
+	public function setDomains($domains)
+	{
+		$this->domains = $domains;
+	}
+	
 	protected function &findPage($criteria, $pageDomains=NULL)
 	{
 		$page = NULL;

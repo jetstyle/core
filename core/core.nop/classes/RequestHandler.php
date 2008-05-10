@@ -161,6 +161,7 @@ class RequestHandler extends ConfigProcessor {
 			}
 
 		//вычисляем base_url
+		
 		if (!isset ($this->base_url))
 			$this->base_url = dirname($_SERVER["PHP_SELF"]) . (dirname($_SERVER["PHP_SELF"]) != '/' ? '/' : '');
 		if (!isset ($this->base_dir))
@@ -168,7 +169,7 @@ class RequestHandler extends ConfigProcessor {
 		if (!isset ($this->host_url))
 			$this->host_url = strtolower(substr($_SERVER['SERVER_PROTOCOL'], 0, strpos($_SERVER['SERVER_PROTOCOL'], '/'))) . '://' . $_SERVER['SERVER_NAME'] .
 			 ($_SERVER['SERVER_PORT'] === '80' ? '' : ':' . $_SERVER['SERVER_PORT']);
-
+	 
 		$this->_setDomains();
 
 		//избавляемся от квотов

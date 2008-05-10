@@ -211,7 +211,7 @@ class ConfigLoader
 	function loadYaml(&$self, $source)
 	{
 		$ctx =& config_get($self, 'ctx');
-		if (!class_exists('Spyc'))
+		if (!class_exists('Spyc', false))
 		{
 			require_once JS_CORE_DIR.'libs/spyc/spyc.php';
 		}
