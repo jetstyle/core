@@ -12,15 +12,15 @@ class LoginPage extends BasicPage
 	{
 		if ($this->rh->principal->isAuth())
 		{
-			$this->rh->redirect($this->rh->base_url.'start');
-		}
-		else
-		{
 			if ($this->rh->ri->get('logout')) 
 			{
 				$this->rh->principal->logout($this->rh->base_url.'login');
 			}
 			
+			$this->rh->redirect($this->rh->base_url.'start');
+		}
+		else
+		{			
 			$this->rh->site_map_path = 'login';
 		}
 	}

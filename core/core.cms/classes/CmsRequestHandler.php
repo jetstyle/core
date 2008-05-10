@@ -53,8 +53,7 @@ class CmsRequestHandler extends RequestHandler
 	
 	function initPrincipal()
 	{
-		// пользователи КМС. для ОЦЕ.
-		$this->UseClass($this->pincipal_class);
+		$this->useClass($this->pincipal_class);
 		$this->principal = &new $this->pincipal_class( $this );
 		if ($this->principal->acl_default)
 		{
@@ -62,9 +61,18 @@ class CmsRequestHandler extends RequestHandler
 			$this->principal->ACL['*'] = array( ROLE_GOD );
 			$this->principal->acl_default = false;
 		}
-		$this->principal->Authorise();
+		$this->principal->authorise();
 	}
 
+	protected function initEnvironment()
+	{
+		$this->tpl->set('user', $this->principal->getUserData());
+		
+		$this->tpl->set('fe_/', $this->front_end->path_rel);
+		
+		parent::initEnvironment();
+	}
+	
 	protected function mapHandler($url)
 	{
 		$this->useClass("domains/PageDomain");
