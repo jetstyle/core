@@ -19,14 +19,19 @@
 	<form name="rubric" id="rubric_form" method="get" action="">
 	  <h2 style="margin-top: 0">
 	  <label for="rubric-select">Файлы из рубрики:</label>
-		<select name="rubric" id="rubric-select" onchange="document.getElementById('rubric_form').submit()">
-			{{rubrics}}
+		<select name="rubric_id" id="rubric-select" onchange="document.getElementById('rubric_form').submit()">
+			<option value="0">Все вместе</option>
+			{{!for rubrics do=@:rubric}}
+			{{:rubric}}
+				<option value="{{*id}}" {{?*selected}}selected="selected"{{/?}}>{{*title}}</option>
+			{{/:rubric}}
+			{{:rubric_sep}}{{/:rubric_sep}}
 		</select>
 		</h2>
 	</form>		
 
-	<div>
-		{{pages}}		
+	<div style="margin-bottom: 10px;">
+		{{@blocks/pager.html}}	
 	</div>
 
 <div class="files">
@@ -45,7 +50,7 @@
         	    <td class="label-"><label for="file-rubric-select">В рубрику:</label></td>
         	    <td class="control-">
                     <select name="rubric" id="file-rubric-select">
-            			{{rubrics}}
+            			{{!for rubrics do=@:rubric}}
             		</select>
         	    </td>
         	</tr>
