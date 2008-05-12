@@ -42,9 +42,13 @@ class ConfigProcessor {
 	function findScript( $type, $name, $level=0, $dr=1, $ext = 'php', $withSubDirs = false )
 	{
 		//проверяем входные данные
-		if($type=='')
+		if (strlen($type) == 0)
 		{
 			throw new Exception("FindScript: <b>*type* пусто</b>, type=<b>$type</b>, name=<b>$name</b>, level=<b>$level</b>, dr=<b>$dr</b>, ext=<b>$ext</b>");
+		}
+		elseif (strlen($name) == 0)
+		{
+			throw new Exception("FindScript: <b>*name* пусто</b>, type=<b>$type</b>, name=<b>$name</b>, level=<b>$level</b>, dr=<b>$dr</b>, ext=<b>$ext</b>");
 		}
 
 		//определяем начальный уровень поиска

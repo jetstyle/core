@@ -42,8 +42,8 @@ class ListSimple
 			$this->perPage = $this->config->perPage;
 		}
 		
-		$config->SELECT_FIELDS[] = ($config->order_field) ? $config->order_field . " as '_order'" : '_order';
-		$config->SELECT_FIELDS[] = ($config->state_field) ? $config->state_field . " as '_state'" : '_state';
+		$this->config->SELECT_FIELDS[] = '_order';
+		$this->config->SELECT_FIELDS[] = '_state';
 		
 		$this->storeTo = "list_".$config->getModuleName();
 		$this->id = intval($this->rh->ri->get($this->idGetVar));
@@ -146,7 +146,7 @@ class ListSimple
 		if (!$this->config->HIDE_CONTROLS['show_trash'])
 		{
 			$show_trash = $_GET['_show_trash'];
-			$this->rh->tpl->set( '_href', $this->rh->ri->hrefPlus('', array('_show_trash' => !$show_trash)));
+			$this->rh->tpl->set( '_show_trash_href', $this->rh->ri->hrefPlus('', array('_show_trash' => !$show_trash)));
 			$this->rh->tpl->parse( $show_trash ? $this->template_trash_hide : $this->template_trash_show, '__trash_switch' );
 		}
 	}
@@ -190,14 +190,19 @@ class ListSimple
 		switch($action)
 		{
 			case 'exchange':
-				$this->result_mode = 1;
-
-				DBDataView::load("(".$this->SELECT_FIELDS[0]."='".$id1."' OR ".$this->SELECT_FIELDS[0]."='".$id2."')");
-				$this->exchange( $id1, $id2 );
+				
+				$model = &$this->getModel();
+				$model->load($model->quoteField($this->idField).'IN('.$id1.','.$id2.')');
+								
+				$data = array('_order' => $model[1]['_order']);
+				$model->update($data, $model->quoteFieldShort($this->idField).'='.$model[0][$this->idField]);
+				
+				$data = array('_order' => $model[0]['_order']);
+				$model->update($data, $model->quoteFieldShort($this->idField).'='.$model[1][$this->idField]);
 				
 				//возвращаем
 				$return = true;
-				break;
+			break;
 		}
 		return $return;
 	}

@@ -6,6 +6,9 @@ class TreeControl
 
 	//templates
 	protected $template = "tree_control.html";
+	protected $template_trash_show = "list_simple.html:TrashShow";
+	protected $template_trash_hide = "list_simple.html:TrashHide";
+	
 	protected $xmlEncoding = "windows-1251";
 
 	protected $loaded = false;
@@ -110,12 +113,14 @@ class TreeControl
 				{
 					$this->rh->tpl->set("toggleEditTreeClass", "class='toggleEditTreeClass-Sel'");
 				}
-				break;
+				
+			break;
 		}
 	}
 
 	public function getHtml()
 	{
+		$this->renderTrash();
 		return $this->rh->tpl->Parse( $this->template);
 	}
 
@@ -138,6 +143,17 @@ class TreeControl
 		return $str;
 	}
 
+	protected function renderTrash()
+	{
+		//render trash switcher
+		if (!$this->config->HIDE_CONTROLS['show_trash'])
+		{
+			$show_trash = $_GET['_show_trash'];
+			$this->rh->tpl->set( '_show_trash_href', $this->rh->ri->hrefPlus('', array('_show_trash' => !$show_trash)));
+			$this->rh->tpl->parse( $show_trash ? $this->template_trash_hide : $this->template_trash_show, '__trash_switch' );
+		}
+	}
+		
 	protected function treeParse($data)
 	{
 		if(is_array($data))

@@ -1,6 +1,6 @@
 <?php
 
-require_once 'TypeLoader.php';
+$this->useClass('TypeLoader');
 
 class ModuleLoader extends TypeLoader
 {
@@ -11,20 +11,5 @@ class ModuleLoader extends TypeLoader
 
 		if (!isset($this->config_name)) $this->config_name = 'config';
 	}
-
-	function load($name, $level=0, $dr=1, $ext = 'php' )
-	{
-		parent::load($name, $level, $dr, $ext);
-
-		if (isset($this->data))
-		{
-			$loader =& new ConfigLoader();
-			$loader->ctx =& $this->ctx;
-			$loader->seeConfig($this->data, $this->namespace.'/'. $name, $this->config_name);
-		}
-	}
-
-
 }
-
 ?>

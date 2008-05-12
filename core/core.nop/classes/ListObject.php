@@ -130,43 +130,14 @@ class ListObject {
 
 		//get current item (array)
 		$ITEM =& $this->ITEMS[ $this->loop_index ];
-
-		//resolve $FIELDS array
-	 /*
-	 if( count($this->ASSIGN_FIELDS)==0 )
-		$FIELDS = array_keys($ITEM);
-	 else
-		$FIELDS =& $this->ASSIGN_FIELDS;
-
-	 //assign from $ITEM
-	 $N = count($FIELDS);
-	 for( $i=0; $i<$N; $i++ )
-		$tpl->Assign( "_".$FIELDS[$i], $ITEM[ $FIELDS[$i] ] );
-	  */
+		
+		$tpl->setRef($this->item_store_to, $ITEM);
+		
 		//assign evolutors
 		foreach($this->EVOLUTORS as $field=>$func)
 		{
 			$handler = '_'.$field;
-		/* lucky@npj: можно чуть проще
-		if( is_array($func) )
-		{
-		  //object and method supported
-		  $_func = $func[1];
-		  $out = $func[0]->$_func($this) ;
-
-		}
-		else
-		{
-		  / *
-		  if( $tpl->CheckAction($func) )
-			 //tpl-action
-			 $tpl->Assign( $handler, $tpl->Action($func) );
-		  else
-				* /
-			 //php-function
-			 $out = $func($this);
-		}
-		 */
+		
 			$topic = array(&$this);
 			if( is_callable($func) )
 			{
@@ -186,12 +157,7 @@ class ListObject {
 				$_suffix = $this->_do($this->issel_function);
 		}
 
-		//чётный-нечётный
-		//$tpl->assign( '__even', $this->loop_index%2 ? '1' : '0' );
-
-		$tpl->setRef($this->item_store_to, $ITEM);
-
-		return $tpl->Parse( $this->tpl_item.$_suffix );
+		return $tpl->parse( $this->tpl_item.$_suffix );
 	}
 
 	function _do($action){

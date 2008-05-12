@@ -36,10 +36,7 @@ class FileNotFoundException extends Exception
 			{
 				
 				if ($can_seek && ( $trace['function']=='Parse' || $trace['function']=='_constructValue' ) && !$this->in_args($needle, $trace['args']) )
-				{
-					//echo '<hr>';
-					//var_dump($traces[$k]);
-					
+				{					
 					//не выводить бэктрейс
 					$this->no_trace = true;
 					
@@ -71,7 +68,7 @@ class FileNotFoundException extends Exception
 			} 
 			
 		}
-		
+
 		/**
 		 * На случай если в site_map.php в HTML:body указывает на несуществующий шаблон
 		 */
@@ -123,6 +120,12 @@ class FileNotFoundException extends Exception
 	protected function equalTemplates($needle, $compare, $dump=false)
 	{
 		$ret = false;
+		
+		if (is_object($compare))
+		{
+			return $ret;
+		}
+		
 		$c1 = strcmp($needle, $compare);
 		$c2 = strcmp('@'.$needle.'.html', $compare);
 		$c3 = strcmp($needle.'.html', $compare);
