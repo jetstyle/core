@@ -81,15 +81,15 @@ class TreeControl
 			break;
 
 			default:
+				
 				if (!$this->id && $this->redirectIfEmptyId)
 				{
 					$rootId = $this->getRootId();
-					if ($rootId)
+					if ($rootId && !defined('UNIT_TEST'))
 					{
 						$this->rh->redirect($this->rh->ri->hrefPlus('', array($this->idGetVar => $rootId)));
 					}
 				}
-
 				$show_trash = $_GET['_show_trash'];
 
 				$this->rh->tpl->set('_url_xml', $this->rh->ri->hrefPlus("do/".$this->config->moduleName."/tree", array('action' => 'xml')));
