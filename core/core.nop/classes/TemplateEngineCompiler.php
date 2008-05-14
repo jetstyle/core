@@ -706,8 +706,14 @@ unset($_z);
            * nop@jetstyle
            * хочу штуки типа {{?place_photos.count==1}}
            */
-          if (preg_match("/(.*)(==|!=|<=|=>|=<|>=|>|<)(.*)/i", $k, $matches)) //  
+           
+          if (preg_match("/(.*)(==|!=|<=|=>|=<|>=|>|<|\|\|)(.*)/i", $k, $matches)) //  
           {
+            if (strpos($k, "||") )
+          {
+            	$matches[3] = $this->_ConstructGetValue( str_replace("*", "", $matches[3]) );
+            }
+
             $k = $matches[1];
             $condition = $matches[2];
            // var_dump($condition);die();
