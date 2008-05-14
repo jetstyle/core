@@ -511,7 +511,7 @@ class DBModel extends Model implements IteratorAggregate, ArrayAccess, Countable
 		}
 
 		$sql = 'DELETE FROM '.$this->buildTableName($this->table)
-			.$this->buildWhere(' AND '.$where_sql);
+			.$this->buildWhere($where_sql);
 		return $this->rh->db->query($sql);
 	}
 
