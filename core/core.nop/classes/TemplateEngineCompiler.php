@@ -536,6 +536,7 @@ if((is_array($_z) && !empty($_z)) || (is_object($_z) && $_z instanceof ArrayAcce
 			"num"=>&$num,
 		);
    $tpl->setRef("For", $for);
+    $assigned_value = '.$assigned_compiled.';
 	foreach($_z AS $r)
 	{
 		$num++;
@@ -543,7 +544,7 @@ if((is_array($_z) && !empty($_z)) || (is_object($_z) && $_z instanceof ArrayAcce
 		$for["even"] = !$for["odd"];
         '.( $assigned_compiled && !$ass_key_noref
           ?
-           '$r["'.$assigned_key.'"]='.$assigned_compiled.';'
+           '$r["'.$assigned_key.'"]= $assigned_value;'
           :
            ''
           )
@@ -757,9 +758,22 @@ unset($_z);
 
             $k = $matches[1];
             $condition = $matches[2];
+           // var_dump($condition);die();
             $value = $matches[3];
+            if ($value{0}=="*")
+            {
 
+                #var_dump( $value );   
             
+                $parsed_value = $this->_parseParams($value);
+                #var_dump($parsed_value);
+                //var_dump($parsed_value[TE_TYPE]);
+                
+                $compiled_value =  $this->_compileParam($parsed_value[0]);
+                #var_dump($compiled_value);
+                #die();
+                $value=$compiled_value;
+            }
           }
 		  /* lucky:
 			* если $_ массив: возвращаем значение по ключу $_[$k]
