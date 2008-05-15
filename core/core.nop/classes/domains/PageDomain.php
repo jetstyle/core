@@ -17,6 +17,8 @@ class PageDomain
 	public function __construct(&$rh)
 	{
 		$this->rh = &$rh;
+		if (!$this->rh->db)
+			$this->domains = array('Handler');
 	}
 	
 	public function &findPageByUrl($url)

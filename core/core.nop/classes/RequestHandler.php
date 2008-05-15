@@ -185,11 +185,14 @@ class RequestHandler extends ConfigProcessor {
 		$this->init();
 		
 		// config from DB
-		$this->useClass('models/DBConfig');
-		$c =& new DBConfig();
-		$c->initialize($this);
-		$c->load();
-		config_joinConfigs($this, $c->data);
+		if ($this->db)
+		{
+			$this->useClass('models/DBConfig');
+			$c =& new DBConfig();
+			$c->initialize($this);
+			$c->load();
+			config_joinConfigs($this, $c->data);
+		}
 	}
 
 	public function & getPageDomain() {
@@ -347,6 +350,7 @@ class RequestHandler extends ConfigProcessor {
 
 	//Инициализация принципала.
 	protected function initPrincipal() {
+		if (!$this->db) return;
 		$this->principal = & new Principal($this, $this->principal_storage_model, $this->principal_security_models);
 
 		if ($this->principal->Identify() > PRINCIPAL_AUTH) {

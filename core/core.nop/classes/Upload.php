@@ -79,6 +79,8 @@ class Upload {
 
 	protected function init()
 	{
+		if (!$this->rh->db)
+			return;
 		$row = $this->rh->db->queryOne("SELECT value FROM ??config WHERE name='upload_ext'");
 		$exts = explode(",", $row['value']);
 

@@ -175,7 +175,8 @@ class BasicPage extends Controller
 	{
 		$status = True;
 
-		$this->loadPlugins();
+		if ($this->rh->db)
+			$this->loadPlugins();
 
 		if (is_array($this->params_map)) 
 		{
