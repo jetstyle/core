@@ -166,12 +166,16 @@ class BasicPage extends Controller
 		return $parent_status && True;
 	}
 
+	function pre_handle()
+	{
+	}
+
 	function handle()
 	{
 		$status = True;
 
 		$this->loadPlugins();
-
+		
 		if (is_array($this->params_map)) 
 		{
 			foreach ($this->params_map as $v)
@@ -193,6 +197,8 @@ class BasicPage extends Controller
 						if (method_exists($controller, $method))
 						{
 							$controller->initialize($this->rh);
+							$this->pre_handle($matches);
+							
 							$status = call_user_func_array(
 								array(&$controller, $method), 
 								array($matches));
@@ -201,6 +207,8 @@ class BasicPage extends Controller
 					}
 					else
 					{
+						$this->pre_handle($matches);
+						
 						$status = call_user_func_array(
 							array(&$this, 'handle_'.$action), 
 							array($matches));
