@@ -61,6 +61,17 @@ class DBDataView extends Obj {
     $this->SELECT_FIELDS = $SELECT_FIELDS;
   }
   
+  function _getSql($where='')
+  {
+
+    $sql = "SELECT ".implode(",",$this->SELECT_FIELDS)." FROM ".$this->table_name;
+    $_where .= $this->where.(($where && $this->where)? ' AND ' : '' ).$where;
+    $sql .= ($_where)? " WHERE ".$_where : "";
+    $sql .= ($this->order_by)? " ORDER BY ".$this->order_by : "";
+
+    return $sql;
+  }
+
   function Load($where=""){
     //aliaces
     $db =& $this->rh->db;
@@ -68,15 +79,15 @@ class DBDataView extends Obj {
     //function
     $this->ITEMS = array();
     //construct sql
-    $sql = "SELECT ".implode(",",$this->SELECT_FIELDS)." FROM ".$this->table_name;
-    $_where .= $this->where.(($where && $this->where)? ' AND ' : '' ).$where;
-    $sql .= ($_where)? " WHERE ".$_where : "";
-    $sql .= ($this->order_by)? " ORDER BY ".$this->order_by : "";
+    $sql = $this->_getSql($where);
     //arrows
-    if($this->arrows){
+    if($this->arrows)
+    {
+      $this->arrows->count_sql = $this->count_sql;
       $this->arrows->Setup( $this->table_name, $_where );
       $this->arrows->Restore();
       $ARR = $this->arrows->Limit();
+
     }
     //load data
 //    print_r($this->SELECT_FIELDS);

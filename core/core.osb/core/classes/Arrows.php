@@ -48,8 +48,17 @@ class Arrows extends StateSet {
   function Setup($table,$where){
     $this->where = $where;
     $this->table = $table;
-    $where = ($where!="")? "WHERE ".$where : "";
-    $query = "SELECT count(*) as sum FROM $table $where";    
+    
+    if ($this->count_sql)
+    {
+	$query = $this->count_sql;
+    }
+    else
+    {
+       $where = ($where!="")? "WHERE ".$where : "";
+       $query = "SELECT count(*) as sum FROM $table $where";    
+    }
+
     $res = $this->rh->db->query($query);
     $this->SetupSum(intval($res[0]['sum']));
   }

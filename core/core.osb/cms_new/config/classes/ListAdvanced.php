@@ -62,6 +62,9 @@ class ListAdvanced extends ListSimple
     $this->arrows = new Arrows( $rh );
     $this->arrows->outpice = $this->config->outpice ? $this->config->outpice : 10;
     $this->arrows->mega_outpice = $this->config->mega_outpice ? $this->config->mega_outpice : 10;
+
+    //for custom count
+    $this->arrows->count_sql = $this->count_sql;
     $this->arrows->Setup( $this->table_name, $this->where );
     $this->arrows->Set($this->state);
     $this->arrows->href_suffix = $__href_suffix;
