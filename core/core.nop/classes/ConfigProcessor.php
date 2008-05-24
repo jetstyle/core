@@ -32,6 +32,27 @@
 
  */
 
+function __autoload($className) 
+{
+	global $app;
+	if ($app)
+	{
+		$dir_name = $app->getPluralizeDir($className);
+		if ($app->findDir("classes/" . $dir_name))
+		{
+			$app->useClass($dir_name . "/" . $className);
+		}	
+		else
+		{
+			$app->useClass($className);
+		}	
+	}
+	else
+	{
+		die("autoload: class <b>$className</b> not found");
+	}
+}
+
 class ConfigProcessor {
 
 	var $DIRS = array(); 				//информаци€ о корневых директори€х дл€ каждого уровн€
@@ -147,7 +168,7 @@ class ConfigProcessor {
 		}
 	}
 
-	function FindDir($name)
+	function findDir($name)
 	{
 		//определ€ем начальный уровень поиска
 		$n = count($this->DIRS);
@@ -168,7 +189,7 @@ class ConfigProcessor {
 	}
 
 	//“оже, что и FindScript_(), но кроме того инклюдим найденный скрипт
-	function UseScript( $type, $name, $level=false, $dr=-1, $ext = 'php', $withSubDirs = false, $hideExc = false ){
+	function useScript( $type, $name, $level=false, $dr=-1, $ext = 'php', $withSubDirs = false, $hideExc = false ){
 		$method = ($hideExc) ? "FindScript" : "FindScript_";
 		if ($path = $this->$method($type,$name,$level,$dr,$ext,$withSubDirs))
 		$this->_useScript( $path );
