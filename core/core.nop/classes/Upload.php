@@ -139,7 +139,7 @@ class Upload {
 
 	protected function parseSizeParam($val)
 	{
-		$pattern = '/(<|>|>=|<=|=|)(\d+)/';
+		$pattern = '/(<|>|>=|<=|=|==|)(\d+)/';
 		preg_match($pattern, $val, $matches);
 		return array($matches[1], $matches[2]);
 	}
