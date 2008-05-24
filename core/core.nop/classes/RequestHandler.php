@@ -407,7 +407,7 @@ class RequestHandler extends ConfigProcessor {
 
 		if (!array_key_exists($name, $this->fixtures)) {
 			if ($s = $this->FindScript($type, $name, false, -1, 'yml')) {
-				if (!class_exists('Spyc'))
+				if (!class_exists('Spyc', false))
 					$this->useLib('spyc');
 				$this->fixtures[$name] = Spyc :: YAMLLoad($s);
 			} else
