@@ -5,25 +5,6 @@
 
  */
 
-
-function __autoload($className)
-{
-	//старый способ с рекурсивным обходом директорий.
-	//	global $app;
-	//	$app->UseClass($className, 0, 1, "php", true);
-	global $app;
-	$dir_name = $app->getPluralizeDir($className);
-	if ($app->findDir("classes/" . $dir_name))
-	{
-		$app->UseClass($dir_name . "/" . $className);
-	}
-	else
-	{
-		$app->UseClass($className);
-	}
-}
-
-
 class CmsRequestHandler extends RequestHandler
 {
 
