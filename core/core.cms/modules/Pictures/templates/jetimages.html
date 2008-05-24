@@ -135,15 +135,15 @@
 		
 		if(mode == 1)	
 		{
-			var h = '<img src="'+images[id].src.preview+'" mode="'+mode+'" bigwidth="'+images[id].width.normal+'" bigheight="'+images[id].height.normal+'" bigsrc="'+images[id].src.normal+'" title="'+images[id].title+'" width="'+images[id].width.preview+'" height="'+images[id].height.preview+'" />';
+			var h = '<img src="'+images[id].src.preview+'" mode="'+mode+'" bigwidth="'+images[id].width.normal+'" bigheight="'+images[id].height.normal+'" bigsrc="'+images[id].src.normal+'" alt="'+images[id].title+'" width="'+images[id].width.preview+'" height="'+images[id].height.preview+'" />';
 		}
 		else if(mode == 2)
 		{
-			var h = '<img src="'+images[id].src.preview+'" mode="'+mode+'" title="'+images[id].title+'" width="'+images[id].width.preview+'" height="'+images[id].height.preview+'" />';
+			var h = '<img src="'+images[id].src.preview+'" mode="'+mode+'" alt="'+images[id].title+'" width="'+images[id].width.preview+'" height="'+images[id].height.preview+'" />';
 		}
 		else
 		{
-			var h = '<img src="'+images[id].src.normal+'" mode="'+mode+'" title="'+images[id].title+'" width="'+images[id].width.normal+'" height="'+images[id].height.normal+'" />';
+			var h = '<img src="'+images[id].src.normal+'" mode="'+mode+'" alt="'+images[id].title+'" width="'+images[id].width.normal+'" height="'+images[id].height.normal+'" />';
 		}			
 						
 		tinyMCEPopup.execCommand('mceInsertContent', false, h);
