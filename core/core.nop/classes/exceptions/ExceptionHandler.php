@@ -36,27 +36,34 @@ class ExceptionHandler
 
 	public function process($exceptionObj)
 	{
+		$actions = array();
+		
 		//вы€сн€ем что делать с данным exception'ом
 		$className = get_class($exceptionObj);
 		if (!isset($this->config[$className]))
 		{
-			$method = $this->methodsByConst[EXCEPTION_SILENT];
-			$this->$method($exceptionObj);
-			die();
+			$actions[EXCEPTION_SHOW] = $this->methodsByConst[EXCEPTION_SHOW];
 		}
-		
-		$actions = array();
-		foreach ($this->methodsByConst as $action=>$method)
-		{
-			if ($this->config[$className] & $action)
-				$actions[$action] = $method;
+		else
+		{	
+			foreach ($this->methodsByConst as $action=>$method)
+			{
+				if ($this->config[$className] & $action)
+				{
+					$actions[$action] = $method;
+				}
+			}
 		}
 
 		foreach ($actions as $method)
+		{
 			$this->$method($exceptionObj);
+		}
 
 		if (!$actions[EXCEPTION_IGNORE])
+		{
 			die();
+		}
 	}
 
 	private function ignore($exceptionObj)
@@ -93,9 +100,10 @@ class ExceptionHandler
 		else
 		{
 			echo $exceptionObj;
-		}		
+		}
 
 		if ($exceptionObj->no_trace) return;
+		
 		echo "<br /><br /><b>Backtrace</b>:<br />";
 		
 		ob_start();
@@ -109,7 +117,6 @@ class ExceptionHandler
 		$_ = preg_replace("/\[db\_user\] \=>[^\,]+\,/", "", $_);
 
 		echo $_;
-
 	}
 
 	function getTrace($data)

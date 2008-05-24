@@ -65,7 +65,7 @@ class DBAL_mysql
 				$this->rh->db_password
 				)
 			)
-				throw new DbException("Mysql connect error. Host=<b>" . $this->rh->db_host . "</b>, User=<b>" . $this->rh->db_user . "</b>, Password=<b>" . $this->rh->db_password . "</b>", 1);
+				throw new DbException("Host=<b>" . $this->rh->db_host . "</b>, User=<b>" . $this->rh->db_user . "</b>", 1);
 		}
 		catch (DbException $e)
 		{
