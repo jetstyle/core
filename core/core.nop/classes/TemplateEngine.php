@@ -315,26 +315,26 @@ class TemplateEngine extends ConfigProcessor
 			$res = trim(ob_get_contents());
 			ob_end_clean();
 		}
-		else if (!@in_array($_name, $this->soft_subtpls))
+ 		else if (!@in_array($_name, $this->soft_subtpls)  && substr($_name, -4)!="_sep" )
 		{
-	  try
-	  {
-	  	$id = ++$this->rh->exception_id;
-	  	$out = "<br /> <p>
-	  		 	<div style='background-color:#DDDDDD'>
-	  			Func_name=<b>" . $func_name . "</b>
-	  			<br /> Sub_tpl_name=<b>" . $_name . "</b>";
-	  	$out .= "<br /> Sub_tpl_source=<b>".$file_source."</b> ";
-	  	$out .= "<a href='#' onclick='document.getElementById(\"exc_".$id."\").style.display= (document.getElementById(\"exc_".$id."\").style.display==\"\" ? \"none\" : \"\" ); document.getElementById(\"exc_".$id."\").style.backgroundColor=\"#EEEEEE\"; return false;'>(click to show)</a></div>";
-	  	$out .= "<div style='display:none' id=\"exc_".$id."\">" . nl2br(implode("\n", file($file_source))) . "</div></p>";
-
-	  	throw new TplException($out);
-	  }
-	  catch (TplException $e)
-	  {
-	  	$exceptionHandler = ExceptionHandler::getInstance();
-	  	$exceptionHandler->process($e);
-	  }
+			try
+			{
+				$id = ++$this->rh->exception_id;
+				$out = "<br /> <p>
+						<div style='background-color:#DDDDDD'>
+						Func_name=<b>" . $func_name . "</b>
+						<br /> Sub_tpl_name=<b>" . $_name . "</b>";
+				$out .= "<br /> Sub_tpl_source=<b>".$file_source."</b> ";
+				$out .= "<a href='#' onclick='document.getElementById(\"exc_".$id."\").style.display= (document.getElementById(\"exc_".$id."\").style.display==\"\" ? \"none\" : \"\" ); document.getElementById(\"exc_".$id."\").style.backgroundColor=\"#EEEEEE\"; return false;'>(click to show)</a></div>";
+				$out .= "<div style='display:none' id=\"exc_".$id."\">" . nl2br(implode("\n", file($file_source))) . "</div></p>";
+		
+				throw new TplException($out);
+			}
+			catch (TplException $e)
+			{
+				$exceptionHandler = ExceptionHandler::getInstance();
+				$exceptionHandler->process($e);
+			}
 		}
 
 		//6. $dummy
