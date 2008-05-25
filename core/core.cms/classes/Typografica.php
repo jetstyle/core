@@ -154,7 +154,7 @@ class Typografica
 		// 5.1 <wbr> после дефисов
 		if ($this->settings["dashwbr"])
 		{
-			$data = preg_replace( "/([a-zа-яА-Я0-9]+)\-([a-zа-яА-Я0-9]+)/i", "\\1-<wbr>\\2", $data );
+			$data = preg_replace( "/([a-zа-яА-Я0-9]+)\-([a-zа-яА-Я0-9]+)/i", "\\1-<span class=\"wbr\"></span>\\2", $data );
 		}
 
 		// 6. Макросы
@@ -195,36 +195,6 @@ class Typografica
 			}
 		}
 
-		/*if(strlen($data) < 20)	{
-			
-			return $data;
-	    
-		}*/
-
-		// переделываем цитаты
-		$data = preg_replace_callback("/<blockquote>(.*?)?<\/blockquote>/si", array($this, "quote_callback"), $data);
-
-		// переделываем заметки
-		$data = preg_replace_callback("/<big>(.*?)?<\/big>/si", array($this, "note_callback"), $data);
-
-		// переделываем картинки
-		$data = preg_replace_callback("/<img(.*?mode=\".*?\".*?)>/si", array($this, "image_callback"), $data);
-						
-//		echo '<pre>';
-		
-		// переделываем файлы
-		$data = preg_replace_callback("/<a(.*?)?>(.*?)?<\/a?>/si", array($this, "file_callback"), $data);
-		/*$data = preg_replace_callback("/<?a.*?mode=\"file\".*?>(.*?)?<\/a?>/si", array($this, "file_callback"), $data);*/
-
-		// переделываем таблички
-		/*
-		$data = preg_replace_callback("/<table.*?class=\"(.*?)?\".*?>(.*?)?<\/table>/si", array($this, "temp_func"), $data);
-		*/
-
-		// БОНУС: прокручивание ссылок через A(...)
-		// --- для ваки не портировано ---
-		// --- для ваки не портировано ---
-
 		//nop@jetstyle: руслан сказал что это невалидный тег
 		$data = str_replace("<sup />", "", $data);
 
@@ -234,138 +204,6 @@ class Typografica
 		return preg_replace( "/^(\s)+/", "",  preg_replace( "/(\s)+$/", "", $data));
 	}
 	///////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-	function quote_callback($matches)	
-	{
-		$r= array('text' => $matches[1]);
-	$this->rh->tpl->setRef('*', $r);
-		return $this->rh->tpl->parse('typografica/quote.html');
-	}
-
-	function note_callback($matches)	
-	{
-		$r= array('text' => $matches[1]);
-		$this->rh->tpl->setRef('*', $r);
-		return $this->rh->tpl->parse('typografica/note.html');
-	}
-
-	function file_callback($match)	
-	{
-		preg_match_all('/((.*?)="(.*?)")/si', $match[1], $matches);
-		if(is_array($matches[2]) && !empty($matches[2]))
-		{
-			$res = array();
-			foreach($matches[2] AS $i => $r)
-			{
-				$res[trim($r)] = trim($matches[3][$i]);
-			}
-			if($res['mode'] == 'file')
-			{
-				$res['fileparams'] = explode('|', $res['fileparams']);
-				$res['size'] = $res['fileparams'][0];
-				$res['ext'] = $res['fileparams'][1];
-				$res['title'] = $match[2];
-				$this->rh->tpl->setRef('*', $res);
-				
-				return $this->rh->tpl->Parse('typografica/file.html');
-			}
-                        // ссылка в новом окне
-			elseif($res['target'] == '_blank')
-			{
-//				$res['_title'] = $match[2];
-//				$this->rh->tpl->setRef('*', $res);
-				
-//				return $this->rh->tpl->Parse('typografica/link.html');
-			}
-			
-		}
-		return $match[0];
-	}
-	
-	function image_callback($matches)	
-	{
-		$str = trim($matches[1], '/');
-		$str = str_replace('\"', '++', $str);
-
-		preg_match_all('/((.*?)="(.*?)")/si', $str, $matches);
-		
-		if(is_array($matches[2]) && !empty($matches[2]))
-		{
-			$res = array();
-			foreach($matches[2] AS $i => $r)
-			{
-				$res[trim($r)] = trim(str_replace('++', '"', $matches[3][$i]));
-			}
-
-			$this->rh->tpl->setRef('*', $res);
-			switch($res['mode'])
-			{
-				case 1:
-					return $this->rh->tpl->Parse('typografica/images.html:image_preview');
-					break;
-				case 2:
-					return $this->rh->tpl->Parse('typografica/images.html:image_small');
-					break;
-				case 3:
-					return $this->rh->tpl->Parse('typografica/images.html:image_big');
-					break;
-				default:
-
-					break;
-			}
-		}
-		return '';
-	}
-
-	function temp_func($matches)	
-	{
-		//        	echo '<pre>';
-		//		print_r($matches);
-		//		die();
-
-		$this->rows_head = 1;
-		$this->row = 0;
-
-		$matches[2] = preg_replace_callback("/<tr.*?>(.*?)?<\/tr>/si",array(&$this, "temp_func1"),$matches[2]);
-
-		return '<div class="in-table"><table class="'.$matches[1].'">'.$matches[2].'</table></div>';
-	}
-
-	function temp_func1($matches)	
-	{
-
-		//print_r($matches);
-		$this->row++;
-		$this->col = 0;
-
-		$matches[1] = preg_replace_callback("/<td.*?>(.*?)?<\/td>/si",array(&$this, "temp_func2"),$matches[1]);
-
-		return '<tr>'.$matches[1].'</tr>';
-	}
-
-	function temp_func2($matches)	
-	{
-
-		$this->col++;
-
-		preg_match_all('/colspan\=.(\d)./si', $matches[0], $m);
-		$colspan = ' colspan="'.$m[1][0].'" ';
-
-		preg_match_all('/rowspan\=.(\d)./si', $matches[0], $m);
-		$rowspan = ' rowspan="'.$m[1][0].'" ';
-
-		if($this->row == 1 && $m[1][0] > $this->rows_head)	{
-			$this->rows_head = $m[1][0];
-		}
-
-		if($this->row <= $this->rows_head) {
-			return '<th '.$colspan.$rowspan.'>'.$matches[1].'</th>';
-		}
-		else	{
-			return '<td '.$colspan.$rowspan.'>'.$matches[1].'</td>';
-		}
-
-	}
 
 	// -----------------------------------------------------------------------------------
 	// Метод для внутреннего использования. Проверяет только спец.символы

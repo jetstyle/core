@@ -8,6 +8,7 @@
 	);
 	
 	$this->PRE_FILTERS = array(
+		'editor_objects' => array('text'),	
 		'typografica' => array('title','text'),
 	);
 ?>
