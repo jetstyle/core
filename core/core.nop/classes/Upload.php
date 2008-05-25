@@ -209,7 +209,7 @@ class Upload {
 				throw new Exception("Upload: directory ".str_replace($this->rh->project_dir, '', $dirname)." is not writable");
 			}
 					
-			if(is_array($params['size']) && (strlen($params['size'][0]) > 0 && strlen($params['size'][1]) > 0))
+			if(in_array($ext, $this->GRAPHICS) && is_array($params['size']) && (strlen($params['size'][0]) > 0 && strlen($params['size'][1]) > 0))
 			{
 				$A = getimagesize($uploaded_file);
 				
