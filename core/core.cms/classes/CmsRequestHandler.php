@@ -65,8 +65,10 @@ class CmsRequestHandler extends RequestHandler
 			$this->data = $page->config;
 			$this->params = $page->params;
 			$this->path = $page->path;
-		} else {
-			$this->page = & $this->pageDomain->findPageByClass('_404');
+		} 
+		else 
+		{
+			$this->_404();
 		}
 	}
 	

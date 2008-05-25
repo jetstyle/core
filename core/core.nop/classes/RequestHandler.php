@@ -145,35 +145,45 @@ class RequestHandler extends ConfigProcessor {
 	var $fixtures = array ();
 	var $use_fixtures = False;
 
-	public function __construct($config_path = 'config/default.php') {
+	public function __construct($config_path = 'config/default.php') 
+	{
 		//пытаемся прочесть файл конфигурации
-		if (is_object($config_path)) {
+		if (is_object($config_path)) 
+		{
 			config_joinConfigs($this, $config_path);
-		} else
-			if (@ is_readable($config_path)) {
+		} 
+		else
+		{
+			if (@ is_readable($config_path)) 
+			{
 				require_once ($config_path);
-			} else {
-				$uri = preg_replace("/\?.*$/", "", $_SERVER["REQUEST_URI"]);
-				$page = $_REQUEST["page"];
-				$uri = substr($uri, 0, strlen($uri) - strlen($page));
-				$uri = rtrim($uri, "/") . "/setup";
-				die("Cannot read local configurations. May be you should try to <a href='" . $uri . "'>run installer</a>, if any?");
+			} 
+			else 
+			{
+				throw new Exception("Cannot read local configurations");
 			}
-
+		}
 		//вычисляем base_url
 		
 		if (!isset ($this->base_url))
+		{
 			$this->base_url = dirname($_SERVER["PHP_SELF"]) . (dirname($_SERVER["PHP_SELF"]) != '/' ? '/' : '');
+		}
 		if (!isset ($this->base_dir))
+		{
 			$this->base_dir = $_SERVER["DOCUMENT_ROOT"] . $this->base_url;
+		}
 		if (!isset ($this->host_url))
+		{
 			$this->host_url = strtolower(substr($_SERVER['SERVER_PROTOCOL'], 0, strpos($_SERVER['SERVER_PROTOCOL'], '/'))) . '://' . $_SERVER['SERVER_NAME'] .
 			 ($_SERVER['SERVER_PORT'] === '80' ? '' : ':' . $_SERVER['SERVER_PORT']);
+		}
 	 
 		$this->_setDomains();
 
 		//избавляемся от квотов
-		if (get_magic_quotes_gpc()) {
+		if (get_magic_quotes_gpc()) 
+		{
 			$this->_fuckQuotes($_POST);
 			$this->_fuckQuotes($_GET);
 			$this->_fuckQuotes($_COOKIE);
@@ -269,6 +279,14 @@ class RequestHandler extends ConfigProcessor {
 
 		header("Location: $href");
 		exit;
+	}
+	
+	public function _404()
+	{
+		$this->page = & $this->pageDomain->findPageByClass('_404');
+		$this->execute();
+		echo $this->tpl->Parse("html.html");
+		die();
 	}
 	
 	protected function execute() {
@@ -381,8 +399,10 @@ class RequestHandler extends ConfigProcessor {
 			$this->data = $page->config;
 			$this->params = $page->params;
 			$this->path = $page->path;
-		} else {
-			$this->page = & $this->pageDomain->findPageByClass('_404');
+		} 
+		else 
+		{
+			$this->_404();
 		}
 	}
 
