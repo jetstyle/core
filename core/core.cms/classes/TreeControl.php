@@ -49,7 +49,7 @@ class TreeControl
 		
 		$this->rh = &$config->rh;
 
-		$this->id = $this->rh->ri->get($this->idGetVar);
+		$this->id = intval($this->rh->ri->get($this->idGetVar));
 	}
 
 	public function handle()
@@ -75,8 +75,25 @@ class TreeControl
 					
 			case 'xml':
 				header("Content-type: text/xml; charset=".$this->xmlEncoding);
-				$this->load();
-				echo $this->toXML();
+				if ($this->config->ajaxAutoLoading)
+				{
+					if ($_GET['autoload'])
+					{
+						$this->load("_parent = ".$this->id);
+						echo $this->toXML($this->id);
+					}
+					else
+					{
+						$parents = $this->getParentsForItem($this->id ? $this->id : $this->getRootId());
+						$this->load("_parent IN('".implode("','", $parents)."')");
+						echo $this->toXML();
+					}
+				}
+				else
+				{
+					$this->load();
+					echo $this->toXML();
+				}
 				die();
 			break;
 
@@ -116,9 +133,20 @@ class TreeControl
 				
 				if (!$this->config->ajaxLoad)
 				{
-					$this->load();
+					if ($this->config->ajaxAutoLoading)
+					{
+						$parents = $this->getParentsForItem($this->id ? $this->id : $this->getRootId());
+						$this->load("_parent IN('".implode("','", $parents)."')");
+					}
+					else
+					{
+						$this->load();
+					}
 					$this->rh->tpl->set('_xml_string', str_replace(array('"', "\n"), array('\"', ""), $this->toXML()));
 				}				
+				
+				$this->rh->tpl->set('_tree_autoloading', $this->config->ajaxAutoLoading);
+				$this->rh->tpl->set('_tree_autoloading_url', $this->rh->ri->hrefPlus("do/".$this->config->moduleName."/tree", array('action' => 'xml', $this->idGetVar => '', 'autoload' => '1')));
 				
 			break;
 		}
@@ -130,11 +158,11 @@ class TreeControl
 		return $this->rh->tpl->Parse( $this->template);
 	}
 
-	public function toXML()
+	public function toXML($treeId = 0)
 	{
 		//start XML
 		$str = "<?xml version=\"1.0\" encoding=\"".$this->xmlEncoding."\" ?>\n";
-		$str .= "<tree id=\"0\">";
+		$str .= "<tree id=\"".$treeId."\">";
 
 		$this->toRoot = array();
 		$c = $this->items[ intval($this->id) ];
@@ -144,7 +172,22 @@ class TreeControl
 			$c = $this->items[$c['_parent']] ;
 		} while($c);
 
-		$str .= $this->treeParse($this->children[$this->items[$this->getRootId()]['_parent']]);
+		if ($this->config->ajaxAutoLoading)
+		{
+			if (0 == $treeId)
+			{
+				$str .= $this->treeParse($this->children[$this->items[$this->getRootId()]['_parent']]);
+			}
+			else
+			{
+				$str .= $this->treeParse($this->children[$this->id]);
+			}
+		}
+		else
+		{
+			$str .= $this->treeParse($this->children[$this->items[$this->getRootId()]['_parent']]);
+		}
+		
 		$str .= "</tree>";
 		return $str;
 	}
@@ -162,6 +205,8 @@ class TreeControl
 		
 	protected function treeParse($data)
 	{
+		$out = '';
+		
 		if(is_array($data))
 		{
 			foreach($data AS $id)
@@ -169,10 +214,25 @@ class TreeControl
 				$title = $this->xmlQuote($this->_getTitle($this->items[$id]));
 				$buttons = $this->_getButtons($this->items[$id]);
 				
-				if(is_array($this->children[$id]))
+				if(is_array($this->children[$id]) || $this->config->ajaxAutoLoading)
 				{
+					if ($this->config->ajaxAutoLoading)
+					{
+						if (($this->items[$id]['_right'] - $this->items[$id]['_left']) == 1)
+						{
+							$_child = 0;
+						}
+						else
+						{
+							$_child = 1;
+						}
+					}
+					else
+					{
+						$_child = 1;
+					}
 					$childs = $this->treeParse($this->children[$id]);
-					$out.= '<item text="'.$title.'" id="'.$id.'" '.($this->toRoot[$id] ? 'open="1"' : '').' child="1" '.($this->id == $id ? 'select="true"' : '').' '.$buttons.'>'.$childs."</item>\n";
+					$out.= '<item text="'.$title.'" id="'.$id.'" '.($this->toRoot[$id] ? 'open="1"' : '').' child="'.$_child.'" '.($this->id == $id ? 'select="true"' : '').' '.$buttons.'>'.$childs."</item>\n";
 				}
 				else
 				{
@@ -184,7 +244,7 @@ class TreeControl
 		return $out;
 	}
 
-	protected function load()
+	protected function load($where = null)
 	{
 		if (!$this->loaded)
 		{
@@ -193,7 +253,7 @@ class TreeControl
 			$result = $this->rh->db->execute("
 				SELECT ".implode(", ", $this->config->SELECT_FIELDS)."
 				FROM ??".$this->config->table_name."
-				WHERE ".( $_GET['_show_trash'] ? '_state>=0' : "_state <>2 " ) . ($this->config->where ? ' AND ' . $this->config->where : '')." ".($this->level_limit ? " AND _level <= ".$this->level_limit : "")."
+				WHERE ".( $_GET['_show_trash'] ? '_state>=0' : "_state <>2 " ) . ($where ? ' AND ' . $where : '') . ($this->config->where ? ' AND ' . $this->config->where : '')." ".($this->level_limit ? " AND _level <= ".$this->level_limit : "")."
 				ORDER BY _order ASC
 			");
 				
@@ -207,7 +267,61 @@ class TreeControl
 			}
 		}
 	}
+	
+	protected function getItem($id)
+	{
+		return $this->loadItem($id);
+	}
 
+	protected function loadItem($id)
+	{
+		return $this->rh->db->queryOne("
+			SELECT ".implode(", ", $this->config->SELECT_FIELDS)."
+			FROM ??".$this->config->table_name."
+			WHERE id = ".intval($id)." ". ($this->config->where ? ' AND ' . $this->config->where : '')." ".($this->level_limit ? " AND _level <= ".$this->level_limit : "")."
+		");
+	}
+	
+	protected function getParentsForItem($id)
+	{
+		$parents = array();
+		
+		$item = $this->getItem($id);
+		if (!$item[$this->idField])
+		{
+			return $parents;
+		}
+		elseif ($item['_level'] == 1)
+		{
+			$parents[] = 0;
+		}
+		elseif ($item['_level'] == 2)
+		{
+			$parents[] = 0;
+			$parents[] = $item['_parent'];
+		}
+		else
+		{
+			$result = $this->rh->db->execute("
+				SELECT _parent
+				FROM ??".$this->config->table_name."
+				WHERE _left <= ".$item['_left']." AND _right >= ".$item['_right']." ". ($this->config->where ? ' AND ' . $this->config->where : '')." 
+			");
+			
+			if ($result)
+			{
+				while ($r = $this->rh->db->getRow($result))
+				{
+					$parents[] = $r['_parent'];
+				}
+			}
+		}
+		
+		//$parents[] = $item['id'];
+		
+		return $parents;
+	}
+	
 	protected function updateTreeStruct()
 	{
 		$rh =& $this->rh;
