@@ -91,7 +91,7 @@ class TreeControl
 					}
 				}
 				$show_trash = $_GET['_show_trash'];
-
+				
 				$this->rh->tpl->set('_url_xml', $this->rh->ri->hrefPlus("do/".$this->config->moduleName."/tree", array('action' => 'xml')));
 				$this->rh->tpl->set('_url_connect', $this->rh->ri->hrefPlus("do/".$this->config->moduleName."/tree", array('action' => 'update')));
 				$url = $this->rh->ri->hrefPlus('', array('id' => ''));
@@ -113,6 +113,12 @@ class TreeControl
 				{
 					$this->rh->tpl->set("toggleEditTreeClass", "class='toggleEditTreeClass-Sel'");
 				}
+				
+				if (!$this->config->ajaxLoad)
+				{
+					$this->load();
+					$this->rh->tpl->set('_xml_string', str_replace(array('"', "\n"), array('\"', ""), $this->toXML()));
+				}				
 				
 			break;
 		}
@@ -170,7 +176,7 @@ class TreeControl
 				}
 				else
 				{
-					$out.= '<item text="'.$title.'" id="'.$id.'" child="0" '.($this->id == $id ? 'select="true"' : '').' '.$buttons.' />';
+					$out.= '<item text="'.$title.'" id="'.$id.'" child="0" '.($this->id == $id ? 'select="true"' : '').' '.$buttons." />\n";
 				}
 			}
 		}
