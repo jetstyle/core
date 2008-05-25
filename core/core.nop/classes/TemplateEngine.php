@@ -389,7 +389,16 @@ class TemplateEngine extends ConfigProcessor
 				try
 				{
 					if (!$file_source = $this->FindScript( "plugins", $action_name, $level, $direction ))
-					throw new TplException("Func_name=<b>" . $func_name . "</b>, Action_name=<b>" . $action_name . "</b>, Tpl_name=<b>" . $params["_caller"] . "</b>, Tpl_source=<b>" . $this->_FindTemplate( $params["_caller"] ) . "</b>, Tpl=<b>" . implode("\n", file($this->_FindTemplate($params["_caller"]))) . "</b>", 1);
+					{
+						if (is_array($params['_caller']) && isset($params['_caller']))
+						{
+							throw new TplException("Func_name=<b>" . $func_name . "</b>, Action_name=<b>" . $action_name . "</b>, Tpl_name=<b>" . $params["_caller"] . "</b>, Tpl_source=<b>" . $this->_FindTemplate( $params["_caller"] ) . "</b>, Tpl=<b>" . implode("\n", file($this->_FindTemplate($params["_caller"]))) . "</b>", 1);
+						}
+						else
+						{
+							throw new TplException("Func_name=<b>" . $func_name . "</b>, Action_name=<b>" . $action_name . "</b>", 1);
+						}
+					}
 				}
 				catch (TplException $e)
 				{
