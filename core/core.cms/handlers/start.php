@@ -7,10 +7,7 @@
     echo $tpl->Parse('access_denied.html');
     $rh->End();
   }
-  if ($rh->db_host=="localhost" && $_SERVER['REMOTE_ADDR']==$_SERVER['SERVER_ADDR'])
-  {
-  	$tpl->set('localhost', 1);
-  }
+
   include( $rh->FindScript("handlers","_toolbar") );
  
   //собираем все разделы для главной страницы

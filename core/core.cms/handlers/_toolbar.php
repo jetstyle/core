@@ -2,6 +2,10 @@
 //рисуем тулбар
 if( $rh->render_toolbar )
 {
+	if ($rh->db_host=="localhost" && $_SERVER['REMOTE_ADDR']==$_SERVER['SERVER_ADDR'])
+	{  	  
+	$tpl->set('localhost', 1);
+	}
 	$this->useClass('Toolbar');
 	$toolbar = new Toolbar($this);
 	$toolbar->handle();
