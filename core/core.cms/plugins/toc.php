@@ -1,7 +1,12 @@
 <?php
+if (is_array($params))
+	$params = $params['_'];	
+	//$params['_']
 
 $rh->useClass('Toc');
 $toc =& new Toc( &$rh );		
-return $toc->correct( $params['_'] );
+
+$ret = $toc->correct( $params );
+return $ret;
 
 ?>
