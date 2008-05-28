@@ -289,13 +289,30 @@ class RequestHandler extends ConfigProcessor {
 		die();
 	}
 	
-	protected function execute() {
+	protected function beforePageHandle()
+	{
+		
+	}
+	
+	protected function afterPageHandle()
+	{
+		
+	}
+	
+	protected function execute() 
+	{
+		$this->beforePageHandle();
+		
 		$this->page->handle();
 		$this->page->rend();
+		
+		$this->afterPageHandle();
+		
 		$this->showSiteMap();
 	}
 
-	protected function init() {
+	protected function init() 
+	{
 		$this->initDebug();
 		$this->initDBAL();
 		$this->initTPL();
