@@ -8,7 +8,7 @@ class TreeControl
 	protected $template = "tree_control.html";
 	protected $template_trash_show = "list_simple.html:TrashShow";
 	protected $template_trash_hide = "list_simple.html:TrashHide";
-	
+
 	protected $xmlEncoding = "windows-1251";
 
 	protected $loaded = false;
@@ -22,7 +22,7 @@ class TreeControl
 	protected $rootId = 0;
 
 	protected $redirectIfEmptyId = false;
-	
+
 	protected $level_limit = 3;
 
 	public function __construct( &$config )
@@ -34,19 +34,19 @@ class TreeControl
 		{
 			$this->xmlEncoding = $this->config->xmlEncoding;
 		}
-		
+
 		if ($this->config->redirectIfEmptyId)
 		{
 			$this->redirectIfEmptyId = $this->config->redirectIfEmptyId;
 		}
-		
+
 		if ($this->config->level_limit)
 		{
 			$this->level_limit = $this->config->level_limit;
 		}
 
 		$this->config->hide_buttons['addChild'][$this->level_limit] = true;
-		
+
 		$this->rh = &$config->rh;
 
 		$this->id = intval($this->rh->ri->get($this->idGetVar));
@@ -72,7 +72,7 @@ class TreeControl
 				echo $res;
 				die();
 			break;
-					
+
 			case 'xml':
 				header("Content-type: text/xml; charset=".$this->xmlEncoding);
 				if ($this->config->ajaxAutoLoading)
@@ -98,7 +98,7 @@ class TreeControl
 			break;
 
 			default:
-				
+
 				if (!$this->id && $this->redirectIfEmptyId)
 				{
 					$rootId = $this->getRootId();
@@ -108,7 +108,7 @@ class TreeControl
 					}
 				}
 				$show_trash = $_GET['_show_trash'];
-				
+
 				$this->rh->tpl->set('_url_xml', $this->rh->ri->hrefPlus("do/".$this->config->moduleName."/tree", array('action' => 'xml')));
 				$this->rh->tpl->set('_url_connect', $this->rh->ri->hrefPlus("do/".$this->config->moduleName."/tree", array('action' => 'update')));
 				$url = $this->rh->ri->hrefPlus('', array('id' => ''));
@@ -130,7 +130,7 @@ class TreeControl
 				{
 					$this->rh->tpl->set("toggleEditTreeClass", "class='toggleEditTreeClass-Sel'");
 				}
-				
+
 				if (!$this->config->ajaxLoad)
 				{
 					if ($this->config->ajaxAutoLoading)
@@ -143,11 +143,11 @@ class TreeControl
 						$this->load();
 					}
 					$this->rh->tpl->set('_xml_string', str_replace(array('"', "\n"), array('\"', ""), $this->toXML()));
-				}				
-				
+				}
+
 				$this->rh->tpl->set('_tree_autoloading', $this->config->ajaxAutoLoading);
 				$this->rh->tpl->set('_tree_autoloading_url', $this->rh->ri->hrefPlus("do/".$this->config->moduleName."/tree", array('action' => 'xml', $this->idGetVar => '', 'autoload' => '1')));
-				
+
 			break;
 		}
 	}
@@ -187,7 +187,7 @@ class TreeControl
 		{
 			$str .= $this->treeParse($this->children[$this->items[$this->getRootId()]['_parent']]);
 		}
-		
+
 		$str .= "</tree>";
 		return $str;
 	}
@@ -202,18 +202,18 @@ class TreeControl
 			$this->rh->tpl->parse( $show_trash ? $this->template_trash_hide : $this->template_trash_show, '__trash_switch' );
 		}
 	}
-		
+
 	protected function treeParse($data)
 	{
 		$out = '';
-		
+
 		if(is_array($data))
 		{
 			foreach($data AS $id)
 			{
 				$title = $this->xmlQuote($this->_getTitle($this->items[$id]));
 				$buttons = $this->_getButtons($this->items[$id]);
-				
+
 				if(is_array($this->children[$id]) || $this->config->ajaxAutoLoading)
 				{
 					if ($this->config->ajaxAutoLoading)
@@ -249,14 +249,14 @@ class TreeControl
 		if (!$this->loaded)
 		{
 			$this->loaded = true;
-				
+
 			$result = $this->rh->db->execute("
 				SELECT ".implode(", ", $this->config->SELECT_FIELDS)."
 				FROM ??".$this->config->table_name."
 				WHERE ".( $_GET['_show_trash'] ? '_state>=0' : "_state <>2 " ) . ($where ? ' AND ' . $where : '') . ($this->config->where ? ' AND ' . $this->config->where : '')." ".($this->level_limit ? " AND _level <= ".$this->level_limit : "")."
 				ORDER BY _order ASC
 			");
-				
+
 			if ($result)
 			{
 				while ($r = $this->rh->db->getRow($result))
@@ -267,7 +267,7 @@ class TreeControl
 			}
 		}
 	}
-	
+
 	protected function getItem($id)
 	{
 		return $this->loadItem($id);
@@ -281,11 +281,11 @@ class TreeControl
 			WHERE id = ".intval($id)." ". ($this->config->where ? ' AND ' . $this->config->where : '')." ".($this->level_limit ? " AND _level <= ".$this->level_limit : "")."
 		");
 	}
-	
+
 	protected function getParentsForItem($id)
 	{
 		$parents = array();
-		
+
 		$item = $this->getItem($id);
 		if (!$item[$this->idField])
 		{
@@ -305,9 +305,9 @@ class TreeControl
 			$result = $this->rh->db->execute("
 				SELECT _parent
 				FROM ??".$this->config->table_name."
-				WHERE _left <= ".$item['_left']." AND _right >= ".$item['_right']." ". ($this->config->where ? ' AND ' . $this->config->where : '')." 
+				WHERE _left <= ".$item['_left']." AND _right >= ".$item['_right']." ". ($this->config->where ? ' AND ' . $this->config->where : '')."
 			");
-			
+
 			if ($result)
 			{
 				while ($r = $this->rh->db->getRow($result))
@@ -316,12 +316,12 @@ class TreeControl
 				}
 			}
 		}
-		
+
 		//$parents[] = $item['id'];
-		
+
 		return $parents;
 	}
-	
+
 	protected function updateTreeStruct()
 	{
 		$rh =& $this->rh;
@@ -330,10 +330,10 @@ class TreeControl
 		if( $_REQUEST['add'])
 		{
 			$id = $this->addNode();
-			
+
 			$this->load();
 			$this->restore();
-			
+
 			return $id;
 		}
 		elseif($delete = intval($_REQUEST['delete']))
@@ -348,7 +348,7 @@ class TreeControl
 					$this->load();
 					$this->restore();
 				}
-				
+
 				return '1';
 			}
 			else
@@ -394,12 +394,69 @@ class TreeControl
 
 			$this->load();
 			$this->restore();
-				
-			include( $rh->findScript_('handlers','_update_tree_pathes') );
-				
+
+			TreeControl::updateTreePathes($this->rh, $this->config->table_name, $this->id, $this->config->allow_empty_supertag);
+
 			return '1';
 		}
 		return '0';
+	}
+
+	public function updateTreePathes(&$rh,$tableName,$id,$allow_empty_supertag = false) {		//$this->config->table_name replaced with $tableName
+		//$this->id replaced with $id
+		//$this->config->allow_empty_supertag replaced with allow_empty_supertag    	//$parent_id = isset($parent_id) ? $parent_id : 1;
+		$root = $rh->db->queryOne("SELECT id,_left,_right,_path,_parent FROM ??".$tableName." WHERE id='".$id."'");
+		if ($root) {
+			//грузим поддерево
+			$result = $rh->db->execute("
+				SELECT id, _supertag, _parent, _path
+				FROM ??".$tableName."
+				WHERE _left>= ".$root['_left']." AND _right <= ".$root['_right']."
+			");
+
+			if ($result) {
+				$tree = array('children' => array(), 'items' => array());
+				while ($r = $rh->db->getRow($result)) {
+					$tree['children'][$r['_parent']][] = $r['id'];
+					$tree['items'][$r['id']] = $r;
+				}
+
+				$parent = $rh->db->queryOne("
+					SELECT id, _supertag, _parent, _path
+					FROM ??".$tableName."
+					WHERE id = ".$root['_parent']."
+				");
+				if ($parent) $tree['items'][$parent['id']] = $parent;
+
+				//обходим поддерево
+				$STACK[] = $root['id'];
+				while(count($STACK)) {
+					$id = array_pop($STACK);
+					//собираем детей
+					if (is_array($tree['children'][$id])) {
+						foreach( $tree['children'][$id] as $_id ) {
+							$STACK[] = $_id;
+						}
+					}
+
+					//модифицируем узел
+					$r = $tree['items'][$id];
+
+					var_dump('<pre>',$r,'</pre>');
+
+					if ($r['_parent'] == 0 && $parent_id !== 0)	{
+						$r['_path'] = '';
+						$r['_supertag'] = '';
+					} else {
+						$parentTag = $tree['items'][ $r['_parent'] ]['_path'];
+						$r['_path'] = ($parentTag ? $parentTag.'/' : '').$r["_supertag"];
+					}
+
+					$rh->db->execute("UPDATE ".$rh->db_prefix.$tableName." SET _supertag='".$r["_supertag"]."',_path='".$r['_path']."' WHERE id='".$r['id']."'");
+					$tree['items'][$id] = $r;
+				}
+			}
+		}
 	}
 
 	protected function addNode()
@@ -434,7 +491,7 @@ class TreeControl
 			SELECT (MAX(_order) + 1) AS _max
 			FROM ??". $this->config->table_name ."
 			WHERE _parent = '".$node['parent']."'
-		");		
+		");
 
 		$id = $db->insert("
 			INSERT INTO ". $this->rh->db_prefix.$this->config->table_name ."
@@ -445,7 +502,7 @@ class TreeControl
 
 		return $id;
 	}
-	
+
 	function deleteNode($nodeId)
 	{
 		$rh =& $this->rh;
@@ -480,7 +537,7 @@ class TreeControl
 
 		return $node;
 	}
-	
+
 	protected function getRootId()
 	{
 		if (!$this->rootId)
@@ -488,10 +545,10 @@ class TreeControl
 			$result = $this->rh->db->queryOne("
 				SELECT ".$this->idField."
 				FROM ??".$this->config->table_name."
-				WHERE _parent = 0 
+				WHERE _parent = 0
 				ORDER BY _order ASC
 			");
-				
+
 			if ($result[$this->idField])
 			{
 				$this->rootId = $result[$this->idField];
@@ -518,7 +575,7 @@ class TreeControl
 		{
 			$_title = $_title  .' [удален]';
 		}
-		 
+
 		$_title = preg_replace( "/<.*?>/is", '', $_title);
 		return $_title;
 	}
@@ -527,7 +584,7 @@ class TreeControl
 	{
 		$buttons = array('addChild', 'addBrother', 'del');
 		$result = '';
-		
+
 		if (is_array($this->config->hide_buttons) && !empty($this->config->hide_buttons))
 		{
 			foreach ($buttons AS $buttonName)
@@ -548,15 +605,15 @@ class TreeControl
 				}
 			}
 		}
-		
+
 		return $result;
 	}
-	
+
 	protected function saveTitle($id, $title)
 	{
 		$title = iconv("UTF-8", "CP1251", $title);
 
-		$sql = "UPDATE ??".$this->config->table_name." SET title_short=".$this->rh->db->quote($title)." WHERE id=".$this->rh->db->quote($id);   
+		$sql = "UPDATE ??".$this->config->table_name." SET title_short=".$this->rh->db->quote($title)." WHERE id=".$this->rh->db->quote($id);
 		$this->rh->db->execute($sql);
 		return $sql;
 	}
