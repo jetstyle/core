@@ -64,7 +64,7 @@ class PrincipalCms
 	protected $ROLES_REVERT = array(
         '' => ROLE_GUEST,
         'user' => ROLE_USER,
-        'admin'=>ROLE_ADMIN, 
+        'admin'=>ROLE_ADMIN,
         'admin'=>ROLE_GOD,
 	);
 	protected $ADMIN_ROLES = array( ROLE_GOD, ROLE_ADMIN, ROLE_USER);
@@ -107,7 +107,7 @@ class PrincipalCms
 		Debug::trace("PrincipalCms::SessionDestroy()", 'prp');
 		$this->rh->db->execute('DELETE FROM '.$this->sessions_table." WHERE id=".$this->rh->db->quote($this->session['id'])."");
 		$this->session = array();
-		setcookie( $this->cookie_prefix.'_sessid', "", 0, "/" );
+		setcookie( $this->cookie_prefix.'_sessid', "", 0, $this->rh->front_end->path_rel );
 	}
 
 	/*** работа с сессиями ***/
@@ -147,7 +147,7 @@ class PrincipalCms
 			}
 			//сохраняем sessid
 			$this->session = $session;
-			setcookie($this->cookie_prefix.'_sessid',$session['id'],0,"/");
+			setcookie($this->cookie_prefix.'_sessid',$session['id'],0,$this->rh->front_end->path_rel);
 		}
 	}
 
@@ -221,7 +221,7 @@ class PrincipalCms
 	{
 		return $this->user;
 	}
-	
+
 	/*** изымание юзера из БД ***/
 
 	protected function _getBy($where)
@@ -294,7 +294,7 @@ class PrincipalCms
 				//нашли строку, которая позволяет?
 				if( in_array($str,$roles,true) )
 				{
-					 
+
 					$granted = true;
 					Debug::trace("Principal::IsGrantedTo() - <font color='green'>granted</font>", 'prp');
 				}
