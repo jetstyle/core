@@ -12,8 +12,14 @@
   <td class="w100">{{@dummy.html}}</td>
   <td class="sep-"><img class="block" src="{{images}}seporate.gif" width="2" height="20" align="top" alt="" /></td>
   <td nowrap="nowrap">
-    <a href="{{/}}start">основное меню</a> | 
-    <a href="{{fe_/}}">на сайт</a> | 
+    <a href="{{/}}start">основное меню</a> |
+    <span>
+    	перейти
+    	<select onchange="if (this.value != -1) window.location.href='{{front_end_url}}'+this.value">
+    		<option value="-1">выбрать</option>
+        	{{!for goto do=@:goToItem}}
+    	</select>
+    </span> |
     <a href="{{/}}login?logout=1" onclick="return confirm('Вы действительно желаете выйти?');">выход</a>
   </td>
 </tr>
@@ -31,7 +37,7 @@ function switchMenu(el)
 	{
 		if(selectedNode)
 		{
-			var old_el 
+			var old_el
 			if(old_el = document.getElementById('submenu_' + selectedNode.getAttribute('item_id')))
 			{
 				old_el.style.display = 'none';
@@ -86,3 +92,7 @@ function switchMenu(el)
 {{/:subitem_item}}
 
 {{:subitem_item_sep}}&nbsp;|&nbsp;{{/:subitem_item_sep}}
+
+{{:goToItem}}
+	<option value="{{*path}}">{{*title}}</option>
+{{/:goToItem}}

@@ -1,26 +1,31 @@
 <?php
 /**
  * @author lunatic lunatic@jetstyle.ru
- *  
+ *
  * @modified 09.05.2008
  */
- 
+
  class Toolbar
  {
  	protected $rh;
  	protected $items = array('main' => array(), 'submenu' => array());
- 	
+ 	protected $goToList;
+
  	public function __construct(&$rh)
  	{
  		$this->rh = &$rh;
  	}
- 	 	
+
  	public function getData()
  	{
  		$this->load();
  		return $this->items;
  	}
- 	
+
+ 	public function getGoToList() {    	$this->loadGoTo();
+    	return $this->goToList;
+ 	}
+
  	/**
  	 * load two levels of menu
  	 */
@@ -28,7 +33,15 @@
  	{
  		$this->constructResult($this->getLoadResult());
  	}
- 	
+
+ 	protected function loadGoTo() {    	$this->goToList = $this->rh->db->query("" .
+ 			"SELECT title_pre AS title, _path AS path " .
+ 			"FROM ??content " .
+ 			"WHERE mode != '' " .
+ 			"ORDER BY _level,_order " .
+ 		"");
+ 	}
+
  	protected function getLoadResult()
  	{
  		return $this->rh->db->execute("" .
@@ -38,7 +51,7 @@
  				"ORDER BY _level ASC, _order ASC " .
  		"");
  	}
- 	
+
  	protected function constructResult($result)
  	{
  		$moduleName = 'do/'.$this->rh->params[0];
@@ -46,8 +59,8 @@
  		while($r = $this->rh->db->getRow($result))
  		{
  			$r['granted'] = $this->rh->principal->isGrantedTo($r['href']);
- 			
- 			
+
+
  			if($r['_level'] == 1)
  			{
  				$this->items['main'][$r['id']] = $r;
@@ -62,7 +75,7 @@
  				{
  					$this->items['main'][$r['_parent']]['granted'] = true;
  				}
- 				
+
  				if(!isset($this->items['submenu'][$r['_parent']]))
  				{
  					$this->items['submenu'][$r['_parent']] = array('id' => $r['_parent'], 'childs' => array());
@@ -85,7 +98,7 @@
  				}
  			}
  		}
- 		
+
  		foreach($this->items['main'] AS $k => $item)
  		{
  			if(!$item['granted'])
@@ -94,6 +107,6 @@
  			}
  		}
  	}
- 	 	
+
  }
 ?>
