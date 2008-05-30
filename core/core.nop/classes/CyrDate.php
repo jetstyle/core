@@ -14,6 +14,21 @@ class CyrDate
 	var $minute=NULL;
 	var $second=NULL;
 
+	var $_cyr_months = array(
+		1 => '€нваре',
+		2 => 'феврале',
+		3 => 'марте',
+		4 => 'апреле',
+		5 => 'мае',
+		6 => 'июне',
+		7 => 'июле',
+		8 => 'августе',
+		9 => 'сент€бре',
+		10 => 'окт€бре',
+		11 => 'но€бре',
+		12 => 'декабре',
+	);
+	
 	var $cyr_months = array(
 		1 => '€нвар€',
 		2 => 'феврал€',
@@ -89,6 +104,7 @@ class CyrDate
 		'Q'=>'quarter',
 		'Y'=>'year',
 		'm'=>'month',
+		'Z'=>'_months_str',
 		'M'=>'months_str',
 		'N'=>'month_str',
 		'd'=>'day',
@@ -287,6 +303,7 @@ class CyrDate
 	function minute() { return sprintf('%02d', $this->minute); }
 	function second() { return sprintf('%02d', $this->second); }
 
+	function _months_str() { return $this->_cyr_months[$this->month]; }
 	function months_str() { return $this->_toStr('months', $this->month); }
 	function month_str() { return $this->_toStr('month', $this->month); }
 	function month_str3() { return substr($this->month_str(), 0, 3); }
