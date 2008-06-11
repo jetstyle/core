@@ -14,12 +14,15 @@ class LoginPage extends BasicPage
 		{
 			if ($this->rh->ri->get('logout'))
 			{
-				$this->rh->principal->logout($this->rh->base_url.'login');
-			}
-
-			if ($_GET['retpath']) {            	$this->rh->redirect($_GET['retpath']);
+				$redirectTo = $this->rh->ri->get('retpath') ?
+							  $this->rh->ri->get('retpath') :
+							  $this->rh->base_url.'login';
+				$this->rh->principal->logout($redirectTo);
 			} else {
-				$this->rh->redirect($this->rh->base_url.'start');
+				if ($this->rh->ri->get('retpath')) {	            	$this->rh->redirect($this->rh->ri->get('retpath'));
+				} else {
+					$this->rh->redirect($this->rh->base_url.'start');
+				}
 			}
 		}
 		else
