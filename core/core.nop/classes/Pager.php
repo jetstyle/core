@@ -11,7 +11,7 @@
  	protected $total = 0;		// total items
  	protected $perPage = 10;	// items per page
  	protected $p = 1;			// current page
- 	protected $frameSize = 4;	// 
+ 	protected $frameSize = 7;	// 
  	protected $data = array();	
  	protected $rh = null;
  	
