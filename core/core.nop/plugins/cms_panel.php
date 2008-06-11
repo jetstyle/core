@@ -9,7 +9,9 @@
 		} else {         	$oce = 'off';
 		}
 		$tpl->set('oce_on', $oce=='on');
-		$tpl->set('cur_url',$rh->ri->hrefPlus('',''));
+		$tpl->set('oce_off_href',$rh->ri->hrefPlus('',array('oce' => 'off')));
+		$tpl->set('oce_on_href',$rh->ri->hrefPlus('',array('oce' => 'on')));
+		$tpl->set('cur_url',$rh->ri->hrefPlus('',array('oce' => '')));
         return $tpl->parse('cms_panel.html');
 	} else return '';
 
