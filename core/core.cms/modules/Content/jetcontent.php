@@ -1,18 +1,13 @@
 <?php
-include( $rh->FindScript('handlers','_start') );
 
-//не авторизован?
-if( !$prp->IsAuth() )
-{
-	$rh->redirect( $rh->url.'login' );
-}
+$rh = &$this->rh;
 
-$rh->tpl->set('url_rel', $rh->url_rel);
-$rh->cm_mode = intval($rh->getVar('cm'));
+$rh->tpl->set('url_rel', $rh->ri->hrefPlus('', array()));
+$rh->cm_mode = intval($rh->ri->get('cm'));
 
-$rh->modes['news'] = 1;
+//$rh->modes['news'] = 1;
 
-$_id = $rh->getVar('id');
+$_id = $rh->ri->get('id');
 
 if($_id)
 {
@@ -26,10 +21,11 @@ if($_id)
 	if($_id == 'content-1')
 	{
 		echo "<tree id='0'>\n";
-		$r = $rh->db->queryOne("SELECT id, title, _path FROM ".$rh->project_name."_content WHERE _parent = 0 AND _state = 0");	
+		$r = $rh->db->queryOne("SELECT id, title, _path FROM ??content WHERE _parent = 0 AND _state = 0");
+			
 		$r['title'] = iconv('cp1251', 'UTF-8', htmlentities($r['title'], ENT_QUOTES, 'cp1251'));
 		$r['title_ins'] = iconv('cp1251', 'UTF-8', htmlentities($r['title_ins'], ENT_QUOTES, 'cp1251'));
-		echo '<item text="'.$r['title'].'" id="'.$r['id'].'" child="1" open="1"><userdata name="link">'.($rh->cm_mode ? '' : $rh->front_end->path_rel).$r['_path'].'</userdata><userdata name="title_ins">'.($r['title_ins'] ? $r['title_ins'] : $r['title'])."</userdata>\n";
+		echo '<item text="'.$r['title'].'" id="'.$r['id'].'" child="1" open="1" hideAddChildButton="true" hideAddBrotherButton="true" hideDelButton="true"><userdata name="link">'.($rh->cm_mode ? '' : $rh->front_end->path_rel).$r['_path'].'</userdata><userdata name="title_ins">'.($r['title_ins'] ? $r['title_ins'] : $r['title'])."</userdata>\n";
 	}
 	else
 	{
@@ -60,7 +56,7 @@ else
 	{
 		$template = 'jetcontent.html:html';		
 	}
-	echo $tpl->parse($template);
+	echo $rh->tpl->parse($template);
 }
 die();
 
@@ -74,7 +70,7 @@ function loadContent($id, &$rh)
 	{
 		$sql = "
 			SELECT id, mode
-			FROM " . $rh->project_name . "_content 
+			FROM ??content 
 			WHERE id = '".intval($id)."' AND _state IN(0,1)
 		";
 		$node = $rh->db->queryOne($sql);
@@ -102,8 +98,8 @@ function loadContent($id, &$rh)
 		
 		$sql = "
 			SELECT c.id, c.title, c.mode, c._path, COUNT(cc.id) AS child, c._state
-			FROM " . $rh->project_name . "_content AS c
-			LEFT JOIN " . $rh->project_name . "_content AS cc ON (c.id = cc._parent AND cc._state IN(0,1))
+			FROM ??content AS c
+			LEFT JOIN ??content AS cc ON (c.id = cc._parent AND cc._state IN(0,1))
 			WHERE c._parent = '".intval($id)."'  AND c._state IN(0,1)
 			GROUP BY c.id
 			ORDER BY c._order ASC
@@ -134,7 +130,7 @@ function loadNews($id, &$rh)
 {
 	$sql = "
 		SELECT id, _path
-		FROM " . $rh->project_name . "_content 
+		FROM ??content 
 		WHERE _state = 0 AND mode = 'news'
 	";
 	$node = $rh->db->queryOne($sql);
@@ -145,7 +141,7 @@ function loadNews($id, &$rh)
 	{
 		$sql = "
 			SELECT DISTINCT year
-			FROM " . $rh->project_name . "_news 
+			FROM ??news 
 			WHERE _state = 0
 			ORDER BY year ASC
 		";
@@ -171,7 +167,7 @@ function loadNews($id, &$rh)
 		{
 			$sql = "
 				SELECT DISTINCT month
-				FROM " . $rh->project_name . "_news 
+				FROM ??news 
 				WHERE _state = 0 AND year = '".intval($id[1])."'
 				ORDER BY month ASC
 			";
@@ -194,7 +190,7 @@ function loadNews($id, &$rh)
 		{
 			$sql = "
 				SELECT id, title, day, month, year 
-				FROM " . $rh->project_name . "_news 
+				FROM ??news 
 				WHERE _state = 0 AND year = '".intval($id[2])."' AND month = '".intval($id[1])."'
 				ORDER BY inserted ASC
 			";
@@ -229,7 +225,7 @@ function parseXml($data)
 		{
 			$r['title'] = iconv('cp1251', 'UTF-8', htmlentities($r['title'], ENT_QUOTES, 'cp1251'));
 			$r['title_ins'] = iconv('cp1251', 'UTF-8', htmlentities($r['title_ins'], ENT_QUOTES, 'cp1251'));
-			$out.= '<item text="'.$r['title'].'" id="'.$r['id'].'" child="'.$r['child'].'"><userdata name="link">'.$r['link'].'</userdata><userdata name="title_ins">'.($r['title_ins'] ? $r['title_ins'] : $r['title'])."</userdata></item>\n";
+			$out.= '<item text="'.$r['title'].'" id="'.$r['id'].'" child="'.$r['child'].'" hideAddChildButton="true" hideAddBrotherButton="true" hideDelButton="true"><userdata name="link">'.$r['link'].'</userdata><userdata name="title_ins">'.($r['title_ins'] ? $r['title_ins'] : $r['title'])."</userdata></item>\n";
 		}
 	}
 	return $out;

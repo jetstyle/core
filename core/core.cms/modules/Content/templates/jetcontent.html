@@ -35,10 +35,6 @@
 	tree.enableCheckBoxes(false); 
 	tree.enableDragAndDrop(false);
 	
-	tree.hideAddBut = true;
-	tree.hideAddChildBut = true;
-	tree.hideDelBut = true;
-	
 	function Ok()
 	{
 		var itemId = tree.getSelectedItemId();
@@ -99,11 +95,7 @@
 	tree.setImagePath("{{images}}tree/"); 
 	tree.enableCheckBoxes(false); 
 	tree.enableDragAndDrop(false);
-	
-	tree.hideAddBut = true;
-	tree.hideAddChildBut = true;
-	tree.hideDelBut = true;
-	
+		
 	function Ok()
 	{
 		var itemId = tree.getSelectedItemId();
@@ -116,8 +108,8 @@
 	}
 
   //tree.setOnClickHandler(Ok);	
-	tree.setXMLAutoLoading("{{/}}{{url_rel}}?cm=1"); 
-	tree.loadXML("{{/}}{{url_rel}}?cm=1&id=content-1");
+	tree.setXMLAutoLoading("{{url_rel}}"); 
+	tree.loadXML("{{url_rel}}&id=content-1");
 </script>
 
 </body>
