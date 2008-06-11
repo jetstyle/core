@@ -5,7 +5,10 @@ $rh->OCE = array(
 		"content"=>"do/Content/form?id=::id::&",
   );
 
-	if($rh->principal->isAuth() && $rh->ri->get('oce') == 'on')
+  	if ($rh->ri->get('oce') == 'off') return '';
+  	if (!$rh->ri->get('oce') && $_COOKIE['oce'] == 'off') return '';
+
+	if($rh->principal->isAuth())
     {
 
   	//$tpl =& $rh->tpl;
