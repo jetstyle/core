@@ -61,7 +61,16 @@ if (!isset($class))
 
 if (isset($class))
 {
-	$clss = explode('/', $class, 2);
+	if (strpos('/', $class) !== false)
+	{
+		$clss = explode('/', $class, 2);
+	}
+	else
+	{
+		$clss = explode('::', $class, 2);
+	}
+	
+	
 	if (count($clss) == 2)
 	{
 		list($page_cls, $item_cls) = $clss;

@@ -7,7 +7,7 @@ $this->useClass('controllers/Controller');
  *
  * Страница заполняет переменные в шаблоне, с заранее известными именами.
  *
- * Эти переменные можно рассматривать как зоны вывода динамического контента 
+ * Эти переменные можно рассматривать как зоны вывода динамического контента
  * в шаблоне страницы.
  */
 class BasicPage extends Controller
@@ -29,13 +29,13 @@ class BasicPage extends Controller
 
 	// private:
 	/**
-	 * массив, где хранятся созданные объекты-плагины
-	 */
+	* массив, где хранятся созданные объекты-плагины
+	*/
 	var $o_plugins = array();
 	/**
 	 * массив для хранения аспектов страницы
 	 *
-	 * аспекты это модули, имеющие известный интерфейс 
+	 * аспекты это модули, имеющие известный интерфейс
 	 * (программный) и стандартное имя. реализацию можно менять как угодно.
 	 *
 	 * все что взаимодействует со страницей может обращаться к ее аспектам.
@@ -64,12 +64,12 @@ class BasicPage extends Controller
 	 *	  $config = array('day' => 10, 'month' => 02, 'year' => 2007);
 	 *	  запустить соответствующий обработчик
 	 *
-	 * .... 
+	 * ....
 	 *
 	 * массив $params_map = array(
 	 *	  array('action_1', array(
-	 *								 'param_1_name' => pattern_1, 
-	 *								 'param_2_name' => pattern_2, 
+	 *								 'param_1_name' => pattern_1,
+	 *								 'param_2_name' => pattern_2,
 	 *								 ...,
 	 *							 )),
 	 *	  ...
@@ -93,12 +93,12 @@ class BasicPage extends Controller
 	 *
 	 * запустить $this->handler_comments($config)
 	 *
-	 *	FIXME: похоже на MapHandler -- это подобная сущность. Можно-ли 
+	 *	FIXME: похоже на MapHandler -- это подобная сущность. Можно-ли
 	 *	скомбинировать??
 	 *
 	 *	FIXME: будет-ли полезно подмешивать в $config явные параметры GET /?foo=11&bar=22 ???
 	 *
-	 *	FIXME: по идее экшен м.б. ссылкой на функцию. тогда хендлеры можно будет мапить в 
+	 *	FIXME: по идее экшен м.б. ссылкой на функцию. тогда хендлеры можно будет мапить в
 	 *	рантайме.
 	 */
 	var $params_map = NULL;
@@ -112,7 +112,7 @@ class BasicPage extends Controller
 	function _match_url($params, $pattern, $matches = array())
 	{
 		$i = 0;
-		if (is_array($pattern)) 
+		if (is_array($pattern))
 		{
 			foreach ($pattern as $k=>$p)
 			{
@@ -147,10 +147,10 @@ class BasicPage extends Controller
 	function notifyOnRend()
 	{
 		$topic = array(&$this);
-		if (isset($this->observers['on_rend'])) 
+		if (isset($this->observers['on_rend']))
 		{
 			foreach ($this->observers['on_rend'] as $v)
-				call_user_func_array($v, $topic);
+			call_user_func_array($v, $topic);
 		}
 	}
 
@@ -158,17 +158,17 @@ class BasicPage extends Controller
 	{
 		$parent_status = parent::initialize($ctx, $config);
 
-		if (isset($config['plugins'])) 
-			config_replace($this, 'plugins', $this->config['plugins']);
-		if (isset($config['_path'])) 
-			config_replace($this, 'path', $this->config['_path'] .'/');
+		if (isset($config['plugins']))
+		config_replace($this, 'plugins', $this->config['plugins']);
+		if (isset($config['_path']))
+		config_replace($this, 'path', $this->config['_path'] .'/');
 
 		return $parent_status && True;
 	}
 
 	function pre_handle()
 	{
-		
+
 	}
 
 	function handle()
@@ -176,46 +176,55 @@ class BasicPage extends Controller
 		$status = True;
 
 		if ($this->rh->db)
-			$this->loadPlugins();
+		$this->loadPlugins();
 
-		if (is_array($this->params_map)) 
+		if (is_array($this->params_map))
 		{
 			foreach ($this->params_map as $v)
-		{
-			$matches = array();
-				
-			list($action, $pattern) = $v;
-			$this->pre_handle();
-
-			if (True === $this->_match_url($this->rh->params, $pattern, &$matches))
 			{
-					$action_parts = explode("::", $action);
+				$matches = array();
 
-					if (count($action_parts)==2)
+				$this->pre_handle();
+
+				$action = array_shift($v);
+				
+				if (count($v) > 0)
+				{
+					foreach ($v AS $pattern)
 					{
-						$this->rh->UseClass('controllers/'.$action_parts[0]);
-						$controller = new $action_parts[0];
-						
-						$method = 'handle_'.$action_parts[1];
-						if (method_exists($controller, $method))
+						if (True === $this->_match_url($this->rh->params, $pattern, &$matches))
 						{
-                            $this->method = $method;
-							$controller->initialize($this->rh);
-							$status = call_user_func_array(
-								array(&$controller, $method), 
-								array($matches));
-							break;
+							$action_parts = explode("::", $action);
+		
+							if (count($action_parts)==2)
+							{
+								$this->rh->UseClass('controllers/'.$action_parts[0]);
+								$controller = new $action_parts[0];
+		
+								$method = 'handle_'.$action_parts[1];
+								if (method_exists($controller, $method))
+								{
+									$this->method = $method;
+									$controller->initialize($this->rh);
+									$status = call_user_func_array(
+										array(&$controller, $method),
+										array($matches)
+									);
+									return $status;
+								}
+							}
+							else
+							{
+								$this->method = $action;
+								$status = call_user_func_array(
+									array(&$this, 'handle_'.$action),
+									array($matches)
+								);
+								return $status;
+							}
 						}
 					}
-					else
-					{
-                        $this->method = $action; 
-				$status = call_user_func_array(
-					array(&$this, 'handle_'.$action), 
-					array($matches));
-				break;
-			}
-		}
+				}
 			}
 		}
 
@@ -226,14 +235,14 @@ class BasicPage extends Controller
 	{
 		foreach ($this->plugins as $info)
 		{
-			if (is_array($info)) 
+			if (is_array($info))
 			{
 				list($name, $config) = $info;
 			}
-			else 
-			{ 
-				$name = $info; 
-				$config = array(); 
+			else
+			{
+				$name = $info;
+				$config = array();
 			}
 			$this->loadPlugin($name, $config);
 		}
@@ -241,24 +250,24 @@ class BasicPage extends Controller
 
 	function &loadPlugin($name, $config)
 	{
-			$aspect = NULL;
-			if (array_key_exists('__aspect', $config))
-			{
-				$aspect = $config['__aspect'];
-			}
+		$aspect = NULL;
+		if (array_key_exists('__aspect', $config))
+		{
+			$aspect = $config['__aspect'];
+		}
 
-			unset($o);
-			$o =& $this->rh->useModule($name);
-			if (empty($o))
-			{
-				$this->rh->useClass('plugins/'.$name.'/'.$name);
-				$o =& new $name();
-			}
-			$config['factory'] =& $this;
-			$o->initialize($this->rh, $config);
-			$this->o_plugins[] =& $o;
-			if ($aspect) $this->o_aspects[$aspect] =& $o;
-			return $o;
+		unset($o);
+		$o =& $this->rh->useModule($name);
+		if (empty($o))
+		{
+			$this->rh->useClass('plugins/'.$name.'/'.$name);
+			$o =& new $name();
+		}
+		$config['factory'] =& $this;
+		$o->initialize($this->rh, $config);
+		$this->o_plugins[] =& $o;
+		if ($aspect) $this->o_aspects[$aspect] =& $o;
+		return $o;
 	}
 
 	function &getAspect($name)
@@ -288,7 +297,69 @@ class BasicPage extends Controller
 
 	function url_to($cls=NULL, $item=NULL)
 	{
-		if (empty($cls)) return rtrim($this->path, '/');
+		$result = '';
+				
+		if (empty($cls))
+		{
+			$result = rtrim($this->path, '/');
+		}
+		else if (null !== $cls && null !== $item)
+		{
+			if (is_array($this->params_map) && !empty($this->params_map))
+			{
+				foreach ($this->params_map AS $v)
+				{
+					if ($v[0] == $cls)
+					{
+						$pathParts = array(rtrim($this->path, '/'));
+						
+						foreach ($v[1] AS $fieldName => $regExp)
+						{
+							if (isset($item[$fieldName]))
+							{
+								$pathParts[] = $item[$fieldName];
+							}
+							else
+							{
+								$fieldNameParts = explode('_', $fieldName);
+//								var_dump($fieldNameParts);
+								if (count($fieldNameParts) > 1)
+								{
+									$value = &$item;
+									foreach ($fieldNameParts AS $fieldNamePart)
+									{
+										if (isset($value[$fieldNamePart]))
+										{
+											$value = &$value[$fieldNamePart];
+										}
+										// TODO: remove HACK
+										else if (isset($value[0]) && isset($value[0][$fieldNamePart]))
+										{
+											$value = &$value[0][$fieldNamePart];
+										}
+										else
+										{
+											$value = null;
+											break;
+										}
+									}
+									
+									if (null !== $value)
+									{
+										$pathParts[] = $value;
+									}
+								}
+							}
+						}
+						
+						$result = implode('/', $pathParts);
+						break;
+					}
+				}
+			}
+		}
+		
+		return $result;
 	}
 }
 
