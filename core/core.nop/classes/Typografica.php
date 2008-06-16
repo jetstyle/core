@@ -1,4 +1,10 @@
 <?php
+/**
+ ****************** ACHTUNG!!!
+ ******** KEEP THIS FILE IN cp1251 encoding
+ *
+ */
+
 class Typografica
 {
 
@@ -229,18 +235,19 @@ class Typografica
 		// 2. ¸ëî÷êè
 		if ($this->settings["laquo"])
 		{
-			$data = preg_replace( "/\"\"/i", "&quot;&quot;", $data );
-			$data = preg_replace( "/(^|\s|\201|\200|>|\()\"((\201|\200)*[0-9¸¨A-Za-zÀ-ßà-ÿ\-:\/\.])/i", "\\1&laquo;\\2", $data );
+			$data = $this->pregReplace("/\"\"/i", "&quot;&quot;", $data);
+			
+			$data = $this->pregReplace( "/(^|\s|\201|\200|>|\()\"((\201|\200)*[0-9¸¨A-Za-zÀ-ßà-ÿ\-:\/\.])/i", "\\1&laquo;\\2", $data );
 			// nb: wacko only regexp follows:
-			$data = preg_replace( "/(^|\s|\201|\200|>|\()\"((\201|\200|\/&nbsp;|\/|\!)*[0-9¸¨A-Za-zÀ-ßà-ÿ\-:\/\.])/i", "\\1&laquo;\\2", $data );
+			$data = $this->pregReplace( "/(^|\s|\201|\200|>|\()\"((\201|\200|\/&nbsp;|\/|\!)*[0-9¸¨A-Za-zÀ-ßà-ÿ\-:\/\.])/i", "\\1&laquo;\\2", $data );
 			$_data = "\"\"";
 			while ($_data != $data)
 			{
 				$_data = $data;
-				$data = preg_replace( "/(\&laquo\;([^\"]*)[¸¨A-Za-zÀ-ßà-ÿ0-9\.\-:\/](\201|\200)*)\"/si", "\\1&raquo;", $data );
+				$data = $this->pregReplace( "/(\&laquo\;([^\"]*)[¸¨A-Za-zÀ-ßà-ÿ0-9\.\-:\/](\201|\200)*)\"/si", "\\1&raquo;", $data );
 				// nb: wacko only regexps follows:
-				$data = preg_replace( "/(\&laquo\;([^\"]*)[¸¨A-Za-zÀ-ßà-ÿ0-9\.\-:\/](\201|\200)*\?(\201|\200)*)\"/si", "\\1&raquo;", $data );
-				$data = preg_replace( "/(\&laquo\;([^\"]*)[¸¨A-Za-zÀ-ßà-ÿ0-9\.\-:\/](\201|\200|\/|\!)*)\"/si", "\\1&raquo;", $data );
+				$data = $this->pregReplace( "/(\&laquo\;([^\"]*)[¸¨A-Za-zÀ-ßà-ÿ0-9\.\-:\/](\201|\200)*\?(\201|\200)*)\"/si", "\\1&raquo;", $data );
+				$data = $this->pregReplace( "/(\&laquo\;([^\"]*)[¸¨A-Za-zÀ-ßà-ÿ0-9\.\-:\/](\201|\200|\/|\!)*)\"/si", "\\1&raquo;", $data );
 			}
 		}
 		// 2a. ¸ëî÷êè äëÿ FAR manager
@@ -310,6 +317,17 @@ class Typografica
 		return $data;
 	}
 
+	private function pregReplace($pattern, $replacement, $data)
+	{
+		$result = preg_replace($pattern, $replacement, $data);
+		if (preg_last_error() === PREG_NO_ERROR)
+		{
+			return $result;
+		}
+		else
+		{
+			return $data;
+		}
+	}
 }
-
 ?>
