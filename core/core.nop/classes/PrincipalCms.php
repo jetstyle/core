@@ -107,7 +107,7 @@ class PrincipalCms
 		Debug::trace("PrincipalCms::SessionDestroy()", 'prp');
 		$this->rh->db->execute('DELETE FROM '.$this->sessions_table." WHERE id=".$this->rh->db->quote($this->session['id'])."");
 		$this->session = array();
-		setcookie( $this->cookie_prefix.'_sessid', "", 0, $this->rh->front_end->path_rel );
+		setcookie( $this->cookie_prefix.'_sessid', "", 0, $this->rh->front_end->path_rel ? $this->rh->front_end->path_rel : $this->rh->base_url );
 	}
 
 	/*** работа с сессиями ***/
@@ -123,6 +123,7 @@ class PrincipalCms
 			$db->execute('DELETE FROM '.$this->sessions_table.' WHERE time<'.(time()-3600));
 			//пытаемся загрузить сессию
 			$session = $db->queryOne('SELECT * FROM '.$this->sessions_table.' WHERE id='.((integer)$_COOKIE[$this->cookie_prefix.'_sessid']));
+
 			if( !empty($session) )
 			{
 				//помечаем текущую сессию как используемую
@@ -147,7 +148,7 @@ class PrincipalCms
 			}
 			//сохраняем sessid
 			$this->session = $session;
-			setcookie($this->cookie_prefix.'_sessid',$session['id'],0,$this->rh->front_end->path_rel);
+			setcookie($this->cookie_prefix.'_sessid',$session['id'], 0, $this->rh->front_end->path_rel ? $this->rh->front_end->path_rel : $this->rh->base_url);
 		}
 	}
 
