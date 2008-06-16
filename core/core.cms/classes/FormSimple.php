@@ -441,7 +441,7 @@ class FormSimple
 			
 			$rh->useClass('Translit');
 			$translit =& new Translit();
-			$this->postData['_supertag'] = $translit->translateLink( $this->postData[$field], $limit );
+			$this->postData['_supertag'] = $translit->supertag( $this->postData[$field], TR_NO_SLASHES, $limit );
 			if ($this->config->supertag_check)
 			{
 				$sql = "SELECT id, _supertag FROM ??".$this->config->table_name." WHERE _supertag=".$rh->db->quote($this->postData['_supertag']);

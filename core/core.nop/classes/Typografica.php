@@ -1,9 +1,8 @@
 <?php
-/**
- ****************** ACHTUNG!!!
- ******** KEEP THIS FILE IN cp1251 encoding
- *
- */
+//
+// ****************** ACHTUNG!!! **********************
+// ******** KEEP THIS FILE IN cp1251 encoding *********
+// 
 
 class Typografica
 {
