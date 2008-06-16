@@ -52,6 +52,11 @@ class ModuleConstructor
 		return $result;
 	}
 	
+	public function getTitle()
+	{
+		return $this->config->module_title;
+	}
+	
 	protected function proceedModule(&$config)
 	{
 		// real module

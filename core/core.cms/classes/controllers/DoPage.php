@@ -46,25 +46,12 @@ class DoPage extends BasicPage
 
 	function handle_default($config)
 	{
-		//первый конфиг
 		$this->rh->useClass("ModuleConstructor");
 		$moduleConstructor =& new ModuleConstructor($this->rh);
 		$moduleConstructor->initialize($config['module']);
 		$this->rh->tpl->set('module_body', $moduleConstructor->proceed($config['mode']));
 
-
-		/*
-		$moduleConfig->read("defs");
-		if ($config['mode'])
-		{
-			$moduleConfig->read( $config['mode'] );
-		}
-
-		//основной модуль
-		$module = $moduleConfig->initModule();
-		$module->store_to = "module_body";
-		$module->handle();
-		*/
+		$this->config['title_short'] = $moduleConstructor->getTitle();
 		$this->rh->site_map_path = 'module';
 	}
 }

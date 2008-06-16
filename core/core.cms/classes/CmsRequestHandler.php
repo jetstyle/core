@@ -8,6 +8,13 @@
 class CmsRequestHandler extends RequestHandler
 {
 
+	public function __construct($config_path = 'config/default.php')
+	{
+		parent::__construct($config_path);
+		$this->front_end->project_title = $this->project_title;
+		$this->project_title = 'CMS: '.$this->project_title;
+	}
+	
 	protected function init() 
 	{
 		$this->base_url .= $this->app_name.'/';
