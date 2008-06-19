@@ -82,7 +82,7 @@
  				}
  				$this->items['submenu'][$r['_parent']]['childs'][$r['id']] = $r;
  			}
- 			if($moduleName == $r['href'])
+ 			if(strlen($moduleName) > 0 && $moduleName == $r['href'])
  			{
  				if($this->items['main'][$r['id']])
  				{
