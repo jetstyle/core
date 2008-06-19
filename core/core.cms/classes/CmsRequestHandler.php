@@ -27,6 +27,7 @@ class CmsRequestHandler extends RequestHandler
 		$this->addToHandlersMap("login", "LoginPage");
 		$this->addToHandlersMap("start", "StartPage");
 		$this->addToHandlersMap("do", "DoPage");
+		$this->addToHandlersMap("pack_modules", "ModulePackerPage");
 		
 		parent::init();
 	}
