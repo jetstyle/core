@@ -54,7 +54,7 @@
 
  	protected function constructResult($result)
  	{
- 		$moduleName = 'do/'.$this->rh->params[0];
+ 		$moduleName = $this->rh->params[0];
 
  		while($r = $this->rh->db->getRow($result))
  		{

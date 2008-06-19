@@ -45,7 +45,7 @@ class DoPage extends BasicPage
 	}
 
 	function handle_default($config)
-	{
+	{		
 		$this->rh->useClass("ModuleConstructor");
 		$moduleConstructor =& new ModuleConstructor($this->rh);
 		$moduleConstructor->initialize($config['module']);
@@ -53,6 +53,28 @@ class DoPage extends BasicPage
 
 		$this->config['title_short'] = $moduleConstructor->getTitle();
 		$this->rh->site_map_path = 'module';
+	}
+	
+	public function url_to($cls=NULL, $item=NULL)
+	{		
+		$result = '';
+		$cls = strtolower($cls);
+				
+		switch($cls)
+		{			
+			case 'module': 
+				$result = 'do/'.$item['href'];
+			break;
+		}
+		
+		if (strlen($result) > 0)
+		{
+			return $result;
+		}
+		else
+		{
+			return parent::url_to($cls, $item);
+		}
 	}
 }
 ?>
