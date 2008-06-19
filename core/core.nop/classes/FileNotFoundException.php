@@ -123,6 +123,10 @@ class FileNotFoundException extends Exception
 	protected function equalTemplates($needle, $compare, $dump=false)
 	{
 		$ret = false;
+		//echo '<hr>';
+		if (!is_string($compare))
+			return $ret;
+
 		$c1 = strcmp($needle, $compare);
 		$c2 = strcmp('@'.$needle.'.html', $compare);
 		$c3 = strcmp($needle.'.html', $compare);
