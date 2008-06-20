@@ -108,7 +108,7 @@ class Site
                 
 			foreach ($loader->getSources() as $source)
 				$cache->addSource($source);
-
+				
 			unset($ctx->ctx);
 			$str = "return '".str_replace("'", "\\'", serialize($ctx))."';";
 			$cache->save($str);

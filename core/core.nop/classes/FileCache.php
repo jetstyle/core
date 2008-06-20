@@ -25,8 +25,15 @@ class FileCache
 	function isValid()
 	{
 		$cached_mtime = @filemtime($this->file_path);
-		$this->fp = $this->getReadableFile();
-		if (empty($this->fp)) return False;
+		try
+		{
+			$this->fp = $this->getReadableFile();
+		}
+		catch(Exception $e)
+		{
+			return false;
+		}
+
 		$str = $this->readLn(); // <?php
 		$str = $this->readLn();
 		$count = intval(substr($str, 2));
@@ -72,12 +79,22 @@ class FileCache
 
 	function getWriteableFile()
 	{
-		return fopen($this->file_path, 'w');
+		$fp = @fopen($this->file_path, 'w');
+		if (!$fp)
+		{
+			throw new Exception("Can't write to file ".$this->file_path);
+		}
+		return $fp;
 	}
 
 	function getReadableFile()
 	{
-		return @fopen($this->file_path, 'r');
+		$fp = @fopen($this->file_path, 'r');
+		if (!$fp)
+		{
+			throw new Exception("Can't open file ".$this->file_path);
+		}
+		return $fp;
 	}
 
 	function save($str)
@@ -87,6 +104,8 @@ class FileCache
 		$this->writeLn($str);
 		$this->writeFooter();
 		$this->close();
+		
+		return true;
 	}
 
 	function writeHeader()

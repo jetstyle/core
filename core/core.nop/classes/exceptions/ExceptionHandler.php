@@ -102,6 +102,10 @@ class ExceptionHandler
 			echo $exceptionObj;
 		}
 
+		// lunatic@jetstyle.ru
+		// нужно продумать механизм показа бэктрейса
+		// ибо тут в некоторых случаях (например, если конфиг нельзя записать в кэш ) проскакивают пароли
+		return;
 		if ($exceptionObj->no_trace) return;
 		
 		echo "<br /><br /><b>Backtrace</b>:<br />";
