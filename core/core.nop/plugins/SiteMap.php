@@ -5,7 +5,7 @@ $base_url =$tpl->rh->base_url;
 echo '<ul>';
 foreach( $tpl->rh->site_map as $key => $map ) if ($key){  
   $href = $base_url.$key;
-  echo ( '<li><a href="'.$href.'">'.$tpl->rh->site_map[$key]['name'].'</a></li>');
+  echo ( '<li><a href="/tpl'.$href.'">'.$tpl->rh->site_map[$key]['name'].'</a></li>');
 }
 echo '</ul>';
 
