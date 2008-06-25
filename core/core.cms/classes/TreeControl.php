@@ -466,7 +466,7 @@ class TreeControl
 
 		$rh->useClass('Translit');
 		$translit =& new Translit();
-
+		
 		$node = array();
 
 		$node['title'] = iconv("UTF-8", "CP1251", $_REQUEST['newtitle']);
@@ -477,7 +477,7 @@ class TreeControl
 
 		$node['title_pre'] = $this->rh->tpl->action('typografica', $node['title']);
 		$node['parent'] = intval($_REQUEST['parent']);
-		$node['supertag'] = $translit->translateLink($node['title'], 20);
+		$node['supertag'] = $translit->supertag($node['title'], 20);
 
 		$parentNode = $db->queryOne("
 			SELECT _path
