@@ -121,6 +121,19 @@ class ModulePacker
 	{
 		$result = array();
 				
+		if (file_exists($moduleDir.'/.meta/tables'))
+		{
+			$result = file($moduleDir.'/.meta/tables', FILE_SKIP_EMPTY_LINES);
+			if ($result === false)
+			{
+				return array();
+			}
+			else
+			{
+				return array_map(array(&$this, 'appendPrefixToTables'), $result);
+			}
+		}
+		
 		$config = new ModuleConfig($this->rh);
 		$config->read($moduleDir.'/'.$configName.'.php');
 		
@@ -159,6 +172,10 @@ class ModulePacker
 		");
 	}
 	
+	protected function appendPrefixToTables($v)
+	{
+		return trim($this->rh->db->prefix.$v);
+	}
 }
 
 ?>

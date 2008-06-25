@@ -14,9 +14,17 @@ class SqlDump
 	public function dumpStructure($tableName, $filename = '')
 	{
 		$result = $this->rh->db->query("SHOW CREATE TABLE ".$this->quoteName($tableName)."");
-		$createSql = $result[0]['Create Table'].';';
 		
-		if (strlen($filename) > 0)
+		if (is_array($result) && !empty($result))
+		{
+			$createSql = $result[0]['Create Table'].";\n\n";
+		}
+		else
+		{
+			$createSql = '';
+		}
+		
+		if (strlen($filename) > 0 && strlen($createSql) > 0)
 		{
 			$this->openFile($filename);
 			$this->writeToFile($createSql);
@@ -62,13 +70,16 @@ class SqlDump
 				$row++;
 			}
 
-			$sql .= ";\n\n";
-			
-			if (strlen($filename) > 0)
+			if ($row > 0)
 			{
-				$this->bufferedWriteToFile($sql);
-				$this->flushBuffer();
-				$this->closeFile();
+				$sql .= ";\n\n";
+				
+				if (strlen($filename) > 0)
+				{
+					$this->bufferedWriteToFile($sql);
+					$this->flushBuffer();
+					$this->closeFile();
+				}
 			}
 		}
 		
