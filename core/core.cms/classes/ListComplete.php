@@ -42,12 +42,15 @@ class ListComplete extends ListSimple
 		if (!$this->loaded)
 		{
 			parent::load();
-			foreach ($this->items AS &$item)
+			if (!empty($this->items))
 			{
-				if ($item[$this->idField] == $this->id)
+				foreach ($this->items AS &$item)
 				{
-					$this->item = &$item;
-					break;
+					if ($item[$this->idField] == $this->id)
+					{
+						$this->item = &$item;
+						break;
+					}
 				}
 			}
 		}
