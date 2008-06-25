@@ -94,9 +94,10 @@ class ModulePacker
 		$this->sqlDumper->dumpData($tableName, $moduleDir.'/.meta/data.sql');
 	}
 	
+	
 	protected function dumpModuleRow()
 	{
-		
+		//TODO: how to do this ?
 	}
 	
 	/**
