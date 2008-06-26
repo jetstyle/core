@@ -30,6 +30,9 @@ class ModulePackerPage extends BasicPage
 
 	public function handle_default($config)
 	{		
+		// force UTF8
+		$this->rh->db->query("SET NAMES utf8");
+		
 		$this->rh->useClass("ModulePacker");
 		$modulePacker =& new ModulePacker($this->rh);
 		$modulePacker->pack();
