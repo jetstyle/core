@@ -6,7 +6,7 @@ $rh->OCE = array(
   );
 
   	if ($rh->ri->get('oce') == 'off') return '';
-  	if (!$rh->ri->get('oce') && $_COOKIE['oce'] == 'off') return '';
+  	if (!$rh->ri->get('oce') && $_COOKIE['oce'] != 'on') return '';
 
 	if($rh->principal->isAuth())
     {
