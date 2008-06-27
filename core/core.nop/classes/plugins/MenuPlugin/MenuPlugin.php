@@ -15,127 +15,137 @@ class MenuPlugin extends RenderablePlugin
 	var $mode = 'normal';
 	var $level = 1;
 	var $depth = 2;
-	var $parents = array ();
-
-	function getParentNodeByLevel($level)
+	protected $parents = null;
+	protected $items = array();
+	protected $childs = array();
+	
+	protected function getParentNodeByLevel($level)
 	{
-		$data = $this->rh->page->config;
-		$sql = 'SELECT id, _path, _level, _left, _right FROM ' . $this->rh->db_prefix . 'content 
-					WHERE _state = 0 AND _level = ' . $level . ' AND ( ' . '			(_left <= ' . $data['_left'] . ' AND _right >= ' . $data['_right'] . ')' . ')';
-		$rs = $this->rh->db->queryOne($sql);
-		return $rs;
+		$data = &$this->rh->page->config;
+		$sql = '
+			SELECT id, _path, _level, _left, _right, hide_from_menu
+			FROM ??content 
+			WHERE 
+				_level = ' . $level . ' 
+					AND 
+				(_left <= ' . $data['_left'] . ' AND _right >= ' . $data['_right'] . ')
+					AND
+				_state = 0 
+		';
+		
+		return $this->rh->db->queryOne($sql);
 	}
 
-	function getParentNodes()
+	protected function getParentNodes()
 	{
-		if (!empty ($this->parents))
+		if (null !== $this->parents)
 		{
 			return $this->parents;
 		}
+		
+		$this->parents = array();
 
-		$data = $this->rh->page->config;
+		$data = &$this->rh->page->config;
 
 		if (!$data['id'])
 			return;
 
-		$sql = 'SELECT id FROM ' . $this->rh->db_prefix . 'content 
-					WHERE _state = 0 AND _left < ' . $data['_left'] . ' AND _right >= ' . $data['_right'] . '';
-		$rs = $this->rh->db->query($sql);
-		if (is_array($rs))
-		{
-			foreach ($rs AS $r)
-			{
-				$this->parents[$r['id']] = 1;
-			}
-		}
-
+		$sql = '
+			SELECT id, hide_from_menu
+			FROM ??content 
+			WHERE _left < ' . $data['_left'] . ' AND _right >= ' . $data['_right'] . ' AND _level < '.($this->level + $this->depth).' AND _state = 0
+		';
+		
+		$this->parents = $this->rh->db->query($sql, "id");
 		return $this->parents;
 	}
 
-	function initialize(& $ctx, $config = NULL)
+	public function initialize(& $ctx, $config = NULL)
 	{
 		parent :: initialize($ctx, $config);
+		
 		/*
 		 * загрузим модель меню
 		 * с условием на where
 		 */
-		$this->rh->UseClass("models/MenuModel");
-		$menu = & new MenuModel();
-
-		$current = $this->rh->page->config;
+		$this->rh->useClass("models/ContentModel");
+		$menu = & new ContentModel();
+		$menu->order = array('_left' => 'ASC');
+		$menu->initialize($this->rh);
+		
+		$current = &$this->rh->page->config;
 		$parents = $this->getParentNodes();
-
-		switch ($this->mode)
+				
+		foreach ($parents AS $p)
 		{
-			case 'submenu' :
-				
-				$parent = $this->getParentNodeByLevel($this->level - 1);
-				if (!$parent['id'])
-				{
-					$this->models['menu']->data = array ();
-					return;
-				}
-				$menu->level = $this->level;
-				$menu->depth = $this->depth;
-				$menu->left = $parent['_left'];
-				$menu->right = $parent['_right'];
-				$menu->initialize($this->rh);
-				
-//				$menu->load(' AND hide_from_menu = 0');
-				$menu->load();
-				
-			break;
-			
-			default :
-			
-				$menu->level = $this->level;
-				$menu->depth = $this->depth;
-				$menu->initialize($this->rh);
-//				$menu->load(' AND hide_from_menu = 0');
-				$menu->load();
-		}
-
-		$this->rh->useClass('Link');
-		$link = new Link($this->rh);
-		$this->items = array ();
-
-		if (is_array($menu->data))
-		{
-			foreach ($menu->data AS $i => $r)
+			if ($p['hide_from_menu'])
 			{
-				if ($parents[$r['id']])
-				{
-					$r['selected'] = 1;
-				}
-				elseif ($r['id'] == $current['id'])
-				{
-					$r['current'] = 1;
-				}
-
-				if ($r['mode'] == 'link')
-				{
-					$r['is_link'] = true;
-					if ($r['link_direct'])
-					{
-						$r['link'] = $link->formatLink($r['link']);
-					}
-				}
-				
-				$this->childs[$r['_parent']][] = $r['id'];
-				$this->items[$r['id']] = $r;
+				$this->models['menu'] = array ();
+				return;
 			}
 		}
 		
-		if(is_array($this->childs))
+		$where = array();
+		
+		$where[] = '('.$menu->quoteField('_level').' >= '.$menu->quote($this->level). ' AND '.$menu->quoteField('_level').' <'.$menu->quote($this->level + $this->depth).')';
+				
+		switch ($this->mode)
 		{
-			$menu->data = $this->prepare(key($this->childs));
+			case 'submenu' :
+			
+				$parent = $this->getParentNodeByLevel($this->level - 1);
+				if (!$parent['id'] || $parent['hide_from_menu'])
+				{
+					$this->models['menu'] = array ();
+					return;
+				}
+				
+				$where[] = $menu->quoteField('_left') .' > ' . $menu->quote($parent['_left']);
+				$where[] = $menu->quoteField('_right') .' < ' . $menu->quote($parent['_right']);
+				
+			break;
 		}
-		unset ($this->items, $this->link, $this->childs);
+		
+		$where[] = $menu->quoteField('hide_from_menu').' = 0';
+		
+		$menu->load(implode(' AND ', $where));
+				
+		$this->rh->useClass('Link');
+		$link = new Link($this->rh);
 
-		$this->models['menu'] = & $menu;
+		foreach ($menu AS $i => $r)
+		{
+			if ($parents[$r['id']])
+			{
+				$r['selected'] = 1;
+			}
+			elseif ($r['id'] == $current['id'])
+			{
+				$r['current'] = 1;
+			}
+
+			if ($r['mode'] == 'link')
+			{
+				$r['is_link'] = true;
+				if ($r['link_direct'])
+				{
+					$r['link'] = $link->formatLink($r['link']);
+				}
+			}
+			$r['href'] = $r['_path'];
+			$this->childs[$r['_parent']][] = $r['id'];
+			$this->items[$r['id']] = $r;
+		}
+		
+		if(!empty($this->childs))
+		{
+			$this->models['menu'] = $this->prepare(key($this->childs));
+		}
+		
+		unset ($this->items, $this->childs);
 	}
 
-	function prepare($id)
+	protected function prepare($id)
 	{
 		$childs = array ();
 		if (is_array($this->childs[$id]))
@@ -148,34 +158,31 @@ class MenuPlugin extends RenderablePlugin
 			$childs[0]['is_first'] = true;
 			$childs[count($keys) - 1]['is_last'] = true;
 		}
-//		$keys = array_keys($childs);
-//		$childs[$keys[0]]['is_first'] = true;
-//		$childs[$keys[count($keys) - 1]]['is_last'] = true;
 		return $childs;
 	}
 
-	function addItem($item)
+	public function addItem($item)
 	{
-		$this->models['menu']->data[] = $item;
+		$this->models['menu'][] = $item;
 	}
 
-	function rend(& $ctx)
+	public function rend(& $ctx)
 	{
-		$this->rh->tpl->set($this->store_to, $this->models['menu']->data);
+		$this->rh->tpl->set($this->store_to, $this->models['menu']);
 	}
 	
-	function &getData()
+	public function &getData()
 	{
-		return $this->models['menu']->data;
+		return $this->models['menu'];
 	}
 	
-	function &findElementById($id)
+	public function &findElementById($id)
 	{
-		$item = &$this->_findElementById($this->models['menu']->data, $id);
+		$item = &$this->_findElementById($this->models['menu'], $id);
 		return $item;
 	}
 	
-	function &_findElementById(&$data, $id)
+	protected function &_findElementById(&$data, $id)
 	{
 		if(is_array($data))
 		{
