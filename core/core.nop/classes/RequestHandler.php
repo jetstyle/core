@@ -198,10 +198,10 @@ class RequestHandler extends ConfigProcessor {
 		if ($this->db)
 		{
 			$this->useClass('models/DBConfig');
-			$c =& new DBConfig();
-			$c->initialize($this);
+			$c =& new DBConfig($this);
 			$c->load();
-			config_joinConfigs($this, $c->data);
+			config_joinConfigs($this, $c->getData());
+			
 		}
 	}
 
@@ -235,11 +235,13 @@ class RequestHandler extends ConfigProcessor {
 
 	// Алиасы, специфичные для RH
 	public function useClass($name, $level = 0, $dr = 1, $ext = 'php', $withSubDirs = false, $hideExc = false) {
+		if (class_exists($name, false)) return;
 		$this->useScript("classes", $name, $level, $dr, $ext, $withSubDirs, $hideExc);
 	}
 
 	// Алиасы, специфичные для RH
 	public function useModel($name, $level = 0, $dr = 1, $ext = 'php', $withSubDirs = false, $hideExc = false) {
+		if (class_exists($name, false)) return;
 		$this->useScript("classes/models", $name, $level, $dr, $ext, $withSubDirs, $hideExc);
 	}
 

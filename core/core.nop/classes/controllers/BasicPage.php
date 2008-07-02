@@ -187,7 +187,7 @@ class BasicPage extends Controller
 				$this->pre_handle();
 
 				$action = array_shift($v);
-				
+								
 				if (count($v) > 0)
 				{
 					foreach ($v AS $pattern)

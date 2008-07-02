@@ -12,14 +12,22 @@ class BreadPlugin extends RenderablePlugin
 
 		parent::initialize(&$ctx, $config);
 
-		/*
-		 * загрузим модель меню
-		 * с условием на where
-		 */
-		$this->rh->UseClass("models/Bread");
-		$model =& new Bread();
-		$model->initialize($this->rh);
-		$model->load();
+		$current = &$this->rh->page->config;
+		
+		$this->rh->useModel("ContentModel");
+		$model =& new ContentModel($this->rh);
+		$model->clearFields();
+		$model->addFields(array('id','_left', '_right', '_level', '_path', '_parent'));
+		$model->addField('title_short', 'IF(LENGTH(title_short) > 0, title_short, title_pre)');
+		$model->addField('href', '_path');
+
+		$model->setOrder(array('_left' => 'ASC'));
+		
+		$where = 
+			'_left <= '.$model->quote($current['_left'])
+			.' AND _right >= '.$model->quote($current['_right']);
+		
+		$model->load($where);
 
 		$this->models['bread'] =& $model;
 	}
@@ -27,19 +35,17 @@ class BreadPlugin extends RenderablePlugin
 	function addItem($path, $title, $hide = 0)
 	{
 //		$title = $this->smartTrim($title);
-		$this->models['bread']->addItem(array('href'=>$path, 'title_short'=>$title, 'hide' => $hide));
-	}
-
-	function url_to(&$d)
-	{
-		$path = $d['href'];
-		return $this->rh->base_url . $path;
+		$this->models['bread'][] = array('href'=>$path, 'title_short'=>$title, 'hide' => $hide);
 	}
 
 	function rend(&$ctx)
 	{
-		$this->models['bread']->data[count($this->models['bread']->data) - 1]['last'] = true;
-		$this->rh->tpl->set($this->store_to, $this->models['bread']->data);
+		$total = count($this->models['bread']);
+		$last = &$this->models['bread'][$total - 1];
+		$last['last'] = true;
+		$this->models['bread'][$total - 1] = $last;
+		
+		$this->rh->tpl->set($this->store_to, $this->models['bread']);
 	}
 	
 	function smartTrim($txt)

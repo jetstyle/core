@@ -34,14 +34,40 @@ class ResultSet implements IteratorAggregate, ArrayAccess, Countable, DataContai
 	public function offsetExists($key) { return isset($this->data[$key]); }
 	
 	public function offsetGet($key)
-	{ 
-		if (isset($this->data[$key]))
+	{
+		if ($this->model->isForeignField($key))
+		{
+			if (!isset($this->data[$key]))
+			{
+				$this->model->loadForeignField($key, $this->data);
+			}
+			
+			$foreignFieldConf = $this->model->getForeignFieldConf($key);
+			if ($foreignFieldConf['type'] == 'has_one')
+			{
+				return $this->data[$key][0];
+			}
+			else
+			{
+				return $this->data[$key]; 
+			}
+		}
+		elseif (isset($this->data[$key]))
+		{
 			return $this->data[$key]; 
+		}
+		
+		/*
+		if (isset($this->data[$key]))
+		{
+			return $this->data[$key]; 
+		}
 		elseif ($this->model->isForeignField($key))
 		{
 			$this->model->loadForeignField($key, $this->data);
 			return $this->data[$key];
 		}
+		*/
 	}
 
 	public function offsetSet($key, $value) { $this->data[$key] = $value; }

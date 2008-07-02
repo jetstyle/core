@@ -69,9 +69,8 @@ class MenuPlugin extends RenderablePlugin
 		 * с условием на where
 		 */
 		$this->rh->useClass("models/ContentModel");
-		$menu = & new ContentModel();
-		$menu->order = array('_left' => 'ASC');
-		$menu->initialize($this->rh);
+		$menu = & new ContentModel($this->rh);
+		$menu->setOrder(array('_left' => 'ASC'));
 		
 		$current = &$this->rh->page->config;
 		$parents = $this->getParentNodes();

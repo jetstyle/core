@@ -1,15 +1,13 @@
 <?php
 
-//интерфейс получения даных от объекта. используется в Controller::add_config, ну и вообще везде где надо определить косит ли объект под массив. (с) dz
+//РёРЅС‚РµСЂС„РµР№СЃ РїРѕР»СѓС‡РµРЅРёСЏ РґР°РЅС‹С… РѕС‚ РѕР±СЉРµРєС‚Р°. РёСЃРїРѕР»СЊР·СѓРµС‚СЃСЏ РІ Controller::add_config, РЅСѓ Рё РІРѕРѕР±С‰Рµ РІРµР·РґРµ РіРґРµ РЅР°РґРѕ РѕРїСЂРµРґРµР»РёС‚СЊ РєРѕСЃРёС‚ Р»Рё РѕР±СЉРµРєС‚ РїРѕРґ РјР°СЃСЃРёРІ. (СЃ) dz
 interface DataContainer
 {
 	public function &getData();
 }
 
 /**
- * Класс DBModel - базовый класс моделек, хранящих чего-то в БД
- *
- * Содержит кучу вспомогательных функций, облегчающих (надеюсь) жизнь .. 
+ * РљР»Р°СЃСЃ DBModel - Р±Р°Р·РѕРІС‹Р№ РєР»Р°СЃСЃ РјРѕРґРµР»РµРє, С…СЂР°РЅСЏС‰РёС… С‡РµРіРѕ-С‚Рѕ РІ Р‘Р”
  * 
  */
 $this->useClass('models/Model');
@@ -19,170 +17,360 @@ $this->useClass("Inflector");
 
 class DBModel extends Model implements IteratorAggregate, ArrayAccess, Countable, DataContainer
 {
-	/** имя таблицы */
-	protected $table=NULL;
-	/** список полей таблицы */
+	/**
+	 * РРјСЏ С‚Р°Р±Р»РёС†С‹
+	 *
+	 * @var string
+	 **/
+	protected $table = NULL;
+	
+	/**
+	 * РђР»РёР°СЃ С‚Р°Р±Р»РёС†С‹
+	 *
+	 * @var string
+	 **/
+	protected $tableAlias = NULL;
+	
+	/**
+	 * РђР»РёР°СЃС‹ С‚Р°Р±Р»РёС†, РєРѕС‚РѕСЂС‹Рµ РЅРµР»СЊР·СЏ РёСЃРїРѕР»СЊР·РѕРІР°С‚СЊ
+	 *
+	 * @var array
+	 **/
+	protected $bannedTableAliases = array();
+	
+	/**
+	 * РњР°СЃСЃРёРІ РїРѕР»РµР№, Р·Р°РґР°РЅРЅС‹Р№ РїРѕР»СЊР·РѕРІР°С‚РµР»РµРј
+	 * Р­С‚Рё РїРѕР»СЏ РїР°СЂСЃСЏС‚СЃСЏ Рё РїСЂРµРІСЂР°С‰Р°СЋС‚СЃСЏ РІ $tableFields Рё $foreignFields
+	 *
+	 * @var array
+	 **/
 	protected $fields = array('*');
-	/** список внешних полей */
-	var $foreign_fields = array();
-	var $fields_info= array();
-	//var $lang_fields = array();
-	/** условие where запроса */
-	var $where = NULL;
-	/** параметры GROUP BY запроса */
-	var $group = NULL;
-	/** параметры ORDER BY запроса */
-	var $order = array('id' => 'DESC');
-	/** параметры LIMIT запроса */
-	var $limit = NULL;
-	var $offset = NULL;
-	/** тут хранится select-from-where часть последнего SQL запроса, 
-	 * который использовался для загрузки (load()) данных */
-	var $sql = NULL;
-	var $has_one = NULL; 
-	var $is_initialized = false;
+	
+	/**
+	 * РџРѕР»СЏ С‚Р°Р±Р»РёС†С‹
+	 *
+	 * @var array
+	 **/
+	protected $tableFields = array();
+	
+	/**
+	 * Р’РЅРµС€РЅРёРµ РїРѕР»СЏ 
+	 *
+	 * @var array
+	 **/
+	protected $foreignFields = array();
+	
+	/**
+	 * РњР°СЃСЃРёРІ РѕР±СЉРµРєС‚РѕРІ РјРѕРґРµР»РµР№ РґР»СЏ РІРЅРµС€РЅРёС… РєР»СЋС‡РµР№
+	 *
+	 * @var array
+	 **/
+	protected $foreignModels = array();
+	
+	/**
+	 * РЈСЃР»РѕРІРёРµ where Р·Р°РїСЂРѕСЃР°
+	 *
+	 * @var string
+	 **/
+	public $where = array();
+	
+	/**
+	 * РїР°СЂР°РјРµС‚СЂС‹ GROUP BY Р·Р°РїСЂРѕСЃР°
+	 *
+	 * @var string
+	 **/
+	protected $group = NULL;
+	
+	/**
+	 * РїР°СЂР°РјРµС‚СЂС‹ ORDER BY Р·Р°РїСЂРѕСЃР°
+	 *
+	 * @var array
+	 **/
+	protected $order = array();
+	
+	/**
+	 * РїР°СЂР°РјРµС‚СЂ LIMIT Р·Р°РїСЂРѕСЃР°
+	 *
+	 * @var int
+	 **/
+	protected $limit = NULL;
+	
+	/**
+	 * РїР°СЂР°РјРµС‚СЂ offcet Р·Р°РїСЂРѕСЃР°
+	 *
+	 * @var int
+	 **/
+	protected $offset = NULL;
+		
+	// protected $isInitialized = false;
 
-	var $data = NULL;
+	protected $sqlParts = array();
 
-	var $resultSetFactory = NULL;
+	protected $data = NULL;
 
-	function initialize(&$ctx, $config=NULL)
+	protected $resultSetFactory = NULL;
+
+	protected function initialize()
 	{
-		$this->is_initialized = true; //иногда создаем объект, а потом делаем "initialize"
+		//$this->is_initialized = true; //РёРЅРѕРіРґР° СЃРѕР·РґР°РµРј РѕР±СЉРµРєС‚, Р° РїРѕС‚РѕРј РґРµР»Р°РµРј "initialize"
 
-		$parent_status = parent::initialize($ctx, $config);
+		$parent_status = parent::initialize();
 
 		if (is_null($this->table))
+		{
 			$this->table = $this->autoDefineTable();
-
-		foreach (array('before_load') as $v)
-		{
-			if (isset($config[$v])) $this->registerObserver($v, $this->config[$v]);
-		}
-		foreach (array('fields', 'where', 'order', 'limit', 'offset') as $v)
-		{
-			if (isset($this->config[$v])) $this->$v = $this->config[$v];
 		}
 
-		// строим поля
-		// на выходе:
-		// feilds_info 
-		// array(
-		//		array('name', 'source', alias'),
-		//		);
+		$this->addFields($this->fields);
 
-//		$this->makeHasOneConfig();
-		$this->makeForeignsConfig();
-
-		$this->_fields_info = array();
-		$fields_info =& $this->_fields_info;
-						
-		if (isset($this->fields_info))
+		//var_dump($this->tableFields);
+		//var_dump($this->foreignFields);
+		
+		return $parent_status && True;
+	}
+	
+	public function getTableName()
+	{
+		return $this->table;
+	}
+	
+	public function getTableAlias()
+	{
+		return $this->tableAlias ? $this->tableAlias : $this->table;
+	}
+	
+	public function setTableAlias($v)
+	{
+		$this->tableAlias = $v;
+	}
+	
+	public function setBannedTableAliases(&$v)
+	{
+		$this->bannedTableAliases = &$v;
+		$this->updateTableAlias();
+	}
+	
+	public function setLimit($v)
+	{
+		if (is_numeric($v))
 		{
-			foreach ($this->fields_info as $v)
-			{
-				$field_name = $v['name']; // с точки зрения программы, в запросе это м.б. алиас
-				$field_source = isset($v['source'])
-					? $v['source'] 
-					: $field_name;
-				// грузим языкозависимые поля?
-				if (array_key_exists('lang', $v) && $v['lang'] !== $ctx->lang)
-				{
-					continue; // не добавляем иностранные тексты
-				}
-				$field_alias = (isset($v['alias']) 
-					? $v['alias']
-					: (
-						($field_source === $field_name) 
-						? NULL
-						: $field_name
-					)
-				);
-				$v['name'] = $field_name;
-				$v['source_full'] = $this->parse($this->_quoteField($field_source, $this->table));
-				$v['source'] = $this->parse($this->_quoteField($field_source));
-				$v['alias'] = $this->_quoteField($field_alias);
-				$fields_info[$field_name] = $v;
-			}
+			$this->limit = $v;
 		}
-		$fields = array();
-		foreach ($this->fields as $field_name)
+	}
+	
+	public function setOrder($v)
+	{
+		if (is_array($v))
 		{
-			if (!array_key_exists($field_name, $fields_info))
+			$this->order = $v;
+		}
+	}
+	
+	public function getForeignFieldConf($fieldName)
+	{
+		return $this->foreignFields[$fieldName];
+	}
+	
+	/**
+	 * Clear fields
+	 *
+	 * @return void
+	 **/
+	public function clearFields()
+	{
+		$this->fields = array();
+		$this->foreignFields = array();
+		$this->foreignModels = array();
+		$this->bannedTableAliases = array();
+		$this->tableFields = array();
+	}
+	
+	public function addFields($fields)
+	{
+		if (!is_array($fields) || empty($fields)) return;
+		
+		foreach ($fields AS $key => $value)
+		{			
+			if (is_numeric($key))
 			{
-				$info = array(
-					'name' => $field_name,
-					'source_full' => $this->parse($this->_quoteField($field_name, $this->table)),
-					'source' => $this->parse($this->_quoteField($field_name)),
-					'alias' => NULL,
-				);
-				$fields_info[$field_name] = $info;
-			}
-			// проверяем тип поля. и если не БД'шный -- перебрасываем в foreign_fields
-			// (по умолчанию, если тип не указан, считаем что он БД'шный
-			if (isset($fields_info[$field_name]['type'])
-				// && $fields_info[$field_name]['type'] ! в списке типов полей из БД
-				&& !in_array($field_name, $this->foreign_fields)
-				)
-			{
-				$this->foreign_fields[] = $field_name;
+				$this->addField($value);
 			}
 			else
 			{
-				$fields[] = $field_name;
+				$this->addField($key, $value);
 			}
 		}
-
-		$this->_fields_info = $fields_info;
-		// теперь здесь только БД'шные поля
-		// остальные -- в $this->foreign_fields
-		$this->fields = $fields;
-		return $parent_status && True;
 	}
-	function autoDefineTable()
+	
+	public function addField($fieldName, $config = NULL)
 	{
-		$class_name = get_class($this);
-		$class_name = str_replace("Model", "", $class_name);
-		$class_name = str_replace("Basic", "", $class_name);
-		return Inflector::underscore($class_name);
+		
+		if (NULL === $config)
+		{
+			$this->tableFields[$fieldName] = array(
+				'name' => $fieldName
+			);
+		}
+		else
+		{
+			// ex: has_one:rubric, has_many:rubrics, many2many:rubrics 
+			if (strpos($fieldName, ':') !== false)
+			{
+				$fieldNameParts = explode(':', $fieldName);
+				$this->addForeignField($fieldNameParts[0], $fieldNameParts[1], $config);
+			}
+			else
+			{
+				// many to many
+				if (substr($fieldName, 0, 2) == '<>')
+				{
+					$this->addForeignField('many2many', substr($fieldName, 2), $config);
+				}
+				// one to many
+				elseif(substr($fieldName, 0, 2) == '>>')
+				{
+					$this->addForeignField('has_many', substr($fieldName, 2), $config);
+				}
+				// one to one
+				elseif(substr($fieldName, 0, 1) == '>')
+				{
+					$this->addForeignField('has_one', substr($fieldName, 1), $config);
+				}
+				// table field
+				else
+				{
+					if (is_array($config))
+					{
+						if ($config['type'])
+						{
+							$this->foreignFields[$fieldName] = $config;
+						}
+						else
+						{
+							$this->tableFields[$fieldName] = $config;
+							$this->tableFields[$fieldName]['name'] = $fieldName;
+						}
+					}
+					else
+					{
+						$this->tableFields[$fieldName] = array(
+							'name' => $fieldName,
+							'source' => $config
+						);
+					}
+				}
+			}
+		}
+	}
+	
+	public function getCount($where = NULL)
+	{
+		$sqlParts = $this->getSqlParts($where);
+		$sql = '
+			SELECT COUNT(*) AS total
+			'.$sqlParts['from'].'
+			'.$sqlParts['join'].'
+			'.$sqlParts['where'].'
+		';
+		
+		$result = $this->rh->db->queryOne($sql);
+		return intval($result['total']);
+	}
+	
+	protected function updateTableAlias()
+	{
+		$ta = $this->getTableAlias();
+		$i = 2;
+		while (in_array($this->getTableAlias(), $this->bannedTableAliases))
+		{
+			$this->setTableAlias($ta.$i++);
+		}
+	}
+	
+	protected function addForeignField($type, $fieldName, $config = NULL)
+	{
+		if (!in_array($type, array('has_one', 'has_many', 'many2many')))
+		{
+			return;
+		}
+		
+		// get model name
+		if (isset($this->foreignModels[$fieldName]))
+		{
+			$className = get_class($this->foreignModels[$fieldName]);
+		}
+		elseif (!is_array($config))
+		{
+			$className = $config;
+			$config = array();
+		}
+		elseif (isset($config["model"]))
+		{
+			$className = $config["model"];
+			unset($config["model"]);
+		}
+
+		$config["name"] = $fieldName;
+		$config["type"] = $type;
+		$config['className'] = $className;
+		
+		$this->foreignFields[$fieldName] = $config;	
+	}
+	
+	public function getPk()
+	{
+		if ($this->pk)
+		{
+			return $this->pk;
+		}
+		else
+		{
+			return 'id';
+		}
+	}
+	
+	protected function autoDefineTable()
+	{
+		$className = get_class($this);
+		if ($className == 'DBModel')
+		{
+			return NULL;
+		}
+		$className = str_replace("Model", "", $className);
+		$className = str_replace("Basic", "", $className);
+		return Inflector::underscore($className);
 	}
 
-	function load($where=NULL, $limit=NULL, $offset=NULL)
+	public function load($where=NULL, $limit=NULL, $offset=NULL)
 	{
 		$this->notify('before_load', array(&$this));
-//		$this->data = $this->select($where, $limit, $offset, true);
+
 		$this->setData($this->select($where, $limit, $offset, true));
+		
 		$this->notify('load', array(&$this));
 	}
-	function loadSql($sql)
+	
+	protected function loadSql($sql)
 	{
 		$this->notify('before_load', array(&$this));
 //		$this->data = $this->selectSql($sql, true);
 		$this->setData($this->selectSql($sql, true));
 		$this->notify('load', array(&$this));
 	}
-	function loadData($data)
+	
+	public function setData($data)
 	{
-		$this->notify('before_load', array(&$this));
-//		$this->data = $data;
-		$this->setData($data);
-		$this->notify('load', array(&$this));
-	}
-
-	private function setData(&$data)
-	{
-		if (is_array($data) || (is_object($data) && $data instanceof IteratorAggregate))
+		if (is_array($data))
 		{
 			$this->data = array();
-			foreach ($data as $row)
+			foreach ($data AS $row)
 			{
 				if (@$this->resultSetFactory)
 				{
-					$item = call_user_func($this->resultSetFactory, $this, $row); //factory сам делаем init
+					$item = call_user_func($this->resultSetFactory, $this, $row); //factory СЃР°Рј РґРµР»Р°РµРј init
 				}
 				else
 				{
-					
 					$item = new ResultSet();
 					$item->init($this, $row);
 				}
@@ -191,148 +379,75 @@ class DBModel extends Model implements IteratorAggregate, ArrayAccess, Countable
 			}
 		}
 		else
+		{	
 			$this->data = null;
+		}
 	}
 
-	// relations
 	/**
-	 * Один-ко-многим или Многие-ко-многим
-	 * $data -- массив с данными этой модели (который возвращает select(), 
-	 * например)
-	 * $info -- инфа о field
-	 */
-	function mapHasMany(&$data, $info, $one = false, $type = 'HasMany')
+	 * РѕРґРёРЅ - РєРѕ - РјРЅРѕРіРёРј
+	 *
+	 * @return void
+	 **/
+	protected function mapHasMany($fieldName, &$data)
 	{
-		// один - ко - многим
-		$field_name = $info['name'];
-		$fk = $info[$type]['fk'];
-		$pk = $info[$type]['pk'];
-		$self_name = $info[$type]['name'];
-
-		$model = $this->getInitModel($field_name);
+		$fieldinfo = &$this->foreignFields[$fieldName];
+		$model = &$this->getForeignModel($fieldName);
+		
 		if (!isset($model)) return;
 
-		if (!$one)
-		{
-			foreach ($data as $k=>$v)
-			{
-				//  lucky: этот load можно вынести "за скобки", и делать выборку для всех
-				//  $pk из $data одним запросом. 
-				//  тогда цикл можно сделать по результату $model->load
-				//  lucky: done (см. ниже)
-				//
-				//  lucky: oups... так делать нельзя.
-				//		 в $model могут быть специфичные ограничения (скажем $limit)
-				//		 тогда результат будет неправильным
-				$where = $model->quoteField($fk) .'='.$model->quote($v[$pk]);
-				$model->load($where);
+		$where = $model->quoteField($fieldinfo['fk']) .'='. $model->dbQuote($data[$fieldinfo['pk']]);
+		$model->load($where);
 
-				$data[$k][$field_name] = $model;
-			}
-		}
-		else
-		{
-				//дублирование (shit), надо убрать. как? (c) dz
-				$where = $model->quoteField($fk) .'='.$model->quote($data[$pk]);
-				$model->load($where);
-
-				$data[$field_name] = $model;
-		}
+		$data[$fieldName] = &$model;
 	}
 	
-	function mapManyToMany(&$data, $info, $one = false)
+	/**
+	 * РјРЅРѕРіРёРµ РєРѕ РјРЅРѕРіРёРј
+	 * 
+	 **/
+	protected function mapMany2Many($fieldName, &$data)
 	{
-		//терлим-бом-бом! (c) dz
-		return $this->mapHasMany($data, $info, $one, 'ManyToMany');
+		$fieldinfo = &$this->foreignFields[$fieldName];
+		$model = &$this->getForeignModel($fieldName);
+		
+		if (!isset($model)) return;
+		
+		$qt = $this->quoteName($this->rh->db_prefix.$fieldinfo['through']['table']);
+		
+		$sqlParts = $model->getSqlParts();
+		$sqlParts['join'] .= ' 
+			INNER JOIN '.$qt.' AS '.$qt.' 
+			ON 
+			(
+				('.$model->quoteField($fieldinfo['fk']).'='.$qt.'.'.$this->quoteName($fieldinfo['through']['fk']).')
+				 AND
+				('.$qt.'.'.$this->quoteName($fieldinfo['through']['pk']) .'='. $model->dbQuote($data[$fieldinfo['pk']]).') 
+			) ';
+				
+		$model->loadSql(implode(' ', $sqlParts));
+		$data[$fieldName] = &$model;		
 	}
 
-	//modified by dz. работающий вариант join'ов для has_one (@ 2008.02.04)
-	function buildJoin($fields, &$fields_str)
+	function mapHasOne($fieldName, &$data)
 	{
-		$sql = '';
-		$types = array('HasOne');
-
-		foreach ($fields as $v)
-		{
-			$info = $this->_fields_info[$v];
-			$type = $info['type'];
-			if (in_array($type, $types) && !$this->isLazyLoadMode($info))
-			{
-				$field_name = $info['name'];
-				$fk = $info[$type]['fk'];
-				$pk = $info[$type]['pk'];
-				$self_name = $info[$type]['name'];
-
-				$f_model = $this->getInitModel($field_name);
-
-				if ($type == "HasOne")
-				{
-//					$where = "(" . $this->quoteField($fk)." = ".$f_model->quoteField($pk) . ")";
-					$where = "(" . $this->_quoteField($fk, $this->table)." = ".$f_model->_quoteField($pk, $f_model->table) . ")";
-					if ($info["where"])
-						$where .= " AND (" . $info["where"] . ")";
-					if ($f_model->where)
-						$where .= " AND (" . $f_model->where . ")";
-					$sql .= 
-					   ($info[$type]['only'] 
-							? " INNER JOIN "
-							: " LEFT JOIN "
-						)
-						. $this->buildTableNameAlias($f_model->table) 
-						.	" ON ("
-						.		  $where
-						.	     ")"
-						;
-					$fields_str .= ", " . $this->buildJoinFieldAliases($f_model);
-				}
-			}
-		}
-
-		return $sql;
-	}
-
-	function mapHasOne(&$data, $info, $one = false)
-	{
-		$type = 'HasOne';
-		$field_name = $info['name'];
-		$fk = $info[$type]['fk'];
-		$pk = $info[$type]['pk'];
-		$self_name = $info[$type]['name'];
-
-		$model = $this->getInitModel($field_name);
+		$fieldinfo = &$this->foreignFields[$fieldName];
+		$model = &$this->getForeignModel($fieldName);
+		
 		if (!isset($model)) return;
 
-		if (!$one)
-		{
-			foreach ($data as $k=>$v)
-			{
-				$where = $model->quoteField($pk) .'='.$model->quote($v[$fk]);
-				$f_row_model = clone $model;
-				$f_row_model->load($where);
-				$item = $f_row_model;
-				if ($item)
-					$data[$k][$field_name] = $item;
-			}
-		}
-		else
-		{
-			//дублирование (shit), надо убрать. как? (c) dz
-			$where = $model->quoteField($pk) .'='.$model->quote($data[$fk]);
-			$f_row_model = clone $model;
-			$f_row_model->load($where);
-			$item = $f_row_model;
-			if ($item)
-				$data[$field_name] = $item;
-		}
-	}
+		$where = $model->quoteField($fieldinfo['fk']) .'='. $model->dbQuote($data[$fieldinfo['pk']]);
+		$model->load($where);
 
+		$data[$fieldName] = &$model;
+	}
+	
+	
 	/**
-	 * Загрузить данные о файлах из аплоада
+	 * Р—Р°РіСЂСѓР·РёС‚СЊ РґР°РЅРЅС‹Рµ Рѕ С„Р°Р№Р»Р°С… РёР· Р°РїР»РѕР°РґР°
 	 *
-	 * FIXME: плохо, что для добавления новых типов
-	 *			нужно править класс
-	 */
-	function mapUpload(&$data, $info)
+	 **/
+	protected function mapUpload(&$data, $info)
 	{	
 		$model =& $this->rh->upload;
 		if (!isset($model)) return;
@@ -350,122 +465,184 @@ class DBModel extends Model implements IteratorAggregate, ArrayAccess, Countable
 		$data[$info['name']] = $file;
 	}
 
-	function getSelectSql($where=NULL, $limit=NULL, $offset=NULL)
+	/**
+	 * РЎС‚СЂРѕРёС‚ join РґР»СЏ has_one
+	 *
+	 * @return string
+	 **/
+	function buildJoin(&$fields, &$fieldsStr)
 	{
-		//buildJoin может менять список загружаемых полей (by dz)
-		$fields_str = $this->buildFieldAliases($this->fields);
-		$joins_str = $this->buildJoin($this->foreign_fields, &$fields_str);
-		$sql1 =  ' SELECT ' . $fields_str
-			. ' FROM '   . $this->buildTableNameAlias($this->table)
-			. $joins_str
-			. $this->buildWhere($where)
-			. $this->buildGroupBy($this->group);
-		$sql = $sql1
-			. $this->buildOrderBy($this->order)
-			. $this->buildLimit($limit, $offset);
-		;
+		$sql = '';
+		
+		$allowedTypes = array('has_one');
 
-		// сохраним sql1 для будщих поколений ;)
-		// count() например
-		return array($sql, $sql1);
+		foreach ($fields AS &$v)
+		{
+			if (!in_array($v['type'], $allowedTypes) || (isset($v['lazy_load']) && $v['lazy_load']))
+			{
+				continue;
+			}
+
+			$foreignModel = &$this->getForeignModel($v['name']);
+
+			$where = "(" . $this->quoteField($v['pk'])." = ".$foreignModel->quoteField($v['fk']) . ")";
+			
+			if ($info["where"])
+			{
+				$where .= " AND (" . $info["where"] . ")";
+			}
+			/*
+			if ($f_model->where)
+				$where .= " AND (" . $f_model->where . ")";
+			*/
+			
+			$sql .= 
+			   ($v['only'] 
+					? " INNER JOIN "
+					: " LEFT JOIN "
+				)
+				. $foreignModel->getTableNameAlias() 
+				.	" ON ("
+				.		  $where
+				.	     ")"
+				;
+				
+			$fieldsStr .= "," . $foreignModel->getFieldsForJoin();
+		}
+
+		return $sql;
+	}
+	
+	public function getSqlParts($where=NULL, $limit=NULL, $offset=NULL)
+	{
+		if (!empty($this->sqlParts))
+		{
+			return $this->sqlParts;
+		}
+		
+		$this->sqlParts = array();
+		
+		$this->sqlParts['fields'] = 'SELECT '.$this->getFields($this->tableFields);
+		$this->sqlParts['from'] = 'FROM '.$this->getTableNameAlias();
+		$this->sqlParts['join'] = $this->buildJoin($this->foreignFields, $sqlParts['fields']);
+		$this->sqlParts['where'] = $this->buildWhere($where);
+		$this->sqlParts['group'] = $this->buildGroupBy($this->group);
+		$this->sqlParts['order'] = $this->buildOrderBy($this->order);
+		$this->sqlParts['limit'] = $this->buildLimit($limit, $offset);
+		
+		return $this->sqlParts;
+	}
+	
+	// protected function getSelectSql($where=NULL, $limit=NULL, $offset=NULL)
+	// {
+	// 	$fieldsStr = $this->getFields($this->tableFields);
+	// 
+	// 	$joinsStr = $this->buildJoin($this->foreignFields, &$fieldsStr);
+	// 	
+	// 	$sql =  ' SELECT ' . $fieldsStr
+	// 		. ' FROM '   . $this->getTableNameAlias()
+	// 		. $joinsStr
+	// 		. $this->buildWhere($where)
+	// 		. $this->buildGroupBy($this->group)
+	// 		. $this->buildOrderBy($this->order)
+	// 		. $this->buildLimit($limit, $offset)
+	// 	;
+	// 
+	// 	return $sql;
+	// }
+	
+	protected function getFields()
+	{
+		return implode(',', array_map(array(&$this, 'buildFieldAlias'), $this->tableFields));
 	}
 
-	function selectSql($sql_parts, $is_load=false)
+	public function getFieldsForJoin()
 	{
-		list($sql, $sql1) = $sql_parts;
-		if ($is_load) $this->sql = $sql1;
-//		$data = $this->rh->db->query($sql);
+		return implode(',', array_map(array(&$this, 'buildJoinFieldAlias'), $this->tableFields));
+	}
 
-		$data = DBAL::getInstance()->query($sql);
-
-//	if ($_GET["debug"] && get_class($this) == "CommentsModel")
-//	if (get_class($this) == "EventsModel")
-//		echo $sql."<br /><br />";
+	function selectSql($sql, $isLoad=false)
+	{
+		//var_dump($sql);
 		
-		$this->loadForeignFields($data);
+		$data = DBAL::getInstance()->query($sql);
+		
+		$this->fillForeignModelsWithData($data);
 		return $data;
 	}
 
-	//dz: новый вариант. теперь поддерживает загрузку has_one через join (@2008.02.04)
-	function loadForeignFields(&$data)
+	protected function fillForeignModelsWithData(&$data)
 	{
-		foreach ($this->foreign_fields as $v)
+		if (!is_array($this->foreignFields) || empty($this->foreignFields))
 		{
-			$info = $this->_fields_info[$v];
-			if (isset($info['type']))
+			return;
+		}
+				
+		// 
+		foreach ($data AS $row => &$d)
+		{
+			$foreignData = array();
+			foreach($d AS $fieldName => $fieldValue)
 			{
-				if (in_array($info["type"], array('HasOne')) && !$this->isLazyLoadMode($info))
+				if (!isset($this->tableFields[$fieldName]))
 				{
-					$f_fields = array();
-					$field_name = $info['name'];
-					$f_model = $this->getInitModel($field_name);
-
-					foreach ($f_model->fields as $field)
+					$fieldParts = explode(':', $fieldName);
+					if (!is_array($foreignData[$fieldParts[0]]))
 					{
-						$name = $this->getQuotedJoinFieldAlias($field, $f_model);
-						$f_fields[$field] = $this->unquoteName($name);
+						$foreignData[$fieldParts[0]] = array();
 					}
-
-					if (!empty($f_fields))
-					{
-						foreach ($data as &$_row)
-						{
-							$f_row = array();
-							foreach ($f_fields as $orig_field => $res_field)
-							{
-								$f_row[$orig_field] = $_row[$res_field];
-								unset($_row[$res_field]);
-							}
-
-							$f_row_model = clone $f_model;
-							$f_row_model->loadData(array($f_row));
-							$_row[$field_name] = $f_row_model;
-							unset($f_row);
-						}
-					}
-					unset($f_fields);
+					$foreignData[$fieldParts[0]][$fieldParts[1]] = $fieldValue;
+					unset($d[$fieldName]);
 				}
-				//lazy load now (c) dz
-//				else
-//				{
-//					$method_name = 'map'.$info['type'];
-//					$this->$method_name($data, $info);
-//				}
+			}
+			
+			foreach ($this->foreignFields AS $foreignField)
+			{
+				if ($foreignField['type'] == 'has_one' && !$foreignField['lazy_load'])
+				{
+					$model = &$this->foreignModels[$foreignField['name']];
+					$tableAlias = $model->getTableAlias();
+					
+					if (isset($foreignData[$tableAlias]))
+					{
+						$clonedModel = clone $model;
+						$clonedModel->setData(array($foreignData[$tableAlias]));
+						$d[$foreignField['name']] = $clonedModel;
+					}
+				}
 			}
 		}
-
 	}
 
-	//author dz. реализуем ленивую загрузку.
-	function loadForeignField($field, &$data = null)
+	public function loadForeignField($fieldName, &$data)
 	{
-//			$info = $this->foreign_fields[$field];
-			$info = $this->_fields_info[$field];
-			$method_name = 'map'.$info['type'];
-			if (is_null($data))
-				$this->$method_name($this->data, $info);
-			else
-				$this->$method_name($data, $info, true);
+		$methodName = 'map'.Inflector::camelize($this->foreignFields[$fieldName]['type']);
+		$this->$methodName($fieldName, $data);
 	}
 
-	function select($where=NULL, $limit=NULL, $offset=NULL, $is_load=false)
+	protected function select($where=NULL, $limit=NULL, $offset=NULL)
 	{
-		$sql = $this->getSelectSql($where, $limit, $offset, $is_load);
-		return $this->selectSql($sql, $is_load);
+		$sqlParts = $this->getSqlParts($where, $limit, $offset);
+		
+		return $this->selectSql(implode(' ', $sqlParts));
 	}
-	function onBeforeInsert(&$row)
+	
+	protected function onBeforeInsert(&$row)
 	{
 		if (array_key_exists('_created', $this->_fields_info) 
 			&& !array_key_exists('_created', $row))
 				$row['_created'] = date('Y-m-d H:i:s');
 	}
-	function onBeforeUpdate(&$row)
+	
+	protected function onBeforeUpdate(&$row)
 	{
 		if (array_key_exists('_modified', $this->_fields_info) 
 			&& !array_key_exists('_modified', $row))
 				$row['_modified'] = date('Y-m-d H:i:s');
 	}
-	function insert(&$row)
+	
+	/*
+	protected function insert(&$row)
 	{
 		$this->onBeforeInsert($row);
 		$this->buildFieldsValues($row, $fields_sql, $values_sql);
@@ -548,7 +725,8 @@ class DBModel extends Model implements IteratorAggregate, ArrayAccess, Countable
 		$count = intval($rs[0]['cnt']);
 		return $count;
 	}
-
+	*/
+	
 	function buildLimit($limit=NULL, $offset=NULL)
 	{
 		$limit = isset($limit) ? $limit : $this->limit;
@@ -562,71 +740,62 @@ class DBModel extends Model implements IteratorAggregate, ArrayAccess, Countable
 		return $limit_sql;
 	}
 
-	function buildFieldsValues($data, &$fields_sql, &$values_sql)
+	protected function buildFieldAlias($field)
 	{
-		// lucky: FIXME: filter row
-		$t = array();
-		foreach ($data as $k=>$v)
+		$result = '';
+				
+		if ($field['source'])
 		{
-//			if (array_key_exists($k, $this->_fields_info))
-//			{ 
-				$t[$k] = $v;
-//			}
+			if (preg_match('/^[\d\w_]+$/i', $field['source']))
+			{
+				$result .= $this->quoteField($field['source']);
+			}
+			else
+			{
+				$result .= $field['source'];
+			}
+			$result .= ' AS '.$this->quoteName($field['name']);
 		}
-		$fields_sql = $this->buildFieldsShort(array_keys($t));
-		$values_sql = $this->buildValues(array_values($t));
+		else
+		{
+			$result .= $this->quoteField($field['name']);
+			
+			//$this->getTableName().'.'.$this->quoteName($field['name']);
+		}
+		
+		return $result;
 	}
-	function buildFieldsValuesSet($data, &$set_sql)
+	
+	protected function buildJoinFieldAlias($field)
 	{
-		$set = array(); 
-		foreach ($data as $k=>$v)
-			$set[] = $this->quoteFieldShort($k) . '='. $this->quoteValue($v);
-		$set_sql = implode(',', $set);
+		$result = '';
+				
+		if ($field['source'])
+		{
+			if (preg_match('/^[\d\w_]+$/i', $field['source']))
+			{
+				$result .= $this->quoteField($field['source']);
+			}
+			else
+			{
+				$result .= $field['source'];
+			}
+		}
+		else
+		{
+			$result .= $this->quoteField($field['name']);
+		}
+		$result .= ' AS '.$this->quoteName($this->getTableAlias().':'.$field['name']);
+		
+		return $result;
 	}
-
-	function buildFieldAliases($fields)
+	
+	public function getTableNameAlias()
 	{
-		$fields_sql = implode(',', @array_map(array(&$this, 'quoteFieldAlias'), $fields));
-		return $fields_sql;
+		return $this->quoteName($this->rh->db_prefix.$this->getTableName()) .' AS '.$this->quoteName($this->getTableAlias());
 	}
-	function buildJoinFieldAliases($model)
-	{
-		$res = array();
-		foreach ($model->fields as $field)
-			$res[] = $this->quoteJoinFieldAlias($field, $model);
-		$fields_sql = implode(',', $res);
-		return $fields_sql;
-	}
-	function buildFieldsShort($fields)
-	{
-		$fields_sql = implode(',', array_map(array(&$this, 'quoteFieldShort'), $fields));
-		return $fields_sql;
-	}
-	function buildFields($fields)
-	{
-		$fields_sql = implode(',', array_map(array(&$this, 'quoteField'), $fields));
-		return $fields_sql;
-	}
-	function buildValues($values)
-	{
-		$values_sql = implode(',', array_map(array(&$this, 'quoteValue'), $values));
-		return $values_sql;
-	}
-	function quoteValues($values)
-	{
-		return $this->buildValues($values);
-	}
-	function buildTableName($table)
-	{
-		$table_name_sql = $this->quoteName($this->rh->db_prefix.$table);
-		return $table_name_sql;
-	}
-	function buildTableNameAlias($table, $alias=NULL)
-	{
-		$table_name_sql = $this->quoteName($this->rh->db_prefix.$table) .' AS '.$this->quoteName(($alias) ? $alias : $table);
-		return $table_name_sql;
-	}
-	function buildWhere($where)
+	
+	protected function buildWhere($where)
 	{
 		if (isset($this->where))
 		{ 
@@ -651,7 +820,8 @@ class DBModel extends Model implements IteratorAggregate, ArrayAccess, Countable
 		}
 		return $where_sql;
 	}
-	function buildGroupBy($fields)
+	
+	protected function buildGroupBy($fields)
 	{
 		if (empty($fields))
 			$sql = '';
@@ -667,14 +837,13 @@ class DBModel extends Model implements IteratorAggregate, ArrayAccess, Countable
 		return $sql;
 	}
 
-	private function buildHaving()
+	protected function buildHaving()
 	{
 		if ($this->having)
 			return " HAVING " . $this->having;
 	}
 
-	//dz: теперь конфиг для order лежить только в $this->order, не в $this->fields_info (@ 2008.02.04)
-	function buildOrderBy($fields)
+	protected function buildOrderBy($fields)
 	{
 		if (empty($fields))
 			$orderby_sql = '';
@@ -700,102 +869,58 @@ class DBModel extends Model implements IteratorAggregate, ArrayAccess, Countable
 		}
 		return $orderby_sql;
 	}
-
-	function quote($str)
+	
+	public function quote($str)
 	{
-		$str_sql = $this->rh->db->quote($str);
-		return $str_sql;
+		return $this->dbQuote($str);
 	}
-	function quoteValue($value)
+	
+	public function dbQuote($str)
 	{
-		return (isset($value) ?  $this->quote($value) : 'NULL');
+		return $this->rh->db->quote($str);
 	}
-	function quoteName($name)
+	
+	public function quoteValue($value)
 	{
+		return (isset($value) ?  $this->dbQuote($value) : 'NULL');
+	}
+	
+	/**
+	 * wrap string with `
+	 *
+	 * @param string $name
+	 * @return string
+	 **/
+	public function quoteName($name)
+	{
+		$result = '';
 		if ($name !== '*') 
-			$name_sql = '`'.$name.'`';
+		{
+			$result = '`'.str_replace('`', '``', $name).'`';
+		}
 		else 
-			$name_sql = $name;
-
-		return $name_sql;
-	}
-	//author dz. нужно для join'ов
-	function unquoteName($name)
-	{
-		return trim($name, '`');
-	}
-	function quoteField($name)
-	{
-		$info =& $this->_fields_info[$name];
-		if (!isset($info)) return NULL;
-
-		return $info['source_full'];
-	}
-	function quoteFieldShort($name)
-	{
-		$info =& $this->_fields_info[$name];
-		if (!isset($info)) 
-		{
-			return $name;
+		{	
+			$result = $name;
 		}
-
-		return $info['source'];
+		return $result;
 	}
-	function quoteOrderField($name, $order)
+	
+	/**
+	 * Construct `table`.`field`
+	 *
+	 * @return string
+	 **/
+	public function quoteField($name)
 	{
-		return $this->_quoteField($name, $this->table) . " " . $order;
+		return '`'.$this->getTableAlias().'`.'.$this->quoteName($name);
 	}
-	function quoteFieldAlias($name)
+
+	protected function quoteOrderField($name, $order)
 	{
-		$info =& $this->_fields_info[$name];
-		if(!$this->is_initialized)
-		{
-			throw new DbException("<b>".get_class($this)."</b> was not initialized", 3);
-		
-		}
-		
-		if (!isset($info)) return NULL;
-
-		return isset($info['alias']) 
-			?  $info['source_full'].' AS '.$info['alias']
-			: $info['source_full'];
+		return $this->quoteField($name) . " " . $order;
 	}
-
-	function _quoteField($name, $table_name=NULL)
-	{
-		if (!isset($name) || strpos($name, ' ')) return $name;
-		return implode('.', 
-			array_map(array(&$this, 'quoteName'), 
-			explode('.',  (
-				(strpos('.', $name) === false && isset($table_name))
-					? $table_name.'.'.$name 
-					: $name
-			))));
-	}
-
-	//author dz: правильное именование полей приджойненных таблиц для вставки в select (@ 2008.02.04)
-	function quoteJoinFieldAlias($name, $model)
-	{
-		$info =& $model->_fields_info[$name];
-		if (!isset($info)) return NULL;
-
-		return isset($info['alias']) 
-			?  $info['source_full'].' AS '.$this->quoteName($model->table . "_" . $this->unquoteName($info['alias']))
-			: $info['source_full'].' AS '.$this->quoteName($model->table . "_" . $this->unquoteName($info["source"]));
-	}
-
-	//author dz: правильно именование полей приджойненных таблиц для разбора результатов (@ 2008.02.04)
-	function getQuotedJoinFieldAlias($name, $model)
-	{
-		$info =& $model->_fields_info[$name];
-		if (!isset($info)) return NULL;
-
-		return isset($info['alias']) 
-			? $this->quoteName($model->table . "_" . $this->unquoteName($info['alias']))
-			: $this->quoteName($model->table . "_" . $this->unquoteName($info["source"]));
-	}
-
-	function parse($query)
+	
+	protected function parse($query)
 	{
 		$args = func_get_args();
 		$query = array_shift($args);
@@ -807,131 +932,63 @@ class DBModel extends Model implements IteratorAggregate, ArrayAccess, Countable
 		return $sql;
 	}
 
-	//author dz: $this->has_one, $this->has_many, $this->many_to_many
-	function makeForeignsConfig()
+	public function &getForeignModel($fieldName)
 	{
-		$this->makeForeignConfig('has_one');
-		$this->makeForeignConfig('has_many');
-		$this->makeForeignConfig('many_to_many');
-	}
-
-	//type in 'has_one', 'has_many', 'many_to_many'
-	function makeForeignConfig($type)
-	{
-		if (!isset($this->$type))
-			return ;
-
-		if (!is_array($this->$type))
-			$this->$type = array($this->$type);
-
-		foreach ($this->$type as $key => $config)
+		if (!isset($this->foreignModels[$fieldName]))
 		{
-			$res = array();
+			$this->initForeignModel($fieldName);
+		}
+		return $this->foreignModels[$fieldName];
+	}
+	
+	protected function initForeignModel($fieldName)
+	{
+		if (!isset($this->foreignFields[$fieldName]))
+		{
+			$this->foreignModels[$fieldName] = NULL;
+			return;
+		}
+		
+		$field = &$this->foreignFields[$fieldName];
+		$this->rh->useModel($field['className']);
+		$model = new $field['className']($this->rh);
+		
+		$model->setBannedTableAliases($this->bannedTableAliases);
+		$this->bannedTableAliases[] = $model->getTableAlias();
 
-			$field = null;
-			//получили поле
-			if (!is_numeric($key))
-				$field = $key;
+		$this->foreignModels[$fieldName] = &$model;
 
-			//получили имя класса
-			if ($field && isset($this->$field))
-				$className = get_class($this->$field);
-			elseif (!is_array($config))
-				$className = $config;
-			elseif (isset($config["name"]))
+		//fk
+		if (!isset($field["fk"]))
+		{
+			if ($field['type'] == "has_one" || $field['type'] == "many2many")
 			{
-				if (Inflector::camelize($config["name"]) == $config["name"])
-					$className = $config["name"];
-				else
-					Inflector::underscore($config["name"]);
+				$field["fk"] = $this->foreignModels[$fieldName]->getPk();
 			}
-			elseif (isset($field))
-				$className = Inflector::camelize($field);
-
-			//сейчас уж точно получили поле
-			if (!$field)
-			{
-				//1
-				if ($type == 'has_one')
-					$field = Inflector::many_singularize_for_underscope(Inflector::underscore($className));
-//					$field = Inflector::underscore($className);
-				else
-					$field = Inflector::underscore($className);
-			}
-
-			//получили объект модели
-			if (!isset($this->$field))
-			{
-				if (is_array($config) && isset($config["model"]) && is_obj($config["model"]))
-					$this->$field = $config["model"];
-				else
-				{
-					$this->rh->UseModel($className);
-					$this->$field = new $className();
-				}
-			}
-
-			//fk
-			if (is_array($config) && isset($config["fk"]))
-				$fk = $config["fk"];
 			else
 			{
-				//2
-				if ($type == "has_one")
-					$fk = Inflector::many_singularize_for_underscope(Inflector::underscore($className)) . "_id";
-//					$fk = Inflector::underscore($className) . "_id";
-				elseif ($type == "has_many" || $type == "many_to_many")
-					$fk = Inflector::many_singularize_for_underscope(Inflector::underscore(get_class($this))) . "_id";
+				$field["fk"] = Inflector::many_singularize_for_underscope(Inflector::underscore(get_class($this))) . "_id";
 			}
-
-			//pk
-			if (is_array($config) && isset($config["pk"]))
-				$pk = $config["pk"];
-			//3
-			elseif (($type == "has_many" || $type == "has_many") && isset($this->pk))
-				$pk = $this->pk;
-			elseif ($type == "has_one" && isset($this->$field->pk))
-				$pk = $this->$field->pk;
-			else
-				$pk = "id";
-
-			$res = array();
-			$res["name"] = $field;
-			//4
-			$res["type"] = $camel = Inflector::camelize($type);
-			$res[$camel] = array("pk" => $pk, "fk" => $fk);
-			if (isset($config["where"]))
-				$res["where"] = $config["where"];
-			$this->fields_info[] = $res;
-			unset($res);
 		}
 
+		//pk
+		if (!isset($field["pk"]))
+		{
+			if ($field['type'] == "has_one")
+			{
+				$field["pk"] = Inflector::many_singularize_for_underscope(Inflector::underscore($field['className'])) . "_id";
+			}
+			else
+			{
+				$field["pk"] = $this->getPk();
+			}
+		}
 	}
 
-	//author dz: проверяем ленивый ли режим загрузки foreign'а
-	function isLazyLoadMode($field_config)
+	public function isForeignField($field)
 	{
-		if ("HasOne" == $field_config["type"])
-			return (isset($field_config["lazy_load"]) ? $field_config["lazy_load"] : false);
-		else
+		if (isset($this->foreignFields[$field]))
 			return true;
-	}
-
-	//ленивая инициализация моделей. сначала храним не инициализированную модель. при обращении инитим. по-моему супер. (c) dz
-	function getInitModel($field_name)
-	{
-		if (!isset($this->$field_name))
-			return null;
-		if (!$this->$field_name->is_initialized)
-			$this->$field_name->initialize($this->rh);
-
-		return $this->$field_name;
-	}
-
-	function isForeignField($field)
-	{
-		if ($field)
-			return in_array($field, $this->foreign_fields);
 		else
 			return false;
 	}
@@ -943,11 +1000,11 @@ class DBModel extends Model implements IteratorAggregate, ArrayAccess, Countable
 
 	/*
 	 * Author dz
-	 * реализация интерфейсов IteratorAggregate, ArrayAccess, Countable
+	 * СЂРµР°Р»РёР·Р°С†РёСЏ РёРЅС‚РµСЂС„РµР№СЃРѕРІ IteratorAggregate, ArrayAccess, Countable
 	 *
 	 */
 
-	function haveData() { return is_array($this->data); }
+	public function haveData() { return is_array($this->data); }
 
 	//implements IteratorAggregate
 	public function getIterator() 
@@ -961,10 +1018,14 @@ class DBModel extends Model implements IteratorAggregate, ArrayAccess, Countable
 	public function offsetGet($key)
 	{ 
 		if (!$this->haveData())
+		{
 			return null;
+		}
+		
 		if (isset($this->data[$key]))
+		{
 			return $this->data[$key]; 
-//		elseif (in_array($key, $this->foreign_fields))
+		}
 		elseif ($this->isForeignField($key))
 		{
 			$this->loadForeignField($key);
@@ -972,12 +1033,28 @@ class DBModel extends Model implements IteratorAggregate, ArrayAccess, Countable
 		}
 	}
 
-	public function offsetSet($key, $value) { $this->data[$key] = $value; }
+	public function offsetSet($key, $value) 
+	{
+		if (NULL === $key)
+		{
+			$this->data[] = $value; 
+		}
+		else
+		{
+			$this->data[$key] = $value; 
+		}
+	}
 
-	public function offsetUnset($key) { unset($this->data[$key]); }
+	public function offsetUnset($key) 
+	{ 
+		unset($this->data[$key]); 
+	}
 
 	//implements Countable
-	public function count() { return ($this->haveData() && !empty($this->data)) ? count($this->data) : 0; }
+	public function count() 
+	{ 
+		return ($this->haveData() && !empty($this->data)) ? count($this->data) : 0; 
+	}
 
 	public function __toString() 
 	{
@@ -1001,6 +1078,7 @@ class DBModel extends Model implements IteratorAggregate, ArrayAccess, Countable
 		return $res;
 	}
 	
+	/*
 	public function setTable($value)
 	{
 		$this->table = $value;
@@ -1019,11 +1097,13 @@ class DBModel extends Model implements IteratorAggregate, ArrayAccess, Countable
 			$this->addField($field);
 		}
 	}
-	
+	*/
+	/*
 	public function addField($fieldName)
 	{
 		$this->fields[] = $fieldName;
 	}
+	*/
 }  
 
 ?>

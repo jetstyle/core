@@ -67,42 +67,48 @@
  */
 class Model
 {
-	var $observers = array();
-	var $config = array();
+	protected $observers = array();
+//	var $config = array();
 
-	function Model(&$rh=null)
+	protected $rh = null;
+
+	public function __construct(&$rh)
 	{
-		//специально для Луната
-		$this->rh=& $rh;
-		if ($rh)
-			$this->initialize($rh);
+		$this->rh = &$rh;
+		$this->initialize();
 	}
 
-	function initialize(&$ctx, $config=NULL) 
+	protected function initialize(/*&$ctx, $config=NULL*/) 
 	{ 
+		/*
 		if (!$this->rh)
 		{
 			$this->rh =& $ctx; 
 			
+			
 			if (is_array($config) && is_array($this->config)) 
 				$this->config = array_merge($this->config, $config);
+			
 		}
+		*/
 		return True;
 	}
 
 	function finalize() { }
 
-	function registerObservers($event, $actions)
+	public function registerObservers($event, $actions)
 	{
 		if (is_array($actions)) foreach ($actions as $k=>$v)
 			$this->observers[$event][] = &$actions[$k];
 	}
-	function registerObserver($event, $action)
+
+	public function registerObserver($event, $action)
 	{
 		if (isset($action))
 			$this->observers[$event][] = &$action;
 	}
-	function notify($event, $params)
+	
+	public function notify($event, $params)
 	{
 		$actions = &$this->observers[$event];
 		if (is_array($actions))
