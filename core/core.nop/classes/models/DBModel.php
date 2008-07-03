@@ -162,6 +162,14 @@ class DBModel extends Model implements IteratorAggregate, ArrayAccess, Countable
 
 	protected $data = NULL;
 
+	/**
+	 * В некоторых случаях (например при удалении или апдейте) нам нужно использовать имя таблицы как префикс
+	 *
+	 * @var boolean
+	 */
+	protected $usePrefixedTableAsAlias = false;
+	
+	
 
 	protected function initialize()
 	{
@@ -189,12 +197,29 @@ class DBModel extends Model implements IteratorAggregate, ArrayAccess, Countable
 	
 	public function getTableAlias()
 	{
-		return $this->tableAlias ? $this->tableAlias : $this->table;
+		if ($this->usePrefixedTableAsAlias)
+		{
+			return $this->rh->db_prefix.$this->table;
+		}
+		else
+		{
+			return $this->tableAlias ? $this->tableAlias : $this->table;
+		}
+	}
+	
+	public function getTableNameWithAlias()
+	{
+		return $this->quoteName($this->rh->db_prefix.$this->getTableName()) .' AS '.$this->quoteName($this->getTableAlias());
 	}
 	
 	public function setTableAlias($v)
 	{
 		$this->tableAlias = $v;
+	}
+	
+	public function setTable($v)
+	{
+		$this->table = $v;
 	}
 	
 	public function setBannedTableAliases(&$v)
@@ -292,6 +317,12 @@ class DBModel extends Model implements IteratorAggregate, ArrayAccess, Countable
 				unset($this->foreignModels[$fieldName]);
 			}
 		}
+	}
+	
+	public function setFields($fields)
+	{
+		$this->clearFields();
+		$this->addFields($fields);
 	}
 	
 	public function addFields($fields)
@@ -468,6 +499,11 @@ class DBModel extends Model implements IteratorAggregate, ArrayAccess, Countable
 	public function quoteField($name)
 	{
 		return $this->quoteName($this->getTableAlias()).'.'.$this->quoteName($name);
+	}
+	
+	public function quoteFieldShort($name)
+	{
+		return $this->quoteName($name);
 	}
 	
 	// ########## END QUOTES ############## //
@@ -669,7 +705,7 @@ class DBModel extends Model implements IteratorAggregate, ArrayAccess, Countable
 					? " INNER JOIN "
 					: " LEFT JOIN "
 				)
-				. $foreignModel->getTableNameAlias() 
+				. $foreignModel->getTableNameWithAlias() 
 				.	" ON ("
 				.		  $where
 				.	     ")"
@@ -691,7 +727,7 @@ class DBModel extends Model implements IteratorAggregate, ArrayAccess, Countable
 		$this->sqlParts = array();
 				
 		$this->sqlParts['fields'] = 'SELECT '.$this->getFields($this->tableFields);
-		$this->sqlParts['from'] = 'FROM '.$this->getTableNameAlias();
+		$this->sqlParts['from'] = 'FROM '.$this->getTableNameWithAlias();
 		
 		list($joinSql, $joinFields, $joinWhere) = $this->buildJoin($this->foreignFields);
 		if ($joinWhere)
@@ -718,16 +754,8 @@ class DBModel extends Model implements IteratorAggregate, ArrayAccess, Countable
 		
 		return $this->sqlParts;
 	}
-		
-	protected function getFields()
-	{
-		return implode(',', array_map(array(&$this, 'buildFieldAlias'), $this->tableFields));
-	}
 
-	public function getFieldsForJoin()
-	{
-		return implode(',', array_map(array(&$this, 'buildJoinFieldAlias'), $this->tableFields));
-	}
+	
 
 	public function selectSql($sql, $isLoad=false)
 	{
@@ -803,81 +831,79 @@ class DBModel extends Model implements IteratorAggregate, ArrayAccess, Countable
 	
 	protected function onBeforeInsert(&$row)
 	{
-		if (array_key_exists('_created', $this->_fields_info) 
-			&& !array_key_exists('_created', $row))
-				$row['_created'] = date('Y-m-d H:i:s');
+		if (isset($this->tableFields['_created']) && !isset($row['_created']))
+		{
+			$row['_created'] = date('Y-m-d H:i:s');
+		}
 	}
 	
 	protected function onBeforeUpdate(&$row)
 	{
-		if (array_key_exists('_modified', $this->_fields_info) 
-			&& !array_key_exists('_modified', $row))
-				$row['_modified'] = date('Y-m-d H:i:s');
+		if (isset($this->tableFields['_modified']) && !isset($row['_modified']))
+		{
+			$row['_modified'] = date('Y-m-d H:i:s');
+		}
 	}
 	
-	/*
-	protected function insert(&$row)
+	public function insert(&$row)
 	{
 		$this->onBeforeInsert($row);
-		$this->buildFieldsValues($row, $fields_sql, $values_sql);
-		$sql = ' INSERT INTO '.$this->buildTableName($this->table)
-			.'('.$fields_sql.')'
-			.' VALUES ('.$values_sql.')';
+		
+		$fields = implode(',', array_map(array(&$this, 'quoteName'), array_keys($row)));
+		$values = implode(',', array_map(array(&$this, 'quoteValue'), $row));
+		
+		$sql = ' INSERT INTO '.$this->quoteName($this->rh->db_prefix.$this->getTableName())
+			.'('.$fields.')'
+			.' VALUES ('.$values.')';
+			
 		$row['id'] = $this->rh->db->insert($sql);
 		return $row['id'];
 	}
-	function update(&$row, $where=NULL)
+	
+	
+	public function update(&$row, $where=NULL)
 	{
-		if (is_array($where)) 
+		$this->usePrefixedTableAsAlias = true;
+		
+		if ($where)
 		{
-			$_where = array();
-			foreach($where as $field)
-			{
-				$_where[] = $this->quoteFieldShort($field) .'='.$this->quote($row[$field]);
-			}
-			$where = implode(' AND ', $_where);
-			unset($_where);
+			$where = 'WHERE '.$this->parse($where);	
 		}
 		
 		$this->onBeforeUpdate($row);
-		$this->buildFieldsValuesSet($row, $fields_sql);
-		$sql = ' UPDATE '.$this->buildTableName($this->table)
-			.' SET '.$fields_sql
-			.' WHERE '.$where;
+		
+		$sql = ' UPDATE '.$this->quoteName($this->rh->db_prefix.$this->getTableName())
+			.' SET '.$this->getFieldsValuesSet($row)
+			. $where;
+		
+		$this->usePrefixedTableAsAlias = false;
+		
 		return $this->rh->db->query($sql);
 	}
-	function delete($where)
+
+	public function delete($where)
 	{
-		if (is_array($where))
+		$this->usePrefixedTableAsAlias = true;
+		
+		if ($where)
 		{
-			$w = array(); 
-			foreach ($where as $k=>$v)
-				$w[] = '('
-					.(isset($v) 
-						?  $this->quoteFieldShort($k) . '='. $this->quoteValue($v)
-						:  $this->quoteFieldShort($k) . ' IS NULL '
-					)
-					.')'
-					;
-			$where_sql = implode(' AND ', $w);
+			$where = 'WHERE '.$this->parse($where);	
 		}
-		else
-		{
-			$where_sql = $where;
-		}
-
-		$sql = 'DELETE FROM '.$this->buildTableName($this->table)
-			.$this->buildWhere($where_sql);
+		
+		$sql = 'DELETE FROM '.$this->quoteName($this->rh->db_prefix.$this->getTableName()).$where;
+		
+		$this->usePrefixedTableAsAlias = false;
+		
 		return $this->rh->db->query($sql);
 	}
 
-	function clean($truncate=True)
+	public function clean($truncate=True)
 	{
 		switch ($truncate)
 		{
-		case True:  $sql = ' TRUNCATE TABLE ' .$this->buildTableName($this->table); 
+		case True:  $sql = ' TRUNCATE TABLE ' .$this->quoteName($this->rh->db_prefix.$this->getTableName()); 
 			break;
-		case False: $sql = ' DELETE FROM ' .$this->buildTableName($this->table); 
+		case False: $sql = ' DELETE FROM ' .$this->quoteName($this->rh->db_prefix.$this->getTableName()); 
 			break;
 		default:    $sql = NULL;
 		}
@@ -885,23 +911,8 @@ class DBModel extends Model implements IteratorAggregate, ArrayAccess, Countable
 		if (isset($sql)) return $this->rh->db->query($sql);
 		return False;
 	}
-
-	//was renamed from "count" by dz @ 2008.02.04
-	function get_count($where=NULL)
-	{
-		if (!isset($this->sql)) list(,$sql) = $this->getSelectSql($where);
-		else $sql = $this->sql;
-
-		if (!preg_match('#(\sFROM\s.+)$#ms', $sql, $matches)) return NULL;
-		$sql = 'SELECT COUNT(*) AS `cnt` '.$matches[1];
-		$rs = $this->rh->db->query($sql);
-		// FIXME: cache it
-		$count = intval($rs[0]['cnt']);
-		return $count;
-	}
-	*/
 	
-	function buildLimit($limit=NULL, $offset=NULL)
+	protected function buildLimit($limit=NULL, $offset=NULL)
 	{
 		$limit = isset($limit) ? $limit : $this->limit;
 		$offset = isset($offset) ? $offset : $this->offset;
@@ -914,6 +925,39 @@ class DBModel extends Model implements IteratorAggregate, ArrayAccess, Countable
 		return $limit_sql;
 	}
 
+	/**
+	 * Return `tableAlias`.`field_1`,`tableAlias`.`field_2` AS `AAAA`,`tableAlias`.`field_3` AS `BBBB`, etc...
+	 *
+	 * @return string
+	 */
+	protected function getFields()
+	{
+		return implode(',', array_map(array(&$this, 'buildFieldAlias'), $this->tableFields));
+	}
+	
+	/**
+	 * Return `field_1`,`field_2`,`field_3`, etc...
+	 *
+	 * @return string
+	 */
+	protected function getShortFields()
+	{
+		//return implode(',', array_map(array(&$this, 'buildShortFieldAlias'), $this->tableFields));
+	}
+	
+	public function getFieldsForJoin()
+	{
+		return implode(',', array_map(array(&$this, 'buildJoinFieldAlias'), $this->tableFields));
+	}
+	
+	protected function getFieldsValuesSet($data)
+	{
+		$set = array(); 
+		foreach ($data AS $k=>$v)
+			$set[] = $this->quoteField($k) . '='. $this->quoteValue($v);
+		return implode(',', $set);
+	}
+	
 	protected function buildFieldAlias($field)
 	{
 		$result = '';
@@ -964,10 +1008,7 @@ class DBModel extends Model implements IteratorAggregate, ArrayAccess, Countable
 		return $result;
 	}
 	
-	public function getTableNameAlias()
-	{
-		return $this->quoteName($this->rh->db_prefix.$this->getTableName()) .' AS '.$this->quoteName($this->getTableAlias());
-	}
+	
 	
 	protected function buildWhere($where)
 	{
@@ -1240,33 +1281,6 @@ class DBModel extends Model implements IteratorAggregate, ArrayAccess, Countable
 
 		return $res;
 	}
-	
-	/*
-	public function setTable($value)
-	{
-		$this->table = $value;
-	}
-	
-	public function setFields($fields)
-	{
-		if (!is_array($fields))
-		{
-			return false;
-		}
-		
-		$this->fields = array();
-		foreach ($fields AS $field)
-		{
-			$this->addField($field);
-		}
-	}
-	*/
-	/*
-	public function addField($fieldName)
-	{
-		$this->fields[] = $fieldName;
-	}
-	*/
 }  
 
 ?>

@@ -45,10 +45,9 @@ class FormSimple
 		}
 		
 		$this->rh->useModel('DBModel');
-		$this->model = new DBModel();
+		$this->model = new DBModel($this->rh);
 		$this->model->setTable($config->table_name);
 		$this->model->setFields($config->SELECT_FIELDS);
-		$this->model->initialize($this->rh);
 		
 		$this->prefix = $config->moduleName.'_form_';
 		
@@ -251,24 +250,20 @@ class FormSimple
 			if ($modelFile = $this->rh->findScript('classes/models', $value['name']))
 			{
 				$this->rh->useModel($value['name']);
-				$model = new $value['name']();
-				//@todo: hack
-				$model->fields = array($value['pk'], 'title');
-				$model->fields_info = array();
-				$model->has_many = array();
+				$model = new $value['name']($this->rh);
+				$model->setFields(array($value['fk'], 'title'));
+								
+				$model->setOrder(array("title" => "ASC"));
 				
-				$model->order = array("title");
-				
-				$model->initialize($this->rh);
 				$model->load();
 				
 				$data = array();
 				foreach($model AS $r)
 				{
-					$data[$r[$value['pk']]] = $r['title'];
+					$data[$r[$value['fk']]] = $r['title'];
 				}
 				
-				$this->config->RENDER[] = array($value['fk'], "select", $data);
+				$this->config->RENDER[] = array($value['pk'], "select", $data);
 			}
 			// думаем, что $value['name'] это имя таблицы
 			else
@@ -304,7 +299,7 @@ class FormSimple
 		// удаляем насовсем
 		else
 		{
-			$this->model->delete($this->model->quoteFieldShort($this->idField).'='.$this->id);
+			$this->model->delete($this->model->quoteField($this->idField).'='.$this->id);
 			$this->rh->ri->free($this->idGetVar);
 			return 2;
 		}

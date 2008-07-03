@@ -105,7 +105,7 @@ class ListSimple
 	
 	public function getTotal($where)
 	{
-		return $this->getModel()->get_count($where);
+		return $this->getModel()->getCount($where);
 	}
 	
 	public function _href(&$list)
@@ -167,12 +167,11 @@ class ListSimple
 		if (!$this->model)
 		{
 			$this->rh->useModel('DBModel');
-			$this->model = new DBModel();
+			$this->model = new DBModel($this->rh);
 			$this->model->setTable($this->config->table_name);
 			$this->model->setFields($this->config->SELECT_FIELDS);
-			$this->model->where = ( $_GET['_show_trash'] ? '_state>=0' : "_state <>2 " ) . ($this->config->where ? ' AND ' . $this->config->where : '') ;
-			$this->model->order = $this->config->order_by;
-			$this->model->initialize($this->rh);
+			$this->model->where = ( $_GET['_show_trash'] ? '{_state}>=0' : "{_state} <>2 " ) . ($this->config->where ? ' AND ' . $this->config->where : '') ;
+			$this->model->setOrder($this->config->order_by);
 		}
 		
 		return $this->model;
