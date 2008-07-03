@@ -1,33 +1,28 @@
-<?
+<?php
 $this->UseClass("models/DBModel");
 
 class DBConfig extends DBModel
 {
-	var $table = 'config';
+	protected $table = 'config';
 
-	var $fields = array(
+	protected $fields = array(
 		'name', 
 		'value',
 	); 
 
-	var $order = '';
-
-// lunatic: зачем это тут ?
-//	var $where = '1 = 1 '; 
-
-	function load($where=NULL, $limit=NULL, $offset=NULL)
-	{
-		parent::load($where, $limit, $offset);
-		$t = array();
-		foreach ($this->data as $v)
-		{
-			$key = strtr($v['name'], array('.' => '_'));
-			$value = $v['value'];
-
-			$t[$key] = $value;
-		}
-		$this->data = $t;
-	}
+//	public function load($where=NULL, $limit=NULL, $offset=NULL)
+//	{
+//		parent::load($where, $limit, $offset);
+//		$t = array();
+//		foreach ($this->data as $v)
+//		{
+//			$key = strtr($v['name'], array('.' => '_'));
+//			$value = $v['value'];
+//
+//			$t[$key] = $value;
+//		}
+//		$this->data = $t;
+//	}
 }  
 
 ?>

@@ -42,6 +42,57 @@ class DBModel extends Model implements IteratorAggregate, ArrayAccess, Countable
 	 * Массив полей, заданный пользователем
 	 * Эти поля парсятся и превращаются в $tableFields и $foreignFields
 	 *
+	 * ex.:
+	 * $fields = array(
+	 * 		'id',
+	 * 		
+	 * 		// alias => source
+	 * 		'title' => 'title_pre', 
+	 * 		'date' => 'DATE_FORMAT(inserted, "%d.%m.%Y")',
+	 * 		
+	 * 		// has_one
+	 * 		'>rubric' => array(
+	 * 			'model' => 'RubricsModel',
+	 * 			'pk' => 'rubric_id',
+	 * 			'fk' => 'id',				// optional
+	 * 		),
+	 * 		'has_one:rubric' => array(
+	 * 			'model' => 'RubricsModel',
+	 * 			'pk' => 'rubric_id',
+	 * 			'lazy_load' => true,		// optional
+	 * 		), 
+	 * 
+	 * 		// has_many
+	 * 		'>>cities' => array(
+	 * 			'model' => 'CitiesModel',
+	 * 			'pk' => 'id',				// optional
+	 * 			'fk' => 'city_id',			
+	 * 		),
+	 * 		'has_many:cities' => array(
+	 * 			'model' => 'CitiesModel',
+	 * 			'pk' => 'id',				// optional
+	 * 			'fk' => 'city_id',			
+	 * 		),
+	 * 
+	 * 		// many2many
+	 * 		'<>users' => array(
+	 *			'model' => 'TestUsersModel',
+	 *			'through' => array(
+	 *				'table' => 'test2users',
+	 *				'pk' => 'test_id',
+	 *				'fk' => 'user_id',
+	 *			),
+	 *		),
+	 * 		'many2many:users' => array(
+	 *			'model' => 'TestUsersModel',
+	 *			'through' => array(
+	 *				'table' => 'test2users',
+	 *				'pk' => 'test_id',
+	 *				'fk' => 'user_id',
+	 *			),
+	 *		)
+	 * );
+	 * 
 	 * @var array
 	 **/
 	protected $fields = array('*');
@@ -70,9 +121,12 @@ class DBModel extends Model implements IteratorAggregate, ArrayAccess, Countable
 	/**
 	 * Условие where запроса
 	 *
+	 * ex.:
+	 * $where = '{id} = 1 AND {_state} = 0';
+	 * 
 	 * @var string
 	 **/
-	public $where = array();
+	public $where = '';
 	
 	/**
 	 * параметры GROUP BY запроса
@@ -108,7 +162,6 @@ class DBModel extends Model implements IteratorAggregate, ArrayAccess, Countable
 
 	protected $data = NULL;
 
-	protected $resultSetFactory = NULL;
 
 	protected function initialize()
 	{
@@ -160,10 +213,17 @@ class DBModel extends Model implements IteratorAggregate, ArrayAccess, Countable
 	
 	public function setOrder($v)
 	{
-		if (is_array($v))
-		{
-			$this->order = $v;
-		}
+		$this->order = $v;
+	}
+	
+	public function setGroupBy($v)
+	{
+		$this->group = $v;
+	}
+	
+	public function setGroup($v)
+	{
+		return $this->setGroupBy($v);
 	}
 	
 	public function getForeignFieldConf($fieldName)
@@ -183,6 +243,55 @@ class DBModel extends Model implements IteratorAggregate, ArrayAccess, Countable
 		$this->foreignModels = array();
 		$this->bannedTableAliases = array();
 		$this->tableFields = array();
+	}
+	
+	/**
+	 * Remove field 
+	 *
+	 * @param string $fieldName (ex.: id, title, >rubric, rubric, etc.)
+	 */
+	public function removeField($fieldName)
+	{
+		if (strpos($fieldName, ':') !== false)
+		{
+			$fieldNameParts = explode(':', $fieldName);
+			$fieldName = $fieldNameParts[1];
+		}
+		else
+		{
+			// many to many
+			if (substr($fieldName, 0, 2) == '<>')
+			{
+				$fieldName = substr($fieldName, 2);
+			}
+			// one to many
+			elseif(substr($fieldName, 0, 2) == '>>')
+			{
+				$fieldName = substr($fieldName, 2);
+			}
+			// one to one
+			elseif(substr($fieldName, 0, 1) == '>')
+			{
+				$fieldName = substr($fieldName, 1);
+			}
+		}
+		
+		if (isset($this->tableFields[$fieldName]))
+		{
+			unset($this->tableFields[$fieldName]);
+		}
+		else
+		{
+			if (isset($this->foreignFields[$fieldName]))
+			{
+				unset($this->foreignFields[$fieldName]);
+			}
+			
+			if (isset($this->foreignModels[$fieldName]))
+			{
+				unset($this->foreignModels[$fieldName]);
+			}
+		}
 	}
 	
 	public function addFields($fields)
@@ -277,6 +386,94 @@ class DBModel extends Model implements IteratorAggregate, ArrayAccess, Countable
 		return intval($result['total']);
 	}
 	
+	/**
+	 * Return primary key 
+	 *
+	 * @return string
+	 */
+	public function getPk()
+	{
+		if ($this->pk)
+		{
+			return $this->pk;
+		}
+		else
+		{
+			return 'id';
+		}
+	}
+	
+	public function setData($data)
+	{
+		if (is_array($data))
+		{
+			$this->data = array();
+			foreach ($data AS $row)
+			{
+				$item = new ResultSet();
+				$item->init($this, $row);
+
+				$this->data[] = $item;
+				unset($item);
+			}
+		}
+		else
+		{	
+			$this->data = null;
+		}
+	}
+	
+	// ########## QUOTES ############## //
+	
+	public function quote($str)
+	{
+		return $this->dbQuote($str);
+	}
+	
+	public function dbQuote($str)
+	{
+		return $this->rh->db->quote($str);
+	}
+	
+	public function quoteValue($value)
+	{
+		return (isset($value) ?  $this->dbQuote($value) : 'NULL');
+	}
+	
+	/**
+	 * wrap string with `
+	 *
+	 * @param string $name
+	 * @return string
+	 **/
+	public function quoteName($name)
+	{
+		$result = '';
+		if ($name !== '*') 
+		{
+			$result = '`'.str_replace('`', '``', $name).'`';
+		}
+		else 
+		{	
+			$result = $name;
+		}
+		return $result;
+	}
+	
+	/**
+	 * Construct `table`.`field`
+	 *
+	 * @return string
+	 **/
+	public function quoteField($name)
+	{
+		return $this->quoteName($this->getTableAlias()).'.'.$this->quoteName($name);
+	}
+	
+	// ########## END QUOTES ############## //
+	
+	
+	
 	protected function updateTableAlias()
 	{
 		$ta = $this->getTableAlias();
@@ -317,18 +514,12 @@ class DBModel extends Model implements IteratorAggregate, ArrayAccess, Countable
 		$this->foreignFields[$fieldName] = $config;	
 	}
 	
-	public function getPk()
-	{
-		if ($this->pk)
-		{
-			return $this->pk;
-		}
-		else
-		{
-			return 'id';
-		}
-	}
 	
+	/**
+	 * Try to determine table name from class name
+	 *
+	 * @return string
+	 */
 	protected function autoDefineTable()
 	{
 		$className = get_class($this);
@@ -336,9 +527,7 @@ class DBModel extends Model implements IteratorAggregate, ArrayAccess, Countable
 		{
 			return NULL;
 		}
-		$className = str_replace("Model", "", $className);
-		$className = str_replace("Basic", "", $className);
-		return Inflector::underscore($className);
+		return Inflector::underscore(str_replace(array("Model", "Basic"), "", $className));
 	}
 
 	public function load($where=NULL, $limit=NULL, $offset=NULL)
@@ -358,32 +547,6 @@ class DBModel extends Model implements IteratorAggregate, ArrayAccess, Countable
 		$this->notify('load', array(&$this));
 	}
 	
-	public function setData($data)
-	{
-		if (is_array($data))
-		{
-			$this->data = array();
-			foreach ($data AS $row)
-			{
-				if (@$this->resultSetFactory)
-				{
-					$item = call_user_func($this->resultSetFactory, $this, $row); //factory сам делаем init
-				}
-				else
-				{
-					$item = new ResultSet();
-					$item->init($this, $row);
-				}
-				$this->data[] = $item;
-				unset($item);
-			}
-		}
-		else
-		{	
-			$this->data = null;
-		}
-	}
-
 	/**
 	 * один - ко - многим
 	 *
@@ -470,9 +633,11 @@ class DBModel extends Model implements IteratorAggregate, ArrayAccess, Countable
 	 *
 	 * @return string
 	 **/
-	function buildJoin(&$fields, &$fieldsStr)
+	protected function buildJoin(&$fields)
 	{
-		$sql = '';
+		$joinSql = '';
+		$fieldsSql = '';
+		$whereSql = '';
 		
 		$allowedTypes = array('has_one');
 
@@ -487,17 +652,20 @@ class DBModel extends Model implements IteratorAggregate, ArrayAccess, Countable
 
 			$where = "(" . $this->quoteField($v['pk'])." = ".$foreignModel->quoteField($v['fk']) . ")";
 			
-			if ($info["where"])
+			if ($v["where"])
 			{
-				$where .= " AND (" . $info["where"] . ")";
+				$where .= " AND (" . $foreignModel->parse($v["where"]) . ")";
 			}
-			/*
-			if ($f_model->where)
-				$where .= " AND (" . $f_model->where . ")";
-			*/
 			
-			$sql .= 
-			   ($v['only'] 
+			
+			if ($foreignModel->where)
+			{
+				$whereSql .= ($whereSql ? " AND " : "")." (" . $foreignModel->parse($foreignModel->where) . ")";
+			}
+			
+			
+			$joinSql .= 
+			   (($v['join'] == 'inner') 
 					? " INNER JOIN "
 					: " LEFT JOIN "
 				)
@@ -507,10 +675,10 @@ class DBModel extends Model implements IteratorAggregate, ArrayAccess, Countable
 				.	     ")"
 				;
 				
-			$fieldsStr .= "," . $foreignModel->getFieldsForJoin();
+			$fieldsSql .= "," . $foreignModel->getFieldsForJoin();
 		}
 
-		return $sql;
+		return array($joinSql, $fieldsSql, $whereSql);
 	}
 	
 	public function getSqlParts($where=NULL, $limit=NULL, $offset=NULL)
@@ -521,36 +689,36 @@ class DBModel extends Model implements IteratorAggregate, ArrayAccess, Countable
 		}
 		
 		$this->sqlParts = array();
-		
+				
 		$this->sqlParts['fields'] = 'SELECT '.$this->getFields($this->tableFields);
 		$this->sqlParts['from'] = 'FROM '.$this->getTableNameAlias();
-		$this->sqlParts['join'] = $this->buildJoin($this->foreignFields, $sqlParts['fields']);
+		
+		list($joinSql, $joinFields, $joinWhere) = $this->buildJoin($this->foreignFields);
+		if ($joinWhere)
+		{
+			if ($where)
+			{
+				$where .= ' AND '.$joinWhere;
+			}
+			else
+			{
+				$where = $joinWhere;
+			}
+		}
+		
+		$this->sqlParts['join'] = $joinSql;
 		$this->sqlParts['where'] = $this->buildWhere($where);
 		$this->sqlParts['group'] = $this->buildGroupBy($this->group);
 		$this->sqlParts['order'] = $this->buildOrderBy($this->order);
 		$this->sqlParts['limit'] = $this->buildLimit($limit, $offset);
 		
+		$this->sqlParts['fields'] .= $joinFields;
+		
+//		var_dump($this->sqlParts);
+		
 		return $this->sqlParts;
 	}
-	
-	// protected function getSelectSql($where=NULL, $limit=NULL, $offset=NULL)
-	// {
-	// 	$fieldsStr = $this->getFields($this->tableFields);
-	// 
-	// 	$joinsStr = $this->buildJoin($this->foreignFields, &$fieldsStr);
-	// 	
-	// 	$sql =  ' SELECT ' . $fieldsStr
-	// 		. ' FROM '   . $this->getTableNameAlias()
-	// 		. $joinsStr
-	// 		. $this->buildWhere($where)
-	// 		. $this->buildGroupBy($this->group)
-	// 		. $this->buildOrderBy($this->order)
-	// 		. $this->buildLimit($limit, $offset)
-	// 	;
-	// 
-	// 	return $sql;
-	// }
-	
+		
 	protected function getFields()
 	{
 		return implode(',', array_map(array(&$this, 'buildFieldAlias'), $this->tableFields));
@@ -561,9 +729,10 @@ class DBModel extends Model implements IteratorAggregate, ArrayAccess, Countable
 		return implode(',', array_map(array(&$this, 'buildJoinFieldAlias'), $this->tableFields));
 	}
 
-	function selectSql($sql, $isLoad=false)
+	public function selectSql($sql, $isLoad=false)
 	{
-		//var_dump($sql);
+//		var_dump($sql);
+//echo $sql;
 		
 		$data = DBAL::getInstance()->query($sql);
 		
@@ -577,7 +746,7 @@ class DBModel extends Model implements IteratorAggregate, ArrayAccess, Countable
 		{
 			return;
 		}
-				
+	
 		// 
 		foreach ($data AS $row => &$d)
 		{
@@ -594,6 +763,11 @@ class DBModel extends Model implements IteratorAggregate, ArrayAccess, Countable
 					$foreignData[$fieldParts[0]][$fieldParts[1]] = $fieldValue;
 					unset($d[$fieldName]);
 				}
+			}
+			
+			if (empty($foreignData))
+			{
+				return;	
 			}
 			
 			foreach ($this->foreignFields AS $foreignField)
@@ -752,7 +926,7 @@ class DBModel extends Model implements IteratorAggregate, ArrayAccess, Countable
 			}
 			else
 			{
-				$result .= $field['source'];
+				$result .= $this->parse($field['source']);
 			}
 			$result .= ' AS '.$this->quoteName($field['name']);
 		}
@@ -778,7 +952,7 @@ class DBModel extends Model implements IteratorAggregate, ArrayAccess, Countable
 			}
 			else
 			{
-				$result .= $field['source'];
+				$result .= $this->parse($field['source']);
 			}
 		}
 		else
@@ -818,7 +992,7 @@ class DBModel extends Model implements IteratorAggregate, ArrayAccess, Countable
 		{
 			$where_sql = '';
 		}
-		return $where_sql;
+		return $this->parse($where_sql);
 	}
 	
 	protected function buildGroupBy($fields)
@@ -830,7 +1004,7 @@ class DBModel extends Model implements IteratorAggregate, ArrayAccess, Countable
 			$sql = ' GROUP BY '. (
 				is_array($fields)
 				? implode(',',array_map(array(&$this, 'quoteField'), $fields))
-				:	$fields)
+				:	$this->quoteField($fields))
 				;
 			$sql .= $this->buildHaving();
 		}
@@ -846,10 +1020,12 @@ class DBModel extends Model implements IteratorAggregate, ArrayAccess, Countable
 	protected function buildOrderBy($fields)
 	{
 		if (empty($fields))
-			$orderby_sql = '';
+		{
+			$sql = '';
+		}
 		else
 		{
-			$orderby_sql = ' ORDER BY ';
+			$sql = ' ORDER BY ';
 			if (is_array($fields))
 			{
 				$orders = array();
@@ -860,76 +1036,36 @@ class DBModel extends Model implements IteratorAggregate, ArrayAccess, Countable
 						$field = $order;
 						$order = "ASC";
 					}
-					$orders[] = $this->quoteOrderField($field, $order);
+					$orders[] = $this->quoteField($field) . " " . $order;
 				}
-				$orderby_sql .= implode(',', $orders);
+				$sql .= implode(',', $orders);
 			}
 			else
-				$orderby_sql .= $fields;
+			{
+				$sql .= $fields;
+			}
 		}
-		return $orderby_sql;
-	}
-	
-	public function quote($str)
-	{
-		return $this->dbQuote($str);
-	}
-	
-	public function dbQuote($str)
-	{
-		return $this->rh->db->quote($str);
-	}
-	
-	public function quoteValue($value)
-	{
-		return (isset($value) ?  $this->dbQuote($value) : 'NULL');
-	}
-	
-	/**
-	 * wrap string with `
-	 *
-	 * @param string $name
-	 * @return string
-	 **/
-	public function quoteName($name)
-	{
-		$result = '';
-		if ($name !== '*') 
-		{
-			$result = '`'.str_replace('`', '``', $name).'`';
-		}
-		else 
-		{	
-			$result = $name;
-		}
-		return $result;
-	}
-	
-	/**
-	 * Construct `table`.`field`
-	 *
-	 * @return string
-	 **/
-	public function quoteField($name)
-	{
-		return '`'.$this->getTableAlias().'`.'.$this->quoteName($name);
-	}
-
-	protected function quoteOrderField($name, $order)
-	{
-		return $this->quoteField($name) . " " . $order;
-	}
-	
-	protected function parse($query)
-	{
-		$args = func_get_args();
-		$query = array_shift($args);
-		$parser =& new DBQueryParser();
-		$parser->factory =& $this;
-		$parser->params =& $args;
-		$parser->initialize($this->rh);
-		$sql = $parser->parse($query);
 		return $sql;
+	}
+	
+		
+	/**
+	 * Parse string and quote fields
+	 *
+	 * ex.:
+	 * '{id} = 1 AND {_state} = 0' wiil become `tableAlias`.`id` = 1 AND `tableAlias`.`_state` = 0
+	 * 
+	 * @param string $str
+	 * @return string
+	 */
+	protected function parse($str)
+	{
+		return preg_replace_callback('#{([^}]+)}#', array(&$this, 'parseCallback'), $str);
+	}
+	
+	protected function parseCallback($matches)
+	{
+		return $this->quoteField($matches[1]);
 	}
 
 	public function &getForeignModel($fieldName)
@@ -983,6 +1119,21 @@ class DBModel extends Model implements IteratorAggregate, ArrayAccess, Countable
 				$field["pk"] = $this->getPk();
 			}
 		}
+		
+		if (isset($field['order']) && is_array($field['order']))
+		{
+			$model->setOrder($field['order']);
+		}
+		
+		if (isset($field['where']))
+		{
+			if ($model->where)
+			{
+				$model->where .= ' AND ';
+			}
+			
+			$model->where .= $field['where']; 
+		}
 	}
 
 	public function isForeignField($field)
@@ -1004,7 +1155,10 @@ class DBModel extends Model implements IteratorAggregate, ArrayAccess, Countable
 	 *
 	 */
 
-	public function haveData() { return is_array($this->data); }
+	public function haveData() 
+	{ 
+		return is_array($this->data); 
+	}
 
 	//implements IteratorAggregate
 	public function getIterator() 
@@ -1013,7 +1167,10 @@ class DBModel extends Model implements IteratorAggregate, ArrayAccess, Countable
 	}
 
 	//implements ArrayAccess
-	public function offsetExists($key) { return $this->haveData() && isset($this->data[$key]); }
+	public function offsetExists($key) 
+	{ 
+		return $this->haveData() && isset($this->data[$key]); 
+	}
 	
 	public function offsetGet($key)
 	{ 
@@ -1026,11 +1183,17 @@ class DBModel extends Model implements IteratorAggregate, ArrayAccess, Countable
 		{
 			return $this->data[$key]; 
 		}
+		else
+		{
+			return null;	
+		}
+		/*
 		elseif ($this->isForeignField($key))
 		{
 			$this->loadForeignField($key);
 			return $this->data[$key];
 		}
+		*/
 	}
 
 	public function offsetSet($key, $value) 
