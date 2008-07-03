@@ -867,7 +867,7 @@ class DBModel extends Model implements IteratorAggregate, ArrayAccess, Countable
 		
 		if ($where)
 		{
-			$where = 'WHERE '.$this->parse($where);	
+			$where = ' WHERE '.$this->parse($where);	
 		}
 		
 		$this->onBeforeUpdate($row);

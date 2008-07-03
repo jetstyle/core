@@ -34,7 +34,7 @@ class FormSimple
 		{
 			foreach($this->config->has_one AS $value)
 			{
-				$config->SELECT_FIELDS[] = $value['fk'];
+				$config->SELECT_FIELDS[] = $value['pk'];
 			}
 		}
 		$config->SELECT_FIELDS[] = '_state';
@@ -210,26 +210,24 @@ class FormSimple
 		if( is_array($this->config->RENDER) )
 		{
 			$N = count($this->config->RENDER);
-			for($i=0;$i<$N;$i++){
+			for($i=0;$i<$N;$i++)
+			{
 				$row =& $this->config->RENDER[$i];
-				switch( $row[1] ){
+				switch( $row[1] )
+				{
 					case 'checkbox':
 						$tpl->set( 'checkbox_'.$row[0], $this->item[$row[0]] ? "checked=\"checked\"" : '' );
-						break;
+					break;
+
 					case 'select':
 						$_str = '';
 						$A =& $row[2];
 						foreach($row[2] as $_id=>$_val)
 						{
-							//            modified by geronimo
-							//              $_str .= "<option value='".$_id."' ".( $this->item[$row[0]]==$_id  || (!$this->item["id"] && $_id==$row[3]) ? "selected=\"selected\"" : '' ).">".$_val;
 							$_str .= "<option value='".$_id."' ".(($this->item["id"] && $this->item[$row[0]]==$_id) || (!$this->item["id"] && $_id==$row[3]) ? "selected=\"selected\"" : '' ).">".$_val;
 						}
 						$tpl->set( 'options_'.$row[0], $_str );
-						break;
-					case 'radiobutton':
-						//заполним по мере необходимости
-						break;
+					break;
 				}
 			}
 		}
@@ -244,7 +242,7 @@ class FormSimple
 		
 		foreach($this->config->has_one AS $key => $value)
 		{
-			$value['pk']  = $value['pk'] ? $value['pk'] : "id";
+			$value['fk']  = $value['fk'] ? $value['fk'] : "id";
 			
 			// пытаемся найти модель 
 			if ($modelFile = $this->rh->findScript('classes/models', $value['name']))
@@ -269,7 +267,7 @@ class FormSimple
 			else
 			{				
 				$result = $this->rh->db->execute("
-					SELECT ".$value['pk'].", title
+					SELECT ".$value['fk'].", title
 					FROM ".$this->rh->db_prefix.$value['name']."
 					WHERE _state = 0
 					ORDER BY ".($value['order'] ? $value['order'] : "title ASC")."
@@ -280,7 +278,7 @@ class FormSimple
 					$data = array();
 					while ($r = $this->rh->db->getRow($result))
 					{
-						$data[$r[$value['pk']]] = $r['title'];
+						$data[$r[$value['fk']]] = $r['title'];
 					}
 					
 					$this->config->RENDER[] = array($value['fk'], "select", $data);
