@@ -170,9 +170,14 @@ class DBModel extends Model
 			$where = ' AND '.$model->quoteField($fk) .'='.$model->quote($v[$pk]);
 			$model->load($where);
 
-			$item = $model->data;
-			foreach($item as $kk=>$vv) $item[$kk][$self_name] =& $data[$k];
-			$data[$k][$field_name] = $item;
+            if (!empty($model->data))
+            {
+			    $item = $model->data;
+			    foreach($item as $kk=>$vv) 
+			        $item[$kk][$self_name] =& $data[$k];
+
+			    $data[$k][$field_name] = $item;
+			}
 		}
 
 

@@ -237,7 +237,10 @@ class Form
             $this->rh->Redirect( $this->config["cancel_url"] );
          // success
          if ($this->processed && $this->success && isset($this->config["success_url"])) 
+         {
+            die($this->config["success_url"]);
             $this->rh->Redirect( $this->config["success_url"] );
+         }
        }
      }
      if (!$processed)
