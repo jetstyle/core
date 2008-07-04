@@ -570,7 +570,7 @@ class DBModel extends Model implements IteratorAggregate, ArrayAccess, Countable
 	{
 		$this->notify('before_load', array(&$this));
 
-		$this->setData($this->select($where, $limit, $offset, true));
+		$this->setData($this->select($where, $limit, $offset));
 		
 		$this->notify('load', array(&$this));
 	}
@@ -721,6 +721,9 @@ class DBModel extends Model implements IteratorAggregate, ArrayAccess, Countable
 	{
 		if (!empty($this->sqlParts))
 		{
+			$this->sqlParts['order'] = $this->buildOrderBy($this->order);
+			$this->sqlParts['limit'] = $this->buildLimit($limit, $offset);
+			
 			return $this->sqlParts;
 		}
 		

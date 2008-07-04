@@ -176,14 +176,14 @@ class BasicPage extends Controller
 		$status = True;
 
 		if ($this->rh->db)
-		$this->loadPlugins();
+		{
+			$this->loadPlugins();
+		}
 
 		if (is_array($this->params_map))
 		{
 			foreach ($this->params_map as $v)
 			{
-				$matches = array();
-
 				$this->pre_handle();
 
 				$action = array_shift($v);
@@ -192,9 +192,15 @@ class BasicPage extends Controller
 				{
 					foreach ($v AS $pattern)
 					{
+						$matches = array();
 						if (True === $this->_match_url($this->rh->params, $pattern, &$matches))
 						{
 							$action_parts = explode("::", $action);
+							
+							if ($pattern[0] === null)
+							{
+								$matches = array();
+							}
 		
 							if (count($action_parts)==2)
 							{
