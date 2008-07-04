@@ -42,15 +42,15 @@ class ResultSet implements IteratorAggregate, ArrayAccess, Countable, DataContai
 				$this->model->loadForeignField($key, $this->data);
 			}
 			
-			$foreignFieldConf = $this->model->getForeignFieldConf($key);
-			if ($foreignFieldConf['type'] == 'has_one')
-			{
-				return $this->data[$key][0];
-			}
-			else
-			{
-				return $this->data[$key]; 
-			}
+//			$foreignFieldConf = $this->model->getForeignFieldConf($key);
+//			if ($foreignFieldConf['type'] == 'has_one')
+//			{
+//				return $this->data[$key][0];
+//			}
+//			else
+//			{
+			return $this->data[$key]; 
+//			}
 		}
 		elseif (isset($this->data[$key]))
 		{

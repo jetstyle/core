@@ -169,9 +169,20 @@ class DBModel extends Model implements IteratorAggregate, ArrayAccess, Countable
 	 */
 	protected $usePrefixedTableAsAlias = false;
 	
-	
+	/**
+	 * Ассоциативный масиив алиас таблицы => имя поля
+	 *
+	 * @var array
+	 */
 	protected $foreignAlias2FieldName = array();
 	
+	/**
+	 * Модель содержит одну единственную запись, загруженную через метод self::loadOne()
+	 * Данные доступны через model[field] вместо model[0][field]
+	 *
+	 * @var boolean
+	 */
+	protected $one = false;
 
 	protected function initialize()
 	{
@@ -260,6 +271,11 @@ class DBModel extends Model implements IteratorAggregate, ArrayAccess, Countable
 	public function setGroup($v)
 	{
 		return $this->setGroupBy($v);
+	}
+	
+	public function setOne($v)
+	{
+		$this->one = $v;
 	}
 	
 	public function getForeignFieldConf($fieldName)
@@ -595,6 +611,12 @@ class DBModel extends Model implements IteratorAggregate, ArrayAccess, Countable
 		$this->notify('load', array(&$this));
 	}
 	
+	public function loadOne($where = NULL)
+	{
+		$this->setOne(true);
+		$this->load($where, 1);
+	}
+	
 	protected function loadSql($sql)
 	{
 		$this->notify('before_load', array(&$this));
@@ -876,6 +898,7 @@ class DBModel extends Model implements IteratorAggregate, ArrayAccess, Countable
 					$clonedModel = clone $model;
 					$d = array($d);
 					
+					$clonedModel->setOne(true);
 					$clonedModel->applyDataToForeignModels(array($valuesSet), $d);
 					$clonedModel->setData($d);
 					$modelData[$row][$fieldName] = $clonedModel;
@@ -1297,7 +1320,7 @@ class DBModel extends Model implements IteratorAggregate, ArrayAccess, Countable
 	//implements ArrayAccess
 	public function offsetExists($key) 
 	{ 
-		return $this->haveData() && isset($this->data[$key]); 
+		return $this->haveData() && ($this->one ? isset($this->data[0][$key]) : isset($this->data[$key])); 
 	}
 	
 	public function offsetGet($key)
@@ -1307,21 +1330,28 @@ class DBModel extends Model implements IteratorAggregate, ArrayAccess, Countable
 			return null;
 		}
 		
-		if (isset($this->data[$key]))
+		if ($this->one)
 		{
-			return $this->data[$key]; 
+			if (isset($this->data[0]) && isset($this->data[0][$key]))
+			{
+				return $this->data[0][$key]; 
+			}
+			else
+			{
+				return null;	
+			}
 		}
 		else
 		{
-			return null;	
+			if (isset($this->data[$key]))
+			{
+				return $this->data[$key]; 
+			}
+			else
+			{
+				return null;	
+			}
 		}
-		/*
-		elseif ($this->isForeignField($key))
-		{
-			$this->loadForeignField($key);
-			return $this->data[$key];
-		}
-		*/
 	}
 
 	public function offsetSet($key, $value) 
