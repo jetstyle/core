@@ -196,8 +196,8 @@ class BasicPage extends Controller
 						if (True === $this->_match_url($this->rh->params, $pattern, &$matches))
 						{
 							$action_parts = explode("::", $action);
-							
-							if ($pattern[0] === null)
+
+							if (isset($pattern[0]) && $pattern[0] === null)
 							{
 								$matches = array();
 							}
