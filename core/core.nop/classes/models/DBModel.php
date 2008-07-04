@@ -156,8 +156,13 @@ class DBModel extends Model implements IteratorAggregate, ArrayAccess, Countable
 	 **/
 	protected $offset = NULL;
 		
-	// protected $isInitialized = false;
-
+	
+	protected $pagerEnabled = false;
+	protected $pager = NULL;
+	protected $pagerPerPage = 10;
+	protected $pagerFrameSize = 9;
+	protected $pagerVar = 'p';
+	
 	protected $sqlParts = array();
 
 	protected $data = NULL;
@@ -225,6 +230,23 @@ class DBModel extends Model implements IteratorAggregate, ArrayAccess, Countable
 		return $this->quoteName($this->rh->db_prefix.$this->getTableName()) .' AS '.$this->quoteName($this->getTableAlias());
 	}
 	
+	public function getPages()
+	{
+		if ($this->pagerEnabled)
+		{
+			return $this->pager->getPages();
+		}
+		else
+		{
+			return null;
+		}
+	}
+	
+	public function getForeignFieldConf($fieldName)
+	{
+		return $this->foreignFields[$fieldName];
+	}
+	
 	public function setTableAlias($v)
 	{
 		$this->tableAlias = $v;
@@ -268,6 +290,11 @@ class DBModel extends Model implements IteratorAggregate, ArrayAccess, Countable
 		$this->group = $v;
 	}
 	
+	public function setHaving($v)
+	{
+		$this->having = $v;
+	}
+	
 	public function setGroup($v)
 	{
 		return $this->setGroupBy($v);
@@ -278,10 +305,55 @@ class DBModel extends Model implements IteratorAggregate, ArrayAccess, Countable
 		$this->one = $v;
 	}
 	
-	public function getForeignFieldConf($fieldName)
+	/**
+	 * Set custom pager object. Object must implement PagerInterface
+	 *
+	 * @param object $obj
+	 */
+	public function setPager(&$obj)
 	{
-		return $this->foreignFields[$fieldName];
+		if (is_object($obj) && in_array('PagerInterface', class_implements($obj)))
+		{
+			$this->pager = &$obj;
+		}
+		else
+		{
+			throw new Exception('Pager object must implement \'PagerInterface\'');	
+		}
 	}
+	
+	public function setPagerPerPage($v)
+	{
+		if (is_numeric($v) && $v > 0)
+		{
+			$this->pagerPerPage = $v;
+		}
+	}
+	
+	public function setPagerFrameSize($v)
+	{
+		if (is_numeric($v) && $v > 0)
+		{
+			$this->pagerFrameSize = $v;
+		}
+	}
+	
+	public function setPagerVar($v)
+	{
+		$this->pagerVar = $v;
+	}
+	
+	public function enablePager()
+	{
+		$this->pagerEnabled = true;
+	}
+	
+	public function disablePager()
+	{
+		$this->pagerEnabled = false;
+	}
+
+	
 	
 	/**
 	 * Clear fields
@@ -544,6 +616,15 @@ class DBModel extends Model implements IteratorAggregate, ArrayAccess, Countable
 	// ########## END QUOTES ############## //
 	
 	
+	protected function &getPager()
+	{
+		if (null === $this->pager)
+		{
+			$this->pager = new Pager($this->rh);
+		}
+		
+		return $this->pager;
+	}
 	
 	protected function updateTableAlias()
 	{
@@ -606,6 +687,21 @@ class DBModel extends Model implements IteratorAggregate, ArrayAccess, Countable
 	{
 		$this->notify('before_load', array(&$this));
 
+		if ($this->pagerEnabled)
+		{
+			$total = $this->getCount($where);
+			
+			if ($total == 0)
+			{
+				return;
+			}
+			
+			$pager = &$this->getPager();
+			$pager->setup($this->rh->ri->get($this->pagerVar), $total, $this->pagerPerPage, $this->pagerFrameSize);
+			$limit = $pager->getLimit();
+			$offset = $pager->getOffset();
+		}
+		
 		$this->setData($this->select($where, $limit, $offset));
 		
 		$this->notify('load', array(&$this));
@@ -1146,7 +1242,7 @@ class DBModel extends Model implements IteratorAggregate, ArrayAccess, Countable
 	protected function buildHaving()
 	{
 		if ($this->having)
-			return " HAVING " . $this->having;
+			return " HAVING " . $this->parse($this->having);
 	}
 
 	protected function buildOrderBy($fields)
@@ -1174,7 +1270,7 @@ class DBModel extends Model implements IteratorAggregate, ArrayAccess, Countable
 			}
 			else
 			{
-				$sql .= $fields;
+				$sql .= $this->parse($fields);
 			}
 		}
 		return $sql;

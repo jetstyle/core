@@ -6,7 +6,9 @@
  * @last-modified 23:36 27.02.2008
  */
  
- class Pager
+ $this->useClass('PagerInterface');
+
+ class Pager implements PagerInterface
  {
  	protected $total = 0;		// total items
  	protected $perPage = 10;	// items per page
@@ -26,7 +28,7 @@
  		return $this->data;
  	}
  	
- 	public function set($currentPage = 1, $total = 0, $perPage = 0, $frameSize = 0)
+ 	public function setup($currentPage = 1, $total = 0, $perPage = 0, $frameSize = 0)
  	{
  		$this->p = $currentPage;
  		if ($this->p < 1)
@@ -35,12 +37,12 @@
 		}
 		
  		$this->total = $total;
- 		if($perPage > 0)
+ 		if ($perPage > 0)
  		{
  			$this->perPage = $perPage;
  		}
  		
- 		if($frameSize > 0)
+ 		if ($frameSize > 0)
  		{
  			$this->frameSize = $frameSize;
  		}
