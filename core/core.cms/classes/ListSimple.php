@@ -210,7 +210,7 @@ class ListSimple
 	{
 		$this->rh->useClass('Pager');
 		$this->pager = new Pager($this->rh);
-		$this->pager->set(intval($this->rh->ri->get($this->pageVar)), $total, $this->perPage, $this->frameSize);
+		$this->pager->setup(intval($this->rh->ri->get($this->pageVar)), $total, $this->perPage, $this->frameSize);
 	}
 	
 	protected function renderPager()

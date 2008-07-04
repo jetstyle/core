@@ -1410,7 +1410,14 @@ class DBModel extends Model implements IteratorAggregate, ArrayAccess, Countable
 	//implements IteratorAggregate
 	public function getIterator() 
 	{
-		return new ArrayIterator($this->data); 
+		if ($this->one)
+		{
+			return new ArrayIterator($this->data[0]);
+		}
+		else
+		{
+			return new ArrayIterator($this->data);
+		} 
 	}
 
 	//implements ArrayAccess
@@ -1454,17 +1461,38 @@ class DBModel extends Model implements IteratorAggregate, ArrayAccess, Countable
 	{
 		if (NULL === $key)
 		{
-			$this->data[] = $value; 
+			if ($this->one)
+			{
+				$this->data[0][] = $value;
+			}
+			else
+			{
+				$this->data[] = $value;
+			} 
 		}
 		else
 		{
-			$this->data[$key] = $value; 
+			if ($this->one)
+			{
+				$this->data[0][$key] = $value;
+			}
+			else
+			{
+				$this->data[$key] = $value;
+			} 
 		}
 	}
 
 	public function offsetUnset($key) 
 	{ 
-		unset($this->data[$key]); 
+		if ($this->one)
+		{
+			unset($this->data[0][$key]);
+		}
+		else
+		{
+			unset($this->data[$key]);
+		} 
 	}
 
 	//implements Countable
