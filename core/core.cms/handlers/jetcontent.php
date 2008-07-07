@@ -229,6 +229,10 @@ function parseXml($data)
 		{
 			$r['title'] = iconv('cp1251', 'UTF-8', htmlentities($r['title'], ENT_QUOTES, 'cp1251'));
 			$r['title_ins'] = iconv('cp1251', 'UTF-8', htmlentities($r['title_ins'], ENT_QUOTES, 'cp1251'));
+			
+			$r['title'] = str_replace(array("&ndash;", "&mdash;", "&nbsp;"), "-", $r["title"]);
+			$r['title_ins'] = str_replace(array("&ndash;", "&mdash;", "&nbsp;"), "-", $r["title_ins"]);
+
 			$out.= '<item text="'.$r['title'].'" id="'.$r['id'].'" child="'.$r['child'].'"><userdata name="link">'.$r['link'].'</userdata><userdata name="title_ins">'.($r['title_ins'] ? $r['title_ins'] : $r['title'])."</userdata></item>\n";
 		}
 	}
