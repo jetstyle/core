@@ -43,8 +43,6 @@ class MenuPlugin extends RenderablePlugin
 			return $this->parents;
 		}
 		
-		$this->parents = array();
-
 		$data = &$this->rh->page->config;
 
 		if (!$data['id'])
@@ -57,6 +55,12 @@ class MenuPlugin extends RenderablePlugin
 		';
 		
 		$this->parents = $this->rh->db->query($sql, "id");
+		
+		if ($this->parents === null)
+		{
+			$this->parents = array();
+		}
+		
 		return $this->parents;
 	}
 

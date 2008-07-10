@@ -232,7 +232,7 @@ class DBModel extends Model implements IteratorAggregate, ArrayAccess, Countable
 	
 	public function getPages()
 	{
-		if ($this->pagerEnabled)
+		if ($this->pagerEnabled && $this->pager)
 		{
 			return $this->pager->getPages();
 		}
@@ -518,10 +518,20 @@ class DBModel extends Model implements IteratorAggregate, ArrayAccess, Countable
 			'.$sqlParts['from'].'
 			'.$sqlParts['join'].'
 			'.$sqlParts['where'].'
+			'.$sqlParts['group'].'
 		';
 		
-		$result = $this->rh->db->queryOne($sql);
-		return intval($result['total']);
+		if ($sqlParts['group'])
+		{
+			$total = $this->rh->db->getNumRows($this->rh->db->execute($sql));
+		}
+		else
+		{
+			$result = $this->rh->db->queryOne($sql);
+			$total = $result['total'];
+		}
+		
+		return intval($total);
 	}
 	
 	/**
@@ -912,14 +922,13 @@ class DBModel extends Model implements IteratorAggregate, ArrayAccess, Countable
 
 	public function selectSql($sql, $isLoad=false)
 	{
-//		var_dump($sql);
-		
 		$data = DBAL::getInstance()->query($sql);
 		
-//		var_dump($data);
-		$foreignData = $this->divideForeignDataFrom($data);
-//		var_dump($foreignData);
-		$this->applyDataToForeignModels($foreignData, $data);
+		if ($data !== null)
+		{		
+			$foreignData = $this->divideForeignDataFrom($data);
+			$this->applyDataToForeignModels($foreignData, $data);
+		}
 
 		return $data;
 	}
@@ -1032,6 +1041,18 @@ class DBModel extends Model implements IteratorAggregate, ArrayAccess, Countable
 		}
 	}
 	
+	/**
+	 * Добавление строчки в таблицу
+	 * 
+	 * $row = array(
+	 * 		'fieldName' => 'value',
+	 * 		'fieldName' => 'value',
+	 * 		........
+	 * );
+	 *
+	 * @param array $row
+	 * @return int inserted id
+	 */
 	public function insert(&$row)
 	{
 		$this->onBeforeInsert($row);
@@ -1393,7 +1414,14 @@ class DBModel extends Model implements IteratorAggregate, ArrayAccess, Countable
 
 	public function &getData()
 	{
-		return $this->data;
+		if ($this->one)
+		{
+			return $this->data[0];
+		}
+		else
+		{
+			return $this->data;
+		}
 	}
 
 	/*
@@ -1410,6 +1438,11 @@ class DBModel extends Model implements IteratorAggregate, ArrayAccess, Countable
 	//implements IteratorAggregate
 	public function getIterator() 
 	{
+		if (null === $this->data)
+		{
+			return new ArrayIterator(array());
+		}
+		
 		if ($this->one)
 		{
 			return new ArrayIterator($this->data[0]);
@@ -1417,7 +1450,7 @@ class DBModel extends Model implements IteratorAggregate, ArrayAccess, Countable
 		else
 		{
 			return new ArrayIterator($this->data);
-		} 
+		}
 	}
 
 	//implements ArrayAccess

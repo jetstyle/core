@@ -2,19 +2,20 @@
 
 class ListSimple 
 {
-	protected $rh; //ññûëêà íà $rh
-	protected $config; //ññûëêà íà îáúåêò êëàññà ModuleConfig
+	protected $rh; 			//ññûëêà íà $rh
+	protected $config;		//ññûëêà íà îáúåêò êëàññà ModuleConfig
 	protected $items;
 	protected $pager;
 	
 	private $model;
 	
 	protected $loaded = false; //ãğóçèëè èëè íåò äàííûå?
-	protected $idGetVar = 'id';
-	protected $idField = "id";
+	
+	protected $idGetVar = 'id';		// 
+	protected $idField = "id";		// ïåğâè÷íûé êëş÷ òàáëèöû
 
-	protected $template = "list_simple.html"; //øàáëîí ğåçóëüòàòà
-	protected $template_list = "list_simple.html:List"; //îòêóäà áğàòü øàáëîíû ıëåìåíòîâ ñïèñêà
+	protected $template = "list_simple.html"; 				//øàáëîí ğåçóëüòàòà
+	protected $template_list = "list_simple.html:List"; 	//îòêóäà áğàòü øàáëîíû ıëåìåíòîâ ñïèñêà
 
 	protected $template_trash_show = "list_simple.html:TrashShow";
 	protected $template_trash_hide = "list_simple.html:TrashHide";
@@ -40,6 +41,11 @@ class ListSimple
 		if ($this->config->perPage)
 		{
 			$this->perPage = $this->config->perPage;
+		}
+		
+		if ($this->config->frameSize)
+		{
+			$this->frameSize = $frameSize;
 		}
 		
 		$this->config->SELECT_FIELDS[] = '_order';
@@ -177,6 +183,11 @@ class ListSimple
 		return $this->model;
 	}
 	
+	/**
+	 * Ìåíÿåì ıëåìåíòû ìåñòàìè
+	 *
+	 * @return boolean
+	 */
 	protected function updateListStruct()
 	{
 		$rh =& $this->rh;
