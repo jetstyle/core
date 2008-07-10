@@ -559,7 +559,9 @@ class TreeControl
 
 	protected function xmlQuote($str)
 	{
-		return htmlspecialchars($str, ENT_COMPAT, $this->xmlEncoding);
+		$str = html_entity_decode($str, ENT_QUOTES, $this->xmlEncoding);
+		$str = htmlspecialchars($str, ENT_QUOTES, $this->xmlEncoding);
+		return $str;
 	}
 
 	protected function _getTitle(&$node)
