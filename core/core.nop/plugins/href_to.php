@@ -1,4 +1,5 @@
 <?php
+//!link_to
 
 /**		
  * {{!href_to class=News item=*}}	     

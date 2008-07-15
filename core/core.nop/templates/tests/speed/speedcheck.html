@@ -1,0 +1,17 @@
+{{@tests/speed/speedcheck_layout.html body=@:body abc=@:body support=@tests/speed/speedcheck_support.html}}
+
+
+{{:body}}
+	{{!for Items do=@:item}}
+	
+	{{:item}}
+		id: {{*id}}<br />
+		title: {{*title}} <br />
+		date: {{*date}}
+	{{/:item}}
+	
+	{{:item_sep}}
+	<hr />
+	{{/:item_sep}}
+	
+{{/:body}}

@@ -21,7 +21,7 @@ class Debug
     */
 	static public function init()
 	{
-		self::$milestone = self::_getmicrotime();
+		self::$milestone = self::getmicrotime();
 		self::$_milestone = self::$milestone;
 		self::$mark['auto'] = self::$milestone;
 		self::$canGetMemoryUsage = function_exists('memory_get_usage');
@@ -31,7 +31,7 @@ class Debug
 	/**
     * работа с временными отметками
     */
-	static protected function _getmicrotime()
+	static public function getmicrotime()
 	{
 		list($usec, $sec) = explode(" ",microtime());
 		return ((float)$usec + (float)$sec);
@@ -87,38 +87,69 @@ class Debug
 	 */
 	static public function trace( $title, $category = null, $label = null, $text = '')
 	{
-		$m = self::_getmicrotime();
+		$m = self::getmicrotime();
 		$diff = $m - self::$_milestone;
-		if ($label)	
+		if (is_string($label))	
 		{
 			$diff1 = $m - self::$mark[$label];
 			unset(self::$mark[$label]);
+		}
+		elseif (is_numeric($label))
+		{
+			$diff1 = $label;
+		}
+		elseif (is_array($label))
+		{
+			$diff1 = $label['time'];
+			$diffMemory = $label['memory'];
 		}
 		else
 		{
 			$diff1 = $m - self::$mark['auto'];
 		}
 
-		if (self::$canGetMemoryUsage)
-		{
-			$memory = number_format((memory_get_usage() / 1024));
-		}
+		
+		$memory = self::getMemoryUsage();
+		
 		
 		self::$log[] = array(
 			'time' => $diff,
 			'diffTime' => $diff1,
 			'memory' => $memory,
+			'diffMemory' => $diffMemory,
 			'category' => $category, 
 			'title' => $title,
 			'text' => $text,
 		);
 		if($category)
 		{
-			self::$categories[$category]++;
+			if (!is_array(self::$categories[$category]))
+			{
+				self::$categories[$category] = array('time' => 0);
+			}
+			self::$categories[$category]['time'] += $diff1;
 		}
 		self::$mark['auto'] = $m;
 	}
-
+	
+	
+	static public function getMemoryUsage()
+	{
+		if (self::$canGetMemoryUsage)
+		{
+			return memory_get_usage();
+		}
+		else
+		{
+			return 0;
+		}
+	}
+	
+	static public function getCategories()
+	{
+		return self::$categories;
+	}
+	
 	/**
 	 * Ставим контрольную отметку
 	 *
@@ -126,7 +157,7 @@ class Debug
 	 */
 	static public function mark($label = 'auto')	
 	{
-		self::$mark[$label] = self::_getmicrotime();
+		self::$mark[$label] = self::getmicrotime();
 	}
 
 	/**
@@ -144,11 +175,16 @@ class Debug
 		$out = '';
 		
 		$out .= sprintf("[%0.4f] ",$item['time']);
-		$out .= sprintf("[%0.4f] ",$item['diffTime']);
+		$out .= sprintf("[%0.8f] ",$item['diffTime']);
 		
 		if($item['memory'])
 		{
-			$out .= '['.$item['memory'].' kb]';
+			$out .= '['.number_format($item['memory'] / 1024).' kb]';
+		}
+		
+		if($item['diffMemory'])
+		{
+			$out .= '['.number_format($item['diffMemory'] / 1024).' kb]';
 		}
 		
 		$out .= '&nbsp;&nbsp;';

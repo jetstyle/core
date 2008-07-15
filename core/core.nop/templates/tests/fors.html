@@ -23,7 +23,16 @@ Assignation2: {{Assignation2}}<br>
 	<hr>
 {{/:item}}
 
-<!--
-≈сть бага в инклуде, что *= работает, а *field= не работает.
-{{@tests/subtpl.html *=Assignation}}
--->
+
+
+{{:test1}}
+	{{!for Items do=@:level1 external_var="test"}}
+{{/:test1}}
+
+{{:level1}}
+{{*id}}-{{external_var}}-{{for.i}}{{!for Items do=@:level2 external_var="other"}}{{*id}}-{{external_var}}-{{for.i}}
+{{/:level1}}
+
+{{:level2}}
+{{*id}}-{{external_var}}-{{for.i}}
+{{/:level2}}

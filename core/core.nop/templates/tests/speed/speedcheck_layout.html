@@ -1,0 +1,18 @@
+
+<div>{{body}}</div>
+<div>{{support}}</div>
+
+<div>{{content.0.id}}</div>
+
+<ul>
+	{{?content}}
+		{{!for content do=@:content}}
+	{{?:}}
+		no content
+	{{/?}}
+</ul>
+
+
+{{:content}}
+	{{*id}}
+{{/:content}}

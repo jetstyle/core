@@ -37,6 +37,8 @@ if (isset($d))
 	
 }
 else
+{
 	echo $date;
+}
 
 ?>

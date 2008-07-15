@@ -1,4 +1,5 @@
 <?php
+//@oce.html
 $rh->OCE = array(
 		"texts"=>"do/Texts/form?id=::id::&",
 		"news"=>"do/News/form?id=::id::&",

@@ -1,5 +1,5 @@
 <?php
-
+//!oce
   $type = $params['type'] ? $params['type'] : 'texts';
   $good = true;
 

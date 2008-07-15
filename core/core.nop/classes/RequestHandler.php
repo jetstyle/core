@@ -230,7 +230,8 @@ class RequestHandler extends ConfigProcessor {
 
 		//выполнение обработчика
 		$this->execute();
-		return $this->tpl->Parse("html.html");
+		
+		$this->showSiteMap();
 	}
 
 	// Алиасы, специфичные для RH
@@ -309,8 +310,6 @@ class RequestHandler extends ConfigProcessor {
 		$this->page->rend();
 		
 		$this->afterPageHandle();
-		
-		$this->showSiteMap();
 	}
 
 	protected function init() 
@@ -472,6 +471,11 @@ class RequestHandler extends ConfigProcessor {
 			'print' => 1
 		)));
 
+		if ($this->ri->get('print')) 
+		{
+			$this->tpl->set('html:print', '1');
+		}
+		
         //умолчательный ключ сайтмапа = controller/method, например news/item
         if (!isset( $this->site_map_path ))
         {
@@ -486,13 +490,19 @@ class RequestHandler extends ConfigProcessor {
         }
 		$conf = $this->site_map[$this->site_map_path];
 
-		$this->_showSiteMapPath($conf);
+		if (!$conf['html'])
+		{
+			$conf['html'] = '@html.html';
+		}
+				
+		$this->tpl->parseSiteMap($this->site_map_path, $conf);
+//		$this->_showSiteMapPath($conf);
+		
+		echo $this->tpl->get('html');
+		
 		
 		//nop: again print params
-		if ($this->ri->get('print')) 
-		{
-			$this->tpl->set('html:print', '1');
-		}
+		
 	}
 	
 	/**

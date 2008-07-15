@@ -21,9 +21,9 @@
 
     if ($text == "") return;
 
-    $rh->UseLib("typografica", "classes/typografica");
+    $rh->useLib("typografica", "classes/typografica");
 
-    $typo = &new typografica( $rh );
+    $typo = &new Typografica( $rh );
 
     $ret = $typo->correct($text);
     

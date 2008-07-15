@@ -1,5 +1,5 @@
 <?php
-
+//@cms_panel.html
 	if($rh->principal->isAuth()) {
 		$cookieOce = $_COOKIE['oce'];
 		$getOce = $rh->ri->get('oce');
@@ -14,5 +14,4 @@
 		$tpl->set('cur_url',$rh->ri->hrefPlus('',array('oce' => '')));
         return $tpl->parse('cms_panel.html');
 	} else return '';
-
 ?>

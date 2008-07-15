@@ -55,12 +55,13 @@ function __autoload($className)
 
 class ConfigProcessor {
 
-	var $DIRS = array(); 				//информация о корневых директориях для каждого уровня
+	public $DIRS = array(); 				//информация о корневых директориях для каждого уровня
 	
 	private $searchHistory = array();	//информация о том, где мы пытались найти файл. Используется в случае неудачного поиска.
+	private $searchCache = array();
 	
 	//Ищет скрипт по уровням проектов.
-	function findScript( $type, $name, $level=0, $dr=1, $ext = 'php', $withSubDirs = false )
+	public function findScript( $type, $name, $level=0, $dr=1, $ext = 'php', $withSubDirs = false )
 	{
 		//проверяем входные данные
 		if (strlen($type) == 0)
@@ -70,6 +71,11 @@ class ConfigProcessor {
 		elseif (strlen($name) == 0)
 		{
 			throw new Exception("FindScript: <b>*name* пусто</b>, type=<b>$type</b>, name=<b>$name</b>, level=<b>$level</b>, dr=<b>$dr</b>, ext=<b>$ext</b>");
+		}
+		
+		if ($this->searchCache[$type][$name.'.'.$ext])
+		{
+			return $this->searchCache[$type][$name.'.'.$ext];
 		}
 
 		//определяем начальный уровень поиска
@@ -92,6 +98,7 @@ class ConfigProcessor {
 				
 				if(@file_exists($fname))
 				{
+					$this->searchCache[$type][$name.'.'.$ext] = $fname;
 					return $fname;
 				}
 
@@ -99,6 +106,7 @@ class ConfigProcessor {
 				{
 					if ($file = $this->recursiveFind((is_array($dir) ? $dir[0] : $dir).$type."/", $name . "." . $ext))
 					{
+						$this->searchCache[$type][$name.'.'.$ext] = $file;
 						return $file;
 					}
 				}
@@ -149,26 +157,20 @@ class ConfigProcessor {
 
 	//newschool
 	//Тоже, что и FindScript(), но в случае не обнаружения файла вываливается с ошибкой
-	function findScript_( $type, $name, $level=0, $dr=1, $ext = 'php', $withSubDirs = false ){
-		try
+	public function findScript_( $type, $name, $level=0, $dr=1, $ext = 'php', $withSubDirs = false )
+	{
+		if (!$fname = $this->findScript($type,$name,$level,$dr,$ext,$withSubDirs))
 		{
-			if (!$fname = $this->FindScript($type,$name,$level,$dr,$ext,$withSubDirs))
-			{
-				throw new FileNotFoundException("name=<b>$name</b>, level=<b>$level</b>, dr=<b>$dr</b>", $type=="templates", $name, $this->rh, $this->searchHistory);
-			}
-			else
-			{
-				return $fname;
-			}
+			die('file not found '.$name);
+			throw new FileNotFoundException("name=<b>$name</b>, level=<b>$level</b>, dr=<b>$dr</b>", $type=="templates", $name, $this->rh, $this->searchHistory);
 		}
-		catch (FileNotFoundException $e)
+		else
 		{
-			$exceptionHandler = ExceptionHandler::getInstance();
-			$exceptionHandler->process($e);
+			return $fname;
 		}
 	}
 
-	function findDir($name)
+	public function findDir($name)
 	{
 		//определяем начальный уровень поиска
 		$n = count($this->DIRS);
@@ -189,14 +191,14 @@ class ConfigProcessor {
 	}
 
 	//Тоже, что и FindScript_(), но кроме того инклюдим найденный скрипт
-	function useScript( $type, $name, $level=false, $dr=-1, $ext = 'php', $withSubDirs = false, $hideExc = false ){
-		$method = ($hideExc) ? "FindScript" : "FindScript_";
+	public function useScript( $type, $name, $level=0, $dr=1, $ext = 'php', $withSubDirs = false, $hideExc = false ){
+		$method = ($hideExc) ? "findScript" : "findScript_";
 		if ($path = $this->$method($type,$name,$level,$dr,$ext,$withSubDirs))
 		$this->_useScript( $path );
 	}
 
 	// Грузит скрипт в контексте меня
-	function _useScript($source)
+	private function _useScript($source)
 	{
 		include_once( $source );
 	}

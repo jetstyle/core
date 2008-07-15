@@ -21,5 +21,4 @@
     if (!$item_name) $item_name = "items";
 
     echo $count."&nbsp;".$tpl->msg->NumberString( $count, $item_name );
-
 ?>

@@ -1,7 +1,4 @@
-<?
-/* Адаптировано со Smarty. */
-/* lucky: Адаптировано с CMS Builder. */
-
+<?php
 
 $string = isset($params[0]) ? $params[0] : $params['_'];
 $esc_type = $params['type'] ? $params['type'] : 'html';

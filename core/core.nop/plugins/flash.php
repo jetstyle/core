@@ -1,5 +1,5 @@
 <?php
-
+//@_/swfobject.html
 /*
 SWF magic     {{!flash someflash.sfw}}
 {{!flash shapka1.swf transparent=1 height="670" version=8 instant=1}}
@@ -24,11 +24,6 @@ SWF magic     {{!flash someflash.sfw}}
 // где уже будет подцепляться swfobject.js
 
 // сгенерить из шаблона скрипт вставки флэша
-
-foreach (array_keys($params) as $k)
-{
-	$params[$k] = $tpl->ParseInstant(str_replace(']]', '}}', str_replace('[[', '{{', $params[$k])));
-}
 
 $src = $params['src'] = $params['src'] ? $params['src'] : $params[0];
 unset ($params[0]);
@@ -94,7 +89,7 @@ foreach ($flashvar_keys as $k)
 {
 	$tpl->set('var_key', $k);
 	$tpl->set('var_value', $params[$k]);
-	$defaults['flashvars'] .= $tpl->Parse("_/swfobject.html:Variable_Item");
+	$defaults['flashvars'] .= $tpl->parse("_/swfobject.html:Variable_Item");
 }
 
 $tpl->setRef('f', $defaults);
