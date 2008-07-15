@@ -766,12 +766,19 @@ class TemplateEngineCompiler
 	 */
 	protected function parseExpression($expr)
 	{
-		return trim(preg_replace_callback("#([^a-zA-Z0-9\.\"'*_:])([a-zA-Z0-9\.*_:]+)([^a-zA-Z0-9\.\"'*_:])#", array(&$this, 'parseExpressionCallback'), " ".$expr." "));
+		return trim(preg_replace_callback("#([^a-zA-Z0-9\.\"'*_:])([a-zA-Z0-9\.*_:]+)([^a-zA-Z0-9\.\"'*_:\(])#", array(&$this, 'parseExpressionCallback'), " ".$expr." "));
 	}
 	
 	protected function parseExpressionCallback($matches)
 	{
-		return $matches[1].$this->parseValue($matches[2]).$matches[3];
+		if (is_numeric($matches[2]))
+		{
+			return $matches[0];
+		}
+		else
+		{
+			return $matches[1].$this->parseValue($matches[2]).$matches[3];
+		}
 	}
 	
 	/**
@@ -780,7 +787,7 @@ class TemplateEngineCompiler
 	 * ex.: items.test.value
 	 *
 	 * @param string $key
-	 * @return unknown
+	 * @return string
 	 */
 	protected function parseValue($key)
 	{
