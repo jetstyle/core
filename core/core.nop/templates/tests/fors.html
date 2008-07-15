@@ -30,9 +30,9 @@ Assignation2: {{Assignation2}}<br>
 {{/:test1}}
 
 {{:level1}}
-{{*id}}-{{external_var}}-{{for.i}}{{!for Items do=@:level2 external_var="other"}}{{*id}}-{{external_var}}-{{for.i}}
+{{*id}}-{{external_var}}-{{for.i}}{{!for Items do=@:level2 external_var="other" external_index=for.i}}{{*id}}-{{external_var}}-{{for.i}}
 {{/:level1}}
 
 {{:level2}}
-{{*id}}-{{external_var}}-{{for.i}}
+{{*id}}-{{external_var}}-{{for.i}}-{{external_index}}
 {{/:level2}}
