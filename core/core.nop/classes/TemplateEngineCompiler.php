@@ -805,7 +805,7 @@ unset($_z);
 		  $res = '((is_array($_) || (is_object($_) && $_ instanceof ArrayAccess)) ? '. ( $check_for_count ). ' $_["'.$k.'"] :'      
 			  . ($use_methods && (preg_match ('#^[A-Za-z_][A-Za-z0-9_]*$#', $method)) 
 			  ?  '(method_exists($_,"'.$method.'")?$_->'.$method.'():'
-			  .(preg_match('#^[A-Za-z_]+$#', $k) ? '($_->'.$k.')' : 'NULL')
+			  .(preg_match('#^[A-Za-z0-9_]+$#', $k) ? '($_->'.$k.')' : 'NULL')
 			  .'))'
 			  : 'NULL)');
 			  ;
