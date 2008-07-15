@@ -7,7 +7,7 @@
   <td nowrap="nowrap">{{@blocks/user.html}}</td>
   <td class="sep-"><img class="block" src="{{images}}seporate.gif" width="2" height="20" align="top" alt="" /></td>
   <td>Μενώ:</td>
-  	{{!for toolbar.main do=@:item}}
+  	{{!for toolbar.main do=@:item sep=@:item_sep}}
   </td>
   <td class="w100">{{@dummy.html}}</td>
   <td class="sep-"><img class="block" src="{{images}}seporate.gif" width="2" height="20" align="top" alt="" /></td>
@@ -63,7 +63,7 @@ function switchMenu(el)
 
 {{:subitem}}
 <div class="cms-toolbar-sub" id="submenu_{{*id}}" {{?!*selected}}style="display: none;"{{/?}}>
-	{{!for *childs do=@:subitem_item}}
+	{{!for *childs do=@:subitem_item sep=@:subitem_item_sep}}
 </div>
 {{/:subitem}}
 

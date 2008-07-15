@@ -1014,9 +1014,9 @@ class TemplateEngineCompiler
 		fputs($fp, "<"."?php\n" );
 		foreach($functions AS $fname=>$content)
 		{
-			fputs($fp, 'function '.$fname.'(&$tpl, &$params)'."\n" );
+			fputs($fp, 'if(!defined(\''.$fname.'\')){define(\''.$fname.'\', true); function '.$fname.'(&$tpl, &$params)'."\n" );
 			fputs($fp,$content);
-			fputs($fp, "\n");
+			fputs($fp, "}\n");
 		}
 		fputs($fp, "?".">" );
 		fclose($fp);

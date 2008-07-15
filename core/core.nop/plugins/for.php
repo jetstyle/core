@@ -15,7 +15,7 @@
 		$templateName = substr($params['do'], 1);
 	 	$storeTo = $params['as'] ? $params['as'] : '*';
 	 	$params[$storeTo] = &$params[0];
-	 	$sep = ($params['sep'] && $params['sep']{0} == '@') ? $tpl->parse($params['sep']) : "";
+	 	$sep = ($params['sep'] && $params['sep']{0} == '@') ? $tpl->parse(substr($params['sep'], 1)) : "";
 	 	$params['for'] = '';
 	 	
 	 	unset($params[0], $params['as'], $params['do'], $params['sep'], $params['_name']);
@@ -29,11 +29,11 @@
 			
 			$rh->tpl->setRef('for', $for);
 			$rh->tpl->setRef($storeTo, $r);
-			echo ($content ? $sep : '').$tpl->parse($templateName);
+			$content .= ($content ? $sep : '').$tpl->parse($templateName);
 		}
 	
 		$tpl->freeStack($stackId);
 		
-//		echo $content;	
+		echo $content;	
 	}
 ?>

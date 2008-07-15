@@ -161,7 +161,6 @@ class ConfigProcessor {
 	{
 		if (!$fname = $this->findScript($type,$name,$level,$dr,$ext,$withSubDirs))
 		{
-			die('file not found '.$name);
 			throw new FileNotFoundException("name=<b>$name</b>, level=<b>$level</b>, dr=<b>$dr</b>", $type=="templates", $name, $this->rh, $this->searchHistory);
 		}
 		else
