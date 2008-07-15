@@ -693,7 +693,7 @@ class TemplateEngineCompiler
 				{
 					if (count ($A) > 0)
 					{
-						$result .= ' $_r = &'.$this->parseValue($var) .';'."\n";										
+						$result .= ' $_r = &'.$this->parseExpression($var) .';'."\n";										
 						foreach ($A AS $stmt)
 						{
 							// FIXME:
@@ -714,10 +714,7 @@ class TemplateEngineCompiler
 						  		
 						  		if ($this->compileWithExternals)
 								{
-									if (!isset($this->compiledActions[$pluginName[TE_VALUE]]))
-									{
-										$this->actionCompile($pluginName[TE_VALUE]);
-									}
+									$this->actionCompile($pluginName[TE_VALUE]);
 								}
 							}
 							// с&p
@@ -726,7 +723,7 @@ class TemplateEngineCompiler
 					}
 					else
 					{
-						$result .= ' echo '.$this->parseValue($var) .';'."\n";
+						$result .= ' echo '.$this->parseExpression($var) .';'."\n";
 					}
 
 					$instant = $result;
@@ -740,6 +737,8 @@ class TemplateEngineCompiler
 		{
 			if ($instant)
 			{ 
+//				var_dump($instant);
+//				die();
 				ob_start();
 				eval($instant);
 //				die();
@@ -766,18 +765,32 @@ class TemplateEngineCompiler
 	 */
 	protected function parseExpression($expr)
 	{
-		return trim(preg_replace_callback("#([^a-zA-Z0-9\.\"'*_:])([a-zA-Z0-9\.*_:]+)([^a-zA-Z0-9\.\"'*_:\(])#", array(&$this, 'parseExpressionCallback'), " ".$expr." "));
+		// strip functions
+		$expr = preg_replace_callback("/([a-zA-Z_0-9]+)\s?\((.*?)\)/si", array(&$this, 'parseExpressionFunctionsCallback'), $expr);
+		return trim(preg_replace_callback("/([\#a-zA-Z0-9\.*_:]+)(.?)/si", array(&$this, 'parseExpressionVarsCallback'), " ".$expr." "));
 	}
 	
-	protected function parseExpressionCallback($matches)
+	protected function parseExpressionVarsCallback($matches)
 	{
-		if (is_numeric($matches[2]))
+		if (is_numeric($matches[1]) || $matches[2] == '(')
 		{
 			return $matches[0];
 		}
 		else
 		{
-			return $matches[1].$this->parseValue($matches[2]).$matches[3];
+			return $this->parseValue($matches[1]).$matches[2];
+		}
+	}
+	
+	protected function parseExpressionFunctionsCallback($matches)
+	{
+		if ($matches[1] == 'count')
+		{
+			return $matches[1].'('.$matches[2].')';
+		}
+		else
+		{
+			return $matches[2];
 		}
 	}
 	
@@ -813,19 +826,25 @@ class TemplateEngineCompiler
 			{
 				continue;
 			}
-			// get array[key]
+
 			$func = '';
-			$args = array();
+			$args = '';
 			if (preg_match('#^[0-9]+$#', $k)) 
 			{ // is numeric key ?
 				$args = $k;
 				$func .= 'a';
 			} 
-			else 
+//			elseif($k == 'count')
+//			{
+//				
+//			}
+			else
 			{
 				$args = "'".$k."'";
 				$func .= 'a';
 			}
+			
+			
 			
 			// для первого ключа $this->domain всегда array()
 //			if ($i !== 0) {
@@ -904,7 +923,7 @@ class TemplateEngineCompiler
 		switch ($param[TE_TYPE])
 		{
 			case TE_TYPE_STRING: $res = $this->phpString($param[TE_VALUE]); break;
-			case TE_TYPE_VARIABLE: $res = $this->parseValue($param[TE_VALUE]); break;
+			case TE_TYPE_VARIABLE: $res = $this->parseExpression($param[TE_VALUE]); break;
 			case TE_TYPE_TEMPLATE: $res = $this->phpString('@'.$param[TE_VALUE]); break;
 			case TE_TYPE_PHP_SCRIPT: $res = $param[TE_VALUE]; break;
 			default:
