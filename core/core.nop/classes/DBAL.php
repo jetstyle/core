@@ -251,9 +251,9 @@ class DBAL
 		return null;
 	}
 	
-	protected function prepareSql($sql)
+	public function prepareSql($sql)
 	{
-		return str_replace("??", $this->prefix, $sql);
+		return preg_replace('/((update|((insert|replace).*?into)|from|join)\s*?)(\?\?)([a-zA-Z0-9_\-]+)/i', '$1'.$this->prefix.'$6', $sql, -1, $count);
 	}
 	
 	protected function logQuery($sql, $limit = 0, $offset = 0)
