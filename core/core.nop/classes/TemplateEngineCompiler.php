@@ -767,19 +767,21 @@ class TemplateEngineCompiler
 	{
 		// strip functions
 		$expr = preg_replace_callback("/([a-zA-Z_0-9]+)\s?\((.*?)\)/si", array(&$this, 'parseExpressionFunctionsCallback'), $expr);
-		return trim(preg_replace_callback("/([\#a-zA-Z0-9\.*_:]+)(.?)/si", array(&$this, 'parseExpressionVarsCallback'), " ".$expr." "));
+
+		return trim(preg_replace_callback("/([^\#a-zA-Z0-9\.*_:\"'])([\#a-zA-Z*_][a-zA-Z0-9\._*:]*?)([^\#a-zA-Z0-9\.*_:\"'\(])/si", array(&$this, 'parseExpressionVarsCallback'), " ".$expr." "));
 	}
 	
 	protected function parseExpressionVarsCallback($matches)
 	{
-		if (is_numeric($matches[1]) || $matches[2] == '(')
-		{
-			return $matches[0];
-		}
-		else
-		{
-			return $this->parseValue($matches[1]).$matches[2];
-		}
+//		var_dump($matches);
+		//		if (is_numeric($matches[2]))
+//		{
+//			return $matches[0];
+//		}
+//		else
+//		{
+			return $matches[1].$this->parseValue($matches[2]).$matches[3];
+//		}
 	}
 	
 	protected function parseExpressionFunctionsCallback($matches)
