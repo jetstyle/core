@@ -127,7 +127,8 @@ class DBAL
 
 		$data = array ();
 		//плейсхолдер для префикса
-		$sql = str_replace("??", $this->prefix, $sql);
+		$sql = $this->applyPlaceholder($sql);
+//		$sql = str_replace("??", $this->prefix, $sql);
 
 		if ($r = $this->lowlevel->Query($sql, $limit, $offset))
 		{
@@ -257,7 +258,8 @@ class DBAL
 	function Execute($sql, $limit = 0, $offset = 0)
 	{
 		//типа такой плейсхолдер
-		$sql = str_replace("??", $this->prefix, $sql);
+		$sql = $this->applyPlaceholder($sql);
+//		$sql = str_replace("??", $this->prefix, $sql);
 
 		if(method_exists($this->rh->debug, 'mark'))
 		{
@@ -332,6 +334,16 @@ class DBAL
 		}
 	}
 
+	function applyPlaceholder($sql)
+	{
+		$sql = preg_replace('/^\s*?(update.*?)(\?\?)([a-zA-Z0-9_\-]+.*?set)/i', '$1'.$this->prefix.'$3', $sql, -1, $count);	
+		if ($count) return $sql;
+		$sql = preg_replace('/^\s*?((insert|replace).*?into\s+)(\?\?)([a-zA-Z0-9_\-]+)/i', '$1'.$this->prefix.'$4', $sql, -1, $count);
+		if ($count) return $sql;
+		$sql = str_replace("??", $this->prefix, $sql);
+		return $sql;
+	}
+	
 	/**
 	 * for osb
 	 */
