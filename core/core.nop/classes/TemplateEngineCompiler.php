@@ -794,7 +794,7 @@ class TemplateEngineCompiler
 				$result .= $symbol;
 			}
 			// нужный нам символ
-			elseif (preg_match('/[a-z0-9\.\#*_:]+/i', $symbol))
+			elseif (preg_match('/[a-z0-9\.\#*_:\/]+/i', $symbol))
 			{
 				$word .= $symbol;
 			}

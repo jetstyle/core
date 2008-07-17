@@ -46,7 +46,10 @@ class MenuPlugin extends RenderablePlugin
 		$data = &$this->rh->page->config;
 
 		if (!$data['id'])
-			return;
+		{
+			$this->parents = array();
+			return $this->parents;
+		}
 
 		$sql = '
 			SELECT id, hide_from_menu
@@ -78,7 +81,7 @@ class MenuPlugin extends RenderablePlugin
 		
 		$current = &$this->rh->page->config;
 		$parents = $this->getParentNodes();
-				
+			
 		foreach ($parents AS $p)
 		{
 			if ($p['hide_from_menu'])

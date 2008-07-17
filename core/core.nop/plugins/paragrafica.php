@@ -25,7 +25,7 @@
 
     if ($text == "") return;
 
-    $rh->UseLib("typografica", "classes/paragrafica");
+    $rh->useLib("typografica", "classes/paragrafica");
 
     // we got pure HTML on input.
     $para = &new paragrafica( &$this->rh );

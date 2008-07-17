@@ -496,71 +496,9 @@ class RequestHandler extends ConfigProcessor {
 		}
 				
 		$this->tpl->parseSiteMap($this->site_map_path, $conf);
-//		$this->_showSiteMapPath($conf);
-		
 		echo $this->tpl->get('html');
-		
-		
-		//nop: again print params
-		
 	}
 	
-	/**
-	 * ѕостроить один массив сайтмапа
-	 * вообще этому пора делать extract class
-	 * nop
-	 */
-	public function _showSiteMapPath($conf=array())
-	{
-		if (!empty($conf)) 
-		{
-			foreach ($conf as $k => $v) 
-			{
-				//массив с шаблонами/значени€ми/инстркуци€ми
-				if (is_array($v)) 
-				{
-					$_v = "";
-					foreach ($v as $v1)
-						$_v .= $this->_constructValue($v1);
-					$this->tpl->set($k, $_v);
-				} 
-				else
-					//значение переменной
-					$this->tpl->set($k, $this->_constructValue($v));
-			}
-		}	
-	}
-
-	/*
-	* ¬спомогательна€ функци€ дл€ сайтмапа (this->End())
-	*/
-	protected function _constructValue($v) {
-		if ($v[0] == "@") //отпарсить шаблон
-			{
-			return $this->tpl->parse(substr($v, 1));
-		}
-		elseif ($v[0] == "{") //значение шаблонной переменной
-		{
-			return $this->tpl->get(substr(substr($v, 2), 0, -2));
-		} else //вставить текст
-			return $v;
-	}
-
-	protected function prepareResult($after_execute) {
-		/*
-		Ќа этом уровне провер€ем, нужно ли оборачивать результат в html.html
-		ƒл€ дополнительной пост-обработки окружени€ перегружать этот метод в наследниках.
-		*/
-		$template = isset ($this->page->template) ? $this->page->template : 'html.html';
-
-		$tpl = & $this->tpl;
-		if (!$tpl->is("HTML:html")) {
-			if (!$tpl->is("HTML:body"))
-				$tpl->set("HTML:body", $after_execute);
-			return $tpl->parse($template);
-		} else
-			return $tpl->get("HTML:html");
-	}
 
 	// удал€ем "магические" квоты из предоставленного массива
 	// и всех содержащихс€ в нЄм массивов
