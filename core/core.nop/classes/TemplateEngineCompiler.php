@@ -706,7 +706,7 @@ class TemplateEngineCompiler
 								
 						  		$params['_'] = array(
 						  			TE_TYPE => TE_TYPE_PHP_SCRIPT,
-						  			TE_VALUE => '&$r',
+						  			TE_VALUE => '&$_r',
 						  		);
 	
 						  		$result .= ' $_='.$this->implodeActionParams( $params ).';';
