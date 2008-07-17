@@ -721,6 +721,10 @@ class TemplateEngineCompiler
 						}
 						$result .= 'echo $_r; ';
 					}
+					elseif (strpos($var, '=') !== false)
+					{
+						$result = ' '.$this->parseExpression($var) .';'."\n";
+					}
 					else
 					{
 						$result .= ' echo '.$this->parseExpression($var) .';'."\n";
@@ -766,9 +770,91 @@ class TemplateEngineCompiler
 	protected function parseExpression($expr)
 	{
 		// strip functions
-		$expr = preg_replace_callback("/([a-zA-Z_0-9]+)\s?\((.*?)\)/si", array(&$this, 'parseExpressionFunctionsCallback'), $expr);
-
-		return trim(preg_replace_callback("/([^\#a-zA-Z0-9\.*_:\"'])([\#a-zA-Z*_][a-zA-Z0-9\._*:]*?)([^\#a-zA-Z0-9\.*_:\"'\(])/si", array(&$this, 'parseExpressionVarsCallback'), " ".$expr." "));
+		$expr = preg_replace_callback("/([a-zA-Z_0-9]+)\s*?\((.*?)\)/si", array(&$this, 'parseExpressionFunctionsCallback'), $expr);
+		$expr = trim($expr);
+		
+		$result = '';
+	
+		$prevSymbol = '';	
+		$inQuotes = false;
+		$quoteSymbol = '';
+		$word = '';
+		
+		for ($i = 0, $length = strlen($expr); $i < $length; $i++ )
+		{
+			$symbol = $expr{$i};
+			
+			// внутри кавычек
+			if ($inQuotes)
+			{
+				if (($symbol == '"' && $prevSymbol != '\\' && $quoteSymbol == '"') || ($symbol == "'" && $prevSymbol != '\\' && $quoteSymbol == "'"))
+				{
+					$inQuotes = false;
+				}
+				$result .= $symbol;
+			}
+			// нужный нам символ
+			elseif (preg_match('/[a-z0-9\.\#*_:]+/i', $symbol))
+			{
+				$word .= $symbol;
+			}
+			// какой то левый символ
+			else
+			{
+				// начинаются кавычки
+				if ($symbol == '"' || $symbol == "'")
+				{
+					$inQuotes = true;
+					$quoteSymbol = $symbol;
+				}
+				// перед кавычкой было название функции
+				elseif($symbol == '(')
+				{
+					$result .= $word;
+					$word = '';
+				}
+				
+				if (strlen($word) > 0)
+				{
+					// это цифры
+					if (preg_match('/^[0-9\.]+$/i', $word))
+					{
+						$result .= $word;
+					}
+					else
+					{
+						if ($prevSymbol == '.')
+						{
+							$result .= $this->parseValue(substr($word, 0, strlen($word) - 2)).'.';
+						}
+						else
+						{
+							$result .= $this->parseValue($word);
+						}
+					}
+					$word = '';
+				}
+				$result .= $symbol;
+			}
+			
+			$prevSymbol = $symbol;
+		}
+		
+		if (strlen($word) > 0)
+		{
+			// это цифры
+			if (preg_match('/^[0-9\.]+$/i', $word))
+			{
+				$result .= $word;
+			}
+			else
+			{
+				$result .= $this->parseValue($word);
+			}
+		}
+		
+		return $result;		
+//		return trim(preg_replace_callback('/(?<!["\'a-z0-9\._:\#*])([a-z0-9\.\#*_:]+)(?!["\'a-z0-9\(\._:\#*])/i', array(&$this, 'parseExpressionVarsCallback'), $expr));
 	}
 	
 	protected function parseExpressionVarsCallback($matches)
@@ -780,7 +866,7 @@ class TemplateEngineCompiler
 //		}
 //		else
 //		{
-			return $matches[1].$this->parseValue($matches[2]).$matches[3];
+			return $this->parseValue($matches[1]);
 //		}
 	}
 	
