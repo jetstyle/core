@@ -532,16 +532,16 @@ if((is_array($_z) && !empty($_z)) || (is_object($_z) && $_z instanceof ArrayAcce
 
 	$first = True;
 	$num = 0;
-	$for = array(
-			"num"=>&$num,
-		);
-   $tpl->setRef("For", $for);
+	$for = array();
+
     $assigned_value = '.$assigned_compiled.';
 	foreach($_z AS $r)
-	{
-		$num++;
+	{	
+		$for["num"] = $num++;
 		$for["odd"] = $num % 2;
 		$for["even"] = !$for["odd"];
+		$tpl->setRef("For", $for);
+		
         '.( $assigned_compiled && !$ass_key_noref
           ?
            '$r["'.$assigned_key.'"]= $assigned_value;'
