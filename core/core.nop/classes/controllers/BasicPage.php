@@ -100,6 +100,7 @@ class BasicPage extends Controller
 	 *
 	 *	FIXME: по идее экшен м.б. ссылкой на функцию. тогда хендлеры можно будет мапить в
 	 *	рантайме.
+	 *  nop: use ClassNamePage::method
 	 */
 	var $params_map = NULL;
 
@@ -111,12 +112,19 @@ class BasicPage extends Controller
 
 	function _match_url($params, $pattern, $matches = array())
 	{
+	
 		$i = 0;
+		$ret = false;
 		if (is_array($pattern))
 		{
 			foreach ($pattern as $k=>$p)
 			{
-				if (!isset($params[$i])) return False;
+				//в массиве $params кончились параметры
+				if (!isset($params[$i]))
+				{
+				    $ret = false;
+				    return $ret;
+				}
 				$value = $params[$i];
 				if ($this->_match_pattern($k, $p, $value))
 				{
@@ -124,19 +132,21 @@ class BasicPage extends Controller
 				}
 				else
 				{
-					return False;
+					$ret = false;
+					return $ret;
 				}
 				$i++;
 			}
-			return True;
+			$ret = true;
 		}
 		elseif (empty($pattern))
 		{
 			$matches = $params;
-			return True;
+			$ret = true;
+			break;
 		}
 
-		return False;
+		return $ret;
 	}
 
 	function registerObserver($event, $observer)
@@ -186,8 +196,9 @@ class BasicPage extends Controller
 			{
 				$this->pre_handle();
 
-				$action = array_shift($v);
-								
+				$action = $this->getActionName($v);
+				array_shift($v);
+
 				if (count($v) > 0)
 				{
 					foreach ($v AS $pattern)
@@ -195,13 +206,16 @@ class BasicPage extends Controller
 						$matches = array();
 						if (True === $this->_match_url($this->rh->params, $pattern, &$matches))
 						{
-							$action_parts = explode("::", $action);
-
-							if (isset($pattern[0]) && $pattern[0] === null)
+						    //echo '<hr>';
+						    //var_dump($matches);
+						    
+							if (isset($pattern[0]) && $pattern[0] === null )
 							{
 								$matches = array();
 							}
-		
+
+							$action_parts = explode("::", $action);
+		                    //методы-ссылки на другой класс
 							if (count($action_parts)==2)
 							{
 								$this->rh->UseClass('controllers/'.$action_parts[0]);
@@ -222,6 +236,7 @@ class BasicPage extends Controller
 							else
 							{
 								$this->method = $action;
+
 								$status = call_user_func_array(
 									array(&$this, 'handle_'.$action),
 									array($matches)
@@ -301,6 +316,39 @@ class BasicPage extends Controller
 		$this->notifyOnRend();
 	}
 
+    /**
+     *  Получить имя метода из 
+     *	   array('item',      *  либо из
+     *     array('item'=>2, 
+     */	
+	private function getActionName($param)
+	{
+	    $keys = array_keys($param);
+	    if (!is_numeric($keys[0]))
+	        $ret = $keys[0];
+	    else
+    	    $ret = $param[0];
+
+	    return $ret;
+	}
+	
+	//Получает параметры приводящие в метод
+	private function getActionParams($param)
+	{
+	    $keys = array_keys($param);
+	    if (!is_numeric($keys[0]))
+	    {
+	        $ret = $param[ $param[ $keys[0] ] ];
+	    }
+	    else
+    	    $ret = $param[1];
+    	
+    	return $ret;
+	}
+
+    /**
+     * По умолчанию url_to пытается угадать в params_map
+     */
 	function url_to($cls=NULL, $item=NULL)
 	{
 		$result = '';
@@ -315,15 +363,16 @@ class BasicPage extends Controller
 			{
 				foreach ($this->params_map AS $v)
 				{
-					if ($v[0] == $cls)
+					if ($this->getActionName($v) == $cls)
 					{
 						$pathParts = array(rtrim($this->path, '/'));
-						
-						foreach ($v[1] AS $fieldName => $regExp)
+
+						foreach ($this->getActionParams($v) AS $fieldName => $regExp)
 						{
 							if (isset($item[$fieldName]))
 							{
 								$pathParts[] = $item[$fieldName];
+//								echo '<br>'.$fieldName.'='.$item[$fieldName];
 							}
 							else
 							{
@@ -357,7 +406,6 @@ class BasicPage extends Controller
 								}
 							}
 						}
-						
 						$result = implode('/', $pathParts);
 						break;
 					}
