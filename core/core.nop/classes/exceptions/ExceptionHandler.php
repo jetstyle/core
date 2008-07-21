@@ -101,6 +101,14 @@ class ExceptionHandler
 				<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="ru" lang="ru">
 				<head>
 					<style type="text/css">
+						* {
+							margin: 0; padding: 0;
+							font-size: 100.01%; }
+						html { }
+						body {
+							padding: 20px; 
+							font-family: Arial, sans-serif; }
+						.backtrace {padding-top: 20px; padding-left: 40px;}
 						.backtrace li {margin-bottom: 15px;}
 						.backtrace .backtrace-file {font-size: 80%; margin-top: 5px;}
 					</style>
