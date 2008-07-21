@@ -59,30 +59,14 @@ class DBAL_mysql
 	{
 		//		if(!extension_loaded("mysql")) dl("mysql.so");
 
-		try
+		if (!$this->dblink = @mysql_connect($this->rh->db_host,	$this->rh->db_user,	$this->rh->db_password))
 		{
-			if (!$this->dblink = @mysql_connect($this->rh->db_host,
-			$this->rh->db_user,
-			$this->rh->db_password
-			)
-			)
 			throw new DbException("Host=<b>" . $this->rh->db_host . "</b>, User=<b>" . $this->rh->db_user . "</b>", 1);
 		}
-		catch (DbException $e)
-		{
-			$exceptionHandler = ExceptionHandler::getInstance();
-			$exceptionHandler->process($e);
-		}
 
-		try
+		if (!mysql_select_db($this->rh->db_name, $this->dblink))
 		{
-			if (!mysql_select_db($this->rh->db_name, $this->dblink))
-				throw new DbException("Mysql database \"" . $this->rh->db_name . "\" select error", 2);
-		}
-		catch (DbException $e)
-		{
-			$exceptionHandler = ExceptionHandler::getInstance();
-			$exceptionHandler->process($e);
+			throw new DbException("Mysql database \"" . $this->rh->db_name . "\" select error", 2);
 		}
 	}
 
