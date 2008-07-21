@@ -12,7 +12,8 @@ class ExceptionHandler
 {
 	static private $instance;
 	private $config;
-	private $methodsByConst = array(EXCEPTION_IGNORE => "ignore",
+	private $methodsByConst = array(
+									EXCEPTION_IGNORE => "ignore",
 	                                EXCEPTION_SILENT => "silent",
 	                                EXCEPTION_MAIL   => "mail",
 	                                EXCEPTION_SHOW   => "show",
@@ -93,6 +94,19 @@ class ExceptionHandler
 
 	private function show($exceptionObj)
 	{
+		ob_end_clean();
+		
+		echo '<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+				<?xml version="1" encoding="windows-1251"?>
+				<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="ru" lang="ru">
+				<head>
+					<style type="text/css">
+						.backtrace li {margin-bottom: 15px;}
+						.backtrace .backtrace-file {font-size: 80%; margin-top: 5px;}
+					</style>
+				</head>
+				<body>';
+		
 		if ("Exception" == get_class($exceptionObj))
 		{
 			echo $exceptionObj->getMessage();
@@ -102,39 +116,23 @@ class ExceptionHandler
 			echo $exceptionObj;
 		}
 
-		// lunatic@jetstyle.ru
-		// нужно продумать механизм показа бэктрейса
-		// ибо тут в некоторых случаях (например, если конфиг нельзя записать в кэш ) проскакивают пароли
-		return;
 		if ($exceptionObj->no_trace) return;
 		
 		echo "<br /><br /><b>Backtrace</b>:<br />";
 		
-		ob_start();
-		echo "<pre>";
-		print_r($this->getTrace($exceptionObj->getTrace()));
-		echo "</pre>";
-		$_ = ob_get_contents();
-		ob_end_clean();
-
-		$_ = preg_replace("/\[db\_password\] \=>[^\,]+\,/", "", $_);
-		$_ = preg_replace("/\[db\_user\] \=>[^\,]+\,/", "", $_);
-
-		echo $_;
+		echo $this->getTrace($exceptionObj->getTrace());
+		
+		echo '</body></html>';
 	}
 
 	function getTrace($data)
 	{
-		$res = array();
+		$res = '<ol class="backtrace">';
 		foreach ($data as $key => $value)
 		{
-			if (is_array($value))
-				$res[$key] = $this->getTrace($value);
-			elseif (is_object($value))
-				$res[$key] = "Is Object '" . get_class($value) . "'";
-			else
-				$res[$key] = $value;
+			$res .= '<li>'.$value['class'].$value['type'].$value['function'].'<div class="backtrace-file">'.$value['file'].' (line: '.$value['line'].')</div></li>';
 		}
+		$res .= '</ol>';
 		return $res;
 	}
 }
