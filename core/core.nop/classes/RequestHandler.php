@@ -288,7 +288,7 @@ class RequestHandler extends ConfigProcessor {
 	{
 		$this->page = & $this->pageDomain->findPageByClass('_404');
 		$this->execute();
-		echo $this->tpl->Parse("html.html");
+		$this->showSiteMap();
 		die();
 	}
 	
