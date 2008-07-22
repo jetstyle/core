@@ -224,6 +224,11 @@ class RequestHandler extends ConfigProcessor {
 			$this->CLASSES[$name] = true;
 		}
 	}
+	
+		// Алиасы, специфичные для RH
+	public function useModel($name, $level = 0, $dr = 1, $ext = 'php', $withSubDirs = false, $hideExc = false) {
+		$this->useScript("classes/models", $name, $level, $dr, $ext, $withSubDirs, $hideExc);
+	}
 
 	function UseLib($name, $level = 0, $direction = 1) {
 		if (!$this->LIBS[$name]) {
