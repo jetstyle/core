@@ -265,13 +265,17 @@ class DBModel extends Model implements IteratorAggregate, ArrayAccess, Countable
 				if ($type == "HasOne")
 				{
 //					$where = "(" . $this->quoteField($fk)." = ".$f_model->quoteField($pk) . ")";
-					$where = "(" . $this->_quoteField($fk, $this->table)." = ".$f_model->_quoteField($pk, $f_model->table) . ")";
+					$where = array();
+					
+					if (!$info["manual_binding"])
+						$where[] = "(" . $this->_quoteField($fk, $this->table)." = ".$f_model->_quoteField($pk, $f_model->table) . ")";
 					if ($info["where"])
-						$where .= " AND (" . $info["where"] . ")";
+						$where[] = "(" . $info["where"] . ")";
 					if ($f_model->where)
-						$where .= " AND (" . $f_model->where . ")";
+						$where[] = "(" . $f_model->where . ")";
+					$where = implode(" AND ", $where);
 					$sql .= 
-					   ($info[$type]['only'] 
+					   ($info['only'] 
 							? " INNER JOIN "
 							: " LEFT JOIN "
 						)
@@ -533,14 +537,19 @@ class DBModel extends Model implements IteratorAggregate, ArrayAccess, Countable
 	//was renamed from "count" by dz @ 2008.02.04
 	function get_count($where=NULL)
 	{
-		if (!isset($this->sql)) list(,$sql) = $this->getSelectSql($where);
-		else $sql = $this->sql;
+		//след две строки мне очень не понятны, поэтому сделал генерацию всегда. (с) dz 09.07.2008
+		//if (!isset($this->sql)) list(,$sql) = $this->getSelectSql($where);
+		//else $sql = $this->sql;
+		list(,$sql) = $this->getSelectSql($where);
 
 		if (!preg_match('#(\sFROM\s.+)$#ms', $sql, $matches)) return NULL;
 		$sql = 'SELECT COUNT(*) AS `cnt` '.$matches[1];
 		$rs = $this->rh->db->query($sql);
 		// FIXME: cache it
-		$count = intval($rs[0]['cnt']);
+		if (strpos($sql, "GROUP BY"))
+			$count = count($rs);
+		else
+			$count = intval($rs[0]['cnt']);
 		return $count;
 	}
 
@@ -882,6 +891,10 @@ class DBModel extends Model implements IteratorAggregate, ArrayAccess, Countable
 			$res[$camel] = array("pk" => $pk, "fk" => $fk);
 			if (isset($config["where"]))
 				$res["where"] = $config["where"];
+			if (isset($config["manual_binding"]) && $config["manual_binding"])
+				$res["manual_binding"] = true;
+			if (isset($config["only"]))
+				$res["only"] = $config["only"];
 			$this->fields_info[] = $res;
 			unset($res);
 		}
@@ -951,7 +964,7 @@ class DBModel extends Model implements IteratorAggregate, ArrayAccess, Countable
 			return $this->data[$key];
 		}
 	}
-
+	
 	public function offsetSet($key, $value) { $this->data[$key] = $value; }
 
 	public function offsetUnset($key) { unset($this->data[$key]); }
@@ -980,6 +993,7 @@ class DBModel extends Model implements IteratorAggregate, ArrayAccess, Countable
 
 		return $res;
 	}
+	
 }  
 
 ?>
