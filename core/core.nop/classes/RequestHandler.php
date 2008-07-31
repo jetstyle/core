@@ -200,8 +200,7 @@ class RequestHandler extends ConfigProcessor {
 			$this->useClass('models/DBConfig');
 			$c =& new DBConfig($this);
 			$c->load();
-			config_joinConfigs($this, $c->getData());
-			
+			config_joinConfigs($this, $c->getData());			
 		}
 	}
 
@@ -320,6 +319,7 @@ class RequestHandler extends ConfigProcessor {
 		$this->initMessageSet();
 		$this->initUpload();
 		$this->initPrincipal();
+		$this->initFixtures();
 		
 		Debug :: trace("RH: constructor done");
 	}
@@ -372,7 +372,8 @@ class RequestHandler extends ConfigProcessor {
 		}
 	}
 
-	protected function initMessageSet() {
+	protected function initMessageSet() 
+	{
 		if ($this->msg_disable === true) {
 			Debug :: trace("RH: MSG DISABLED");
 		} else {
@@ -385,7 +386,8 @@ class RequestHandler extends ConfigProcessor {
 	}
 
 	//»нициализаци€ принципала.
-	protected function initPrincipal() {
+	protected function initPrincipal() 
+	{
 		if (!$this->db) return;
 		$this->principal = & new Principal($this, $this->principal_storage_model, $this->principal_security_models);
 
@@ -393,9 +395,26 @@ class RequestHandler extends ConfigProcessor {
 			$this->principal->Guest();
 		}
 	}
-
+	
+	protected function initFixtures()
+	{
+		if (!$this->use_fixtures) return;
+		
+		$this->useClass('Fixtures');
+		$fixtures = new Fixtures($this);
+		$fixtures->setDir($this->app_dir.'fixtures/');
+		$fixtures->load();
+		$data = $fixtures->get();
+		
+		foreach ($data AS $k => $v)
+		{
+			$this->tpl->set($k, $v);
+		}
+	}
+	
 	// функци€, заполн€юща€ пол€ *_domain, чтобы помогать кукам и вообще всем
-	protected function _setDomains() {
+	protected function _setDomains() 
+	{
 		if (!isset ($this->base_domain))
 			$this->base_domain = preg_replace("/^www\./i", "", $_SERVER["SERVER_NAME"]);
 		if (!isset ($this->current_domain))
@@ -425,7 +444,8 @@ class RequestHandler extends ConfigProcessor {
 	}
 
 	//ѕостроение стандартного окружени€.
-	protected function initEnvironment() {
+	protected function initEnvironment() 
+	{
 		// на этом уровне включает только заполнение очень полезной
 		// шаблонной переменной "/", соответствующей корню сайта
 		$this->tpl->set("/", $this->ri->Href(""));
@@ -441,24 +461,24 @@ class RequestHandler extends ConfigProcessor {
 //		trigger_error($msg, E_USER_ERROR);
 //	}
 
-	public function useFixture($type, $name) {
-
-		if (!array_key_exists($name, $this->fixtures)) {
-			if ($s = $this->FindScript($type, $name, false, -1, 'yml')) {
-				if (!class_exists('Spyc', false))
-					$this->useLib('spyc');
-				$this->fixtures[$name] = Spyc :: YAMLLoad($s);
-			} else
-				if ($s = $this->FindScript($type, $name, false, -1, 'php')) {
-					$tpl = & $this->tpl;
-					$this->fixtures[$name] = include $s;
-				} else {
-					$this->fixtures[$name] = NULL;
-				}
-		}
-		return isset ($this->fixtures[$name]) ? $this->fixtures : NULL;
-
-	}
+//	public function useFixture($type, $name) {
+//
+//		if (!array_key_exists($name, $this->fixtures)) {
+//			if ($s = $this->FindScript($type, $name, false, -1, 'yml')) {
+//				if (!class_exists('Spyc', false))
+//					$this->useLib('spyc');
+//				$this->fixtures[$name] = Spyc :: YAMLLoad($s);
+//			} else
+//				if ($s = $this->FindScript($type, $name, false, -1, 'php')) {
+//					$tpl = & $this->tpl;
+//					$this->fixtures[$name] = include $s;
+//				} else {
+//					$this->fixtures[$name] = NULL;
+//				}
+//		}
+//		return isset ($this->fixtures[$name]) ? $this->fixtures : NULL;
+//
+//	}
 //
 	public function _onCreatePage(& $page) {
 	}

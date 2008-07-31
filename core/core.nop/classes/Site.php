@@ -59,11 +59,8 @@ class Site
 		$environment = $config['environment'];
 
 		require_once 'FileCache.php';
-		$cache =& new FileCache();
-		$cache->initialize(array(
-			'file_path' => $cache_dir.$environment.'_config'.'.php',
-		));
-
+		$cache =& new FileCache($cache_dir.$environment.'_config'.'.php');
+		
 		// если кеш валидный
 		if ($cache->isValid())
 		{
@@ -111,7 +108,7 @@ class Site
 				
 			unset($ctx->ctx);
 			$str = "return '".str_replace("'", "\\'", serialize($ctx))."';";
-			$cache->save($str);
+			$cache->write($str);
 			$ctx->ctx =& $ctx;
 		}
 

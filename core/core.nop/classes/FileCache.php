@@ -5,101 +5,68 @@
  */
 class FileCache
 {
-
-	var $_sources = array();
-
-	function FileCache()
+	protected $filePath = '';
+	protected $cacheSources = null;		// источники, прочитанные из закешированного файла
+	protected $sources = array();		// источники, которые добавятся в заголовок кэша при записи
+	protected $fp = null;
+	
+	public function __construct($filePath)
 	{
+		$this->filePath = $filePath;
 	}
 
-	// FIXME: lucky: may be refactor interface
-	function initialize($config)
+	public function getSources()
 	{
-		$this->file_path = $config['file_path'];
-	}
-
-	function finalize()
-	{
-	}
-
-	function isValid()
-	{
-		$cached_mtime = @filemtime($this->file_path);
-		try
+		if ($this->cacheSources === null)
 		{
-			$this->fp = $this->getReadableFile();
+			$this->getSourcesFromFile();
 		}
-		catch(Exception $e)
+		return $this->cacheSources;
+	}
+	
+	public function addSource($path)
+	{
+		$this->sources[$path] = $path;
+	}
+	
+	public function getFileName()
+	{
+		return $this->filePath;
+	}
+	
+	public function isValid()
+	{
+		if (!file_exists($this->filePath))
 		{
 			return false;
 		}
 
-		$str = $this->readLn(); // <?php
-		$str = $this->readLn();
-		$count = intval(substr($str, 2));
-		$status = True;
-		for($i=0; $i < $count; $i++)
+		$sources = $this->getSources();
+		
+		if (count($sources) > 0)
 		{
-			$file_source = substr($this->readLn(), 2);
-			if (!is_file($file_source) || $cached_mtime < @filemtime($file_source)) 
+			$status = True;
+			$cachedMtime = @filemtime($this->filePath);
+			
+			foreach ($sources AS $fileSource)
+			if (!is_file($fileSource) || $cachedMtime < @filemtime($fileSource)) 
 			{
 				$status = False;
 				break;
 			}
 		}
-		$this->close();
+		else
+		{
+			return false;
+		}
+		
 		return $status;
 	}
 
-	function getFileName()
+	public function write($str)
 	{
-		return $this->file_path;
-	}
-
-	function close()
-	{
-		$this->_close($this->fp);
-		unset($this->fp);
-	}
-
-	function _read($fp, $length=1024)
-	{
-		return fgets($fp, $length);
-	}
-
-	function readLn()
-	{
-		$str = $this->_read($this->fp);
-		return substr($str, 0, -1);
-	}
-
-	function load()
-	{
-	}
-
-	function getWriteableFile()
-	{
-		$fp = @fopen($this->file_path, 'w');
-		if (!$fp)
-		{
-			throw new Exception("Can't write to file ".$this->file_path);
-		}
-		return $fp;
-	}
-
-	function getReadableFile()
-	{
-		$fp = @fopen($this->file_path, 'r');
-		if (!$fp)
-		{
-			throw new Exception("Can't open file ".$this->file_path);
-		}
-		return $fp;
-	}
-
-	function save($str)
-	{
-		$this->fp = $this->getWriteableFile();
+		$this->openFileForWrite();
+		
 		$this->writeHeader();
 		$this->writeLn($str);
 		$this->writeFooter();
@@ -107,53 +74,100 @@ class FileCache
 		
 		return true;
 	}
-
-	function writeHeader()
+	
+	protected function getSourcesFromFile()
 	{
-		$sources = $this->getSources();
+		$this->cacheSources = array();
+		
+		try
+		{
+			$this->openFileForRead();
+		}
+		catch(Exception $e)
+		{
+			return;
+		}
+		
+		$str = $this->readLn(); // <?php
+		$str = $this->readLn();
+		$count = intval(substr($str, 2));
+
+		for($i=0; $i < $count; $i++)
+		{
+			$this->cacheSources[] = substr($this->readLn(), 2);
+		}
+		
+		$this->close();
+	}
+	
+	protected function close()
+	{
+		fclose($this->fp);
+		$this->fp = null;
+	}
+
+	protected function _read($length=1024)
+	{
+		return fgets($this->fp, $length);
+	}
+
+	protected function readLn()
+	{
+		$str = $this->_read();
+		return substr($str, 0, -1);
+	}
+
+	protected function openFileForWrite()
+	{
+		$this->fp = @fopen($this->filePath, 'w');
+		if (!$this->fp)
+		{
+			throw new Exception("Can't write to file ".$this->filePath);
+		}
+		return $this->fp;
+	}
+
+	protected function openFileForRead()
+	{
+		$this->fp = @fopen($this->filePath, 'r');
+		if (!$this->fp)
+		{
+			throw new Exception("Can't open file ".$this->filePath);
+		}
+		return $this->fp;
+	}
+
+	protected function writeHeader()
+	{
 		$this->writeLn('<?php');
-		$this->writeLn('# '.count($sources));
-		foreach ($sources as $source)
+		$this->writeLn('# '.count($this->sources));
+		foreach ($this->sources as $source)
 		{
 			$this->writeLn('# '.$source);
 		}
 		$this->writeLn('');
 	}
 
-	function writeFooter()
+	protected function writeFooter()
 	{
 		$this->writeLn('?>');
 	}
 
-	function writeLn($str)
+	protected function writeLn($str)
 	{
-		return $this->_write($this->fp, $str."\n");
+		return $this->_write($str."\n");
 	}
 
-	function _write($fp, $str)
+	protected function _write($str)
 	{
-		if (empty($this->fp)) 
+		if ($this->fp === null) 
 		{
-			trigger_error('FileCache:: can\'t write to file '.$this->file_path);
-			return False;
+			throw new Exception('FileCache:: can\'t write to file '.$this->filePath);
 		}
 		else
-			return fwrite($fp, $str);
-	}
-
-	function _close($fp)
-	{
-		return fclose($fp);
-	}
-
-	function addSource($path)
-	{
-		$this->_sources[$path] = $path;
-	}
-
-	function getSources()
-	{
-		return $this->_sources;
+		{
+			return fwrite($this->fp, $str);
+		}
 	}
 
 }
