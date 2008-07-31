@@ -336,12 +336,7 @@ class DBAL
 
 	function applyPlaceholder($sql)
 	{
-		$sql = preg_replace('/^\s*?(update.*?)(\?\?)([a-zA-Z0-9_\-]+.*?set)/i', '$1'.$this->prefix.'$3', $sql, -1, $count);	
-		if ($count) return $sql;
-		$sql = preg_replace('/^\s*?((insert|replace).*?into\s+)(\?\?)([a-zA-Z0-9_\-]+)/i', '$1'.$this->prefix.'$4', $sql, -1, $count);
-		if ($count) return $sql;
-		$sql = str_replace("??", $this->prefix, $sql);
-		return $sql;
+		return preg_replace('/((update|((insert|replace).*?into)|from|join)\s*?)(\?\?)([a-zA-Z0-9_\-]+)/i', '$1'.$this->prefix.'$6', $sql, -1, $count);
 	}
 	
 	/**
