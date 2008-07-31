@@ -36,10 +36,11 @@ class TemplateEngine extends ConfigProcessor
 	 * @var array
 	 */
 	protected $files2functions = array();
-	
 	protected $skinNames = array();
-	
 	protected $skinName = '';
+	protected $skinDir = '';
+	
+	// ############################################## //
 	
 	public function __construct( &$rh )
 	{
@@ -170,19 +171,24 @@ class TemplateEngine extends ConfigProcessor
 	 */
 	public function skin( $skinName="" )
 	{
-		if($skinName == "")
-		{
-			return false;
-		}
 		// запомнить каталог для FindScript
-		$dir = $this->rh->tpl_root_dir.$skinName;
-		if ($skinName != "") $dir.="/";
-		
-		array_unshift($this->DIRS, $dir);
+		$this->skinDir = $this->rh->tpl_root_dir.$skinName;
+		if (substr($this->skinDir, -1) != "/") $this->skinDir.="/";
+				
+		array_unshift($this->DIRS, $this->skinDir);
 		// запомнить имя шкуры
 		$this->skinNames[] = $skinName;
-		// установить шкуру
-		$this->setSkin( $skinName );
+		$this->skinName = $skinName;
+		
+		$this->set( "skin", $this->skinDir );
+		
+		$tplRootHref = $this->rh->tpl_root_href.$skinName;
+		if (substr($tplRootHref, -1) != "/") $tplRootHref.="/";
+		
+		foreach($this->rh->tpl_skin_dirs AS $k => $dir)
+		{
+			$this->set( $dir, $tplRootHref.$dir."/");
+		}
 	}
 
 	/**
@@ -379,13 +385,14 @@ class TemplateEngine extends ConfigProcessor
 
 			$this->parseCache = $files;
 		}
-		
+				
 		if (is_array($data))
 		{
 			foreach ($data AS $k => $v)
 			{
 				if ($v{0} == '@')
 				{
+					
 					$this->parse(substr($v, 1), $k);
 				}
 				else
@@ -560,21 +567,6 @@ class TemplateEngine extends ConfigProcessor
 		return $_;
 	}
 	
-	/**
-	 * Устанавливаем новую шкуру и зависимые от нее шаблонные переменные
-	 *
-	 * @param string $skinName
-	 */	
-	protected function setSkin( $skinName )
-	{
-		$this->set( "skin", $this->rh->tpl_root_href.$skinName );
-		foreach($this->rh->tpl_skin_dirs AS $k => $dir)
-		{
-			$this->set( $dir, $this->rh->tpl_root_href.$skinName."/".$dir."/" );
-		}
-		$this->skinName = $skinName;
-	}
-
 	/**
 	 * Порождает компиляторскую часть
 	 *
