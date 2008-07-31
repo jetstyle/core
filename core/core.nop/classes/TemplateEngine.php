@@ -40,6 +40,9 @@ class TemplateEngine extends ConfigProcessor
 	protected $skinName = '';
 	protected $skinDir = '';
 	
+	protected $siteMap = array();
+	protected $siteMapFilename = 'site_map.yml';
+	
 	// ############################################## //
 	
 	public function __construct( &$rh )
@@ -189,6 +192,8 @@ class TemplateEngine extends ConfigProcessor
 		{
 			$this->set( $dir, $tplRootHref.$dir."/");
 		}
+		
+		$this->loadSiteMap();
 	}
 
 	/**
@@ -301,20 +306,22 @@ class TemplateEngine extends ConfigProcessor
 	 * Отпарсить массив
 	 * Все шаблоны и подшаблоны складываются в один закэшированный файл 
 	 * 
-	 * ex.:
-	 * $cacheName = 'news'
-	 * $data = array(
-	 * 		'name' => 'Новости',
-	 * 		'HTML:body' => '@news/item.html',
-	 * 		'html' => '@html.html'
-	 * );
-	 * 
-	 * @param string $cacheName
-	 * @param array $data
+	 * @param string $siteMapKey
 	 */
-	public function parseSiteMap($cacheName, $data)
+	public function parseSiteMap($siteMapKey)
 	{
-		$cacheName = preg_replace("/[^\w\x7F-\xFF\s]/", $this->rh->tpl_template_sepfix, $cacheName);
+		if (!isset($this->siteMap[$siteMapKey]))
+		{
+			throw new Exception('Sitemap "'.$siteMapKey.'" not found');
+		}
+		
+		$data = $this->siteMap[$siteMapKey];
+		if (!$data['html'])
+		{
+			$data['html'] = '@html.html';
+		}
+		
+		$cacheName = preg_replace("/[^\w\x7F-\xFF\s]/", $this->rh->tpl_template_sepfix, $siteMapKey);
 		$fileCached = $this->rh->cache_dir . $this->rh->environment . $this->rh->tpl_template_sepfix . $this->skinName . $this->rh->tpl_template_file_prefix .	$cacheName . ".php";
 		
 		if (!file_exists($fileCached))
@@ -565,6 +572,31 @@ class TemplateEngine extends ConfigProcessor
 		$_ = trim(ob_get_contents());
 		ob_end_clean();
 		return $_;
+	}
+	
+	/**
+	 * Загрузим файл карты сайта. Должен лежать в директории со скином
+	 *
+	 */
+	protected function loadSiteMap()
+	{
+		if (file_exists($this->skinDir.$this->siteMapFilename))
+		{
+			$fileCache = new FileCache($this->skinName.'_site_map.php');
+			if ($fileCache->isValid())
+			{
+				$data = include $fileCache->getFileName();
+				$this->siteMap = unserialize($data);
+			}
+			else
+			{
+				$this->rh->useLib('spyc');
+				$this->siteMap = Spyc :: YAMLLoad($this->skinDir.$this->siteMapFilename);
+				$fileCache->addSource($this->skinDir.$this->siteMapFilename);
+				$str = "return '".str_replace("'", "\\'", serialize($this->siteMap))."';";
+				$fileCache->write($str);
+			}
+		}
 	}
 	
 	/**

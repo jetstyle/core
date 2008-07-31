@@ -75,9 +75,6 @@ config_set($self, 'lib_dir',  $self->lib_href_part);
 
 config_set($self, 'magic_word',  "I luv rokket"); // магическое слово для генерации разных псевдослучайностей
 
-// разбор урла
-config_set($self, 'url_allow_direct_handling',  false); // напрямую переводить URL в путь до хандлера
-
 // параметры кук
 config_set($self, 'cookie_prefix',  ""); // (+) префикс всех кук. Позволяет нескольким сайтам на одном домене независимо существовать в куках
 config_set($self, 'cookie_expire_days',  60); // сколько дней держаться перманентные куки
@@ -105,7 +102,4 @@ $DIRS[] = $_app_dir;
 $DIRS[] = $_core_dir;
 
 config_set($self, 'DIRS', $DIRS);
-
-config_seeConfig($config_loader, $self,
-	$self->tpl_root_dir.$self->tpl_skin, 'site_map');
 ?>

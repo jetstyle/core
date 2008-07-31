@@ -12,7 +12,7 @@ class FileCache
 	
 	public function __construct($filePath)
 	{
-		$this->filePath = $filePath;
+		$this->filePath = JS_CACHE_DIR.$filePath;
 	}
 
 	public function getSources()

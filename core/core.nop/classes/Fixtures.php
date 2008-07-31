@@ -51,7 +51,7 @@ class Fixtures
 			return;
 		}
 		
-		$this->fileCacheObj = new FileCache($this->rh->cache_dir.$this->cachedName.'.php');
+		$this->fileCacheObj = new FileCache($this->cachedName.'.php');
 		$sources = $this->fileCacheObj->getSources();
 		
 		// need to recompile	
@@ -61,7 +61,7 @@ class Fixtures
 		}
 		else
 		{
-			$data = include $this->rh->cache_dir.$this->cachedName.'.php';
+			$data = include $this->fileCacheObj->getFileName();
 			$this->data = unserialize($data);
 		}
 	}

@@ -47,19 +47,10 @@ class Site
 
 		$ctx = NULL;
 
-		/* если директории кеша нет в конфиге, посчитаем */
-		if (!isset($config['cache_dir']))
-			$config['cache_dir']	= $config['project_dir']
-										. 'cache/'
-										. $config['app_name']
-										. '/';
-
-
-		$cache_dir = $config['cache_dir'];
 		$environment = $config['environment'];
 
 		require_once 'FileCache.php';
-		$cache =& new FileCache($cache_dir.$environment.'_config'.'.php');
+		$cache =& new FileCache($environment.'_config'.'.php');
 		
 		// если кеш валидный
 		if ($cache->isValid())

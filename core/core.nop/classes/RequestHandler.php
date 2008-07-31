@@ -508,14 +508,8 @@ class RequestHandler extends ConfigProcessor {
                 
             $this->site_map_path = $k;
         }
-		$conf = $this->site_map[$this->site_map_path];
-
-		if (!$conf['html'])
-		{
-			$conf['html'] = '@html.html';
-		}
-				
-		$this->tpl->parseSiteMap($this->site_map_path, $conf);
+        		
+		$this->tpl->parseSiteMap($this->site_map_path);
 		echo $this->tpl->get('html');
 	}
 	
