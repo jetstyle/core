@@ -138,7 +138,11 @@ class ExceptionHandler
 		$res = '<ol class="backtrace">';
 		foreach ($data as $key => $value)
 		{
-			$res .= '<li>'.$value['class'].$value['type'].$value['function'].'<div class="backtrace-file">'.$value['file'].' (line: '.$value['line'].')</div></li>';
+			$res .= '<li>'.$value['class'].$value['type'].$value['function'];
+			if ($value['file'])
+			{
+				$res .= '<div class="backtrace-file">'.$value['file'].' (line: '.$value['line'].')</div></li>';
+			}
 		}
 		$res .= '</ol>';
 		return $res;
