@@ -2,9 +2,9 @@
 
 class DbException extends JSException
 {
-	public function __toString() 
+	public function getText()
 	{
-		return parent::__toString()."<br /><br /><b>".mysql_error()."</b>";
+		return "<b>Mysql said:</b><div class=\"source\">".mysql_error()."</div>";
 	}
 	
 }

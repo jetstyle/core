@@ -57,16 +57,14 @@ class DBAL_mysql
 
 	public function connect()
 	{
-		//		if(!extension_loaded("mysql")) dl("mysql.so");
-
 		if (!$this->dblink = @mysql_connect($this->rh->db_host,	$this->rh->db_user,	$this->rh->db_password))
 		{
-			throw new DbException("Host=<b>" . $this->rh->db_host . "</b>, User=<b>" . $this->rh->db_user . "</b>", 1);
+			throw new DbException("Connect failed: Host=<b>" . $this->rh->db_host . "</b>, User=<b>" . $this->rh->db_user . "</b>");
 		}
 
 		if (!mysql_select_db($this->rh->db_name, $this->dblink))
 		{
-			throw new DbException("Mysql database \"" . $this->rh->db_name . "\" select error", 2);
+			throw new DbException("Database \"" . $this->rh->db_name . "\" select error");
 		}
 	}
 
@@ -109,11 +107,13 @@ class DBAL_mysql
 
 		// 1. execute
 		if (!$result = mysql_query($sql, $this->dblink))
-			throw new DbException("Mysql query \"" . $sql . "\" error");
+			throw new DbException("Query failed: <div class=\"query\">" . $this->formatSql($sql) . "</div>");
 		
-		
-		if (!is_resource($result)) $result = FALSE;
-
+		if (!is_resource($result))
+		{
+			$result = false;
+		}
+			
 		return $result;
 	}
 
@@ -121,7 +121,7 @@ class DBAL_mysql
 	{ return mysql_insert_id( $this->dblink ); }
 
 	public function fetchAssoc( $handle )
-	{ return mysql_fetch_assoc($handle); }
+	{ return mysql_fetch_assoc($handle);}
 
 	public function fetchObject( $handle )
 	{ return mysql_fetch_object($handle); }
@@ -134,6 +134,11 @@ class DBAL_mysql
 
 	public function getNumRows($handle)
 	{ return mysql_num_rows($handle); }
+	
+	protected function formatSql($sql)
+	{
+		return preg_replace('/((select|from|((left|right|inner)\s*?join)|where|order|group|having|limit))\s/i', '<br /><b>$1</b> ', $sql);
+	}
 
 	// EOC{ DBAL_mysql }
 }

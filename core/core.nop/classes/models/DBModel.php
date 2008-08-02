@@ -1140,7 +1140,7 @@ class DBModel extends Model implements IteratorAggregate, ArrayAccess, Countable
 	 */
 	protected function getFields()
 	{
-		return implode(',', array_map(array(&$this, 'buildFieldAlias'), $this->tableFields));
+		return implode(', ', array_map(array(&$this, 'buildFieldAlias'), $this->tableFields));
 	}
 	
 	/**
