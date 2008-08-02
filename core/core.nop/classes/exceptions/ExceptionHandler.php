@@ -11,7 +11,25 @@ define("EXCEPTION_SHOW",   8);
 class ExceptionHandler
 {
 	static private $instance;
-	private $config;
+	
+	/**
+	 * Reaction on exception
+	 * 
+	 * ex.
+	 * $config = array(
+	 * 	'FileNotFoundException' => EXCEPTION_SHOW,
+	 * 	'DbException' => EXCEPTION_MAIL + EXCEPTION_SILENT
+	 * );
+	 *
+	 * @var array
+	 */
+	private $config = array();
+	
+	/**
+	 * Methods to execute
+	 *
+	 * @var array
+	 */
 	private $methodsByConst = array(
 									EXCEPTION_IGNORE => "ignore",
 	                                EXCEPTION_SILENT => "silent",
@@ -27,7 +45,7 @@ class ExceptionHandler
 			self::$instance = new self();
 		return self::$instance;
 	}
-
+	
 	private function __construct() {}
 
 	public function init($config)
@@ -47,7 +65,7 @@ class ExceptionHandler
 		}
 		else
 		{	
-			foreach ($this->methodsByConst as $action=>$method)
+			foreach ($this->methodsByConst AS $action => $method)
 			{
 				if ($this->config[$className] & $action)
 				{
@@ -108,12 +126,26 @@ class ExceptionHandler
 						body {
 							padding: 20px; 
 							font-family: Arial, sans-serif; }
-						.backtrace {padding-top: 20px; padding-left: 40px;}
-						.backtrace li {margin-bottom: 15px;}
+						
+						ol {padding-top: 20px;}
+						ol li {margin-bottom: 15px;}
+						
+						.info td {vertical-align: top;}
+						
+						.backtrace {padding-top: 30px; padding-left: 20px; min-width: 500px;}
 						.backtrace .backtrace-file {font-size: 80%; margin-top: 5px;}
+						
+						.detailed-info {padding-top: 30px; padding-left: 30px;}
+						
+						.clearer {clear: both;}
+						tt { color:#666600; background:#ffffcc; padding: 5px; font-family: Arial, sans-serif;}
+						.warning {color: red; font-weight: bold;}
+						.source {margin-top: 5px; background-color: #EAEAEA; padding: 10px; font-family: Arial, sans-serif;}
 					</style>
 				</head>
 				<body>';
+		
+		echo '<div class="message">';
 		
 		if ("Exception" == get_class($exceptionObj))
 		{
@@ -124,18 +156,25 @@ class ExceptionHandler
 			echo $exceptionObj;
 		}
 
-		if ($exceptionObj->no_trace) return;
+		echo "</div>";
 		
-		echo "<br /><br /><b>Backtrace</b>:<br />";
+//		echo "<br class=\"clearer\" />";
 		
+		echo "<table class=\"info\"><tr><td class=\"backtrace\">";
+		echo "<b>Backtrace</b>:<br />";
 		echo $this->getTrace($exceptionObj->getTrace());
+		echo "</td><td class=\"detailed-info\">";
+		
+//		echo "<b>Info</b>:<br />";
+		echo $exceptionObj->getText();
+		echo "</td></tr></table>";
 		
 		echo '</body></html>';
 	}
 
-	function getTrace($data)
+	private function getTrace($data)
 	{
-		$res = '<ol class="backtrace">';
+		$res = '<ol>';
 		foreach ($data as $key => $value)
 		{
 			$res .= '<li>'.$value['class'].$value['type'].$value['function'];

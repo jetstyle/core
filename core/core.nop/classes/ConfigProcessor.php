@@ -161,7 +161,9 @@ class ConfigProcessor {
 	{
 		if (!$fname = $this->findScript($type,$name,$level,$dr,$ext,$withSubDirs))
 		{
-			throw new FileNotFoundException("name=<b>$name</b>, level=<b>$level</b>, dr=<b>$dr</b>", $type=="templates", $name, $this->rh, $this->searchHistory);
+			$e = new FileNotFoundException("File not found: <b>".$name.".".$ext."</b>", $this->buildSearchHistory());
+			$e->setFilename($name.".".$ext);
+			throw $e;
 		}
 		else
 		{
@@ -200,6 +202,24 @@ class ConfigProcessor {
 	private function _useScript($source)
 	{
 		include_once( $source );
+	}
+	
+	private function buildSearchHistory()
+	{
+		if(empty($this->searchHistory))
+		{
+			return '';
+		}
+		
+		$out = '<b>Search history:</b><ol>';
+
+		foreach($this->searchHistory AS $k => $v)
+		{
+			$out .= '<li>'.str_replace($this->rh->project_dir, '', $v).'</li>';
+		}
+		
+		$out .= '</ol>';
+		return $out;
 	}
 }
 ?>

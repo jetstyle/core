@@ -104,6 +104,8 @@ class TemplateEngineCompiler
 	 */
 	protected $externalTemplates = array();
 	
+	protected $sourceFile = null;
+	protected $sourceTemplate = null;
 	
 	public function __construct( &$rh )
 	{
@@ -182,12 +184,39 @@ class TemplateEngineCompiler
 		$this->compiledTemplates = array();
 		$this->compiledActions = array();
 		
-		foreach ($data AS $k => $v)
+		try
 		{
-			if ($v{0} == '@')
+			foreach ($data AS $k => $v)
 			{
-				$this->compile(substr($v, 1));
+				if ($v{0} == '@')
+				{
+					$this->compile(substr($v, 1));
+				}
 			}
+		}
+		catch (FileNotFoundException $e)
+		{
+//			var_dump($this->sourceFile);
+//			die();
+			
+			$out = $e->getText().'<br />';
+			
+			if ($this->sourceFile)
+			{
+				$fn = $e->getFilename();
+				$pi = pathinfo($fn);
+				if ($pi['extension'] == 'php')
+				{
+					$fn = substr($fn, 0, strlen($fn) - 4);
+				}
+				
+				$file = file_get_contents($this->sourceFile);
+				$file = htmlentities($file, ENT_COMPAT, 'cp1251');
+				$file = str_replace($fn, "<span class=\"warning\">".$fn."</span>", $file);
+				$out .= "<b>Source:</b><br /><br /><div><tt>".$this->sourceTemplate."</tt><pre class=\"source\">".$file."</pre></div>";
+			}
+			
+			throw new TplException('Compiler: '.$e->getMessage(), $out);
 		}
 		
 		$compiledTemplates = array();
@@ -215,7 +244,7 @@ class TemplateEngineCompiler
 	 * Компиляция шаблона. 
 	 *
 	 * @param array OR string $tplInfo (если string - то имя шаблона, иначе результат $tpl->getTplInfo())
-	 * @param unknown_type $fileCached
+	 * @param string $fileCached
 	 * @return boolean
 	 */
 	public function compile($tplInfo, $fileCached = null)
@@ -224,16 +253,11 @@ class TemplateEngineCompiler
 		{
 			$tplInfo = $this->tpl->getTplInfo($tplInfo);
 		}
-		
-		if (!file_exists($tplInfo['file_source']))
-		{
-			throw new FileNotFoundException("TPL::compile: file *".$tplInfo['file_source']."* not found");
-		}
-		
+				
 		$pi = pathinfo( $tplInfo['file_source'] );
 		if ($pi["extension"] != "html")
 		{
-			throw new TplException("TPL: not .html template found @ ".$tplInfo['file_source']."!");
+			throw new TplException("Compiler: not .html template found @ ".$tplInfo['file_source']."!");
 		}
 
 		if (!isset($this->compiledTemplates[$tplInfo['tpl'].'.html']))
@@ -359,6 +383,8 @@ class TemplateEngineCompiler
 					{
 						foreach ($files AS $file)
 						{
+							$this->sourceFile = $source;
+							$this->sourceTemplate = $actionInfo['name'];
 							if ($file{0} == '@')
 							{
 								$fileName = trim(substr($file, 1));
@@ -379,7 +405,7 @@ class TemplateEngineCompiler
 		}
 		else
 		{
-			throw new TplException('can\'t read file '.$source);
+			throw new TplException('Compiler: can\'t read file '.$source);
 		}
 		
 		if (null === $cacheFile)
@@ -408,7 +434,7 @@ class TemplateEngineCompiler
 		$contents = @file_get_contents($fileName);
 		if (!$contents)
 		{
-			throw new TplException("TPL: Can't read *$fileName*");
+			throw new TplException("Compiler: Can't read *".$fileName."*");
 		}
 
 		// {{/TPL}}
@@ -417,7 +443,7 @@ class TemplateEngineCompiler
 						$this->rh->tpl_postfix."/si", $contents, $matches)
 			)
 		{
-			throw new TplException("TPL: {{/TPL}} found!");
+			throw new TplException("Compiler: {{/TPL}} found!");
 		}
 
 		// B. typo correcting {{?/}} => {{/?}}
@@ -464,22 +490,26 @@ class TemplateEngineCompiler
 		
 		// replace @: with template name && compile external
 		$this->_template_item = $tplName;
+		$this->externalTemplates[$tplName] = array();
+		$this->externalActions[$tplName] = array();
 		$contents = preg_replace_callback("/(".$this->rh->tpl_prefix.')(.*?)('.$this->rh->tpl_postfix.")/si", array(&$this, 'templateReadCallback'), $contents);
 		$this->_template_item = '';
 
 		if ($this->compileWithExternals)
 		{
-			foreach ($this->externalTemplates AS $template)
+			foreach ($this->externalTemplates[$tplName] AS $template)
 			{
+				$this->sourceFile = $fileName;
+				$this->sourceTemplate = $tplName.'.html';
 				$this->compile($template);
 			}
-			$this->externalTemplates = array();
 			
-			foreach ($this->externalActions AS $action)
+			foreach ($this->externalActions[$tplName] AS $action)
 			{
+				$this->sourceFile = $fileName;
+				$this->sourceTemplate = $tplName.'.html';
 				$this->actionCompile($action);
 			}
-			$this->externalActions = array();
 		}
 		
 		// 2. grep all {{TPL:..}} & replace `em by !includes
@@ -560,7 +590,7 @@ class TemplateEngineCompiler
 			{
 				foreach ($matches1[1] AS $m1)
 				{
-					$this->externalTemplates[$m1] = $m1;
+					$this->externalTemplates[$tplName][$m1] = $m1;
 				}
 			}
 			
@@ -568,14 +598,14 @@ class TemplateEngineCompiler
 			
 			if ($matches[2]{0} == '@')
 			{
-				$this->externalActions['include'] = 'include';
+				$this->externalActions[$tplName]['include'] = 'include';
 			}
 			else
 			{
 				preg_match('/^(!|!!)([\w_]+).*?/si', $matches[2], $matches1);
 				if (!empty($matches1[2]))
 				{
-					$this->externalActions[$matches1[2]] = $matches1[2];
+					$this->externalActions[$tplName][$matches1[2]] = $matches1[2];
 				}
 			}
 		}
@@ -1015,7 +1045,7 @@ class TemplateEngineCompiler
 			case TE_TYPE_TEMPLATE: $res = $this->phpString('@'.$param[TE_VALUE]); break;
 			case TE_TYPE_PHP_SCRIPT: $res = $param[TE_VALUE]; break;
 			default:
-				throw new TplException("TemplateEngineCompiler::compileParam() - undefined param type");
+				throw new TplException("Compiler: undefined param type");
 			break;
 		}
 		return $res;
@@ -1141,12 +1171,12 @@ class TemplateEngineCompiler
 	{
 		if (file_exists($file_to) && !is_writable($file_to) )
 		{
-			throw new Exception("TPL: can't write to file ".$file_to);
+			throw new TplException("Compiler: can't write to file *".$file_to."*");
 		}
 
 		if (!file_exists($file_to) && !is_writable($this->rh->cache_dir))
 		{
-			throw new Exception("TPL: can't write to cache dir ".$this->rh->cache_dir);
+			throw new TplException("Compiler: can't write to cache dir *".$this->rh->cache_dir."*");
 		}
 	}
 

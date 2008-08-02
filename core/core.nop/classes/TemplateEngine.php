@@ -312,7 +312,7 @@ class TemplateEngine extends ConfigProcessor
 	{
 		if (!isset($this->siteMap[$siteMapKey]))
 		{
-			throw new Exception('Sitemap "'.$siteMapKey.'" not found');
+			throw new TplException('Sitemap "'.$siteMapKey.'" not found');
 		}
 		
 		$data = $this->siteMap[$siteMapKey];
@@ -467,23 +467,12 @@ class TemplateEngine extends ConfigProcessor
 					}
 					else
 					{
-						if (!@in_array($tplInfo['subtpl'], $this->soft_subtpls) && substr($tplInfo['subtpl'], -4) != "_sep" && substr($tplInfo['subtpl'], -6) != "_empty")
-						{
-							$id = ++$this->rh->exception_id;
-							$out = "<br /> <p>
-									<div style='background-color:#DDDDDD'>
-									Func_name=<b>" . $funcName . "</b>
-									<br /> Sub_tpl_name=<b>" . $tplInfo['subtpl'] . "</b>";
-							$out .= "<br /> Sub_tpl_source=<b>".$tplInfo['file_source']."</b> ";
-							$out .= "<a href='#' onclick='document.getElementById(\"exc_".$id."\").style.display= (document.getElementById(\"exc_".$id."\").style.display==\"\" ? \"none\" : \"\" ); document.getElementById(\"exc_".$id."\").style.backgroundColor=\"#EEEEEE\"; return false;'>(click to show)</a></div>";
-							$out .= "<div style='display:none' id=\"exc_".$id."\">" . nl2br(implode("\n", file($tplInfo['file_source']))) . "</div></p>";
-					
-							throw new TplException($out);
-						}
-						else
-						{
-							$this->parseFunctionsCache[$funcName] = false;
-						}
+						$file = file_get_contents($tplInfo['file_source']);
+						$file = htmlentities($file, ENT_COMPAT, 'cp1251');
+						$file = str_replace($tplInfo['subtpl'], "<span class=\"warning\">".$tplInfo['subtpl']."</span>", $file);
+						$file = str_replace($tplName, "<span class=\"warning\">".$tplName."</span>", $file);
+						$out = "<b>Source:</b><br /><br /><div><tt>".$tplInfo['tpl'].".html"."</tt><pre class=\"source\">".$file."</pre></div>";
+						throw new TplException("template *<b>".$tplName."</b>* not found", $out);
 					}
 				}
 				else
