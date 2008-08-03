@@ -131,7 +131,7 @@ class Site
 				require_once $app_dir.'/classes/controllers/'.$cls.'.php';
 			}
 			//site controller, builds site environment
-			$o =& new $cls($ctx);
+			$o =& call_user_func(array($cls, 'getInstance'), $ctx, $cls);
 			Site::__store(_JS_SITE_METHOD_SET, $app_name, &$o);
 		}
 

@@ -134,6 +134,8 @@ require_once JS_CORE_DIR . 'classes/ConfigProcessor.php';
 
 class RequestHandler extends ConfigProcessor {
 
+	protected static $instance = null;
+	
 	//информация об остатке адреса для обработчика
 	var $params = array ();
 	var $params_string = "";
@@ -145,7 +147,17 @@ class RequestHandler extends ConfigProcessor {
 	var $fixtures = array ();
 	var $use_fixtures = False;
 
-	public function __construct($config_path = 'config/default.php') 
+	public static function &getInstance($config = null, $className = '')
+	{
+		if (null === self::$instance)
+		{
+			self::$instance = new $className($config);
+		}
+		
+		return self::$instance;
+	}
+	
+	protected function __construct($config_path = 'config/default.php') 
 	{
 		//пытаемся прочесть файл конфигурации
 		if (is_object($config_path)) 
@@ -189,7 +201,7 @@ class RequestHandler extends ConfigProcessor {
 			$this->_fuckQuotes($_COOKIE);
 			$this->_fuckQuotes($_REQUEST);
 		}
-		
+
 		//базовые объекты фреймворка
 		//TODO: все они синглтоны
 		$this->init();
@@ -349,7 +361,7 @@ class RequestHandler extends ConfigProcessor {
 			//			$this->db =& new DBAL( $this );
 			$this->db = & DBAL :: getInstance($this);
 			if ($this->db_set_encoding) {
-				$this->db->Query("SET NAMES " . $this->db_set_encoding);
+				$this->db->query("SET NAMES " . $this->db_set_encoding);
 			}
 		}
 		Debug :: trace("RH: created DBAL", "db", "db");
