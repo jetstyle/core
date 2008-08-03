@@ -9,7 +9,6 @@
 
 	if((is_array($data) || ($data instanceof ArrayAccess)) && count($data) > 0)
 	{
-		$for = array();
 		$content = '';
 		
 		$templateName = substr($params['do'], 1);
@@ -24,8 +23,12 @@
 	 	$i=0;
 		foreach($data AS $key => $r)
 		{
-			$for['i'] = ++$i;
-			$for['key'] = $key;
+			$for = array(
+				'i' => ++$i,
+				'key' => $key,
+				'odd' => $i%2,				
+			);
+			$for['even'] = !$for['odd'];
 			
 			$rh->tpl->setRef('for', $for);
 			$rh->tpl->setRef($storeTo, $r);
