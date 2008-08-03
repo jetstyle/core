@@ -72,9 +72,9 @@ class Model
 
 	protected $rh = null;
 
-	public function __construct(&$rh)
+	public function __construct()
 	{
-		$this->rh = &$rh;
+		$this->rh = &RequestHandler::getInstance();
 		$this->initialize();
 	}
 

@@ -189,23 +189,33 @@ class DBModel extends Model implements IteratorAggregate, ArrayAccess, Countable
 	 */
 	protected $one = false;
 
-	protected function initialize()
+	/**
+	 * Модель создана через фабрику?
+	 *
+	 * @var boolean
+	 */
+	protected $fromFactory = false;
+
+	public static function factory($className = '')
 	{
-		//$this->is_initialized = true; //иногда создаем объект, а потом делаем "initialize"
-
-		$parent_status = parent::initialize();
-
-		if (is_null($this->table))
+		$obj = null;
+		if ($className)
 		{
-			$this->table = $this->autoDefineTable();
+			if (substr($className, -5) != 'Model')
+			{
+				$className .= 'Model';
+			}
 		}
-
-		$this->addFields($this->fields);
-
-		//var_dump($this->tableFields);
-		//var_dump($this->foreignFields);
+		else
+		{
+			$className = get_class(self);
+		}
 		
-		return $parent_status && True;
+		RequestHandler::getInstance()->useModel($className);
+		$obj = new $className();
+		$obj->setFromFactory(true);
+		
+		return $obj;
 	}
 	
 	public function getTableName()
@@ -250,11 +260,13 @@ class DBModel extends Model implements IteratorAggregate, ArrayAccess, Countable
 	public function setTableAlias($v)
 	{
 		$this->tableAlias = $v;
+		if ($this->fromFactory) return $this;
 	}
 	
 	public function setTable($v)
 	{
 		$this->table = $v;
+		if ($this->fromFactory) return $this;
 	}
 	
 	public function setBannedTableAliases(&$v)
@@ -278,31 +290,41 @@ class DBModel extends Model implements IteratorAggregate, ArrayAccess, Countable
 		{
 			$this->limit = $v;
 		}
+		if ($this->fromFactory) return $this;
 	}
 	
 	public function setOrder($v)
 	{
 		$this->order = $v;
+		if ($this->fromFactory) return $this;
 	}
 	
 	public function setGroupBy($v)
 	{
 		$this->group = $v;
+		if ($this->fromFactory) return $this;
 	}
 	
 	public function setHaving($v)
 	{
 		$this->having = $v;
+		if ($this->fromFactory) return $this;
 	}
 	
 	public function setGroup($v)
 	{
 		return $this->setGroupBy($v);
+		if ($this->fromFactory) return $this;
 	}
 	
 	public function setOne($v)
 	{
 		$this->one = $v;
+	}
+	
+	public function setFromFactory($bool)
+	{
+		$this->fromFactory = $bool;
 	}
 	
 	/**
@@ -320,6 +342,7 @@ class DBModel extends Model implements IteratorAggregate, ArrayAccess, Countable
 		{
 			throw new Exception('Pager object must implement \'PagerInterface\'');	
 		}
+		if ($this->fromFactory) return $this;
 	}
 	
 	public function setPagerPerPage($v)
@@ -328,6 +351,7 @@ class DBModel extends Model implements IteratorAggregate, ArrayAccess, Countable
 		{
 			$this->pagerPerPage = $v;
 		}
+		if ($this->fromFactory) return $this;
 	}
 	
 	public function setPagerFrameSize($v)
@@ -336,21 +360,25 @@ class DBModel extends Model implements IteratorAggregate, ArrayAccess, Countable
 		{
 			$this->pagerFrameSize = $v;
 		}
+		if ($this->fromFactory) return $this;
 	}
 	
 	public function setPagerVar($v)
 	{
 		$this->pagerVar = $v;
+		if ($this->fromFactory) return $this;
 	}
 	
 	public function enablePager()
 	{
 		$this->pagerEnabled = true;
+		if ($this->fromFactory) return $this;
 	}
 	
 	public function disablePager()
 	{
 		$this->pagerEnabled = false;
+		if ($this->fromFactory) return $this;
 	}
 
 	
@@ -360,13 +388,15 @@ class DBModel extends Model implements IteratorAggregate, ArrayAccess, Countable
 	 *
 	 * @return void
 	 **/
-	public function clearFields()
+	public function &clearFields()
 	{
 		$this->fields = array();
 		$this->foreignFields = array();
 		$this->foreignModels = array();
 		$this->bannedTableAliases = array();
 		$this->tableFields = array();
+		
+		if ($this->fromFactory) return $this;
 	}
 	
 	/**
@@ -416,12 +446,13 @@ class DBModel extends Model implements IteratorAggregate, ArrayAccess, Countable
 				unset($this->foreignModels[$fieldName]);
 			}
 		}
+		if ($this->fromFactory) return $this;
 	}
 	
 	public function setFields($fields)
 	{
 		$this->clearFields();
-		$this->addFields($fields);
+		return $this->addFields($fields);
 	}
 	
 	public function addFields($fields)
@@ -439,6 +470,8 @@ class DBModel extends Model implements IteratorAggregate, ArrayAccess, Countable
 				$this->addField($key, $value);
 			}
 		}
+		
+		if ($this->fromFactory) return $this;
 	}
 	
 	public function addField($fieldName, $config = NULL)
@@ -500,6 +533,7 @@ class DBModel extends Model implements IteratorAggregate, ArrayAccess, Countable
 				}
 			}
 		}
+		if ($this->fromFactory) return $this;
 	}
 	
 	public function addForeignModel($fieldName, &$model)
@@ -508,6 +542,7 @@ class DBModel extends Model implements IteratorAggregate, ArrayAccess, Countable
 		
 		$model->setBannedTableAliases($this->bannedTableAliases);
 //		$this->bannedTableAliases[] = $model->getTableAlias();
+		if ($this->fromFactory) return $this;
 	}
 	
 	public function getCount($where = NULL)
@@ -569,6 +604,7 @@ class DBModel extends Model implements IteratorAggregate, ArrayAccess, Countable
 		{	
 			$this->data = null;
 		}
+		if ($this->fromFactory) return $this;
 	}
 	
 	// ########## QUOTES ############## //
@@ -623,8 +659,64 @@ class DBModel extends Model implements IteratorAggregate, ArrayAccess, Countable
 		return $this->quoteName($name);
 	}
 	
-	// ########## END QUOTES ############## //
 	
+	public function &load($where=NULL, $limit=NULL, $offset=NULL)
+	{
+		$this->notify('before_load', array(&$this));
+
+		if ($this->pagerEnabled)
+		{
+			$total = $this->getCount($where);
+			
+			if ($total == 0)
+			{
+				return;
+			}
+			
+			$pager = &$this->getPager();
+			$pager->setup($this->rh->ri->get($this->pagerVar), $total, $this->pagerPerPage, $this->pagerFrameSize);
+			$limit = $pager->getLimit();
+			$offset = $pager->getOffset();
+		}
+		
+		$this->setData($this->select($where, $limit, $offset));
+		
+		$this->notify('load', array(&$this));
+		
+		if ($this->fromFactory) return $this;
+	}
+	
+	public function &loadOne($where = NULL)
+	{
+		$this->setOne(true);
+		return $this->load($where, 1);
+	}
+	
+	
+	
+	
+	
+	// ############# Internal realization ######################### //
+	
+	
+	protected function initialize()
+	{
+		//$this->is_initialized = true; //иногда создаем объект, а потом делаем "initialize"
+
+		$parent_status = parent::initialize();
+
+		if (is_null($this->table))
+		{
+			$this->table = $this->autoDefineTable();
+		}
+
+		$this->addFields($this->fields);
+
+		//var_dump($this->tableFields);
+		//var_dump($this->foreignFields);
+		
+		return $parent_status && True;
+	}
 	
 	protected function &getPager()
 	{
@@ -693,35 +785,6 @@ class DBModel extends Model implements IteratorAggregate, ArrayAccess, Countable
 		return Inflector::underscore(str_replace(array("Model", "Basic"), "", $className));
 	}
 
-	public function load($where=NULL, $limit=NULL, $offset=NULL)
-	{
-		$this->notify('before_load', array(&$this));
-
-		if ($this->pagerEnabled)
-		{
-			$total = $this->getCount($where);
-			
-			if ($total == 0)
-			{
-				return;
-			}
-			
-			$pager = &$this->getPager();
-			$pager->setup($this->rh->ri->get($this->pagerVar), $total, $this->pagerPerPage, $this->pagerFrameSize);
-			$limit = $pager->getLimit();
-			$offset = $pager->getOffset();
-		}
-		
-		$this->setData($this->select($where, $limit, $offset));
-		
-		$this->notify('load', array(&$this));
-	}
-	
-	public function loadOne($where = NULL)
-	{
-		$this->setOne(true);
-		$this->load($where, 1);
-	}
 	
 	protected function loadSql($sql)
 	{
@@ -776,7 +839,7 @@ class DBModel extends Model implements IteratorAggregate, ArrayAccess, Countable
 		$data[$fieldName] = &$model;		
 	}
 
-	function mapHasOne($fieldName, &$data)
+	protected function mapHasOne($fieldName, &$data)
 	{
 		$fieldinfo = &$this->foreignFields[$fieldName];
 		$model = &$this->getForeignModel($fieldName);
