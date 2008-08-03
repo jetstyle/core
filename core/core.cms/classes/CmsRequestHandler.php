@@ -15,7 +15,7 @@ class CmsRequestHandler extends RequestHandler
 		$this->project_title = 'CMS: '.$this->project_title;
 	}
 	
-	protected function init() 
+	public function init() 
 	{
 		$this->base_url .= $this->app_name.'/';
 		
