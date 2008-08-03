@@ -201,10 +201,17 @@ class RequestHandler extends ConfigProcessor {
 			$this->_fuckQuotes($_COOKIE);
 			$this->_fuckQuotes($_REQUEST);
 		}
+	}
 
-		//базовые объекты фреймворка
-		//TODO: все они синглтоны
-		$this->init();
+	public function init() 
+	{
+		$this->initDebug();
+		$this->initDBAL();
+		$this->initTPL();
+		$this->initMessageSet();
+		$this->initUpload();
+		$this->initPrincipal();
+		$this->initFixtures();
 		
 		// config from DB
 		if ($this->db)
@@ -214,8 +221,10 @@ class RequestHandler extends ConfigProcessor {
 			$c->load();
 			config_joinConfigs($this, $c->getData());			
 		}
+		
+		Debug :: trace("RH: init done");
 	}
-
+	
 	public function & getPageDomain() {
 		return $this->pageDomain;
 	}
@@ -321,19 +330,6 @@ class RequestHandler extends ConfigProcessor {
 		$this->page->rend();
 		
 		$this->afterPageHandle();
-	}
-
-	protected function init() 
-	{
-		$this->initDebug();
-		$this->initDBAL();
-		$this->initTPL();
-		$this->initMessageSet();
-		$this->initUpload();
-		$this->initPrincipal();
-		$this->initFixtures();
-		
-		Debug :: trace("RH: constructor done");
 	}
 
 	protected function initUpload()
