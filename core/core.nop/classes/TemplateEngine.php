@@ -328,14 +328,17 @@ class TemplateEngine extends ConfigProcessor
 		
 		$cacheName = preg_replace("/[^\w\x7F-\xFF\s]/", $this->rh->tpl_template_sepfix, $siteMapKey);
 		$fileCached = $this->rh->cache_dir . $this->rh->environment . $this->rh->tpl_template_sepfix . $this->skinName . $this->rh->tpl_template_file_prefix .	$cacheName . ".php";
+		$fileHelperCached = $this->rh->cache_dir . $this->rh->environment . $this->rh->tpl_template_sepfix . $this->skinName . $this->rh->tpl_template_file_prefix .	$cacheName . "_helper.php";
 		
-		if (!file_exists($fileCached))
+		if (!file_exists($fileCached) || !file_exists($fileHelperCached))
 		{
 			$this->spawnCompiler();
-			$this->compiler->compileSiteMap($data, $fileCached);
+			$this->compiler->compileSiteMap($data, $fileCached, $fileHelperCached);
 		}
 		
-		include_once($fileCached);
+		// сначала получим список всех использованных в этом сайтмапе файлов и экшенов
+		include_once($fileHelperCached);
+		
 		// шаблоны, из которых собран кэш
 		$funcName = $this->getFuncName('site_map_system', '__get_used_files');
 		$files = $funcName($this);
@@ -343,11 +346,7 @@ class TemplateEngine extends ConfigProcessor
 		// плагины, из которых собран кэш
 		$funcName = $this->getFuncName('site_map_system', '__get_used_actions');
 		$actions = $funcName($this);
-		
-		// сопоставления шаблон => функция
-		$funcName = $this->getFuncName('site_map_system', '__get_files2functions');
-		$this->files2functions = $funcName($this);
-		
+
 		if (is_array($files))
 		{
 			$recompile = $this->rh->tpl_compile != TPL_COMPILE_NEVER;
@@ -391,11 +390,18 @@ class TemplateEngine extends ConfigProcessor
 				if ($recompile)
 				{
 					$this->spawnCompiler();
-					$this->compiler->compileSiteMap($data, $fileCached);
+					$this->compiler->compileSiteMap($data, $fileCached, $fileHelperCached);
 				}
 			}
 
 			$this->parseCache = $files;
+
+			
+			include_once($fileCached);
+			
+			// сопоставления шаблон => функция
+			$funcName = $this->getFuncName('site_map_system', '__get_files2functions');
+			$this->files2functions = $funcName($this);
 		}
 				
 		if (is_array($data))
@@ -404,7 +410,6 @@ class TemplateEngine extends ConfigProcessor
 			{
 				if ($v{0} == '@')
 				{
-					
 					$this->parse(substr($v, 1), $k);
 				}
 				else

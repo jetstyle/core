@@ -169,8 +169,9 @@ class TemplateEngineCompiler
 	 * 
 	 * @param array $data
 	 * @param string $fileCached - имя кэш файла
+	 * @param string $fileHelperCached - имя кэш файла с сервисной информацией
 	 */
-	public function compileSiteMap($data, $fileCached)
+	public function compileSiteMap($data, $fileCached, $fileHelperCached)
 	{
 		if (!is_array($data) || empty($data))
 		{
@@ -196,9 +197,6 @@ class TemplateEngineCompiler
 		}
 		catch (FileNotFoundException $e)
 		{
-//			var_dump($this->sourceFile);
-//			die();
-			
 			$out = $e->getText().'<br />';
 			
 			if ($this->sourceFile)
@@ -226,14 +224,17 @@ class TemplateEngineCompiler
 			$compiledTemplates[$fileName] = true;
 		}
 		
-		// helper functions, also store to cache
 		$this->compiledFunctions[$this->tpl->getFuncName('site_map_system', '__get_files2functions')] = $this->templateBuildFunction('<'.'?php return unserialize(\''.str_replace("'", "\'", serialize($this->files2functions)).'\'); ?'.'>');
-		$this->compiledFunctions[$this->tpl->getFuncName('site_map_system', '__get_used_files')] = $this->templateBuildFunction('<'.'?php return unserialize(\''.str_replace("'", "\'", serialize($compiledTemplates)).'\'); ?'.'>');
-		$this->compiledFunctions[$this->tpl->getFuncName('site_map_system', '__get_used_actions')] = $this->templateBuildFunction('<'.'?php return unserialize(\''.str_replace("'", "\'", serialize($this->compiledActions)).'\'); ?'.'>');
-		
 		
 		$this->writeToFile($fileCached, $this->compiledFunctions);
 		$this->writeActionsToFile($fileCached, $this->compiledActionFunctions, 'a');
+		
+		// helper functions, also store to cache
+		$helper = array();
+		$helper[$this->tpl->getFuncName('site_map_system', '__get_used_files')] = $this->templateBuildFunction('<'.'?php return unserialize(\''.str_replace("'", "\'", serialize($compiledTemplates)).'\'); ?'.'>');
+		$helper[$this->tpl->getFuncName('site_map_system', '__get_used_actions')] = $this->templateBuildFunction('<'.'?php return unserialize(\''.str_replace("'", "\'", serialize($this->compiledActions)).'\'); ?'.'>');
+		
+		$this->writeToFile($fileHelperCached, $helper);
 		
 		$this->compileWithExternals = false;
 		
