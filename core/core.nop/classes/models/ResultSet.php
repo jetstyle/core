@@ -18,6 +18,28 @@ class ResultSet implements IteratorAggregate, ArrayAccess, Countable, DataContai
 		return $this->data;
 	}
 
+	public function getArray()
+	{
+		$result = array();
+		
+		if (is_array($this->data))
+		{
+			foreach ($this->data AS $k => $v)
+			{
+				if (is_object($v))
+				{
+					$result[$k] = $v->getArray();
+				}
+				else
+				{
+					$result[$k] = $v;
+				}
+			}
+		}
+		
+		return $result;
+	}
+	
 	/*
 	 * Author dz
 	 * реализация интерфейсов IteratorAggregate, ArrayAccess, Countable
