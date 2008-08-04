@@ -241,6 +241,11 @@ class TemplateEngine extends ConfigProcessor
 		return $result;
 	}
 	
+	public function getSiteMap()
+	{
+		return $this->siteMap;
+	}
+	
 	/**
 	 * Получение информации о плагине
 	 *
