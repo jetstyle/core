@@ -43,14 +43,14 @@ class HandlerPageDomain extends BasicPageDomain
 				{
 					$page_cls = $_handler;
 					$config = array (
-					'class' => $page_cls,
-					'config' => array (),
-					'path' => $up,
-					'url' => $url,
+						'class' => $page_cls,
+						'config' => array (),
+						'path' => $up,
+						'url' => $url,
 					);
-					if ($this->rh->FindScript("classes/controllers", $page_cls))
+					if ($this->rh->findScript("classes/controllers", $page_cls))
 					{
-						$this->rh->UseClass("controllers/".$page_cls);
+						$this->rh->useClass("controllers/".$page_cls);
 						if ($this->handler = &$this->buildPage($config))
 						{
 							return True;
@@ -69,15 +69,25 @@ class HandlerPageDomain extends BasicPageDomain
 		*/
 		if (!empty($page_cls))
 		{
-			$config = array (
-			'class' => $page_cls,
-			'config' => array (),
-			'path' => $this->rh->url,
-			'url' => $this->rh->url,
-			);
-			if ($this->rh->FindScript("classes/controllers", $page_cls))
+			if (substr($page_cls, -4) != 'Page')
 			{
-				$this->rh->UseClass("controllers/".$page_cls);
+				$page_cls .= 'Page';
+			}
+			
+			$config = array (
+				'class' => $page_cls,
+				'config' => array (),
+			);
+			
+			if (is_array($this->rh->handlers_map))
+			{
+				$config['path'] = array_search($page_cls, $this->rh->handlers_map);
+				$config['url'] = $config['path'];
+			}
+			
+			if ($this->rh->findScript("classes/controllers", $page_cls))
+			{
+				$this->rh->useClass("controllers/".$page_cls);
 				if ($this->handler = &$this->buildPage($config))
 				{
 					return True;
