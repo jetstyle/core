@@ -297,7 +297,7 @@ class FormSimple
 		// удаляем насовсем
 		else
 		{
-			$this->model->delete($this->model->quoteField($this->idField).'='.$this->id);
+			$this->model->delete('{'.$this->idField.'}='.$this->id);
 			$this->rh->ri->free($this->idGetVar);
 			return 2;
 		}
