@@ -26,6 +26,6 @@
 
 <script language="javascript">
 	var base_url = "{{/}}";
-	var tc = new treeControl('{{_url_connect}}', "{{_url_xml}}", "{{images}}tree/", "{{_href}}", {{?_tree_autoloading}}true{{?:}}false{{/?}}, "{{_tree_autoloading_url}}");
+	var tc = new treeControl('{{_url_connect}}', "{{_url_xml}}", "{{images}}tree/", "{{_href}}", {{?_tree_autoloading}}true{{?:}}false{{/?}}, "{{_tree_autoloading_url}}", {{?_tree_allow_drop_to_root}}true{{?:}}false{{/?}});
 	tc.load("{{_xml_string}}");
 </script>

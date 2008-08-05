@@ -145,6 +145,7 @@ class TreeControl
 					$this->rh->tpl->set('_xml_string', str_replace(array('"', "\n"), array('\"', ""), $this->toXML()));
 				}
 
+				$this->rh->tpl->set('_tree_allow_drop_to_root', $this->config->allowDropToRoot);
 				$this->rh->tpl->set('_tree_autoloading', $this->config->ajaxAutoLoading);
 				$this->rh->tpl->set('_tree_autoloading_url', $this->rh->ri->hrefPlus("do/".$this->config->moduleName."/tree", array('action' => 'xml', $this->idGetVar => '', 'autoload' => '1')));
 
@@ -441,8 +442,6 @@ class TreeControl
 
 					//модифицируем узел
 					$r = $tree['items'][$id];
-
-					var_dump('<pre>',$r,'</pre>');
 
 					if ($r['_parent'] == 0 && $parent_id !== 0)	{
 						$r['_path'] = '';
