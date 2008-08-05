@@ -47,7 +47,7 @@ abstract class PopupObjects
 		
 		$this->rh->useClass('Pager');
 		$this->pager = new Pager($this->rh);
-		$this->pager->set(intval($this->rh->ri->get($this->pageVar)), $total, 8, 5);
+		$this->pager->setup(intval($this->rh->ri->get($this->pageVar)), $total, 8, 5);
 		
 		$result = $this->rh->db->execute("
 			SELECT id, title
