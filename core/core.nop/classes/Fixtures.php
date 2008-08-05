@@ -40,7 +40,8 @@ class Fixtures
 	{
 		if (!is_dir($this->dir))
 		{
-			throw new Exception('Fixtures dir "'.$this->dir.'" doesn\'t exists.<br />If you don\'t need fixtures, disable it in config file. (use_fixtures=false)');
+			//throw new Exception('Fixtures dir "'.$this->dir.'" doesn\'t exists.<br />If you don\'t need fixtures, disable it in config file. (use_fixtures=false)');
+			return;
 		}
 		
 		$this->countHash();
