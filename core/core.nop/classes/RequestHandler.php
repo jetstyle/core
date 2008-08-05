@@ -306,7 +306,7 @@ class RequestHandler extends ConfigProcessor {
 	
 	public function _404()
 	{
-		$this->page = & $this->pageDomain->findPageByClass('_404');
+		$this->page = & $this->pageDomain->findPageByClass('PageNotFoundPage');
 		$this->execute();
 		$this->showSiteMap();
 		die();

@@ -1,13 +1,13 @@
 <?php
 /**
- * _404 Page
+ * 404 Page
  *
  * @author lucky@npj
  */
 $this->useClass('controllers/BasicPage');
-class _404 extends BasicPage
+class PageNotFoundPage extends BasicPage
 {
-	var $title = '404. Документ не найден';
+	protected $title = '404. Документ не найден';
 	
 	function handle() 
 	{
