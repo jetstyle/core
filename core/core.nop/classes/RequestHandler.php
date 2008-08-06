@@ -447,7 +447,7 @@ class RequestHandler extends ConfigProcessor {
 		} 
 		else 
 		{
-			$this->_404();
+			$this->page = & $this->pageDomain->findPageByClass('PageNotFoundPage');
 		}
 	}
 
