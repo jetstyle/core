@@ -106,7 +106,7 @@ class BasicPage extends Controller
 
 	function _match_pattern($name, $pattern, $value)
 	{
-		if (preg_match('#'.$pattern.'#', $value)) return True;
+		if (preg_match('#^'.$pattern.'$#', $value)) return True;
 		return False;
 	}
 
