@@ -20,8 +20,20 @@ class IFrame
 	function Handle(){
 		$tpl =& $this->rh->tpl;
 		$tpl->set( '__url', $this->config->url );
-		$tpl->Parse( $this->template, $this->store_to, true );
-		
+	
+		$tpl = & $this->rh->tpl;
+
+        $wid = $_GET['id'];
+		$vis = isset ($_COOKIE["cf" . $wid]) ? ($_COOKIE["cf" . $wid]==="true") : !$this->config->closed_iframe;
+
+		$tpl->set('_id', $wid);
+		$tpl->set('_class_name_1', ( $vis === true) ? "visible" : "invisible");
+		$tpl->set('_class_name_2', ( $vis === false) ? "visible" : "invisible");
+
+//        var_dump($vis, $tpl->get('_class_name_1'), $tpl->get('_class_name_2'));
+		$tpl->set('prefix', $this->prefix);
+		$tpl->Parse( $this->template, $this->store_to, true );	
+
 	}
 }	
 ?>

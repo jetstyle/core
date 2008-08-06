@@ -12,7 +12,7 @@ function SwapIframes( id1, id2 )
   document.getElementById(id1).style.display = "none";
   document.getElementById(id2).style.display = "block";
   
-  document.cookie = "cf"+{{_id}}+"=" + ("iframe_opened"==id2);
+  document.cookie = "cf"+"{{_id}}"+"=" + ("iframe_opened"==id2);
 
 }
 
@@ -54,7 +54,7 @@ function ReloadFrame(id){
 </table>
 </div>
 
-<!-- Развёрнутый модуль -->
+<!-- Свёрнутый модуль -->
 <div class="{{_class_name_2}}"
   id="iframe_closed{{_iframe_number}}"
   onmouseover="//document.getElementById('iframe_table_closed').className='module-title- m-over-'; return false;"

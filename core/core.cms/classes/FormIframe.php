@@ -9,7 +9,6 @@ class FormIframe extends FormFiles
 	function Handle()
 	{
 		$tpl = & $this->rh->tpl;
-
 		//load item
 		$this->Load();
 
