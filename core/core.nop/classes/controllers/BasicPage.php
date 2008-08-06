@@ -184,7 +184,6 @@ class BasicPage extends Controller
 			$matches = array();
 				
 			list($action, $pattern) = $v;
-			$this->pre_handle();
 
 			if (True === $this->_match_url($this->rh->params, $pattern, &$matches))
 			{
@@ -199,6 +198,7 @@ class BasicPage extends Controller
 						if (method_exists($controller, $method))
 						{
                             $this->method = $method;
+							$this->pre_handle();
 							$controller->initialize($this->rh);
 							$status = call_user_func_array(
 								array(&$controller, $method), 
@@ -209,9 +209,10 @@ class BasicPage extends Controller
 					else
 					{
                         $this->method = $action; 
-				$status = call_user_func_array(
-					array(&$this, 'handle_'.$action), 
-					array($matches));
+                        $this->pre_handle();
+        				$status = call_user_func_array(
+		        			array(&$this, 'handle_'.$action), 
+        					array($matches));
 				break;
 			}
 		}
