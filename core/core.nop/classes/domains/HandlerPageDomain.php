@@ -74,7 +74,7 @@ class HandlerPageDomain extends BasicPageDomain
 				$page_cls .= 'Page';
 			}
 						
-			if ($path = array_search($page_cls, $this->rh->handlers_map))
+			if (($page_cls == 'PageNotFoundPage') || ($path = array_search($page_cls, $this->rh->handlers_map)))
 			{
 				$config = array (
 					'class' => $page_cls,
