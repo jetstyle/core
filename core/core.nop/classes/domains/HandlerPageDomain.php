@@ -73,24 +73,23 @@ class HandlerPageDomain extends BasicPageDomain
 			{
 				$page_cls .= 'Page';
 			}
-			
-			$config = array (
-				'class' => $page_cls,
-				'config' => array (),
-			);
-			
-			if (is_array($this->rh->handlers_map))
+						
+			if ($path = array_search($page_cls, $this->rh->handlers_map))
 			{
-				$config['path'] = array_search($page_cls, $this->rh->handlers_map);
+				$config = array (
+					'class' => $page_cls,
+					'config' => array (),
+					'path' => $path
+				);
+				
 				$config['url'] = $config['path'];
-			}
-			
-			if ($this->rh->findScript("classes/controllers", $page_cls))
-			{
-				$this->rh->useClass("controllers/".$page_cls);
-				if ($this->handler = &$this->buildPage($config))
+				if ($this->rh->findScript("classes/controllers", $page_cls))
 				{
-					return True;
+					$this->rh->useClass("controllers/".$page_cls);
+					if ($this->handler = &$this->buildPage($config))
+					{
+						return True;
+					}
 				}
 			}
 		}
