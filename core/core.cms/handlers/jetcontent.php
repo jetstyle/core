@@ -1,7 +1,7 @@
 <?php
 include( $rh->FindScript('handlers','_start') );
 
-//не авторизован?
+// ?
 if( !$prp->IsAuth() )
 {
 	$rh->redirect( $rh->url.'login' );
@@ -51,7 +51,7 @@ if($_id)
 }
 else
 {
-	//возврашаем шаблон
+	// 
 	if($rh->cm_mode)
 	{
 		$template = 'jetcontent.html:html_alt';
@@ -118,7 +118,7 @@ function loadContent($id, &$rh)
 			{
 				$arr[] = array(
 					'id' => 'content-'.$r['id'],
-					'title' => $r['title'].($r['_state'] ? ' [скрыт]' : ''),
+					'title' => $r['title'].($r['_state'] ? ' [hidden]' : ''),
 					'title_ins' => $r['title'],
 					'child' => (($r['child'] || $rh->modes[$r['mode']]) ? 1 : 0),
 					'link' => ($rh->cm_mode ? '' : $rh->front_end->path_rel).$r['_path'],
@@ -220,6 +220,13 @@ function loadNews($id, &$rh)
 	return parseXml($arr);
 }
 
+function xmlQuote($str)
+{
+	$str = html_entity_decode($str, ENT_QUOTES, "cp1251");
+	$str = htmlspecialchars($str, ENT_QUOTES, "cp1251");
+	return $str;
+}
+
 function parseXml($data)
 {
 	$out = '';
@@ -227,8 +234,9 @@ function parseXml($data)
 	{
 		foreach($data AS $r)
 		{
-			$r['title'] = iconv('cp1251', 'UTF-8', htmlentities($r['title'], ENT_QUOTES, 'cp1251'));
-			$r['title_ins'] = iconv('cp1251', 'UTF-8', htmlentities($r['title_ins'], ENT_QUOTES, 'cp1251'));
+
+			$r['title'] = iconv('cp1251', 'UTF-8', xmlQuote($r['title']));
+			$r['title_ins'] = iconv('cp1251', 'UTF-8', xmlQuote($r['title_ins']));
 			
 			$r['title'] = str_replace(array("&ndash;", "&mdash;", "&nbsp;"), "-", $r["title"]);
 			$r['title_ins'] = str_replace(array("&ndash;", "&mdash;", "&nbsp;"), "-", $r["title_ins"]);
