@@ -119,6 +119,11 @@ class ConfigProcessor {
 		//ничего не нашли
 		return false;
 	}
+	
+	public function getDirsStack()
+	{
+		return $this->DIRS;
+	}
 
 	private function recursiveFind($dir, $name)
 	{
