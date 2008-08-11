@@ -40,7 +40,7 @@ class TemplateEngine extends ConfigProcessor
 	protected $skinName = '';
 	protected $skinDir = '';
 	
-	protected $siteMap = array();
+	public $siteMap = array();
 	protected $siteMapFilename = 'site_map.yml';
 	
 	// ############################################## //
