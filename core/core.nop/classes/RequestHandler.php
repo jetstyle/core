@@ -213,13 +213,12 @@ class RequestHandler extends ConfigProcessor {
 		$this->initPrincipal();
 		$this->initFixtures();
 		
+		$this->useModel('DBModel');
+		
 		// config from DB
 		if ($this->db)
-		{
-			$this->useClass('models/DBConfig');
-			$c =& new DBConfig($this);
-			$c->load();
-			config_joinConfigs($this, $c->getData());			
+		{			
+			config_joinConfigs($this, DBModel::factory('DBConfig')->load()->getData());			
 		}
 		
 		Debug :: trace("RH: init done");

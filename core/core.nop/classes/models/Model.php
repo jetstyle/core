@@ -78,6 +78,11 @@ class Model
 		$this->initialize();
 	}
 
+	protected function initialize($fieldSet = null)
+	{
+		
+	}
+	
 	public function registerObservers($event, $actions)
 	{
 		if (is_array($actions)) foreach ($actions as $k=>$v)
