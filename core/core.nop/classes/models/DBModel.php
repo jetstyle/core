@@ -942,7 +942,7 @@ class DBModel extends Model implements IteratorAggregate, ArrayAccess, Countable
 
 	function isEmpty() 
 	{ 
-		return !empty($this->data) && !is_array($this->data); 
+		return empty($this->data) || !is_array($this->data); 
 	}
 
 	//implements IteratorAggregate
