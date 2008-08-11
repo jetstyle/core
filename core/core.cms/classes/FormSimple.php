@@ -352,7 +352,7 @@ class FormSimple
 	
 	protected function updateData($data)
 	{
-		$this->model->update( $data, $this->model->quoteFieldShort($this->idField).'='.$this->model->quote($this->id) );
+		$this->model->update( $data, $this->model->quoteFieldShort($this->idField).'='.DBModel::quote($this->id) );
 	}
 
 	protected function needUpdate()

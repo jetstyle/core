@@ -59,7 +59,7 @@ class ListComplete extends ListSimple
 	protected function _delete() 
 	{
 		$model = &$this->getModel();
-		$model->delete($model->quoteFieldShort($this->idField).'='.$model->quote($this->id));
+		$model->delete($model->quoteFieldShort($this->idField).'='.DBModel::quote($this->id));
 	}
 
 	protected function updateForm() {
@@ -77,7 +77,7 @@ class ListComplete extends ListSimple
 			{
 				$data = array($this->config->SELECT_FIELDS[1] => $_POST[$this->prefix . $this->config->SELECT_FIELDS[1]]);
 				$model = &$this->getModel();
-				$model->update($data, $model->quoteFieldShort($this->idField).'='.$model->quote($this->id));
+				$model->update($data, $model->quoteFieldShort($this->idField).'='.DBModel::quote($this->id));
 			} 
 			else
 			{
@@ -101,7 +101,7 @@ class ListComplete extends ListSimple
 		
 		// update order
 		$data = array('_order' => $this->id);
-		$model->update($data, $model->quoteFieldShort($this->idField).'='.$model->quote($this->id));
+		$model->update($data, $model->quoteFieldShort($this->idField).'='.DBModel::quote($this->id));
 	}
 }
 ?>
