@@ -166,7 +166,10 @@ class ExceptionHandler
 		echo "</td><td class=\"detailed-info\">";
 		
 //		echo "<b>Info</b>:<br />";
-		echo $exceptionObj->getText();
+		if ("Exception" != get_class($exceptionObj))
+		{
+			echo $exceptionObj->getText();
+		}
 		echo "</td></tr></table>";
 		
 		echo '</body></html>';

@@ -224,7 +224,7 @@ class DBModel extends Model implements IteratorAggregate, ArrayAccess, Countable
 			$model = new DBModel();
 			if (!$model->loadConfig( $className, $fieldSet ))
 			{
-				throw new Exception('DBModel: can\'t find model "'.$className.'"'. ($fieldSet ? " with field set \"".$fieldSet."\"" : ""));
+				throw new JSException('DBModel: can\'t find model "'.$className.'"'. ($fieldSet ? " with field set \"".$fieldSet."\"" : ""));
 			}
 		}
 		 
