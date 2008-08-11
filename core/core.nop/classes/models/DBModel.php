@@ -212,22 +212,21 @@ class DBModel extends Model implements IteratorAggregate, ArrayAccess, Countable
 			$className = get_class(self);
 		}
 
-        //есть php-класс мдоели
+        //есть php-класс модели
     	$classFile = RequestHandler::getInstance()->findScript('classes/models', $className);
     	if ( $classFile )
     	{
     		RequestHandler::getInstance()->useModel($className);
-    		$ret = new $className();
-    		
+    		$model = new $className();
+    		$model->loadConfig( $className, $fieldSet );
     	}
-    	//есть yml
     	else
         {
-        	$ret = new DBModel();
-            //$ret->setConfig( $ymlConfig );
+			$model = new DBModel();
+			$model->loadConfig( $className, $fieldSet );
     	}
     	
-		return $ret;
+		return $model;
 	}
 	
 	/**
@@ -235,16 +234,17 @@ class DBModel extends Model implements IteratorAggregate, ArrayAccess, Countable
 	 *
 	 * загрузка файла с конфигом
 	 *
-	 * @param string $className - имя файла[:филдсета] конфига из каталога classes/models
+	 * @param string $className		имя файла конфига из каталога classes/models
+	 * @param string $fieldSet		имя набора полей из конфига
 	 */
-	private function loadConfig( $className )
+	public function loadConfig( $fileName, $fieldSet = null )
 	{
-	   $ymlFile  = RequestHandler::getInstance()->findScript('classes/models', $className, 0, 1, 'yml') ;
+	   $ymlFile  = $this->rh->findScript('classes/models', $fileName, 0, 1, 'yml') ;
 
        if ( $ymlFile )
        {
            //имя файла, которое будет у закэшированного файла
-           $cache_file_name = 'model_'.$className.'.php';
+           $cache_file_name = 'model_'.$fileName.'.php';
            $fileCache = new FileCache( $cache_file_name );
            if ($fileCache->isValid())
            {
@@ -253,7 +253,7 @@ class DBModel extends Model implements IteratorAggregate, ArrayAccess, Countable
            }
            else
            {
-               RequestHandler::getInstance()->useLib('spyc');
+               $this->rh->useLib('spyc');
                $ymlConfig = Spyc :: YAMLLoad($ymlFile);
             
                //путь до исходного файла, у которого проверяется дата модификации
@@ -262,7 +262,6 @@ class DBModel extends Model implements IteratorAggregate, ArrayAccess, Countable
 
                $fileCache->write($str);
            }
-       
 
            if ( $fieldSet && isset( $ymlConfig[ $fieldSet ] ) )
            {
@@ -271,9 +270,10 @@ class DBModel extends Model implements IteratorAggregate, ArrayAccess, Countable
            else if ( isset( $ymlConfig['default'] ) )
            {
                $ymlConfig = $ymlConfig['default'];
-           } 	
+           }
+           
+           $this->setConfig($ymlConfig);
        }
-       return $ymlConfig;
 	}
 
     /**
@@ -917,8 +917,6 @@ class DBModel extends Model implements IteratorAggregate, ArrayAccess, Countable
 	
 	protected function initialize()
 	{
-		//$this->is_initialized = true; //иногда создаем объект, а потом делаем "initialize"
-
 		$parent_status = parent::initialize();
 
 		if (is_null($this->table))
@@ -927,22 +925,12 @@ class DBModel extends Model implements IteratorAggregate, ArrayAccess, Countable
 		}
 
         //для всех классов с пустым fields
-		if ( empty( $this->fields ) )
-		{
-    		Debug::trace('after load YAML for '.get_class($this), 'YAML');
-            $ymlConfig = $this->loadConfig( get_class($this) );
-
-		    //у модели нет полей
-		    if ( !empty($ymlConfig) )
-		    {
-		        $this->setConfig( $ymlConfig );
-		    }
-            Debug::trace('after load YAML', 'YAML');
-        }
+//        $className = get_class($this);
+//		if ( $className !== 'DBModel' )
+//		{
+//            $this->loadConfig($className);
+//        }
 	    $this->addFields($this->fields);
-		
-		//var_dump($this->tableFields);
-		//var_dump($this->foreignFields);
 		
 		return $parent_status && True;
 	}

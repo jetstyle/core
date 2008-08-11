@@ -45,26 +45,21 @@
 
 class DBAL_mysql
 {
-	protected $rh;     // $this->rh->debug->Trace (..->Error)
-	protected $dbal;   // higher level
 	protected $dblink; // рукоятка к mysql db
 
-	public function __construct( &$dbal )
-	{
-		$this->rh = &$dbal->getRh();
-		$this->dbal = &$dbal;
-	}
+	public function __construct(){}
 
 	public function connect()
 	{
-		if (!$this->dblink = @mysql_connect($this->rh->db_host,	$this->rh->db_user,	$this->rh->db_password))
+		$rh = &RequestHandler::getInstance();
+		if (!$this->dblink = @mysql_connect($rh->db_host, $rh->db_user, $rh->db_password))
 		{
-			throw new DbException("Connect failed: Host=<b>" . $this->rh->db_host . "</b>, User=<b>" . $this->rh->db_user . "</b>");
+			throw new DbException("Connect failed: Host=<b>" . $rh->db_host . "</b>, User=<b>" . $rh->db_user . "</b>");
 		}
 
-		if (!mysql_select_db($this->rh->db_name, $this->dblink))
+		if (!mysql_select_db($rh->db_name, $this->dblink))
 		{
-			throw new DbException("Database \"" . $this->rh->db_name . "\" select error");
+			throw new DbException("Database \"" . $rh->db_name . "\" select error");
 		}
 	}
 

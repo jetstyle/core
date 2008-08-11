@@ -66,27 +66,27 @@
 
 class DBAL
 {
+	private static $instance = null;
+	
 	protected $rh;
 	protected $lowlevel;
 	protected $queryCount = 0;
 
-	public function __construct(& $rh, $connect = true)
+	private function __construct($connect = true)
 	{
-		$this->rh = & $rh;
-		$this->prefix = $rh->db_prefix;
+		$this->rh = RequestHandler::getInstance();
+		$this->prefix = $this->rh->db_prefix;
 
-		// создать низкоуровневый дбал
-//		require_once (dirname(__FILE__) . "/DBAL_" . $rh->db_al . ".php");
-		$lowlevel_name = "DBAL_" . $rh->db_al;
+		$lowlevelClass = "DBAL_" . $this->rh->db_al;		
+		$this->rh->useClass($lowlevelClass);
 		
-		$rh->useClass($lowlevel_name);
-		
-		$lowlevel = & new $lowlevel_name ($this);
-		$this->lowlevel = & $lowlevel;
+		$this->lowlevel = & new $lowlevelClass();
 
 		// connection, if any
 		if ($connect)
+		{
 			$this->connect();
+		}
 	}
 	
 	/**
@@ -96,21 +96,15 @@ class DBAL
 	 * @param string $connect
 	 * @return DBAL
 	 */
-	public function &getInstance(&$rh = null, $connect = true)
+	public static function &getInstance($connect = true)
 	{
-		static $instance = null;
-		if (null === $instance) 
+		if (null === self::$instance) 
 		{
-			$instance = new DBAL($rh, $connect); 
+			self::$instance = new DBAL($connect); 
 		}
-		return $instance;
+		return self::$instance;
 	}
-	
-	public function &getRh()
-	{
-		return $this->rh;
-	}
-	
+		
 	public function connect()
 	{
 		$this->lowlevel->connect();
