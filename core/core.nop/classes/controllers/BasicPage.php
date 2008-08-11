@@ -166,10 +166,9 @@ class BasicPage extends Controller
 		return $parent_status && True;
 	}
 
-	function pre_handle()
-	{
-		
-	}
+	function pre_handle(){} 
+	
+	function post_handle(){}     
 
 	function handle()
 	{
@@ -213,6 +212,7 @@ class BasicPage extends Controller
         				$status = call_user_func_array(
 		        			array(&$this, 'handle_'.$action), 
         					array($matches));
+        				$this->post_handle();
 				break;
 			}
 		}
