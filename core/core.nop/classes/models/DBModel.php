@@ -940,7 +940,7 @@ class DBModel extends Model implements IteratorAggregate, ArrayAccess, Countable
 	 *
 	 */
 
-	function empty() 
+	function isEmpty() 
 	{ 
 		return !empty($this->data) && !is_array($this->data); 
 	}
@@ -954,12 +954,12 @@ class DBModel extends Model implements IteratorAggregate, ArrayAccess, Countable
 	//implements ArrayAccess
 	public function offsetExists($key) 
 	{ 
-		return !$this->empty() && isset($this->data[$key]); 
+		return !$this->isEmpty() && isset($this->data[$key]); 
 	}
 	
 	public function offsetGet($key)
 	{ 
-		if (!$this->haveData())
+		if ($this->isEmpty())
 			return null;
 		if (isset($this->data[$key]))
 			return $this->data[$key]; 
@@ -976,7 +976,7 @@ class DBModel extends Model implements IteratorAggregate, ArrayAccess, Countable
 	public function offsetUnset($key) { unset($this->data[$key]); }
 
 	//implements Countable
-	public function count() { return (!$this->empty()) ? count($this->data) : 0; }
+	public function count() { return (!$this->isEmpty()) ? count($this->data) : 0; }
 
 	public function __toString() 
 	{
