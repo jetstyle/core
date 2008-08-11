@@ -244,15 +244,20 @@ class FormSimple
 		{
 			$value['fk']  = $value['fk'] ? $value['fk'] : "id";
 			
-			// пытаемся найти модель 
-			if ($modelFile = $this->rh->findScript('classes/models', $value['name']))
+			// пытаемся найти модель
+			try
 			{
-				$this->rh->useModel($value['name']);
-				$model = new $value['name']($this->rh);
+				$model = DBModel::factory($value['name']);
+			}
+			catch(Exception $e)
+			{
+				// 
+			}
+			
+			if ($model)
+			{
 				$model->setFields(array($value['fk'], 'title'));
-								
 				$model->setOrder(array("title" => "ASC"));
-				
 				$model->load();
 				
 				$data = array();
