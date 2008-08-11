@@ -59,7 +59,7 @@ class ListNews extends ListSimple
 			$M[ $row['month'] ] = true;
 		}
 		
-		include( $rh->findScript('handlers','_monthes') );
+		$MONTHES_NOMINATIVE = array("","€нварь","февраль","март","апрель","май","июнь","июль","август","сент€брь","окт€брь","но€брь","декабрь");
 				
 		for($i=1;$i<=12;$i++)
 		{
