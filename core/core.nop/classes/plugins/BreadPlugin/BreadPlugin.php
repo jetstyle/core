@@ -14,14 +14,12 @@ class BreadPlugin extends RenderablePlugin
 
 		$current = &$this->rh->page->config;
 		
-		$this->rh->useModel("ContentModel");
-		$model =& new ContentModel($this->rh);
-		$model->clearFields();
-		$model->addFields(array('id','_left', '_right', '_level', '_path', '_parent'));
-		$model->addField('title_short', 'IF(LENGTH(title_short) > 0, title_short, title_pre)');
-		$model->addField('href', '_path');
-
-		$model->setOrder(array('_left' => 'ASC'));
+		$model = & DBModel::factory('Content')
+							->clearFields()
+							->addFields(array('id','_left', '_right', '_level', '_path', '_parent'))
+							->addField('title_short', 'IF(LENGTH(title_short) > 0, title_short, title_pre)')
+							->addField('href', '_path')
+							->setOrder(array('_left' => 'ASC'));
 		
 		$where = 
 			'_left <= '.$model->quote($current['_left'])

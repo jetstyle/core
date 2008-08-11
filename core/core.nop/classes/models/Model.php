@@ -78,24 +78,6 @@ class Model
 		$this->initialize();
 	}
 
-	protected function initialize(/*&$ctx, $config=NULL*/) 
-	{ 
-		/*
-		if (!$this->rh)
-		{
-			$this->rh =& $ctx; 
-			
-			
-			if (is_array($config) && is_array($this->config)) 
-				$this->config = array_merge($this->config, $config);
-			
-		}
-		*/
-		return True;
-	}
-
-	function finalize() { }
-
 	public function registerObservers($event, $actions)
 	{
 		if (is_array($actions)) foreach ($actions as $k=>$v)

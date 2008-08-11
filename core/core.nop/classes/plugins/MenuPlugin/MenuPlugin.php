@@ -75,8 +75,7 @@ class MenuPlugin extends RenderablePlugin
 		 * загрузим модель меню
 		 * с условием на where
 		 */
-		$this->rh->useClass("models/ContentModel");
-		$menu = & new ContentModel($this->rh);
+		$menu = & DBModel::factory('Content');
 		$menu->setOrder(array('_left' => 'ASC'));
 		
 		$current = &$this->rh->page->config;

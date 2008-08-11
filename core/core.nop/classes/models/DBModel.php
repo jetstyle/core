@@ -217,8 +217,7 @@ class DBModel extends Model implements IteratorAggregate, ArrayAccess, Countable
     	if ( $classFile )
     	{
     		RequestHandler::getInstance()->useModel($className);
-    		$model = new $className();
-    		$model->loadConfig( $className, $fieldSet );
+    		$model = new $className($fieldSet);
     	}
     	else
         {
@@ -229,6 +228,12 @@ class DBModel extends Model implements IteratorAggregate, ArrayAccess, Countable
 		return $model;
 	}
 	
+	public function __construct($fieldSet = null)
+	{
+		$this->rh = &RequestHandler::getInstance();
+		$this->initialize($fieldSet);
+	}
+	
 	/**
 	 * loadConfig
 	 *
@@ -236,6 +241,7 @@ class DBModel extends Model implements IteratorAggregate, ArrayAccess, Countable
 	 *
 	 * @param string $className		имя файла конфига из каталога classes/models
 	 * @param string $fieldSet		имя набора полей из конфига
+	 * @return void
 	 */
 	public function loadConfig( $fileName, $fieldSet = null )
 	{
@@ -273,7 +279,10 @@ class DBModel extends Model implements IteratorAggregate, ArrayAccess, Countable
            }
            
            $this->setConfig($ymlConfig);
+           return true;
        }
+       
+       return false;
 	}
 
     /**
@@ -711,7 +720,7 @@ class DBModel extends Model implements IteratorAggregate, ArrayAccess, Countable
 		if (!is_array($fields) || empty($fields)) return;
 		
 		foreach ($fields AS $key => $value)
-		{			
+		{
 			if (is_numeric($key))
 			{
 				$this->addField($value);
@@ -915,24 +924,25 @@ class DBModel extends Model implements IteratorAggregate, ArrayAccess, Countable
 	// ############# Internal realization ######################### //
 	
 	
-	protected function initialize()
+	protected function initialize($fieldSet = null)
 	{
-		$parent_status = parent::initialize();
-
 		if (is_null($this->table))
 		{
 			$this->autoDefineTable();
 		}
 
         //для всех классов с пустым fields
-//        $className = get_class($this);
-//		if ( $className !== 'DBModel' )
-//		{
-//            $this->loadConfig($className);
-//        }
-	    $this->addFields($this->fields);
-		
-		return $parent_status && True;
+        $className = get_class($this);
+        $configLoaded = false;
+		if ( $className !== 'DBModel' )
+		{
+			$configLoaded = $this->loadConfig($className);
+        }
+        
+        if (!$configLoaded)
+        {
+	    	$this->addFields($this->fields);
+        }
 	}
 	
 	protected function &getPager()
@@ -1171,8 +1181,8 @@ class DBModel extends Model implements IteratorAggregate, ArrayAccess, Countable
 		}
 		
 		$this->sqlParts = array();
-				
-		$this->sqlParts['fields'] = 'SELECT '.$this->getFields($this->tableFields);
+		
+		$this->sqlParts['fields'] = 'SELECT '.$this->getFields();
 		$this->sqlParts['from'] = 'FROM '.$this->getTableNameWithAlias();
 		
 		list($joinSql, $joinFields, $joinWhere) = $this->buildJoin();
@@ -1624,9 +1634,7 @@ class DBModel extends Model implements IteratorAggregate, ArrayAccess, Countable
 		}
 		
 		$field = &$this->foreignFields[$fieldName];
-		$this->rh->useModel($field['className']);
-		$model = new $field['className']($this->rh);
-		
+		$model = & DBModel::factory($field['className']);
 		$model->setBannedTableAliases($this->bannedTableAliases);
 		//$this->bannedTableAliases[] = $model->getTableAlias();
 

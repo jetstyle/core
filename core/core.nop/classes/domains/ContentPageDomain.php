@@ -27,8 +27,7 @@ class ContentPageDomain extends BasicPageDomain
 	{
 		if (empty($criteria)) return False; // FIXME: lucky@npj -- вернуть все страницы?
 
-		$this->rh->useClass('models/ContentModel');
-		$content =& new ContentModel($this->rh);
+		$content = DBModel::factory('Content');
 		
 		$where = array();
 		if (!isset($criteria['class']) && $criteria['url']=="")
