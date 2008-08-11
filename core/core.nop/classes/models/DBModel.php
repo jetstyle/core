@@ -95,7 +95,7 @@ class DBModel extends Model implements IteratorAggregate, ArrayAccess, Countable
 	 * 
 	 * @var array
 	 **/
-	protected $fields = array('*');
+	protected $fields = array();
 	
 	/**
 	 * Поля таблицы
@@ -192,6 +192,14 @@ class DBModel extends Model implements IteratorAggregate, ArrayAccess, Countable
 	public static function factory($className = '')
 	{
 		$obj = null;
+		$parts = explode(":", $className);
+		
+		if (count($parts)>1)
+		{
+		    $className= $parts[0];
+		    $fieldSet = $parts[1];
+		}
+		
 		if ($className)
 		{
 			if (substr($className, -5) != 'Model')
@@ -203,9 +211,91 @@ class DBModel extends Model implements IteratorAggregate, ArrayAccess, Countable
 		{
 			$className = get_class(self);
 		}
-		
-		RequestHandler::getInstance()->useModel($className);
-		return new $className();
+
+        //есть php-класс мдоели
+    	$classFile = RequestHandler::getInstance()->findScript('classes/models', $className);
+    	if ( $classFile )
+    	{
+    		RequestHandler::getInstance()->useModel($className);
+    		$ret = new $className();
+    		
+    	}
+    	//есть yml
+    	else
+        {
+        	$ret = new DBModel();
+            //$ret->setConfig( $ymlConfig );
+    	}
+    	
+		return $ret;
+	}
+	
+	/**
+	 * loadConfig
+	 *
+	 * загрузка файла с конфигом
+	 *
+	 * @param string $className - имя файла[:филдсета] конфига из каталога classes/models
+	 */
+	private function loadConfig( $className )
+	{
+	   $ymlFile  = RequestHandler::getInstance()->findScript('classes/models', $className, 0, 1, 'yml') ;
+
+       if ( $ymlFile )
+       {
+           //имя файла, которое будет у закэшированного файла
+           $cache_file_name = 'model_'.$className.'.php';
+           $fileCache = new FileCache( $cache_file_name );
+           if ($fileCache->isValid())
+           {
+                $data = include $fileCache->getFileName();
+                $ymlConfig = unserialize($data);
+           }
+           else
+           {
+               RequestHandler::getInstance()->useLib('spyc');
+               $ymlConfig = Spyc :: YAMLLoad($ymlFile);
+            
+               //путь до исходного файла, у которого проверяется дата модификации
+               $fileCache->addSource($ymlFile);
+               $str = "return '".str_replace("'", "\\'", serialize( $ymlConfig ))."';";
+
+               $fileCache->write($str);
+           }
+       
+
+           if ( $fieldSet && isset( $ymlConfig[ $fieldSet ] ) )
+           {
+               $ymlConfig = $ymlConfig[ $fieldSet ];
+           }
+           else if ( isset( $ymlConfig['default'] ) )
+           {
+               $ymlConfig = $ymlConfig['default'];
+           } 	
+       }
+       return $ymlConfig;
+	}
+
+    /**
+     * setConfig
+     *
+     * установка полей конфига в модель
+     *
+     * @param array $ymlConfig конфиг загруженный функцией loadConfig
+     */	
+	private function setConfig( $ymlConfig )
+	{
+        $this->setFields($ymlConfig['fields']);
+    	$this->setWhere($ymlConfig['where']);
+    	$this->setOrder($ymlConfig['order']);
+    	$this->setGroupBy($ymlConfig['group']);
+    	$this->setHaving($ymlConfig['having']);
+        $this->setLimit($ymlConfig['limit']);
+
+        if ( !empty( $ymlConfig['table'] ) )
+            $this->setTable( $ymlConfig['table'] );
+        else
+            $this->autoDefineTable($className);
 	}
 	
 	// ######## GETTERS ############## //	
@@ -407,6 +497,21 @@ class DBModel extends Model implements IteratorAggregate, ArrayAccess, Countable
 		}
 		return $this;
 	}
+
+    /**
+     * setWhere 
+     *
+     * sets where condition
+     * 
+     * @param string $where
+     */
+    public function setWhere($where)
+    {
+        if (!empty($where))
+            $this->where = $where;
+
+        return $this;
+    }
 	
 	/**
 	 * Set query limit
@@ -691,7 +796,11 @@ class DBModel extends Model implements IteratorAggregate, ArrayAccess, Countable
 		return $this;
 	}
 	
-	
+	public function tpl($store_to)
+	{
+	    $this->rh->tpl->set($store_to, $this);
+	    return $this;
+	}
 	
 	public function setData($data)
 	{
@@ -814,11 +923,24 @@ class DBModel extends Model implements IteratorAggregate, ArrayAccess, Countable
 
 		if (is_null($this->table))
 		{
-			$this->table = $this->autoDefineTable();
+			$this->autoDefineTable();
 		}
 
-		$this->addFields($this->fields);
+        //для всех классов с пустым fields
+		if ( empty( $this->fields ) )
+		{
+    		Debug::trace('after load YAML for '.get_class($this), 'YAML');
+            $ymlConfig = $this->loadConfig( get_class($this) );
 
+		    //у модели нет полей
+		    if ( !empty($ymlConfig) )
+		    {
+		        $this->setConfig( $ymlConfig );
+		    }
+            Debug::trace('after load YAML', 'YAML');
+        }
+	    $this->addFields($this->fields);
+		
 		//var_dump($this->tableFields);
 		//var_dump($this->foreignFields);
 		
@@ -882,14 +1004,17 @@ class DBModel extends Model implements IteratorAggregate, ArrayAccess, Countable
 	 *
 	 * @return string
 	 */
-	protected function autoDefineTable()
+	protected function autoDefineTable($className="")
 	{
-		$className = get_class($this);
+	    if (!$className)
+    		$className = get_class($this);
+
 		if ($className == 'DBModel')
 		{
 			return NULL;
 		}
-		return Inflector::underscore(str_replace(array("Model", "Basic"), "", $className));
+		
+		$this->setTable( Inflector::underscore(str_replace(array("Model", "Basic"), "", $className)) );
 	}
 
 	
@@ -1411,6 +1536,7 @@ class DBModel extends Model implements IteratorAggregate, ArrayAccess, Countable
 		{
 			$where_sql = '';
 		}
+
 		return $this->parse($where_sql);
 	}
 	
@@ -1467,7 +1593,6 @@ class DBModel extends Model implements IteratorAggregate, ArrayAccess, Countable
 		return $sql;
 	}
 	
-		
 	/**
 	 * Parse string and quote fields
 	 *
@@ -1479,12 +1604,14 @@ class DBModel extends Model implements IteratorAggregate, ArrayAccess, Countable
 	 */
 	protected function parse($str)
 	{
-		return preg_replace_callback('#{([^}]+)}#', array(&$this, 'parseCallback'), $str);
+	    $str = preg_replace_callback('#{([^}]+)}#', array(&$this, 'parseCallback'), $str);
+		return $str;
 	}
 	
 	protected function parseCallback($matches)
 	{
-		return $this->quoteField($matches[1]);
+		$ret = $this->quoteField($matches[1]);
+		return $ret;
 	}
 
 	public function &getForeignModel($fieldName)
