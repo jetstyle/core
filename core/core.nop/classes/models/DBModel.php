@@ -231,6 +231,11 @@ class DBModel extends Model implements IteratorAggregate, ArrayAccess, Countable
 		return $model;
 	}
 
+	public static function quote($str)
+	{
+		return DBAL::getInstance()->quote($str);
+	}
+
 	public function __construct($fieldSet = null)
 	{
 		$this->rh = &RequestHandler::getInstance();
@@ -852,20 +857,9 @@ class DBModel extends Model implements IteratorAggregate, ArrayAccess, Countable
 	}
 
 	// ########## QUOTES ############## //
-
-	public function quote($str)
-	{
-		return $this->dbQuote($str);
-	}
-
-	public function dbQuote($str)
-	{
-		return $this->rh->db->quote($str);
-	}
-
 	public function quoteValue($value)
 	{
-		return (isset($value) ?  $this->dbQuote($value) : 'NULL');
+		return (isset($value) ?  self::quote($value) : 'NULL');
 	}
 
 	/**

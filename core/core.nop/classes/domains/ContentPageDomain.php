@@ -34,10 +34,10 @@ class ContentPageDomain extends BasicPageDomain
 			$where[] = "mode='home'";
 		elseif (isset($criteria['url']))
 		{
-			$where[] = '_path IN ('.$content->quote($this->getPossiblePaths($criteria['url'])). ')';
+			$where[] = '_path IN ('.DBModel::quote($this->getPossiblePaths($criteria['url'])). ')';
 		}
 		elseif (isset($criteria['class']))
-			$where[] = 'mode='.$content->quote($this->getModeByPageClass($criteria['class']));
+			$where[] = 'mode='.DBModel::quote($this->getModeByPageClass($criteria['class']));
 		$where = implode(" AND ", $where);
 
 		$content->load($where);

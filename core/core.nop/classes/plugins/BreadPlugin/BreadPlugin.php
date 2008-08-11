@@ -19,13 +19,9 @@ class BreadPlugin extends RenderablePlugin
 							->addFields(array('id','_left', '_right', '_level', '_path', '_parent'))
 							->addField('title_short', 'IF(LENGTH(title_short) > 0, title_short, title_pre)')
 							->addField('href', '_path')
-							->setOrder(array('_left' => 'ASC'));
-		
-		$where = 
-			'_left <= '.$model->quote($current['_left'])
-			.' AND _right >= '.$model->quote($current['_right']);
-		
-		$model->load($where);
+							->setOrder(array('_left' => 'ASC'))
+							->setWhere('_left <= '.DBModel::quote($current['_left']).' AND _right >= '.DBModel::quote($current['_right']))
+							->load();
 
 		$this->models['bread'] =& $model;
 	}

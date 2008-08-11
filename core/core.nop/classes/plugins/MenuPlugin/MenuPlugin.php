@@ -92,7 +92,7 @@ class MenuPlugin extends RenderablePlugin
 		
 		$where = array();
 		
-		$where[] = '('.$menu->quoteField('_level').' >= '.$menu->quote($this->level). ' AND '.$menu->quoteField('_level').' <'.$menu->quote($this->level + $this->depth).')';
+		$where[] = '('.$menu->quoteField('_level').' >= '.DBModel::quote($this->level). ' AND '.$menu->quoteField('_level').' <'.DBModel::quote($this->level + $this->depth).')';
 				
 		switch ($this->mode)
 		{
@@ -105,8 +105,8 @@ class MenuPlugin extends RenderablePlugin
 					return;
 				}
 				
-				$where[] = $menu->quoteField('_left') .' > ' . $menu->quote($parent['_left']);
-				$where[] = $menu->quoteField('_right') .' < ' . $menu->quote($parent['_right']);
+				$where[] = $menu->quoteField('_left') .' > ' . DBModel::quote($parent['_left']);
+				$where[] = $menu->quoteField('_right') .' < ' . DBModel::quote($parent['_right']);
 				
 			break;
 		}
