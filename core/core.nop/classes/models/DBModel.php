@@ -981,7 +981,7 @@ class DBModel extends Model implements IteratorAggregate, ArrayAccess, Countable
 	public function __toString() 
 	{
 		$res = "<br />object of " . get_class($this) . " values:";
-		if ($this->haveData())
+		if (!$this->isEmpty())
 		{
 			foreach ($this->data as $k=>$item)
 			{
