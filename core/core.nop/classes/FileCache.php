@@ -10,9 +10,23 @@ class FileCache
 	protected $sources = array();		// источники, которые добавятся в заголовок кэша при записи
 	protected $fp = null;
 	
-	public function __construct($filePath)
+	public function __construct($filePath = '')
 	{
-		$this->filePath = JS_CACHE_DIR.$filePath;
+		if ($filePath)
+		{
+			$this->setFile($filePath);
+		}
+	}
+
+	public function setFile($filePath)
+	{
+		$this->filePath = Config::get('cache_dir').$filePath;
+		$this->cachedSources = null;
+		$this->sources = array();
+		if ($this->fp)
+		{
+			$this->close();
+		}
 	}
 
 	public function getSources()

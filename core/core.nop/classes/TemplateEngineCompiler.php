@@ -107,39 +107,70 @@ class TemplateEngineCompiler
 	protected $sourceFile = null;
 	protected $sourceTemplate = null;
 
-	public function __construct( &$rh )
+	protected $prefix = "{{";
+	protected $postfix = "}}";
+	protected $instant = "~";
+	protected $constructAction = "!";    // {{!text Test}}
+	protected $constructAction2 = "!!";   // {{!!text}}Test{{!!/text}}
+	protected $constructIf = "?";    // {{?var}} or {{?!var}}
+	protected $constructIfelse = "?:";   // {{?:}} 
+	protected $constructIfend = "?/";   // {{?/}} is similar to {{/?}}
+	protected $constructObject = "#.";   // {{#obj.property}}
+	protected $constructTplt = "TPL:"; // {{TPL:Name}}...{{/TPL:Name}}
+	protected $constructTplt2 = ":"; // {{:Name}}...{{/:Name}}   -- ru@jetstyle бесят буквы TPL в капсе
+	protected $constructComment = "#";    // <!-- # persistent comment -->
+
+	// lucky+ru: аргументы внутри шаблона {{!for do=[[pages]]
+	protected $argPrefix = "";
+	protected $argPostfix = "";
+
+	protected $instantPlugins = array( "dummy" ); // plugins that are ALWAYS instant
+
+	protected $shortcuts = array(
+		"=>" => array("=", " typografica=1"),
+		"=<" => array("=", " strip_tags=1"),
+		"+>" => array("+", " typografica=1"),
+		"+<" => array("+", " strip_tags=1"),
+		"*" => "#*.",
+		"@" => "!include @",
+		"=" => "!_ tag=",
+		"+" => "!message ",
+	);
+
+	public function __construct()
 	{
-		$this->tpl = &$rh->tpl;
-		$this->rh  = &$rh;
+		$this->rh  = &RequestHandler::getInstance();
+		$this->tpl = &$this->rh->tpl;
+		
 		// compiler meta regexp
 		$this->long_regexp =
          "/(".
-              "(".$this->rh->tpl_prefix.$this->rh->tpl_construct_action2.
-                  "(.+?)".$this->rh->tpl_postfix.
+              "(".$this->prefix.$this->constructAction2.
+                  "(.+?)".$this->postfix.
                   ".*?".
-		$this->rh->tpl_prefix."\/".$this->rh->tpl_construct_action2.
-                  "(\\3)?".$this->rh->tpl_postfix.")".         // loooong standing {{!!xxx}}yyy{{/!!}}
+		$this->prefix."\/".$this->constructAction2.
+                  "(\\3)?".$this->postfix.")".         // loooong standing {{!!xxx}}yyy{{/!!}}
           "|".
-              "(".$this->rh->tpl_prefix.".+?".$this->rh->tpl_postfix.")". // single standing {{zzz}}
+              "(".$this->prefix.".+?".$this->postfix.")". // single standing {{zzz}}
           ")/si";
 
 		$this->single_regexp =
-         "/^".$this->rh->tpl_prefix."(.+?)".$this->rh->tpl_postfix."$/ims";
+         "/^".$this->prefix."(.+?)".$this->postfix."$/ims";
 		$this->double_regexp =
-         "/^".$this->rh->tpl_prefix.$this->rh->tpl_construct_action2.
-              "(.+?)".$this->rh->tpl_postfix.
+         "/^".$this->prefix.$this->constructAction2.
+              "(.+?)".$this->postfix.
               "(.*?)".
-		$this->rh->tpl_prefix."\/".$this->rh->tpl_construct_action2.
-              "(\\1)?".$this->rh->tpl_postfix."$/ims";
+		$this->prefix."\/".$this->constructAction2.
+              "(\\1)?".$this->postfix."$/ims";
 		// single regexps
 		$this->object_regexp =
-         "/^".$this->rh->tpl_construct_object{0}."([^".$this->rh->tpl_construct_object{1}."]+)".
-          "[".$this->rh->tpl_construct_object{1}."](.+)$/i";
+         "/^".$this->constructObject{0}."([^".$this->constructObject{1}."]+)".
+          "[".$this->constructObject{1}."](.+)$/i";
 		$this->action_regexp =
-         "/^".$this->rh->tpl_construct_action."(.+)$/i";
+         "/^".$this->constructAction."(.+)$/i";
 		$this->tpl_string_regexp = '/^([\'"])([^\\1]*)(\\1)$/i';
-	 $this->tpl_arg_regexp = '/^'.preg_quote($this->rh->tpl_arg_prefix, '/')
-	 .'(.+)'.preg_quote($this->rh->tpl_arg_postfix, '/').'$/i';
+	 $this->tpl_arg_regexp = '/^'.preg_quote($this->argPrefix, '/')
+	 .'(.+)'.preg_quote($this->argPostfix, '/').'$/i';
 
 	}
 
@@ -362,7 +393,7 @@ class TemplateEngineCompiler
 
 		$source = Finder::findScript_( "plugins", $actionInfo['name']);
 
-		$enviroment = "<"."?php \$rh=&\$tpl->getRh(); ?>";
+		$enviroment = "<"."?php \$rh=&RequestHandler::getInstance(); ?>";
 
 		if (null !== $cacheFile)
 		{
@@ -439,28 +470,28 @@ class TemplateEngineCompiler
 		}
 
 		// {{/TPL}}
-		if (preg_match( "/".$this->rh->tpl_prefix."\/".
-						$this->rh->tpl_construct_tplt.
-						$this->rh->tpl_postfix."/si", $contents, $matches)
+		if (preg_match( "/".$this->prefix."\/".
+						$this->constructTplt.
+						$this->postfix."/si", $contents, $matches)
 			)
 		{
 			throw new TplException("Compiler: {{/TPL}} found!");
 		}
 
 		// B. typo correcting {{?/}} => {{/?}}
-		$contents =  str_replace( $this->rh->tpl_prefix.$this->rh->tpl_construct_ifend.
-		$this->rh->tpl_postfix,
-		$this->rh->tpl_prefix."/".$this->rh->tpl_construct_if.
-		$this->rh->tpl_postfix,
+		$contents =  str_replace( $this->prefix.$this->constructIfend.
+		$this->postfix,
+		$this->prefix."/".$this->constructIf.
+		$this->postfix,
 		$contents );
 
 		// 1. strip comments
 		$contents = preg_replace( "/(\s*)<!--(".
                                     "( )".
                                     "|".
-                                    "( [^".$this->rh->tpl_construct_comment."].*?)".
+                                    "( [^".$this->constructComment."].*?)".
                                     "|".
-                                    "([^ ".$this->rh->tpl_construct_comment."].*?)".
+                                    "([^ ".$this->constructComment."].*?)".
                                     ")-->(\s*)/msi",
                               "", $contents );
 
@@ -474,7 +505,7 @@ class TemplateEngineCompiler
 		// lucky: наследование шаблонов
 		// {{#extends @path/to/base.html}}
 		$is_extends = NULL;
-		$re = $this->rh->tpl_prefix.'#extends'.'\s+@(.+?)\\.html\s*'.$this->rh->tpl_postfix;
+		$re = $this->prefix.'#extends'.'\s+@(.+?)\\.html\s*'.$this->postfix;
 		if (preg_match('/'. $re .'/i', $contents, $matches))
 		{
 			$is_extends = TRUE;
@@ -493,7 +524,7 @@ class TemplateEngineCompiler
 		$this->_template_item = $tplName;
 		$this->externalTemplates[$tplName] = array();
 		$this->externalActions[$tplName] = array();
-		$contents = preg_replace_callback("/(".$this->rh->tpl_prefix.')(.*?)('.$this->rh->tpl_postfix.")/si", array(&$this, 'templateReadCallback'), $contents);
+		$contents = preg_replace_callback("/(".$this->prefix.')(.*?)('.$this->postfix.")/si", array(&$this, 'templateReadCallback'), $contents);
 		$this->_template_item = '';
 
 		if ($this->compileWithExternals)
@@ -514,32 +545,32 @@ class TemplateEngineCompiler
 		}
 
 		// 2. grep all {{TPL:..}} & replace `em by !includes
-		//$include_prefix = $this->rh->tpl_prefix.$this->rh->tpl_construct_action."include ";
+		//$include_prefix = $this->prefix.$this->rh->tpl_construct_action."include ";
 		$stack     = array( $contents );
 		$stackname = array( "@" );
 		$stackargs = array( '' );
 		$stackpos = 0;
 
 		/* ru@jetstyle чтобы шаблоны можно было метить облегчённо */
-		$tpl_construct_tplt_re = '('.$this->rh->tpl_construct_tplt.'|'.$this->rh->tpl_construct_tplt2.')';
+		$tpl_construct_tplt_re = '('.$this->constructTplt.'|'.$this->constructTplt2.')';
 		//разрезаем на подшаблоны
 		while ($stackpos < sizeof($stack) )
 		{
 			$data = $stack[$stackpos];
-			$c =preg_match_all( "/".$this->rh->tpl_prefix.
+			$c =preg_match_all( "/".$this->prefix.
 			/*$this->rh->tpl_construct_tplt*/
 			//$tpl_construct_tplt_re."([A-Za-z0-9_]+)".
 			$tpl_construct_tplt_re.'([A-Za-z0-9_]+)(?:\s+(.+?))?'.
-			$this->rh->tpl_postfix."(.*?)".
-			$this->rh->tpl_prefix."\/".
+			$this->postfix."(.*?)".
+			$this->prefix."\/".
 			/*$this->rh->tpl_construct_tplt*/"\\1\\2".
-			$this->rh->tpl_postfix."/si",
+			$this->postfix."/si",
 			$data, $matches, PREG_SET_ORDER  );
 
 			foreach( $matches as $match )
 			{
 				//$sub = $tpl_name.".html:".$match[1];
-				//$data = str_replace( $match[0], $include_prefix.$sub.$this->rh->tpl_postfix, $data );
+				//$data = str_replace( $match[0], $include_prefix.$sub.$this->postfix, $data );
 				$data = str_replace( $match[0], '', $data ); // ru@jetstyle
 
 				$stack[]     = $match[4]; // контент внутри шаблона
@@ -618,7 +649,7 @@ class TemplateEngineCompiler
 
 	protected function applyShortcuts($thing)
 	{
-		foreach( $this->rh->shortcuts AS $shortcut=>$replacement )
+		foreach( $this->shortcuts AS $shortcut=>$replacement )
 		{
 			if (strpos($thing, $shortcut) === 0)
 			{
@@ -641,10 +672,10 @@ class TemplateEngineCompiler
 		$thing = $things[0];
 
 		// is instant ?
-		if ($thing{(strlen($this->rh->tpl_prefix))} == $this->rh->tpl_instant)
+		if ($thing{(strlen($this->prefix))} == $this->instant)
 		{
-			$thing = substr( $thing, 0, strlen($this->rh->tpl_prefix) ).
-			substr( $thing, strlen($this->rh->tpl_prefix)+1 );
+			$thing = substr( $thing, 0, strlen($this->prefix) ).
+			substr( $thing, strlen($this->prefix)+1 );
 			$_instant = true;
 		}
 
@@ -670,7 +701,7 @@ class TemplateEngineCompiler
 			$thing = $this->applyShortcuts($thing);
 
 			// {{?:}} // else, elseif
-			if (strpos($thing, $this->rh->tpl_construct_ifelse) === 0)
+			if (strpos($thing, $this->constructIfelse) === 0)
 			{
 				$what = trim(substr($thing, 2));
 
@@ -684,12 +715,12 @@ class TemplateEngineCompiler
 				}
 			}
 			// {{/?}} // end of if
-			elseif ($thing == "/".$this->rh->tpl_construct_if)
+			elseif ($thing == "/".$this->constructIf)
 			{
 				$result = ' } ';
 			}
 			// {{?var}}	// if
-			elseif ($thing{0} == $this->rh->tpl_construct_if)
+			elseif ($thing{0} == $this->constructIf)
 			{
 				$result =  ' if ('.$invert.$this->parseExpression(substr($thing, 1)).') { ';
 			}
@@ -700,7 +731,7 @@ class TemplateEngineCompiler
 				$pluginName = $params['_name'];
 				unset($params['_name']);
 
-				if (in_array($params["_name"][TE_VALUE], $this->rh->tpl_instant_plugins) || (isset($params["instant"]) && $params["instant"][TE_VALUE]))
+				if (in_array($params["_name"][TE_VALUE], $this->instantPlugins) || (isset($params["instant"]) && $params["instant"][TE_VALUE]))
 				{
 					$_instant=true;
 				}
@@ -1175,9 +1206,9 @@ class TemplateEngineCompiler
 			throw new TplException("Compiler: can't write to file *".$file_to."*");
 		}
 
-		if (!file_exists($file_to) && !is_writable($this->rh->cache_dir))
+		if (!file_exists($file_to) && !is_writable(Config::get('cache_dir')))
 		{
-			throw new TplException("Compiler: can't write to cache dir *".$this->rh->cache_dir."*");
+			throw new TplException("Compiler: can't write to cache dir *".Config::get('cache_dir')."*");
 		}
 	}
 

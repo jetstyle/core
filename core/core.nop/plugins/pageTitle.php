@@ -10,7 +10,7 @@ else
 	{
 		echo strip_tags($rh->page->config['title_short']).' &mdash; ';
 	}
-	echo $rh->project_title;
+	echo Config::get('project_title');
 }
 
 ?>

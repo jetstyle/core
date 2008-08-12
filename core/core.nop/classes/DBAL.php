@@ -68,16 +68,16 @@ class DBAL
 {
 	private static $instance = null;
 
-	protected $rh;
 	protected $lowlevel;
 	protected $queryCount = 0;
 
+	protected $prefix = '';
+
 	private function __construct($connect = true)
 	{
-		$this->rh = RequestHandler::getInstance();
-		$this->prefix = $this->rh->db_prefix;
+		$this->prefix = Config::get('db_prefix');
 
-		$lowlevelClass = "DBAL_" . $this->rh->db_al;
+		$lowlevelClass = "DBAL_" . Config::get('db_al');
 		Finder::useClass($lowlevelClass);
 
 		$this->lowlevel = & new $lowlevelClass();
@@ -104,7 +104,7 @@ class DBAL
 		}
 		return self::$instance;
 	}
-
+	
 	public function connect()
 	{
 		$this->lowlevel->connect();
@@ -254,7 +254,7 @@ class DBAL
 	{
 		$this->queryCount++;
 
-		if($this->rh->enable_debug && $this->rh->explain_queries)
+		if(Config::get('enable_debug') && Config::get('explain_queries'))
 		{
 			if(!(strpos(strtolower($sql), 'select') === false))
 			{

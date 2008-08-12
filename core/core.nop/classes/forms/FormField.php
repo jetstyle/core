@@ -40,7 +40,7 @@ class FormField
            "interface"  => "interface_string",
            "validator"  => "validator_base",
            "event"      => "abstract",
-         /*  ---- а пока -- временный, смешной ----
+         /*  ---- а пока -- временный, смешной ---- 
            "model"      => "_pile_of_junk",
            "wrapper"    => "_pile_of_junk",
            "view"       => "_pile_of_junk",
@@ -61,7 +61,7 @@ class FormField
 
      if (!is_array($config)) $config = $this->default_config;
      else                    Form::StaticDefaults($this->default_config, $config);
-
+       
      $this->config = &$config;
      $this->_BuildComponents();
    }
@@ -84,8 +84,8 @@ class FormField
          $c_instance = &$this->components_hash[ $c_name ];
        else // independent object, need to create
        {
-         Finder::useClass( "FormComponents/abstract" );
-         Finder::useClass( "FormComponents/".$c_name );
+         $this->rh->useClass( "FormComponents/abstract" );
+         $this->rh->useClass( "FormComponents/".$c_name );
          $class_name = 'FormComponent_'.$c_name;
          $c_instance =& new $class_name( $this->config );
          $c_instance->LinkToField( $this );
@@ -93,17 +93,17 @@ class FormField
        }
        switch ($c)
        {
-         case "model":      $this->model     = &$c_instance;
+         case "model":      $this->model     = &$c_instance; 
                             break;
-         case "wrapper":    $this->wrapper   = &$c_instance;
+         case "wrapper":    $this->wrapper   = &$c_instance;  
                             break;
-         case "view":       $this->view      = &$c_instance;
+         case "view":       $this->view      = &$c_instance; 
                             break;
-         case "interface":  $this->interface = &$c_instance;
+         case "interface":  $this->interface = &$c_instance; 
                             break;
-         case "validator":  $this->validator = &$c_instance;
+         case "validator":  $this->validator = &$c_instance; 
                             break;
-         case "event":      $this->event     = &$c_instance;
+         case "event":      $this->event     = &$c_instance; 
                             break;
        }
      }
@@ -121,8 +121,8 @@ class FormField
    {
      Debug::trace("FormField: <b>Parsing field: { ".$this->name." } </b>", 'form');
 
-     if ($is_readonly ||
-     		(isset($this->config["readonly"]) && $this->config["readonly"]) ||
+     if ($is_readonly || 
+     		(isset($this->config["readonly"]) && $this->config["readonly"]) || 
      		(isset($this->form->config["readonly"]) && $this->form->config["readonly"])
      		)
        $result = $this->view->View_Parse();
@@ -138,19 +138,19 @@ class FormField
    }
 
    // распознавание данных из поста
-   function LoadFromPost( $post_data )
+   function LoadFromPost( $post_data )           
    {
      if (@$this->config["readonly"]) return;
      return $this->model->Model_LoadFromArray(
                 $this->interface->Interface_PostToArray( $post_data )
                                              );
    }
-   function LoadFromArray( $a )
+   function LoadFromArray( $a )           
    {
      if (@$this->config["readonly"]) return;
      return $this->model->Model_LoadFromArray( $a );
    }
-
+   
    // валидация одного поля
    function Validate()
    {

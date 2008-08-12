@@ -64,6 +64,7 @@ class Finder {
 	//Ищет скрипт по уровням проектов.
 	public static function findScript( $type, $name, $level=0, $dr=1, $ext = 'php', $withSubDirs = false )
 	{
+
 		//проверяем входные данные
 		if (strlen($type) == 0)
 		{
@@ -167,6 +168,8 @@ class Finder {
 	{
 		if (!$fname = self::findScript($type,$name,$level,$dr,$ext,$withSubDirs))
 		{
+					var_dump(self::$DIRS);
+					die();
 			$e = new FileNotFoundException("File not found: <b>".$name.".".$ext."</b>", self::buildSearchHistory());
 			$e->setFilename($name.".".$ext);
 			throw $e;
@@ -245,15 +248,12 @@ class Finder {
 
 	public static function useLib($libraryName, $fileName = "") 
 	{
-		$direction = 1;
-		$level = 0;
-
 		if ($fileName == "")
 		{
 			$fileName = $libraryName;
 		}
 
-		Finder::useScript('libs', $libraryName . "/" . $fileName, 1, 0, 'php');
+		Finder::useScript('libs', $libraryName . "/" . $fileName, 0, 1, 'php');
 	}
 
 	/*public static function useModule($name, $type = NULL) {

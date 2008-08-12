@@ -10,11 +10,19 @@ class HandlerPageDomain extends BasicPageDomain
 {
 	private $handlers_map = array();
 
+	function __construct()
+	{
+		parent::__construct();
+		$this->handlers_map = Config::get('handlers_map');
+		if (!is_array($this->handlers_map))
+		{
+			$this->handlers_map = array();
+		}
+	}
+
 	function findByUrl($url)
 	{
 		$possible_paths = $this->getPossiblePaths($url);
-
-		$this->handlers_map = $this->rh->handlers_map;
 
 		foreach ($possible_paths as $up)
 		{
@@ -74,7 +82,7 @@ class HandlerPageDomain extends BasicPageDomain
 				$page_cls .= 'Page';
 			}
 
-			if (($page_cls == 'PageNotFoundPage') || ($path = array_search($page_cls, $this->rh->handlers_map)))
+			if (($page_cls == 'PageNotFoundPage') || ($path = array_search($page_cls, $this->handlers_map)))
 			{
 				$config = array (
 					'class' => $page_cls,

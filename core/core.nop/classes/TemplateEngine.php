@@ -16,10 +16,7 @@ class TemplateEngine
 {
 	public $domain = array();
 
-	protected $rh;
-
 	protected $compiler = null;
-
 	protected $stack = array();
 
 	protected $parseCache = array();
@@ -40,26 +37,32 @@ class TemplateEngine
 	protected $skinName = '';
 	protected $skinDir = '';
 
+	// protected $markupLevel = 0; // TPL_MODE_CLEAN
+	protected $compileMode = 1;
+	protected $skinDirs = array( "css", "js", "images" );
+	protected $rootHref = '';
+	protected $rootDir = '';
+
+	protected $actionPrefix = "rockette_action_";
+	protected $templatePrefix = "rockette_template_";
+	protected $templateSepfix = "__";
+	protected $actionFilePrefix = "@@";
+	protected $templateFilePrefix = "@";
+	protected $cachePrefix = "@";
+
 	public $siteMap = array();
 	protected $siteMapFilename = 'site_map.yml';
 
 	// ############################################## //
 
-	public function __construct( &$rh )
+	public function __construct()
 	{
-		$this->rh = &$rh;
-
 		// изначальный стек шкур на основе стека RH
-		$this->DIRS = $rh->DIRS;
-		unset($this->DIRS[0]);
+		$this->rootHref = Config::get('base_url').Config::get('app_name').'/skins/';
+		$this->rootDir = Config::get('app_dir').'skins/';
 
 		// выбрать шкуру
-		$this->skin( $rh->tpl_skin );
-	}
-
-	public function &getRh()
-	{
-		return $this->rh;
+		$this->skin( Config::get('tpl_skin') );
 	}
 
 	public function get( $key ) // -- получить значение (намеренно без ссылки)
@@ -175,7 +178,7 @@ class TemplateEngine
 	public function skin( $skinName="" )
 	{
 		// запомнить каталог дл€ FindScript
-		$this->skinDir = $this->rh->tpl_root_dir.$skinName;
+		$this->skinDir = $this->rootDir.$skinName;
 		if (substr($this->skinDir, -1) != "/") $this->skinDir.="/";
 
 		Finder::prependDir($this->skinDir);
@@ -185,10 +188,11 @@ class TemplateEngine
 
 		$this->set( "skin", $this->skinDir );
 
-		$tplRootHref = $this->rh->tpl_root_href.$skinName;
+		$tplRootHref = $this->rootHref.$skinName;
 		if (substr($tplRootHref, -1) != "/") $tplRootHref.="/";
 
-		foreach($this->rh->tpl_skin_dirs AS $k => $dir)
+
+		foreach($this->skinDirs AS $k => $dir)
 		{
 			$this->set( $dir, $tplRootHref.$dir."/");
 		}
@@ -236,7 +240,7 @@ class TemplateEngine
 		$result['tpl'] = $_pos ? substr($a[0], 0, $_pos) : $a[0];
 
 		$result['file_source'] = $this->findTemplate( $result['tpl'] );
-		$result['cache_name'] = preg_replace("/[^\w\x7F-\xFF\s]/", $this->rh->tpl_template_sepfix, str_replace($this->rh->project_dir, '', $result['file_source']));
+		$result['cache_name'] = preg_replace("/[^\w\x7F-\xFF\s]/", $this->templateSepfix, str_replace(Config::get('project_dir'), '', $result['file_source']));
 
 		return $result;
 	}
@@ -269,7 +273,7 @@ class TemplateEngine
 	 */
 	public function getFuncName($cacheName, $subTpl = '')
 	{
-		return $this->rh->tpl_template_prefix . $this->getSkinName() . $this->rh->tpl_template_sepfix . $cacheName . $this->rh->tpl_template_sepfix . $subTpl;
+		return $templatePrefix . $this->getSkinName() . $this->templateSepfix . $cacheName . $this->templateSepfix . $subTpl;
 	}
 
 	/**
@@ -280,7 +284,7 @@ class TemplateEngine
 	 */
 	public function getActionFuncName($cacheName)
 	{
-		return $this->rh->tpl_action_prefix . $this->getSkinName() . $this->rh->tpl_template_sepfix . $cacheName;
+		return $this->actionPrefix . $this->getSkinName() . $this->templateSepfix . $cacheName;
 	}
 
 
@@ -326,9 +330,9 @@ class TemplateEngine
 			$data['html'] = '@html.html';
 		}
 
-		$cacheName = preg_replace("/[^\w\x7F-\xFF\s]/", $this->rh->tpl_template_sepfix, $siteMapKey);
-		$fileCached = $this->rh->cache_dir . $this->rh->environment . $this->rh->tpl_template_sepfix . $this->skinName . $this->rh->tpl_template_file_prefix .	$cacheName . ".php";
-		$fileHelperCached = $this->rh->cache_dir . $this->rh->environment . $this->rh->tpl_template_sepfix . $this->skinName . $this->rh->tpl_template_file_prefix .	$cacheName . "_helper.php";
+		$cacheName = preg_replace("/[^\w\x7F-\xFF\s]/", $this->templateSepfix, $siteMapKey);
+		$fileCached = Config::get('cache_dir') . $this->templateSepfix . $this->skinName . $this->templateFilePrefix .	$cacheName . ".php";
+		$fileHelperCached = Config::get('cache_dir') . $this->templateSepfix . $this->skinName . $this->templateFilePrefix .	$cacheName . "_helper.php";
 
 		if (!file_exists($fileCached) || !file_exists($fileHelperCached))
 		{
@@ -349,7 +353,7 @@ class TemplateEngine
 
 		if (is_array($files))
 		{
-			$recompile = $this->rh->tpl_compile != TPL_COMPILE_NEVER;
+			$recompile = $this->compileMode != TPL_COMPILE_NEVER;
 
 			if ($recompile)
 			{
@@ -448,13 +452,13 @@ class TemplateEngine
 					if (!isset($this->parseCache[$tplInfo['tpl']]))
 					{
 						// получение имЄн файлов исходника и компил€та
-						$fileCached = $this->rh->cache_dir . $this->rh->environment . $this->rh->tpl_template_sepfix . $this->skinName . $this->rh->tpl_template_file_prefix .	$tplInfo['cache_name'] . ".php";
+						$fileCached = Config::get('cache_dir') . $this->templateSepfix . $this->skinName . $this->templateFilePrefix .	$tplInfo['cache_name'] . ".php";
 
 						// 3. проверка наличи€ в кэше/необходимости рекомпил€ции
-						$recompile = $this->rh->tpl_compile != TPL_COMPILE_NEVER;
+						$recompile = $this->compileMode != TPL_COMPILE_NEVER;
 						$recompile = $recompile || !file_exists( $fileCached );
 
-						if ($recompile && $tplInfo['file_source'] && ($this->rh->tpl_compile != TPL_COMPILE_ALWAYS) && @filemtime($fileCached) >= @filemtime($tplInfo['file_source']))
+						if ($recompile && $tplInfo['file_source'] && ($this->compileMode != TPL_COMPILE_ALWAYS) && @filemtime($fileCached) >= @filemtime($tplInfo['file_source']))
 						{
 							$recompile = false;
 						}
@@ -536,16 +540,16 @@ class TemplateEngine
 		//провер€ем экшен на существование
 		if( !function_exists($funcName) )
 		{
-			$fileCached = $this->rh->cache_dir.$this->rh->tpl_action_file_prefix.$this->rh->environment.$this->rh->tpl_template_sepfix.$this->getSkinName().$this->rh->tpl_template_sepfix.$actionInfo['cache_name'].".php";
+			$fileCached = Config::get('cache_dir') . $this->actionFilePrefix.$this->templateSepfix.$this->getSkinName().$this->templateSepfix.$actionInfo['cache_name'].".php";
 
 			//проверка на необходимость компил€ции
-			$recompile = $this->rh->tpl_compile != TPL_COMPILE_NEVER;
+			$recompile = $this->compileMode != TPL_COMPILE_NEVER;
 			$recompile = $recompile || !file_exists( $fileCached );
 			if ($recompile)
 			{
 				$fileSource = Finder::findScript_( "plugins", $actionName);
 
-				if ($fileSource && ($this->rh->tpl_compile != TPL_COMPILE_ALWAYS))
+				if ($fileSource && ($this->compileMode != TPL_COMPILE_ALWAYS))
 				{
 					if (@filemtime($fileCached) >= @filemtime($fileSource))
 					{
@@ -581,20 +585,7 @@ class TemplateEngine
 	{
 		if (file_exists($this->skinDir.$this->siteMapFilename))
 		{
-			$fileCache = new FileCache($this->skinName.'_site_map.php');
-			if ($fileCache->isValid())
-			{
-				$data = include $fileCache->getFileName();
-				$this->siteMap = unserialize($data);
-			}
-			else
-			{
-				Finder::useLib('spyc');
-				$this->siteMap = Spyc :: YAMLLoad($this->skinDir.$this->siteMapFilename);
-				$fileCache->addSource($this->skinDir.$this->siteMapFilename);
-				$str = "return '".str_replace("'", "\\'", serialize($this->siteMap))."';";
-				$fileCache->write($str);
-			}
+			$this->siteMap = YamlWrapper::load($this->skinDir.$this->siteMapFilename);
 		}
 	}
 
@@ -607,7 +598,7 @@ class TemplateEngine
 		if ( null === $this->compiler)
 		{
 			Finder::useClass("TemplateEngineCompiler");
-			$this->compiler = new TemplateEngineCompiler( $this->rh );
+			$this->compiler = new TemplateEngineCompiler();
 		}
 	}
 

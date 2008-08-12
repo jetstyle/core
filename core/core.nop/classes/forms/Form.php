@@ -28,7 +28,7 @@
 
   // Процессинг формы !! Самое главное
 
-  * Handle( $ignore_post=false, $ignore_load=false, $ignore_validator=false, $ignore_session=false )
+  * Handle( $ignore_post=false, $ignore_load=false, $ignore_validator=false, $ignore_session=false ) 
       - $ignore_* -- игнорировать те или иные этапы сценария процессинга
       - false, если результат -- не отпарсенная форма (иными словами, если нет редиректа, но событие произошло
 
@@ -68,9 +68,9 @@
 
   // Вспомогательные методы
 
-  * StaticDefaults( $default_config, &$supplied_config ) - статичный метод, модифицирует
-                                                            supplied_config по дефолтному
-                                                            (выставляя все поля, которые
+  * StaticDefaults( $default_config, &$supplied_config ) - статичный метод, модифицирует 
+                                                            supplied_config по дефолтному 
+                                                            (выставляя все поля, которые 
                                                             отсутствуют в супплиеде
   * _ParseWrapper( $content )
   * _ParseButtons()
@@ -78,13 +78,13 @@
 
 ================================================================== v.0 (kuso@npj)
 */
-define( "FORM_EVENT_OK",     "ok");     // ничего не делаем, переход по "success_url", if redirect
-define( "FORM_EVENT_CANCEL", "cancel"); // отмена, переход по "cancel_url", if redirect
-define( "FORM_EVENT_RESET",  "reset");  // сброс состояния формы к стартовому
-define( "FORM_EVENT_INSERT", "insert"); // вставка в БД, переход по "success_url", if redirect
-define( "FORM_EVENT_UPDATE", "update"); // правка в БД, переход по "success_url", if redirect
-define( "FORM_EVENT_DELETE", "delete"); // удалить всё из БД, переход по "success_url", if redirect
-define( "FORM_EVENT_AUTO",   "auto");   // insert/update based on $data_id
+define( "FORM_EVENT_OK",     "ok");     // ничего не делаем, переход по "success_url", if redirect  
+define( "FORM_EVENT_CANCEL", "cancel"); // отмена, переход по "cancel_url", if redirect  
+define( "FORM_EVENT_RESET",  "reset");  // сброс состояния формы к стартовому  
+define( "FORM_EVENT_INSERT", "insert"); // вставка в БД, переход по "success_url", if redirect  
+define( "FORM_EVENT_UPDATE", "update"); // правка в БД, переход по "success_url", if redirect  
+define( "FORM_EVENT_DELETE", "delete"); // удалить всё из БД, переход по "success_url", if redirect  
+define( "FORM_EVENT_AUTO",   "auto");   // insert/update based on $data_id  
 
 class Form
 {
@@ -109,8 +109,8 @@ class Form
            "template_form"                  =>"form.html:Form",
            "template_buttonlist"            =>"form.html:Buttons",
            "multipart"    =>  1,
-           "auto_datetime"=>  1,
-           "auto_user_id" =>  1,
+           "auto_datetime"=>  1,  
+           "auto_user_id" =>  1,  
            "id_field"     =>  "id",
            "active_field" =>  "active",
            "event_handlers_type" => "handlers/formevents", //IVAN
@@ -121,7 +121,7 @@ class Form
            "fieldname_edited_user_id"   => "_edited_user_id",
            "fieldname_created_datetime" => "_created_datetime",
            "fieldname_edited_datetime"  => "_edited_datetime",
-           // [optional] "success_url" =>
+           // [optional] "success_url" => 
            // [optional] "cancel_url" =>
            // [optional] "on_before_event", "on_after_event"
                               );
@@ -131,11 +131,11 @@ class Form
      $this->rh  = &$rh;
      $this->tpl = &$rh->tpl; // чтобы потом можно было отстроиться от "текущего" шаблонного движка.
                              // очень полезная фича
-
-     Finder::useClass("FormField"); // он нам стопудово понадобится
-
+     
+     $this->rh->UseClass("FormField"); // он нам стопудово понадобится
+     
      $this->action = $rh->ri->url;
-
+                            
      if (!$form_config) $form_config = $this->default_config;
      else               Form::StaticDefaults($this->default_config, $form_config);
 
@@ -180,12 +180,12 @@ class Form
 
    // САМАЯ СТРАШНАЯ ПРОЦЕДУРА --------------------------------------------------------
    //zharik: ну, теперь она не такая уж и страшная 8))
-   function Handle( $ignore_post     =false,  $ignore_load   =false,
+   function Handle( $ignore_post     =false,  $ignore_load   =false, 
                     $ignore_validator=false,  $ignore_session=false )
    {
      $processed = false;
 
-     //инициализация значений полей
+     //инициализация значений полей    
      if ($this->data_id && !$ignore_load) $this->Load();  // пробуем загрузить
      if (!$this->data_id || $ignore_load) $this->Reset(); // устанавливаем default-значения
      if (!$ignore_session) $this->FromSession();
@@ -219,24 +219,24 @@ class Form
 
        if (!is_array($event)) $event = array( "event" => $event );
 
-       if ($ignore_validator
+       if ($ignore_validator 
            || ($event["event"] == FORM_EVENT_CANCEL)
            || ($event["event"] == FORM_EVENT_RESET)
            || ($event["event"] == FORM_EVENT_DELETE)
            || $this->Validate()
           )
-       {
+       { 
          $processed = 1;
          if (!$ignore_session) $this->ToSession();
 
          $this->_ProcessEvent( $event );
-
+         
          // redirect
          // cancel
-         if ($this->processed && !$this->success && isset($this->config["cancel_url"]))
+         if ($this->processed && !$this->success && isset($this->config["cancel_url"])) 
             $this->rh->Redirect( $this->config["cancel_url"] );
          // success
-         if ($this->processed && $this->success && isset($this->config["success_url"]))
+         if ($this->processed && $this->success && isset($this->config["success_url"])) 
             $this->rh->Redirect( $this->config["success_url"] );
        }
      }
@@ -256,7 +256,7 @@ class Form
      if (!$event && ($event_code != $this->config["default_event"]))
        return $this->ProcessEvent( $event_code );
 
-     return $this->_ProcessEvent( $event );
+     return $this->_ProcessEvent( $event ); 
    }
    function _ProcessEvent( $event )
    {
@@ -286,31 +286,31 @@ class Form
           }else
           //это может быть отдельный хэндлер
           {
-            $this->_ExecEventHandler( $event, Finder::findScript_($this->config["event_handlers_type"], $v) );
+            $this->_ExecEventHandler( $event, $this->rh->FindScript_($this->config["event_handlers_type"], $v) );
           }
         }
       }
    }
-
+   
    //выполнить хэндлер в отдельно области видимости
    function _ExecEventHandler( $event, $event_handler )
    {
     if ($event_handler !== false){
-
+      
       //создаём алиасы для обработчика
       $rh =& $this->rh;
-      include( Finder::findScript("handlers","_enviroment") );
+      include( $this->rh->FindScript("handlers","_enviroment") );
       $form =& $this;
-
+      
       //вызываем обработчик
       include($event_handler);
     }
    }
 
    // сбросить все поля формы в начальное состояние
-   function Reset()
+   function Reset()       
    {
-     foreach($this->fields as $field)
+     foreach($this->fields as $field) 
        $field->model->Model_SetDefault();
    }
 
@@ -318,7 +318,7 @@ class Form
    function Parse()
    {
      $result = "";
-     foreach($this->fields as $field)
+     foreach($this->fields as $field) 
        $result .= $field->Parse();
      return $this->_ParseWrapper( $result );
    }
@@ -327,7 +327,7 @@ class Form
    function ParsePreview()
    {
      $result = "";
-     foreach($this->fields as $field)
+     foreach($this->fields as $field) 
        $result .= $field->Parse( "readonly" );
      return $result;
    }
@@ -336,8 +336,8 @@ class Form
    function _ParseWrapper( $content )
    {
      $form_name = isset($this->config["form_name"]) ? $this->config["form_name"] : 'form_'.$this->name;
-     $this->tpl->Set( "form",
-      $this->rh->ri->Form(
+     $this->tpl->Set( "form", 
+      $this->rh->ri->Form( 
         $this->action, METHOD_POST, ' id="'.$form_name.'" name="'.$form_name.'" enctype="multipart/form-data" '
       )
      );
@@ -349,7 +349,7 @@ class Form
      $this->tpl->Set( "data_id", $this->data_id );
      $this->tpl->Set( "buttons", $this->_ParseButtons() );
      return $this->tpl->Parse( $this->config["template_prefix"].$this->config["template_form"]);
-
+     
    }
 
    // парсинг кнопок
@@ -366,19 +366,19 @@ class Form
    }
 
    // загрузка из формы
-   function LoadFromPost( $post_data )
-   {
+   function LoadFromPost( $post_data )           
+   { 
      $this->AssignId( @$post_data[ $this->data_id_var ] ); //IVAN
 
-     foreach($this->fields as $k=>$field)
+     foreach($this->fields as $k=>$field) 
        $this->fields[$k]->LoadFromPost( $post_data );
    }
 
    // валидация всех полей формы
-   function Validate()
-   {
+   function Validate()    
+   { 
      $this->valid = true;
-     foreach($this->fields as $k=>$field)
+     foreach($this->fields as $k=>$field) 
        $this->valid = $this->fields[$k]->Validate() && $this->valid; // важно, что именно в таком порядке
      return $this->valid;
    }
@@ -390,7 +390,7 @@ class Form
      foreach( $this->fields as $k=>$field )
       $dump_hash[ $field->name ] = $field->_Dump();
 
-     if ($is_error)
+     if ($is_error) 
      {
 		throw new Exception($dump_hash);
 //     	$this->rh->debug->Error_R( $dump_hash );
@@ -398,19 +398,19 @@ class Form
      else
      {
 //     	$this->rh->debug->Trace_R( $dump_hash );
-     }
+     }           
    }
 
    // работа в сессии
-   function FromSession()
-   {
+   function FromSession() 
+   { 
      $key = "form_".$this->config["db_table"];
      $session_storage = isset($_SESSION[$key]) ? $_SESSION[$key] : "";
      if (!is_array($session_storage)) return; // no session -- no restore
      foreach( $this->fields as $k=>$field )
       $this->fields[$k]->FromSession( $session_storage );
    }
-   function ToSession()
+   function ToSession()   
    {
      $session_storage = array();
      foreach( $this->fields as $k=>$field )
@@ -418,12 +418,12 @@ class Form
      $_SESSION[ "form_".$this->config["db_table"] ] = $session_storage;
    }
    function ResetSession()
-   {
+   { 
      $_SESSION[ "form_".$this->config["db_table"] ] = "";
    }
 
    // обработка события, ага (вставка/редактирование)
-   function HandleEvent( $event = FORM_EVENT_AUTO )
+   function HandleEvent( $event = FORM_EVENT_AUTO ) 
    {
      if (is_array($event)) $_event = $event["event"];
      else                  $_event = $event;
@@ -469,7 +469,7 @@ class Form
        case FORM_EVENT_OK:
        default:               $this->success   = true;
                               $this->processed = true;
-     }
+     } 
      $this->processed_event = $event;
 
      if (!$this->processed)
@@ -485,11 +485,11 @@ class Form
    {
       if (!$this->config["db_table"])
      {
-       if ($this->config["db_ignore"])
+       if ($this->config["db_ignore"]) 
        {
        	return;
        }
-       else
+       else 
        {
        	 throw new Exception("[Form]: *db_table* form config option is not set.");
        }
@@ -506,9 +506,9 @@ class Form
         $values[$k] = $this->rh->db->Quote($values[$k]);
 
       $sql = "insert into ".$this->config["db_table"];
-      if (sizeof($fields) > 0)
+      if (sizeof($fields) > 0) 
         $sql.=" (".implode(",",$fields).") VALUES (".implode(",",$values).")";
-
+        
       //$this->rh->debug->Error( $sql );
       $this->data_id = $this->rh->db->Insert($sql);
 
@@ -517,20 +517,20 @@ class Form
    }
    function DbUpdate( $data_id = NULL )
    {
-      if (!$this->config["db_table"])
+      if (!$this->config["db_table"]) 
       {
-        if ($this->config["db_ignore"])
+        if ($this->config["db_ignore"]) 
         {
         	return;
         }
-        else
+        else 
         {
         	throw new Exception("[Form]: *db_table* form config option is not set.");
         }
       }
       if ($data_id == NULL) $data_id = $this->data_id;
 
-      $fields = array();
+      $fields = array(); 
       $values = array();
       foreach($this->fields as $k=>$v)
       {
@@ -585,15 +585,15 @@ class Form
    }
 
    // загрузка из БД
-   function Load( $data_id = NULL )
+   function Load( $data_id = NULL )  
    {
      if (!$this->config["db_table"])
      {
-       if ($this->config["db_ignore"])
+       if ($this->config["db_ignore"]) 
        {
        	return;
        }
-       else
+       else 
        {
        	 throw new Exception("[Form]: *db_table* form config option is not set.");
        }
@@ -603,7 +603,7 @@ class Form
      $sql = "select * from ".$this->config["db_table"]." where ".
              $this->config["id_field"]."=".$this->rh->db->Quote($data_id);
      $data = $this->rh->db->QueryOne( $sql );
-     if ($data == false)
+     if ($data == false) 
      {
        $this->data_id = 0;
        return;
@@ -617,11 +617,11 @@ class Form
    {
      if (!$this->config["db_table"])
      {
-       if ($this->config["db_ignore"])
+       if ($this->config["db_ignore"]) 
        {
        	return;
        }
-       else
+       else 
        {
        	 throw new Exception("[Form]: *db_table* form config option is not set.");
        }

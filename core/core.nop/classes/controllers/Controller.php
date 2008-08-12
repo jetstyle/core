@@ -4,29 +4,30 @@
  *
  */
 
-class Controller extends Configurable
+class Controller 
 {
-	var $rh;
 	var $config = array();
+	protected $rh = null;
 	
-	function Controller()
+	public function __construct()
 	{
+		$this->rh = RequestHandler::getInstance();
 	}
-
-	function initialize(&$ctx, $config=NULL) 
+	
+	public function initialize($config=NULL)
 	{ 
-		parent::initialize($ctx, $config);
 		if (isset($config)) 
-//			$this->config = array_merge($this->config, $config);
-			$this->config = $this->add_config($config);
+		{
+			$this->config = $this->addConfig($config);
+		}
 		return True;
 	}
 
-	function handle() 
+	public function handle() 
 	{
 	}
 
-	private function add_config($config)
+	private function addConfig($config)
 	{
 		if (is_object($config) && $config instanceof DataContainer)
 			$config = $config->getData();

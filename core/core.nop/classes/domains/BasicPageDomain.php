@@ -11,15 +11,11 @@ class BasicPageDomain
 	var $path = NULL;
 	var $url = NULL;
 	var $config = array();
+	protected $rh = null;
 
 	function __construct()
 	{
-	}
-
-	function initialize(&$ctx, $config=NULL)
-	{
-		$this->rh =& $ctx;
-		if (isset($config)) $this->config = array_merge($this->config, $config);
+		$this->rh = RequestHandler::getInstance();
 	}
 
 	function &find($criteria=NULL) { return False; }
@@ -66,7 +62,7 @@ class BasicPageDomain
 			$page->path = $config['path'];
 			$page->params = $this->getParams($page->url, $page->path);
 			$this->rh->_onCreatePage($page,$config);
-			$page->initialize($this->rh, $config['config']);
+			$page->initialize($config['config']);
 		}
 
 		return $page;

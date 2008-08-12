@@ -4,7 +4,7 @@
  * @created 09.09.2007
  **/
 
-if($rh->enable_debug)	
+if(Config::get('enable_debug'))	
 {
 	echo Debug::getHtml();
 } 

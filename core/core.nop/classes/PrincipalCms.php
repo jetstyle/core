@@ -49,8 +49,8 @@ class PrincipalCms
 	protected $SELECT_FIELDS = array("user_id","roles","login","password");
 
 
-	protected $users_table = 'users';
-	protected $sessions_table = 'users_sessions';
+	protected $users_table = '??users';
+	protected $sessions_table = '??users_sessions';
 	protected $users_where = '_state=0';
 
 	protected $cookie_prefix = '';

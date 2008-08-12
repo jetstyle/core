@@ -8,15 +8,14 @@
 
 class PageDomain
 {
-	protected $rh;
 	protected $domains = array('Handler', 'Content');
 	protected $pageDomains = null;						// domain Obj's
 	protected $url2page = array();						// cache
 	protected $cls2page = array();						// cache
 
-	public function __construct(&$rh)
+	public function __construct()
 	{
-		$this->rh = &$rh;
+		$this->rh = RequestHandler::getInstance();
 		if (!$this->rh->db)
 			$this->domains = array('Handler');
 	}
@@ -93,7 +92,6 @@ class PageDomain
 			{
 				$className = ucfirst($domain).'PageDomain';
 				$this->pageDomains[$domain] = new $className();
-				$this->pageDomains[$domain]->initialize($this->rh);
 			}
 		}
 		return $this->pageDomains;

@@ -51,15 +51,16 @@ class DBAL_mysql
 
 	public function connect()
 	{
-		$rh = &RequestHandler::getInstance();
-		if (!$this->dblink = @mysql_connect($rh->db_host, $rh->db_user, $rh->db_password))
+		if (!$this->dblink = @mysql_connect(Config::get('db_host'), Config::get('db_user'), Config::get('db_password')))
 		{
-			throw new DbException("Connect failed: Host=<b>" . $rh->db_host . "</b>, User=<b>" . $rh->db_user . "</b>");
+			throw new DbException("Connect failed: Host=<b>" . Config::get('db_host') . "</b>, User=<b>" . Config::get('db_user') . "</b>");
 		}
-
-		if (!mysql_select_db($rh->db_name, $this->dblink))
+		
+		Config::set('db_password', '');
+		
+		if (!mysql_select_db(Config::get('db_name'), $this->dblink))
 		{
-			throw new DbException("Database \"" . $rh->db_name . "\" select error");
+			throw new DbException("Database \"" . Config::get('db_name') . "\" select error");
 		}
 	}
 

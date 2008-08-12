@@ -130,81 +130,48 @@
 
  */
 
-class RequestHandler {
-
+class RequestHandler 
+{
 	protected static $instance = null;
+	
+	protected $pageDomains = null;
 
-	//информация об остатке адреса для обработчика
-	var $params = array ();
-	var $params_string = "";
-
-	//информация об корневом обработчике
-	var $handler = ''; // site/handlers/{$handler}.php
-	var $handler_full = false; // =/home/..../site/handlers/{$handler}.php
-
-	var $fixtures = array ();
-	var $use_fixtures = False;
-
-	public static function &getInstance($config = null, $className = '')
+	public static function &getInstance($className = '')
 	{
 		if (null === self::$instance)
 		{
-			self::$instance = new $className($config);
+			Finder::useClass($className);
+			self::$instance = new $className();
 		}
 
 		return self::$instance;
 	}
 
-	protected function __construct($config_path = 'config/default.php')
-	{
-		//пытаемся прочесть файл конфигурации
-		if (is_object($config_path))
-		{
-			config_joinConfigs($this, $config_path);
-		}
-		else
-		{
-			if (@ is_readable($config_path))
-			{
-				require_once ($config_path);
-			}
-			else
-			{
-				throw new Exception("Cannot read local configurations");
-			}
-		}
-		//вычисляем base_url
-
-		if (!isset ($this->base_url))
-		{
-			$this->base_url = dirname($_SERVER["PHP_SELF"]) . (dirname($_SERVER["PHP_SELF"]) != '/' ? '/' : '');
-		}
-		if (!isset ($this->base_dir))
-		{
-			$this->base_dir = $_SERVER["DOCUMENT_ROOT"] . $this->base_url;
-		}
-		if (!isset ($this->host_url))
-		{
-			$this->host_url = strtolower(substr($_SERVER['SERVER_PROTOCOL'], 0, strpos($_SERVER['SERVER_PROTOCOL'], '/'))) . '://' . $_SERVER['SERVER_NAME'] .
-			 ($_SERVER['SERVER_PORT'] === '80' ? '' : ':' . $_SERVER['SERVER_PORT']);
-		}
-
-		$this->_setDomains();
-
-		//избавляемся от квотов
-		if (get_magic_quotes_gpc())
-		{
-			$this->_fuckQuotes($_POST);
-			$this->_fuckQuotes($_GET);
-			$this->_fuckQuotes($_COOKIE);
-			$this->_fuckQuotes($_REQUEST);
-		}
-
-		Finder::setDirs($this->DIRS);
-	}
+	protected function __construct()	{	}
 
 	public function init()
 	{
+		if (get_magic_quotes_gpc())
+		{
+			$this->fuckQuotes($_POST);
+			$this->fuckQuotes($_GET);
+			$this->fuckQuotes($_COOKIE);
+			$this->fuckQuotes($_REQUEST);
+		}
+		
+		if (!Config::get('base_url'))
+		{
+			Config::set('base_url', dirname($_SERVER["PHP_SELF"]) . (dirname($_SERVER["PHP_SELF"]) != '/' ? '/' : ''));
+		}
+		
+		if (Config::get('host_url'))
+		{
+			Config::set('host_url', strtolower(substr($_SERVER['SERVER_PROTOCOL'], 0, strpos($_SERVER['SERVER_PROTOCOL'], '/'))) . '://' . $_SERVER['SERVER_NAME'] .
+			 ($_SERVER['SERVER_PORT'] === '80' ? '' : ':' . $_SERVER['SERVER_PORT']));
+		}
+		
+		$this->_setDomains();
+		
 		$this->initDebug();
 		$this->initDBAL();
 		$this->initTPL();
@@ -218,18 +185,20 @@ class RequestHandler {
 		// config from DB
 		if ($this->db)
 		{
-			config_joinConfigs($this, DBModel::factory('DBConfig')->load()->getData());
+			Config::loadFromDb('??config');
 		}
 
 		Debug :: trace("RH: init done");
 	}
 
-	public function & getPageDomain() {
+	public function & getPageDomain() 
+	{
 		return $this->pageDomain;
 	}
 
 	//основная функция обработки запроса
-	public function handle($ri = false) {
+	public function handle($ri = false) 
+	{
 		if ($ri)
 		{
 			$this->ri = & $ri;
@@ -239,7 +208,7 @@ class RequestHandler {
 			//инициализация $ri по умолчанию
 			$this->ri = & new RequestInfo($this); // kuso@npj: default RI должен быть с одним параметром имхо
 		}
-		$this->url = $this->ri->GetUrl();
+		$this->url = $this->ri->getUrl();
 
 		//определение обработчика
 		$this->mapHandler($this->url);
@@ -253,7 +222,8 @@ class RequestHandler {
 		$this->showSiteMap();
 	}
 
-	public function getPluralizeDir($classname) {
+	public function getPluralizeDir($classname) 
+	{
 		Finder::useClass("Inflector");
 		$words = preg_split('/[A-Z]/', $classname);
 		$last_word = substr($classname, -strlen($words[count($words) - 1]) - 1);
@@ -261,7 +231,8 @@ class RequestHandler {
 		return Inflector :: pluralize($last_word);
 	}
 
-	public function redirect($href) {
+	public function redirect($href) 
+	{
 		if (strpos($href, "http://") !== 0)
 			$href = $this->ri->_host_prot . $href;
 
@@ -301,28 +272,34 @@ class RequestHandler {
 	{
 		Debug :: mark("upload");
 		Finder::useClass("Upload");
-		$this->upload = & new Upload($this, $this->project_dir . "files/", '', 'files/');
+		$this->upload = & new Upload($this, Config::get('project_dir') . "files/", '', 'files/');
 		Debug :: trace("RH: created Upload", null, "upload");
 	}
 
-	protected function initDebug() {
+	protected function initDebug() 
+	{
 		//инициализируем базовые объекты
-		if ($this->enable_debug) {
+		if (Config::get('enable_debug')) 
+		{
 			Finder::useClass("Debug");
 			Debug :: init();
-		} else {
+		} 
+		else
+		{
 			Finder::useClass("DebugDummy");
 		}
 	}
 
-	protected function initDBAL() {
+	protected function initDBAL() 
+	{
 		Debug :: mark("db");
-		if ($this->db_al) {
+		if (Config::get('db_al')) 
+		{
 			Finder::useClass("DBAL");
-			//			$this->db =& new DBAL( $this );
-			$this->db = & DBAL :: getInstance($this);
-			if ($this->db_set_encoding) {
-				$this->db->query("SET NAMES " . $this->db_set_encoding);
+			$this->db = & DBAL :: getInstance();
+			if (Config::get('db_set_encoding')) 
+			{
+				$this->db->query("SET NAMES " . Config::get('db_set_encoding'));
 			}
 		}
 		Debug :: trace("RH: created DBAL", "db", "db");
@@ -332,11 +309,15 @@ class RequestHandler {
 	 *  Создание шаблонизатора
 	 *  TODO: всякие шаблонные переменные не должны здесь устанавливаться
 	 */
-	protected function initTPL() {
+	protected function initTPL() 
+	{
 		// ВЫКЛЮЧАЕМ tpl если что
-		if ($this->tpl_disable === true) {
+		if (Config::get('tpl_disable') === true) 
+		{
 			Debug :: trace("RH: TPL DISABLED");
-		} else {
+		} 
+		else 
+		{
 			Debug :: mark("tpl");
 			Finder::useClass("TemplateEngine");
 			$this->tpl = & new TemplateEngine($this);
@@ -347,13 +328,16 @@ class RequestHandler {
 
 	protected function initMessageSet()
 	{
-		if ($this->msg_disable === true) {
+		if (Config::get('msg_disable') === true) 
+		{
 			Debug :: trace("RH: MSG DISABLED");
-		} else {
+		} 
+		else 
+		{
 			Debug :: mark("msg");
 			Finder::useClass("MessageSet");
 			$this->msg = & new MessageSet($this);
-			$this->tpl->msg = & $this->msg;
+			// $this->tpl->msg = & $this->msg;
 			Debug :: trace("RH: created MSG", null, "msg");
 		}
 	}
@@ -375,7 +359,7 @@ class RequestHandler {
 
 		Finder::useClass('Fixtures');
 		$fixtures = new Fixtures($this);
-		$fixtures->setDir($this->app_dir.'fixtures/');
+		$fixtures->setDir(Config::get('app_dir').'fixtures/');
 		$fixtures->load();
 		$data = $fixtures->get();
 
@@ -386,6 +370,7 @@ class RequestHandler {
 	}
 
 	// функция, заполняющая поля *_domain, чтобы помогать кукам и вообще всем
+	
 	protected function _setDomains()
 	{
 		if (!isset ($this->base_domain))
@@ -398,6 +383,7 @@ class RequestHandler {
 
 		session_set_cookie_params(0, "/", $this->cookie_domain);
 	}
+	
 
 	protected function mapHandler($url)
 	{
@@ -489,11 +475,12 @@ class RequestHandler {
 
 	// удаляем "магические" квоты из предоставленного массива
 	// и всех содержащихся в нём массивов
-	protected function _fuckQuotes(& $a) {
+	protected function fuckQuotes(& $a) 
+	{
 		if (is_array($a))
 			foreach ($a as $k => $v)
 				if (is_array($v))
-					$this->_FuckQuotes($a[$k]);
+					$this->fuckQuotes($a[$k]);
 				else
 					$a[$k] = stripslashes($v);
 	}
