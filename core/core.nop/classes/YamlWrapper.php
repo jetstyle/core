@@ -39,6 +39,7 @@ final class YamlWrapper
 		
 		$cacher = self::getCacher();
 		$cacher->setFile(self::getCachedName($filePath));
+		$cacher->addSource($filePath);
 				
 		if ($cacher->isValid())
 		{
@@ -49,7 +50,6 @@ final class YamlWrapper
 		{
 			Finder::useLib('spyc');
 			$result = Spyc :: YAMLLoad($filePath);
-			$cacher->addSource($filePath);
 			$cacher->write("return '".str_replace("'", "\\'", serialize($result))."';");
 		}
 		

@@ -1,25 +1,18 @@
 <?php
 /**
- * @author lunatic lunatic@jetstyle.ru
- *
- * @created 		12:40 31.07.2008
- * @last-modified 	12:40 31.07.2008
+ * Fixtures.
+ * Load all fixtures and cache them.
+ * 
+ * @author lunatic <lunatic@jetstyle.ru>
  */
-
 class Fixtures
 {
-	protected $rh = null;
 	protected $dir = '';
 	protected $data = array();
 	protected $cachedName = 'fixtures';
-	protected $fileCacheObj = null;
+	protected $cacheObj = null;
 	protected $filesHash = '';
 	protected $files = array();
-
-	public function __construct(&$rh)
-	{
-		$this->rh = &$rh;
-	}
 
 	public function setDir($dirName)
 	{
@@ -40,57 +33,47 @@ class Fixtures
 	{
 		if (!is_dir($this->dir))
 		{
-			//throw new Exception('Fixtures dir "'.$this->dir.'" doesn\'t exists.<br />If you don\'t need fixtures, disable it in config file. (use_fixtures=false)');
 			return;
 		}
 
-		$this->countHash();
+		$this->findFixtures();
 
 		// fixtures folder is empty
 		if (empty($this->files))
 		{
 			return;
 		}
-
-		$this->fileCacheObj = new FileCache($this->cachedName.'.php');
-		$sources = $this->fileCacheObj->getSources();
-
+		
+		$cacheObj = $this->getCacheObj();
+		$cacheObj->setFile($this->cachedName.'.php');
+		$cacheObj->addSources($this->files);
+		$cacheObj->useHash(true);
+				
 		// need to recompile
-		if ((count($sources) > 0 && $sources[0] !== $this->filesHash) || count($sources) == 0)
+		if (!$cacheObj->isValid())
 		{
-			$this->compile();
+			// compile files
+			Finder::useLib('spyc');
+			foreach ($this->files AS $fileName)
+			{
+				$fileParts = pathinfo($fileName);
+				$this->data[$fileParts['filename']] = Spyc :: YAMLLoad($fileName);
+			}
+			$str = "return '".str_replace("'", "\\'", serialize($this->data))."';";
+			$cacheObj->write($str);
 		}
 		else
 		{
-			$data = include $this->fileCacheObj->getFileName();
+			$data = include $cacheObj->getFileName();
 			$this->data = unserialize($data);
 		}
-	}
-
-	/**
-	 * Скомпилировать все фикстуры и положить их в кэш
-	 *
-	 */
-	protected function compile()
-	{
-		Finder::useLib('spyc');
-		foreach ($this->files AS $fileName)
-		{
-			$fileParts = pathinfo($fileName);
-			$this->data[$fileParts['filename']] = Spyc :: YAMLLoad($this->dir.$fileName);
-		}
-
-		$this->fileCacheObj->addSource($this->filesHash);
-
-		$str = "return '".str_replace("'", "\\'", serialize($this->data))."';";
-		$this->fileCacheObj->write($str);
 	}
 
 	/**
 	 * Подсчет хэша папки с фикстурами
 	 *
 	 */
-	protected function countHash()
+	protected function findFixtures()
 	{
 		if ($handle = opendir($this->dir))
 		{
@@ -103,17 +86,19 @@ class Fixtures
 				{
 					continue;
 				}
-
-				$hash .= '|'.$file.'|'.filemtime($this->dir.'/'.$file).'|';
-				$this->files[] = $file;
+				$this->files[] = $this->dir.$file;
 		    }
 			closedir($handle);
-			if (strlen($hash) > 0)
-			{
-				$hash = md5($hash);
-			}
-			$this->filesHash = $hash;
 		}
+	}
+	
+	protected function getCacheObj()
+	{
+		if (null === $this->cacheObj)
+		{
+			$this->cacheObj = new FileCache();
+		}
+		return $this->cacheObj;
 	}
 }
 ?>

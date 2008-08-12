@@ -58,7 +58,6 @@ if (!isset($class))
 	}
 }
 
-
 if (isset($class))
 {
 	if (strpos($class, '/') !== false)
@@ -80,11 +79,7 @@ if (isset($class))
 		$item_cls = NULL;
 	}
 
-	$pageDomain =& $rh->getPageDomain();
-	
-	if ($pageDomain==null)	return;
-
-	if ($p = $pageDomain->findPageByClass($page_cls))
+	if ($p = Router::findByClass($page_cls))
 	{
 		$url = $p->url_to($item_cls, $item);
 	}

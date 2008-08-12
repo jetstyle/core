@@ -20,7 +20,7 @@ class Link
 				return $val;
 			}
 		}
-		return $this->rh->ri->Href(ltrim($val, '/'));		
+		return $val;		
 	}
 	
 }

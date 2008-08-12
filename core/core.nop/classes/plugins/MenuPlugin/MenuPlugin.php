@@ -1,7 +1,7 @@
 <?php
-Finder::useClass('controllers/Plugin');
+Finder::useClass('Plugin');
 
-class MenuPlugin extends RenderablePlugin
+class MenuPlugin extends Plugin
 {
 	var $config_vars = array (
 		'template',
@@ -21,7 +21,7 @@ class MenuPlugin extends RenderablePlugin
 
 	protected function getParentNodeByLevel($level)
 	{
-		$data = &$this->rh->page->config;
+		$data = &$this->rh->page;
 		$sql = '
 			SELECT id, _path, _level, _left, _right, hide_from_menu
 			FROM ??content
@@ -43,7 +43,7 @@ class MenuPlugin extends RenderablePlugin
 			return $this->parents;
 		}
 
-		$data = &$this->rh->page->config;
+		$data = &$this->rh->page;
 
 		if (!$data['id'])
 		{
@@ -78,7 +78,7 @@ class MenuPlugin extends RenderablePlugin
 		$menu = & DBModel::factory('Content');
 		$menu->setOrder(array('_left' => 'ASC'));
 
-		$current = &$this->rh->page->config;
+		$current = &$this->rh->page;
 		$parents = $this->getParentNodes();
 
 		foreach ($parents AS $p)
@@ -171,7 +171,7 @@ class MenuPlugin extends RenderablePlugin
 		$this->models['menu'][] = $item;
 	}
 
-	public function rend(& $ctx)
+	public function rend()
 	{
 		$this->rh->tpl->set($this->store_to, $this->models['menu']);
 	}

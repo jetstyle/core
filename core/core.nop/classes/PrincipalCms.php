@@ -69,14 +69,12 @@ class PrincipalCms
 	);
 	protected $ADMIN_ROLES = array( ROLE_GOD, ROLE_ADMIN, ROLE_USER);
 
-	public function __construct(&$rh)
+	public function __construct()
 	{
-		$this->rh =& $rh;
+		$this->rh =& RequestHandler::getInstance();
 		$this->state = PRINCIPAL_UNKNOWN;
 
-		$this->cookie_prefix = ($rh->cookie_prefix ? $rh->cookie_prefix : $rh->db_prefix).'_';
-		$this->users_table = $rh->db_prefix.$this->users_table;
-		$this->sessions_table = $rh->db_prefix.$this->sessions_table;
+		$this->cookie_prefix = (Config::get('cookie_prefix') ? Config::get('cookie_prefix') : Config::get('db_prefix').'_');
 	}
 
 	//сохраняем в сессию

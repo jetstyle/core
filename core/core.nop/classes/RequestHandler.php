@@ -1,98 +1,4 @@
 <?php
-
-/*
-  Основной обработчик запроса.
-  Организует последовательность обработки и функциональное окружение.
-  Служит мостом для сообщения между собой подключаемых модулей.
-
-  ===================
-
-  //поток обработки
-
-  * Requesthandler( $config_path = 'config/default.php' ) -- конструктор,
-					 грузит конфиг, выполняет инициализацию, строит базовое окружение.
-	 ВХОД:
-		- $config_path -- путь до файла с конфигом
-	 ВЫХОД:
-		Базовое окружение: $rh->db, $rh->tpl, $rh->debug
-
-  * Handle ( $ri=false ) -- Обеспечивает основную последовательность обработки запроса.
-	 ВХОД:
-		- $ri -- если указан, объект класса RequestInfo
-		kuso@npj: потенциально не нравится, что передаётся не ссылкой, а копией.
-					 обсуждение -- в имплементации метода
-	 ВЫХОД:
-		Строка с результатами работы.
-
-  * InitPrincipal () -- Инициализация принципала. Функция не доработана!
-	 ВХОД:
-		неясно
-		kuso@npj: imho -- без параметров
-	 ВЫХОД:
-		неясно
-		kuso@npj: imho -- ссылка на объект класса-наследника от Principal
-
-  * MapHandler( $url ) -- Выбор обработчика на основе строки запроса и карты обработчиков.
-								  Поиск в конент-таблице реализовывать в наследниках.
-	 ВХОД:
-		$this->handlers_map -- хэш, ставящий в соответствие адресам обработчики
-		$url -- строка адресу внутри сайта: catalogue/trees/pice/qa
-	 ВЫХОД:
-		$this->handler - имя файла обработчика. Возможно, пустое, если не нашли обработчика.
-		$this->params_string -- строка, остаток строки адреса
-		$this->params -- массив, остаток строки адреса, разбитый по слешам
-
-  * _UrlTrail(&$A,$i) -- Формирует информацию об остатке адреса для обработчика. Для внутреннего использования.
-	 ВХОД:
-		- $A -- массив, полная строка запроса, разбитая по слэшам
-		- $i -- индекс, начиная с которого нужно сформировать остаток
-		kuso@npj: давай будем называть параметры "говорящим образом"
-		- $URL_SEPARATED (?)
-		- $start_index
-	 ВЫХОД:
-		$this->params
-		$this->params_string
-
-  * InitEnvironment() -- Построение стандартнго окружения. На данном уровне пуст. Перегружать в наследниках.
-	 ВХОД:
-		ничего
-	 ВЫХОД:
-		$this->db, $this->tpl, $this->debug
-
-  * Execute( $handler='' ) -- Запуск выбранного обработчика на исполнение.
-	 ВХОД:
-		- $handler -- возможно указать обработчик явно
-		kuso@npj: у меня на вход давалась тройка $handler, $params, $principal
-					 реально последний не использовался.
-					 Если давался пустой $handler, то $handler, $params брались из $this->..
-		zharik: предлагаю пока передавать только $handler. Остальное добавим по мере появления потребностей.
-		kuso@npj: ок
-	 ВЫХОД:
-		$this->tpl->VALUES['HTML:body'] или $this->tpl->VALUES['HTML:html']
-
-  * PrepareResult () -- Пост-обработка результатов работы.
-			Если $this->tpl->VALUES['HTML:html'] пусто, то оборачивает $this->tpl->VALUES['HTML:body'] в html.html.
-	 ВХОД:
-		$this->tpl->VALUES['HTML:body'] или $this->tpl->VALUES['HTML:html']
-	 ВЫХОД:
-		строка с результатами работы
-
-  //вспомогательные функции
-
-  * _FuckQuotes (&$a) -- Удаляет квотирование в массиве и всех содержащихся в нём массивах рекурсивно.
-	 ВХОД:
-		- $a -- ссылка на массив, который нужно обработать
-	 ВЫХОД:
-		Обработанный массив $a.
-
-  * _SetDomains () -- Функция, заполняющая поля *_domain, чтобы помогать кукам и вообще всем
-	 ЗАПОЛНЯЕТ:
-		- $this->base_domain
-		- $this->current_domain
-		- $this->cookie_domain
-
- */
-
 class RequestHandler 
 {
 	protected static $instance = null;
@@ -109,6 +15,14 @@ class RequestHandler
 
 		return self::$instance;
 	}
+	
+	public static function _404()
+	{
+		Finder::useLib('http');
+		Http::status(404);
+		RequestHandler::getInstance()->finalize('404');	
+		die();
+	}
 
 	protected function __construct()	{	}
 
@@ -121,20 +35,7 @@ class RequestHandler
 			$this->fuckQuotes($_COOKIE);
 			$this->fuckQuotes($_REQUEST);
 		}
-		
-		if (!Config::get('base_url'))
-		{
-			Config::set('base_url', dirname($_SERVER["PHP_SELF"]) . (dirname($_SERVER["PHP_SELF"]) != '/' ? '/' : ''));
-		}
-		
-		if (Config::get('host_url'))
-		{
-			Config::set('host_url', strtolower(substr($_SERVER['SERVER_PROTOCOL'], 0, strpos($_SERVER['SERVER_PROTOCOL'], '/'))) . '://' . $_SERVER['SERVER_NAME'] .
-			 ($_SERVER['SERVER_PORT'] === '80' ? '' : ':' . $_SERVER['SERVER_PORT']));
-		}
-		
-		$this->_setDomains();
-		
+				
 		$this->initDebug();
 		$this->initDBAL();
 		$this->initTPL();
@@ -142,47 +43,31 @@ class RequestHandler
 		$this->initUpload();
 		$this->initPrincipal();
 		$this->initFixtures();
-
-		Finder::useModel('DBModel');
-
+		$this->initRequestInfo();
+		
 		// config from DB
 		if ($this->db)
 		{
+			Finder::useModel('DBModel');
 			Config::loadFromDb('??config');
 		}
 
 		Debug :: trace("RH: init done");
 	}
 
-	public function & getPageDomain() 
+	public function finalize($siteMap = '')
 	{
-		return $this->pageDomain;
-	}
+		$this->tpl->set('print_href', RequestInfo::hrefChange('', array (
+			'print' => 1
+		)));
 
-	//основная функция обработки запроса
-	public function handle($ri = false) 
-	{
-		if ($ri)
+		if (RequestInfo::get('print'))
 		{
-			$this->ri = & $ri;
+			$this->tpl->set('html:print', '1');
 		}
 
-		if (!isset ($this->ri)) {
-			//инициализация $ri по умолчанию
-			$this->ri = & new RequestInfo($this); // kuso@npj: default RI должен быть с одним параметром имхо
-		}
-		$this->url = $this->ri->getUrl();
-
-		//определение обработчика
-		$this->mapHandler($this->url);
-
-		//построение окружения
-		$this->initEnvironment();
-
-		//выполнение обработчика
-		$this->execute();
-
-		$this->showSiteMap();
+		$this->tpl->parseSiteMap($siteMap);
+		echo $this->tpl->get('html');
 	}
 
 	public function getPluralizeDir($classname) 
@@ -201,34 +86,6 @@ class RequestHandler
 
 		header("Location: $href");
 		exit;
-	}
-
-	public function _404()
-	{
-		$this->page = & $this->pageDomain->findPageByClass('PageNotFoundPage');
-		$this->execute();
-		$this->showSiteMap();
-		die();
-	}
-
-	protected function beforePageHandle()
-	{
-
-	}
-
-	protected function afterPageHandle()
-	{
-
-	}
-
-	protected function execute()
-	{
-		$this->beforePageHandle();
-
-		$this->page->handle();
-		$this->page->rend();
-
-		$this->afterPageHandle();
 	}
 
 	protected function initUpload()
@@ -251,6 +108,15 @@ class RequestHandler
 		{
 			Finder::useClass("DebugDummy");
 		}
+	}
+
+	protected function initRequestInfo()
+	{
+		Finder::useClass('RequestInfo');
+		RequestInfo::init();
+
+		session_set_cookie_params(0, RequestInfo::$baseUrl, RequestInfo::$cookieDomain);
+		$this->tpl->set("/", RequestInfo::$baseUrl);
 	}
 
 	protected function initDBAL() 
@@ -300,7 +166,6 @@ class RequestHandler
 			Debug :: mark("msg");
 			Finder::useClass("MessageSet");
 			$this->msg = & new MessageSet($this);
-			// $this->tpl->msg = & $this->msg;
 			Debug :: trace("RH: created MSG", null, "msg");
 		}
 	}
@@ -318,7 +183,7 @@ class RequestHandler
 
 	protected function initFixtures()
 	{
-		if (!$this->use_fixtures) return;
+		if (!Config::get('use_fixtures')) return;
 
 		Finder::useClass('Fixtures');
 		$fixtures = new Fixtures($this);
@@ -331,108 +196,8 @@ class RequestHandler
 			$this->tpl->set($k, $v);
 		}
 	}
-
-	// функция, заполняющая поля *_domain, чтобы помогать кукам и вообще всем
 	
-	protected function _setDomains()
-	{
-		if (!isset ($this->base_domain))
-			$this->base_domain = preg_replace("/^www\./i", "", $_SERVER["SERVER_NAME"]);
-		if (!isset ($this->current_domain))
-			$this->current_domain = preg_replace("/^www\./i", "", $_SERVER["HTTP_HOST"]);
-		if (!isset ($this->cookie_domain))
-			// lucky@npj: see http://ru.php.net/manual/ru/function.setcookie.php#49350
-			$this->cookie_domain = strpos($this->base_domain, '.') === false ? false : "." . $this->base_domain;
-
-		session_set_cookie_params(0, "/", $this->cookie_domain);
-	}
-	
-
-	protected function mapHandler($url)
-	{
-		Finder::useClass("domains/PageDomain");
-		$this->pageDomain = new PageDomain($this);
-		if ($page = & $this->pageDomain->findPageByUrl($url))
-		{
-			$this->page = & $page;
-			$this->data = $page->config;
-			$this->params = $page->params;
-			$this->path = $page->path;
-		}
-		else
-		{
-			$this->page = & $this->pageDomain->findPageByClass('PageNotFoundPage');
-		}
-	}
-
-	//Построение стандартного окружения.
-	protected function initEnvironment()
-	{
-		// на этом уровне включает только заполнение очень полезной
-		// шаблонной переменной "/", соответствующей корню сайта
-		$this->tpl->set("/", $this->ri->Href(""));
-//		$this->tpl->set("lib", $this->ri->Href($this->lib_href_part) . "/");
-//		$this->tpl->setRef("SITE", $this);
-	}
-
-
-
-
-
-//	function error($msg) {
-//		trigger_error($msg, E_USER_ERROR);
-//	}
-
-//	public function useFixture($type, $name) {
-//
-//		if (!array_key_exists($name, $this->fixtures)) {
-//			if ($s = $this->FindScript($type, $name, false, -1, 'yml')) {
-//				if (!class_exists('Spyc', false))
-//					$this->useLib('spyc');
-//				$this->fixtures[$name] = Spyc :: YAMLLoad($s);
-//			} else
-//				if ($s = $this->FindScript($type, $name, false, -1, 'php')) {
-//					$tpl = & $this->tpl;
-//					$this->fixtures[$name] = include $s;
-//				} else {
-//					$this->fixtures[$name] = NULL;
-//				}
-//		}
-//		return isset ($this->fixtures[$name]) ? $this->fixtures : NULL;
-//
-//	}
-//
 	public function _onCreatePage(& $page) {
-	}
-
-	protected function showSiteMap()
-	{
-		//TODO: extract and document setting of print params
-		//nop
-		$this->tpl->set('print_href', $this->ri->hrefPlus('', array (
-			'print' => 1
-		)));
-
-		if ($this->ri->get('print'))
-		{
-			$this->tpl->set('html:print', '1');
-		}
-
-        //умолчательный ключ сайтмапа = controller/method, например news/item
-        if (!isset( $this->site_map_path ))
-        {
-            $ss = str_replace("Page", "", get_class($this->page));
-
-            if ($this->page->method!="default" || ( $this->page->method == "default" && isset( $this->site_map[ strtolower( $ss.'/'.$this->page->method ) ]  ) ))
-                $k = strtolower($ss.'/'.$this->page->method);
-            else
-                $k = strtolower($ss);
-
-            $this->site_map_path = $k;
-        }
-
-		$this->tpl->parseSiteMap($this->site_map_path);
-		echo $this->tpl->get('html');
 	}
 
 

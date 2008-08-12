@@ -33,9 +33,9 @@ class Plugin
 			elseif (!isset($this->$v)) $this->$v = NULL;
 	}
 
-	function initialize(&$ctx, $config=NULL)
+	function initialize($config=NULL)
 	{
-		$this->rh =& $ctx;
+		$this->rh = &RequestHandler::getInstance();
 
 		if (isset($config['factory'])) $this->factory =& $config['factory'];
 
@@ -45,7 +45,4 @@ class Plugin
 	}
 
 }
-
-
-Finder::useClass('controllers/RenderablePlugin');
 ?>

@@ -248,7 +248,7 @@ class DBModel extends Model implements IteratorAggregate, ArrayAccess, Countable
 	 *
 	 * @param string $className		имя файла конфига из каталога classes/models
 	 * @param string $fieldSet		имя набора полей из конфига
-	 * @return void
+	 * @return boolean
 	 */
 	public function loadConfig( $fileName, $fieldSet = null )
 	{
@@ -256,27 +256,7 @@ class DBModel extends Model implements IteratorAggregate, ArrayAccess, Countable
 
 		if ( $ymlFile )
 		{
-//			var_dump($fileName);
-//			var_dump($fieldSet);
-			//имя файла, которое будет у закэшированного файла
-			$cache_file_name = 'model_'.$fileName.'.php';
-			$fileCache = new FileCache( $cache_file_name );
-			if ($fileCache->isValid())
-			{
-				$data = include $fileCache->getFileName();
-				$ymlConfig = unserialize($data);
-			}
-			else
-			{
-				Finder::useLib('spyc');
-				$ymlConfig = Spyc :: YAMLLoad($ymlFile);
-
-				//путь до исходного файла, у которого проверяется дата модификации
-				$fileCache->addSource($ymlFile);
-				$str = "return '".str_replace("'", "\\'", serialize( $ymlConfig ))."';";
-
-				$fileCache->write($str);
-			}
+			$ymlConfig = YamlWrapper::load($ymlFile);
 
 			if (!is_array($ymlConfig) || empty($ymlConfig))
 			{
@@ -911,7 +891,7 @@ class DBModel extends Model implements IteratorAggregate, ArrayAccess, Countable
 			}
 
 			$pager = &$this->getPager();
-			$pager->setup($this->rh->ri->get($this->pagerVar), $total, $this->pagerPerPage, $this->pagerFrameSize);
+			$pager->setup(RequestInfo::get($this->pagerVar), $total, $this->pagerPerPage, $this->pagerFrameSize);
 			$limit = $pager->getLimit();
 			$offset = $pager->getOffset();
 		}

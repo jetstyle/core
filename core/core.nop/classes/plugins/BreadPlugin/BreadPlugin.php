@@ -1,18 +1,18 @@
 <?php
 
-Finder::useClass('controllers/Plugin');
+Finder::useClass('Plugin');
 
-class BreadPlugin extends RenderablePlugin
+class BreadPlugin extends Plugin
 {
 	var $config_vars = array('store_to');
 
-	function initialize(&$ctx, $config)
+	function initialize($config)
 	{
 		if ($this->initialized) return;
 
-		parent::initialize(&$ctx, $config);
+		parent::initialize($config);
 
-		$current = &$this->rh->page->config;
+		$current = &$this->rh->page;
 
 		$model = & DBModel::factory('Content')
 							->clearFields()
@@ -28,11 +28,10 @@ class BreadPlugin extends RenderablePlugin
 
 	function addItem($path, $title, $hide = 0)
 	{
-//		$title = $this->smartTrim($title);
 		$this->models['bread'][] = array('href'=>$path, 'title_short'=>$title, 'hide' => $hide);
 	}
 
-	function rend(&$ctx)
+	function rend()
 	{
 		$total = count($this->models['bread']);
 		$last = &$this->models['bread'][$total - 1];

@@ -9,6 +9,6 @@
  *
  */
 
-echo $rh->base_url.$tpl->Action('link_to', $params);
+echo RequestInfo::$baseUrl.$tpl->Action('link_to', $params);
 
 ?>

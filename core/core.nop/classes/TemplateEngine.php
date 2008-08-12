@@ -57,8 +57,10 @@ class TemplateEngine
 
 	public function __construct()
 	{
-		// изначальный стек шкур на основе стека RH
-		$this->rootHref = Config::get('base_url').Config::get('app_name').'/skins/';
+		if (!$this->rootHref = Config::get('rootHref'))
+		{
+			$this->rootHref = Config::get('base_url').Config::get('app_name').'/skins/';
+		}
 		$this->rootDir = Config::get('app_dir').'skins/';
 
 		// выбрать шкуру

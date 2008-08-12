@@ -8,6 +8,6 @@
  * http://server/path/to/site/path/to/page
  */
 
-echo $rh->host_url.$tpl->action('href_to', $params);
+echo RequestInfo::$hostProt.$tpl->action('href_to', $params);
 
 ?>

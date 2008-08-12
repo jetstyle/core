@@ -15,12 +15,6 @@
  	protected $p = 1;			// current page
  	protected $frameSize = 7;	//
  	protected $data = array();
- 	protected $rh = null;
-
- 	public function __construct(&$rh)
- 	{
- 		$this->rh = &$rh;
- 	}
 
  	public function getPages()
  	{
@@ -100,8 +94,8 @@
 			if ($allPages > $this->frameSize)
 			{
 				$this->data['pages'][$i-1]['has_more'] = $i;
-				$this->data['pages'][$i-1]['has_more_url'] = $this->fixUrl( $this->rh->ri->HrefPlus('',array ('p' => $i,'submit' => '')) );
-				$this->data['pages'][$i-1]['last_url'] = $this->fixUrl( $this->rh->ri->HrefPlus('',array ('p' => $allPages)) );
+				$this->data['pages'][$i-1]['has_more_url'] = $this->fixUrl( RequestInfo::hrefChange('',array ('p' => $i,'submit' => '')) );
+				$this->data['pages'][$i-1]['last_url'] = $this->fixUrl( RequestInfo::hrefChange('',array ('p' => $allPages)) );
 				$this->data['pages'][$i-1]['last_num'] = $allPages;
 			}
 		}
@@ -132,8 +126,8 @@
 			if ( $allPages > $i )
 			{
 				$this->data['pages'][$i-1]['has_more'] = $i;
-				$this->data['pages'][$i-1]['has_more_url'] = $this->fixUrl( $this->rh->ri->HrefPlus('',array ('p' => $i,'submit' => '')) );
-				$this->data['pages'][$i-1]['last_url'] = $this->fixUrl( $this->rh->ri->HrefPlus('',array ('p' => $allPages)) );
+				$this->data['pages'][$i-1]['has_more_url'] = $this->fixUrl( RequestInfo::hrefChange('',array ('p' => $i,'submit' => '')) );
+				$this->data['pages'][$i-1]['last_url'] = $this->fixUrl( RequestInfo::hrefChange('',array ('p' => $allPages)) );
 				$this->data['pages'][$i-1]['last_num'] = $allPages;
 
 			}
@@ -141,7 +135,7 @@
 
 		if ($p > 1)
 		{
-			$this->data['prev_page'] = $this->fixUrl( $this->rh->ri->HrefPlus('', array (
+			$this->data['prev_page'] = $this->fixUrl( RequestInfo::hrefChange('', array (
 				'p' => ($p -1
 			), 'submit' => ''))
 			)
@@ -149,7 +143,7 @@
 		}
 		if ($p <= ($allPages -1))
 		{
-			$this->data['next_page'] = $this->fixUrl( $this->rh->ri->HrefPlus('', array (
+			$this->data['next_page'] = $this->fixUrl( RequestInfo::hrefChange('', array (
 																			  'p' => ($p +1
 																			), 'submit' => ''))
 			);
@@ -173,7 +167,7 @@
  	{
  		$page = array (
 					'num' => $i,
-					'url' => $this->fixUrl( $this->rh->ri->HrefPlus('',
+					'url' => $this->fixUrl( RequestInfo::hrefChange('',
 					array (
 						'p' => $i,
 						'submit' => ''
@@ -189,8 +183,8 @@
 		//для первой страницы текущего фрейма проверим, можно ли отмотать фрейм назад
 		if ( $i == $start_from && $start_from > 1 )
 		{
-			$page['has_less_url'] = $this->fixUrl( $this->rh->ri->HrefPlus('',array ('p' => $i-1)) );
-			$page['first_url'] = $this->fixUrl( $this->rh->ri->HrefPlus('',array ('p' => 1)) );
+			$page['has_less_url'] = $this->fixUrl( RequestInfo::hrefChange('',array ('p' => $i-1)) );
+			$page['first_url'] = $this->fixUrl( RequestInfo::hrefChange('',array ('p' => 1)) );
 		}
 
 		return $page;

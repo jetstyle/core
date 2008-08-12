@@ -1,7 +1,9 @@
 <?php
-
 /**
- * Класс FileCache - управляет кешами
+ * FileCache.
+ * Cache one or many files to the cache directory. Validating cache.
+ * 
+ * @author lunatic <lunatic@jetstyle.ru>
  */
 class FileCache
 {
@@ -9,6 +11,8 @@ class FileCache
 	protected $cacheSources = null;		// источники, прочитанные из закешированного файла
 	protected $sources = array();		// источники, которые добавятся в заголовок кэша при записи
 	protected $fp = null;
+	protected $useHash = false;
+	protected $hash = '';
 	
 	public function __construct($filePath = '')
 	{
@@ -18,6 +22,12 @@ class FileCache
 		}
 	}
 
+	/**
+	 * Set cached filename
+	 * 
+	 * @param string $filePath
+	 * @return void
+	 */
 	public function setFile($filePath)
 	{
 		$this->filePath = Config::get('cache_dir').$filePath;
@@ -28,7 +38,40 @@ class FileCache
 			$this->close();
 		}
 	}
+	
+	/**
+	 * Add source.
+	 * 
+	 * @param string $path
+	 * @return void
+	 */
+	public function addSource($path)
+	{
+		$this->sources[$path] = $path;
+	}
 
+	/**
+	 * Add sources.
+	 * 
+	 * @param array $data
+	 * @return void
+	 */
+	public function addSources($data)
+	{
+		if (is_array($data))
+		{
+			foreach ($data AS $path)
+			{
+				$this->addSource($path);
+			}
+		}
+	}
+
+	/**
+	 * Get sources, extracted from cached file.
+	 * 
+	 * @return array
+	 */
 	public function getSources()
 	{
 		if ($this->cacheSources === null)
@@ -38,16 +81,32 @@ class FileCache
 		return $this->cacheSources;
 	}
 	
-	public function addSource($path)
-	{
-		$this->sources[$path] = $path;
-	}
-	
+	/**
+	 * Get cached filename.
+	 * 
+	 * @return string 
+	 */
 	public function getFileName()
 	{
 		return $this->filePath;
 	}
 	
+	/**
+	 * Use files hash for validating cache file.
+	 * 
+	 * @param boolean $state
+	 * @return void
+	 */
+	public function useHash($state)
+	{
+		$this->useHash = $state;
+	}
+	
+	/**
+	 * Check, if cached filed is valid.
+	 * 
+	 * @return boolean
+	 */
 	public function isValid()
 	{
 		if (!file_exists($this->filePath))
@@ -55,28 +114,49 @@ class FileCache
 			return false;
 		}
 
-		$sources = $this->getSources();
+		$sources = &$this->sources;
 		
 		if (count($sources) > 0)
 		{
 			$status = True;
-			$cachedMtime = @filemtime($this->filePath);
 			
-			foreach ($sources AS $fileSource)
-			if (!is_file($fileSource) || $cachedMtime < @filemtime($fileSource)) 
+			if ($this->useHash)
 			{
-				$status = False;
-				break;
+				$hash = $this->getHash();				
+				$cachedSources = $this->getSources();
+				if (!is_array($cachedSources) || $hash !== $cachedSources[0])
+				{
+					$status = false;
+				}
+			}
+			else
+			{
+				$cachedMtime = @filemtime($this->filePath);
+
+				foreach ($sources AS $fileSource)
+				{
+					if (!is_file($fileSource) || $cachedMtime < @filemtime($fileSource)) 
+					{
+						$status = False;
+						break;
+					}
+				}
 			}
 		}
 		else
 		{
-			return false;
+			$status = False;
 		}
 		
 		return $status;
 	}
 
+	/**
+	 * Write to file.
+	 * 
+	 * @param string $str
+	 * @return boolean
+	 */
 	public function write($str)
 	{
 		$this->openFileForWrite();
@@ -87,6 +167,26 @@ class FileCache
 		$this->close();
 		
 		return true;
+	}
+	
+	protected function countHash()
+	{
+		$this->hash = '';
+		foreach ($this->sources AS $fileSource)
+		{
+			$this->hash .= '|'.$fileSource.'|'.filemtime($fileSource).'|';
+		}
+		$this->hash = md5($this->hash);
+	}
+	
+	protected function getHash()
+	{
+		if (strlen($this->hash) != 32)
+		{
+			$this->countHash();
+		}
+		
+		return $this->hash;
 	}
 	
 	protected function getSourcesFromFile()
@@ -153,6 +253,11 @@ class FileCache
 
 	protected function writeHeader()
 	{
+		if ($this->useHash)
+		{
+			array_unshift($this->sources, $this->getHash());
+		}
+		
 		$this->writeLn('<?php');
 		$this->writeLn('# '.count($this->sources));
 		foreach ($this->sources as $source)

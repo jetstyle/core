@@ -4,10 +4,10 @@
  *
  */
 
-Finder::useClass("controllers/BasicPage");
-class BasicTplPage extends BasicPage
+Finder::useClass("controllers/BasicController");
+class TplController extends BasicController
 {
-	var $plugins = array(
+	protected $plugins = array(
 		array('MenuPlugin', array(
 			'__aspect' => 'MainMenu',
 			'store_to' => 'menu',
@@ -22,9 +22,8 @@ class BasicTplPage extends BasicPage
         parent::handle();
 
         $this->rh->tpl->set('tpl', 'tpl');
-        $this->rh->site_map_path= rtrim(implode("/", $this->params), "/");
+        $this->siteMap = rtrim(implode("/", $this->params), "/");
 	}
 
 }
-
 ?>

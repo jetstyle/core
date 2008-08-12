@@ -203,8 +203,6 @@ class Finder {
 	{
 		if (!$fname = self::findScript($type,$name,$level,$dr,$ext,$withSubDirs))
 		{
-					var_dump(self::$DIRS);
-					die();
 			$e = new FileNotFoundException("File not found: <b>".$name.".".$ext."</b>", self::buildSearchHistory());
 			$e->setFilename($name.".".$ext);
 			throw $e;
