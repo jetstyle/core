@@ -1,5 +1,5 @@
 <?php
-$this->useClass('controllers/Plugin');
+Finder::useClass('controllers/Plugin');
 
 class MenuPlugin extends RenderablePlugin
 {
@@ -18,21 +18,21 @@ class MenuPlugin extends RenderablePlugin
 	protected $parents = null;
 	protected $items = array();
 	protected $childs = array();
-	
+
 	protected function getParentNodeByLevel($level)
 	{
 		$data = &$this->rh->page->config;
 		$sql = '
 			SELECT id, _path, _level, _left, _right, hide_from_menu
-			FROM ??content 
-			WHERE 
-				_level = ' . $level . ' 
-					AND 
+			FROM ??content
+			WHERE
+				_level = ' . $level . '
+					AND
 				(_left <= ' . $data['_left'] . ' AND _right >= ' . $data['_right'] . ')
 					AND
-				_state = 0 
+				_state = 0
 		';
-		
+
 		return $this->rh->db->queryOne($sql);
 	}
 
@@ -42,7 +42,7 @@ class MenuPlugin extends RenderablePlugin
 		{
 			return $this->parents;
 		}
-		
+
 		$data = &$this->rh->page->config;
 
 		if (!$data['id'])
@@ -53,34 +53,34 @@ class MenuPlugin extends RenderablePlugin
 
 		$sql = '
 			SELECT id, hide_from_menu
-			FROM ??content 
+			FROM ??content
 			WHERE _left < ' . $data['_left'] . ' AND _right >= ' . $data['_right'] . ' AND _level < '.($this->level + $this->depth).' AND _state = 0
 		';
-		
+
 		$this->parents = $this->rh->db->query($sql, "id");
-		
+
 		if ($this->parents === null)
 		{
 			$this->parents = array();
 		}
-		
+
 		return $this->parents;
 	}
 
 	public function initialize(& $ctx, $config = NULL)
 	{
 		parent :: initialize($ctx, $config);
-		
+
 		/*
 		 * загрузим модель меню
 		 * с условием на where
 		 */
 		$menu = & DBModel::factory('Content');
 		$menu->setOrder(array('_left' => 'ASC'));
-		
+
 		$current = &$this->rh->page->config;
 		$parents = $this->getParentNodes();
-			
+
 		foreach ($parents AS $p)
 		{
 			if ($p['hide_from_menu'])
@@ -89,33 +89,33 @@ class MenuPlugin extends RenderablePlugin
 				return;
 			}
 		}
-		
+
 		$where = array();
-		
+
 		$where[] = '('.$menu->quoteField('_level').' >= '.DBModel::quote($this->level). ' AND '.$menu->quoteField('_level').' <'.DBModel::quote($this->level + $this->depth).')';
-				
+
 		switch ($this->mode)
 		{
 			case 'submenu' :
-			
+
 				$parent = $this->getParentNodeByLevel($this->level - 1);
 				if (!$parent['id'] || $parent['hide_from_menu'])
 				{
 					$this->models['menu'] = array ();
 					return;
 				}
-				
+
 				$where[] = $menu->quoteField('_left') .' > ' . DBModel::quote($parent['_left']);
 				$where[] = $menu->quoteField('_right') .' < ' . DBModel::quote($parent['_right']);
-				
+
 			break;
 		}
-		
+
 		$where[] = $menu->quoteField('hide_from_menu').' = 0';
-		
+
 		$menu->load(implode(' AND ', $where));
-				
-		$this->rh->useClass('Link');
+
+		Finder::useClass('Link');
 		$link = new Link($this->rh);
 
 		foreach ($menu AS $i => $r)
@@ -141,12 +141,12 @@ class MenuPlugin extends RenderablePlugin
 			$this->childs[$r['_parent']][] = $r['id'];
 			$this->items[$r['id']] = $r;
 		}
-		
+
 		if(!empty($this->childs))
 		{
 			$this->models['menu'] = $this->prepare(key($this->childs));
 		}
-		
+
 		unset ($this->items, $this->childs);
 	}
 
@@ -175,18 +175,18 @@ class MenuPlugin extends RenderablePlugin
 	{
 		$this->rh->tpl->set($this->store_to, $this->models['menu']);
 	}
-	
+
 	public function &getData()
 	{
 		return $this->models['menu'];
 	}
-	
+
 	public function &findElementById($id)
 	{
 		$item = &$this->_findElementById($this->models['menu'], $id);
 		return $item;
 	}
-	
+
 	protected function &_findElementById(&$data, $id)
 	{
 		if(is_array($data))

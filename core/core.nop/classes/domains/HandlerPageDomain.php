@@ -2,14 +2,14 @@
 /*
  * @created Feb 21, 2008
  * @author lunatic lunatic@jetstyle.ru
- * 
+ *
  * Страницы среди классов страниц
  */
- 
+
 class HandlerPageDomain extends BasicPageDomain
 {
 	private $handlers_map = array();
-	
+
 	function findByUrl($url)
 	{
 		$possible_paths = $this->getPossiblePaths($url);
@@ -48,9 +48,9 @@ class HandlerPageDomain extends BasicPageDomain
 						'path' => $up,
 						'url' => $url,
 					);
-					if ($this->rh->findScript("classes/controllers", $page_cls))
+					if (Finder::findScript("classes/controllers", $page_cls))
 					{
-						$this->rh->useClass("controllers/".$page_cls);
+						Finder::useClass("controllers/".$page_cls);
 						if ($this->handler = &$this->buildPage($config))
 						{
 							return True;
@@ -73,7 +73,7 @@ class HandlerPageDomain extends BasicPageDomain
 			{
 				$page_cls .= 'Page';
 			}
-						
+
 			if (($page_cls == 'PageNotFoundPage') || ($path = array_search($page_cls, $this->rh->handlers_map)))
 			{
 				$config = array (
@@ -81,11 +81,11 @@ class HandlerPageDomain extends BasicPageDomain
 					'config' => array (),
 					'path' => $path
 				);
-				
+
 				$config['url'] = $config['path'];
-				if ($this->rh->findScript("classes/controllers", $page_cls))
+				if (Finder::findScript("classes/controllers", $page_cls))
 				{
-					$this->rh->useClass("controllers/".$page_cls);
+					Finder::useClass("controllers/".$page_cls);
 					if ($this->handler = &$this->buildPage($config))
 					{
 						return True;
@@ -106,5 +106,5 @@ class HandlerPageDomain extends BasicPageDomain
 	}
 
 }
- 
+
 ?>

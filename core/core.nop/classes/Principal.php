@@ -4,7 +4,7 @@
   Абстракция от метода хранения данных о пользователе:
   * логин/логаут/перманентный логин
   * хранение информации о текущем пользователе
-  * обеспечение других модулей функциями "контроля доступа" 
+  * обеспечение других модулей функциями "контроля доступа"
 
   Principal( &$rh, $storage_model="profiles", $security_models = "noguests" )
       - $rh              -- ссылка на RH, как обычно
@@ -15,13 +15,13 @@
 
   // Логин/Логаут
 
-  * Identify( $redirect=PRINCIPAL_REDIRECT, $_skip_cookies=false ) -- 
-                               попытка понять, можем ли мы идентифицировать принципала 
+  * Identify( $redirect=PRINCIPAL_REDIRECT, $_skip_cookies=false ) --
+                               попытка понять, можем ли мы идентифицировать принципала
                                в текущей сессии. Вызывает и попытку логина.
       - $redirect=1 -- в случае успеха сам делает редирект на ту же страницу
       - $_skip_cookies=false -- для внутреннего использования, чтобы авторизоваться постом при провале кук
       - он же ищет в посте и куках
-          * в посте поля: "_principal_login", "_principal_password", 
+          * в посте поля: "_principal_login", "_principal_password",
                           "_principal_permanent_login", "_principal_permanent_password"
           * в куках поля: "_principal_stored_login", "_principal_stored_password"
       - варианты возврата без редиректа:
@@ -46,7 +46,7 @@
 
   * GetStoredLogin() -- достаёт из кук "сохранённый туда логин"
 
-  * GenerateTempPassword( $user_data ) -- создаёт новый временный пароль 
+  * GenerateTempPassword( $user_data ) -- создаёт новый временный пароль
   * GenerateTempPasswordHash( $user_data ) -- создаёт хэш от временного пароля для отправки его по емайлу
 
   // "Хакерские" штучки. Для ситуаций, когда нам нужно временно выступить в другом лице.
@@ -58,18 +58,18 @@
 
   // Откуда берутся данные принципала?
 
-  * Guest( $profile="guest" ) -- инициализация "гостем" без подъёма/записи сессии. 
+  * Guest( $profile="guest" ) -- инициализация "гостем" без подъёма/записи сессии.
       - $profile указывает на имя файла, которое лежит в специально указанной папке "principal_profiles"
-  * LoadById($id), LoadByLogin($login, $realm="") -- загружают структуру принципала из "хранилища", 
+  * LoadById($id), LoadByLogin($login, $realm="") -- загружают структуру принципала из "хранилища",
                                                      возвращая её. Тут встроено кэширование.
 
   // Работа с сессией (внутренние)
-  * _Store(), _Restore() -- запись и восстановление данных о принципале в сессию. 
+  * _Store(), _Restore() -- запись и восстановление данных о принципале в сессию.
                             При этом "cheated" состояния в сессию не записываются и не восстанавливаются.
   * _StoreReset()        -- сбросить сохранённое в сессии состояние
 
   // Механизмы генерации и инвалидации сохранённого пароля
-  * _CheckStoredPassword( $stored_password, $stored_invariant ) -- проверяет, подходит ли пароль, 
+  * _CheckStoredPassword( $stored_password, $stored_invariant ) -- проверяет, подходит ли пароль,
                                                                    исходя из выбранной политики
        - $stored_password  -- пароль, полученный "из кук"
        - $stored_invariant -- хранимый в профиле принципала инвариант пароля
@@ -78,7 +78,7 @@
        - $stored_invariant -- хранимый в профиле принципала инвариант пароля
        - вызывается из Identify
 
-  * InvalidateStoredPassword() -- инвалидация пароля (генерирует новый инвариант на основе текущего профиля, 
+  * InvalidateStoredPassword() -- инвалидация пароля (генерирует новый инвариант на основе текущего профиля,
                                   записывает его в профиль через внутренние функции)
                                   Можно делать только из-под авторизации, основываясь на $this->data
   * _GenerateInvariant( $user_data ) -- генерирует новый инвариант пароля, вызывается из инвалидации
@@ -132,16 +132,16 @@ class Principal
      $this->rh = &$rh;
 
      //. достроить стораж модель
-     $this->rh->UseClass("PrincipalStorage");
-     $this->storage_model =& PrincipalStorage::Factory( $this, $storage_model );  
+     Finder::useClass("PrincipalStorage");
+     $this->storage_model =& PrincipalStorage::Factory( $this, $storage_model );
 
      //. построить модели безопасности
-     $this->rh->UseClass("PrincipalSecurity");
+     Finder::useClass("PrincipalSecurity");
      $this->security_models = array();
      if (!is_array($security_models)) $security_models = array( $security_models );
      foreach( $security_models as $model )
-       $this->security_models[ $model ] =& PrincipalSecurity::Factory( $this, $model ); 
-    
+       $this->security_models[ $model ] =& PrincipalSecurity::Factory( $this, $model );
+
    }
 
    function _SetUserData($user_data)
@@ -152,7 +152,7 @@ class Principal
 
    // работа с инвариантами паролей
    // -- проверяет, подходит ли пароль, исходя из выбранной политики
-   function _CheckStoredPassword( $stored_password, $stored_invariant ) 
+   function _CheckStoredPassword( $stored_password, $stored_invariant )
    {
      $gen_md5 = $this->_GenerateStoredPassword( $stored_invariant );
      if ($gen_md5 == $stored_password) return true;
@@ -165,14 +165,14 @@ class Principal
      return md5($gen);
    }
    // -- генерирует новый инвариант пароля, вызывается из инвалидации
-   function _GenerateInvariant( $user_data ) 
+   function _GenerateInvariant( $user_data )
    {
      $invariant = $user_data["login"].date("Ymdhis");
      return $invariant;
    }
-   // -- инвалидация пароля (генерирует новый инвариант на основе текущего профиля, 
+   // -- инвалидация пароля (генерирует новый инвариант на основе текущего профиля,
    //    записывает его в профиль через внутренние функции)
-   function InvalidateStoredPassword() 
+   function InvalidateStoredPassword()
    {
      if ($this->data["login"] == "!") return false;        // no principal @ all
      if ($this->data["guest_profile"] != "") return false; // guest principal
@@ -182,7 +182,7 @@ class Principal
    // -- создаёт хэш от временного пароля для отправки его по емайлу
    function _GenerateTempPasswordHash( $temp_password )
    { return $this->_GenerateStoredPassword( $temp_password ); }
-   function _CheckTempPassword( $given_password, $temp_password ) 
+   function _CheckTempPassword( $given_password, $temp_password )
    { return $this->_CheckStoredPassword( $given_password, $temp_password ); }
 
    // -- создаёт пару временный пароль + таймаут
@@ -203,7 +203,7 @@ class Principal
    function GenerateTempPasswordHash( $user_data )
    {
      // ?протух
-     if (time() > strtotime($user_data["temp_timeout"]))                  
+     if (time() > strtotime($user_data["temp_timeout"]))
        $tmp = $this->InvalidateTempPassword( $user_data );
      else
        $tmp = $user_data["temp_password"];
@@ -239,7 +239,7 @@ class Principal
 
      // 2. потом из поста
      if (!$have_credentials && isset($_POST["_principal_login"]) && ($_POST["_principal_login"] !== ""))
-     {                                                                
+     {
        $login  = $_POST["_principal_login"];
        $realm  = "";
        $pwd    = $_POST["_principal_password"];
@@ -258,8 +258,8 @@ class Principal
      }
 
      // 3. login (and store to session)
-     if ($have_credentials) 
-       $status = $this->Login( $login, $realm, $pwd, $login_mode, PRINCIPAL_STORE ); 
+     if ($have_credentials)
+       $status = $this->Login( $login, $realm, $pwd, $login_mode, PRINCIPAL_STORE );
 
      // если вышло?
      if ($status == PRINCIPAL_AUTH)
@@ -292,7 +292,7 @@ class Principal
        if ($restoral === PRINCIPAL_OLD_SESSION)
        {
          // принципала надо попробовать перелогинить, стерев куку
-         setcookie( $this->rh->cookie_prefix."_principal_auth", "", time()-3600, "/", $this->rh->cookie_domain ); 
+         setcookie( $this->rh->cookie_prefix."_principal_auth", "", time()-3600, "/", $this->rh->cookie_domain );
          unset($_COOKIE[$this->rh->cookie_prefix."_principal_auth"]);
          return $this->Identify( $redirect ); // ?????? possible recursion !
        }
@@ -305,15 +305,15 @@ class Principal
    function _WritePermanentCookieLogin( $login )
    {
       setcookie( $this->rh->cookie_prefix."_principal_stored_login", $login,
-                 time()+$this->rh->cookie_expire_days*24*3600 , 
-                 "/", $this->rh->cookie_domain ); 
+                 time()+$this->rh->cookie_expire_days*24*3600 ,
+                 "/", $this->rh->cookie_domain );
    }
    function _WritePermanentCookiePassword( $password_invariant )
    {
-      setcookie( $this->rh->cookie_prefix."_principal_stored_password", 
+      setcookie( $this->rh->cookie_prefix."_principal_stored_password",
                  $this->_GenerateStoredPassword( $password_invariant ),
-                 time()+$this->rh->cookie_expire_days*24*3600 , 
-                 "/", $this->rh->cookie_domain ); 
+                 time()+$this->rh->cookie_expire_days*24*3600 ,
+                 "/", $this->rh->cookie_domain );
    }
 
    function SetPermanent()
@@ -326,7 +326,7 @@ class Principal
    }
 
    // -- логин принципала
-   function Login( $login="", $realm="", $pwd="", $login_mode=PRINCIPAL_POST_LOGIN, $store_to_session=PRINCIPAL_NO_SESSION ) 
+   function Login( $login="", $realm="", $pwd="", $login_mode=PRINCIPAL_POST_LOGIN, $store_to_session=PRINCIPAL_NO_SESSION )
    {
      // получить данные принципала
      $user_data = $this->LoadByLogin( $login, $realm );
@@ -341,7 +341,7 @@ class Principal
            if ($pwd != $user_data["temp_password"])              return PRINCIPAL_WRONG_PWD;
            if (time() > strtotime( $user_data["temp_timeout"] )) return PRINCIPAL_TEMP_TIMEOUT;
          }
-       else 
+       else
        {
          if ($pwd != $user_data["temp_password"])              return PRINCIPAL_WRONG_PWD;
          if (time() > strtotime( $user_data["temp_timeout"] )) return PRINCIPAL_TEMP_TIMEOUT;
@@ -392,7 +392,7 @@ class Principal
    }
 
    // -- вне зависимости от пароля идентифицируется под пользователя
-   function _Cheat( $login, $realm="" ) 
+   function _Cheat( $login, $realm="" )
    {
      $user_data = $this->LoadByLogin( $login, $realm );
      return $this->__Cheat( $user_data );
@@ -408,14 +408,14 @@ class Principal
 
      $this->_cheat_stack[] = $this->data;
      $this->_SetUserData($user_data);
-     // как бы произошёл "логин" 
+     // как бы произошёл "логин"
      foreach( $this->security_models as $model=>$v )
        $this->security_models[ $model ]->OnLogin( $this->data );
      // но в сессию ничего не кладём
      return PRINCIPAL_AUTH;
    }
    // -- возвращается обратно к предыдущему состоянию
-   function _UnCheat() 
+   function _UnCheat()
    {
      $this->_SetUserData(array_pop($this->_cheat_stack));
 
@@ -425,10 +425,10 @@ class Principal
      // но в сессию ничего не кладём
    }
 
-   // -- загружают структуру принципала из "хранилища" 
-   function LoadById($id) 
+   // -- загружают структуру принципала из "хранилища"
+   function LoadById($id)
    { return $this->storage_model->LoadById( $id ); }
-   function LoadByLogin($login, $realm="") 
+   function LoadByLogin($login, $realm="")
    { return $this->storage_model->LoadByLogin( $login, $realm ); }
 
    // Работа с сессией (внутренние)
@@ -439,11 +439,11 @@ class Principal
       // заодно запустим сессию.
       if (!session_id()) session_start();
 
-      setcookie( $this->rh->cookie_prefix."_principal_auth", "", time()-3600, "/", $this->rh->cookie_domain ); 
+      setcookie( $this->rh->cookie_prefix."_principal_auth", "", time()-3600, "/", $this->rh->cookie_domain );
       unset($_SESSION[$this->rh->cookie_prefix."principal"]);
 
       // снимем также и куку пермалогина
-      setcookie( $this->rh->cookie_prefix."_principal_stored_password", "", time()-3600, "/", $this->rh->cookie_domain ); 
+      setcookie( $this->rh->cookie_prefix."_principal_stored_password", "", time()-3600, "/", $this->rh->cookie_domain );
 
       return true;
    }
@@ -451,8 +451,8 @@ class Principal
    {
       // заодно запустим сессию.
       if (!session_id()) session_start();
-      
-      setcookie( $this->rh->cookie_prefix."_principal_auth", 1, 0, "/", $this->rh->cookie_domain ); 
+
+      setcookie( $this->rh->cookie_prefix."_principal_auth", 1, 0, "/", $this->rh->cookie_domain );
       $_SESSION[$this->rh->cookie_prefix."principal"] = $this->data;
       return true;
    }
@@ -492,9 +492,9 @@ class Principal
      else
      {
        // find script or return
-       $file_source = $this->rh->FindScript( "principal_profiles", $profile, false, -1 );
+       $file_source = Finder::findScript( "principal_profiles", $profile, false, -1 );
        if ($file_source === false) return false;
-  
+
        // uplink
        include( $file_source );
        $this->_SetUserData($included_profile);
@@ -508,7 +508,7 @@ class Principal
    }
 
    // -- есть ли доступ у данной персоны согласно модели доступа
-   function Security( $model, $params="" ) 
+   function Security( $model, $params="" )
    {
      if (!$this->security_models[$model]) return DENIED;
      else return $this->security_models[$model]->Check( $this->data, $params );

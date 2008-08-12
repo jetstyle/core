@@ -10,10 +10,10 @@ interface DataContainer
  * Класс DBModel - базовый класс моделек, хранящих чего-то в БД
  *
  */
-$this->useClass('models/Model');
-$this->useClass('models/ResultSet');
-$this->useClass('DBQueryParser');
-$this->useClass("Inflector");
+Finder::useClass('models/Model');
+Finder::useClass('models/ResultSet');
+Finder::useClass('DBQueryParser');
+Finder::useClass("Inflector");
 
 class DBModel extends Model implements IteratorAggregate, ArrayAccess, Countable, DataContainer
 {
@@ -213,10 +213,10 @@ class DBModel extends Model implements IteratorAggregate, ArrayAccess, Countable
 		}
 
 		//есть php-класс модели
-		$classFile = RequestHandler::getInstance()->findScript('classes/models', $className);
+		$classFile = Finder::findScript('classes/models', $className);
 		if ( $classFile )
 		{
-			RequestHandler::getInstance()->useModel($className);
+			Finder::useModel($className);
 			$model = new $className($fieldSet);
 		}
 		else
@@ -227,7 +227,7 @@ class DBModel extends Model implements IteratorAggregate, ArrayAccess, Countable
 				throw new JSException('DBModel: can\'t find model "'.$className.'"'. ($fieldSet ? " with field set \"".$fieldSet."\"" : ""));
 			}
 		}
-		 
+
 		return $model;
 	}
 
@@ -253,7 +253,7 @@ class DBModel extends Model implements IteratorAggregate, ArrayAccess, Countable
 	 */
 	public function loadConfig( $fileName, $fieldSet = null )
 	{
-		$ymlFile  = $this->rh->findScript('classes/models', $fileName, 0, 1, 'yml') ;
+		$ymlFile  = Finder::findScript('classes/models', $fileName, 0, 1, 'yml') ;
 
 		if ( $ymlFile )
 		{
@@ -269,7 +269,7 @@ class DBModel extends Model implements IteratorAggregate, ArrayAccess, Countable
 			}
 			else
 			{
-				$this->rh->useLib('spyc');
+				Finder::useLib('spyc');
 				$ymlConfig = Spyc :: YAMLLoad($ymlFile);
 
 				//путь до исходного файла, у которого проверяется дата модификации
@@ -283,25 +283,25 @@ class DBModel extends Model implements IteratorAggregate, ArrayAccess, Countable
 			{
 				return false;
 			}
-			 
+
 			if ( $fieldSet )
 			{
 				if (!isset( $ymlConfig[ $fieldSet ] ) || !is_array( $ymlConfig[ $fieldSet ] ) || empty( $ymlConfig[ $fieldSet ] ))
 				{
 					return false;
 				}
-				
+
 				$ymlConfig = $ymlConfig[ $fieldSet ];
 			}
 			else if ( isset( $ymlConfig['default'] ) )
 			{
 				$ymlConfig = $ymlConfig['default'];
 			}
-			
+
 			$this->setConfig($ymlConfig, $fileName);
 			return true;
 		}
-		 
+
 		return false;
 	}
 
@@ -724,7 +724,7 @@ class DBModel extends Model implements IteratorAggregate, ArrayAccess, Countable
 			{
 				unset($this->foreignFields[$fieldName]);
 			}
-				
+
 			if (isset($this->foreignModels[$fieldName]))
 			{
 				unset($this->foreignModels[$fieldName]);
@@ -905,12 +905,12 @@ class DBModel extends Model implements IteratorAggregate, ArrayAccess, Countable
 		if ($this->pagerEnabled)
 		{
 			$total = $this->getCount($where);
-				
+
 			if ($total == 0)
 			{
 				return;
 			}
-				
+
 			$pager = &$this->getPager();
 			$pager->setup($this->rh->ri->get($this->pagerVar), $total, $this->pagerPerPage, $this->pagerFrameSize);
 			$limit = $pager->getLimit();
@@ -1070,12 +1070,12 @@ class DBModel extends Model implements IteratorAggregate, ArrayAccess, Countable
 
 		$sqlParts = $model->getSqlParts();
 		$sqlParts['join'] .= '
-			INNER JOIN '.$qt.' AS '.$qt.' 
-			ON 
+			INNER JOIN '.$qt.' AS '.$qt.'
+			ON
 			(
 				('.$model->quoteField($fieldinfo['fk']).'='.$qt.'.'.$this->quoteName($fieldinfo['through']['fk']).')
 				 AND
-				('.$qt.'.'.$this->quoteName($fieldinfo['through']['pk']) .'='. $model->dbQuote($data[$fieldinfo['pk']]).') 
+				('.$qt.'.'.$this->quoteName($fieldinfo['through']['pk']) .'='. $model->dbQuote($data[$fieldinfo['pk']]).')
 			) ';
 
 		$model->loadSql(implode(' ', $sqlParts));
@@ -1139,26 +1139,26 @@ class DBModel extends Model implements IteratorAggregate, ArrayAccess, Countable
 			}
 
 			$foreignModel = &$this->getForeignModel($v['name']);
-				
+
 			if (!$foreignModel)
 			{
 				continue;
 			}
-				
+
 			$where = "(" . $this->quoteField($v['pk'])." = ".$foreignModel->quoteField($v['fk']) . ")";
-				
+
 			if ($v["where"])
 			{
 				$where .= " AND (" . $foreignModel->parse($v["where"]) . ")";
 			}
-				
-				
+
+
 			if ($foreignModel->where)
 			{
 				$whereSql .= ($whereSql ? " AND " : "")." (" . $foreignModel->parse($foreignModel->where) . ")";
 			}
-				
-				
+
+
 			$joinSql .=
 			(($v['join'] == 'inner')
 			? " INNER JOIN "
@@ -1171,8 +1171,8 @@ class DBModel extends Model implements IteratorAggregate, ArrayAccess, Countable
 			;
 
 			$fieldsSql .= "," . $foreignModel->getFieldsForJoin();
-				
-				
+
+
 			// foreign joins
 			$foreignSql = $foreignModel->buildJoin();
 			$joinSql .= $foreignSql[0];
@@ -1189,7 +1189,7 @@ class DBModel extends Model implements IteratorAggregate, ArrayAccess, Countable
 		{
 			$this->sqlParts['order'] = $this->buildOrderBy($this->order);
 			$this->sqlParts['limit'] = $this->buildLimit($limit, $offset);
-				
+
 			return $this->sqlParts;
 		}
 
@@ -1269,7 +1269,7 @@ class DBModel extends Model implements IteratorAggregate, ArrayAccess, Countable
 					unset($d[$fieldName]);
 				}
 			}
-				
+
 			if (empty($foreignData))
 			{
 				return $foreignData;
@@ -1305,10 +1305,10 @@ class DBModel extends Model implements IteratorAggregate, ArrayAccess, Countable
 				{
 					$fieldName = $this->foreignAlias2FieldName[$tableAlias];
 					$model = &$this->foreignModels[$fieldName];
-						
+
 					$clonedModel = clone $model;
 					$d = array($d);
-						
+
 					$clonedModel->setOne(true);
 					$clonedModel->applyDataToForeignModels(array($valuesSet), $d);
 					$clonedModel->setData($d);
@@ -1369,7 +1369,7 @@ class DBModel extends Model implements IteratorAggregate, ArrayAccess, Countable
 		$sql = ' INSERT INTO '.$this->quoteName($this->rh->db_prefix.$this->getTableName())
 		.'('.$fields.')'
 		.' VALUES ('.$values.')';
-			
+
 		$row['id'] = $this->rh->db->insert($sql);
 		return $row['id'];
 	}
@@ -1491,7 +1491,7 @@ class DBModel extends Model implements IteratorAggregate, ArrayAccess, Countable
 		else
 		{
 			$result .= $this->quoteField($field['name']);
-				
+
 			//$this->getTableName().'.'.$this->quoteName($field['name']);
 		}
 
@@ -1701,7 +1701,7 @@ class DBModel extends Model implements IteratorAggregate, ArrayAccess, Countable
 			{
 				$model->where .= ' AND ';
 			}
-				
+
 			$model->where .= $field['where'];
 		}
 

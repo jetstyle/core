@@ -29,9 +29,9 @@ class ModuleConstructor extends Constructor
 	 */
 	function &instance()
 	{
-		$cfg = $this->rh->findScript($this->type, $this->name);
+		$cfg = Finder::findScript($this->type, $this->name);
 		if (empty($cfg)) return NULL;
-		$status = config_seeConfig($loader, $self, $cfg, $this->name); 
+		$status = config_seeConfig($loader, $self, $cfg, $this->name);
 	}
 
 }

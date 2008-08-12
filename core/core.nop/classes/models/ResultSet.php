@@ -1,6 +1,6 @@
 <?php
 
-$this->useClass("models/DBModel"); //здесь DataContainer
+Finder::useClass("models/DBModel"); //здесь DataContainer
 
 class ResultSet implements IteratorAggregate, ArrayAccess, Countable, DataContainer
 {
@@ -21,7 +21,7 @@ class ResultSet implements IteratorAggregate, ArrayAccess, Countable, DataContai
 	public function getArray()
 	{
 		$result = array();
-		
+
 		if (is_array($this->data))
 		{
 			foreach ($this->data AS $k => $v)
@@ -36,10 +36,10 @@ class ResultSet implements IteratorAggregate, ArrayAccess, Countable, DataContai
 				}
 			}
 		}
-		
+
 		return $result;
 	}
-	
+
 	/*
 	 * Author dz
 	 * реализация интерфейсов IteratorAggregate, ArrayAccess, Countable
@@ -47,14 +47,14 @@ class ResultSet implements IteratorAggregate, ArrayAccess, Countable, DataContai
 	 */
 
 	//implements IteratorAggregate
-	public function getIterator() 
+	public function getIterator()
 	{
-		return new ArrayIterator($this->data); 
+		return new ArrayIterator($this->data);
 	}
 
 	//implements ArrayAccess
 	public function offsetExists($key) { return isset($this->data[$key]); }
-	
+
 	public function offsetGet($key)
 	{
 		if ($this->model->isForeignField($key))
@@ -63,7 +63,7 @@ class ResultSet implements IteratorAggregate, ArrayAccess, Countable, DataContai
 			{
 				$this->model->loadForeignField($key, $this->data);
 			}
-			
+
 //			$foreignFieldConf = $this->model->getForeignFieldConf($key);
 //			if ($foreignFieldConf['type'] == 'has_one')
 //			{
@@ -71,18 +71,18 @@ class ResultSet implements IteratorAggregate, ArrayAccess, Countable, DataContai
 //			}
 //			else
 //			{
-			return $this->data[$key]; 
+			return $this->data[$key];
 //			}
 		}
 		elseif (isset($this->data[$key]))
 		{
-			return $this->data[$key]; 
+			return $this->data[$key];
 		}
-		
+
 		/*
 		if (isset($this->data[$key]))
 		{
-			return $this->data[$key]; 
+			return $this->data[$key];
 		}
 		elseif ($this->model->isForeignField($key))
 		{
@@ -99,7 +99,7 @@ class ResultSet implements IteratorAggregate, ArrayAccess, Countable, DataContai
 	//implements Countable
 	public function count() { return (!empty($this->data)) ? count($this->data) : 0; }
 
-	public function __toString() 
+	public function __toString()
 	{
 		$res = "<br />object of " . get_class($this) . " values:";
 		foreach ($this->data as $k=>$item)

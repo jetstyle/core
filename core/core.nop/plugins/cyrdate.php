@@ -2,7 +2,7 @@
 
 /**
  * Форматирует дату через CyrDate
- * 
+ *
  * Параметры
  *	 data		- строка даты
  *	 iformat - формат строки даты
@@ -19,7 +19,7 @@ if (is_object($date))
 }
 else
 {
-	$rh->useClass('CyrDate');
+	Finder::useClass('CyrDate');
 	$d =& CyrDate::newFromStr($ifmt, $date);
 }
 
@@ -34,7 +34,7 @@ if (isset($d))
 	{
 		echo $d->format($ofmt);
 	}
-	
+
 }
 else
 {

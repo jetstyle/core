@@ -5,7 +5,7 @@
   * see http://in.jetstyle.ru/rocket/rocketforms
 
   FormComponent_model_filters( &$config )
-      - $field -- $field->config instance-a поля  
+      - $field -- $field->config instance-a поля
 
   -------------------
 
@@ -15,14 +15,14 @@
 
   // Модель. Операции с данными и хранилищем
 
-  * Model_ToArray( &$a ) 
+  * Model_ToArray( &$a )
 
   * Model_DbInsert( &$fields, &$values )
   * Model_DbUpdate( $data_id, &$fields, &$values )
 
 ================================================================== v.1 (kuso@npj)
 */
-$this->UseClass( "FormComponents/model_plain" );
+Finder::useClass( "FormComponents/model_plain" );
 
 class FormComponent_model_filters extends FormComponent_model_plain
 {
@@ -47,7 +47,7 @@ class FormComponent_model_filters extends FormComponent_model_plain
 
    // private method "filtering"
    function _Filter()
-   {                   
+   {
      $data = $this->model_data;
      $filtered = array();
      $params = array();
@@ -78,7 +78,7 @@ class FormComponent_model_filters extends FormComponent_model_plain
 
 
 // EOC{ FormComponent_model_filters }
-}  
-   
+}
+
 
 ?>

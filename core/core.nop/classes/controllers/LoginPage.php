@@ -4,10 +4,10 @@
  *
  */
 
-$this->UseClass("controllers/BasicLoginPage");
+Finder::useClass("controllers/BasicLoginPage");
 class LoginPage extends BasicLoginPage
 {
-}	
+}
 
 
 ?>

@@ -1,9 +1,9 @@
 <?php
 /**
  * @author lunatic lunatic@jetstyle.ru
- * 
+ *
  * Роутинг и поиск страниц
- * 
+ *
  */
 
 class PageDomain
@@ -13,37 +13,37 @@ class PageDomain
 	protected $pageDomains = null;						// domain Obj's
 	protected $url2page = array();						// cache
 	protected $cls2page = array();						// cache
-	
+
 	public function __construct(&$rh)
 	{
 		$this->rh = &$rh;
 		if (!$this->rh->db)
 			$this->domains = array('Handler');
 	}
-	
+
 	public function &findPageByUrl($url)
 	{
 		$page = &$this->findPage(array('url' => $url));
 		return $page;
 	}
-	
+
 	public function &findPageByClass($class)
 	{
 		$page = &$this->findPage(array('class' => $class));
 		return $page;
 	}
-	
+
 	public function setDomains($domains)
 	{
 		$this->domains = $domains;
 	}
-	
+
 	protected function &findPage($criteria, $pageDomains=NULL)
 	{
 		$page = NULL;
 		$cls = strtolower($criteria['class']);
 		$url = $criteria['url'];
-		
+
 		if (isset($url) && isset($this->url2page[$url]))
 		{
 			return $this->url2page[$url];
@@ -60,7 +60,7 @@ class PageDomain
 		}
 		else
 		{
-			if (!isset($pageDomains)) 
+			if (!isset($pageDomains))
 			{
 				$pageDomains = &$this->getPageDomains();
 			}
@@ -73,22 +73,22 @@ class PageDomain
 				}
 			}
 		}
-		
+
 		if (isset($page))
 		{
 			$cls = strtolower(substr(get_class($page), 0, -strlen('Page')));
 			$this->cls2page[$cls] =& $page;
 			$this->url2page[$page->url] =& $page;
 		}
-		
+
 		return $page;
 	}
-	
+
 	protected function &getPageDomains()
 	{
 		if (empty($this->pageDomains))
 		{
-			$this->rh->useClass('domains/BasicPageDomain');
+			Finder::useClass('domains/BasicPageDomain');
 			foreach($this->domains AS $domain)
 			{
 				$className = ucfirst($domain).'PageDomain';
@@ -98,7 +98,7 @@ class PageDomain
 		}
 		return $this->pageDomains;
 	}
-	
+
 }
 
 ?>

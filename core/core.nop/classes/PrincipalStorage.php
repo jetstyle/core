@@ -29,7 +29,7 @@
 
   * SetLoginDatetime( $user_data, $datetime="" ) -- изменить в БД дату последнего логина
       - $user_data      -- профиль принципала (по нему модель определяет, где ей менять, например, используя "user_id"
-      - $datetime       -- на какую дату-время изменить? если пустое, то берёт текущую. 
+      - $datetime       -- на какую дату-время изменить? если пустое, то берёт текущую.
                            в формате time()
 
   NB: оба метода возвращают структуру для размещения в $principal->data,
@@ -46,9 +46,9 @@ class PrincipalStorage
      $this->rh = &$principal->rh;
    }
 
-   function LoadById($id) 
+   function LoadById($id)
    { return false; }
-   function LoadByLogin($login, $realm="") 
+   function LoadByLogin($login, $realm="")
    { return false; }
 
    function SetStoredPassword( $user_data, $new_invariant )
@@ -62,18 +62,18 @@ class PrincipalStorage
    function _SetLoginDatetime( $user_data, $datetime )
    {
    }
-   
+
    function &Factory( &$principal, $model_name )
    {
      $class_name = "PrincipalStorage_".$model_name;
      // find script or die
-     $file_source = $principal->rh->FindScript_( "classes/PrincipalModels", $class_name );
+     $file_source = Finder::FindScript_( "classes/PrincipalModels", $class_name );
 
      // uplink
      include_once( $file_source );
 
      eval('$product = &new '.$class_name.'( $principal );');
-     return $product; 
+     return $product;
    }
 
 // EOC{ PrincipalStorage }

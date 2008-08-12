@@ -4,7 +4,7 @@
  *
  */
 
-$this->UseClass("controllers/BasicPage");
+Finder::useClass("controllers/BasicPage");
 class BasicLogoutPage extends BasicPage
 {
 	function Handle()
@@ -12,7 +12,7 @@ class BasicLogoutPage extends BasicPage
 		$this->rh->principal->Logout(PRINCIPAL_REDIRECT, $this->rh->base_url);
 		parent::handle();
 	}
-}	
+}
 
 
 ?>

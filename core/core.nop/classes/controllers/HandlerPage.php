@@ -3,7 +3,7 @@
  *  Страница для отображения хендлера
  */
 
-$this->UseClass("controllers/BasicPage");
+Finder::useClass("controllers/BasicPage");
 class HandlerPage extends BasicPage
 {
 
@@ -22,7 +22,7 @@ class HandlerPage extends BasicPage
 		return True;
 	}
 
-}	
+}
 
 
 ?>

@@ -1,6 +1,6 @@
 <?php
 
-$this->useClass('controllers/Plugin');
+Finder::useClass('controllers/Plugin');
 
 class BreadPlugin extends RenderablePlugin
 {
@@ -13,7 +13,7 @@ class BreadPlugin extends RenderablePlugin
 		parent::initialize(&$ctx, $config);
 
 		$current = &$this->rh->page->config;
-		
+
 		$model = & DBModel::factory('Content')
 							->clearFields()
 							->addFields(array('id','_left', '_right', '_level', '_path', '_parent'))
@@ -38,10 +38,10 @@ class BreadPlugin extends RenderablePlugin
 		$last = &$this->models['bread'][$total - 1];
 		$last['last'] = true;
 		$this->models['bread'][$total - 1] = $last;
-		
+
 		$this->rh->tpl->set($this->store_to, $this->models['bread']);
 	}
-	
+
 	function smartTrim($txt)
 	{
 		$txt = trim($txt);

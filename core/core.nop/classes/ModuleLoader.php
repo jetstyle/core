@@ -1,6 +1,6 @@
 <?php
 
-$this->useClass('TypeLoader');
+Finder::useClass('TypeLoader');
 
 class ModuleLoader extends TypeLoader
 {

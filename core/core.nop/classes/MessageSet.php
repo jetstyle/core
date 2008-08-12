@@ -23,7 +23,7 @@
 
   * SwitchTo( $lang = "ru" ) -- Переключение языка "на лету"
       - $lang -- префикс мессаджсетов
-  
+
   * Get( $key, $level=false, $dir=-1 ) -- Получить значение константы
       - $key         -- имя ключа, например "email"
       - $level, $dir -- стартовое положение в стеке мессаджсетов,
@@ -33,7 +33,7 @@
       - $level, $dir -- параметры поиска файла для FindScript
 
   * Unload( $to_level = false ) -- выгрузить messagesets до указанного уровня
-      - $to_level -- если не указан, то выгружается только верхний  
+      - $to_level -- если не указан, то выгружается только верхний
       - если =0, то получаем "чистый" мессаджсет
 
 
@@ -41,7 +41,7 @@
 
   Параметры для мессаджесета в $rh:
 
-  $rh->msg_default = "ru"; 
+  $rh->msg_default = "ru";
 
 =============================================================== v.1 (kuso@npj)
 */
@@ -61,7 +61,7 @@ class MessageSet
     // load default msgset always
     $this->Load();
 
-    if ($rh->msg_default) 
+    if ($rh->msg_default)
     {
       $this->SwitchTo( $rh->msg_default );
       $this->Load();
@@ -73,7 +73,7 @@ class MessageSet
   {
     $names = $this->MSG_NAMES;
     // clean up ms
-    $this->UnLoad(1); 
+    $this->UnLoad(1);
     // change lang
     $this->lang = $lang;
     // load`em back in stack
@@ -81,7 +81,7 @@ class MessageSet
      if ($k > 0)
       $this->Load( $name[0], $name[1], $name[2] );
   }
-  
+
   function Get( $key, $level=false, $dir=-1 ) // -- Получить значение константы
   {
     //определяем начальный уровень поиска
@@ -98,17 +98,17 @@ class MessageSet
       if($dir==0)
         break;
     }
-   
+
     //ничего не нашли
     return $key;
-    
+
   }
 
   function Load( $ms_name="", $level=false, $dir=-1 ) // -- догрузить messageset, расширив стек
   {
     $this->MSG_NAMES[] = array($ms_name, $level, $dir);
     if ($ms_name) $ms_name = "_".$ms_name;
-    $script = $this->rh->FindScript( "messagesets", $this->lang.$ms_name, $level, $dir );
+    $script = Finder::findScript( "messagesets", $this->lang.$ms_name, $level, $dir );
     if ($script) include($script);
     else         $this->MSGS[] = array(); // load empty if not found at all
   }
@@ -147,7 +147,7 @@ class MessageSet
   }
 
 
-// EOC{ MessageSet } 
+// EOC{ MessageSet }
 }
 
 

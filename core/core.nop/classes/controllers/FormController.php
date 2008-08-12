@@ -3,7 +3,7 @@
  * Класс FormController -- управляет формами
  */
 
-$this->UseClass("controllers/Controller");
+Finder::useClass("controllers/Controller");
 class FormController extends Controller
 {
 	var $form_fields = array();
@@ -61,7 +61,7 @@ class FormController extends Controller
 			}
 			else
 			// field
-			if (isset($data[$form_field])) 
+			if (isset($data[$form_field]))
 			{
 				$value = $data[$form_field];
 			}
@@ -70,8 +70,8 @@ class FormController extends Controller
 			/* проверям значение */
 			$field_info = array(
 				'form_name'=>$form_name, // имя формы
-				'name'=>$field,			 // имя поля формы для проверки 
-				'value'=>$value,			 // значение  
+				'name'=>$field,			 // имя поля формы для проверки
+				'value'=>$value,			 // значение
 				#'new_value'=>NULL,		 // сюда чекер может кинуть новое значение
 			);
 			$e = NULL;
@@ -79,14 +79,14 @@ class FormController extends Controller
 			{
 				$this->errors[$field] = $e;
 			}
-			if (array_key_exists('new_value', $field_info)) 
+			if (array_key_exists('new_value', $field_info))
 				$item[$field] = $field_info['new_value'];
 		}
 
 		/* проверям форму целиком */
 		$form_info = array(
 			'form_name' => $form_name,
-			'items' => $item, 
+			'items' => $item,
 			#'new_items'=>NULL,
 		);
 		$e = array();
@@ -95,14 +95,14 @@ class FormController extends Controller
 			$this->errors = array_merge($this->errors, $e);
 		}
 
-		if (array_key_exists('new_items', $form_info)) 
+		if (array_key_exists('new_items', $form_info))
 			$item = $form_info['new_items'];
 
 		if (empty($this->errors))
 		{
 			$form_info = array(
 				'form_name' => $form_name,
-				'items' => $item, 
+				'items' => $item,
 			);
 			$status = $this->_successForm($form_info);
 		}
@@ -110,7 +110,7 @@ class FormController extends Controller
 		{
 			$form_info = array(
 				'form_name' => $form_name,
-				'items' => $item, 
+				'items' => $item,
 				'errors' => $this->errors,
 			);
 			$status = $this->_errorForm($form_info);
@@ -165,7 +165,7 @@ class FormController extends Controller
 		if (method_exists($this, $method))
 		{
 			// $this->onError()
-			$status = $this->$method($form_info['items'], 
+			$status = $this->$method($form_info['items'],
 				$form_info['errors']);
 		}
 		return $status;

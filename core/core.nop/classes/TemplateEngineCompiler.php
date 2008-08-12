@@ -2,9 +2,9 @@
 /*
 	Компилятор шаблонного движка. Создаётся внутри TE, руками пользоваться не должен.
 	 ---------
-	
+
 	 Необходимые параметры в $rh, описывающие правила разбора шаблонов:
-	
+
 	 $rh->tpl_prefix = "{{";
 	 $rh->tpl_postfix = "}}";
 	 $rh->tpl_instant = "~";
@@ -17,12 +17,12 @@
 	 $rh->tpl_construct_tplt     = "TPL:"; // {{TPL:Name}}...{{/TPL:Name}}
 	 $rh->tpl_construct_comment  = "#";    // <!-- # persistent comment -->
 	 $rh->tpl_construct_for       = "!for";    // {{!for items do=template}}
-	
+
 	 $rh->tpl_instant_plugins = array( "dummy" );
 	 // lucky:
 	 $rh->tpl_construct_standard_camelCase   = True;   // $o->SomeValue(), иначе $o->some_value()
 	 $rh->tpl_construct_standard_getter_prefix   = 'get';   // $o->getSomeValue(), иначе $o->SomeValue()
-	
+
 	 $rh->shortcuts = array(
 	 "=>" => array("=", " typografica=1"),
 	 "=<" => array("=", " strip_tags=1"),
@@ -45,68 +45,68 @@ class TemplateEngineCompiler
 {
 	protected $rh;
 	protected $tpl;
-	
+
 	/**
 	 * Скомпилированные функции шаблонов
 	 *
 	 * @var array
 	 */
 	protected $compiledFunctions = array();
-	
+
 	/**
 	 * Скомпилированные функции плагинов
 	 *
 	 * @var array
 	 */
 	protected $compiledActionFunctions = array();
-	
+
 	/**
 	 * Компилировать шаблон вместе со всеми его зависимостями
 	 *
 	 * @var boolean
 	 */
 	protected $compileWithExternals = false;
-	
+
 	/**
 	 * Скомпилированные шаблоны
 	 *
 	 * @var array
 	 */
 	protected $compiledTemplates = array();
-	
+
 	/**
 	 * Скомпилированные плагины
 	 *
 	 * @var array
 	 */
 	protected $compiledActions = array();
-	
+
 	/**
 	 * Сопоставление шаблона закэшированной функции
 	 *
 	 * @var array
 	 */
 	protected $files2functions = array();
-	
+
 	/**
 	 * Временное хранилище
-	 * При компиляции шаблона сюда собираются имена плагинов, входящих в него 
+	 * При компиляции шаблона сюда собираются имена плагинов, входящих в него
 	 *
 	 * @var array
 	 */
 	protected $externalActions = array();
-	
+
 	/**
 	 * Временное хранилище
-	 * При компиляции шаблона сюда собираются имена внешних шаблонов, входящих в него 
+	 * При компиляции шаблона сюда собираются имена внешних шаблонов, входящих в него
 	 *
 	 * @var array
 	 */
 	protected $externalTemplates = array();
-	
+
 	protected $sourceFile = null;
 	protected $sourceTemplate = null;
-	
+
 	public function __construct( &$rh )
 	{
 		$this->tpl = &$rh->tpl;
@@ -151,13 +151,13 @@ class TemplateEngineCompiler
 	 * @param boolean $instant
 	 * @return string
 	 */
-	public function templateCompile( $content, $instant = false ) 
+	public function templateCompile( $content, $instant = false )
 	{
 		$this->_instant = $instant;
 		$content = preg_replace_callback($this->long_regexp, array( &$this, "templateCompileCallback"), $content);
 		return $content;
 	}
-	
+
 	/**
 	 * Компиляция массива шаблонов и из зависимостей в один кэш файл
 	 *
@@ -166,7 +166,7 @@ class TemplateEngineCompiler
 	 * 		'HTML:body' => '@news/item.html',
 	 * 		'html' => '@html.html'
 	 * );
-	 * 
+	 *
 	 * @param array $data
 	 * @param string $fileCached - имя кэш файла
 	 * @param string $fileHelperCached - имя кэш файла с сервисной информацией
@@ -177,14 +177,14 @@ class TemplateEngineCompiler
 		{
 			throw new TplException('TplCompiler: $data empty');
 		}
-		
+
 		$this->compileWithExternals = true;
-		
+
 		$this->compiledFunctions = array();
 		$this->compiledActionFunctions = array();
 		$this->compiledTemplates = array();
 		$this->compiledActions = array();
-		
+
 		try
 		{
 			foreach ($data AS $k => $v)
@@ -198,7 +198,7 @@ class TemplateEngineCompiler
 		catch (FileNotFoundException $e)
 		{
 			$out = $e->getText().'<br />';
-			
+
 			if ($this->sourceFile)
 			{
 				$fn = $e->getFilename();
@@ -207,42 +207,42 @@ class TemplateEngineCompiler
 				{
 					$fn = substr($fn, 0, strlen($fn) - 4);
 				}
-				
+
 				$file = file_get_contents($this->sourceFile);
 				$file = htmlentities($file, ENT_COMPAT, 'cp1251');
 				$file = str_replace($fn, "<span class=\"warning\">".$fn."</span>", $file);
 				$out .= "<b>Source:</b><br /><br /><div><tt>".$this->sourceTemplate."</tt><pre class=\"source\">".$file."</pre></div>";
 			}
-			
+
 			throw new TplException('Compiler: '.$e->getMessage(), $out);
 		}
-		
+
 		$compiledTemplates = array();
 		foreach ($this->compiledTemplates AS $fileName => $v)
 		{
 			$fileName = substr($fileName, 0, strrpos($fileName, '.'));
 			$compiledTemplates[$fileName] = true;
 		}
-		
+
 		$this->compiledFunctions[$this->tpl->getFuncName('site_map_system', '__get_files2functions')] = $this->templateBuildFunction('<'.'?php return unserialize(\''.str_replace("'", "\'", serialize($this->files2functions)).'\'); ?'.'>');
-		
+
 		$this->writeToFile($fileCached, $this->compiledFunctions);
 		$this->writeActionsToFile($fileCached, $this->compiledActionFunctions, 'a');
-		
+
 		// helper functions, also store to cache
 		$helper = array();
 		$helper[$this->tpl->getFuncName('site_map_system', '__get_used_files')] = $this->templateBuildFunction('<'.'?php return unserialize(\''.str_replace("'", "\'", serialize($compiledTemplates)).'\'); ?'.'>');
 		$helper[$this->tpl->getFuncName('site_map_system', '__get_used_actions')] = $this->templateBuildFunction('<'.'?php return unserialize(\''.str_replace("'", "\'", serialize($this->compiledActions)).'\'); ?'.'>');
-		
+
 		$this->writeToFile($fileHelperCached, $helper);
-		
+
 		$this->compileWithExternals = false;
-		
+
 		return true;
 	}
-	
+
 	/**
-	 * Компиляция шаблона. 
+	 * Компиляция шаблона.
 	 *
 	 * @param array OR string $tplInfo (если string - то имя шаблона, иначе результат $tpl->getTplInfo())
 	 * @param string $fileCached
@@ -254,7 +254,7 @@ class TemplateEngineCompiler
 		{
 			$tplInfo = $this->tpl->getTplInfo($tplInfo);
 		}
-				
+
 		$pi = pathinfo( $tplInfo['file_source'] );
 		if ($pi["extension"] != "html")
 		{
@@ -269,18 +269,18 @@ class TemplateEngineCompiler
 		{
 			return false;
 		}
-				
+
 		// 1. разобрать файл на кусочки
 		if (!$pieces = $this->templateRead( $tplInfo['file_source'], $tplInfo['tpl'] ))
 		{
 			return false;
 		}
-	
+
 		if (null !== $fileCached)
 		{
 			$this->compiledFunctions = array();
 		}
-		
+
 		// 2. скомпилировать кусочки
 		foreach( $pieces AS $k=>$v )
 		{
@@ -297,7 +297,7 @@ class TemplateEngineCompiler
 				 if (empty($fbody) && empty($args))
 				 {
 					 // мы тут первый и последний раз. это {{:tpl}}
-					 $fbody = $body; 
+					 $fbody = $body;
 					 $singlePattern = True; break;
 				 }
 				 elseif (empty($fbody))
@@ -311,8 +311,8 @@ class TemplateEngineCompiler
 					 // шаблоны после можно пропустить
 				 }
 			 }
-			 
-			 if (!$singlePattern) 
+
+			 if (!$singlePattern)
 			 {
 			 	$fbody .= '{{/?}}';
 			 }
@@ -330,11 +330,11 @@ class TemplateEngineCompiler
 		{
 			$this->writeToFile($fileCached, $this->compiledFunctions);
 		}
-		
+
 		return true;
 	}
 
-	
+
 	/**
 	 * Компиляция плагина
 	 *
@@ -348,7 +348,7 @@ class TemplateEngineCompiler
 		{
 			$actionInfo = $this->tpl->getActionInfo($actionInfo);
 		}
-		
+
 		if (!isset($this->compiledActions[$actionInfo['name']]))
 		{
 			$this->compiledActions[$actionInfo['name']] = true;
@@ -357,24 +357,24 @@ class TemplateEngineCompiler
 		{
 			return false;
 		}
-		
+
 		$funcName = $this->tpl->getActionFuncName($actionInfo['cache_name']);
-		
-		$source = $this->tpl->findScript_( "plugins", $actionInfo['name']);
-		
+
+		$source = Finder::findScript_( "plugins", $actionInfo['name']);
+
 		$enviroment = "<"."?php \$rh=&\$tpl->getRh(); ?>";
 
 		if (null !== $cacheFile)
 		{
 			$this->compiledActionFunctions = array();
 		}
-		
+
 		$lines = @file($source);
-		
+
 		if (is_array($lines))
 		{
 			$this->compiledActionFunctions[ $funcName ] = $this->templateBuildFunction( $enviroment . preg_replace("/\/\*.*?\*\//s","",implode('', $lines)));
-			
+
 			if ($this->compileWithExternals)
 			{
 				if (substr($lines[1], 0, 2) == '//')
@@ -408,7 +408,7 @@ class TemplateEngineCompiler
 		{
 			throw new TplException('Compiler: can\'t read file '.$source);
 		}
-		
+
 		if (null === $cacheFile)
 		{
 			return $this->compiledActionFunctions;
@@ -420,10 +420,10 @@ class TemplateEngineCompiler
 
 		return true;
 	}
-	
-	
+
+
 	/**
-	 * Разбор файла на подшаблоны и то, что находится вне подшаблонов 
+	 * Разбор файла на подшаблоны и то, что находится вне подшаблонов
 	 *
 	 * @param string $file_name
 	 * @param string $tplName
@@ -461,7 +461,7 @@ class TemplateEngineCompiler
                                     "( [^".$this->rh->tpl_construct_comment."].*?)".
                                     "|".
                                     "([^ ".$this->rh->tpl_construct_comment."].*?)".
-                                    ")-->(\s*)/msi", 
+                                    ")-->(\s*)/msi",
                               "", $contents );
 
 		// and then strip "contstructness" from comments
@@ -486,9 +486,9 @@ class TemplateEngineCompiler
 			$is_extends = FALSE;
 			$res = array();
 		}
-		
+
 		// собираем внешние шаблоны и плагины
-		
+
 		// replace @: with template name && compile external
 		$this->_template_item = $tplName;
 		$this->externalTemplates[$tplName] = array();
@@ -504,7 +504,7 @@ class TemplateEngineCompiler
 				$this->sourceTemplate = $tplName.'.html';
 				$this->compile($template);
 			}
-			
+
 			foreach ($this->externalActions[$tplName] AS $action)
 			{
 				$this->sourceFile = $fileName;
@@ -512,7 +512,7 @@ class TemplateEngineCompiler
 				$this->actionCompile($action);
 			}
 		}
-		
+
 		// 2. grep all {{TPL:..}} & replace `em by !includes
 		//$include_prefix = $this->rh->tpl_prefix.$this->rh->tpl_construct_action."include ";
 		$stack     = array( $contents );
@@ -554,7 +554,7 @@ class TemplateEngineCompiler
 			$stack[$stackpos] = $data;
 			$stackpos++;
 		}
-		
+
 		if ($is_extends)
 		{
 			// lucky: что использовать в качестве основного шаблона: себя или родителя?
@@ -583,7 +583,7 @@ class TemplateEngineCompiler
 	protected function templateReadCallback($matches)
 	{
 		$tplName = $this->_template_item;
-		
+
 		if ($this->compileWithExternals)
 		{
 			preg_match_all('/.*?@([\w]+[\w\/\._]+).*?/si', $matches[2], $matches1);
@@ -594,9 +594,9 @@ class TemplateEngineCompiler
 					$this->externalTemplates[$tplName][$m1] = $m1;
 				}
 			}
-			
+
 			$action = '';
-			
+
 			if ($matches[2]{0} == '@')
 			{
 				$this->externalActions[$tplName]['include'] = 'include';
@@ -610,12 +610,12 @@ class TemplateEngineCompiler
 				}
 			}
 		}
-				
-		$matches[2] = preg_replace('#(.*?@)(:)([\w]+.*?)#i', "$1".$tplName.".html:$3", $matches[2]);		
+
+		$matches[2] = preg_replace('#(.*?@)(:)([\w]+.*?)#i', "$1".$tplName.".html:$3", $matches[2]);
 		return $matches[1].$matches[2].$matches[3];
 	}
-	
-	
+
+
 	protected function applyShortcuts($thing)
 	{
 		foreach( $this->rh->shortcuts AS $shortcut=>$replacement )
@@ -626,20 +626,20 @@ class TemplateEngineCompiler
 				$thing = $replacement[0]. substr($thing, strlen($shortcut)). $replacement[1];
 			}
 		}
-		
+
 		return $thing;
 	}
-	
+
 	protected function templateCompileCallback( $things )
 	{
 //		var_dump($things);
 //		var_dump($this->rh->tpl_instant);
 //		die();
-		
+
 		$_instant = false;
 
 		$thing = $things[0];
-		
+
 		// is instant ?
 		if ($thing{(strlen($this->rh->tpl_prefix))} == $this->rh->tpl_instant)
 		{
@@ -663,17 +663,17 @@ class TemplateEngineCompiler
 		{
 			// 1. rip {{..}}
 			preg_match($this->single_regexp, $thing, $matches);
-			
+
 			$thing = preg_replace('#[\\n\\r]#', '', $matches[1]);
 
 			// 2. shortcuts
 			$thing = $this->applyShortcuts($thing);
-			
+
 			// {{?:}} // else, elseif
 			if (strpos($thing, $this->rh->tpl_construct_ifelse) === 0)
 			{
 				$what = trim(substr($thing, 2));
-				
+
 				if ($what)
 				{
 					$result =  ' } elseif ('.$invert.$this->parseExpression($what).') { ';
@@ -699,7 +699,7 @@ class TemplateEngineCompiler
 				$params = $this->parseActionParams( $matches[1] );
 				$pluginName = $params['_name'];
 				unset($params['_name']);
-				
+
 				if (in_array($params["_name"][TE_VALUE], $this->rh->tpl_instant_plugins) || (isset($params["instant"]) && $params["instant"][TE_VALUE]))
 				{
 					$_instant=true;
@@ -724,7 +724,7 @@ class TemplateEngineCompiler
 				{
 					if (count ($A) > 0)
 					{
-						$result .= ' $_r = &'.$this->parseExpression($var) .';'."\n";										
+						$result .= ' $_r = &'.$this->parseExpression($var) .';'."\n";
 						foreach ($A AS $stmt)
 						{
 							// FIXME:
@@ -734,15 +734,15 @@ class TemplateEngineCompiler
 						 		$params = $this->parseActionParams( $matches[1] );
 								$pluginName = $params['_name'];
 								unset($params['_name']);
-								
+
 						  		$params['_'] = array(
 						  			TE_TYPE => TE_TYPE_PHP_SCRIPT,
 						  			TE_VALUE => '&$_r',
 						  		);
-	
+
 						  		$result .= ' $_='.$this->implodeActionParams( $params ).';';
 						  		$result .= ' $_r = $tpl->action('.$this->compileParam($pluginName).', $_ ); ';
-						  		
+
 						  		if ($this->compileWithExternals)
 								{
 									$this->actionCompile($pluginName[TE_VALUE]);
@@ -767,11 +767,11 @@ class TemplateEngineCompiler
 		}
 
 		$tpl = &$this->tpl;
-		
+
 		if ($this->_instant || $_instant)
 		{
 			if ($instant)
-			{ 
+			{
 //				var_dump($instant);
 //				die();
 				ob_start();
@@ -781,18 +781,18 @@ class TemplateEngineCompiler
 				ob_end_clean();
 				return $contents;
 			}
-			else 
+			else
 			{
 				return "[!instant unavailable!]";
 			}
 		}
-		
+
 		return '<'.'?php '.$result.'?'.'>';
 	}
-	
+
 	/**
 	 * Парсинг выражения с шаблонными переменными
-	 * 
+	 *
 	 * ex.: (items.test && items.length) || !(noitems)
 	 *
 	 * @param string $expr
@@ -803,18 +803,18 @@ class TemplateEngineCompiler
 		// strip functions
 		$expr = preg_replace_callback("/([a-zA-Z_0-9]+)\s*?\((.*?)\)/si", array(&$this, 'parseExpressionFunctionsCallback'), $expr);
 		$expr = trim($expr);
-		
+
 		$result = '';
-	
-		$prevSymbol = '';	
+
+		$prevSymbol = '';
 		$inQuotes = false;
 		$quoteSymbol = '';
 		$word = '';
-		
+
 		for ($i = 0, $length = strlen($expr); $i < $length; $i++ )
 		{
 			$symbol = $expr{$i};
-			
+
 			// внутри кавычек
 			if ($inQuotes)
 			{
@@ -844,7 +844,7 @@ class TemplateEngineCompiler
 					$result .= $word;
 					$word = '';
 				}
-				
+
 				if (strlen($word) > 0)
 				{
 					// это цифры
@@ -867,10 +867,10 @@ class TemplateEngineCompiler
 				}
 				$result .= $symbol;
 			}
-			
+
 			$prevSymbol = $symbol;
 		}
-		
+
 		if (strlen($word) > 0)
 		{
 			// это цифры
@@ -883,11 +883,11 @@ class TemplateEngineCompiler
 				$result .= $this->parseValue($word);
 			}
 		}
-		
-		return $result;		
+
+		return $result;
 //		return trim(preg_replace_callback('/(?<!["\'a-z0-9\._:\#*])([a-z0-9\.\#*_:]+)(?!["\'a-z0-9\(\._:\#*])/i', array(&$this, 'parseExpressionVarsCallback'), $expr));
 	}
-	
+
 	protected function parseExpressionVarsCallback($matches)
 	{
 //		var_dump($matches);
@@ -900,7 +900,7 @@ class TemplateEngineCompiler
 			return $this->parseValue($matches[1]);
 //		}
 	}
-	
+
 	protected function parseExpressionFunctionsCallback($matches)
 	{
 		if ($matches[1] == 'count')
@@ -912,10 +912,10 @@ class TemplateEngineCompiler
 			return $matches[2];
 		}
 	}
-	
+
 	/**
-	 * Парсинг шаблонной переменной 
-	 * 
+	 * Парсинг шаблонной переменной
+	 *
 	 * ex.: items.test.value
 	 *
 	 * @param string $key
@@ -924,22 +924,22 @@ class TemplateEngineCompiler
 	protected function parseValue($key)
 	{
 		$key = $this->applyShortcuts($key);
-		
+
 		if ($key{0} == '#')
 		{
 			$key = substr($key, 1);
 		}
-		
+
 		$names = explode('.', $key);
-		
+
 		return $this->constructValue($names);
 	}
-	
+
 	protected function constructValue($ks, $domain = '$tpl->domain')
 	{
 		$use_methods = false;
-			
-		foreach ($ks AS $i=>$k) 
+
+		foreach ($ks AS $i=>$k)
 		{
 			if (strlen($k) == 0)
 			{
@@ -948,23 +948,23 @@ class TemplateEngineCompiler
 
 			$func = '';
 			$args = '';
-			if (preg_match('#^[0-9]+$#', $k)) 
+			if (preg_match('#^[0-9]+$#', $k))
 			{ // is numeric key ?
 				$args = $k;
 				$func .= 'a';
-			} 
+			}
 //			elseif($k == 'count')
 //			{
-//				
+//
 //			}
 			else
 			{
 				$args = "'".$k."'";
 				$func .= 'a';
 			}
-			
-			
-			
+
+
+
 			// для первого ключа $this->domain всегда array()
 //			if ($i !== 0) {
 				// get object method or property
@@ -992,7 +992,7 @@ class TemplateEngineCompiler
 
 		return $domain;
 	}
-	
+
 	protected function parseParam($thing)
 	{
 		// @template.html:name или @:name
@@ -1072,8 +1072,8 @@ class TemplateEngineCompiler
 				$params[] = $this->parseParam($match[3]);
 			}
 		}
-		
-//		foreach($named as $k=>$v) 
+
+//		foreach($named as $k=>$v)
 //		{
 //			$params[$k] = $v;
 //		}
@@ -1084,7 +1084,7 @@ class TemplateEngineCompiler
 	{
 		$params = array();
 //		$params["_plain"] = $this->parseParam('"'.$content.'"');
-		
+
 		// 1. get name by explosion
 		$a = explode(" ", $content);
 		$params["_name"] = $this->parseParam('"'.$a[0].'"'); // kuso@npj removed: strtolower($a[0]);
@@ -1130,12 +1130,12 @@ class TemplateEngineCompiler
 		return $content;
 	}
 
-	
+
 	protected function writeToFile($fileCached, $functions, $filemode = 'w')
 	{
 		// можем ли записывать файл?
 		$this->checkWritable($fileCached);
-			
+
 		// склеить готовый файл
 		$fp = fopen( $fileCached , $filemode);
 		fputs($fp, "<"."?php\n" );
@@ -1148,12 +1148,12 @@ class TemplateEngineCompiler
 		fputs($fp, "?".">" );
 		fclose($fp);
 	}
-	
+
 	protected function writeActionsToFile($fileCached, $functions, $filemode = 'w')
 	{
 		// можем ли записывать файл?
 		$this->checkWritable($fileCached);
-			
+
 		// склеить готовый файл
 		$fp = fopen( $fileCached ,$filemode);
 		fputs($fp, "<"."?php\n" );
@@ -1166,7 +1166,7 @@ class TemplateEngineCompiler
 		fputs($fp, "?".">" );
 		fclose($fp);
 	}
-	
+
 	//zharik - проверяет можем ли мы писать в этот файл
 	protected function checkWritable($file_to)
 	{

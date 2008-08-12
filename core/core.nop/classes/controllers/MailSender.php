@@ -1,6 +1,6 @@
 <?php
 
-$this->UseClass("controllers/Controller");
+Finder::useClass("controllers/Controller");
 /**
  * Отправляет почту из outbox'а
  */
@@ -11,9 +11,9 @@ class MailSender extends Controller
 	{
 		parent::initialize($ctx, $config);
 
-		if (!isset($this->outbox)) 
+		if (!isset($this->outbox))
 		{
-			$this->rh->useClass('models/MailOutbox');
+			Finder::useClass('models/MailOutbox');
 			$outbox =& new MailOutbox();
 			$outbox->initialize($this->rh);
 			$outbox->limit = 30;
@@ -33,12 +33,12 @@ class MailSender extends Controller
      		"text_charset" => "Windows-1251",
 	    	"head_charset" => "Windows-1251",
     	);
-		
+
 		$outbox =& $this->outbox;
 
 		$outbox->load();
 
-		$this->rh->UseClass('HtmlMimeMail2');
+		Finder::useClass('HtmlMimeMail2');
 		foreach ($outbox->data as $k=>$v)
 		{
 			$from = $v['from'];

@@ -5,7 +5,7 @@
   * see http://in.jetstyle.ru/rocket/rocketforms
 
   FormComponent_date( &$config )
-      - $field -- $field->config instance-a поля  
+      - $field -- $field->config instance-a поля
 
   -------------------
 
@@ -18,8 +18,8 @@
 
   Опции в конфиге
 
-  * view_date_format      = "d.m.Y" 
-  * interface_date_format = "d.m.Y" 
+  * view_date_format      = "d.m.Y"
+  * interface_date_format = "d.m.Y"
 
   * date_optional = true|false (false is default)
 
@@ -27,7 +27,7 @@
 
   // Модель. Операции с данными и хранилищем
   * Model_LoadFromArray( $a )
-  * Model_ToArray( &$a ) 
+  * Model_ToArray( &$a )
   * Model_DbInsert( &$fields, &$values )
   * Model_DbUpdate( $data_id, &$fields, &$values )
   * Model_DbAfterInsert( $data_id )
@@ -51,7 +51,7 @@
 
 ================================================================== v.0 (kuso@npj)
 */
-$this->UseClass( "FormComponents/view_plain" );
+Finder::useClass( "FormComponents/view_plain" );
 
 class FormComponent_date extends FormComponent_view_plain
 {
@@ -71,7 +71,7 @@ class FormComponent_date extends FormComponent_view_plain
    }
    // изменение значения в виде "шифра" или "ключа"
    function Model_SetDataValue($model_value)
-   { 
+   {
      $a = explode( "|", $model_value );
      $this->model_data_active = $a[0];
      $this->model_data        = $a[1];
@@ -105,7 +105,7 @@ class FormComponent_date extends FormComponent_view_plain
    }
    // ---- работа с БД ----
    function Model_DbLoad( $db_row )
-   { 
+   {
      if(isset($db_row[ $this->field->name ]))
      {
        $this->model_data        = $db_row[ $this->field->name ];
@@ -128,7 +128,7 @@ class FormComponent_date extends FormComponent_view_plain
    {
      return $this->Model_DbInsert( $fields, $values );
    }
-  
+
    // VALIDATOR ==============================================================================
    function Validate()
    {
@@ -139,7 +139,7 @@ class FormComponent_date extends FormComponent_view_plain
 
      return $this->valid;
    }
-  
+
    // VIEW ==============================================================================
    // парсинг readonly значения
    function View_Parse( $plain_data=NULL )
@@ -160,7 +160,7 @@ class FormComponent_date extends FormComponent_view_plain
    // INTERFACE ==============================================================================
    // парсинг полей интерфейса
    function Interface_Parse()
-   { 
+   {
      parent::Interface_Parse();
 
      $format = "d.m.Y";
@@ -186,7 +186,7 @@ class FormComponent_date extends FormComponent_view_plain
    // преобразование из поста в массив для загрузки моделью
    function Interface_PostToArray( $post_data )
    {
-     $a = array( 
+     $a = array(
           $this->field->name           => @trim($post_data['_'.$this->field->name]),
           $this->field->name."_active" => ($post_data['_'.$this->field->name."_active"]?1:0),
                   );
@@ -195,7 +195,7 @@ class FormComponent_date extends FormComponent_view_plain
      else
        $a[$this->field->name] = $this->zero_data;
 
-     return $a; 
+     return $a;
    }
 
 }

@@ -1,6 +1,6 @@
 <?php
 
-class Plugin 
+class Plugin
 {
 	/** Имена параметров конфигурации плагина */
 	var $config_vars = array();
@@ -10,8 +10,8 @@ class Plugin
 	{
 	}
 
-	/** 
-	 * Вернуть конфиг 
+	/**
+	 * Вернуть конфиг
 	 */
 	function getConfig()
 	{
@@ -21,7 +21,7 @@ class Plugin
 		return $config;
 	}
 
-	/** 
+	/**
 	 * Установить параметры конфигурации
 	 *
 	 * Можно указывать не все
@@ -33,9 +33,9 @@ class Plugin
 			elseif (!isset($this->$v)) $this->$v = NULL;
 	}
 
-	function initialize(&$ctx, $config=NULL) 
-	{ 
-		$this->rh =& $ctx; 
+	function initialize(&$ctx, $config=NULL)
+	{
+		$this->rh =& $ctx;
 
 		if (isset($config['factory'])) $this->factory =& $config['factory'];
 
@@ -47,5 +47,5 @@ class Plugin
 }
 
 
-$this->useClass('controllers/RenderablePlugin');
+Finder::useClass('controllers/RenderablePlugin');
 ?>

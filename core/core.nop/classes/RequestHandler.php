@@ -1,8 +1,8 @@
 <?php
 
 /*
-  Основной обработчик запроса. 
-  Организует последовательность обработки и функциональное окружение. 
+  Основной обработчик запроса.
+  Организует последовательность обработки и функциональное окружение.
   Служит мостом для сообщения между собой подключаемых модулей.
 
   ===================
@@ -54,7 +54,7 @@
 		$this->params_string
 
   * InitEnvironment() -- Построение стандартнго окружения. На данном уровне пуст. Перегружать в наследниках.
-	 ВХОД: 
+	 ВХОД:
 		ничего
 	 ВЫХОД:
 		$this->db, $this->tpl, $this->debug
@@ -82,7 +82,7 @@
   * FindScript ( $type, $name, $level=false, $dr=-1, $ext = 'php' ) -- Ищет скрипт по уровням проектов.
 	 ВХОД:
 		$type -- псевдотип скрипта, например classes, handlers, actions и пр.
-		$name -- относительное имя файла в каталоге псевдокласса, без расширения 
+		$name -- относительное имя файла в каталоге псевдокласса, без расширения
 		$level -- уровень проекта, начиная с которого нужно искать файл
 					 если не задан, берётся равный самому последнему
 		$dr -- направление поиска, возможные значения : -1,0,+1
@@ -97,10 +97,10 @@
 		полное имя скрипта, которое можно вставить в include()
 		false, если скрипт не найден
 
-  * FindScript_( $type, $name, $level=false, $dr=-1, $ext = 'php' ) -- То же, что и FindScript, 
+  * FindScript_( $type, $name, $level=false, $dr=-1, $ext = 'php' ) -- То же, что и FindScript,
 				  но в случае не обнаружения файла вываливается с ошибкой.
 
-  * UseScript( $type, $name, $level=false, $dr=-1, $ext = 'php' ) -- То же, что и FindScript_, 
+  * UseScript( $type, $name, $level=false, $dr=-1, $ext = 'php' ) -- То же, что и FindScript_,
 				  но дополнительно инклюдит скрипт
 
   * UseClass( $name, $level=0, $dr=1, $ext = 'php' ) -- То же, что и UseScript, но
@@ -130,12 +130,10 @@
 
  */
 
-require_once JS_CORE_DIR . 'classes/ConfigProcessor.php';
-
-class RequestHandler extends ConfigProcessor {
+class RequestHandler {
 
 	protected static $instance = null;
-	
+
 	//информация об остатке адреса для обработчика
 	var $params = array ();
 	var $params_string = "";
@@ -153,30 +151,30 @@ class RequestHandler extends ConfigProcessor {
 		{
 			self::$instance = new $className($config);
 		}
-		
+
 		return self::$instance;
 	}
-	
-	protected function __construct($config_path = 'config/default.php') 
+
+	protected function __construct($config_path = 'config/default.php')
 	{
 		//пытаемся прочесть файл конфигурации
-		if (is_object($config_path)) 
+		if (is_object($config_path))
 		{
 			config_joinConfigs($this, $config_path);
-		} 
+		}
 		else
 		{
-			if (@ is_readable($config_path)) 
+			if (@ is_readable($config_path))
 			{
 				require_once ($config_path);
-			} 
-			else 
+			}
+			else
 			{
 				throw new Exception("Cannot read local configurations");
 			}
 		}
 		//вычисляем base_url
-		
+
 		if (!isset ($this->base_url))
 		{
 			$this->base_url = dirname($_SERVER["PHP_SELF"]) . (dirname($_SERVER["PHP_SELF"]) != '/' ? '/' : '');
@@ -190,20 +188,23 @@ class RequestHandler extends ConfigProcessor {
 			$this->host_url = strtolower(substr($_SERVER['SERVER_PROTOCOL'], 0, strpos($_SERVER['SERVER_PROTOCOL'], '/'))) . '://' . $_SERVER['SERVER_NAME'] .
 			 ($_SERVER['SERVER_PORT'] === '80' ? '' : ':' . $_SERVER['SERVER_PORT']);
 		}
-	 
+
 		$this->_setDomains();
 
 		//избавляемся от квотов
-		if (get_magic_quotes_gpc()) 
+		if (get_magic_quotes_gpc())
 		{
 			$this->_fuckQuotes($_POST);
 			$this->_fuckQuotes($_GET);
 			$this->_fuckQuotes($_COOKIE);
 			$this->_fuckQuotes($_REQUEST);
 		}
+
+		Finder::setDirs($this->DIRS);
+		Finder::setLibDir($this->lib_dir);
 	}
 
-	public function init() 
+	public function init()
 	{
 		$this->initDebug();
 		$this->initDBAL();
@@ -212,18 +213,18 @@ class RequestHandler extends ConfigProcessor {
 		$this->initUpload();
 		$this->initPrincipal();
 		$this->initFixtures();
-		
-		$this->useModel('DBModel');
-		
+
+		Finder::useModel('DBModel');
+
 		// config from DB
 		if ($this->db)
-		{			
-			config_joinConfigs($this, DBModel::factory('DBConfig')->load()->getData());			
+		{
+			config_joinConfigs($this, DBModel::factory('DBConfig')->load()->getData());
 		}
-		
+
 		Debug :: trace("RH: init done");
 	}
-	
+
 	public function & getPageDomain() {
 		return $this->pageDomain;
 	}
@@ -249,46 +250,12 @@ class RequestHandler extends ConfigProcessor {
 
 		//выполнение обработчика
 		$this->execute();
-		
+
 		$this->showSiteMap();
 	}
 
-	// Алиасы, специфичные для RH
-	public function useClass($name, $level = 0, $dr = 1, $ext = 'php', $withSubDirs = false, $hideExc = false) {
-		if (class_exists($name, false)) return;
-		$this->useScript("classes", $name, $level, $dr, $ext, $withSubDirs, $hideExc);
-	}
-
-	// Алиасы, специфичные для RH
-	public function useModel($name, $level = 0, $dr = 1, $ext = 'php', $withSubDirs = false, $hideExc = false) {
-		if (class_exists($name, false)) return;
-		$this->useScript("classes/models", $name, $level, $dr, $ext, $withSubDirs, $hideExc);
-	}
-
-	public function useLib($library_name, $file_name = "") {
-		// library is near core, library have no levels
-		//$direction = 0;
-		// lucky@npj: фиг вам -- где угодно. сначала в приложении, затем в core
-		$direction = 1;
-		$level = 0;
-		// usually library have one file to link itself
-		if ($file_name == "")
-			$file_name = $library_name;
-		$ext = "php";
-
-		$this->useScript($this->lib_dir, $library_name . "/" . $file_name, $level, $direction, $ext);
-	}
-
-	public function useModule($name, $type = NULL) {
-		$this->useClass('ModuleLoader');
-		$o = & new ModuleLoader();
-		$o->initialize($this);
-		$o->load($name);
-		return $o->data;
-	}
-	
 	public function getPluralizeDir($classname) {
-		$this->UseClass("Inflector");
+		Finder::useClass("Inflector");
 		$words = preg_split('/[A-Z]/', $classname);
 		$last_word = substr($classname, -strlen($words[count($words) - 1]) - 1);
 		$last_word = strtolower($last_word);
@@ -302,7 +269,7 @@ class RequestHandler extends ConfigProcessor {
 		header("Location: $href");
 		exit;
 	}
-	
+
 	public function _404()
 	{
 		$this->page = & $this->pageDomain->findPageByClass('PageNotFoundPage');
@@ -310,49 +277,49 @@ class RequestHandler extends ConfigProcessor {
 		$this->showSiteMap();
 		die();
 	}
-	
+
 	protected function beforePageHandle()
 	{
-		
+
 	}
-	
+
 	protected function afterPageHandle()
 	{
-		
+
 	}
-	
-	protected function execute() 
+
+	protected function execute()
 	{
 		$this->beforePageHandle();
-		
+
 		$this->page->handle();
 		$this->page->rend();
-		
+
 		$this->afterPageHandle();
 	}
 
 	protected function initUpload()
 	{
 		Debug :: mark("upload");
-		$this->UseClass("Upload");
+		Finder::useClass("Upload");
 		$this->upload = & new Upload($this, $this->project_dir . "files/", '', 'files/');
 		Debug :: trace("RH: created Upload", null, "upload");
 	}
-	
+
 	protected function initDebug() {
 		//инициализируем базовые объекты
 		if ($this->enable_debug) {
-			$this->useClass("Debug");
+			Finder::useClass("Debug");
 			Debug :: init();
 		} else {
-			$this->useClass("DebugDummy");
+			Finder::useClass("DebugDummy");
 		}
 	}
 
 	protected function initDBAL() {
 		Debug :: mark("db");
 		if ($this->db_al) {
-			$this->UseClass("DBAL");
+			Finder::useClass("DBAL");
 			//			$this->db =& new DBAL( $this );
 			$this->db = & DBAL :: getInstance($this);
 			if ($this->db_set_encoding) {
@@ -372,20 +339,20 @@ class RequestHandler extends ConfigProcessor {
 			Debug :: trace("RH: TPL DISABLED");
 		} else {
 			Debug :: mark("tpl");
-			$this->UseClass("TemplateEngine");
+			Finder::useClass("TemplateEngine");
 			$this->tpl = & new TemplateEngine($this);
 //			$this->tpl->set('/', $this->base_url);
 			Debug :: trace("RH: created TPL", "tpl", "tpl");
 		}
 	}
 
-	protected function initMessageSet() 
+	protected function initMessageSet()
 	{
 		if ($this->msg_disable === true) {
 			Debug :: trace("RH: MSG DISABLED");
 		} else {
 			Debug :: mark("msg");
-			$this->UseClass("MessageSet");
+			Finder::useClass("MessageSet");
 			$this->msg = & new MessageSet($this);
 			$this->tpl->msg = & $this->msg;
 			Debug :: trace("RH: created MSG", null, "msg");
@@ -393,7 +360,7 @@ class RequestHandler extends ConfigProcessor {
 	}
 
 	//Инициализация принципала.
-	protected function initPrincipal() 
+	protected function initPrincipal()
 	{
 		if (!$this->db) return;
 		$this->principal = & new Principal($this, $this->principal_storage_model, $this->principal_security_models);
@@ -402,25 +369,25 @@ class RequestHandler extends ConfigProcessor {
 			$this->principal->Guest();
 		}
 	}
-	
+
 	protected function initFixtures()
 	{
 		if (!$this->use_fixtures) return;
-		
-		$this->useClass('Fixtures');
+
+		Finder::useClass('Fixtures');
 		$fixtures = new Fixtures($this);
 		$fixtures->setDir($this->app_dir.'fixtures/');
 		$fixtures->load();
 		$data = $fixtures->get();
-		
+
 		foreach ($data AS $k => $v)
 		{
 			$this->tpl->set($k, $v);
 		}
 	}
-	
+
 	// функция, заполняющая поля *_domain, чтобы помогать кукам и вообще всем
-	protected function _setDomains() 
+	protected function _setDomains()
 	{
 		if (!isset ($this->base_domain))
 			$this->base_domain = preg_replace("/^www\./i", "", $_SERVER["SERVER_NAME"]);
@@ -433,25 +400,25 @@ class RequestHandler extends ConfigProcessor {
 		session_set_cookie_params(0, "/", $this->cookie_domain);
 	}
 
-	protected function mapHandler($url) 
+	protected function mapHandler($url)
 	{
-		$this->useClass("domains/PageDomain");
+		Finder::useClass("domains/PageDomain");
 		$this->pageDomain = new PageDomain($this);
-		if ($page = & $this->pageDomain->findPageByUrl($url)) 
+		if ($page = & $this->pageDomain->findPageByUrl($url))
 		{
 			$this->page = & $page;
 			$this->data = $page->config;
 			$this->params = $page->params;
 			$this->path = $page->path;
-		} 
-		else 
+		}
+		else
 		{
 			$this->page = & $this->pageDomain->findPageByClass('PageNotFoundPage');
 		}
 	}
 
 	//Построение стандартного окружения.
-	protected function initEnvironment() 
+	protected function initEnvironment()
 	{
 		// на этом уровне включает только заполнение очень полезной
 		// шаблонной переменной "/", соответствующей корню сайта
@@ -460,9 +427,9 @@ class RequestHandler extends ConfigProcessor {
 //		$this->tpl->setRef("SITE", $this);
 	}
 
-	
 
-	
+
+
 
 //	function error($msg) {
 //		trigger_error($msg, E_USER_ERROR);
@@ -490,7 +457,7 @@ class RequestHandler extends ConfigProcessor {
 	public function _onCreatePage(& $page) {
 	}
 
-	protected function showSiteMap() 
+	protected function showSiteMap()
 	{
 		//TODO: extract and document setting of print params
 		//nop
@@ -498,28 +465,28 @@ class RequestHandler extends ConfigProcessor {
 			'print' => 1
 		)));
 
-		if ($this->ri->get('print')) 
+		if ($this->ri->get('print'))
 		{
 			$this->tpl->set('html:print', '1');
 		}
-		
+
         //умолчательный ключ сайтмапа = controller/method, например news/item
         if (!isset( $this->site_map_path ))
         {
-            $ss = str_replace("Page", "", get_class($this->page)); 
-                        
+            $ss = str_replace("Page", "", get_class($this->page));
+
             if ($this->page->method!="default" || ( $this->page->method == "default" && isset( $this->site_map[ strtolower( $ss.'/'.$this->page->method ) ]  ) ))
                 $k = strtolower($ss.'/'.$this->page->method);
-            else 
+            else
                 $k = strtolower($ss);
-                
+
             $this->site_map_path = $k;
         }
-        		
+
 		$this->tpl->parseSiteMap($this->site_map_path);
 		echo $this->tpl->get('html');
 	}
-	
+
 
 	// удаляем "магические" квоты из предоставленного массива
 	// и всех содержащихся в нём массивов
@@ -531,7 +498,7 @@ class RequestHandler extends ConfigProcessor {
 				else
 					$a[$k] = stripslashes($v);
 	}
-	
+
 	public function jsonEncode($input)
 	{
 		$out = array();

@@ -15,12 +15,12 @@ class Fixtures
 	protected $fileCacheObj = null;
 	protected $filesHash = '';
 	protected $files = array();
-	
+
 	public function __construct(&$rh)
 	{
 		$this->rh = &$rh;
 	}
-	
+
 	public function setDir($dirName)
 	{
 		$this->dir = $dirName;
@@ -30,12 +30,12 @@ class Fixtures
 	{
 		$this->cachedName = $name;
 	}
-	
+
 	public function get()
 	{
 		return $this->data;
 	}
-	
+
 	public function load()
 	{
 		if (!is_dir($this->dir))
@@ -43,19 +43,19 @@ class Fixtures
 			//throw new Exception('Fixtures dir "'.$this->dir.'" doesn\'t exists.<br />If you don\'t need fixtures, disable it in config file. (use_fixtures=false)');
 			return;
 		}
-		
+
 		$this->countHash();
-		
+
 		// fixtures folder is empty
 		if (empty($this->files))
 		{
 			return;
 		}
-		
+
 		$this->fileCacheObj = new FileCache($this->cachedName.'.php');
 		$sources = $this->fileCacheObj->getSources();
-		
-		// need to recompile	
+
+		// need to recompile
 		if ((count($sources) > 0 && $sources[0] !== $this->filesHash) || count($sources) == 0)
 		{
 			$this->compile();
@@ -66,14 +66,14 @@ class Fixtures
 			$this->data = unserialize($data);
 		}
 	}
-	
+
 	/**
 	 * Скомпилировать все фикстуры и положить их в кэш
 	 *
 	 */
 	protected function compile()
 	{
-		$this->rh->useLib('spyc');
+		Finder::useLib('spyc');
 		foreach ($this->files AS $fileName)
 		{
 			$fileParts = pathinfo($fileName);
@@ -81,11 +81,11 @@ class Fixtures
 		}
 
 		$this->fileCacheObj->addSource($this->filesHash);
-		
+
 		$str = "return '".str_replace("'", "\\'", serialize($this->data))."';";
 		$this->fileCacheObj->write($str);
 	}
-	
+
 	/**
 	 * Подсчет хэша папки с фикстурами
 	 *
@@ -96,14 +96,14 @@ class Fixtures
 		{
 			$this->files = array();
 			$hash = '';
-			
-			while (false !== ($file = readdir($handle))) 
+
+			while (false !== ($file = readdir($handle)))
 			{
 				if ($file == '.svn' || $file == '.' || $file == '..')
 				{
 					continue;
 				}
-				
+
 				$hash .= '|'.$file.'|'.filemtime($this->dir.'/'.$file).'|';
 				$this->files[] = $file;
 		    }

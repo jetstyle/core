@@ -12,21 +12,21 @@ define ("TPL_COMPILE_NEVER",  0);
 define ("TPL_COMPILE_SMART",  1);
 define ("TPL_COMPILE_ALWAYS", 2);
 
-class TemplateEngine extends ConfigProcessor
+class TemplateEngine
 {
 	public $domain = array();
-	
+
 	protected $rh;
-	
+
 	protected $compiler = null;
-	
+
 	protected $stack = array();
-	
+
 	protected $parseCache = array();
 	protected $parseFunctionsCache = array();
 	/**
 	 * Массив соответсвий шаблон => имя закешированной функции
-	 * 
+	 *
 	 * ex.:
 	 * array(
 	 * 		'news/item.html' => 'news_item_html',
@@ -39,12 +39,12 @@ class TemplateEngine extends ConfigProcessor
 	protected $skinNames = array();
 	protected $skinName = '';
 	protected $skinDir = '';
-	
+
 	public $siteMap = array();
 	protected $siteMapFilename = 'site_map.yml';
-	
+
 	// ############################################## //
-	
+
 	public function __construct( &$rh )
 	{
 		$this->rh = &$rh;
@@ -52,7 +52,7 @@ class TemplateEngine extends ConfigProcessor
 		// изначальный стек шкур на основе стека RH
 		$this->DIRS = $rh->DIRS;
 		unset($this->DIRS[0]);
-		
+
 		// выбрать шкуру
 		$this->skin( $rh->tpl_skin );
 	}
@@ -61,7 +61,7 @@ class TemplateEngine extends ConfigProcessor
 	{
 		return $this->rh;
 	}
-	
+
 	public function get( $key ) // -- получить значение (намеренно без ссылки)
 	{ return isset($this->domain[$key]) ? $this->domain[$key] : "" ; }
 
@@ -83,7 +83,7 @@ class TemplateEngine extends ConfigProcessor
 		{
 			$stackId = count($this->stack);
 			$this->stack[$stackId] = array();
-			
+
 			foreach ($data AS $name => &$value)
 			{
 				$this->stack[$stackId][$name] = $this->domain[$name];
@@ -96,7 +96,7 @@ class TemplateEngine extends ConfigProcessor
 					$this->domain[$name] = &$value;
 				}
 			}
-			
+
 			return $stackId;
 		}
 		else
@@ -104,7 +104,7 @@ class TemplateEngine extends ConfigProcessor
 			return null;
 		}
 	}
-	
+
 	public function freeStack($stackId)
 	{
 		if (is_array($this->stack[$stackId]))
@@ -116,15 +116,15 @@ class TemplateEngine extends ConfigProcessor
 			unset($this->stack[$stackId]);
 		}
 	}
-	
+
 	/**
 	 * Очистка домена
 	 *
 	 * @param string $key
 	 */
 	public function free( $key = "" )
-	{ 
-		if ($key === "") 
+	{
+		if ($key === "")
 		{
 			$this->domain = array();
 		}
@@ -134,8 +134,8 @@ class TemplateEngine extends ConfigProcessor
 			{
 				unset( $this->domain[$k] );
 			}
-		} 
-		else 
+		}
+		else
 		{
 			unset( $this->domain[$key] );
 		}
@@ -166,7 +166,7 @@ class TemplateEngine extends ConfigProcessor
 	{
 		return $this->skinName;
 	}
-	
+
 	/**
 	 * Установить шкуру
 	 *
@@ -177,22 +177,22 @@ class TemplateEngine extends ConfigProcessor
 		// запомнить каталог для FindScript
 		$this->skinDir = $this->rh->tpl_root_dir.$skinName;
 		if (substr($this->skinDir, -1) != "/") $this->skinDir.="/";
-				
-		array_unshift($this->DIRS, $this->skinDir);
+
+		Finder::prependDir($this->skinDir);
 		// запомнить имя шкуры
 		$this->skinNames[] = $skinName;
 		$this->skinName = $skinName;
-		
+
 		$this->set( "skin", $this->skinDir );
-		
+
 		$tplRootHref = $this->rh->tpl_root_href.$skinName;
 		if (substr($tplRootHref, -1) != "/") $tplRootHref.="/";
-		
+
 		foreach($this->rh->tpl_skin_dirs AS $k => $dir)
 		{
 			$this->set( $dir, $tplRootHref.$dir."/");
 		}
-		
+
 		$this->loadSiteMap();
 	}
 
@@ -217,35 +217,35 @@ class TemplateEngine extends ConfigProcessor
 	 *  'file_source' => путь до файла
 	 *  'cache_name' => имя, используемое для кэша
 	 * );
-	 * 
+	 *
 	 * @param string $tplName
 	 * @return array
 	 */
 	public function getTplInfo($tplName)
 	{
 		$result = array();
-		
+
 		$a = explode( ":", $tplName );
 
-		if (sizeof($a) > 1) 
+		if (sizeof($a) > 1)
 		{
 			$result['subtpl'] = $a[1]; // имя подшаблона
 		}
-		
+
 		$_pos = strrpos($tplName, ".");
 		$result['tpl'] = $_pos ? substr($a[0], 0, $_pos) : $a[0];
-		
+
 		$result['file_source'] = $this->findTemplate( $result['tpl'] );
 		$result['cache_name'] = preg_replace("/[^\w\x7F-\xFF\s]/", $this->rh->tpl_template_sepfix, str_replace($this->rh->project_dir, '', $result['file_source']));
-		
+
 		return $result;
 	}
-	
+
 	public function getSiteMap()
 	{
 		return $this->siteMap;
 	}
-	
+
 	/**
 	 * Получение информации о плагине
 	 *
@@ -259,7 +259,7 @@ class TemplateEngine extends ConfigProcessor
 		$result['cache_name'] = str_replace("/", "__", $actionName);
 		return $result;
 	}
-	
+
 	/**
 	 * Получение имени функции по кэшированному имени и имени подшаблона
 	 *
@@ -271,7 +271,7 @@ class TemplateEngine extends ConfigProcessor
 	{
 		return $this->rh->tpl_template_prefix . $this->getSkinName() . $this->rh->tpl_template_sepfix . $cacheName . $this->rh->tpl_template_sepfix . $subTpl;
 	}
-	
+
 	/**
 	 * Получение имени функции по кэшированному имени
 	 *
@@ -282,8 +282,8 @@ class TemplateEngine extends ConfigProcessor
 	{
 		return $this->rh->tpl_action_prefix . $this->getSkinName() . $this->rh->tpl_template_sepfix . $cacheName;
 	}
-	
-	
+
+
 	/**
 	 * Поиск шаблона
 	 *
@@ -292,9 +292,9 @@ class TemplateEngine extends ConfigProcessor
 	 */
 	public function findTemplate( $file )
 	{
-		return parent::findScript_( "templates", $file, 0, 1, "html" );
+		return Finder::findScript_( "templates", $file, 0, 1, "html" );
 	}
-	
+
 	/**
 	 * Отпарсить контент, данный как параметр (а не брать из файла)
 	 *
@@ -309,8 +309,8 @@ class TemplateEngine extends ConfigProcessor
 
 	/**
 	 * Отпарсить массив
-	 * Все шаблоны и подшаблоны складываются в один закэшированный файл 
-	 * 
+	 * Все шаблоны и подшаблоны складываются в один закэшированный файл
+	 *
 	 * @param string $siteMapKey
 	 */
 	public function parseSiteMap($siteMapKey)
@@ -319,26 +319,26 @@ class TemplateEngine extends ConfigProcessor
 		{
 			throw new TplException('Sitemap "'.$siteMapKey.'" not found');
 		}
-		
+
 		$data = $this->siteMap[$siteMapKey];
 		if (!$data['html'])
 		{
 			$data['html'] = '@html.html';
 		}
-		
+
 		$cacheName = preg_replace("/[^\w\x7F-\xFF\s]/", $this->rh->tpl_template_sepfix, $siteMapKey);
 		$fileCached = $this->rh->cache_dir . $this->rh->environment . $this->rh->tpl_template_sepfix . $this->skinName . $this->rh->tpl_template_file_prefix .	$cacheName . ".php";
 		$fileHelperCached = $this->rh->cache_dir . $this->rh->environment . $this->rh->tpl_template_sepfix . $this->skinName . $this->rh->tpl_template_file_prefix .	$cacheName . "_helper.php";
-		
+
 		if (!file_exists($fileCached) || !file_exists($fileHelperCached))
 		{
 			$this->spawnCompiler();
 			$this->compiler->compileSiteMap($data, $fileCached, $fileHelperCached);
 		}
-		
+
 		// сначала получим список всех использованных в этом сайтмапе файлов и экшенов
 		include_once($fileHelperCached);
-		
+
 		// шаблоны, из которых собран кэш
 		$funcName = $this->getFuncName('site_map_system', '__get_used_files');
 		$files = $funcName($this);
@@ -350,7 +350,7 @@ class TemplateEngine extends ConfigProcessor
 		if (is_array($files))
 		{
 			$recompile = $this->rh->tpl_compile != TPL_COMPILE_NEVER;
-			
+
 			if ($recompile)
 			{
 				$cachemtime = @filemtime($fileCached);
@@ -364,12 +364,12 @@ class TemplateEngine extends ConfigProcessor
 						break;
 					}
 				}
-				
+
 				if (is_array($actions) && !$_recompile)
 				{
 					foreach ($actions AS $action => $v)
 					{
-						$source = $this->findScript_( "plugins", $action);
+						$source = Finder::findScript_( "plugins", $action);
 						if (@filemtime($source) > $cachemtime)
 						{
 							$_recompile = true;
@@ -377,7 +377,7 @@ class TemplateEngine extends ConfigProcessor
 						}
 					}
 				}
-				
+
 				if ($_recompile)
 				{
 					$recompile = true;
@@ -386,7 +386,7 @@ class TemplateEngine extends ConfigProcessor
 				{
 					$recompile = false;
 				}
-				
+
 				if ($recompile)
 				{
 					$this->spawnCompiler();
@@ -396,14 +396,14 @@ class TemplateEngine extends ConfigProcessor
 
 			$this->parseCache = $files;
 
-			
+
 			include_once($fileCached);
-			
+
 			// сопоставления шаблон => функция
 			$funcName = $this->getFuncName('site_map_system', '__get_files2functions');
 			$this->files2functions = $funcName($this);
 		}
-				
+
 		if (is_array($data))
 		{
 			foreach ($data AS $k => $v)
@@ -419,7 +419,7 @@ class TemplateEngine extends ConfigProcessor
 			}
 		}
 	}
-	
+
 	/**
 	 * Парсим шаблон и  возвращаем результат
 	 *
@@ -437,10 +437,10 @@ class TemplateEngine extends ConfigProcessor
 			 $this->parseFunctionsCache[$funcName] = true;
 		}
 		else
-		{		
+		{
 			$tplInfo = $this->getTplInfo($tplName);
 			$funcName = $this->getFuncName($tplInfo['cache_name'], $tplInfo['subtpl']);
-			
+
 			if (!isset($this->parseFunctionsCache[$funcName]))
 			{
 				if (!function_exists ($funcName))
@@ -449,28 +449,28 @@ class TemplateEngine extends ConfigProcessor
 					{
 						// получение имён файлов исходника и компилята
 						$fileCached = $this->rh->cache_dir . $this->rh->environment . $this->rh->tpl_template_sepfix . $this->skinName . $this->rh->tpl_template_file_prefix .	$tplInfo['cache_name'] . ".php";
-					
+
 						// 3. проверка наличия в кэше/необходимости рекомпиляции
 						$recompile = $this->rh->tpl_compile != TPL_COMPILE_NEVER;
 						$recompile = $recompile || !file_exists( $fileCached );
-							
+
 						if ($recompile && $tplInfo['file_source'] && ($this->rh->tpl_compile != TPL_COMPILE_ALWAYS) && @filemtime($fileCached) >= @filemtime($tplInfo['file_source']))
-						{		 
+						{
 							$recompile = false;
 						}
-							
+
 						// 4. перекомпиляция
 						if ($recompile)
 						{
 							$this->spawnCompiler();
 							$this->compiler->compile($tplInfo, $fileCached);
 						}
-										
+
 						// 5. парсинг-таки
 						include_once( $fileCached );
 						$this->parseCache[$tplInfo['tpl']] = true;
 					}
-			
+
 					if (function_exists ($funcName))
 					{
 						$this->parseFunctionsCache[$funcName] = true;
@@ -491,7 +491,7 @@ class TemplateEngine extends ConfigProcessor
 				}
 			}
 		}
-		
+
 		if ($this->parseFunctionsCache[$funcName])
 		{
 			ob_start();
@@ -499,7 +499,7 @@ class TemplateEngine extends ConfigProcessor
 			$res = trim(ob_get_contents());
 			ob_end_clean();
 		}
-		
+
 		//6. $dummy
 		if( $res=='' ) $res = $dummy;
 
@@ -515,7 +515,7 @@ class TemplateEngine extends ConfigProcessor
 				$this->domain[ $storeTo ] = $res;
 			}
 		}
-		
+
 		return $res;
 	}
 
@@ -543,11 +543,11 @@ class TemplateEngine extends ConfigProcessor
 			$recompile = $recompile || !file_exists( $fileCached );
 			if ($recompile)
 			{
-				$fileSource = $this->findScript_( "plugins", $actionName);
-								
+				$fileSource = Finder::findScript_( "plugins", $actionName);
+
 				if ($fileSource && ($this->rh->tpl_compile != TPL_COMPILE_ALWAYS))
 				{
-					if (@filemtime($fileCached) >= @filemtime($fileSource)) 
+					if (@filemtime($fileCached) >= @filemtime($fileSource))
 					{
 						$recompile = false;
 					}
@@ -572,7 +572,7 @@ class TemplateEngine extends ConfigProcessor
 		ob_end_clean();
 		return $_;
 	}
-	
+
 	/**
 	 * Загрузим файл карты сайта. Должен лежать в директории со скином
 	 *
@@ -589,7 +589,7 @@ class TemplateEngine extends ConfigProcessor
 			}
 			else
 			{
-				$this->rh->useLib('spyc');
+				Finder::useLib('spyc');
 				$this->siteMap = Spyc :: YAMLLoad($this->skinDir.$this->siteMapFilename);
 				$fileCache->addSource($this->skinDir.$this->siteMapFilename);
 				$str = "return '".str_replace("'", "\\'", serialize($this->siteMap))."';";
@@ -597,16 +597,16 @@ class TemplateEngine extends ConfigProcessor
 			}
 		}
 	}
-	
+
 	/**
 	 * Порождает компиляторскую часть
 	 *
 	 */
-	protected function spawnCompiler() 
+	protected function spawnCompiler()
 	{
 		if ( null === $this->compiler)
 		{
-			$this->rh->useClass("TemplateEngineCompiler");
+			Finder::useClass("TemplateEngineCompiler");
 			$this->compiler = new TemplateEngineCompiler( $this->rh );
 		}
 	}
@@ -624,17 +624,17 @@ class TemplateEngine extends ConfigProcessor
 		{
 			$d = &$this->domain;
 		}
-		
-		if (is_array($d) || $d instanceof ArrayAccess) 
+
+		if (is_array($d) || $d instanceof ArrayAccess)
 		{
-			if (isset($d[$key])) 
-				return $d[$key]; 
-			else 
-				return NULL; 
+			if (isset($d[$key]))
+				return $d[$key];
+			else
+				return NULL;
 		}
 		return NULL;
 	}
-	
+
 	// EOC{ TemplateEngine }
 }
 

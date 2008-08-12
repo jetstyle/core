@@ -5,7 +5,7 @@
   * see http://in.jetstyle.ru/rocket/rocketforms
 
   FormComponent_image( &$config )
-      - $field -- $field->config instance-a поля  
+      - $field -- $field->config instance-a поля
 
   -------------------
 
@@ -22,7 +22,7 @@
   * file_dir  = -- путь, куда класть файлы.
   * file_random_name = false (true)
 
-  + image_thumbs = array( x, y, ... ) 
+  + image_thumbs = array( x, y, ... )
 
   -------------------
 
@@ -35,11 +35,11 @@
 
 ================================================================== v.0 (kuso@npj)
 */
-$this->UseClass( "FormComponents/file" );
+Finder::useClass( "FormComponents/file" );
 
 class FormComponent_image extends FormComponent_file
 {
-  
+
    // VALIDATOR ==============================================================================
    function Validate()
    {
@@ -48,11 +48,11 @@ class FormComponent_image extends FormComponent_file
      // @todo: validate Width and Height of picture
      return $this->valid;
    }
-  
+
    // INTERFACE ==============================================================================
    // парсинг полей интерфейса
    function Interface_Parse()
-   { 
+   {
      FormComponent_model_plain::Interface_Parse();
 
      $name = $this->field->model->Model_GetDataValue();
@@ -64,7 +64,7 @@ class FormComponent_image extends FormComponent_file
      }
      else
      {
-       $size = getimagesize( $this->field->config["file_dir"].$name ); 
+       $size = getimagesize( $this->field->config["file_dir"].$name );
        $this->field->tpl->Set("interface_w", $size[0] );
        $this->field->tpl->Set("interface_h", $size[1] );
        $this->field->tpl->Set("interface_path", $this->field->config["file_url"] );
@@ -85,7 +85,7 @@ class FormComponent_image extends FormComponent_file
      if ($this->file_uploaded && isset($this->field->config["image_thumbs"]))
        $this->_Thumb( $this->file_name, $this->field->config["image_thumbs"] );
 
-     return $a; 
+     return $a;
    }
 
    // ---------------------------------------------------------------------------
@@ -97,13 +97,13 @@ class FormComponent_image extends FormComponent_file
       if ($file_name == "") return;
 
       $name = preg_replace( "/\.[^\.]*$/", "", $file_name );
-      
+
       $src = $this->field->config["file_dir"].$file_name;
       if (!file_exists($src)) return;
 
       Debug::Trace( "thumbnailing $src" );
 
-      $size = getimagesize( $src ); 
+      $size = getimagesize( $src );
 
       // Debug::Error_R( $size );
 
@@ -111,7 +111,7 @@ class FormComponent_image extends FormComponent_file
       if ($size[2] == 1) $img = imagecreatefromgif ( $src ); else
       if ($size[2] == 2) $img = imagecreatefromjpeg( $src ); else
       if ($size[2] == 3) $img = imagecreatefrompng ( $src ); else return;
-      
+
       for ($i=0; $i<$tl; $i+=2)
       {
         if (is_numeric($thumbs[$i]) && is_numeric($thumbs[$i+1]))
@@ -125,7 +125,7 @@ class FormComponent_image extends FormComponent_file
         if (!is_numeric($thumbs[$i+1])) $thumbs[$i+1] = floor($size[1]*$thumbs[$i]  /$size[0]);
 
         Debug::Trace( $thumbs[$i]." x ".$thumbs[$i+1] );
-        $thumb = imagecreatetruecolor( $thumbs[$i], $thumbs[$i+1] ); 
+        $thumb = imagecreatetruecolor( $thumbs[$i], $thumbs[$i+1] );
         imagecopyresampled($thumb, $img, 0, 0, 0, 0, $thumbs[$i], $thumbs[$i+1], $size[0], $size[1]);
         imagejpeg($thumb, $this->field->config["file_dir"].
                           $name."_".($i/2+1).".jpg", $this->field->config["image_quality"]);

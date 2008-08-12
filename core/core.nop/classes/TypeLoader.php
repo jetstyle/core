@@ -13,8 +13,8 @@ class TypeLoader extends Configurable
 	{
 		$self = NULL;
 
-		$classSource = $this->rh->useClass($this->namespace.'/'.$name.'/'.$name);
-			
+		$classSource = Finder::useClass($this->namespace.'/'.$name.'/'.$name);
+
 		$self =& new $name();
 		$self->class = $name;
 		$this->data =& $self;

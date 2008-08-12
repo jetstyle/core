@@ -21,12 +21,12 @@
 
     if ($text == "") return;
 
-    $rh->useLib("typografica", "classes/typografica");
+    Finder::useLib("typografica", "classes/typografica");
 
     $typo = &new Typografica( $rh );
 
     $ret = $typo->correct($text);
-    
+
     echo $ret;
 
 

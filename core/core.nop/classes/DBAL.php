@@ -9,10 +9,10 @@
 
   ---------
 
-  NB: вместо $rh можно передавать любой объект, содержащий свойства $this->db_* 
+  NB: вместо $rh можно передавать любой объект, содержащий свойства $this->db_*
       и опционально $this->debug (объект класса Debug)
 
-  Этот класс -- верхний уровень абстракции от СУБД. 
+  Этот класс -- верхний уровень абстракции от СУБД.
   Для конкретных СУБД реализован нижний уровень -- DBAL_****, через $rh->db_al="****"
   Файлы должны лежать в одном каталоге.
 
@@ -21,7 +21,7 @@
   // Защита строкового значения кавычками
 
   * Quote( $value ) -- обквочивает значение, делая его безопасным для SQL
-      - возвращает что-то вроде '13' или 'строка' 
+      - возвращает что-то вроде '13' или 'строка'
         (вместе с правильными кавычками, которые вокруг добавлять уже не надо)
 
   // Упрощение вызовов SQL с возвратом в виде хэшей
@@ -67,7 +67,7 @@
 class DBAL
 {
 	private static $instance = null;
-	
+
 	protected $rh;
 	protected $lowlevel;
 	protected $queryCount = 0;
@@ -77,9 +77,9 @@ class DBAL
 		$this->rh = RequestHandler::getInstance();
 		$this->prefix = $this->rh->db_prefix;
 
-		$lowlevelClass = "DBAL_" . $this->rh->db_al;		
-		$this->rh->useClass($lowlevelClass);
-		
+		$lowlevelClass = "DBAL_" . $this->rh->db_al;
+		Finder::useClass($lowlevelClass);
+
 		$this->lowlevel = & new $lowlevelClass();
 
 		// connection, if any
@@ -88,7 +88,7 @@ class DBAL
 			$this->connect();
 		}
 	}
-	
+
 	/**
 	 * singletone
 	 *
@@ -98,13 +98,13 @@ class DBAL
 	 */
 	public static function &getInstance($connect = true)
 	{
-		if (null === self::$instance) 
+		if (null === self::$instance)
 		{
-			self::$instance = new DBAL($connect); 
+			self::$instance = new DBAL($connect);
 		}
 		return self::$instance;
 	}
-		
+
 	public function connect()
 	{
 		$this->lowlevel->connect();
@@ -124,12 +124,12 @@ class DBAL
 	public function query($sql, $limit = 0, $offset = 0)
 	{
 		$resultId = $this->execute($sql, $limit, $offset);
-		
+
 		if (is_string($limit))
 			$key = $limit;
 		else
 			$key = null;
-		
+
 		return $this->getArray($resultId, $key);
 	}
 
@@ -154,7 +154,7 @@ class DBAL
 	{
 		return $this->lowlevel->insertId();
 	}
-	
+
 	public function affectedRows()
 	{
 		return $this->lowlevel->affectedRows();
@@ -167,10 +167,10 @@ class DBAL
 	public function execute($sql, $limit = 0, $offset = 0)
 	{
 		Debug::mark('q');
-		
+
 		//типа такой плейсхолдер
 		$sql = str_replace("??", $this->prefix, $sql);
-				
+
 		$this->handle = $this->lowlevel->query($sql, $limit, $offset);
 		$this->logQuery($sql, $limit, $offset);
 
@@ -182,7 +182,7 @@ class DBAL
 		$resultId = $resultId ? $resultId : $this->handle;
 		return $this->lowlevel->getNumRows($resultId);
 	}
-	
+
 	/**
 	 * возвращает строчку объектом нужного класса
 	 */
@@ -223,11 +223,11 @@ class DBAL
 	public function getArray($resultId = null, $key = null)
 	{
 		$resultId = $resultId ? $resultId : $this->handle;
-				
+
 		if ($resultId)
 		{
 			$data = array();
-			
+
 			while ($row = $this->getRow($resultId))
 			{
 				if ($key !== null)
@@ -235,64 +235,64 @@ class DBAL
 				else
 					$data[] = $row;
 			}
-			
+
 			if (!empty($data))
 			{
 				return $data;
 			}
 		}
-		
+
 		return null;
 	}
-	
+
 	public function prepareSql($sql)
 	{
 		return preg_replace('/((update|((insert|replace).*?into)|from|join)\s*?)(\?\?)([a-zA-Z0-9_\-]+)/i', '$1'.$this->prefix.'$6', $sql, -1, $count);
 	}
-	
+
 	protected function logQuery($sql, $limit = 0, $offset = 0)
 	{
 		$this->queryCount++;
-		
-		if($this->rh->enable_debug && $this->rh->explain_queries)	
+
+		if($this->rh->enable_debug && $this->rh->explain_queries)
 		{
-			if(!(strpos(strtolower($sql), 'select') === false))	
+			if(!(strpos(strtolower($sql), 'select') === false))
 			{
 				$_data = array();
 				if ($r = $this->lowlevel->Query("EXPLAIN ".$sql, $limit, $offset))
 				{
-					while ($row = $this->lowlevel->FetchAssoc($r)) 
+					while ($row = $this->lowlevel->FetchAssoc($r))
 					{
 						$_data[] = $row;
 					}
 					$this->lowlevel->FreeResult($r);
 				}
-				if(is_array($_data) && !empty($_data))	
+				if(is_array($_data) && !empty($_data))
 				{
-					foreach($_data AS $i => $r)	
+					foreach($_data AS $i => $r)
 					{
-						if($i == 0)	
+						if($i == 0)
 						{
 							$head = array_keys($r);
-							foreach($head AS $rr)	
+							foreach($head AS $rr)
 							{
 								$out .= "<td>".$rr."</td>";
 							}
 							$out = "<tr>".$out."</tr>";
 						}
 
-						foreach($r AS $rr)	
+						foreach($r AS $rr)
 						{
 							$row .= "<td>".$rr."</td>";
 						}
 						$out .= "<tr>".$row."</tr>";
 						$row = '';
 					}
-					
+
 					$out = "<table>".$out."</table>";
 				}
 				$bad = 0;
-				if(!(stripos($out, 'filesort') === false) || !(stripos($out, 'temporary') === false))	
+				if(!(stripos($out, 'filesort') === false) || !(stripos($out, 'temporary') === false))
 				{
 					$bad = 1;
 				}
@@ -303,6 +303,6 @@ class DBAL
 
 		Debug::trace("<b>QUERY".($limit == 1 ? " ONE: " : ": ")."</b> ".$sql, 'db', 'q');
 	}
-	// EOC{ DBAL } 
+	// EOC{ DBAL }
 }
 ?>

@@ -4,8 +4,8 @@
  *
  */
 
-$this->UseClass("controllers/BasicContentPage");
+Finder::useClass("controllers/BasicContentPage");
 class ContentPage extends BasicContentPage
 {
-}	
+}
 ?>

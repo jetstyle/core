@@ -28,12 +28,12 @@
                                  ¬ообще, как правило достаточно идентичности поведени€ OnGuest ==> OnLogin,
                                  что и прописано в "предке"
 
-    NB: $user_data -- во всем методы передаЄтс€ то, что записано в $principal->data, 
+    NB: $user_data -- во всем методы передаЄтс€ то, что записано в $principal->data,
                       оно же извлечено из сессии или будет положено в неЄ.
 
   // ќсновной метод дл€ наследников:
 
-  * Check( &$user_data, $params="" ) - при вызове $principal->Security 
+  * Check( &$user_data, $params="" ) - при вызове $principal->Security
       - $user_data -- то же, что и выше
       - $params    -- параметры, переданные принципалу в его метод.
 
@@ -66,13 +66,13 @@ class PrincipalSecurity
    {
      $class_name = "PrincipalSecurity_".$model_name;
      // find script or die
-     $file_source = $principal->rh->FindScript_( "classes/PrincipalModels", $class_name );
+     $file_source = Finder::FindScript_( "classes/PrincipalModels", $class_name );
 
      // uplink
      include_once( $file_source );
 
      eval('$product = &new '.$class_name.'( $principal );');
-     return $product; 
+     return $product;
    }
 
 // EOC{ PrincipalSecurity }

@@ -1,6 +1,6 @@
 <?php
 
-$this->UseClass("controllers/Controller");
+Finder::useClass("controllers/Controller");
 class MailerController extends Controller
 {
 	var $template = NULL;
@@ -33,7 +33,7 @@ class MailerController extends Controller
 		if (0)
 		{
 
-			$this->rh->UseClass('HtmlMimeMail2');
+			Finder::useClass('HtmlMimeMail2');
 			$mail = new HtmlMimeMail2();
 			$mail->setFrom($from);
 			$mail->setReturnPath($from);
@@ -51,7 +51,7 @@ class MailerController extends Controller
 
 		{
 
-			$this->rh->useClass('models/MailOutbox');
+			Finder::useClass('models/MailOutbox');
 			$outbox =& new MailOutbox();
 			$outbox->initialize($this->rh);
 			$row = array(

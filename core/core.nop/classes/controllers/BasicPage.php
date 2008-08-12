@@ -1,6 +1,6 @@
 <?php
 
-$this->useClass('controllers/Controller');
+Finder::useClass('controllers/Controller');
 
 /**
  *  ласс BasicPage - базовый класс дл€ страниц сайта
@@ -112,7 +112,7 @@ class BasicPage extends Controller
 
 	function _match_url($params, $pattern, $matches = array())
 	{
-	
+
 		$i = 0;
 		$ret = false;
 		if (is_array($pattern))
@@ -208,7 +208,7 @@ class BasicPage extends Controller
 						{
 						    //echo '<hr>';
 						    //var_dump($matches);
-						    
+
 							if (isset($pattern[0]) && $pattern[0] === null )
 							{
 								$matches = array();
@@ -218,9 +218,9 @@ class BasicPage extends Controller
 		                    //методы-ссылки на другой класс
 							if (count($action_parts)==2)
 							{
-								$this->rh->UseClass('controllers/'.$action_parts[0]);
+								Finder::useClass('controllers/'.$action_parts[0]);
 								$controller = new $action_parts[0];
-		
+
 								$method = 'handle_'.$action_parts[1];
 								if (method_exists($controller, $method))
 								{
@@ -278,12 +278,12 @@ class BasicPage extends Controller
 		}
 
 		unset($o);
-		$o =& $this->rh->useModule($name);
-		if (empty($o))
-		{
-			$this->rh->useClass('plugins/'.$name.'/'.$name);
-			$o =& new $name();
-		}
+		//$o =& Finder::useModule($name);
+		//if (empty($o))
+		//{
+		Finder::useClass('plugins/'.$name.'/'.$name);
+		$o =& new $name();
+		//}
 		$config['factory'] =& $this;
 		$o->initialize($this->rh, $config);
 		$this->o_plugins[] =& $o;
@@ -320,10 +320,10 @@ class BasicPage extends Controller
 	}
 
     /**
-     *  ѕолучить им€ метода из 
-     *	   array('item',      *  либо из
-     *     array('item'=>2, 
-     */	
+     *  ѕолучить им€ метода из
+     *	   array('item',     *  либо из
+     *     array('item'=>2,
+     */
 	private function getActionName($param)
 	{
 	    $keys = array_keys($param);
@@ -334,7 +334,7 @@ class BasicPage extends Controller
 
 	    return $ret;
 	}
-	
+
 	//ѕолучает параметры привод€щие в метод
 	private function getActionParams($param)
 	{
@@ -345,7 +345,7 @@ class BasicPage extends Controller
 	    }
 	    else
     	    $ret = $param[1];
-    	
+
     	return $ret;
 	}
 
@@ -355,7 +355,7 @@ class BasicPage extends Controller
 	function url_to($cls=NULL, $item=NULL)
 	{
 		$result = '';
-				
+
 		if (empty($cls))
 		{
 			$result = rtrim($this->path, '/');
@@ -401,7 +401,7 @@ class BasicPage extends Controller
 											break;
 										}
 									}
-									
+
 									if (null !== $value)
 									{
 										$pathParts[] = $value;
@@ -415,7 +415,7 @@ class BasicPage extends Controller
 				}
 			}
 		}
-		
+
 		return $result;
 	}
 }

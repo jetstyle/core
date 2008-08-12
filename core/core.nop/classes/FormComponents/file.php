@@ -5,7 +5,7 @@
   * see http://in.jetstyle.ru/rocket/rocketforms
 
   FormComponent_file( &$config )
-      - $field -- $field->config instance-a поля  
+      - $field -- $field->config instance-a поля
 
   -------------------
 
@@ -37,7 +37,7 @@
 
 ================================================================== v.0 (kuso@npj)
 */
-$this->UseClass( "FormComponents/model_plain" );
+Finder::useClass( "FormComponents/model_plain" );
 
 class FormComponent_file extends FormComponent_model_plain
 {
@@ -54,7 +54,7 @@ class FormComponent_file extends FormComponent_model_plain
    {
      return $this->Model_DbInsert( $fields, $values );
    }
-  
+
    // VALIDATOR ==============================================================================
    function Validate()
    {
@@ -74,7 +74,7 @@ class FormComponent_file extends FormComponent_model_plain
 
      if ($this->file_size)
        if (@$this->field->config["validator_func"]) {
-         if ($result = call_user_func( $this->field->config["validator_func"], 
+         if ($result = call_user_func( $this->field->config["validator_func"],
                                        $this->field->model->Model_GetDataValue(),
                                        $this->field->config ))
            $this->_Invalidate( "func", $result );
@@ -93,12 +93,12 @@ class FormComponent_file extends FormComponent_model_plain
        if (!in_array($ext,$this->field->config["file_ext"]))
          return false;
      return true;
-   } 
-  
+   }
+
    // INTERFACE ==============================================================================
    // парсинг полей интерфейса
    function Interface_Parse()
-   { 
+   {
      parent::Interface_Parse();
 
      $name = $this->field->model->Model_GetDataValue();
@@ -124,11 +124,11 @@ class FormComponent_file extends FormComponent_model_plain
 
      if ($value === false) return array(); // no data here
 
-     $a = array( 
+     $a = array(
           $this->field->name           => $value,
                );
 
-     return $a; 
+     return $a;
    }
 
    // ---------------------------------------------------------------------------
@@ -142,14 +142,14 @@ class FormComponent_file extends FormComponent_model_plain
    }
    function _UploadFile( $post_data )
    {
-    $uploaded_file = @$_FILES[ '_'.$this->field->name ]["tmp_name"]; 
+    $uploaded_file = @$_FILES[ '_'.$this->field->name ]["tmp_name"];
     if(is_uploaded_file($uploaded_file))
     {
       //клиентские данные
       $type = $_FILES[ '_'.$this->field->name ]['type'];
       $size = $_FILES[ '_'.$this->field->name ]['size'];
       $ext = explode(".",$_FILES[ '_'.$this->field->name ]['name']);
-      $ext = strtolower(end($ext)); 
+      $ext = strtolower(end($ext));
 
       $this->file_size = $size;
       $this->file_ext  = $ext;
@@ -158,7 +158,7 @@ class FormComponent_file extends FormComponent_model_plain
 
       if ($this->_CheckExtSize($ext, $size))
       {
-        $this->field->rh->UseLib( "Translit", "php/translit" );
+        Finder::useLib( "Translit", "php/translit" );
 
         if (isset($this->field->config["file_random_name"]) && $this->field->config["file_random_name"])
         {
@@ -186,7 +186,7 @@ class FormComponent_file extends FormComponent_model_plain
       }
       else return "[error]";
     }
-    else 
+    else
     {
       $this->file_uploaded = false;
       return false;

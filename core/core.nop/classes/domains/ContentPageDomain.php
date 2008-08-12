@@ -2,7 +2,7 @@
 /*
  * @created Feb 21, 2008
  * @author lunatic lunatic@jetstyle.ru
- * 
+ *
  * —траницы в дереве контента
  */
 
@@ -15,7 +15,7 @@ class ContentPageDomain extends BasicPageDomain
 		? $this->rh->mode_map[$mode]
 		: (($mode ? implode('', array_map(ucfirst, explode('_', $mode))) : "Content" ) .  "Page");
 	}
-	
+
 	function getModeByPageClass($cls)
 	{
 		$res = strtolower(trim(preg_replace('#([A-Z])#', '_\\1', $cls), '_'));
@@ -28,7 +28,7 @@ class ContentPageDomain extends BasicPageDomain
 		if (empty($criteria)) return False; // FIXME: lucky@npj -- вернуть все страницы?
 
 		$content = DBModel::factory('Content');
-		
+
 		$where = array();
 		if (!isset($criteria['class']) && $criteria['url']=="")
 			$where[] = "mode='home'";
@@ -52,9 +52,9 @@ class ContentPageDomain extends BasicPageDomain
 			'path' => $data['_path'],
 			'url' => $criteria['url'],
 			);
-			if ($this->rh->FindScript("classes/controllers", $page_cls))
+			if (Finder::findScript("classes/controllers", $page_cls))
 			{
-				$this->rh->UseClass("controllers/".$page_cls);
+				Finder::useClass("controllers/".$page_cls);
 				if ($this->handler = &$this->buildPage($config))
 				{
 					return True;

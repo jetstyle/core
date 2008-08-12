@@ -4,14 +4,14 @@
  *
  * @author lucky@npj
  */
-$this->useClass('controllers/BasicPage');
+Finder::useClass('controllers/BasicPage');
 class PageNotFoundPage extends BasicPage
 {
 	protected $title = '404. Документ не найден';
-	
-	function handle() 
+
+	function handle()
 	{
-		$this->rh->useLib('http');
+		Finder::useLib('http');
 		Http::status(404);
 		$this->rh->site_map_path = '404';
 		parent::handle();
@@ -22,6 +22,6 @@ class PageNotFoundPage extends BasicPage
 		$this->rh->tpl->set('page', $this->rh->url);
 		parent::rend();
 	}
-	
-}	
+
+}
 ?>

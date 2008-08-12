@@ -5,29 +5,29 @@
  *
  * @last-modified 23:36 27.02.2008
  */
- 
- $this->useClass('PagerInterface');
+
+ Finder::useClass('PagerInterface');
 
  class Pager implements PagerInterface
  {
  	protected $total = 0;		// total items
  	protected $perPage = 10;	// items per page
  	protected $p = 1;			// current page
- 	protected $frameSize = 7;	// 
- 	protected $data = array();	
+ 	protected $frameSize = 7;	//
+ 	protected $data = array();
  	protected $rh = null;
- 	
+
  	public function __construct(&$rh)
  	{
  		$this->rh = &$rh;
  	}
- 	
+
  	public function getPages()
  	{
  		$this->construct();
  		return $this->data;
  	}
- 	
+
  	public function setup($currentPage = 1, $total = 0, $perPage = 0, $frameSize = 0)
  	{
  		$this->p = $currentPage;
@@ -35,29 +35,29 @@
 		{
 			$this->p = 1;
 		}
-		
+
  		$this->total = $total;
  		if ($perPage > 0)
  		{
  			$this->perPage = $perPage;
  		}
- 		
+
  		if ($frameSize > 0)
  		{
  			$this->frameSize = $frameSize;
  		}
  	}
- 	
+
  	public function getLimit()
  	{
  		return $this->perPage;
  	}
- 	
+
  	public function getOffset()
  	{
  		return (($this->p-1) * $this->perPage);
  	}
- 	
+
  	protected function construct()
  	{
  		if ($this->total <= $this->perPage)
@@ -74,7 +74,7 @@
 		elseif ($this->p >= $allPages)
 		{
 			$p = $allPages;
-		} 
+		}
 		else
 		{
 			$p = $this->p;
@@ -113,17 +113,17 @@
 			{
 				$this->data['pages'][$i] = $this->buildPage($i, $p, $start_from);
 			}
-			
-		} 
+
+		}
 		else
 		{
-			
+
 			$start_from = ($p - (floor($this->frameSize / 2)));
 			$end_to =  (p + (floor($this->frameSize / 2)));
-			
+
 			$end_to = $start_from + $this->frameSize ;
 			//echo 'else '.$start_from." to ".$end_to;
-		
+
 			for ($i = $start_from; $i < $end_to ; $i++)
 			{
 				$this->data['pages'][$i] = $this->buildPage($i, $p, $start_from);
@@ -154,8 +154,8 @@
 																			), 'submit' => ''))
 			);
 		}
- 	} 
- 	
+ 	}
+
  	/**
  	 * Делает поправку для аяксовых урлов
  	 */
@@ -165,10 +165,10 @@
  		//var_dump($url);
  		return $url;
  	}
- 	
+
  	/**
  	 * nop: page builder for every case
- 	 */ 
+ 	 */
  	protected function buildPage($i, $p, $start_from)
  	{
  		$page = array (
@@ -179,20 +179,20 @@
 						'submit' => ''
 					)
 				)) );
-	
-				
+
+
 		if ($i == $p)
 		{
 			$page['current'] = true;
 		}
-		
+
 		//для первой страницы текущего фрейма проверим, можно ли отмотать фрейм назад
 		if ( $i == $start_from && $start_from > 1 )
 		{
 			$page['has_less_url'] = $this->fixUrl( $this->rh->ri->HrefPlus('',array ('p' => $i-1)) );
 			$page['first_url'] = $this->fixUrl( $this->rh->ri->HrefPlus('',array ('p' => 1)) );
 		}
-		
+
 		return $page;
  	}
  }
