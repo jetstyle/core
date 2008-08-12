@@ -221,7 +221,7 @@ class Finder {
 
 		foreach(self::$searchHistory AS $k => $v)
 		{
-			$out .= '<li>'.str_replace($this->rh->project_dir, '', $v).'</li>';
+			$out .= '<li>'.str_replace(RequestHandler::getInstance()->project_dir, '', $v).'</li>';
 		}
 
 		$out .= '</ol>';
