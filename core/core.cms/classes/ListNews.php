@@ -10,18 +10,18 @@
  «аполнение полей на совести обработчика формы.
  */
 
-$this->useClass('ListSimple');
+Finder::useClass('ListSimple');
 
 class ListNews extends ListSimple
 {
 	protected $template = 'list_news.html';
 	protected $template_calendar = 'list_news.html:calendar';
-	
+
 	protected $pages; //объект постраничной рубрикации
 
 	protected $year = 0;
 	protected $month = 0;
-	
+
 	public function __construct( &$config )
 	{
 		//упор€дочиваем список
@@ -50,32 +50,32 @@ class ListNews extends ListSimple
 		//грузим признаки загруженности по мес€цам
 		$M = array();
 		$rs = $rh->db->execute("
-	    	SELECT DISTINCT month 
-	    	FROM ??".$this->config->get('table_name')." 
+	    	SELECT DISTINCT month
+	    	FROM ??".$this->config->get('table_name')."
 	    	WHERE year='".$this->year."' AND _state <= 1 ".($this->config->get('where') ? " AND ".$this->config->get('where') : "" )
 		);
 		while($row = $rh->db->getRow())
 		{
 			$M[ $row['month'] ] = true;
 		}
-		
+
 		$MONTHES_NOMINATIVE = array("","€нварь","февраль","март","апрель","май","июнь","июль","август","сент€брь","окт€брь","но€брь","декабрь");
-				
+
 		for($i=1;$i<=12;$i++)
 		{
 			$month_options .= "<option value='$i' ".( $i==$this->month ? "selected='true'" : '' ).' '.( $M[$i] ? "style='background-color:#eeeeee'" : '' ).">".$MONTHES_NOMINATIVE[$i]."</option>";
 		}
-		
+
 		$tpl->set( '_month_options', $month_options );
-		
+
 		//годы
 		$rs = $rh->db->execute("
-	    	SELECT DISTINCT year 
-	    	FROM ??".$this->config->get('table_name')." 
+	    	SELECT DISTINCT year
+	    	FROM ??".$this->config->get('table_name')."
 	    	WHERE _state <= 1 ".($this->config->get('where') ? " AND ".$this->config->get('where') : "" ) . "
 	    	ORDER BY year ASC
 	    ");
-		
+
 		$year_options = '';
 		if ($rs)
 		{
@@ -87,7 +87,7 @@ class ListNews extends ListSimple
 
 		$tpl->set( '_year_options', $year_options );
 		$tpl->Parse( $this->template_calendar, '__calendar' );
-		
+
 		//по этапу
 		parent::handle();
 	}
@@ -100,10 +100,10 @@ class ListNews extends ListSimple
 	protected function defineDate()
 	{
 		$rh =& $this->rh;
-		
+
 		$this->year = intval($this->rh->ri->get('year'));
 		$this->month = intval($this->rh->ri->get('month'));
-				
+
 		if (!$this->year || !$this->month)
 		{
 			$rs = $rh->db->queryOne("SELECT id, year, month FROM ??".$this->config->get('table_name')." WHERE _state<=1 ".($this->config->where ? " AND ".$this->config->where : "" )." ORDER BY inserted DESC");
@@ -118,7 +118,7 @@ class ListNews extends ListSimple
 				$this->month = date('m');
 			}
 		}
-		
+
 		$this->rh->ri->set('year', $this->year);
 		$this->rh->ri->set('month', $this->month);
 	}

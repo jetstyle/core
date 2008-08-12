@@ -4,7 +4,7 @@
  *
  */
 
-$this->UseClass("controllers/BasicPage");
+Finder::useClass("controllers/BasicPage");
 class DoPage extends BasicPage
 {
 	var $plugins = array(
@@ -45,8 +45,8 @@ class DoPage extends BasicPage
 	}
 
 	function handle_default($config)
-	{		
-		$this->rh->useClass("ModuleConstructor");
+	{
+		Finder::useClass("ModuleConstructor");
 		$moduleConstructor =& new ModuleConstructor($this->rh);
 		$moduleConstructor->initialize($config['module']);
 		$this->rh->tpl->set('module_body', $moduleConstructor->proceed($config['mode']));
@@ -54,19 +54,19 @@ class DoPage extends BasicPage
 		$this->config['title_short'] = $moduleConstructor->getTitle();
 		$this->rh->site_map_path = 'module';
 	}
-	
+
 	public function url_to($cls=NULL, $item=NULL)
-	{		
+	{
 		$result = '';
 		$cls = strtolower($cls);
-				
+
 		switch($cls)
-		{			
-			case 'module': 
+		{
+			case 'module':
 				$result = 'do/'.$item['href'];
 			break;
 		}
-		
+
 		if (strlen($result) > 0)
 		{
 			return $result;

@@ -1,6 +1,6 @@
 <?php
 
-class FormSimple 
+class FormSimple
 {
 	protected $rh; //ссылка на $rh
 	protected $config; //ссылка на объект класса ModuleConfig
@@ -8,28 +8,28 @@ class FormSimple
 	protected $model = null;
 	protected $item = null;
 	protected $postData = array();		// данные из формы
-	
+
 	//templates
 	protected $template = "form_simple.html";
 	protected $template_item = ''; //возьмём из конфига
 	protected $_template_item = 'form'; //basename шаблона формы, если брать его из конфига
 
 	protected $prefix;
-	
+
 	protected $idGetVar = 'id';
 	protected $idField = "id";
 	protected $id = 0; //id редактируемой записи
 
 	protected $supertagLimit = 20;
-	
+
 	protected $html;
-	
+
 	public function __construct( &$config )
 	{
 		//base modules binds
 		$this->config =& $config;
 		$this->rh = &$config->rh;
-		
+
 		if (is_array($this->config->has_one))
 		{
 			foreach($this->config->has_one AS $value)
@@ -38,19 +38,19 @@ class FormSimple
 			}
 		}
 		$config->SELECT_FIELDS[] = '_state';
-		
+
 		if (!$this->config->UPDATE_FIELDS)
 		{
 			$this->config->UPDATE_FIELDS = $this->config->SELECT_FIELDS;
 		}
-		
-		$this->rh->useModel('DBModel');
+
+		Finder::useModel('DBModel');
 		$this->model = new DBModel($this->rh);
 		$this->model->setTable($config->table_name);
 		$this->model->setFields($config->SELECT_FIELDS);
-		
+
 		$this->prefix = $config->moduleName.'_form_';
-		
+
 		//настройки шаблонов
 		$this->store_to = "form_".$config->getModuleName();
 
@@ -63,21 +63,21 @@ class FormSimple
 		{
 			$this->template_item = $config->_template_item ? $config->_template_item : $this->_template_item;
 		}
-		
+
 		if ($this->config->idField)
 		{
 			$this->idField = $this->config->idField;
 		}
-		
+
 		$this->id = intval($this->rh->ri->get( $this->idGetVar));
 	}
-	
+
 	public function handle()
 	{
 		//load data
 		$this->load();
 
-		//update data 
+		//update data
 		if ($this->needDelete())
 		{
 			$redirect = $this->delete();
@@ -91,7 +91,7 @@ class FormSimple
 			$this->readPost();
 			$redirect = $this->update();
 		}
-		
+
 		//редирект или выставление флага, что он нужен
 		if ($redirect)
 		{
@@ -161,7 +161,7 @@ class FormSimple
 		$this->rh->tpl->parse( $this->template_item, '___form');
 		return $this->rh->tpl->parse($this->template);
 	}
-	
+
 	protected function load()
 	{
 		if( !$this->loaded )
@@ -170,12 +170,12 @@ class FormSimple
 			{
 				$this->model->load($this->model->quoteField($this->idField).'='.$this->id);
 				list($this->item) = $this->model->getData();
-				
+
 				if (!$this->item[$this->idField])
 				{
 					$this->rh->redirect($this->rh->ri->hrefPlus('', array($this->idGetVar => '')));
 				}
-				
+
 				if ($this->item['_state']>0)
 				{
 					$this->rh->tpl->set("body_class", "class='state1'");
@@ -186,27 +186,27 @@ class FormSimple
 		}
 		return false;
 	}
-	
+
 	protected function renderFields()
 	{
-		if( $this->fieldsRendered ) 
+		if( $this->fieldsRendered )
 		{
 			return;
 		}
-		
+
 		$this->fieldsRendered = true;
 
 		$this->handleForeignFields();
 
 		$tpl =& $this->rh->tpl;
-		
+
 		/*
 			 $this->config->RENDER - каждая запись в нём:
 			 0 - имя поля
 			 1 - тип поля - checkbox | select | radiobutton
 			 2 - хэш значений - array( id => value )
 		 */
-		
+
 		if( is_array($this->config->RENDER) )
 		{
 			$N = count($this->config->RENDER);
@@ -239,11 +239,11 @@ class FormSimple
 		{
 			return;
 		}
-		
+
 		foreach($this->config->has_one AS $key => $value)
 		{
 			$value['fk']  = $value['fk'] ? $value['fk'] : "id";
-			
+
 			// пытаемся найти модель
 			try
 			{
@@ -251,33 +251,33 @@ class FormSimple
 			}
 			catch(Exception $e)
 			{
-				// 
+				//
 			}
-			
+
 			if ($model)
 			{
 				$model->setFields(array($value['fk'], 'title'));
 				$model->setOrder(array("title" => "ASC"));
 				$model->load();
-				
+
 				$data = array();
 				foreach($model AS $r)
 				{
 					$data[$r[$value['fk']]] = $r['title'];
 				}
-				
+
 				$this->config->RENDER[] = array($value['pk'], "select", $data);
 			}
 			// думаем, что $value['name'] это имя таблицы
 			else
-			{				
+			{
 				$result = $this->rh->db->execute("
 					SELECT ".$value['fk'].", title
 					FROM ".$this->rh->db_prefix.$value['name']."
 					WHERE _state = 0
 					ORDER BY ".($value['order'] ? $value['order'] : "title ASC")."
 				");
-				
+
 				if ($result)
 				{
 					$data = array();
@@ -285,13 +285,13 @@ class FormSimple
 					{
 						$data[$r[$value['fk']]] = $r['title'];
 					}
-					
+
 					$this->config->RENDER[] = array($value['fk'], "select", $data);
 				}
 			}
 		}
 	}
-	
+
 	protected function delete()
 	{
 		if ($this->item['_state'] <= 1 )
@@ -332,11 +332,11 @@ class FormSimple
 			}
 		}
 	}
-		
+
 	protected function update()
 	{
 		$this->filters();
-			
+
 		if ( $this->id )
 		{
 			$this->updateData($this->postData);
@@ -346,10 +346,10 @@ class FormSimple
 			$this->insert();
 			$this->rh->ri->set($this->idGetVar, $this->id);
 		}
-		
+
 		return true;
 	}
-	
+
 	protected function updateData($data)
 	{
 		$this->model->update( $data, $this->model->quoteFieldShort($this->idField).'='.DBModel::quote($this->id) );
@@ -364,17 +364,17 @@ class FormSimple
 	{
 		return $_POST[$this->prefix."delete"] ? true : false;
 	}
-	
+
 	protected function needRestore()
 	{
 		return $_POST[$this->prefix."restore"] ? true : false;
 	}
-	
+
 	protected function filters()
 	{
 		$rh =& $this->rh;
 		$tpl =& $rh->tpl;
-		
+
 		//filter data
 		if( is_array($this->config->UPDATE_FILTERS) )
 		{
@@ -436,8 +436,8 @@ class FormSimple
 				$field = $this->config->supertag;
 				$limit = $this->supertagLimit;
 			}
-			
-			$rh->useClass('Translit');
+
+			Finder::useClass('Translit');
 			$translit =& new Translit();
 			$this->postData['_supertag'] = $translit->supertag( $this->postData[$field], TR_NO_SLASHES, $limit );
 			if ($this->config->supertag_check)
@@ -452,7 +452,7 @@ class FormSimple
 			$this->UPDATE_FIELDS[] = '_supertag';
 		}
 		elseif ($this->config->allow_empty_supertag)
-		{	 
+		{
 			$this->UPDATE_FIELDS[] = '_supertag';
 		}
 	}
@@ -469,9 +469,9 @@ class FormSimple
 
 		$this->postData['_created'] = date('Y-m-d H:i:s');
 		$this->new_id = $this->id = $this->model->insert($this->postData);
-		
+
 		// update order
-		$this->updateData(array('_order' => $id));		
+		$this->updateData(array('_order' => $id));
 	}
 }
 

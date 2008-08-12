@@ -14,11 +14,11 @@ class CmsRequestHandler extends RequestHandler
 		$this->front_end->project_title = $this->project_title;
 		$this->project_title = 'CMS: '.$this->project_title;
 	}
-	
-	public function init() 
+
+	public function init()
 	{
 		$this->base_url .= $this->app_name.'/';
-		
+
 		if (!is_array($this->handlers_map))
 		{
 			$this->handlers_map = array();
@@ -28,10 +28,10 @@ class CmsRequestHandler extends RequestHandler
 		$this->addToHandlersMap("start", "StartPage");
 		$this->addToHandlersMap("do", "DoPage");
 		$this->addToHandlersMap("pack_modules", "ModulePackerPage");
-		
+
 		parent::init();
 	}
-	
+
 	protected function addToHandlersMap($url, $controller)
 	{
 		if (!isset($this->handlers_map[$url]))
@@ -39,10 +39,10 @@ class CmsRequestHandler extends RequestHandler
 			$this->handlers_map[$url] = $controller;
 		}
 	}
-	
+
 	function initPrincipal()
 	{
-		$this->useClass($this->pincipal_class);
+		Finder::useClass($this->pincipal_class);
 		$this->principal = &new $this->pincipal_class( $this );
 		if ($this->principal->acl_default)
 		{
@@ -56,15 +56,15 @@ class CmsRequestHandler extends RequestHandler
 	protected function initEnvironment()
 	{
 		$this->tpl->set('user', $this->principal->getUserData());
-		
+
 		$this->tpl->set('fe_/', $this->front_end->path_rel);
-		
+
 		parent::initEnvironment();
 	}
-	
+
 	protected function mapHandler($url)
 	{
-		$this->useClass("domains/PageDomain");
+		Finder::useClass("domains/PageDomain");
 		$this->pageDomain = new PageDomain($this);
 		$this->pageDomain->setDomains(array('Handler'));
 		if ($page = & $this->pageDomain->findPageByUrl($url))
@@ -73,13 +73,13 @@ class CmsRequestHandler extends RequestHandler
 			$this->data = $page->config;
 			$this->params = $page->params;
 			$this->path = $page->path;
-		} 
-		else 
+		}
+		else
 		{
 			$this->_404();
 		}
 	}
-	
+
 	public function deny()
 	{
 		die($this->tpl->Parse('access_denied.html'));

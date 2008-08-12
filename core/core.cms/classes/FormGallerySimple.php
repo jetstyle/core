@@ -4,7 +4,7 @@ class FormGallerySimple
 {
 	var $template_item = "form_gallery_simple.html";
 	var $template = "form_simple.html";
-	
+
 	function FormGallerySimple(& $config)
 	{
 		$this->rh = &$config->rh;
@@ -22,17 +22,17 @@ class FormGallerySimple
 		if (!$this->template_item)
 		{
 			$_template_item = $config->_template_item ? $config->_template_item : $this->_template_item;
-			$this->template_item = $this->rh->FindScript($config->handlers_type, $this->config->module_name . '/' . $_template_item, CURRENT_LEVEL, SEARCH_DOWN, true);
+			$this->template_item = Finder::findScript($config->handlers_type, $this->config->module_name . '/' . $_template_item, CURRENT_LEVEL, SEARCH_DOWN, true);
 			$this->full_path = true;
 		}
 		//StateSet
 		$this->state = & new StateSet($this->rh);
 		$this->state->Set($this->rh->state);
-		
-		$this->rh->UseClass('Upload');
+
+		Finder::useClass('Upload');
 		$this->upload = & new Upload($this->rh, $this->config->upload_dir ? $this->rh->front_end->file_dir . $this->config->upload_dir . "/" : $this->rh->front_end->file_dir);
 		$this->web_upload_dir = $this->rh->front_end->path_rel . 'files/' . ($this->config->upload_dir ? $this->config->upload_dir . "/" : "");
-		
+
 		$this->_FILES = &$this->config->_FILES;
 	}
 
@@ -65,7 +65,7 @@ class FormGallerySimple
 //			$opts = '';
 //			foreach($res AS $r)
 //			{
-//				$opts .= '<option value="'.$r['id'].'">'.$r['title'].'</option>'; 
+//				$opts .= '<option value="'.$r['id'].'">'.$r['title'].'</option>';
 //			}
 //			$this->rh->tpl->set('options_rubrics', $opts);
 //			$this->rh->tpl->parse($this->template_item.':rubrics', 'rubric_select');
@@ -81,10 +81,10 @@ class FormGallerySimple
 		if (!isset ($_POST['action']))
 		{
 			return;
-		}	
-		
+		}
+
 		$this->rubric_id = intval($_POST['gallery_id']) ? intval($_POST['gallery_id']) : intval($_POST['rubric']);
-		
+
 		switch ($_POST['action'])
 		{
 			case 'list' :
@@ -93,9 +93,9 @@ class FormGallerySimple
 				$out = array ();
 				if (is_array($res) && !empty ($res))
 				{
-					
+
 					$need_update = false;
-					
+
 					foreach ($res AS $r)
 					{
 						foreach($this->_FILES AS $v)
@@ -108,7 +108,7 @@ class FormGallerySimple
 									{
 										$A = getimagesize($file->name_full);
 										$out[$r['id']] = array(
-											'src' => $this->web_upload_dir . $file->name_short, 
+											'src' => $this->web_upload_dir . $file->name_short,
 											'height' => $A[1],
 											'width' => $A[0],
 //											'title' => iconv('cp1251', 'UTF-8', $r['title']),
@@ -125,7 +125,7 @@ class FormGallerySimple
 							}
 						}
 					}
-					
+
 					if($need_update)
 					{
 						if(method_exists($this, 'afterAction'))
@@ -133,7 +133,7 @@ class FormGallerySimple
 							$this->afterAction('delete_after_list');
 						}
 					}
-					
+
 				}
 				echo $this->json($out);
 				break;
@@ -147,22 +147,22 @@ class FormGallerySimple
 					{
 						$this->delFile($result_array, $id);
 					}
-					
+
 					$this->rh->db->Query("DELETE FROM " . $this->table_name . " WHERE id = " . $id);
 					echo '1';
 					$this->afterAction('delete');
-				} 
+				}
 				else
 				{
 					echo '0';
 				}
 
 			break;
-			
+
 			case 'updateorder':
-			
+
 				unset($_POST['action'], $_POST['rubric']);
-				
+
 				if(is_array($_POST))
 				{
 					foreach($_POST AS $id => $v)
@@ -171,7 +171,7 @@ class FormGallerySimple
 					}
 					$this->afterAction('updateorder');
 				}
-				
+
 				echo '1';
 			break;
 		}
@@ -188,7 +188,7 @@ class FormGallerySimple
 			if($file->name_full)
 			{
 				@unlink($file->name_full);
-			}	
+			}
 		}
 	}
 
@@ -196,11 +196,11 @@ class FormGallerySimple
 	{
 		$id = intval($this->rh->ri->get('picid'));
 		$rubric_id = intval($this->rh->ri->get($this->prefix . 'rubric'));
-		
-		$this->rubric_id = $rubric_id; 
-		
+
+		$this->rubric_id = $rubric_id;
+
 		$upload = &$this->upload;
-		
+
 		foreach($this->_FILES AS $input_field => $result_array)
 		{
 			if (is_uploaded_file($_FILES[$input_field]['tmp_name']))
@@ -215,9 +215,9 @@ class FormGallerySimple
 				{
 					$new_id = $id;
 				}
-				
+
 				$broken = false;
-				
+
 				foreach($result_array AS $r)
 				{
 					if($id)
@@ -228,7 +228,7 @@ class FormGallerySimple
 							@unlink($file->name_full);
 						}
 					}
-					
+
 					if ($r['exts'])
 					{
 						$upload->ALLOW = $r['exts'];
@@ -237,7 +237,7 @@ class FormGallerySimple
 					{
 						$upload->ALLOW = array_intersect($upload->ALLOW, $this->GRAPHICS);
 					}
-					
+
 					$file = $upload->UploadFile($input_field, str_replace('*', $new_id, $r['filename']), false, $this->buildParams($r));
 					if(!$file->name_full)
 					{
@@ -254,7 +254,7 @@ class FormGallerySimple
 						);
 					}
 				}
-				
+
 				if($broken)
 				{
 					$this->rh->db->Query("DELETE FROM " . $this->table_name . " WHERE id = " . $new_id);
@@ -290,13 +290,13 @@ class FormGallerySimple
 				'size' => $d['size'],
 				'filesize' => $d['filesize'],
 				'crop' => $d['crop'],
-				'base' => $d['base'],				
+				'base' => $d['base'],
 			);
 	}
 
 	function afterAction($action = '')
 	{
-		
+
 	}
 
 }

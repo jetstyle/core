@@ -4,15 +4,15 @@
  *
  */
 
-$this->UseClass("controllers/BasicPage");
+Finder::useClass("controllers/BasicPage");
 class HomePage extends BasicPage
 {
 	var $plugins = array();
-	
+
 	var $params_map = array(
 		array('default', array(NULL)),
 	);
-	
+
 	function handle_default($config)
 	{
 		if ($this->rh->principal->isAuth())

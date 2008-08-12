@@ -463,9 +463,9 @@ class TreeControl
 		$rh =& $this->rh;
 		$db =& $rh->db;
 
-		$rh->useClass('Translit');
+		Finder::useClass('Translit');
 		$translit =& new Translit();
-		
+
 		$node = array();
 
 		$node['title'] = iconv("UTF-8", "CP1251", $_REQUEST['newtitle']);

@@ -1,5 +1,5 @@
 <?php
-$this->useClass('controllers/Plugin');
+Finder::useClass('controllers/Plugin');
 
 class ToolbarPlugin extends RenderablePlugin
 {
@@ -13,7 +13,7 @@ class ToolbarPlugin extends RenderablePlugin
 
 		if (!$this->rh->ri->get('hide_toolbar'))
  		{
- 			$this->rh->useClass('Toolbar');
+ 			Finder::useClass('Toolbar');
 			$toolbar = new Toolbar($this->rh);
 			$this->data = $toolbar->getData();
 			$this->goTo = $toolbar->getGoToList();

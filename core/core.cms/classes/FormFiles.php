@@ -1,13 +1,13 @@
 <?php
 
-$this->useClass('FormSimple');
+Finder::useClass('FormSimple');
 
-class FormFiles extends FormSimple  
+class FormFiles extends FormSimple
 {
 	protected $upload;
 	protected $max_file_size = 55242880; //максимальный размер файла для загрузки
 	protected $template_files = 'formfiles.html';
-	
+
 	//До каких размеров картинки показывать просто, а больше - через превью и попап?
 	var $view_width_max = 300;
 	var $view_height_max = 300;
@@ -79,15 +79,15 @@ class FormFiles extends FormSimple
 						{
 							$upload->ALLOW = array_intersect($upload->ALLOW, $upload->GRAPHICS);
 						}
-												
+
 						$file = $upload->getFile(str_replace('*', $this->id, $vv['filename']));
-												
+
 						if($file->name_full && in_array($file->ext, $upload->GRAPHICS ) )
 						{
 							$r = array(
 								'src' => $this->rh->front_end->path_rel.'files/'.($this->config->upload_dir ? $this->config->upload_dir."/" : "").$file->name_short,
 							);
-							
+
 							if($vv['link_to'])
 							{
 								foreach($this->config->_FILES[$vv['link_to']] AS $_vv)
@@ -108,7 +108,7 @@ class FormFiles extends FormSimple
 									}
 								}
 							}
-							
+
 							if(!$this->item[$field_file])
 							{
 								$this->rh->tpl->setRef('file', $r);
@@ -123,9 +123,9 @@ class FormFiles extends FormSimple
 								'src'      => $this->rh->front_end->path_rel.'files/'.($this->config->upload_dir ? $this->config->upload_dir."/" : "").$file->name_short,
 								'name_short' =>  $file->name_short,
 							);
-							
+
 							$this->rh->tpl->setRef('file', $r);
-													
+
 							if($file->ext == 'flv')
 							{
 								$this->item[$field_file] = $this->rh->tpl->parse($this->template_files.':file_video');
@@ -142,7 +142,7 @@ class FormFiles extends FormSimple
 							{
 								$this->item[$field_file] = $this->rh->tpl->parse($this->template_files.':file');
 							}
-							
+
                             $this->item[$field_file."_down"] = $this->item[$field_file];
 						}
                         $this->file = $file;
@@ -152,7 +152,7 @@ class FormFiles extends FormSimple
 				{
 					$exts = $vv['exts'];
 				}
-				
+
 				$ar = $this->_getExts($exts);
 				$this->item[$field_file."_exts"] = $ar['all'];
 				$this->item[$field_file."_exts_graphics"] = $ar['graphics'];
@@ -306,14 +306,14 @@ class FormFiles extends FormSimple
 					{
 						$upload->ALLOW = array_intersect($upload->ALLOW, $upload->GRAPHICS);
 					}
-					
+
 					//нужно сохранить превью?
 					if ($me_too = $this->_shouldTakeFromIfEmpty($field_file))
 					{
 						$vvv = $this->take_to;
 						$upload->UploadFile($this->prefix.$field_file, str_replace('*', $this->id, $vvv['filename']), false, $this->buildParams($vvv));
 					}
-					
+
 					$this->current_file = $upload->UploadFile($this->prefix.$field_file, str_replace('*', $this->id, $vv['filename']), false, $this->buildParams($vv));
 				}
 			}
@@ -327,7 +327,7 @@ class FormFiles extends FormSimple
 				'filesize' => $d['filesize'],
 				'crop' => $d['crop'],
 				'base' => $d['base'],
-				'to_flv' => $d['convert_to_flv'],			
+				'to_flv' => $d['convert_to_flv'],
 			);
 	}
 

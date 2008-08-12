@@ -1,5 +1,5 @@
 <?php
-$this->useClass('FormFiles');
+Finder::useClass('FormFiles');
 
 class FormIframe extends FormFiles
 {
@@ -23,12 +23,12 @@ class FormIframe extends FormFiles
 					$tpl->set("_iframe_number", $k);
 					$this->_parseIframe($href_for_iframe);
 				}
-			} 
+			}
 			else
 			{
 				$this->_parseIframe($this->config->href_for_iframe);
 			}
-		} 
+		}
 		else
 		{
 			$tpl->set('_iframe', '<br />');

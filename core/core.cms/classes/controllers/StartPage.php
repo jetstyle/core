@@ -4,16 +4,16 @@
  *
  */
 
-$this->UseClass("controllers/BasicPage");
+Finder::useClass("controllers/BasicPage");
 class StartPage extends BasicPage
 {
 	var $plugins = array(
 		array('ToolbarPlugin', array(
 			'__aspect' => 'Toolbar',
-			'store_to' => 'toolbar', 
+			'store_to' => 'toolbar',
 		)),
 	);
-	
+
 	var $params_map = array(
 		array('default', array(NULL)),
 	);
@@ -34,7 +34,7 @@ class StartPage extends BasicPage
 		{
 			return $this->rh->deny();
 		}
-		
+
 		$this->rh->site_map_path = "start";
 	}
 }

@@ -1,5 +1,5 @@
 <?php
-$this->UseClass("controllers/BasicPage");
+Finder::useClass("controllers/BasicPage");
 class LoginPage extends BasicPage
 {
 	var $plugins = array();
