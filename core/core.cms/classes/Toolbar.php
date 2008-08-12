@@ -7,13 +7,12 @@
 
  class Toolbar
  {
- 	protected $rh;
  	protected $items = array('main' => array(), 'submenu' => array());
  	protected $goToList;
 
- 	public function __construct(&$rh)
+ 	public function __construct()
  	{
- 		$this->rh = &$rh;
+ 		$this->rh = &RequestHandler::getInstance();
  	}
 
  	public function getData()
@@ -22,7 +21,8 @@
  		return $this->items;
  	}
 
- 	public function getGoToList() {    	$this->loadGoTo();
+ 	public function getGoToList() {
+    	$this->loadGoTo();
     	return $this->goToList;
  	}
 
@@ -34,7 +34,8 @@
  		$this->constructResult($this->getLoadResult());
  	}
 
- 	protected function loadGoTo() {    	$this->goToList = $this->rh->db->query("" .
+ 	protected function loadGoTo() {
+    	$this->goToList = $this->rh->db->query("" .
  			"SELECT title_pre AS title, _path AS path " .
  			"FROM ??content " .
  			"WHERE mode != '' " .
@@ -54,7 +55,8 @@
 
  	protected function constructResult($result)
  	{
- 		$moduleName = $this->rh->params[0];
+ 		$params = $this->rh->page->getParams();
+		$moduleName = $params[0];
 
  		while($r = $this->rh->db->getRow($result))
  		{

@@ -61,7 +61,7 @@ class ListSimple
 	{
 		if( $this->updateListStruct() )
 		{
-			$this->rh->redirect( RequestInfo::hrefPlus('', array()));
+			$this->rh->redirect( RequestInfo::hrefChange('', array()));
 		}
 
 		$tpl =& $this->rh->tpl;
@@ -116,7 +116,7 @@ class ListSimple
 
 	public function _href(&$list)
 	{
-		return RequestInfo::hrefPlus('', array($this->idGetVar => $list->ITEMS[ $list->loop_index ][$this->idField]));
+		return RequestInfo::hrefChange('', array($this->idGetVar => $list->ITEMS[ $list->loop_index ][$this->idField]));
 	}
 
 	public function _title(&$list)
@@ -152,7 +152,7 @@ class ListSimple
 		if (!$this->config->HIDE_CONTROLS['show_trash'])
 		{
 			$show_trash = $_GET['_show_trash'];
-			$this->rh->tpl->set( '_show_trash_href', RequestInfo::hrefPlus('', array('_show_trash' => !$show_trash)));
+			$this->rh->tpl->set( '_show_trash_href', RequestInfo::hrefChange('', array('_show_trash' => !$show_trash)));
 			$this->rh->tpl->parse( $show_trash ? $this->template_trash_hide : $this->template_trash_show, '__trash_switch' );
 		}
 	}
@@ -162,7 +162,7 @@ class ListSimple
 		if (!$this->config->HIDE_CONTROLS['add_new'])
 		{
 			//ссылка на новое
-			$this->rh->tpl->set( '_add_new_href', RequestInfo::hrefPlus('', array($this->idGetVar => '', '_new' => 1)));
+			$this->rh->tpl->set( '_add_new_href', RequestInfo::hrefChange('', array($this->idGetVar => '', '_new' => 1)));
 			$this->rh->tpl->set( '_add_new_title', $this->config->get('add_new_title') ? $this->config->get('add_new_title') : 'создать новый элемент' );
 			$this->rh->tpl->Parse( $this->template_new, '__add_new' );
 		}

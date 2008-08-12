@@ -17,7 +17,7 @@ class ListComplete extends ListSimple
 		//возможно, операции с формой
 		if ($this->updateForm())
 		{
-			$this->rh->redirect(RequestInfo::hrefPlus('', array('rnd' => mt_rand(1, 255))));
+			$this->rh->redirect(RequestInfo::hrefChange('', array('rnd' => mt_rand(1, 255))));
 		}
 
 		//рендерим форму
