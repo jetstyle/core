@@ -107,8 +107,8 @@ class RequestInfo
 		// 0. заполнить параметры для хрефов
 		$this->_host = preg_replace('/:.*/','',$_SERVER["HTTP_HOST"]);
 		$this->_host_prot = "http://".$_SERVER["HTTP_HOST"];
-		$this->_base_full = "http://".$this->_host.$this->rh->base_url;
-		$this->_base_url  = $this->rh->base_url;
+		$this->_base_full = "http://".$this->_host.Config::get('base_url');
+		$this->_base_url  = Config::get('base_url');
 
 	}
 
