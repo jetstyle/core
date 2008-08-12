@@ -83,6 +83,11 @@ abstract class Controller implements ArrayAccess
 		$this->params = $params;
 	}
 	
+	public function getParams()
+	{
+		return $this->params;
+	}
+	
 	public function setData($data)
 	{
 		$this->data = $data;

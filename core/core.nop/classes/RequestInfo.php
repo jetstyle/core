@@ -93,6 +93,11 @@ class RequestInfo
 		return self::$data[$key];
 	}
 
+	static public function set($key, $value)
+	{
+		self::$data[$key] = $value;
+	}
+
 	/**
 	 * Добавление / изменение / удаление переменных из УРЛа
 	 *
