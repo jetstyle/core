@@ -221,7 +221,7 @@ class Finder {
 
 		foreach(self::$searchHistory AS $k => $v)
 		{
-			$out .= '<li>'.str_replace(RequestHandler::getInstance()->project_dir, '', $v).'</li>';
+			$out .= '<li>'.str_replace(Config::get('project_dir'), '', $v).'</li>';
 		}
 
 		$out .= '</ol>';
@@ -243,18 +243,17 @@ class Finder {
 		self::useScript("classes/models", $name, $level, $dr, $ext, $withSubDirs, $hideExc);
 	}
 
-	public static function useLib($library_name, $file_name = "") {
-		// library is near core, library have no levels
-		//$direction = 0;
-		// lucky@npj: фиг вам -- где угодно. сначала в приложении, затем в core
+	public static function useLib($libraryName, $fileName = "") 
+	{
 		$direction = 1;
 		$level = 0;
-		// usually library have one file to link itself
-		if ($file_name == "")
-			$file_name = $library_name;
-		$ext = "php";
 
-		Finder::useScript(self::$lib_dir, $library_name . "/" . $file_name, $level, $direction, $ext);
+		if ($fileName == "")
+		{
+			$fileName = $libraryName;
+		}
+
+		Finder::useScript('libs', $libraryName . "/" . $fileName, 1, 0, 'php');
 	}
 
 	/*public static function useModule($name, $type = NULL) {
@@ -265,14 +264,16 @@ class Finder {
 		return $o->data;
 	}*/
 
-	public static function prependDir($dir) {		array_unshift(self::$DIRS,$dir);
+	public static function prependDir($dir) {
+		array_unshift(self::$DIRS,$dir);
 	}
 
 	public static function appendDir($dir) {
 		array_push(self::$DIRS,$dir);
 	}
 
-	public static function setLibDir($dir) {		self::$lib_dir = $dir;
+	public static function setLibDir($dir) {
+		self::$lib_dir = $dir;
 	}
 }
 ?>
