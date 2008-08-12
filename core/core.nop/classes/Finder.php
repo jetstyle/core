@@ -271,9 +271,5 @@ class Finder {
 	public static function appendDir($dir) {
 		array_push(self::$DIRS,$dir);
 	}
-
-	public static function setLibDir($dir) {
-		self::$lib_dir = $dir;
-	}
 }
 ?>

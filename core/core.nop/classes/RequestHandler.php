@@ -201,7 +201,6 @@ class RequestHandler {
 		}
 
 		Finder::setDirs($this->DIRS);
-		Finder::setLibDir($this->lib_dir);
 	}
 
 	public function init()
