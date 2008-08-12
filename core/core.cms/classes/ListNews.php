@@ -101,8 +101,8 @@ class ListNews extends ListSimple
 	{
 		$rh =& $this->rh;
 
-		$this->year = intval($this->rh->ri->get('year'));
-		$this->month = intval($this->rh->ri->get('month'));
+		$this->year = intval(RequestInfo::get('year'));
+		$this->month = intval(RequestInfo::get('month'));
 
 		if (!$this->year || !$this->month)
 		{
@@ -119,8 +119,8 @@ class ListNews extends ListSimple
 			}
 		}
 
-		$this->rh->ri->set('year', $this->year);
-		$this->rh->ri->set('month', $this->month);
+		RequestInfo::set('year', $this->year);
+		RequestInfo::set('month', $this->month);
 	}
 }
 

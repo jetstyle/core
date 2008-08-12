@@ -52,7 +52,7 @@ class ListSimple
 		$this->config->SELECT_FIELDS[] = '_state';
 
 		$this->storeTo = "list_".$config->getModuleName();
-		$this->id = intval($this->rh->ri->get($this->idGetVar));
+		$this->id = intval(RequestInfo::get($this->idGetVar));
 
 		$this->prefix = $config->moduleName.'_list_';
 	}
@@ -61,7 +61,7 @@ class ListSimple
 	{
 		if( $this->updateListStruct() )
 		{
-			$this->rh->redirect( $this->rh->ri->hrefPlus('', array()));
+			$this->rh->redirect( RequestInfo::hrefPlus('', array()));
 		}
 
 		$tpl =& $this->rh->tpl;
@@ -116,7 +116,7 @@ class ListSimple
 
 	public function _href(&$list)
 	{
-		return $this->rh->ri->hrefPlus('', array($this->idGetVar => $list->ITEMS[ $list->loop_index ][$this->idField]));
+		return RequestInfo::hrefPlus('', array($this->idGetVar => $list->ITEMS[ $list->loop_index ][$this->idField]));
 	}
 
 	public function _title(&$list)
@@ -152,7 +152,7 @@ class ListSimple
 		if (!$this->config->HIDE_CONTROLS['show_trash'])
 		{
 			$show_trash = $_GET['_show_trash'];
-			$this->rh->tpl->set( '_show_trash_href', $this->rh->ri->hrefPlus('', array('_show_trash' => !$show_trash)));
+			$this->rh->tpl->set( '_show_trash_href', RequestInfo::hrefPlus('', array('_show_trash' => !$show_trash)));
 			$this->rh->tpl->parse( $show_trash ? $this->template_trash_hide : $this->template_trash_show, '__trash_switch' );
 		}
 	}
@@ -162,7 +162,7 @@ class ListSimple
 		if (!$this->config->HIDE_CONTROLS['add_new'])
 		{
 			//ссылка на новое
-			$this->rh->tpl->set( '_add_new_href', $this->rh->ri->hrefPlus('', array($this->idGetVar => '', '_new' => 1)));
+			$this->rh->tpl->set( '_add_new_href', RequestInfo::hrefPlus('', array($this->idGetVar => '', '_new' => 1)));
 			$this->rh->tpl->set( '_add_new_title', $this->config->get('add_new_title') ? $this->config->get('add_new_title') : 'создать новый элемент' );
 			$this->rh->tpl->Parse( $this->template_new, '__add_new' );
 		}
@@ -221,7 +221,7 @@ class ListSimple
 	{
 		Finder::useClass('Pager');
 		$this->pager = new Pager($this->rh);
-		$this->pager->setup(intval($this->rh->ri->get($this->pageVar)), $total, $this->perPage, $this->frameSize);
+		$this->pager->setup(intval(RequestInfo::get($this->pageVar)), $total, $this->perPage, $this->frameSize);
 	}
 
 	protected function renderPager()

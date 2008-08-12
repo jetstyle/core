@@ -49,7 +49,7 @@ class TreeControl
 
 		$this->rh = &$config->rh;
 
-		$this->id = intval($this->rh->ri->get($this->idGetVar));
+		$this->id = intval(RequestInfo::get($this->idGetVar));
 	}
 
 	public function handle()
@@ -104,14 +104,14 @@ class TreeControl
 					$rootId = $this->getRootId();
 					if ($rootId && !defined('UNIT_TEST'))
 					{
-						$this->rh->redirect($this->rh->ri->hrefPlus('', array($this->idGetVar => $rootId)));
+						$this->rh->redirect(RequestInfo::hrefChange('', array($this->idGetVar => $rootId)));
 					}
 				}
 				$show_trash = $_GET['_show_trash'];
 
-				$this->rh->tpl->set('_url_xml', $this->rh->ri->hrefPlus("do/".$this->config->moduleName."/tree", array('action' => 'xml')));
-				$this->rh->tpl->set('_url_connect', $this->rh->ri->hrefPlus("do/".$this->config->moduleName."/tree", array('action' => 'update')));
-				$url = $this->rh->ri->hrefPlus('', array('id' => ''));
+				$this->rh->tpl->set('_url_xml', RequestInfo::hrefChange("do/".$this->config->moduleName."/tree", array('action' => 'xml')));
+				$this->rh->tpl->set('_url_connect', RequestInfo::hrefChange("do/".$this->config->moduleName."/tree", array('action' => 'update')));
+				$url = RequestInfo::hrefChange('', array('id' => ''));
 				$pos = strpos($url, '?');
 				if ($pos !== false)
 				{
@@ -147,7 +147,7 @@ class TreeControl
 
 				$this->rh->tpl->set('_tree_allow_drop_to_root', $this->config->allowDropToRoot);
 				$this->rh->tpl->set('_tree_autoloading', $this->config->ajaxAutoLoading);
-				$this->rh->tpl->set('_tree_autoloading_url', $this->rh->ri->hrefPlus("do/".$this->config->moduleName."/tree", array('action' => 'xml', $this->idGetVar => '', 'autoload' => '1')));
+				$this->rh->tpl->set('_tree_autoloading_url', RequestInfo::hrefChange("do/".$this->config->moduleName."/tree", array('action' => 'xml', $this->idGetVar => '', 'autoload' => '1')));
 
 			break;
 		}
@@ -199,7 +199,7 @@ class TreeControl
 		if (!$this->config->HIDE_CONTROLS['show_trash'])
 		{
 			$show_trash = $_GET['_show_trash'];
-			$this->rh->tpl->set( '_show_trash_href', $this->rh->ri->hrefPlus('', array('_show_trash' => !$show_trash)));
+			$this->rh->tpl->set( '_show_trash_href', RequestInfo::hrefChange('', array('_show_trash' => !$show_trash)));
 			$this->rh->tpl->parse( $show_trash ? $this->template_trash_hide : $this->template_trash_show, '__trash_switch' );
 		}
 	}
@@ -403,9 +403,11 @@ class TreeControl
 		return '0';
 	}
 
-	public function updateTreePathes(&$rh,$tableName,$id,$allow_empty_supertag = false) {		//$this->config->table_name replaced with $tableName
+	public function updateTreePathes(&$rh,$tableName,$id,$allow_empty_supertag = false) {
+		//$this->config->table_name replaced with $tableName
 		//$this->id replaced with $id
-		//$this->config->allow_empty_supertag replaced with allow_empty_supertag    	//$parent_id = isset($parent_id) ? $parent_id : 1;
+		//$this->config->allow_empty_supertag replaced with allow_empty_supertag
+    	//$parent_id = isset($parent_id) ? $parent_id : 1;
 		$root = $rh->db->queryOne("SELECT id,_left,_right,_path,_parent FROM ??".$tableName." WHERE id='".$id."'");
 		if ($root) {
 			//грузим поддерево

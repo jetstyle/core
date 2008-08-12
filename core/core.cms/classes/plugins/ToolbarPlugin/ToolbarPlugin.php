@@ -1,17 +1,17 @@
 <?php
-Finder::useClass('controllers/Plugin');
+Finder::useClass('Plugin');
 
-class ToolbarPlugin extends RenderablePlugin
+class ToolbarPlugin extends Plugin
 {
 	var $config_vars = array (
 		'store_to',
 	);
 
-	function initialize(& $ctx, $config = NULL)
+	function initialize($config = NULL)
 	{
-		parent :: initialize($ctx, $config);
+		parent :: initialize($config);
 
-		if (!$this->rh->ri->get('hide_toolbar'))
+		if (!RequestInfo::get('hide_toolbar'))
  		{
  			Finder::useClass('Toolbar');
 			$toolbar = new Toolbar($this->rh);
@@ -20,11 +20,12 @@ class ToolbarPlugin extends RenderablePlugin
  		}
 	}
 
-	function rend(& $ctx)
+	function rend()
 	{
 		$this->rh->tpl->set($this->store_to, $this->data);
 		$this->rh->tpl->set('goto', $this->goTo);
-		$this->rh->tpl->set('front_end_url',$this->rh->front_end->path_rel);
+		
+		// $this->rh->tpl->set('front_end_url',$this->rh->front_end->path_rel);
 	}
 }
 ?>

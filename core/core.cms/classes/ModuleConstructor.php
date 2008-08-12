@@ -9,9 +9,9 @@ class ModuleConstructor
 	protected $config;
 	protected $handlersType = 'modules';
 
-	public function __construct(&$rh)
+	public function __construct()
 	{
-		$this->rh =& $rh;
+		$this->rh = &RequestHandler::getInstance();
 	}
 
 	public function initialize($moduleName)

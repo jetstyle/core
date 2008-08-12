@@ -69,7 +69,7 @@ class FormSimple
 			$this->idField = $this->config->idField;
 		}
 
-		$this->id = intval($this->rh->ri->get( $this->idGetVar));
+		$this->id = intval(RequestInfo::get( $this->idGetVar));
 	}
 
 	public function handle()
@@ -95,7 +95,7 @@ class FormSimple
 		//редирект или выставление флага, что он нужен
 		if ($redirect)
 		{
-			$this->_redirect = $this->rh->ri->hrefPlus('', array('rnd' => mt_rand(1,255)));
+			$this->_redirect = RequestInfo::hrefChange('', array('rnd' => mt_rand(1,255)));
 			if ($this->stop_redirect)
 			{
 				$this->redirect = $this->_redirect;
@@ -173,7 +173,7 @@ class FormSimple
 
 				if (!$this->item[$this->idField])
 				{
-					$this->rh->redirect($this->rh->ri->hrefPlus('', array($this->idGetVar => '')));
+					$this->rh->redirect(RequestInfo::hrefChange('', array($this->idGetVar => '')));
 				}
 
 				if ($this->item['_state']>0)
@@ -303,7 +303,7 @@ class FormSimple
 		else
 		{
 			$this->model->delete('{'.$this->idField.'}='.$this->id);
-			$this->rh->ri->free($this->idGetVar);
+			RequestInfo::free($this->idGetVar);
 			return 2;
 		}
 	}
@@ -327,7 +327,7 @@ class FormSimple
 						$_POST[$this->prefix.$fieldName] = '';
 					}
 					$this->postData[$fieldName] = $_POST[$this->prefix.$fieldName];
-					$this->rh->ri->free($this->prefix.$fieldName);
+					RequestInfo::free($this->prefix.$fieldName);
 				}
 			}
 		}
@@ -344,7 +344,7 @@ class FormSimple
 		elseif (!$this->config->dont_insert)
 		{
 			$this->insert();
-			$this->rh->ri->set($this->idGetVar, $this->id);
+			RequestInfo::set($this->idGetVar, $this->id);
 		}
 
 		return true;

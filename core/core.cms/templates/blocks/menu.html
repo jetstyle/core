@@ -72,11 +72,11 @@ function switchMenu(el)
 <br class="clearer">
 
 {{:item *selected}}
-	<td class="selected-" nowrap="nowrap"><a href="{{!href_to 'DoPage/module' *}}" id="menu_selected_{{*id}}" item_id="{{*id}}" onclick="return switchMenu(this);">{{*title}}</a></td>
+	<td class="selected-" nowrap="nowrap"><a href="{{!href_to 'Do/module' *}}" id="menu_selected_{{*id}}" item_id="{{*id}}" onclick="return switchMenu(this);">{{*title}}</a></td>
 {{/:item}}
 
 {{:item}}
-	<td class="item-" nowrap="nowrap"><a href="{{!href_to 'DoPage/module' *}}" item_id="{{*id}}" onclick="return switchMenu(this);">{{*title}}</a></td>
+	<td class="item-" nowrap="nowrap"><a href="{{!href_to 'Do/module' *}}" item_id="{{*id}}" onclick="return switchMenu(this);">{{*title}}</a></td>
 {{/:item}}
 
 {{:item_sep}}
@@ -88,7 +88,7 @@ function switchMenu(el)
 {{/:subitem_item}}
 
 {{:subitem_item}}
-	<a href="{{!href_to 'DoPage/module' *}}">{{*title}}</a>
+	<a href="{{!href_to 'Do/module' *}}">{{*title}}</a>
 {{/:subitem_item}}
 
 {{:subitem_item_sep}}&nbsp;|&nbsp;{{/:subitem_item_sep}}

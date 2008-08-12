@@ -17,7 +17,7 @@ class ListComplete extends ListSimple
 		//возможно, операции с формой
 		if ($this->updateForm())
 		{
-			$this->rh->redirect($this->rh->ri->hrefPlus('', array('rnd' => mt_rand(1, 255))));
+			$this->rh->redirect(RequestInfo::hrefPlus('', array('rnd' => mt_rand(1, 255))));
 		}
 
 		//рендерим форму
@@ -67,7 +67,7 @@ class ListComplete extends ListSimple
 		if ($_POST[$this->prefix . 'delete'])
 		{
 			$this->_delete();
-			$this->rh->ri->free($this->idGetVar);
+			RequestInfo::free($this->idGetVar);
 			return true;
 		}
 		//update
@@ -82,7 +82,7 @@ class ListComplete extends ListSimple
 			else
 			{
 				$this->insert();
-				$this->rh->ri->set($this->idGetVar, $this->id);
+				RequestInfo::set($this->idGetVar, $this->id);
 			}
 			return true;
 		}

@@ -4,23 +4,23 @@
  *
  */
 
-Finder::useClass("controllers/BasicPage");
-class DoPage extends BasicPage
+Finder::useClass("controllers/Controller");
+class DoController extends Controller
 {
-	var $plugins = array(
+ 	protected $plugins = array(
 		array('ToolbarPlugin', array(
 			'__aspect' => 'Toolbar',
 			'store_to' => 'toolbar',
 		)),
 	);
 
-	var $params_map = array(
+	protected $params_map = array(
 		array('default', array(
-			'module' => '^\w+$',
-			'mode' => '^\w+$',
+			'module' => '\w+',
+			'mode' => '\w+',
 		)),
 		array('default', array(
-			'module' => '^\w+$',
+			'module' => '\w+',
 		)),
 		array('start', array(NULL)),
 	);
@@ -29,10 +29,10 @@ class DoPage extends BasicPage
 	{
 		if (!$this->rh->principal->isAuth())
 		{
-			$redirectTo = $this->rh->base_url.'login'; //login page
+			$redirectTo = RequestInfo::$baseUrl.'login'; //login page
             $redirectTo .= '?retpath='; //path to return there
             $redirectTo .= $_SERVER['HTTPS'] ? 'https://' : 'http://';
-            $redirectTo .= $_SERVER['SERVER_NAME'].$this->rh->ri->hrefPlus('');
+            $redirectTo .= $_SERVER['SERVER_NAME'].RequestInfo::hrefChange('');
 			$this->rh->redirect($redirectTo);
 		}
 
@@ -41,18 +41,18 @@ class DoPage extends BasicPage
 
 	function handle_start($config)
 	{
-		$this->rh->redirect($this->rh->base_url.'start');
+		$this->rh->redirect(RequestInfo::$baseUrl.'start');
 	}
 
 	function handle_default($config)
 	{
 		Finder::useClass("ModuleConstructor");
-		$moduleConstructor =& new ModuleConstructor($this->rh);
+		$moduleConstructor =& new ModuleConstructor();
 		$moduleConstructor->initialize($config['module']);
 		$this->rh->tpl->set('module_body', $moduleConstructor->proceed($config['mode']));
 
 		$this->config['title_short'] = $moduleConstructor->getTitle();
-		$this->rh->site_map_path = 'module';
+		$this->siteMap = 'module';
 	}
 
 	public function url_to($cls=NULL, $item=NULL)
