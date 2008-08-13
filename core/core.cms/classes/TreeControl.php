@@ -398,14 +398,14 @@ class TreeControl
 			$this->load();
 			$this->restore();
 
-			TreeControl::updateTreePathes($this->rh, $this->config->table_name, $this->id, $this->config->allow_empty_supertag);
+			TreeControl::updateTreePathes($this->config->table_name, $this->id, $this->config->allow_empty_supertag);
 
 			return '1';
 		}
 		return '0';
 	}
 
-	public function updateTreePathes(&$rh,$tableName,$id,$allow_empty_supertag = false) {
+	public function updateTreePathes($tableName, $id, $allow_empty_supertag = false) {
 		//$this->config->table_name replaced with $tableName
 		//$this->id replaced with $id
 		//$this->config->allow_empty_supertag replaced with allow_empty_supertag
