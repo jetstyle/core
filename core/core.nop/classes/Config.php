@@ -49,6 +49,11 @@ final class Config
 		self::$data[$key] = $value;
 	}
 	
+	public static function append($key, $value)
+	{
+		self::$data[$key] .= $value;
+	}
+	
 	/**
 	 * Load data from source (file, array, db).
 	 * Source determined automatically

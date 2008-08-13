@@ -126,10 +126,6 @@ class RequestHandler
 		{
 			Finder::useClass("DBAL");
 			$this->db = & DBAL :: getInstance();
-			if (Config::get('db_set_encoding')) 
-			{
-				$this->db->query("SET NAMES " . Config::get('db_set_encoding'));
-			}
 		}
 		Debug :: trace("RH: created DBAL", "db", "db");
 	}
@@ -149,8 +145,7 @@ class RequestHandler
 		{
 			Debug :: mark("tpl");
 			Finder::useClass("TemplateEngine");
-			$this->tpl = & new TemplateEngine($this);
-//			$this->tpl->set('/', $this->base_url);
+			$this->tpl = &TemplateEngine::getInstance();
 			Debug :: trace("RH: created TPL", "tpl", "tpl");
 		}
 	}

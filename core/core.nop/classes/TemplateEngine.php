@@ -14,6 +14,8 @@ define ("TPL_COMPILE_ALWAYS", 2);
 
 class TemplateEngine
 {
+	private static $instance = null;
+	
 	public $domain = array();
 
 	protected $compiler = null;
@@ -55,7 +57,7 @@ class TemplateEngine
 
 	// ############################################## //
 
-	public function __construct()
+	private function __construct()
 	{
 		if (!$this->rootHref = Config::get('rootHref'))
 		{
@@ -67,6 +69,16 @@ class TemplateEngine
 		$this->skin( Config::get('tpl_skin') );
 	}
 
+	public static function &getInstance()
+	{
+		if (null === self::$instance)
+		{
+			self::$instance = new self();
+		}
+		
+		return self::$instance;
+	}
+	
 	public function get( $key ) // -- получить значение (намеренно без ссылки)
 	{ return isset($this->domain[$key]) ? $this->domain[$key] : "" ; }
 

@@ -62,6 +62,11 @@ class DBAL_mysql
 		{
 			throw new DbException("Database \"" . Config::get('db_name') . "\" select error");
 		}
+		
+		if (Config::get('db_set_encoding')) 
+		{
+			$this->query("SET NAMES " . Config::get('db_set_encoding'));
+		}
 	}
 
 	public function close() { /* в нашем случае ничего */ }
