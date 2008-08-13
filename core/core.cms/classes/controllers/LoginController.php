@@ -18,10 +18,15 @@ class LoginController extends Controller
 							  RequestInfo::get('retpath') :
 							  RequestInfo::$baseUrl.'login';
 				$this->rh->principal->logout($redirectTo);
-			} else {
-				if (RequestInfo::get('retpath')) {
+			} 
+			else 
+			{
+				if (RequestInfo::get('retpath')) 
+				{
 	            	$this->rh->redirect(RequestInfo::get('retpath'));
-				} else {
+				} 
+				else 
+				{
 					$this->rh->redirect(RequestInfo::$baseUrl.'start');
 				}
 			}

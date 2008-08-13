@@ -9,11 +9,11 @@
 
 class EditorObjectsCorrector
 {
-	protected $rh = null;
+	protected $tpl = null;
 
-	public function __construct(&$rh)
+	public function __construct()
 	{
-		$this->rh = &$rh;
+		$this->tpl = &TemplateEngine::getInstance();
 	}
 
 	/**
@@ -38,15 +38,15 @@ class EditorObjectsCorrector
 	protected function correctQuotes($matches)
 	{
 		$r= array('text' => $matches[1]);
-		$this->rh->tpl->setRef('*', $r);
-		return $this->rh->tpl->parse('editor/quote.html');
+		$this->tpl->setRef('*', $r);
+		return $this->tpl->parse('editor/quote.html');
 	}
 
 	protected function correctNotes($matches)
 	{
 		$r= array('text' => $matches[1]);
-		$this->rh->tpl->setRef('*', $r);
-		return $this->rh->tpl->parse('editor/note.html');
+		$this->tpl->setRef('*', $r);
+		return $this->tpl->parse('editor/note.html');
 	}
 
 	protected function correctFiles($matches)
@@ -66,17 +66,17 @@ class EditorObjectsCorrector
 				$res['size'] = $res['fileparams'][0];
 				$res['ext'] = $res['fileparams'][1];
 				$res['title'] = $matches[2];
-				$this->rh->tpl->setRef('*', $res);
+				$this->tpl->setRef('*', $res);
 
-				return $this->rh->tpl->parse('editor/file.html');
+				return $this->tpl->parse('editor/file.html');
 			}
 			// link in new window
 			elseif($res['target'] == '_blank')
 			{
 				//$res['_title'] = $match[2];
-				//$this->rh->tpl->setRef('*', $res);
+				//$this->tpl->setRef('*', $res);
 
-				//return $this->rh->tpl->Parse('typografica/link.html');
+				//return $this->tpl->Parse('typografica/link.html');
 			}
 				
 		}
@@ -94,19 +94,19 @@ class EditorObjectsCorrector
 				$res[trim($r)] = trim(str_replace('\"', '"', $paramsMatches[2][$i]));
 			}
 
-			$this->rh->tpl->setRef('*', $res);
+			$this->tpl->setRef('*', $res);
 			switch($res['mode'])
 			{
 				case 1:
-					return $this->rh->tpl->Parse('editor/images.html:image_preview');
+					return $this->tpl->Parse('editor/images.html:image_preview');
 					break;
 				
 				case 2:
-					return $this->rh->tpl->Parse('editor/images.html:image_small');
+					return $this->tpl->Parse('editor/images.html:image_small');
 					break;
 				
 				case 3:
-					return $this->rh->tpl->Parse('editor/images.html:image_big');
+					return $this->tpl->Parse('editor/images.html:image_big');
 					break;
 				
 				default:

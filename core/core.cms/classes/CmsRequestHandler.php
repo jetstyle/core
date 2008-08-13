@@ -1,24 +1,8 @@
 <?php
-/**
- Основной обработчик запроса.
- Здесь перегрузим разбор урла.
-
- */
-
 class CmsRequestHandler extends RequestHandler
 {
-
-	public function __construct()
-	{
-		parent::__construct();
-		$this->project_title = 'CMS: '.Config::get('project_title');
-	}
-
 	public function init()
 	{
-		Config::set('base_url', Config::get('base_url').Config::get('app_name').'/');
-		Config::set('rootHref', Config::get('base_url').'skins/');
-
 		$this->addToHandlersMap("", "HomeController");
 		$this->addToHandlersMap("login", "LoginController");
 		$this->addToHandlersMap("start", "StartController");
@@ -26,6 +10,8 @@ class CmsRequestHandler extends RequestHandler
 		$this->addToHandlersMap("pack_modules", "ModulePackerController");
 
 		parent::init();
+		
+		$this->initEnvironment();
 	}
 
 	protected function addToHandlersMap($url, $controller)
@@ -59,10 +45,7 @@ class CmsRequestHandler extends RequestHandler
 	protected function initEnvironment()
 	{
 		$this->tpl->set('user', $this->principal->getUserData());
-
-		$this->tpl->set('fe_/', $this->front_end->path_rel);
-
-		parent::initEnvironment();
+		$this->tpl->set('fe_/', Config::get('front_end_path'));
 	}
 
 	public function deny()

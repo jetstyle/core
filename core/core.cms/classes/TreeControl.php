@@ -2,6 +2,7 @@
 class TreeControl
 {
 	protected $rh;
+	protected $tpl;
 	protected $config;
 
 	//templates
@@ -47,8 +48,9 @@ class TreeControl
 
 		$this->config->hide_buttons['addChild'][$this->level_limit] = true;
 
-		$this->rh = &$config->rh;
-
+		$this->rh = &RequestHandler::getInstance();
+		$this->tpl = &TemplateEngine::getInstance();
+		
 		$this->id = intval(RequestInfo::get($this->idGetVar));
 	}
 
@@ -109,8 +111,8 @@ class TreeControl
 				}
 				$show_trash = $_GET['_show_trash'];
 
-				$this->rh->tpl->set('_url_xml', RequestInfo::hrefChange("do/".$this->config->moduleName."/tree", array('action' => 'xml')));
-				$this->rh->tpl->set('_url_connect', RequestInfo::hrefChange("do/".$this->config->moduleName."/tree", array('action' => 'update')));
+				$this->tpl->set('_url_xml', RequestInfo::hrefChange(RequestInfo::$baseUrl."do/".$this->config->moduleName."/tree", array('action' => 'xml')));
+				$this->tpl->set('_url_connect', RequestInfo::hrefChange(RequestInfo::$baseUrl."do/".$this->config->moduleName."/tree", array('action' => 'update')));
 				$url = RequestInfo::hrefChange('', array('id' => ''));
 				$pos = strpos($url, '?');
 				if ($pos !== false)
@@ -124,11 +126,11 @@ class TreeControl
 				{
 					$url .= '?';
 				}
-				$this->rh->tpl->set( '_href', $url);
+				$this->tpl->set( '_href', $url);
 
 				if ($_COOKIE['tree_control_btns'] == 'true')
 				{
-					$this->rh->tpl->set("toggleEditTreeClass", "class='toggleEditTreeClass-Sel'");
+					$this->tpl->set("toggleEditTreeClass", "class='toggleEditTreeClass-Sel'");
 				}
 
 				if (!$this->config->ajaxLoad)
@@ -142,12 +144,12 @@ class TreeControl
 					{
 						$this->load();
 					}
-					$this->rh->tpl->set('_xml_string', str_replace(array('"', "\n"), array('\"', ""), $this->toXML()));
+					$this->tpl->set('_xml_string', str_replace(array('"', "\n"), array('\"', ""), $this->toXML()));
 				}
 
-				$this->rh->tpl->set('_tree_allow_drop_to_root', $this->config->allowDropToRoot);
-				$this->rh->tpl->set('_tree_autoloading', $this->config->ajaxAutoLoading);
-				$this->rh->tpl->set('_tree_autoloading_url', RequestInfo::hrefChange("do/".$this->config->moduleName."/tree", array('action' => 'xml', $this->idGetVar => '', 'autoload' => '1')));
+				$this->tpl->set('_tree_allow_drop_to_root', $this->config->allowDropToRoot);
+				$this->tpl->set('_tree_autoloading', $this->config->ajaxAutoLoading);
+				$this->tpl->set('_tree_autoloading_url', RequestInfo::hrefChange(RequestInfo::$baseUrl."do/".$this->config->moduleName."/tree", array('action' => 'xml', $this->idGetVar => '', 'autoload' => '1')));
 
 			break;
 		}
@@ -156,7 +158,7 @@ class TreeControl
 	public function getHtml()
 	{
 		$this->renderTrash();
-		return $this->rh->tpl->Parse( $this->template);
+		return $this->tpl->Parse( $this->template);
 	}
 
 	public function toXML($treeId = 0)
@@ -199,8 +201,8 @@ class TreeControl
 		if (!$this->config->HIDE_CONTROLS['show_trash'])
 		{
 			$show_trash = $_GET['_show_trash'];
-			$this->rh->tpl->set( '_show_trash_href', RequestInfo::hrefChange('', array('_show_trash' => !$show_trash)));
-			$this->rh->tpl->parse( $show_trash ? $this->template_trash_hide : $this->template_trash_show, '__trash_switch' );
+			$this->tpl->set( '_show_trash_href', RequestInfo::hrefChange('', array('_show_trash' => !$show_trash)));
+			$this->tpl->parse( $show_trash ? $this->template_trash_hide : $this->template_trash_show, '__trash_switch' );
 		}
 	}
 
@@ -453,7 +455,7 @@ class TreeControl
 						$r['_path'] = ($parentTag ? $parentTag.'/' : '').$r["_supertag"];
 					}
 
-					$rh->db->execute("UPDATE ".$rh->db_prefix.$tableName." SET _supertag='".$r["_supertag"]."',_path='".$r['_path']."' WHERE id='".$r['id']."'");
+					$rh->db->execute("UPDATE ".DBAL::$prefix.$tableName." SET _supertag='".$r["_supertag"]."',_path='".$r['_path']."' WHERE id='".$r['id']."'");
 					$tree['items'][$id] = $r;
 				}
 			}
@@ -476,7 +478,7 @@ class TreeControl
 			$node['title'] = 'Новый узел';
 		}
 
-		$node['title_pre'] = $this->rh->tpl->action('typografica', $node['title']);
+		$node['title_pre'] = $this->tpl->action('typografica', $node['title']);
 		$node['parent'] = intval($_REQUEST['parent']);
 		$node['supertag'] = $translit->supertag($node['title'], 20);
 
@@ -495,7 +497,7 @@ class TreeControl
 		");
 
 		$id = $db->insert("
-			INSERT INTO ". $this->rh->db_prefix.$this->config->table_name ."
+			INSERT INTO ". DBAL::$prefix.$this->config->table_name ."
 			(title, title_pre, _parent, _supertag, _path, _order, _state)
 			VALUES
 			(".$this->rh->db->quote($node['title']).", ".$this->rh->db->quote($node['title_pre']).", ".$this->rh->db->quote($node['parent']).", ".$this->rh->db->quote($node['supertag']).", ".$this->rh->db->quote($node['_path']).", ".$this->rh->db->quote($order['_max']).", 1)
@@ -521,7 +523,7 @@ class TreeControl
 			if ($node['_state'] == 2)
 			{
 				$db->query("
-					DELETE FROM ". $this->rh->db_prefix.$this->config->table_name ."
+					DELETE FROM ". DBAL::$prefix.$this->config->table_name ."
 					WHERE _left >= ".$node['_left']." AND _right <= ".$node['_right']."
 				");
 			}
@@ -529,7 +531,7 @@ class TreeControl
 			else
 			{
 				$db->query("
-					UPDATE ". $this->rh->db_prefix.$this->config->table_name ."
+					UPDATE ". DBAL::$prefix.$this->config->table_name ."
 					SET _state = 2
 					WHERE _left >= ".$node['_left']." AND _right <= ".$node['_right']."
 				");

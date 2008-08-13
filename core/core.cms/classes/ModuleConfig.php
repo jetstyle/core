@@ -4,9 +4,9 @@ class ModuleConfig
 	public $rh;
 	public $moduleName = '';
 	
-	public function __construct(&$rh)
+	public function __construct()
 	{
-		$this->rh = &$rh;
+		$this->rh = RequestHandler::getInstance();
 	}
 	
 	public function read($configFile)

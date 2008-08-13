@@ -7,7 +7,7 @@ class FormGallerySimple
 
 	function FormGallerySimple(& $config)
 	{
-		$this->rh = &$config->rh;
+		$this->rh = &RequestHandler::getInstance();
 		$this->table_name = $config->table_name;
 		//base modules binds
 		$this->config = & $config;
@@ -29,9 +29,10 @@ class FormGallerySimple
 		$this->state = & new StateSet($this->rh);
 		$this->state->Set($this->rh->state);
 
-		Finder::useClass('Upload');
-		$this->upload = & new Upload($this->rh, $this->config->upload_dir ? $this->rh->front_end->file_dir . $this->config->upload_dir . "/" : $this->rh->front_end->file_dir);
-		$this->web_upload_dir = $this->rh->front_end->path_rel . 'files/' . ($this->config->upload_dir ? $this->config->upload_dir . "/" : "");
+		//upload
+		$this->upload = &$this->rh->upload;
+		$this->upload->setDir($config->upload_dir ? Config::get('file_dir').$config->upload_dir."/" : Config::get('file_dir'));
+		//$this->web_upload_dir = $this->rh->front_end->path_rel . 'files/' . ($this->config->upload_dir ? $this->config->upload_dir . "/" : "");
 
 		$this->_FILES = &$this->config->_FILES;
 	}
@@ -108,7 +109,7 @@ class FormGallerySimple
 									{
 										$A = getimagesize($file->name_full);
 										$out[$r['id']] = array(
-											'src' => $this->web_upload_dir . $file->name_short,
+											'src' => $file->link,
 											'height' => $A[1],
 											'width' => $A[0],
 //											'title' => iconv('cp1251', 'UTF-8', $r['title']),
@@ -248,7 +249,7 @@ class FormGallerySimple
 						$A = getimagesize($file->name_full);
 						$params = array (
 							'id' => $new_id,
-							'src' => $this->web_upload_dir . $file->name_short,
+							'src' => $file->link,
 							'width' => $A[0],
 							'height' => $A[1],
 						);

@@ -26,10 +26,9 @@ class ModuleConstructor
 		$this->moduleName = $moduleName;
 
 		// add module dir to DIRS stack
-		$module_dir = $this->rh->DIRS[0].$this->handlersType.'/'.$this->moduleName.'/';
-		Finder::prependDir($module_dir);
+		Finder::prependDir(Config::get('app_dir').$this->handlersType.'/'.$this->moduleName.'/');
 
-		$this->config = new ModuleConfig($this->rh);
+		$this->config = new ModuleConfig();
 		$this->config->read(Finder::findScript_( $this->handlersType, $this->moduleName.'/defs'));
 		$this->config->moduleName = $this->moduleName;
 	}

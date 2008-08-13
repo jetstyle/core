@@ -3,7 +3,6 @@
  *  Контроллер главной страницы
  *
  */
-
 Finder::useClass("controllers/Controller");
 class HomeController extends Controller
 {

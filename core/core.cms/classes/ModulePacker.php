@@ -17,12 +17,12 @@ class ModulePacker
 	protected $rh;
 	protected $sqlDumper = null;
 
-	public function __construct(&$rh)
+	public function __construct()
 	{
-		$this->rh = &$rh;
+		$this->rh = RequestHandler::getInstance();
 		Finder::useClass('ModuleConfig');
 		Finder::useClass('sql/SqlDump');
-		$this->sqlDumper = new SqlDump($this->rh);
+		$this->sqlDumper = new SqlDump();
 	}
 
 	/**
@@ -50,7 +50,7 @@ class ModulePacker
 
 	protected function packModule($module)
 	{
-		$moduleDir = $this->rh->app_dir.'modules/'.$module['href'];
+		$moduleDir = Config::get('app_dir').'modules/'.$module['href'];
 
 		if (!file_exists($moduleDir))
 		{
@@ -134,7 +134,7 @@ class ModulePacker
 			}
 		}
 
-		$config = new ModuleConfig($this->rh);
+		$config = new ModuleConfig();
 		$config->read($moduleDir.'/'.$configName.'.php');
 
 		$wrapped = $config->get('WRAPPED');
@@ -148,7 +148,7 @@ class ModulePacker
 		}
 		elseif ($tableName = $config->get('table_name'))
 		{
-			$result[] = $this->rh->db_prefix.$tableName;
+			$result[] = DBAL::$prefix.$tableName;
 		}
 
 		return array_unique($result);

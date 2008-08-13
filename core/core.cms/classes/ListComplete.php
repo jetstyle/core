@@ -9,7 +9,7 @@ class ListComplete extends ListSimple
 
 	public function handle()
 	{
-		$tpl = & $this->rh->tpl;
+		$tpl = &TemplateEngine::getInstance();
 
 		//грузим данные
 		$this->load();
@@ -62,7 +62,8 @@ class ListComplete extends ListSimple
 		$model->delete($model->quoteFieldShort($this->idField).'='.DBModel::quote($this->id));
 	}
 
-	protected function updateForm() {
+	protected function updateForm() 
+	{
 		//delete
 		if ($_POST[$this->prefix . 'delete'])
 		{

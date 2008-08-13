@@ -28,7 +28,7 @@ class FormSimple
 	{
 		//base modules binds
 		$this->config =& $config;
-		$this->rh = &$config->rh;
+		$this->rh = &RequestHandler::getInstance();
 
 		if (is_array($this->config->has_one))
 		{
@@ -45,7 +45,7 @@ class FormSimple
 		}
 
 		Finder::useModel('DBModel');
-		$this->model = new DBModel($this->rh);
+		$this->model = new DBModel();
 		$this->model->setTable($config->table_name);
 		$this->model->setFields($config->SELECT_FIELDS);
 
@@ -273,7 +273,7 @@ class FormSimple
 			{
 				$result = $this->rh->db->execute("
 					SELECT ".$value['fk'].", title
-					FROM ".$this->rh->db_prefix.$value['name']."
+					FROM ??".$value['name']."
 					WHERE _state = 0
 					ORDER BY ".($value['order'] ? $value['order'] : "title ASC")."
 				");

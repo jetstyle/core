@@ -19,7 +19,7 @@ class FormFiles extends FormSimple
 
 		//upload
 		$this->upload = &$this->rh->upload;
-		$this->upload->dir = $config->upload_dir ? $this->rh->front_end->file_dir.$config->upload_dir."/" : $this->rh->front_end->file_dir;
+		$this->upload->setDir($config->upload_dir ? Config::get('file_dir').$config->upload_dir."/" : Config::get('file_dir'));
 	}
 
 	public function handle()
@@ -85,7 +85,7 @@ class FormFiles extends FormSimple
 						if($file->name_full && in_array($file->ext, $upload->GRAPHICS ) )
 						{
 							$r = array(
-								'src' => $this->rh->front_end->path_rel.'files/'.($this->config->upload_dir ? $this->config->upload_dir."/" : "").$file->name_short,
+								'src' => $file->link,
 							);
 
 							if($vv['link_to'])
@@ -101,7 +101,7 @@ class FormFiles extends FormSimple
 											$A = getimagesize($file->name_full);
 											$r['width'] = $A[0];
 											$r['height'] = $A[1];
-											$r['src_original'] = $this->rh->front_end->path_rel.'files/'.($this->config->upload_dir ? $this->config->upload_dir."/" : "").$file->name_short.'?popup=1';
+											$r['src_original'] = $file->link.'?popup=1';
 											$this->rh->tpl->setRef('file', $r);
 											$this->item[$field_file] = $this->rh->tpl->parse($this->template_files.':image_with_link');
 										}
@@ -120,7 +120,7 @@ class FormFiles extends FormSimple
 							$r = array(
 								'filesize' => $file->size,
 								'format'   => $file->format,
-								'src'      => $this->rh->front_end->path_rel.'files/'.($this->config->upload_dir ? $this->config->upload_dir."/" : "").$file->name_short,
+								'src'      => $file->link,
 								'name_short' =>  $file->name_short,
 							);
 

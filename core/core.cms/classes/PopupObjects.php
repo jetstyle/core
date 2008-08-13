@@ -13,13 +13,13 @@ abstract class PopupObjects
 	protected $pager = null;
 	protected $pageVar = "p";
 
-	public function __construct(&$rh, $fileConfig)
+	public function __construct($fileConfig)
 	{
 		include($fileConfig);
-
-		$this->rh = &$rh;
-		Finder::useClass('Upload');
-		$this->upload =& new Upload($this->rh, $this->rh->front_end->file_dir.$this->upload_dir.'/');
+		
+		$this->rh = &RequestHandler::getInstance();
+		$this->upload =&Upload::getInstance();
+		$this->upload->setDir(Config::get('file_dir').$this->upload_dir.'/');
 	}
 
 	public function setRubric($value)
@@ -92,11 +92,7 @@ abstract class PopupObjects
 		$this->rubricsTable = $value;
 	}
 
-	// IMPLEMENT THIS
-	protected function getFile($data)
-	{
-
-	}
+	abstract function getFile($data);
 
 	protected function getItemsCount()
 	{

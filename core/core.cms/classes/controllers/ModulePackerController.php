@@ -4,17 +4,17 @@
  *
  */
 
-Finder::useClass("controllers/BasicPage");
-class ModulePackerPage extends BasicPage
+Finder::useClass("controllers/Controller");
+class ModulePackerController extends Controller
 {
-	var $plugins = array(
+	protected $plugins = array(
 		array('ToolbarPlugin', array(
 			'__aspect' => 'Toolbar',
 			'store_to' => 'toolbar',
 		)),
 	);
 
-	var $params_map = array(
+	protected $params_map = array(
 		array('default', array(NULL)),
 	);
 
@@ -22,7 +22,7 @@ class ModulePackerPage extends BasicPage
 	{
 		if (!$this->rh->principal->isAuth())
 		{
-			$this->rh->redirect($this->rh->base_url.'login');
+			$this->rh->redirect(RequestInfo::$baseUrl.'login');
 		}
 
 		parent::handle();
@@ -34,10 +34,10 @@ class ModulePackerPage extends BasicPage
 		$this->rh->db->query("SET NAMES utf8");
 
 		Finder::useClass("ModulePacker");
-		$modulePacker =& new ModulePacker($this->rh);
+		$modulePacker =& new ModulePacker();
 		$modulePacker->pack();
 
-		$this->rh->site_map_path = 'module';
+		$this->siteMap = 'module';
 	}
 }
 ?>

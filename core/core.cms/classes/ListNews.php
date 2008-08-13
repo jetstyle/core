@@ -39,22 +39,21 @@ class ListNews extends ListSimple
 
 	public function handle()
 	{
-		$rh =& $this->rh;
-		$tpl =& $rh->tpl;
+		$db =&DBAL::getInstance();
 
 		//assign some
-		$tpl->set('prefix', $this->prefix);
+		$this->tpl->set('prefix', $this->prefix);
 
 		//рендерим фильтр по датам
 		//мес€цы
 		//грузим признаки загруженности по мес€цам
 		$M = array();
-		$rs = $rh->db->execute("
+		$rs = $db->execute("
 	    	SELECT DISTINCT month
 	    	FROM ??".$this->config->get('table_name')."
 	    	WHERE year='".$this->year."' AND _state <= 1 ".($this->config->get('where') ? " AND ".$this->config->get('where') : "" )
 		);
-		while($row = $rh->db->getRow())
+		while($row = $db->getRow())
 		{
 			$M[ $row['month'] ] = true;
 		}
@@ -66,10 +65,10 @@ class ListNews extends ListSimple
 			$month_options .= "<option value='$i' ".( $i==$this->month ? "selected='true'" : '' ).' '.( $M[$i] ? "style='background-color:#eeeeee'" : '' ).">".$MONTHES_NOMINATIVE[$i]."</option>";
 		}
 
-		$tpl->set( '_month_options', $month_options );
+		$this->tpl->set( '_month_options', $month_options );
 
 		//годы
-		$rs = $rh->db->execute("
+		$rs = $db->execute("
 	    	SELECT DISTINCT year
 	    	FROM ??".$this->config->get('table_name')."
 	    	WHERE _state <= 1 ".($this->config->get('where') ? " AND ".$this->config->get('where') : "" ) . "
@@ -79,14 +78,14 @@ class ListNews extends ListSimple
 		$year_options = '';
 		if ($rs)
 		{
-			while ($r = $this->rh->db->getRow($rs))
+			while ($r = $db->getRow($rs))
 			{
 				$year_options .= "<option value='".$r['year']."' ".( $r['year'] == $this->year ? "selected='true'" : '' ).">".$r['year']."</option>";
 			}
 		}
 
-		$tpl->set( '_year_options', $year_options );
-		$tpl->Parse( $this->template_calendar, '__calendar' );
+		$this->tpl->set( '_year_options', $year_options );
+		$this->tpl->parse( $this->template_calendar, '__calendar' );
 
 		//по этапу
 		parent::handle();
@@ -99,14 +98,14 @@ class ListNews extends ListSimple
 
 	protected function defineDate()
 	{
-		$rh =& $this->rh;
+		$db =&DBAL::getInstance();
 
 		$this->year = intval(RequestInfo::get('year'));
 		$this->month = intval(RequestInfo::get('month'));
 
 		if (!$this->year || !$this->month)
 		{
-			$rs = $rh->db->queryOne("SELECT id, year, month FROM ??".$this->config->get('table_name')." WHERE _state<=1 ".($this->config->where ? " AND ".$this->config->where : "" )." ORDER BY inserted DESC");
+			$rs = $db->queryOne("SELECT id, year, month FROM ??".$this->config->get('table_name')." WHERE _state<=1 ".($this->config->where ? " AND ".$this->config->where : "" )." ORDER BY inserted DESC");
 			if($rs['id'])
 			{
 				$this->year = $rs['year'];

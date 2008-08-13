@@ -54,7 +54,7 @@ class FormIframe extends FormFiles
 		$tpl->set('_class_name_2', ($vis == "false" || $vis === false) ? "visible" : "invisible");
 
 		$tpl->set('prefix', $this->prefix);
-		$tpl->set('__url', $this->rh->base_url . $href_for_iframe . $this->id . '&hide_toolbar=1');
+		$tpl->set('__url', RequestInfo::$baseUrl . $href_for_iframe . $this->id . '&hide_toolbar=1');
 		$tpl->parse('iframe.html', '_iframe', 1);
 	}
 }

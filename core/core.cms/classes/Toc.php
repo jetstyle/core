@@ -2,8 +2,6 @@
 
 class Toc
 {
-
-	var $rh;
 	var $stack;
 	var $curId = 0;
 	var $numerate = false;
@@ -11,9 +9,9 @@ class Toc
 	var $nums = array();
 	var $items = array();
 	
-	function toc( &$rh )
+	public function __construct()
 	{
-		$this->rh = &$rh;
+		$this->rh = RequestHandler::getInstance();
 		$this->numerate = $rh->toc_numerate;
 		$this->limit = $rh->toc_limit;
 	}

@@ -3,6 +3,8 @@
 class ListSimple
 {
 	protected $rh; 			//ссылка на $rh
+	protected $tpl;
+	
 	protected $config;		//ссылка на объект класса ModuleConfig
 	protected $items;
 	protected $pager;
@@ -36,8 +38,9 @@ class ListSimple
 	public function __construct( &$config )
 	{
 		$this->config =& $config;
-		$this->rh = &$config->rh;
-
+		$this->rh = &RequestHandler::getInstance();
+		$this->tpl = &TemplateEngine::getInstance();
+		
 		if ($this->config->perPage)
 		{
 			$this->perPage = $this->config->perPage;
@@ -64,7 +67,7 @@ class ListSimple
 			$this->rh->redirect( RequestInfo::hrefChange('', array()));
 		}
 
-		$tpl =& $this->rh->tpl;
+//		$this->tpl =&TemplateEngine::getInstance();
 
 		$this->load();
 
@@ -133,17 +136,16 @@ class ListSimple
 
 	public function _controls(&$list)
 	{
-		$tpl =& $this->rh->tpl;
 		if( !$this->config->HIDE_CONTROLS['exchange'] )
 		{
-			return $tpl->parse( $list->tpl_item.'_Exchange' );
+			return $this->tpl->parse( $list->tpl_item.'_Exchange' );
 		}
 		return '';
 	}
 
 	public function getHtml()
 	{
-		return $this->rh->tpl->parse( $this->template);
+		return $this->tpl->parse( $this->template);
 	}
 
 	protected function renderTrash()
@@ -152,8 +154,8 @@ class ListSimple
 		if (!$this->config->HIDE_CONTROLS['show_trash'])
 		{
 			$show_trash = $_GET['_show_trash'];
-			$this->rh->tpl->set( '_show_trash_href', RequestInfo::hrefChange('', array('_show_trash' => !$show_trash)));
-			$this->rh->tpl->parse( $show_trash ? $this->template_trash_hide : $this->template_trash_show, '__trash_switch' );
+			$this->tpl->set( '_show_trash_href', RequestInfo::hrefChange('', array('_show_trash' => !$show_trash)));
+			$this->tpl->parse( $show_trash ? $this->template_trash_hide : $this->template_trash_show, '__trash_switch' );
 		}
 	}
 
@@ -162,9 +164,9 @@ class ListSimple
 		if (!$this->config->HIDE_CONTROLS['add_new'])
 		{
 			//ссылка на новое
-			$this->rh->tpl->set( '_add_new_href', RequestInfo::hrefChange('', array($this->idGetVar => '', '_new' => 1)));
-			$this->rh->tpl->set( '_add_new_title', $this->config->get('add_new_title') ? $this->config->get('add_new_title') : 'создать новый элемент' );
-			$this->rh->tpl->Parse( $this->template_new, '__add_new' );
+			$this->tpl->set( '_add_new_href', RequestInfo::hrefChange('', array($this->idGetVar => '', '_new' => 1)));
+			$this->tpl->set( '_add_new_title', $this->config->get('add_new_title') ? $this->config->get('add_new_title') : 'создать новый элемент' );
+			$this->tpl->Parse( $this->template_new, '__add_new' );
 		}
 	}
 
@@ -220,7 +222,7 @@ class ListSimple
 	protected function pager($total)
 	{
 		Finder::useClass('Pager');
-		$this->pager = new Pager($this->rh);
+		$this->pager = new Pager();
 		$this->pager->setup(intval(RequestInfo::get($this->pageVar)), $total, $this->perPage, $this->frameSize);
 	}
 
@@ -228,8 +230,8 @@ class ListSimple
 	{
 		if ($this->pager)
 		{
-			$this->rh->tpl->set('pager', $this->pager->getPages());
-			$this->rh->tpl->parse('blocks/pager.html', '__arrows');
+			$this->tpl->set('pager', $this->pager->getPages());
+			$this->tpl->parse('blocks/pager.html', '__arrows');
 		}
 	}
 }
