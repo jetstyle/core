@@ -49,9 +49,20 @@ final class Config
 		self::$data[$key] = $value;
 	}
 	
+	/**
+	 * Append data
+	 *
+	 * @param string $key
+	 * @param string $value
+	 */
 	public static function append($key, $value)
 	{
 		self::$data[$key] .= $value;
+	}
+	
+	public static function exists($key)
+	{
+		return isset(self::$data[$key]);
 	}
 	
 	/**

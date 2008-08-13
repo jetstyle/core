@@ -314,7 +314,7 @@ abstract class Controller implements ArrayAccess
     	return $ret;
 	}
 
-	protected function url_to($cls=NULL, $item=NULL)
+	public function url_to($cls=NULL, $item=NULL)
 	{
 		$result = '';
 
