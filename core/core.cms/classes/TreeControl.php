@@ -252,8 +252,8 @@ class TreeControl
 		if (!$this->loaded)
 		{
 			$this->loaded = true;
-
-			$result = $this->rh->db->execute("
+			$db = &DBAL::getInstance();
+			$result = $db->execute("
 				SELECT ".implode(", ", $this->config->SELECT_FIELDS)."
 				FROM ??".$this->config->table_name."
 				WHERE ".( $_GET['_show_trash'] ? '_state>=0' : "_state <>2 " ) . ($where ? ' AND ' . $where : '') . ($this->config->where ? ' AND ' . $this->config->where : '')." ".($this->level_limit ? " AND _level <= ".$this->level_limit : "")."
@@ -262,7 +262,7 @@ class TreeControl
 
 			if ($result)
 			{
-				while ($r = $this->rh->db->getRow($result))
+				while ($r = $db->getRow($result))
 				{
 					$this->items[$r[$this->idField]] = $r;
 					$this->children[$r['_parent']][] = $r[$this->idField];
@@ -278,7 +278,7 @@ class TreeControl
 
 	protected function loadItem($id)
 	{
-		return $this->rh->db->queryOne("
+		return DBAL::getInstance()->queryOne("
 			SELECT ".implode(", ", $this->config->SELECT_FIELDS)."
 			FROM ??".$this->config->table_name."
 			WHERE id = ".intval($id)." ". ($this->config->where ? ' AND ' . $this->config->where : '')." ".($this->level_limit ? " AND _level <= ".$this->level_limit : "")."
@@ -305,7 +305,8 @@ class TreeControl
 		}
 		else
 		{
-			$result = $this->rh->db->execute("
+			$db = &DBAL::getInstance();
+			$result = $db->execute("
 				SELECT _parent
 				FROM ??".$this->config->table_name."
 				WHERE _left <= ".$item['_left']." AND _right >= ".$item['_right']." ". ($this->config->where ? ' AND ' . $this->config->where : '')."
@@ -313,7 +314,7 @@ class TreeControl
 
 			if ($result)
 			{
-				while ($r = $this->rh->db->getRow($result))
+				while ($r = $db->getRow($result))
 				{
 					$parents[] = $r['_parent'];
 				}
@@ -327,9 +328,6 @@ class TreeControl
 
 	protected function updateTreeStruct()
 	{
-		$rh =& $this->rh;
-		$db =& $rh->db;
-
 		if( $_REQUEST['add'])
 		{
 			$id = $this->addNode();
@@ -365,7 +363,9 @@ class TreeControl
 			$this->id = $itemId;
 			$targetId = intval($_REQUEST['target']);
 			$beforeId = intval($_REQUEST['before']);
-
+			
+			$db = &DBAL::getInstance();
+			
 			if($beforeId)
 			{
 				$node = $db->queryOne("
@@ -410,10 +410,11 @@ class TreeControl
 		//$this->id replaced with $id
 		//$this->config->allow_empty_supertag replaced with allow_empty_supertag
     	//$parent_id = isset($parent_id) ? $parent_id : 1;
-		$root = $rh->db->queryOne("SELECT id,_left,_right,_path,_parent FROM ??".$tableName." WHERE id='".$id."'");
+    	$db = &DBAL::getInstance();
+		$root = $db->queryOne("SELECT id,_left,_right,_path,_parent FROM ??".$tableName." WHERE id='".$id."'");
 		if ($root) {
 			//грузим поддерево
-			$result = $rh->db->execute("
+			$result = $db->execute("
 				SELECT id, _supertag, _parent, _path
 				FROM ??".$tableName."
 				WHERE _left>= ".$root['_left']." AND _right <= ".$root['_right']."
@@ -421,12 +422,12 @@ class TreeControl
 
 			if ($result) {
 				$tree = array('children' => array(), 'items' => array());
-				while ($r = $rh->db->getRow($result)) {
+				while ($r = $db->getRow($result)) {
 					$tree['children'][$r['_parent']][] = $r['id'];
 					$tree['items'][$r['id']] = $r;
 				}
 
-				$parent = $rh->db->queryOne("
+				$parent = $db->queryOne("
 					SELECT id, _supertag, _parent, _path
 					FROM ??".$tableName."
 					WHERE id = ".$root['_parent']."
@@ -455,7 +456,7 @@ class TreeControl
 						$r['_path'] = ($parentTag ? $parentTag.'/' : '').$r["_supertag"];
 					}
 
-					$rh->db->execute("UPDATE ".DBAL::$prefix.$tableName." SET _supertag='".$r["_supertag"]."',_path='".$r['_path']."' WHERE id='".$r['id']."'");
+					$db->execute("UPDATE ".DBAL::$prefix.$tableName." SET _supertag='".$r["_supertag"]."',_path='".$r['_path']."' WHERE id='".$r['id']."'");
 					$tree['items'][$id] = $r;
 				}
 			}
@@ -500,7 +501,7 @@ class TreeControl
 			INSERT INTO ". DBAL::$prefix.$this->config->table_name ."
 			(title, title_pre, _parent, _supertag, _path, _order, _state)
 			VALUES
-			(".$this->rh->db->quote($node['title']).", ".$this->rh->db->quote($node['title_pre']).", ".$this->rh->db->quote($node['parent']).", ".$this->rh->db->quote($node['supertag']).", ".$this->rh->db->quote($node['_path']).", ".$this->rh->db->quote($order['_max']).", 1)
+			(".$this->rh->db->quote($node['title']).", ".$db->quote($node['title_pre']).", ".$db->quote($node['parent']).", ".$db->quote($node['supertag']).", ".$db->quote($node['_path']).", ".$db->quote($order['_max']).", 1)
 		");
 
 		return $id;
@@ -508,8 +509,7 @@ class TreeControl
 
 	function deleteNode($nodeId)
 	{
-		$rh =& $this->rh;
-		$db =& $rh->db;
+		$db = &DBAL::getInstance();
 
 		$node = $db->queryOne("
 			SELECT id, _left, _right, _state
@@ -523,7 +523,7 @@ class TreeControl
 			if ($node['_state'] == 2)
 			{
 				$db->query("
-					DELETE FROM ". DBAL::$prefix.$this->config->table_name ."
+					DELETE FROM ??". $this->config->table_name ."
 					WHERE _left >= ".$node['_left']." AND _right <= ".$node['_right']."
 				");
 			}
@@ -531,7 +531,7 @@ class TreeControl
 			else
 			{
 				$db->query("
-					UPDATE ". DBAL::$prefix.$this->config->table_name ."
+					UPDATE ??". $this->config->table_name ."
 					SET _state = 2
 					WHERE _left >= ".$node['_left']." AND _right <= ".$node['_right']."
 				");
@@ -545,7 +545,7 @@ class TreeControl
 	{
 		if (!$this->rootId)
 		{
-			$result = $this->rh->db->queryOne("
+			$result = DBAL::getInstance()->queryOne("
 				SELECT ".$this->idField."
 				FROM ??".$this->config->table_name."
 				WHERE _parent = 0
@@ -617,9 +617,11 @@ class TreeControl
 	protected function saveTitle($id, $title)
 	{
 		$title = iconv("UTF-8", "CP1251", $title);
-
-		$sql = "UPDATE ??".$this->config->table_name." SET title_short=".$this->rh->db->quote($title)." WHERE id=".$this->rh->db->quote($id);
-		$this->rh->db->execute($sql);
+		
+		$db = &DBAL::getInstance();
+		
+		$sql = "UPDATE ??".$this->config->table_name." SET title_short=".$db->quote($title)." WHERE id=".$db->quote($id);
+		$db->execute($sql);
 		return $sql;
 	}
 
@@ -627,7 +629,8 @@ class TreeControl
 	{
 		//shortcuts
 		$node =& $this->items[ $parent_id ];
-
+		$db = &DBAL::getInstance();
+		
 		//_level
 		if($node[$this->idField])
 		{
@@ -661,7 +664,7 @@ class TreeControl
 
 		//store in DB
 		//    print("UPDATE ".$this->table_name." SET _level='".$node['_level']."', _left='".$node['_left']."', _right='".$node['_right']."' WHERE id='".$node['id']."'<br>\n");
-		$this->rh->db->execute("UPDATE ??".$this->config->table_name." SET _level='".$node['_level']."', _left='".$node['_left']."', _right='".$node['_right']."', _order = '".$order."' WHERE ".$this->idField."='".$node[$this->idField]."'");
+		$db->execute("UPDATE ??".$this->config->table_name." SET _level='".$node['_level']."', _left='".$node['_left']."', _right='".$node['_right']."', _order = '".$order."' WHERE ".$this->idField."='".$node[$this->idField]."'");
 
 		// return the right value of this node + 1
 		return $right + 1;
