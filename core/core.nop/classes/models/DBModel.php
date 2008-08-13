@@ -1028,7 +1028,7 @@ class DBModel extends Model implements IteratorAggregate, ArrayAccess, Countable
 
 		if (!isset($model)) return;
 
-		$where = $model->quoteField($fieldinfo['fk']) .'='. $model->dbQuote($data[$fieldinfo['pk']]);
+		$where = $model->quoteField($fieldinfo['fk']) .'='. DBModel::quote($data[$fieldinfo['pk']]);
 		$model->load($where);
 
 		$data[$fieldName] = &$model;
@@ -1054,7 +1054,7 @@ class DBModel extends Model implements IteratorAggregate, ArrayAccess, Countable
 			(
 				('.$model->quoteField($fieldinfo['fk']).'='.$qt.'.'.$this->quoteName($fieldinfo['through']['fk']).')
 				 AND
-				('.$qt.'.'.$this->quoteName($fieldinfo['through']['pk']) .'='. $model->dbQuote($data[$fieldinfo['pk']]).')
+				('.$qt.'.'.$this->quoteName($fieldinfo['through']['pk']) .'='. DBModel::quote($data[$fieldinfo['pk']]).')
 			) ';
 
 		$model->loadSql(implode(' ', $sqlParts));
@@ -1068,7 +1068,7 @@ class DBModel extends Model implements IteratorAggregate, ArrayAccess, Countable
 
 		if (!isset($model)) return;
 
-		$where = $model->quoteField($fieldinfo['fk']) .'='. $model->dbQuote($data[$fieldinfo['pk']]);
+		$where = $model->quoteField($fieldinfo['fk']) .'='. DBModel::quote($data[$fieldinfo['pk']]);
 		$model->load($where);
 
 		$data[$fieldName] = &$model;

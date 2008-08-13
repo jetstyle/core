@@ -60,11 +60,10 @@ class Typografica
 		"html" => 0     // запрет тагов html
 	);
 
-	function typografica ( &$rh )
+	function __construct ()
 	{
-		$this->rh = &$rh;
-		$this->Indent1 = "<img src=".$rh->path_rel.'images/'.$this->Indent1;
-		$this->Indent2 = "<img src=".$rh->path_rel.'images/'.$this->Indent2;
+		$this->Indent1 = "<img src=".RequestInfo::$baseUrl.'images/'.$this->Indent1;
+		$this->Indent2 = "<img src=".RequestInfo::$baseUrl.'images/'.$this->Indent2;
 	}
 
 	///////////////////////////////////////////////////////////////////////////////////////////////////////////

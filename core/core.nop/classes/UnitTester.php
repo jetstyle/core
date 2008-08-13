@@ -5,8 +5,8 @@ require_once($TEST_TOOLS.'/simpletest/unit_tester.php');
 require_once($TEST_TOOLS.'/simpletest/web_tester.php');
 require_once($TEST_TOOLS.'/simpletest/mock_objects.php');
 require_once($TEST_TOOLS.'/simpletest/reporter.php');
-require_once('Config.php');
-require_once('Configurable.php');
+//require_once('Config.php');
+//require_once('Configurable.php');
 
 
 /**
@@ -20,7 +20,7 @@ require_once('Configurable.php');
  *		classes/AspectTest.php		-- тест дл€ юнита
  * 
  */
-class UnitTester extends Configurable
+class UnitTester
 {
 
 	var $tests = array();
@@ -57,31 +57,15 @@ class UnitTester extends Configurable
 		closedir($dir);
 	}
 
-	function initialize(&$ctx, $config=NULL)
+	function initialize()
 	{
-		parent::initialize($ctx, $config);
+		$this->rh = &RequestHandler::getInstance();
 
-		config_set($this, 'recursive', True);
-		config_set($this, 'namespaces', array('classes'));
-		config_set($this, 'test', new GroupTest($ctx->project_name));
-		config_set($this, 'reporter', new TextReporter());
-		// lucky: да прост€т м€. ;)
-		// однако в тестах бывает нужен $ctx
-		config_set($this->reporter, 'ctx', &$ctx);
-		if (is_array($ctx->tests)) 
-			config_replace($this, 'tests', &$ctx->tests);
-
-/*		foreach ($ctx->DIRS as $dir)
-		{
-			foreach ($this->namespaces as $namespace)
-			{
-				$fullpath = $dir.$namespace.'/';
-				$this->base_dir = $fullpath;
-				if (is_dir($this->base_dir))
-					$this->addTests('', $this->recursive);
-			}
-		}
-*/	}
+		$this->recursive = true;
+		$this->namespaces = array('classes');
+		$this->test = new GroupTest(Config::get('project_name'));
+		$this->reporter = new TextReporter();
+	}
 
 	function run()
 	{
@@ -90,14 +74,14 @@ class UnitTester extends Configurable
 
 }
 
-class CtxUnitTestCase extends UnitTestCase
-{
-
-	function setUp()
-	{
-		$this->ctx =& $this->_reporter->ctx;
-		parent::setUp();
-	}
-
-}
+//class CtxUnitTestCase extends UnitTestCase
+//{
+//
+//	function setUp()
+//	{
+//		$this->ctx =& $this->_reporter->ctx;
+//		parent::setUp();
+//	}
+//
+//}
 ?>
