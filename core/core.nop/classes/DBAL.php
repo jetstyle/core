@@ -67,15 +67,14 @@
 class DBAL
 {
 	private static $instance = null;
+	public static $prefix = '';
 
 	protected $lowlevel;
 	protected $queryCount = 0;
 
-	protected $prefix = '';
-
 	private function __construct($connect = true)
 	{
-		$this->prefix = Config::get('db_prefix');
+		DBAL::$prefix = Config::get('db_prefix');
 
 		$lowlevelClass = "DBAL_" . Config::get('db_al');
 		Finder::useClass($lowlevelClass);
@@ -169,7 +168,7 @@ class DBAL
 		Debug::mark('q');
 
 		//типа такой плейсхолдер
-		$sql = str_replace("??", $this->prefix, $sql);
+		$sql = str_replace("??", DBAL::$prefix, $sql);
 
 		$this->handle = $this->lowlevel->query($sql, $limit, $offset);
 		$this->logQuery($sql, $limit, $offset);
@@ -247,7 +246,7 @@ class DBAL
 
 	public function prepareSql($sql)
 	{
-		return preg_replace('/((update|((insert|replace).*?into)|from|join)\s*?)(\?\?)([a-zA-Z0-9_\-]+)/i', '$1'.$this->prefix.'$6', $sql, -1, $count);
+		return preg_replace('/((update|((insert|replace).*?into)|from|join)\s*?)(\?\?)([a-zA-Z0-9_\-]+)/i', '$1'.DBAL::$prefix.'$6', $sql, -1, $count);
 	}
 
 	protected function logQuery($sql, $limit = 0, $offset = 0)
