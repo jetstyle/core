@@ -38,12 +38,6 @@ class RequestHandler
 				
 		$this->initDebug();
 		$this->initDBAL();
-		$this->initTPL();
-		$this->initMessageSet();
-		$this->initUpload();
-		$this->initPrincipal();
-		$this->initFixtures();
-		$this->initRequestInfo();
 		
 		// config from DB
 		if ($this->db)
@@ -51,6 +45,14 @@ class RequestHandler
 			Finder::useModel('DBModel');
 			Config::loadFromDb('??config');
 		}
+		
+		$this->initTPL();
+		$this->initMessageSet();
+		$this->initUpload();
+		$this->initPrincipal();
+		$this->initFixtures();
+		$this->initRequestInfo();
+		
 
 		Debug :: trace("RH: init done");
 	}
@@ -92,7 +94,8 @@ class RequestHandler
 	{
 		Debug :: mark("upload");
 		Finder::useClass("Upload");
-		$this->upload = & new Upload($this, Config::get('project_dir') . "files/", '', 'files/');
+		$this->upload = &Upload::getInstance();
+		$this->upload->setDir(Config::get('file_dir'));
 		Debug :: trace("RH: created Upload", null, "upload");
 	}
 

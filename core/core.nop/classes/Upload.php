@@ -53,97 +53,56 @@
  =============================================================== v.2 (Zharik)
 
  */
-class Upload {
+class Upload 
+{
 
-	public $dir;
+	private static $instance = null;
+	
 	public $TYPES = array(); // ext => [type,word]
 	public $ALLOW = array(); // белый список расширений
 	public $DENY = array(); // чёрный список расширений
 	public $GRAPHICS = array('jpg', 'jpeg', 'gif', 'png', 'bmp');
 	
-	protected $rh;
+	protected $dir;
 	protected $current = false; //последний загруженный/выбранный файл
-	protected $table_name; //имя таблицы, в которой хранить данные о типах
 	protected $chmod = 0744; //какие права выставлять на загруженный файл
 
 	protected $DIRS_SWAPPED = array(); //для DirSwap(),  DirUnSwap();
 
-	public function __construct(&$rh, $dir="", $table_name='')
+	private function __construct()
 	{
-		$this->rh =& $rh;
-		$this->dir = $dir;//with trailing '/'
-		$this->webDir = $this->rh->base_url.str_replace($this->rh->project_dir, '', $this->dir);
-		$this->table_name = $table_name ? $table_name : $rh->project_name.'_upload';
-		$this->init();
-	}
-
-	protected function init()
-	{
-		if (!$this->rh->db)
-			return;
-		$row = $this->rh->db->queryOne("SELECT value FROM ??config WHERE name='upload_ext'");
-		$exts = explode(",", $row['value']);
-
-		if (!empty($exts))
+		if (Config::get('upload_ext'))
 		{
-			foreach ($exts as $ext)
+			$exts = explode(",", Config::get('upload_ext'));
+	
+			if (!empty($exts))
 			{
-				$ext = trim($ext);
-				$this->TYPES[ $ext ] = array($ext,$ext);
-				$this->ALLOW [$ext]  = $ext;
-			}
-		}
-		else
-		{
-			$this->rh->db->execute("SELECT * FROM ??upload ");
-			while($row = $this->rh->db->getRow())
-			{
-				$this->TYPES[ $row['ext'] ] = array($row['type'],$row['title']);
-				$this->ALLOW [$row['ext']]  = $row['ext'];
+				foreach ($exts as $ext)
+				{
+					$ext = trim($ext);
+					$this->TYPES[ $ext ] = array($ext,$ext);
+					$this->ALLOW [$ext]  = $ext;
+				}
 			}
 		}
 	}
 
-	protected function _current($file_name, $ext)
+	public static function &getInstance()
 	{
-		$file_name_ext = $file_name.".".$ext;
-		$file_name_full = $this->dir.$file_name_ext;
-		$this->current->name_full = $file_name_full;
-		$this->current->name_short = $file_name_ext;
-		$this->current->ext = strtolower($ext);
-		$this->current->format = ($this->TYPES[$ext][1] ? $this->TYPES[$ext][1] : strtolower($ext));
-		$this->current->_format = $this->TYPES[$ext][0];
-		$this->current->size = floor(100.0*@filesize($file_name_full)/1024)/100;
-		$this->current->link = $this->webDir.$this->current->name_short;
+		 if (null === self::$instance)
+		 {
+		 	self::$instance = new self();
+		 }
+		 
+		 return self::$instance;
 	}
-
-	/*
-	function checkExt($ext,$type)
+	
+	public function setDir($dir)
 	{
-		if(!isset($this->TYPES[$ext]))
-		{
-			$this->TYPES[$ext] = array( $type, $ext );
-			$this->rh->db->execute("INSERT INTO ".$this->table_name."(ext,type,title) VALUES('$ext','$type','$ext')");
-		}
+		$this->dir = $dir;
+		$this->webDir = (Config::get('front_end_path') ? Config::get('front_end_path') : RequestInfo::$baseUrl).str_replace(Config::get('project_dir'), '', $this->dir);
 	}
-	*/
-
-	protected function isAllowed($ext)
-	{
-		if( (count($this->ALLOW) && !in_array($ext,$this->ALLOW))	|| (count($this->DENY) && in_array($ext,$this->DENY)) )
-		{
-			return false;
-		}
-		return true;
-	}
-
-	protected function parseSizeParam($val)
-	{
-		$pattern = '/(<|>|>=|<=|=|==|)(\d+)/';
-		preg_match($pattern, $val, $matches);
-		return array($matches[1], $matches[2]);
-	}
-
+	
 	public function uploadFile($_file, $file_name, $is_full_name=false, $params = NULL )
 	{
 		if(!is_array($_file))	
@@ -201,12 +160,12 @@ class Upload {
 			{
 				if (!$this->createDir($dirname))
 				{
-					throw new Exception("Upload: can't create directory ".str_replace($this->rh->project_dir, '', $dirname));
+					throw new Exception("Upload: can't create directory ".str_replace(Config::get('project_dir'), '', $dirname));
 				}
 			}
 			elseif (!is_writable($dirname))
 			{
-				throw new Exception("Upload: directory ".str_replace($this->rh->project_dir, '', $dirname)." is not writable");
+				throw new Exception("Upload: directory ".str_replace(Config::get('project_dir'), '', $dirname)." is not writable");
 			}
 					
 			if(in_array($ext, $this->GRAPHICS) && is_array($params['size']) && (strlen($params['size'][0]) > 0 && strlen($params['size'][1]) > 0))
@@ -262,6 +221,35 @@ class Upload {
 		{
 			return false;
 		}
+	}
+	
+	protected function _current($file_name, $ext)
+	{
+		$file_name_ext = $file_name.".".$ext;
+		$file_name_full = $this->dir.$file_name_ext;
+		$this->current->name_full = $file_name_full;
+		$this->current->name_short = $file_name_ext;
+		$this->current->ext = strtolower($ext);
+		$this->current->format = ($this->TYPES[$ext][1] ? $this->TYPES[$ext][1] : strtolower($ext));
+		$this->current->_format = $this->TYPES[$ext][0];
+		$this->current->size = floor(100.0*@filesize($file_name_full)/1024)/100;
+		$this->current->link = $this->webDir.$this->current->name_short;
+	}
+
+	protected function isAllowed($ext)
+	{
+		if( (count($this->ALLOW) && !in_array($ext,$this->ALLOW))	|| (count($this->DENY) && in_array($ext,$this->DENY)) )
+		{
+			return false;
+		}
+		return true;
+	}
+
+	protected function parseSizeParam($val)
+	{
+		$pattern = '/(<|>|>=|<=|=|==|)(\d+)/';
+		preg_match($pattern, $val, $matches);
+		return array($matches[1], $matches[2]);
 	}
 
 	protected function convertToFlv($fn, $ft)
