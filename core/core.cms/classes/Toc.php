@@ -12,8 +12,8 @@ class Toc
 	public function __construct()
 	{
 		$this->rh = RequestHandler::getInstance();
-		$this->numerate = $rh->toc_numerate;
-		$this->limit = $rh->toc_limit;
+		$this->numerate = $this->rh->toc_numerate;
+		$this->limit = $this->rh->toc_limit;
 	}
 
 	///////////////////////////////////////////////////////////////////////////////////////////////////////////

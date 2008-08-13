@@ -92,7 +92,7 @@ abstract class PopupObjects
 		$this->rubricsTable = $value;
 	}
 
-	abstract function getFile($data);
+	abstract protected function getFile($data);
 
 	protected function getItemsCount()
 	{
