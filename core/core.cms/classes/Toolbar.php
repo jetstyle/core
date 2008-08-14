@@ -9,10 +9,13 @@
  {
  	protected $items = array('main' => array(), 'submenu' => array());
  	protected $goToList;
-
+	protected $db = null;
+	protected $tpl = null;
+ 	
  	public function __construct()
  	{
- 		$this->rh = &RequestHandler::getInstance();
+ 		$this->db = &Locator::get('db');
+ 		$this->tpl = &Locator::get('tpl');
  	}
 
  	public function getData()
@@ -35,7 +38,7 @@
  	}
 
  	protected function loadGoTo() {
-    	$this->goToList = $this->rh->db->query("" .
+    	$this->goToList = $this->db->query("" .
  			"SELECT title_pre AS title, _path AS path " .
  			"FROM ??content " .
  			"WHERE mode != '' " .
@@ -45,7 +48,7 @@
 
  	protected function getLoadResult()
  	{
- 		return $this->rh->db->execute("" .
+ 		return $this->db->execute("" .
  				"SELECT id, title, href, _level, _parent " .
  				"FROM ??toolbar " .
  				"WHERE _state = 0 AND _level IN (1,2) " .
@@ -55,12 +58,14 @@
 
  	protected function constructResult($result)
  	{
- 		$params = $this->rh->page->getParams();
+ 		$params = Locator::get('controller')->getParams();
 		$moduleName = $params[0];
 
- 		while($r = $this->rh->db->getRow($result))
+		$principal = &Locator::get('principal');
+		
+ 		while($r = $this->db->getRow($result))
  		{
- 			$r['granted'] = $this->rh->principal->isGrantedTo($r['href']);
+ 			$r['granted'] = $principal->isGrantedTo($r['href']);
 
 
  			if($r['_level'] == 1)
@@ -89,14 +94,14 @@
  				if($this->items['main'][$r['id']])
  				{
  					$this->items['main'][$r['id']]['selected'] = true;
- 					$this->rh->tpl->set('menu_selected', $r['id']);
+ 					$this->tpl->set('menu_selected', $r['id']);
  				}
  				else
  				{
  					$this->items['submenu'][$r['_parent']]['childs'][$r['id']]['selected'] = true;
  					$this->items['submenu'][$r['_parent']]['selected'] = true;
  					$this->items['main'][$r['_parent']]['selected'] = true;
- 					$this->rh->tpl->set('menu_selected', $r['_parent']);
+ 					$this->tpl->set('menu_selected', $r['_parent']);
  				}
  			}
  		}

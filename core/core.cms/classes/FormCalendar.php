@@ -58,10 +58,10 @@ class FormCalendar extends FormIframe
 		{
 			foreach($this->CALENDAR_FIELDS AS $field)
 			{
-				$this->rh->tpl->set('_'.$field, date($this->date_format));
+				$this->tpl->set('_'.$field, date($this->date_format));
 				if($this->USE_TIME)
 				{
-					$this->rh->tpl->set('_'.$field.'_time', date('H:i'));
+					$this->tpl->set('_'.$field.'_time', date('H:i'));
 				}
 			}
 		}
@@ -87,8 +87,6 @@ class FormCalendar extends FormIframe
 
 	function update()
 	{
-		$rh =& $this->rh;
-
 		if($this->YEAR)
 		{
 			$this->postData['year'] = preg_replace($this->r_date_in, $this->r_year, $_POST[$this->prefix.$this->YEAR]);

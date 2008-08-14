@@ -14,7 +14,7 @@ class ListSelect extends ListSimple
 	var $topic_field = 'topic_id';
 	function Handle()
 	{
-		$db = &DBAL::getInstance();
+		$db = &$this->db;
 		
 		$id_opts = $this->config->id_opts ? $this->config->id_opts : "id";
 		if($this->config->topic_field)

@@ -3,23 +3,17 @@
 Finder::useClass('ModuleConfig');
 class ModuleConstructor
 {
-	public $rh; 				//ссылка на $rh
 	public $moduleName = ''; 	//имя текущего модуля
 
 	protected $config;
 	protected $handlersType = 'modules';
 
-	public function __construct()
-	{
-		$this->rh = &RequestHandler::getInstance();
-	}
-
 	public function initialize($moduleName)
 	{
 		//проеряем права
-		if( !$this->rh->principal->isGrantedTo('do/'.$moduleName ) )
+		if( !Locator::get('principal')->isGrantedTo('do/'.$moduleName ) )
 		{
-			return $this->rh->deny();
+			return Controller::deny();
 		}
 
 		//всё ОК
@@ -75,8 +69,9 @@ class ModuleConstructor
 			{
 				$result[] = $this->proceedModule($this->getConfig($subModule, $config));
 			}
-			$this->rh->tpl->setRef('wrapped', $result);
-			return $this->rh->tpl->parse($config->template);
+			$tpl = &Locator::get('tpl');
+			$tpl->setRef('wrapped', $result);
+			return $tpl->parse($config->template);
 		}
 		else
 		{
@@ -87,9 +82,9 @@ class ModuleConstructor
 	protected function getConfig($name, $cfg = null)
 	{
 		//проеряем права
-		if( !$this->rh->principal->isGrantedTo('do/'.$this->moduleName.'/'.$what ) )
+		if( !Locator::get('principal')->isGrantedTo('do/'.$this->moduleName.'/'.$what ) )
 		{
-			return $this->rh->deny();
+			return Controller::deny();
 		}
 
 		if ($cfg)

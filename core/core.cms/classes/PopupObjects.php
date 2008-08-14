@@ -2,7 +2,7 @@
 
 abstract class PopupObjects
 {
-	protected $rh = null;
+	protected $db = null;
 	protected $upload = null;
 	protected $rubricId = 0;			// текущая рубрика
 	protected $rubrics = array();		// массив со всеми рубриками array(0 => array('id' => 0, 'title' => 'hello'), ....)
@@ -17,8 +17,9 @@ abstract class PopupObjects
 	{
 		include($fileConfig);
 		
-		$this->rh = &RequestHandler::getInstance();
-		$this->upload =&Upload::getInstance();
+		$this->db = &Locator::get('db');
+		
+		$this->upload =&Locator::get('upload');
 		$this->upload->setDir(Config::get('file_dir').$this->upload_dir.'/');
 	}
 
@@ -46,19 +47,19 @@ abstract class PopupObjects
 		}
 
 		Finder::useClass('Pager');
-		$this->pager = new Pager($this->rh);
+		$this->pager = new Pager();
 		$this->pager->setup(intval(RequestInfo::get($this->pageVar)), $total, 8, 5);
 
-		$result = $this->rh->db->execute("
+		$result = $this->db->execute("
 			SELECT id, title
 			FROM ??".$this->table."
-			WHERE ".($this->rubricId ? "topic_id =".$this->rh->db->quote($this->rubricId)." AND " : "")." _state = 0
+			WHERE ".($this->rubricId ? "topic_id =".$this->db->quote($this->rubricId)." AND " : "")." _state = 0
 			LIMIT ".$this->pager->getOffset().",".$this->pager->getLimit()."
 		");
 
 		if ($result)
 		{
-            while ($r = $this->rh->db->getRow($result))
+            while ($r = $this->db->getRow($result))
     		{
     			if ($data = $this->getFile($r))
 				{
@@ -96,10 +97,10 @@ abstract class PopupObjects
 
 	protected function getItemsCount()
 	{
-		$res = $this->rh->db->queryOne("
+		$res = $this->db->queryOne("
 			SELECT COUNT(id) AS total
 			FROM ??".$this->table."
-			WHERE ".($this->rubricId ? "topic_id =".$this->rh->db->quote($this->rubricId)." AND " : "")." _state = 0
+			WHERE ".($this->rubricId ? "topic_id =".$this->db->quote($this->rubricId)." AND " : "")." _state = 0
 		");
 
 		return intval($res['total']);
@@ -107,7 +108,7 @@ abstract class PopupObjects
 
 	protected function loadRubrics()
 	{
-		$this->rubrics = $this->rh->db->query("
+		$this->rubrics = $this->db->query("
 			SELECT id, title
 			FROM ??".$this->rubricsTable."
 			WHERE _state = 0

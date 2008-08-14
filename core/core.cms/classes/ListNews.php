@@ -39,7 +39,7 @@ class ListNews extends ListSimple
 
 	public function handle()
 	{
-		$db =&DBAL::getInstance();
+		$db = &$this->db;
 
 		//assign some
 		$this->tpl->set('prefix', $this->prefix);
@@ -98,7 +98,7 @@ class ListNews extends ListSimple
 
 	protected function defineDate()
 	{
-		$db =&DBAL::getInstance();
+		$db = &$this->db;
 
 		$this->year = intval(RequestInfo::get('year'));
 		$this->month = intval(RequestInfo::get('month'));

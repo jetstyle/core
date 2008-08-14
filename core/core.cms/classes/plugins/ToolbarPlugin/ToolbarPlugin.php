@@ -14,7 +14,7 @@ class ToolbarPlugin extends Plugin
 		if (!RequestInfo::get('hide_toolbar'))
  		{
  			Finder::useClass('Toolbar');
-			$toolbar = new Toolbar($this->rh);
+			$toolbar = new Toolbar();
 			$this->data = $toolbar->getData();
 			$this->goTo = $toolbar->getGoToList();
  		}
@@ -22,10 +22,9 @@ class ToolbarPlugin extends Plugin
 
 	function rend()
 	{
-		$this->rh->tpl->set($this->store_to, $this->data);
-		$this->rh->tpl->set('goto', $this->goTo);
-		
-		// $this->rh->tpl->set('front_end_url',$this->rh->front_end->path_rel);
+		$tpl = &Locator::get('tpl');
+		$tpl->set($this->store_to, $this->data);
+		$tpl->set('goto', $this->goTo);
 	}
 }
 ?>

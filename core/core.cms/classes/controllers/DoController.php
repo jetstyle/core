@@ -27,13 +27,13 @@ class DoController extends Controller
 
 	function handle()
 	{
-		if (!$this->rh->principal->isAuth())
+		if (!Locator::get('principal')->isAuth())
 		{
 			$redirectTo = RequestInfo::$baseUrl.'login'; //login page
             $redirectTo .= '?retpath='; //path to return there
             $redirectTo .= $_SERVER['HTTPS'] ? 'https://' : 'http://';
             $redirectTo .= $_SERVER['SERVER_NAME'].RequestInfo::hrefChange('');
-			$this->rh->redirect($redirectTo);
+			Controller::redirect($redirectTo);
 		}
 
 		parent::handle();
@@ -41,7 +41,7 @@ class DoController extends Controller
 
 	function handle_start($config)
 	{
-		$this->rh->redirect(RequestInfo::$baseUrl.'start');
+		Controller::redirect(RequestInfo::$baseUrl.'start');
 	}
 
 	function handle_default($config)
@@ -49,9 +49,9 @@ class DoController extends Controller
 		Finder::useClass("ModuleConstructor");
 		$moduleConstructor =& new ModuleConstructor();
 		$moduleConstructor->initialize($config['module']);
-		$this->rh->tpl->set('module_body', $moduleConstructor->proceed($config['mode']));
+		Locator::get('tpl')->set('module_body', $moduleConstructor->proceed($config['mode']));
 
-		$this->config['title_short'] = $moduleConstructor->getTitle();
+		$this->data['title_short'] = $moduleConstructor->getTitle();
 		$this->siteMap = 'module';
 	}
 
@@ -63,7 +63,7 @@ class DoController extends Controller
 		switch($cls)
 		{
 			case 'module':
-				$result = 'do/'.$item['href'];
+				$result = $this->path.'/'.$item['href'];
 			break;
 		}
 

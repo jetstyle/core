@@ -1,14 +1,8 @@
 <?php
 class ModuleConfig 
 {
-	public $rh;
 	public $moduleName = '';
-	
-	public function __construct()
-	{
-		$this->rh = RequestHandler::getInstance();
-	}
-	
+		
 	public function read($configFile)
 	{
 		include($configFile);

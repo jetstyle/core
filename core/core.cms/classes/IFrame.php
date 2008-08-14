@@ -14,12 +14,12 @@ class IFrame
 	
 	public function handle()
 	{
-		TemplateEngine::getInstance()->set( '__url', $this->config->url );
+		Locator::get('tpl')->set( '__url', $this->config->url );
 	}
 	
 	public function getHtml()
 	{
-		return TemplateEngine::getInstance()->parse( $this->template );
+		return Locator::get('tpl')->parse( $this->template );
 	}
 }	
 ?>

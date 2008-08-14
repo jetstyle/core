@@ -9,11 +9,13 @@ class Toc
 	var $nums = array();
 	var $items = array();
 	
+	protected $tpl = null;
+	
 	public function __construct()
 	{
-		$this->rh = RequestHandler::getInstance();
-		$this->numerate = $this->rh->toc_numerate;
-		$this->limit = $this->rh->toc_limit;
+		$this->tpl = &Locator::get('tpl');
+		$this->numerate = Config::get('toc_numerate');
+		$this->limit = Config::get('toc_limit');
 	}
 
 	///////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -25,8 +27,8 @@ class Toc
 		$out = $this->buildToc($this->childs[0]);
 		if($out)
 		{
-			$this->rh->tpl->set('res', $out);
-			$out = $this->rh->tpl->parse('toc.html:main');
+			$this->tpl->set('res', $out);
+			$out = $this->tpl->parse('toc.html:main');
 			$data = $out.$data;
 		}
 
@@ -78,8 +80,8 @@ class Toc
 				$r['childs'] = $this->buildToc($this->childs[$id]);
 				if($r['childs'])
 				{
-					$this->rh->tpl->setRef('res', $r['childs']);
-					$r['childs'] = $this->rh->tpl->parse('toc.html:childs');
+					$this->tpl->setRef('res', $r['childs']);
+					$r['childs'] = $this->tpl->parse('toc.html:childs');
 				}
 							
 				if($this->numerate)
@@ -87,8 +89,8 @@ class Toc
 					$r['title'] = $r['num'].' '.$r['title'];
 				}			
 				
-				$this->rh->tpl->setRef('*', $r);
-				$out .= $this->rh->tpl->parse('toc.html:item');
+				$this->tpl->setRef('*', $r);
+				$out .= $this->tpl->parse('toc.html:item');
 			}
 		}
 		return $out;

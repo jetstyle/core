@@ -18,21 +18,21 @@ class StartController extends Controller
 		array('default', array(NULL)),
 	);
 
-	function handle()
+	public function handle()
 	{
-		if (!$this->rh->principal->isAuth())
+		if (!Locator::get('principal')->isAuth())
 		{
-			$this->rh->redirect(RequestInfo::$baseUrl.'login');
+			Controller::redirect(RequestInfo::$baseUrl.'login');
 		}
 
 		parent::handle();
 	}
 
-	function handle_default($config)
+	protected function handle_default($config)
 	{
-		if( !$this->rh->principal->isGrantedTo('start') )
+		if(!Locator::get('principal')->isGrantedTo('start') )
 		{
-			return $this->rh->deny();
+			return Controller::deny();
 		}
 
 		$this->siteMap = "start";

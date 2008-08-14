@@ -14,12 +14,12 @@
 
 class ModulePacker
 {
-	protected $rh;
+	protected $db = null;
 	protected $sqlDumper = null;
 
 	public function __construct()
 	{
-		$this->rh = RequestHandler::getInstance();
+		$this->db = &Locator::get('db');
 		Finder::useClass('ModuleConfig');
 		Finder::useClass('sql/SqlDump');
 		$this->sqlDumper = new SqlDump();
@@ -156,7 +156,7 @@ class ModulePacker
 
 	protected function getModulesList()
 	{
-		return $this->rh->db->query("
+		return $this->db->query("
 			SELECT *
 			FROM ??toolbar
 			WHERE LENGTH(href) > 0 AND _state IN (0,1)
@@ -165,16 +165,16 @@ class ModulePacker
 
 	protected function getModule($href)
 	{
-		return $this->rh->db->queryOne("
+		return $this->db->queryOne("
 			SELECT *
 			FROM ??toolbar
-			WHERE href = ".$this->rh->db->quote($href)." AND LENGTH(href) > 0
+			WHERE href = ".$this->db->quote($href)." AND LENGTH(href) > 0
 		");
 	}
 
 	protected function appendPrefixToTables($v)
 	{
-		return trim($this->rh->db->prefix.$v);
+		return trim(DBAL::$prefix.$v);
 	}
 }
 

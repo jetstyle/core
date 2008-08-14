@@ -1,5 +1,5 @@
 <?php
-
+die('old shit');
 class FormGallerySimple
 {
 	var $template_item = "form_gallery_simple.html";
@@ -7,7 +7,7 @@ class FormGallerySimple
 
 	function FormGallerySimple(& $config)
 	{
-		$this->rh = &RequestHandler::getInstance();
+
 		$this->table_name = $config->table_name;
 		//base modules binds
 		$this->config = & $config;

@@ -2,7 +2,6 @@
 
 class ListSimple
 {
-	protected $rh; 			//ссылка на $rh
 	protected $tpl;
 	
 	protected $config;		//ссылка на объект класса ModuleConfig
@@ -38,8 +37,9 @@ class ListSimple
 	public function __construct( &$config )
 	{
 		$this->config =& $config;
-		$this->rh = &RequestHandler::getInstance();
-		$this->tpl = &TemplateEngine::getInstance();
+	
+		$this->db = &Locator::get('db');
+		$this->tpl = &Locator::get('tpl');
 		
 		if ($this->config->perPage)
 		{
@@ -64,10 +64,8 @@ class ListSimple
 	{
 		if( $this->updateListStruct() )
 		{
-			$this->rh->redirect( RequestInfo::hrefChange('', array()));
+			Controller::redirect( RequestInfo::hrefChange('', array()));
 		}
-
-//		$this->tpl =&TemplateEngine::getInstance();
 
 		$this->load();
 
@@ -76,7 +74,7 @@ class ListSimple
 
 		//render list
 		Finder::useClass("ListObject");
-		$list =& new ListObject( $this->rh, $this->items );
+		$list =& new ListObject( $this->items );
 		$list->ASSIGN_FIELDS = $this->SELECT_FIELDS;
 		$list->EVOLUTORS = $this->EVOLUTORS; //потомки могут добавить своего
 		$list->EVOLUTORS["href"] = array( &$this, "_href" );
@@ -175,7 +173,7 @@ class ListSimple
 		if (!$this->model)
 		{
 			Finder::useModel('DBModel');
-			$this->model = new DBModel($this->rh);
+			$this->model = new DBModel();
 			$this->model->setTable($this->config->table_name);
 			$this->model->setFields($this->config->SELECT_FIELDS);
 			$this->model->where = ( $_GET['_show_trash'] ? '{_state}>=0' : "{_state} <>2 " ) . ($this->config->where ? ' AND ' . $this->config->where : '') ;
@@ -192,7 +190,6 @@ class ListSimple
 	 */
 	protected function updateListStruct()
 	{
-		$rh =& $this->rh;
 		//params
 		$id1 = intval($_POST['id1']);
 		$id2 = intval($_POST['id2']);

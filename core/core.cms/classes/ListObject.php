@@ -34,9 +34,8 @@
 =============================================================== v.3 (Zharik)
  */
 
-class ListObject {
-
-	var $rh;  //ссылка на объект типа RequestHandler
+class ListObject 
+{
 	var $tpl; //то же, но на TemplateEngine
 	var $ITEMS = array(); //ссылка на массив объектов, по которым нужно бегать
 	var $EVOLUTORS = array();
@@ -55,9 +54,8 @@ class ListObject {
 
 	var $list_store_to = "_";
 
-	function ListObject( &$rh, &$ITEMS ){
-		$this->rh =& $rh;
-		$this->tpl=& $rh->tpl;
+	function __construct( &$ITEMS ){
+		$this->tpl=&Locator::get('tpl');
 		$this->ITEMS =& $ITEMS;
 	}
 
@@ -123,7 +121,7 @@ class ListObject {
 
 	function parseOne()
 	{
-		$tpl =& $this->rh->tpl;
+		$tpl =& $this->tpl;
 
 		//assign misc values
 		$tpl->Set( "_index", $this->loop_index );

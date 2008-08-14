@@ -24,7 +24,7 @@ class ListDrugs extends ListAdvanced
 
  function handle()
  {
-    $this->rh->tpl->set('table_name', $this->table_name);
+    $this->tpl->set('table_name', $this->table_name);
     parent::Handle();
  }
 }

@@ -18,7 +18,7 @@ class FormFiles extends FormSimple
 		parent::__construct($config);
 
 		//upload
-		$this->upload = &$this->rh->upload;
+		$this->upload = &Locator::get('upload');
 		$this->upload->setDir($config->upload_dir ? Config::get('file_dir').$config->upload_dir."/" : Config::get('file_dir'));
 	}
 
@@ -37,16 +37,11 @@ class FormFiles extends FormSimple
 	{
 		if( $this->filesRendred ) return;
 
-		$rh =& $this->rh;
-		$tpl =& $rh->tpl;
+		$tpl =& $this->tpl;
 		$config =& $this->config;
 
 		//рендерим файлы
-		if( is_array($config->FILES) )
-		{
-			$this->_renderFilesOld();
-		}
-		elseif(is_array($config->_FILES))
+		if(is_array($config->_FILES))
 		{
 			$this->_renderFiles();
 		}
@@ -57,8 +52,7 @@ class FormFiles extends FormSimple
 
 	function _renderFiles()
 	{
-		$rh =& $this->rh;
-		$tpl =& $rh->tpl;
+		$tpl =& $this->tpl;
 		$upload =& $this->upload;
 		$config =& $this->config;
 
@@ -102,8 +96,8 @@ class FormFiles extends FormSimple
 											$r['width'] = $A[0];
 											$r['height'] = $A[1];
 											$r['src_original'] = $file->link.'?popup=1';
-											$this->rh->tpl->setRef('file', $r);
-											$this->item[$field_file] = $this->rh->tpl->parse($this->template_files.':image_with_link');
+											$this->tpl->setRef('file', $r);
+											$this->item[$field_file] = $this->tpl->parse($this->template_files.':image_with_link');
 										}
 									}
 								}
@@ -111,8 +105,8 @@ class FormFiles extends FormSimple
 
 							if(!$this->item[$field_file])
 							{
-								$this->rh->tpl->setRef('file', $r);
-								$this->item[$field_file] = $this->rh->tpl->parse($this->template_files.':image');
+								$this->tpl->setRef('file', $r);
+								$this->item[$field_file] = $this->tpl->parse($this->template_files.':image');
 							}
 						}
 						else if ($file->name_full)
@@ -124,23 +118,23 @@ class FormFiles extends FormSimple
 								'name_short' =>  $file->name_short,
 							);
 
-							$this->rh->tpl->setRef('file', $r);
+							$this->tpl->setRef('file', $r);
 
 							if($file->ext == 'flv')
 							{
-								$this->item[$field_file] = $this->rh->tpl->parse($this->template_files.':file_video');
+								$this->item[$field_file] = $this->tpl->parse($this->template_files.':file_video');
 							}
 							elseif($file->ext == 'mp3')
 							{
-								$this->item[$field_file] = $this->rh->tpl->parse($this->template_files.':file_mp3');
+								$this->item[$field_file] = $this->tpl->parse($this->template_files.':file_mp3');
 							}
 							elseif($file->ext == 'swf')
 							{
-								$this->item[$field_file] = $this->rh->tpl->parse($this->template_files.':file_flash');
+								$this->item[$field_file] = $this->tpl->parse($this->template_files.':file_flash');
 							}
 							else
 							{
-								$this->item[$field_file] = $this->rh->tpl->parse($this->template_files.':file');
+								$this->item[$field_file] = $this->tpl->parse($this->template_files.':file');
 							}
 
                             $this->item[$field_file."_down"] = $this->item[$field_file];
@@ -175,67 +169,13 @@ class FormFiles extends FormSimple
 		return array("all" => "(".implode(", ",$exts).")", "graphics" => "(".implode(", ", array_intersect($exts, $this->upload->GRAPHICS)).")");
 	}
 
-	function _renderFilesOld()
-	{
-		$rh =& $this->rh;
-		$tpl =& $rh->tpl;
-		$upload =& $this->upload;
-		$config =& $this->config;
-
-		foreach($config->FILES as $row)
-		{
-			if( $file = $upload->GetFile( str_replace('*', $this->id, $row[0])) )
-			{
-				//файл? рисуем статистику и ссылку "скачать"
-				$_href = $this->rh->front_end->path_rel.'files/'.($this->config->upload_dir ? $this->config->upload_dir."/" : "").$file->name_short;
-				//            $_href = $rh->url.'files/'.$file->name_short;
-				$tpl->set( 'file_'.$row[1], '('.$file->size.'kb, '.$file->format.", <a href='".$_href."'>скачать</a>)" );
-				$this->item[$this->field_file] = '<img src="'.$this->rh->front_end->path_rel.'files/'.($this->config->upload_dir ? $this->config->upload_dir."/" : "").$file->name_short.'" />';
-			}
-		}
-	}
-
 	function update()
 	{
 		if( parent :: update() )
 		{
-			$rh =& $this->rh;
 			//загружаем и удал€ем файлы
 			$upload =& $this->upload;
-			if( is_array($this->config->FILES) )	{
-				foreach($this->config->FILES as $row)
-				{
-					$fname = str_replace('*', $this->id, $row[0]);
-					//грузим файл и провер€ем формат, если нужно
-					if($this->config->RESIZE)
-					$file = $upload->UploadFile( $this->prefix.$row[1], $fname, false, array($row[3][0], $row[3][1]));
-					else
-					$file = $upload->UploadFile( $this->prefix.$row[1], $fname );
-					$kill = false;
-					if( is_array($row[2]) && count($row[2]) && !in_array( $file->ext, $row[2]) )
-					$kill = true;
-					//провер€ем ограничение на линейные размеры
-					if(is_array($row[3]))
-					{
-						$A = @getimagesize( $file->name_full );
-						if(
-						$row[3][2] && ( $row[3][0] && $A[0]!=$row[3][0] || $row[3][1] && $A[1]!=$row[3][1]) || //строгие размеры
-						($row[3][0]>0 && $A[0]>$row[3][0]) || //по щирине
-						($row[3][1]>0 && $A[1]>$row[3][1]) //по высоте
-						)
-						$kill = true;
-					}
-					//удал€ем файл, если нужно
-					if( $_POST[$this->prefix.$row[1].'_del'] ){
-						if( !$file ) $file = $upload->GetFile($fname);
-						$kill = true;
-						//            @unlink( $file->name_full );
-					}
-					if($kill && $file)
-					@unlink( $file->name_full );
-				}
-			} /* added by lunatic */
-			elseif(is_array($this->config->_FILES))
+			if(is_array($this->config->_FILES))
 			{
 				foreach($this->config->_FILES AS $field_file => $result_arrays)
 				{
@@ -283,7 +223,6 @@ class FormFiles extends FormSimple
 
 	function _handleUpload($field_file, &$result_arrays, $do_upload=false)
 	{
-		$rh =& $this->rh;
 		$upload =& $this->upload;
 
 		if(is_array($result_arrays))

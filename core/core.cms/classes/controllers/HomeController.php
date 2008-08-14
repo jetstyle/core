@@ -14,13 +14,13 @@ class HomeController extends Controller
 
 	function handle_default($config)
 	{
-		if ($this->rh->principal->isAuth())
+		if (Locator::get('principal')->isAuth())
 		{
-			$this->rh->redirect(RequestInfo::$baseUrl.'start');
+			Controller::redirect(RequestInfo::$baseUrl.'start');
 		}
 		else
 		{
-			$this->rh->redirect(RequestInfo::$baseUrl.'login');
+			Controller::redirect(RequestInfo::$baseUrl.'login');
 		}
 	}
 }

@@ -20,9 +20,9 @@ class ModulePackerController extends Controller
 
 	public function handle()
 	{
-		if (!$this->rh->principal->isAuth())
+		if (!Locator::get('principal')->isAuth())
 		{
-			$this->rh->redirect(RequestInfo::$baseUrl.'login');
+			Controller::redirect(RequestInfo::$baseUrl.'login');
 		}
 
 		parent::handle();
@@ -31,7 +31,7 @@ class ModulePackerController extends Controller
 	public function handle_default($config)
 	{
 		// force UTF8
-		$this->rh->db->query("SET NAMES utf8");
+		Locator::get('db')->query("SET NAMES utf8");
 
 		Finder::useClass("ModulePacker");
 		$modulePacker =& new ModulePacker();

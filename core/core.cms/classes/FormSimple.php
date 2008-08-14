@@ -2,7 +2,9 @@
 
 class FormSimple
 {
-	protected $rh; //ññûëêà íà $rh
+	protected $tpl = null;
+	protected $db = null;
+	
 	protected $config; //ññûëêà íà îáúåêò êëàññà ModuleConfig
 	protected $loaded = false; //ãğóçèëè èëè íåò äàííûå?
 	protected $model = null;
@@ -28,8 +30,9 @@ class FormSimple
 	{
 		//base modules binds
 		$this->config =& $config;
-		$this->rh = &RequestHandler::getInstance();
-
+		$this->tpl = &Locator::get('tpl');
+		$this->db = &Locator::get('db');
+		
 		if (is_array($this->config->has_one))
 		{
 			foreach($this->config->has_one AS $value)
@@ -103,11 +106,11 @@ class FormSimple
 			}
 			else
 			{
-				$this->rh->redirect( $this->_redirect );
+				Controller::redirect( $this->_redirect );
 			}
 		}
 
-		$tpl =& $this->rh->tpl;
+		$tpl =& $this->tpl;
 
 		//ïîäãîòîâêà íåòåêñòîâûõ ïîëåé
 		$this->renderFields();
@@ -158,8 +161,8 @@ class FormSimple
 
 	public function getHtml()
 	{
-		$this->rh->tpl->parse( $this->template_item, '___form');
-		return $this->rh->tpl->parse($this->template);
+		$this->tpl->parse( $this->template_item, '___form');
+		return $this->tpl->parse($this->template);
 	}
 
 	protected function load()
@@ -173,12 +176,12 @@ class FormSimple
 
 				if (!$this->item[$this->idField])
 				{
-					$this->rh->redirect(RequestInfo::hrefChange('', array($this->idGetVar => '')));
+					Controller::redirect(RequestInfo::hrefChange('', array($this->idGetVar => '')));
 				}
 
 				if ($this->item['_state']>0)
 				{
-					$this->rh->tpl->set("body_class", "class='state1'");
+					$this->tpl->set("body_class", "class='state1'");
 				}
 			}
 			$this->loaded = true;
@@ -198,7 +201,7 @@ class FormSimple
 
 		$this->handleForeignFields();
 
-		$tpl =& $this->rh->tpl;
+		$tpl =& $this->tpl;
 
 		/*
 			 $this->config->RENDER - êàæäàÿ çàïèñü â í¸ì:
@@ -271,7 +274,7 @@ class FormSimple
 			// äóìàåì, ÷òî $value['name'] ıòî èìÿ òàáëèöû
 			else
 			{
-				$result = $this->rh->db->execute("
+				$result = $this->db->execute("
 					SELECT ".$value['fk'].", title
 					FROM ??".$value['name']."
 					WHERE _state = 0
@@ -281,7 +284,7 @@ class FormSimple
 				if ($result)
 				{
 					$data = array();
-					while ($r = $this->rh->db->getRow($result))
+					while ($r = $this->db->getRow($result))
 					{
 						$data[$r[$value['fk']]] = $r['title'];
 					}
@@ -372,8 +375,7 @@ class FormSimple
 
 	protected function filters()
 	{
-		$rh =& $this->rh;
-		$tpl =& $rh->tpl;
+		$tpl =& $this->tpl;
 
 		//filter data
 		if( is_array($this->config->UPDATE_FILTERS) )
@@ -442,8 +444,8 @@ class FormSimple
 			$this->postData['_supertag'] = $translit->supertag( $this->postData[$field], TR_NO_SLASHES, $limit );
 			if ($this->config->supertag_check)
 			{
-				$sql = "SELECT id, _supertag FROM ??".$this->config->table_name." WHERE _supertag=".$rh->db->quote($this->postData['_supertag']);
-				$rs = $rh->db->queryOne($sql);
+				$sql = "SELECT id, _supertag FROM ??".$this->config->table_name." WHERE _supertag=".$this->db->quote($this->postData['_supertag']);
+				$rs = $this->db->queryOne($sql);
 				if ($rs['id'])
 				{
 					$this->postData['_supertag'] .= "_".$this->id;

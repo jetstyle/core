@@ -10,24 +10,25 @@ class LoginController extends Controller
 
 	function handle_default($config)
 	{
-		if ($this->rh->principal->isAuth())
+		$prp = &Locator::get('principal');
+		if ($prp->isAuth())
 		{
 			if (RequestInfo::get('logout'))
 			{
 				$redirectTo = RequestInfo::get('retpath') ?
 							  RequestInfo::get('retpath') :
 							  RequestInfo::$baseUrl.'login';
-				$this->rh->principal->logout($redirectTo);
+				$prp->logout($redirectTo);
 			} 
 			else 
 			{
 				if (RequestInfo::get('retpath')) 
 				{
-	            	$this->rh->redirect(RequestInfo::get('retpath'));
+	            	Controller::redirect(RequestInfo::get('retpath'));
 				} 
 				else 
 				{
-					$this->rh->redirect(RequestInfo::$baseUrl.'start');
+					Controller::redirect(RequestInfo::$baseUrl.'start');
 				}
 			}
 		}

@@ -13,7 +13,7 @@ class EditorObjectsCorrector
 
 	public function __construct()
 	{
-		$this->tpl = &TemplateEngine::getInstance();
+		$this->tpl = &Locator::get('tpl');
 	}
 
 	/**

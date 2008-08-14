@@ -8,7 +8,7 @@ class FormIframe extends FormFiles
 
 	public function handle()
 	{
-		$tpl = & $this->rh->tpl;
+		$tpl = & $this->tpl;
 
 		//load item
 		$this->load();
@@ -44,7 +44,7 @@ class FormIframe extends FormFiles
 		{
 			return;
 		}
-		$tpl = & $this->rh->tpl;
+		$tpl = & $this->tpl;
 		$wid = $this->item[$this->idField];
 
 		$vis = isset ($_COOKIE["cf" . $wid]) ? $_COOKIE["cf" . $wid] : !$this->config->closed_iframe;

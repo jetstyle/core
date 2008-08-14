@@ -1,8 +1,7 @@
 <?php
 class TreeControl
 {
-	protected $rh;
-	protected $tpl;
+	protected $tpl = null;
 	protected $config;
 
 	//templates
@@ -48,8 +47,8 @@ class TreeControl
 
 		$this->config->hide_buttons['addChild'][$this->level_limit] = true;
 
-		$this->rh = &RequestHandler::getInstance();
-		$this->tpl = &TemplateEngine::getInstance();
+		$this->tpl = &Locator::get('tpl');
+		$this->db = &Locator::get('db');
 		
 		$this->id = intval(RequestInfo::get($this->idGetVar));
 	}
@@ -106,7 +105,7 @@ class TreeControl
 					$rootId = $this->getRootId();
 					if ($rootId && !defined('UNIT_TEST'))
 					{
-						$this->rh->redirect(RequestInfo::hrefChange('', array($this->idGetVar => $rootId)));
+						Controller::redirect(RequestInfo::hrefChange('', array($this->idGetVar => $rootId)));
 					}
 				}
 				$show_trash = $_GET['_show_trash'];
@@ -252,7 +251,7 @@ class TreeControl
 		if (!$this->loaded)
 		{
 			$this->loaded = true;
-			$db = &DBAL::getInstance();
+			$db = &$this->db;
 			$result = $db->execute("
 				SELECT ".implode(", ", $this->config->SELECT_FIELDS)."
 				FROM ??".$this->config->table_name."
@@ -278,7 +277,7 @@ class TreeControl
 
 	protected function loadItem($id)
 	{
-		return DBAL::getInstance()->queryOne("
+		return $this->db->queryOne("
 			SELECT ".implode(", ", $this->config->SELECT_FIELDS)."
 			FROM ??".$this->config->table_name."
 			WHERE id = ".intval($id)." ". ($this->config->where ? ' AND ' . $this->config->where : '')." ".($this->level_limit ? " AND _level <= ".$this->level_limit : "")."
@@ -305,7 +304,7 @@ class TreeControl
 		}
 		else
 		{
-			$db = &DBAL::getInstance();
+			$db = &$this->db;
 			$result = $db->execute("
 				SELECT _parent
 				FROM ??".$this->config->table_name."
@@ -364,7 +363,7 @@ class TreeControl
 			$targetId = intval($_REQUEST['target']);
 			$beforeId = intval($_REQUEST['before']);
 			
-			$db = &DBAL::getInstance();
+			$db = &$this->db;
 			
 			if($beforeId)
 			{
@@ -405,12 +404,13 @@ class TreeControl
 		return '0';
 	}
 
-	public function updateTreePathes($tableName, $id, $allow_empty_supertag = false) {
+	public static function updateTreePathes($tableName, $id, $allow_empty_supertag = false) 
+	{
 		//$this->config->table_name replaced with $tableName
 		//$this->id replaced with $id
 		//$this->config->allow_empty_supertag replaced with allow_empty_supertag
     	//$parent_id = isset($parent_id) ? $parent_id : 1;
-    	$db = &DBAL::getInstance();
+    	$db = &Locator::get('db');
 		$root = $db->queryOne("SELECT id,_left,_right,_path,_parent FROM ??".$tableName." WHERE id='".$id."'");
 		if ($root) {
 			//грузим поддерево
@@ -465,8 +465,7 @@ class TreeControl
 
 	protected function addNode()
 	{
-		$rh =& $this->rh;
-		$db =& $rh->db;
+		$db =& $this->db;
 
 		Finder::useClass('Translit');
 		$translit =& new Translit();
@@ -501,7 +500,7 @@ class TreeControl
 			INSERT INTO ". DBAL::$prefix.$this->config->table_name ."
 			(title, title_pre, _parent, _supertag, _path, _order, _state)
 			VALUES
-			(".$this->rh->db->quote($node['title']).", ".$db->quote($node['title_pre']).", ".$db->quote($node['parent']).", ".$db->quote($node['supertag']).", ".$db->quote($node['_path']).", ".$db->quote($order['_max']).", 1)
+			(".$this->db->quote($node['title']).", ".$db->quote($node['title_pre']).", ".$db->quote($node['parent']).", ".$db->quote($node['supertag']).", ".$db->quote($node['_path']).", ".$db->quote($order['_max']).", 1)
 		");
 
 		return $id;
@@ -509,7 +508,7 @@ class TreeControl
 
 	function deleteNode($nodeId)
 	{
-		$db = &DBAL::getInstance();
+		$db = &$this->db;
 
 		$node = $db->queryOne("
 			SELECT id, _left, _right, _state
@@ -545,7 +544,7 @@ class TreeControl
 	{
 		if (!$this->rootId)
 		{
-			$result = DBAL::getInstance()->queryOne("
+			$result = $this->db->queryOne("
 				SELECT ".$this->idField."
 				FROM ??".$this->config->table_name."
 				WHERE _parent = 0
@@ -618,7 +617,7 @@ class TreeControl
 	{
 		$title = iconv("UTF-8", "CP1251", $title);
 		
-		$db = &DBAL::getInstance();
+		$db = &$this->db;
 		
 		$sql = "UPDATE ??".$this->config->table_name." SET title_short=".$db->quote($title)." WHERE id=".$db->quote($id);
 		$db->execute($sql);
@@ -629,7 +628,7 @@ class TreeControl
 	{
 		//shortcuts
 		$node =& $this->items[ $parent_id ];
-		$db = &DBAL::getInstance();
+		$db = &$this->db;
 		
 		//_level
 		if($node[$this->idField])

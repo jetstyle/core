@@ -9,7 +9,7 @@ class ListComplete extends ListSimple
 
 	public function handle()
 	{
-		$tpl = &TemplateEngine::getInstance();
+		$tpl = &$this->tpl;
 
 		//грузим данные
 		$this->load();
@@ -17,7 +17,7 @@ class ListComplete extends ListSimple
 		//возможно, операции с формой
 		if ($this->updateForm())
 		{
-			$this->rh->redirect(RequestInfo::hrefChange('', array('rnd' => mt_rand(1, 255))));
+			Controller::redirect(RequestInfo::hrefChange('', array('rnd' => mt_rand(1, 255))));
 		}
 
 		//рендерим форму
