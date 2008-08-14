@@ -16,6 +16,8 @@ Finder::useClass("Inflector");
 
 class DBModel extends Model implements IteratorAggregate, ArrayAccess, Countable, DataContainer
 {
+	protected $db = null;
+
 	/**
 	 * Имя таблицы
 	 *
@@ -232,12 +234,12 @@ class DBModel extends Model implements IteratorAggregate, ArrayAccess, Countable
 
 	public static function quote($str)
 	{
-		return DBAL::getInstance()->quote($str);
+		return Locator::get('db')->quote($str);
 	}
 
 	public function __construct($fieldSet = null)
 	{
-		$this->rh = &RequestHandler::getInstance();
+		$this->db = &Locator::get('db');
 		$this->initialize($fieldSet);
 	}
 
@@ -432,11 +434,11 @@ class DBModel extends Model implements IteratorAggregate, ArrayAccess, Countable
 
 		if ($sqlParts['group'])
 		{
-			$total = $this->rh->db->getNumRows($this->rh->db->execute($sql));
+			$total = $this->db->getNumRows($this->db->execute($sql));
 		}
 		else
 		{
-			$result = $this->rh->db->queryOne($sql);
+			$result = $this->db->queryOne($sql);
 			$total = $result['total'];
 		}
 
@@ -808,9 +810,9 @@ class DBModel extends Model implements IteratorAggregate, ArrayAccess, Countable
 		return $this;
 	}
 
-	public function tpl($store_to)
+	public function tpl($storeTo)
 	{
-		$this->rh->tpl->set($store_to, $this);
+		Locator::get('tpl')->setRef($storeTo, $this);
 		return $this;
 	}
 
@@ -941,7 +943,7 @@ class DBModel extends Model implements IteratorAggregate, ArrayAccess, Countable
 	{
 		if (null === $this->pager)
 		{
-			$this->pager = new Pager($this->rh);
+			$this->pager = new Pager();
 		}
 
 		return $this->pager;
@@ -1081,7 +1083,7 @@ class DBModel extends Model implements IteratorAggregate, ArrayAccess, Countable
 	 **/
 	protected function mapUpload(&$data, $info)
 	{
-		$model =& $this->rh->upload;
+		$model =& Locator::get('upload');
 		if (!isset($model)) return;
 
 		$fname = str_replace('*', $data['id'], $info['path']);
@@ -1207,7 +1209,7 @@ class DBModel extends Model implements IteratorAggregate, ArrayAccess, Countable
 
 	public function selectSql($sql, $isLoad=false)
 	{
-		$data = DBAL::getInstance()->query($sql);
+		$data = Locator::get('db')->query($sql);
 
 		if ($data !== null)
 		{
@@ -1349,7 +1351,7 @@ class DBModel extends Model implements IteratorAggregate, ArrayAccess, Countable
 		.'('.$fields.')'
 		.' VALUES ('.$values.')';
 
-		$row['id'] = $this->rh->db->insert($sql);
+		$row['id'] = $this->db->insert($sql);
 		return $row['id'];
 	}
 
@@ -1371,7 +1373,7 @@ class DBModel extends Model implements IteratorAggregate, ArrayAccess, Countable
 
 		$this->usePrefixedTableAsAlias = false;
 
-		return $this->rh->db->query($sql);
+		return $this->db->query($sql);
 	}
 
 	public function delete($where)
@@ -1387,7 +1389,7 @@ class DBModel extends Model implements IteratorAggregate, ArrayAccess, Countable
 
 		$this->usePrefixedTableAsAlias = false;
 
-		return $this->rh->db->query($sql);
+		return $this->db->query($sql);
 	}
 
 	public function clean($truncate=True)
@@ -1401,7 +1403,7 @@ class DBModel extends Model implements IteratorAggregate, ArrayAccess, Countable
 			default:    $sql = NULL;
 		}
 
-		if (isset($sql)) return $this->rh->db->query($sql);
+		if (isset($sql)) return $this->db->query($sql);
 		return False;
 	}
 

@@ -5,7 +5,7 @@
   * see http://in.jetstyle.ru/rocket/rocketforms
 
   FormComponent_interface_string( &$config )
-      - $field -- $field->config instance-a поля  
+      - $field -- $field->config instance-a поля
 
   -------------------
 
@@ -14,7 +14,7 @@
   -------------------
 
   // Интерфейс (парсинг и обработка данных)
-  
+
   * Interface_SafeDataValue( $data_value )
   * Interface_Parse()
   * Interface_PostToArray( $post_data )
@@ -36,11 +36,11 @@ class FormComponent_interface_string extends FormComponent_abstract
      $_data = $this->field->model->Model_GetDataValue();
      $data  = $this->field->interface->Interface_SafeDataValue($_data);
 
-     $this->field->tpl->Set( "interface_data", $data );
-     
+     RequestHandler::getInstance()->tpl->set( "interface_data", $data );
+
      $result = FormComponent_abstract::Interface_Parse();
 
-     return $this->field->tpl->Parse( $this->field->form->config["template_prefix_interface"].
+     return RequestHandler::getInstance()->tpl->parse( $this->field->form->config["template_prefix_interface"].
                                       $this->field->config["interface_tpl"] );
 
    }
@@ -53,7 +53,7 @@ class FormComponent_interface_string extends FormComponent_abstract
    }
 
 // EOC{ FormComponent_interface_string }
-}  
-   
+}
+
 
 ?>

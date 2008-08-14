@@ -33,12 +33,10 @@
 
  ---------
 
- Этому DBAL нужны такие параметры в $rh:
-
- $rh->db_host     = "localhost"
- $rh->db_user     = "username"
- $rh->db_password = "pwd"
- $rh->db_name     = "project_db"
+ db_host     = "localhost"
+ db_user     = "username"
+ db_password = "pwd"
+ db_name     = "project_db"
 
  =============================================================== v.1 (kuso@npj)
  */
@@ -56,7 +54,7 @@ class DBAL_mysql
 			throw new DbException("Connect failed: Host=<b>" . Config::get('db_host') . "</b>, User=<b>" . Config::get('db_user') . "</b>");
 		}
 		
-		Config::set('db_password', '');
+		Config::free('db_password');
 		
 		if (!mysql_select_db(Config::get('db_name'), $this->dblink))
 		{

@@ -7,7 +7,7 @@
  * Протокол модели
  *
  * // инициализация
- * $o  =& new Model($rh);
+ * $o  =& new Model();
  * if ($o->inititalize())
  * {
  *		// теперь можем выполнять операции модели
@@ -35,7 +35,7 @@
  * Конфиги и параметры модели
  *
  * Возможно модели понадобится конфиг или установка дополнительных атрибутов-параметров
- * $o  =& new Model($rh);
+ * $o  =& new Model();
  * $o->config = $model_config;
  * $o->limit = 111;
  * if ($o->inititalize())
@@ -68,13 +68,9 @@
 class Model
 {
 	protected $observers = array();
-//	var $config = array();
-
-	protected $rh = null;
 
 	public function __construct()
 	{
-		$this->rh = &RequestHandler::getInstance();
 		$this->initialize();
 	}
 

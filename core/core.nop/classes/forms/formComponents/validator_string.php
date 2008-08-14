@@ -5,7 +5,7 @@
   * see http://in.jetstyle.ru/rocket/rocketforms
 
   FormComponent_validator_string( &$config )
-      - $field -- $field->config instance-a поля  
+      - $field -- $field->config instance-a поля
 
   -------------------
 
@@ -28,7 +28,7 @@
 
 ================================================================== v.1 (kuso@npj)
 */
-$this->UseClass( "FormComponents/validator_base" );
+Finder::useClass( "FormComponents/validator_base" );
 
 class FormComponent_validator_string extends FormComponent_validator_base
 {
@@ -84,7 +84,7 @@ class FormComponent_validator_string extends FormComponent_validator_base
    }
 
 // EOC{ FormComponent_validator_base }
-}  
-   
+}
+
 
 ?>

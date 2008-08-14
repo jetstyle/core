@@ -6,8 +6,6 @@
 
 class Typografica
 {
-
-	var $rh;
 	var $skipTags = true;
 	var $pPrefix = "<p class=typo>";
 	var $pPostfix = "</p>";
@@ -60,15 +58,15 @@ class Typografica
 		"html" => 0     // запрет тагов html
 	);
 
-	function __construct ()
+	public function __construct ()
 	{
 		$this->Indent1 = "<img src=".RequestInfo::$baseUrl.'images/'.$this->Indent1;
 		$this->Indent2 = "<img src=".RequestInfo::$baseUrl.'images/'.$this->Indent2;
 	}
-
+	
 	///////////////////////////////////////////////////////////////////////////////////////////////////////////
 	///////////////////////////////////////////////////////////////////////////////////////////////////////////
-	function correct( $data, $noParagraph )
+	public function correct( $data, $noParagraph )
 	{
 		// -2. игнорируем ещё регексп
 		$ignored = array();

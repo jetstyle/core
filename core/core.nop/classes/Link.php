@@ -2,27 +2,32 @@
 
 class Link
 {
-	var $rh = null;
-	var $allowed_proto = array();
+	private static $allowedProto = null;
 	
-	function Link(&$rh)
+	public static function formatLink($val)
 	{
-		$this->rh = &$rh;
-		$this->allowed_proto = explode(',', $this->rh->link_allowed_protocols);
-	}
-	
-	function formatLink($val)
-	{
-		foreach($this->allowed_proto AS $r)
+		$ap = &self::getAllowedProto();
+		if (is_array($ap))
 		{
-			if($r && !(strpos($val, $r) === false))
+			foreach($ap AS $r)
 			{
-				return $val;
+				if($r && !(strpos($val, $r) === false))
+				{
+					return $val;
+				}
 			}
 		}
 		return $val;		
 	}
 	
+	private static function &getAllowedProto()
+	{
+		if (null === self::$allowedProto)
+		{
+			self::$allowedProto = explode(',', Config::get('link_allowed_protocols'));
+		}
+		return self::$allowedProto; 
+	}
 }
 
 ?>

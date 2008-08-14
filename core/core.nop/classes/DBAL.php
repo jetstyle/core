@@ -5,7 +5,7 @@
   * упрощение вызова sql-запросов
   * защита кавычками от sql-oriented violations
 
-  DBAL( &$rh, $connect=true )
+  DBAL($connect=true )
 
   ---------
 
@@ -46,13 +46,13 @@
 
   Типовые DBAL-параметры в $rh:
 
-  $rh->db_host     = "localhost"
-  $rh->db_user     = "username"
-  $rh->db_password = "pwd"
-  $rh->db_name     = "project_db"
-  $rh->db_prefix   = "prefix_"
+  db_host     = "localhost"
+  db_user     = "username"
+  db_password = "pwd"
+  db_name     = "project_db"
+  db_prefix   = "prefix_"
 
-  $rh->db_al       = "mysql" <- по этой штуке мы ловим, какой дбал нам был нужен
+  db_al       = "mysql" <- по этой штуке мы ловим, какой дбал нам был нужен
 
   ---------
 

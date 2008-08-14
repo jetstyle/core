@@ -19,11 +19,11 @@ class HandlersRouter extends BasicRouter
 
 	public function &find($criteria)
 	{
-		if (empty($criteria)) return false;
+		if (empty($criteria)) return null;
 
 		if (isset($criteria['url'])) return $this->findByUrl($criteria['url']);
 		if (isset($criteria['class'])) return $this->findByClass($criteria['class']);
-		return false;
+		return null;
 	}
 
 	private function findByUrl($url)
@@ -68,7 +68,7 @@ class HandlersRouter extends BasicRouter
 				}
 			}
 		}
-		return false;
+		return null;
 	}
 
 	function findByClass($class)
@@ -98,7 +98,7 @@ class HandlersRouter extends BasicRouter
 				}
 			}
 		}
-		return false;
+		return null;
 	}
 }
 ?>

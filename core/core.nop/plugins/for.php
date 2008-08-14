@@ -30,8 +30,8 @@
 			);
 			$for['even'] = !$for['odd'];
 			
-			$rh->tpl->setRef('for', $for);
-			$rh->tpl->setRef($storeTo, $r);
+			$tpl->setRef('for', $for);
+			$tpl->setRef($storeTo, $r);
 			$content .= ($content ? $sep : '').$tpl->parse($templateName);
 		}
 	

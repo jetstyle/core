@@ -19,24 +19,24 @@ define ("PRINCIPAL_ACL_NOT_FOUND", 8);
 
 class PrincipalCms
 {
+	private static $instance;
+	
 	public $acl_default = true; //флаг инициализации ACL
 	public $user = array(); //хэш текущего пользователя
 	public $is_granted_default = false; //есть ли доступ по умолчанию?
 
 	//массив записей прав доступа [локация]=>[массив ролей]
 	public $ACL = array(
-      '*' => array( ROLE_GUEST ),
+      '*' => array( ROLE_GOD ),
 	);
 
 	public $ROLES = array(
-	ROLE_GUEST => 'гость',
-	ROLE_GOD => 'бог',
-	ROLE_ADMIN => 'администратор',
-	ROLE_USER => 'пользователь',
+		ROLE_GUEST => 'гость',
+		ROLE_GOD => 'бог',
+		ROLE_ADMIN => 'администратор',
+		ROLE_USER => 'пользователь',
 	);
 
-
-	protected $rh; //ссылка на $rh
 
 	protected $state; //константа состояния авторизовации
 	protected $granted_state; //константа состояния проверки доступа
@@ -58,7 +58,8 @@ class PrincipalCms
 
 	protected $USERS = array(); //массив юзерей изначально пуст
 
-	//человеческие названия ролей
+	
+	protected $db = null;
 
 
 	protected $ROLES_REVERT = array(
@@ -69,20 +70,30 @@ class PrincipalCms
 	);
 	protected $ADMIN_ROLES = array( ROLE_GOD, ROLE_ADMIN, ROLE_USER);
 
-	public function __construct()
+	private function __construct()
 	{
-		$this->rh =& RequestHandler::getInstance();
+		$this->db = &Locator::get('db');
 		$this->state = PRINCIPAL_UNKNOWN;
-
-		$this->cookie_prefix = (Config::get('cookie_prefix') ? Config::get('cookie_prefix') : Config::get('db_prefix').'_');
+		$this->cookie_prefix = (Config::exists('cookie_prefix') ? Config::get('cookie_prefix') : Config::get('db_prefix'));
 	}
-
+	
+	public static function &getInstance()
+	{
+		if (null === self::$instance)
+		{
+			self::$instance = new self();
+			self::$instance->authorise();
+		}
+		
+		return self::$instance;
+	}
+	
 	//сохраняем в сессию
 	protected function sessionStore()
 	{
 		Debug::trace("PrincipalCms::sessionStore()");
 		$this->_session();
-		$this->rh->db->execute('UPDATE '.$this->sessions_table." SET user_id='".$this->user[$this->id_field]."' WHERE id=".$this->rh->db->quote($this->session['id'])."");
+		$this->db->execute('UPDATE '.$this->sessions_table." SET user_id='".$this->user[$this->id_field]."' WHERE id=".$this->db->quote($this->session['id'])."");
 		$this->session['user_id'] = $this->user['id'];
 	}
 
@@ -103,9 +114,9 @@ class PrincipalCms
 	protected function sessionDestroy()
 	{
 		Debug::trace("PrincipalCms::SessionDestroy()", 'prp');
-		$this->rh->db->execute('DELETE FROM '.$this->sessions_table." WHERE id=".$this->rh->db->quote($this->session['id'])."");
+		$this->db->execute('DELETE FROM '.$this->sessions_table." WHERE id=".$this->db->quote($this->session['id'])."");
 		$this->session = array();
-		setcookie( $this->cookie_prefix.'_sessid', "", 0, $this->rh->front_end->path_rel ? $this->rh->front_end->path_rel : $this->rh->base_url );
+		setcookie( $this->cookie_prefix.'_sessid', "", 0, Config::exists('front_end_path') ? Config::get('front_end_path') : RequestInfo::$baseUrl, RequestInfo::$cookieDomain );
 	}
 
 	/*** работа с сессиями ***/
@@ -113,7 +124,7 @@ class PrincipalCms
 	protected function _session()
 	{
 		//    Debug::trace("PrincipalCms::_Session() - ...", 'prp');
-		$db =& $this->rh->db;
+		$db =& $this->db;
 		if( !$this->session['id'] )
 		{
 			Debug::trace("PrincipalCms::_Session() - сессии пока нет", 'prp');
@@ -125,7 +136,7 @@ class PrincipalCms
 			if( !empty($session) )
 			{
 				//помечаем текущую сессию как используемую
-				$db->execute('UPDATE '.$this->sessions_table.' SET time='.time()." WHERE id=".$this->rh->db->quote($session['id'])."");
+				$db->execute('UPDATE '.$this->sessions_table.' SET time='.time()." WHERE id=".$this->db->quote($session['id'])."");
 				Debug::trace("PrincipalDB::_Session() - восстановлена через куки [".$session['id']."]", 'prp');
 			}
 			else
@@ -146,7 +157,7 @@ class PrincipalCms
 			}
 			//сохраняем sessid
 			$this->session = $session;
-			setcookie($this->cookie_prefix.'_sessid',$session['id'], 0, $this->rh->front_end->path_rel ? $this->rh->front_end->path_rel : $this->rh->base_url);
+			setcookie($this->cookie_prefix.'_sessid',$session['id'], 0, Config::exists('front_end_path') ? Config::get('front_end_path') : RequestInfo::$baseUrl, RequestInfo::$cookieDomain);
 		}
 	}
 
@@ -205,7 +216,7 @@ class PrincipalCms
 	public function logout( $redirect='' ){
 		$this->sessionDestroy();
 		if( $redirect )
-		$this->rh->redirect($redirect);
+		Controller::redirect($redirect);
 	}
 
 	/*
@@ -226,7 +237,7 @@ class PrincipalCms
 	protected function _getBy($where)
 	{
 		Debug::trace("PrincipalDB::_GetBy() - [$where] ...", 'prp');
-		$db =& $this->rh->db;
+		$db =& $this->db;
 		$user = $db->queryOne('SELECT '.implode(",",$this->SELECT_FIELDS).' FROM '.$this->users_table.' WHERE '.$this->users_where.' AND '.$where);
 
 		if( $user[$this->id_field] )
@@ -248,7 +259,7 @@ class PrincipalCms
 	}
 
 	protected function getByLogin($login){
-		return $this->_getBy("login=".$this->rh->db->quote($login)."");
+		return $this->_getBy("login=".$this->db->quote($login)."");
 	}
 
 	public function isGrantedTo( $location )
@@ -265,7 +276,7 @@ class PrincipalCms
 		$str = $this->getUserRole();
 		$str1 = '!'.$this->getUserRole();
 
-		Debug::trace("Principal::IsGrantedTo() - ищем [$str] [$str1]", 'prp');
+//		Debug::trace("Principal::IsGrantedTo() - ищем [$str] [$str1]", 'prp');
 
 
 		foreach($ACL as $loc=>$roles)
@@ -280,7 +291,6 @@ class PrincipalCms
 			//проверяем права
 			if( $OK )
 			{
-				//        $this->rh->debug->Trace("Principal::IsGrantedTo() - строка $loc => [".implode(',',$roles)."]");
 				//нашли строку с запретом?
 				if( in_array($str1,$roles,true) )
 				{
@@ -295,11 +305,10 @@ class PrincipalCms
 				{
 
 					$granted = true;
-					Debug::trace("Principal::IsGrantedTo() - <font color='green'>granted</font>", 'prp');
+//					Debug::trace("Principal::IsGrantedTo() - <font color='green'>granted</font>", 'prp');
 				}
 			}else
 			Debug::trace("<font color='grey'>Principal::IsGrantedTo() - строка loc = $loc</font>", 'prp');
-			//      $this->rh->debug->Trace("Principal::IsGrantedTo() - ***");
 		}
 		//в конце концов, нашли строку, которая позволяет?
 		if( $granted ){

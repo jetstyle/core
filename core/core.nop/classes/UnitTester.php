@@ -59,8 +59,6 @@ class UnitTester
 
 	function initialize()
 	{
-		$this->rh = &RequestHandler::getInstance();
-
 		$this->recursive = true;
 		$this->namespaces = array('classes');
 		$this->test = new GroupTest(Config::get('project_name'));

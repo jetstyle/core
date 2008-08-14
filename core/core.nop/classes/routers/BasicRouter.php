@@ -38,7 +38,7 @@ abstract class BasicRouter
 
 	protected function &buildController($config)
 	{
-		$page = NULL;
+		$page = null;
 
 		if (class_exists($config['class']))
 		{
@@ -51,8 +51,6 @@ abstract class BasicRouter
 			{
 				$page->setData($config['data']);
 			}
-			
-			RequestHandler::getInstance()->_onCreatePage($page,$config);
 		}
 
 		return $page;

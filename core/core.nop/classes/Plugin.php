@@ -35,8 +35,6 @@ class Plugin
 
 	function initialize($config=NULL)
 	{
-		$this->rh = &RequestHandler::getInstance();
-
 		if (isset($config['factory'])) $this->factory =& $config['factory'];
 
 		$this->setConfig($config);

@@ -69,22 +69,14 @@
 
 function __autoload($className)
 {
-	global $app;
-	if ($app)
+	$dirName = Finder::getPluralizeDir($className);
+	if (Finder::findDir("classes/" . $dirName))
 	{
-		$dir_name = $app->getPluralizeDir($className);
-		if (Finder::findDir("classes/" . $dir_name))
-		{
-			Finder::useClass($dir_name . "/" . $className);
-		}
-		else
-		{
-			Finder::useClass($className);
-		}
+		Finder::useClass($dirName . "/" . $className);
 	}
 	else
 	{
-		die("autoload: class <b>$className</b> not found");
+		Finder::useClass($className);
 	}
 }
 
@@ -99,7 +91,6 @@ class Finder {
 	//»щет скрипт по уровн€м проектов.
 	public static function findScript( $type, $name, $level=0, $dr=1, $ext = 'php', $withSubDirs = false )
 	{
-
 		//провер€ем входные данные
 		if (strlen($type) == 0)
 		{
@@ -114,14 +105,13 @@ class Finder {
 		{
 			return self::$searchCache[$type][$name.'.'.$ext];
 		}
-
+		
 		//определ€ем начальный уровень поиска
 		$n = count(self::$DIRS);
 		if($level===false) $level = $n - 1;
 		$i = $level>=0 ? $level : $n - $level;
 
 		self::$searchHistory = array();
-
 		//ищем
 		for( ; $i>=0 && $i<$n; $i+=$dr )
 		{
@@ -162,6 +152,15 @@ class Finder {
 		return self::$DIRS;
 	}
 
+	public static function getPluralizeDir($classname) 
+	{
+		Finder::useClass("Inflector");
+		$words = preg_split('/[A-Z]/', $classname);
+		$last_word = substr($classname, -strlen($words[count($words) - 1]) - 1);
+		$last_word = strtolower($last_word);
+		return Inflector :: pluralize($last_word);
+	}
+	
 	private static function recursiveFind($dir, $name)
 	{
 		if ($handle = @opendir($dir))
@@ -217,16 +216,18 @@ class Finder {
 	{
 		//определ€ем начальный уровень поиска
 		$n = count(self::$DIRS);
-		$level = $n - 1;
-		$i = $level>=0 ? $level : $n - $level;
+//		$level = $n - 1;
+//		$i = $level>=0 ? $level : $n - $level;
 
 		//ищем
 		for( ; $i>=0 && $i<$n; $i-=1 )
 		{
 			//разбор каждого уровн€ тут
-			$dir =& self::$DIRS[$i];
-	  if (is_dir($dir . $name))
-	  return true;
+			$dir = self::$DIRS[$i];
+	  		if (is_dir($dir . $name))
+	  		{
+	  			return true;
+	  		}
 		}
 
 		//ничего не нашли
@@ -264,17 +265,19 @@ class Finder {
 		return $out;
 	}
 
-	public static function setDirs($DIRS) {
+	public static function setDirs($DIRS) 
+	{
 		self::$DIRS = $DIRS;
 	}
 
-	public static function useClass($name, $level = 0, $dr = 1, $ext = 'php', $withSubDirs = false, $hideExc = false) {
+	public static function useClass($name, $level = 0, $dr = 1, $ext = 'php', $withSubDirs = false, $hideExc = false) 
+	{
 		if (class_exists($name, false)) return;
 		Finder::useScript("classes", $name, $level, $dr, $ext, $withSubDirs, $hideExc);
 	}
 
-	// јлиасы, специфичные дл€ RH
-	public static function useModel($name, $level = 0, $dr = 1, $ext = 'php', $withSubDirs = false, $hideExc = false) {
+	public static function useModel($name, $level = 0, $dr = 1, $ext = 'php', $withSubDirs = false, $hideExc = false) 
+	{
 		if (class_exists($name, false)) return;
 		self::useScript("classes/models", $name, $level, $dr, $ext, $withSubDirs, $hideExc);
 	}
@@ -289,19 +292,13 @@ class Finder {
 		Finder::useScript('libs', $libraryName . "/" . $fileName, 0, 1, 'php');
 	}
 
-	/*public static function useModule($name, $type = NULL) {
-		self::useClass('ModuleLoader');
-		$o = & new ModuleLoader();
-		$o->initialize($this);
-		$o->load($name);
-		return $o->data;
-	}*/
-
-	public static function prependDir($dir) {
+	public static function prependDir($dir) 
+	{
 		array_unshift(self::$DIRS,$dir);
 	}
 
-	public static function appendDir($dir) {
+	public static function appendDir($dir) 
+	{
 		array_push(self::$DIRS,$dir);
 	}
 }

@@ -12,7 +12,11 @@ class BreadPlugin extends Plugin
 
 		parent::initialize($config);
 
-		$current = &$this->rh->page;
+		$current = array();
+		if (Locator::exists('controller'))
+		{
+			$current = &Locator::get('controller');
+		}
 
 		$model = & DBModel::factory('Content')
 							->clearFields()
@@ -20,8 +24,7 @@ class BreadPlugin extends Plugin
 							->addField('title_short', 'IF(LENGTH(title_short) > 0, title_short, title_pre)')
 							->addField('href', '_path')
 							->setOrder(array('_left' => 'ASC'))
-							->setWhere('_left <= '.DBModel::quote($current['_left']).' AND _right >= '.DBModel::quote($current['_right']))
-							->load();
+							->load('_left <= '.DBModel::quote($current['_left']).' AND _right >= '.DBModel::quote($current['_right']));
 
 		$this->models['bread'] =& $model;
 	}
@@ -38,7 +41,7 @@ class BreadPlugin extends Plugin
 		$last['last'] = true;
 		$this->models['bread'][$total - 1] = $last;
 
-		$this->rh->tpl->set($this->store_to, $this->models['bread']);
+		Locator::get('tpl')->set($this->store_to, $this->models['bread']);
 	}
 
 	function smartTrim($txt)

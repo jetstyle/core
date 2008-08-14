@@ -56,10 +56,10 @@ $template_name = $params['do']?$params['do']:$params['use']; // шаблон
 if (isset($template_name))
 // параметры: шаблон форма
 {
-	$old_s =& $tpl->Get("Text");
-	$tpl->SetRef("Text", $s);
+	$old_s =& $tpl->get("Text");
+	$tpl->setRef("Text", $s);
 	$out = $tpl->parse(substr($template_name, 1));
-	$tpl->SetRef("Text", $old_s );
+	$tpl->setRef("Text", $old_s );
 }
 else
 if (isset($params[4])) 

@@ -1,38 +1,4 @@
 <?php
-/*
-	Компилятор шаблонного движка. Создаётся внутри TE, руками пользоваться не должен.
-	 ---------
-
-	 Необходимые параметры в $rh, описывающие правила разбора шаблонов:
-
-	 $rh->tpl_prefix = "{{";
-	 $rh->tpl_postfix = "}}";
-	 $rh->tpl_instant = "~";
-	 $rh->tpl_construct_action   = "!";    // {{!text Test}}
-	 $rh->tpl_construct_action2  = "!!";   // {{!!text}}Test{{!!/text}}
-	 $rh->tpl_construct_if       = "?";    // {{?var}} or {{?!var}}
-	 $rh->tpl_construct_ifelse   = "?:";   // {{?:}}
-	 $rh->tpl_construct_ifend    = "?/";   // {{?/}} is similar to {{/?}}
-	 $rh->tpl_construct_object   = "#.";   // {{#obj.property}}
-	 $rh->tpl_construct_tplt     = "TPL:"; // {{TPL:Name}}...{{/TPL:Name}}
-	 $rh->tpl_construct_comment  = "#";    // <!-- # persistent comment -->
-	 $rh->tpl_construct_for       = "!for";    // {{!for items do=template}}
-
-	 $rh->tpl_instant_plugins = array( "dummy" );
-	 // lucky:
-	 $rh->tpl_construct_standard_camelCase   = True;   // $o->SomeValue(), иначе $o->some_value()
-	 $rh->tpl_construct_standard_getter_prefix   = 'get';   // $o->getSomeValue(), иначе $o->SomeValue()
-
-	 $rh->shortcuts = array(
-	 "=>" => array("=", " typografica=1"),
-	 "=<" => array("=", " strip_tags=1"),
-	 "+>" => array("+", " typografica=1"),
-	 "+<" => array("+", " strip_tags=1"),
-	 "@" => "!include ",
-	 "=" => "!text ",
-	 "+" => "!message ",
-	 );
- */
 define ('TE_TYPE', 0);
 define ('TE_VALUE', 1);
 
@@ -43,9 +9,6 @@ define ('TE_TYPE_PHP_SCRIPT', 3);
 
 class TemplateEngineCompiler
 {
-	protected $rh;
-	protected $tpl;
-
 	/**
 	 * Скомпилированные функции шаблонов
 	 *
@@ -139,8 +102,7 @@ class TemplateEngineCompiler
 
 	public function __construct()
 	{
-		$this->rh  = &RequestHandler::getInstance();
-		$this->tpl = &$this->rh->tpl;
+		$this->tpl = &Locator::get('tpl');
 		
 		// compiler meta regexp
 		$this->long_regexp =
@@ -390,10 +352,7 @@ class TemplateEngineCompiler
 		}
 
 		$funcName = $this->tpl->getActionFuncName($actionInfo['cache_name']);
-
 		$source = Finder::findScript_( "plugins", $actionInfo['name']);
-
-		$enviroment = "<"."?php \$rh=&RequestHandler::getInstance(); ?>";
 
 		if (null !== $cacheFile)
 		{
@@ -404,7 +363,7 @@ class TemplateEngineCompiler
 
 		if (is_array($lines))
 		{
-			$this->compiledActionFunctions[ $funcName ] = $this->templateBuildFunction( $enviroment . preg_replace("/\/\*.*?\*\//s","",implode('', $lines)));
+			$this->compiledActionFunctions[ $funcName ] = $this->templateBuildFunction( preg_replace("/\/\*.*?\*\//s","",implode('', $lines)));
 
 			if ($this->compileWithExternals)
 			{
@@ -509,7 +468,7 @@ class TemplateEngineCompiler
 		if (preg_match('/'. $re .'/i', $contents, $matches))
 		{
 			$is_extends = TRUE;
-			$res = $this->templateRead($this->tpl->_findTemplate($matches[1]));
+			$res = $this->templateRead($this->tpl->findTemplate($matches[1]));
 			$contents = str_replace( $matches[0], '', $contents );
 		}
 		else
@@ -545,7 +504,6 @@ class TemplateEngineCompiler
 		}
 
 		// 2. grep all {{TPL:..}} & replace `em by !includes
-		//$include_prefix = $this->prefix.$this->rh->tpl_construct_action."include ";
 		$stack     = array( $contents );
 		$stackname = array( "@" );
 		$stackargs = array( '' );
@@ -558,7 +516,6 @@ class TemplateEngineCompiler
 		{
 			$data = $stack[$stackpos];
 			$c =preg_match_all( "/".$this->prefix.
-			/*$this->rh->tpl_construct_tplt*/
 			//$tpl_construct_tplt_re."([A-Za-z0-9_]+)".
 			$tpl_construct_tplt_re.'([A-Za-z0-9_]+)(?:\s+(.+?))?'.
 			$this->postfix."(.*?)".
@@ -567,7 +524,7 @@ class TemplateEngineCompiler
 			$this->postfix."/si",
 			$data, $matches, PREG_SET_ORDER  );
 
-			foreach( $matches as $match )
+			foreach( $matches AS $match )
 			{
 				//$sub = $tpl_name.".html:".$match[1];
 				//$data = str_replace( $match[0], $include_prefix.$sub.$this->postfix, $data );
@@ -663,10 +620,6 @@ class TemplateEngineCompiler
 
 	protected function templateCompileCallback( $things )
 	{
-//		var_dump($things);
-//		var_dump($this->rh->tpl_instant);
-//		die();
-
 		$_instant = false;
 
 		$thing = $things[0];
@@ -803,11 +756,8 @@ class TemplateEngineCompiler
 		{
 			if ($instant)
 			{
-//				var_dump($instant);
-//				die();
 				ob_start();
 				eval($instant);
-//				die();
 				$contents = ob_get_contents();
 				ob_end_clean();
 				return $contents;
@@ -984,39 +934,11 @@ class TemplateEngineCompiler
 				$args = $k;
 				$func .= 'a';
 			}
-//			elseif($k == 'count')
-//			{
-//
-//			}
 			else
 			{
 				$args = "'".$k."'";
 				$func .= 'a';
 			}
-
-
-
-			// для первого ключа $this->domain всегда array()
-//			if ($i !== 0) {
-				// get object method or property
-//				if (preg_match('#^[A-Za-z_][A-Za-z0-9_]*$#', $k)) {
-					//$args[] = "'".$k."'";
-//					$func .= 'p';
-//					if ($use_methods) {
-//						$method = ($this->tpl->tpl_construct_standard_getter_prefix
-//							? $this->tpl->tpl_construct_standard_getter_prefix .'_'.$k // get_$k
-//							: $k);
-//						if ($this->tpl->tpl_construct_standard_camelCase) {
-//							//$method = implode('', array_map('ucfirst', explode('_', $method))); // GetSomeValue
-//							$method = implode('', explode('_', $method)); // getsomevalue
-//						}
-//						if (preg_match('#^[A-Za-z_][A-Za-z0-9_]*$#', $k)) {
-//							$args[] = "'".$method."'";
-//							$func .= 'm';
-//						}
-//					}
-//				}
-//			}
 
 			$domain .= "[".$args."]";
 		}

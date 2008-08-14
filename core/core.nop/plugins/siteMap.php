@@ -1,7 +1,7 @@
 <?php 
-$base_url =$rh->base_url.'tpl/';
+$base_url = RequestInfo::$baseUrl.'tpl/';
 
-$siteMap = $rh->tpl->getSiteMap();
+$siteMap = Locator::get('tpl')->getSiteMap();
 
 if (is_array($siteMap) && !empty($siteMap))
 {

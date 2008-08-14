@@ -2,18 +2,18 @@
 
 class SqlDump
 {
-	protected $rh;
+	protected $db;
 	protected $fp = null;		// file pointer
 	protected $buffer = '';
 	
-	public function __construct(&$rh)
+	public function __construct()
 	{
-		$this->rh = &$rh;
+		$this->db = &Locator::get('db');
 	}
 	
 	public function dumpStructure($tableName, $filename = '')
 	{
-		$result = $this->rh->db->query("SHOW CREATE TABLE ".$this->quoteName($tableName)."");
+		$result = $this->db->query("SHOW CREATE TABLE ".$this->quoteName($tableName)."");
 		
 		if (is_array($result) && !empty($result))
 		{
@@ -39,7 +39,7 @@ class SqlDump
 		$sql = '';
 		$row = 0;
 		
-		$result = $this->rh->db->execute("SELECT * FROM ".$this->quoteName($tableName).(strlen($where) > 0 ? " WHERE ".$where : ""));
+		$result = $this->db->execute("SELECT * FROM ".$this->quoteName($tableName).(strlen($where) > 0 ? " WHERE ".$where : ""));
 		
 		if ($result)
 		{
@@ -48,7 +48,7 @@ class SqlDump
 				$this->openFile($filename);
 			}
 							
-			while ($r = $this->rh->db->getRow($result))
+			while ($r = $this->db->getRow($result))
 			{
 				if ($row == 0)
 				{
@@ -59,7 +59,7 @@ class SqlDump
 					$sql .= ",\n";
 				}
 				
-				$sql .= '('.implode(',', array_map(array(&$this->rh->db, 'quote'), $r)).')';
+				$sql .= '('.implode(',', array_map(array(&$this->db, 'quote'), $r)).')';
 				
 				if (strlen($filename) > 0)
 				{

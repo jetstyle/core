@@ -7,7 +7,7 @@
   Один компонент, максимально абстрактный.
 
   FormComponent_abstract( &$config )
-      - $field -- $field->config instance-a поля  
+      - $field -- $field->config instance-a поля
 
   -------------------
 
@@ -24,7 +24,7 @@
   // Модель. Операции с данными и хранилищем
 
   * Model_LoadFromArray( $a )
-  * Model_ToArray( &$a ) 
+  * Model_ToArray( &$a )
 
   * Model_DbInsert( &$fields, &$values )
   * Model_DbUpdate( $data_id, &$fields, &$values )
@@ -56,7 +56,7 @@
 
   // Настройка и подстройка
   * Event_Register() -- регистрация в форме. Перегружать имеет смысл только для групп
-  * LinkToField( &$field ) -- привязаться к полю. 
+  * LinkToField( &$field ) -- привязаться к полю.
                               Делается отдельно, чтобы дать возможность создавать компоненты вручную
 
 ================================================================== v.0 (kuso@npj)
@@ -83,7 +83,7 @@ class FormComponent_abstract
    // регистрация в форме
    function Event_Register()
    {
-     Debug::trace( "event_register for: { ".$this->field->name." } ", 'form');
+     Debug::Trace( "event_register for: { ".$this->field->name." } ");
      $this->field->form->hash[ $this->field->name ] = &$this->field;
    }
 
@@ -138,9 +138,10 @@ class FormComponent_abstract
      return $this->valid;
    }
    // этот метод нужно звать, чтобы инвалидировать поле с этим валидатором.
-   // $reason -- ключ для мессаджсета, 
+   // $reason -- ключ для мессаджсета,
    function _Invalidate( $reason, $msg="there is no custom message" )
    {
+
      $this->valid=false;
 
 		 // shumkov: Либо всегда проверять, либо добавить в функцию доп. параметр.
@@ -153,9 +154,9 @@ class FormComponent_abstract
      // kuso: my practice with always-messageset oriented programming shows
      //       that is a great burden for single-language sites which are common
 
-     $value = $this->field->rh->tpl->msg->Get( 'Form:Validator/'.$reason );
+     $value = $msg;//$this->field->rh->tpl->msg->Get( 'Form:Validator/'.$reason );
      if (!empty($value) && $value != 'Form:Validator/'.$reason) $msg = $value;
-     
+
      $this->validator_messages[$reason] = $msg;
    }
 
@@ -176,13 +177,14 @@ class FormComponent_abstract
    { return ""; }
    // парсинг полей интерфейса
    function Interface_Parse()
-   { 
-     $this->field->tpl->Set( "field", "_".$this->field->name );
-     $this->field->tpl->Set( "field_id", "id_".$this->form->name."_".$this->field->name );
+   {
+     $tpl = TemplateEngine::getInstance();
+     $tpl->set( "field", "_".$this->field->name );
+     $tpl->set( "field_id", "id_".$this->form->name."_".$this->field->name );
      if (isset($this->field->config["interface_tpl_params"]) && is_array($this->field->config["interface_tpl_params"]))
      {
        foreach( $this->field->config["interface_tpl_params"] as $param=>$value )
-         $this->field->tpl->Set("params_".$param, $value );
+         $tpl->Set("params_".$param, $value );
      }
      return "";
    }
@@ -191,7 +193,7 @@ class FormComponent_abstract
    { return array(); }
 
 // EOC{ FormComponent_abstract }
-}  
-   
+}
+
 
 ?>

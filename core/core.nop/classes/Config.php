@@ -65,6 +65,11 @@ final class Config
 		return isset(self::$data[$key]);
 	}
 	
+	public static function free($key)
+	{
+		unset(self::$data[$key]);
+	}
+	
 	/**
 	 * Load data from source (file, array, db).
 	 * Source determined automatically
@@ -111,7 +116,7 @@ final class Config
 	 */
 	public static function loadFromDb($tableName)
 	{
-		$db = &DBAL::getInstance();
+		$db = &Locator::get('db');
 		$result = $db->execute("SELECT name, value FROM ".$tableName." WHERE _state = 0");
 		
 		while ($r = $db->getRow($result))
@@ -145,7 +150,7 @@ final class Config
 	
 	public static function dump()
 	{
-		vaR_dump(self::$data);
+		var_dump(self::$data);
 	}
 }
 

@@ -5,8 +5,7 @@
  */
 
 abstract class Controller implements ArrayAccess
-{
-	protected $rh = null;
+{	
 	protected $plugins = array();
 
 	private $o_plugins = array();
@@ -23,9 +22,37 @@ abstract class Controller implements ArrayAccess
 	
 	protected $siteMap = '';
 	
+	public static function _404()
+	{
+		Finder::useLib('http');
+		Http::status(404);
+		$tpl = &Locator::get('tpl');
+		$tpl->parseSiteMap('404');
+		echo $tpl->get('html');
+		die();
+	}
+	
+	public static function deny()
+	{
+		Finder::useLib('http');
+		Http::status(403);
+		$tpl = &Locator::get('tpl');
+		$tpl->parseSiteMap('forbidden');
+		echo $tpl->get('html');
+		die();
+	}
+	
+	public static function redirect($url)
+	{
+		if (strpos($url, "http://") !== 0)
+			$url = RequestInfo::$hostProt . $url;
+
+		header("Location: $url");
+		exit;
+	}
+	
 	public function __construct()
 	{
-		$this->rh = RequestHandler::getInstance();
 	}
 	
 	public function offsetExists($key)
@@ -54,7 +81,7 @@ abstract class Controller implements ArrayAccess
 		{
 			$ss = str_replace("Controller", "", get_class($this));
 			$method = str_replace('handle_', '', $this->method);
-			$siteMap = RequestHandler::getInstance()->tpl->getSiteMap();
+			$siteMap = Locator::get('tpl')->getSiteMap();
             if ($method != "default" || ( $method == "default" && isset( $siteMap[ strtolower( $ss.'/'.$method ) ]  ) ))
 			{
 				$this->siteMap = strtolower($ss.'/'.$method);
@@ -97,7 +124,7 @@ abstract class Controller implements ArrayAccess
 	{
 		$status = True;
 
-		if ($this->rh->db)
+		if (!Config::get('disable_db'))
 		{
 			$this->loadPlugins();
 		}
@@ -124,8 +151,12 @@ abstract class Controller implements ArrayAccess
 							$action_parts = explode("::", $action);
 							if (count($action_parts)==2)
 							{
-								Finder::useClass('controllers/'.$action_parts[0]);
-								$controller = new $action_parts[0];
+								$controller = &Router::findByClass($action_parts[0]);
+								
+								if (null === $controller)
+								{
+									throw new JSException('Controller::params_map: Controller "'.$action_parts[0].'" not found');
+								}
 
 								$method = 'handle_'.$action_parts[1];
 								if (method_exists($controller, $method))
@@ -163,11 +194,12 @@ abstract class Controller implements ArrayAccess
 						);
 					}
 					$this->postHandle();
-					$this->rend();
 					break;
 				}
 			}
 		}
+		
+		$this->rend();
 
 		return $status;
 	}
@@ -285,7 +317,7 @@ abstract class Controller implements ArrayAccess
 		
 		if (!empty($this->data))
 		{
-			$this->rh->tpl->set('PAGE', $this->data);
+			Locator::get('tpl')->set('PAGE', $this->data);
 		}
 	}
 

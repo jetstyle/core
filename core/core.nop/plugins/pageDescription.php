@@ -1,3 +1,5 @@
 <?php
-echo $rh->page->config['meta_description']
+if (!Locator::exists('controller')) return;
+$controller = &Locator::get('controller'); 
+echo $controller['meta_description'];
 ?>

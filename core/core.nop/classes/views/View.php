@@ -13,9 +13,8 @@ class View
 	{
 	}
 
-	function initialize(&$ctx, $config=NULL) 
-	{ 
-		$this->rh =& $ctx; 
+	function initialize($config=NULL) 
+	{  
 		if (isset($config)) 
 			$this->config = array_merge($this->config, $config);
 		return True;

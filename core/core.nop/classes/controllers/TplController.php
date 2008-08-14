@@ -1,11 +1,11 @@
 <?php
 /**
- *  Контроллер вывода массива cайтмапа или однго из его ключей
+ *  Sho
  *
  */
 
-Finder::useClass("controllers/BasicController");
-class TplController extends BasicController
+Finder::useClass("controllers/Controller");
+class TplController extends Controller
 {
 	protected $plugins = array(
 		array('MenuPlugin', array(
@@ -18,10 +18,8 @@ class TplController extends BasicController
 
 	function handle()
 	{
-        //например так
         parent::handle();
-
-        $this->rh->tpl->set('tpl', 'tpl');
+		$this->tpl->set('tpl', 'tpl');
         $this->siteMap = rtrim(implode("/", $this->params), "/");
 	}
 

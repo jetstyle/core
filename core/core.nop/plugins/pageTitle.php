@@ -1,16 +1,17 @@
 <?php
+if (!Locator::exists('controller')) return;
 
-if($rh->page->config['meta_title'])
+$controller = Locator::get('controller');
+if($controller['meta_title'])
 {
-	echo $rh->page->config['meta_title'];
+	echo $controller['meta_title'];
 }
 else
 {
-	if($rh->page->config['title_short'])
+	if($controller['title_short'])
 	{
-		echo strip_tags($rh->page->config['title_short']).' &mdash; ';
+		echo strip_tags($controller['title_short']).' &mdash; ';
 	}
 	echo Config::get('project_title');
 }
-
 ?>

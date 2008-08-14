@@ -1,31 +1,32 @@
 <?php
 /**
- * Работа с УРЛом
+ * RequestInfo.
+ * 
  * @author lunatic <lunatic@jetstyle.ru>
  */
 class RequestInfo
 {
+	public static $host = '';
+	public static $hostProt = '';
+
 	const STATE_USE = 0;
 	const STATE_IGNORE = 1;
 	const METHOD_GET = "get";
 	const METHOD_POST = "post";
 
-	static public $host = '';
-	static public $hostProt = '';
+	public static $pageUrl = '';
+	public static $baseUrl = '';
+	public static $baseFull = '';
 
-	static public $pageUrl = '';
-	static public $baseUrl = '';
-	static public $baseFull = '';
+	public static $baseDomain = '';
+	public static $cookieDomain = '';
 
-	static public $baseDomain = '';
-	static public $cookieDomain = '';
-
-	static private $data = array();
-	static private $params = array();
-	static private $denyForeignPosts = false;
-	static private $_compiled_ready = false;
-	static private $_compiled = array();
-	static private $values = array();
+	private static $data = array();
+	private static $params = array();
+	private static $denyForeignPosts = false;
+	private static  $_compiled_ready = false;
+	private static  $_compiled = array();
+	private static  $values = array();
 
 	private function __construct(){}
 
@@ -33,7 +34,7 @@ class RequestInfo
 	 * Инициализация
 	 *
 	 */
-	static public function init()
+	public static function init()	
 	{
 		if (self::$denyForeignPosts)
 		{
@@ -61,7 +62,15 @@ class RequestInfo
 				}
 			}
 		}
-
+	
+		if (get_magic_quotes_gpc())
+		{
+			self::fuckQuotes($_POST);
+			self::fuckQuotes($_GET);
+			self::fuckQuotes($_COOKIE);
+			self::fuckQuotes($_REQUEST);
+		}
+		
 		self::$host = preg_replace('/:.*/','',$_SERVER["HTTP_HOST"]);
 		self::$hostProt = "http://".$_SERVER["HTTP_HOST"];
 		self::$baseFull = "http://".self::$host.Config::get('base_url');
@@ -81,7 +90,7 @@ class RequestInfo
 	 *
 	 * @param array $values
 	 */
-	static public function load($values)
+	public static function load($values)	
 	{
 		if(!is_array($values) || empty($values))	return;
 		foreach($values AS $key => $value)
@@ -90,18 +99,18 @@ class RequestInfo
 		}
 	}
 
-	static public function free($key)
+	public static function free($key)	
 	{
 		unset(self::$data[$key]);
 	}
 
 
-	static public function get($key)
+	public static function get($key)	
 	{
 		return self::$data[$key];
 	}
 
-	static public function set($key, $value)
+	public static function set($key, $value)
 	{
 		self::$data[$key] = $value;
 	}
@@ -113,13 +122,13 @@ class RequestInfo
 	 * @param array $key
 	 * @return string
 	 */
-	static public function hrefChange($url, $key)
+	public static function hrefChange($url, $key)	
 	{
 		if (!$url)	$url = self::$baseUrl.self::$pageUrl;
 		if (!is_array($key) || empty($key)) return $url;
 
 		$d = self::$data;
-
+		
 		foreach($key AS $k => $v)
 		{
 			if ($d[$k])
@@ -136,10 +145,37 @@ class RequestInfo
 		{
 			if ($v)
 			{
-				$d[$k] = $k.'='.urlencode($v);
+				if (is_array($v))
+				{
+					$dd = array();
+					foreach($v AS $kv => $vv)
+					{
+						if ($vv)
+						{
+							$dd[] = $k.'['.urlencode($kv).']='.urlencode($vv);
+						}
+					}
+					
+					if (!empty($dd))
+					{
+						$d[$k] = implode('&', $dd);
+					}
+					else
+					{
+						unset($d[$k]);
+					}
+				}
+				else
+				{
+					$d[$k] = $k.'='.urlencode($v);
+				}
+			}
+			else
+			{
+				unset($d[$k]);
 			}
 		}
-
+		
 		if (is_array($d))
 		{
 			$line = @implode('&', $d);
@@ -148,9 +184,10 @@ class RequestInfo
 				$url = $url.'?'.$line;
 			}
 		}
+		
 		return $url;
 	}
-
+	
 	public static function pack( $method=self::METHOD_GET, $bonus="", $only="" ) // -- упаковать в строку для GET/POST запроса
 	{
 		if (!self::$_compiled_ready)
@@ -185,6 +222,16 @@ class RequestInfo
 			else $data.=$this->q.$bonus;
 			else if ($data != "") $data = $this->q.$data;
 		return $data;
+	}
+	
+	private static function fuckQuotes(&$a)
+	{
+		if (is_array($a))
+			foreach ($a AS $k => &$v)
+				if (is_array($v))
+					self::fuckQuotes($v);
+				else
+					$v = stripslashes($v);
 	}
 }
 ?>

@@ -9,7 +9,7 @@ class ContentRouter extends BasicRouter
 {
 	public function &find($criteria)
 	{
-		if (empty($criteria)) return false;
+		if (empty($criteria)) return null;
 
 		$content = DBModel::factory('Content');
 
@@ -46,7 +46,7 @@ class ContentRouter extends BasicRouter
 				return $this->buildController($config);
 			}
 		}
-		return false;
+		return null;
 	}
 	
 	private function getClassByMode($mode)

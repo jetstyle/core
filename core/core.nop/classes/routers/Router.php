@@ -16,13 +16,12 @@ class Router
 
 	private function __construct()
 	{
-		$this->rh = RequestHandler::getInstance();
 		if (Config::get('routers'))
 		{
 			$this->routers = Config::get('routers');
 		}
 		
-		if (!$this->rh->db && ($key = array_search('Handlers', $this->routers)))
+		if (!Config::get('disable_db') && ($key = array_search('Handlers', $this->routers)))
 		{
 			unset($this->routers[$key]);
 		}
@@ -55,12 +54,12 @@ class Router
 		
 		if (isset($url) && isset($this->url2controller[$url]))
 		{
-			return $this->url2controller[$url];
+			return Locator::get($this->url2controller[$url]);
 		}
 
 		if (isset($cls) && isset($this->cls2controller[$cls]))
 		{
-			return $this->cls2controller[$cls];
+			return Locator::get($this->cls2controller[$cls]);
 		}
 
 		if (!isset($routers))
@@ -79,8 +78,17 @@ class Router
 		if (null !== $page)
 		{
 			$cls = strtolower(substr(get_class($page), 0, -strlen('Controller')));
-			$this->cls2controller[$cls] =& $page;
-			$this->url2controller[$page['url']] =& $page;
+			if (Locator::exists('controller'))
+			{
+				$id = $cls;
+			}
+			else
+			{
+				$id = 'controller';
+			}
+			$this->cls2controller[$cls] = $id;
+			$this->url2controller[$page['url']] = $id;
+			Locator::bind($id, $page);
 		}
 
 		return $page;

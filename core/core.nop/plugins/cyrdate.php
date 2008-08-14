@@ -25,7 +25,6 @@ else
 
 if (isset($d))
 {
-	$d->ctx =& $rh;
 	if($params['ucfirst'])
 	{
 		echo ucfirst($d->format($ofmt));

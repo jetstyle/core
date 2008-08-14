@@ -366,15 +366,10 @@ class CyrDate
 	{
 		$lang = (isset($this->lang) 
 			? $this->lang 
-			: (
-				isset($this->ctx->lang) 
-				? $this->ctx->lang 
-				: 'cyr'));
+			: 'cyr');
 		$attr = $lang.'_'.$name; 
 		$src = $this->$attr;
 		return $src[$value];
 	}
 }
-
-
 ?>

@@ -21,5 +21,5 @@
 echo $params[0];  // число
 if (isset($params['sep']))  // опционально разделитель
 	echo $params['sep'];
-echo $tpl->Action('splural', $params);
+echo $tpl->action('splural', $params);
 ?>

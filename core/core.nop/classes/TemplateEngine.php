@@ -1,19 +1,16 @@
 <?php
 /**
- * Ўаблонный движок
+ * TemplateEngine.
+ * 
+ * @author JetStyle team
  *
  */
-
-define ("TPL_APPEND", 1);
-define ("TPL_MODE_CLEAN",    0);
-define ("TPL_MODE_COMMENTS", 1);
-define ("TPL_MODE_TEXT",     2);
-define ("TPL_COMPILE_NEVER",  0);
-define ("TPL_COMPILE_SMART",  1);
-define ("TPL_COMPILE_ALWAYS", 2);
-
 class TemplateEngine
 {
+	const COMPILE_NEVER = 0;
+	const COMPILE_SMART = 1;
+	const COMPILE_ALWAYS = 2;
+	
 	private static $instance = null;
 	
 	public $domain = array();
@@ -39,7 +36,6 @@ class TemplateEngine
 	protected $skinName = '';
 	protected $skinDir = '';
 
-	// protected $markupLevel = 0; // TPL_MODE_CLEAN
 	protected $compileMode = 1;
 	protected $skinDirs = array( "css", "js", "images" );
 	protected $rootHref = '';
@@ -52,21 +48,38 @@ class TemplateEngine
 	protected $templateFilePrefix = "@";
 	protected $cachePrefix = "@";
 
-	public $siteMap = array();
+	protected $siteMap = array();
 	protected $siteMapFilename = 'site_map.yml';
 
 	// ############################################## //
 
+	/**
+	 * Singletone
+	 * 
+	 * @access private
+	 */
 	private function __construct()
 	{
-		if (!$this->rootHref = Config::get('rootHref'))
+		if (!($this->rootHref = Config::get('rootHref')))
 		{
-			$this->rootHref = Config::get('base_url').Config::get('app_name').'/skins/';
+			$this->rootHref = RequestInfo::$baseUrl.Config::get('app_name').'/skins/';
 		}
 		$this->rootDir = Config::get('app_dir').'skins/';
-
+		
+		if (Config::exists('tpl_compile'))
+		{
+			$this->compileMode = Config::get('tpl_compile');
+		}
+		
+		if (Config::get('use_fixtures'))
+		{
+			$this->loadFixtures();
+		}
+		
 		// выбрать шкуру
 		$this->skin( Config::get('tpl_skin') );
+		
+		$this->set("/", RequestInfo::$baseUrl);
 	}
 
 	public static function &getInstance()
@@ -77,6 +90,11 @@ class TemplateEngine
 		}
 		
 		return self::$instance;
+	}
+	
+	public function setCompileMode($mode)
+	{
+		$this->compileMode = $mode;
 	}
 	
 	public function get( $key ) // -- получить значение (намеренно без ссылки)
@@ -182,6 +200,11 @@ class TemplateEngine
 	public function getSkinName()
 	{
 		return $this->skinName;
+	}
+	
+	public function getSkinDir()
+	{
+		return $this->skinDir;
 	}
 
 	/**
@@ -367,7 +390,7 @@ class TemplateEngine
 
 		if (is_array($files))
 		{
-			$recompile = $this->compileMode != TPL_COMPILE_NEVER;
+			$recompile = $this->compileMode != self::COMPILE_NEVER;
 
 			if ($recompile)
 			{
@@ -469,10 +492,10 @@ class TemplateEngine
 						$fileCached = Config::get('cache_dir') . $this->templateSepfix . $this->skinName . $this->templateFilePrefix .	$tplInfo['cache_name'] . ".php";
 
 						// 3. проверка наличи€ в кэше/необходимости рекомпил€ции
-						$recompile = $this->compileMode != TPL_COMPILE_NEVER;
+						$recompile = $this->compileMode != self::COMPILE_NEVER;
 						$recompile = $recompile || !file_exists( $fileCached );
 
-						if ($recompile && $tplInfo['file_source'] && ($this->compileMode != TPL_COMPILE_ALWAYS) && @filemtime($fileCached) >= @filemtime($tplInfo['file_source']))
+						if ($recompile && $tplInfo['file_source'] && ($this->compileMode != self::COMPILE_ALWAYS) && @filemtime($fileCached) >= @filemtime($tplInfo['file_source']))
 						{
 							$recompile = false;
 						}
@@ -557,13 +580,13 @@ class TemplateEngine
 			$fileCached = Config::get('cache_dir') . $this->actionFilePrefix.$this->templateSepfix.$this->getSkinName().$this->templateSepfix.$actionInfo['cache_name'].".php";
 
 			//проверка на необходимость компил€ции
-			$recompile = $this->compileMode != TPL_COMPILE_NEVER;
+			$recompile = $this->compileMode != self::COMPILE_NEVER;
 			$recompile = $recompile || !file_exists( $fileCached );
 			if ($recompile)
 			{
 				$fileSource = Finder::findScript_( "plugins", $actionName);
 
-				if ($fileSource && ($this->compileMode != TPL_COMPILE_ALWAYS))
+				if ($fileSource && ($this->compileMode != self::COMPILE_ALWAYS))
 				{
 					if (@filemtime($fileCached) >= @filemtime($fileSource))
 					{
@@ -602,6 +625,20 @@ class TemplateEngine
 			$this->siteMap = YamlWrapper::load($this->skinDir.$this->siteMapFilename);
 		}
 	}
+	
+	protected function loadFixtures()
+	{
+		Finder::useClass('Fixtures');
+		$fixtures = new Fixtures();
+		$fixtures->setDir(Config::get('app_dir').'fixtures/');
+		$fixtures->load();
+		$data = $fixtures->get();
+
+		foreach ($data AS $k => $v)
+		{
+			$this->set($k, $v);
+		}
+	}
 
 	/**
 	 * ѕорождает компил€торскую часть
@@ -614,30 +651,6 @@ class TemplateEngine
 			Finder::useClass("TemplateEngineCompiler");
 			$this->compiler = new TemplateEngineCompiler();
 		}
-	}
-
-	/**
-	 * get tpl var
-	 *
-	 * @param unknown_type $key
-	 * @param unknown_type $d
-	 * @return unknown
-	 */
-	public function &a($key, &$d = null)
-	{
-		if ($d === null)
-		{
-			$d = &$this->domain;
-		}
-
-		if (is_array($d) || $d instanceof ArrayAccess)
-		{
-			if (isset($d[$key]))
-				return $d[$key];
-			else
-				return NULL;
-		}
-		return NULL;
 	}
 
 	// EOC{ TemplateEngine }

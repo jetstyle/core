@@ -21,7 +21,7 @@ class MenuPlugin extends Plugin
 
 	protected function getParentNodeByLevel($level)
 	{
-		$data = &$this->rh->page;
+		$data = &Locator::get('controller');
 		$sql = '
 			SELECT id, _path, _level, _left, _right, hide_from_menu
 			FROM ??content
@@ -33,7 +33,7 @@ class MenuPlugin extends Plugin
 				_state = 0
 		';
 
-		return $this->rh->db->queryOne($sql);
+		return Locator::get('db')->queryOne($sql);
 	}
 
 	protected function getParentNodes()
@@ -43,7 +43,7 @@ class MenuPlugin extends Plugin
 			return $this->parents;
 		}
 
-		$data = &$this->rh->page;
+		$data = &Locator::get('controller');
 
 		if (!$data['id'])
 		{
@@ -57,7 +57,7 @@ class MenuPlugin extends Plugin
 			WHERE _left < ' . $data['_left'] . ' AND _right >= ' . $data['_right'] . ' AND _level < '.($this->level + $this->depth).' AND _state = 0
 		';
 
-		$this->parents = $this->rh->db->query($sql, "id");
+		$this->parents = Locator::get('db')->query($sql, "id");
 
 		if ($this->parents === null)
 		{
@@ -67,10 +67,10 @@ class MenuPlugin extends Plugin
 		return $this->parents;
 	}
 
-	public function initialize(& $ctx, $config = NULL)
+	public function initialize($config = NULL)
 	{
-		parent :: initialize($ctx, $config);
-
+		parent :: initialize($config);
+				
 		/*
 		 * загрузим модель меню
 		 * с условием на where
@@ -78,7 +78,7 @@ class MenuPlugin extends Plugin
 		$menu = & DBModel::factory('Content');
 		$menu->setOrder(array('_left' => 'ASC'));
 
-		$current = &$this->rh->page;
+		$current = &Locator::get('controller');
 		$parents = $this->getParentNodes();
 
 		foreach ($parents AS $p)
@@ -115,9 +115,6 @@ class MenuPlugin extends Plugin
 
 		$menu->load(implode(' AND ', $where));
 
-		Finder::useClass('Link');
-		$link = new Link($this->rh);
-
 		foreach ($menu AS $i => $r)
 		{
 			if ($parents[$r['id']])
@@ -134,7 +131,7 @@ class MenuPlugin extends Plugin
 				$r['is_link'] = true;
 				if ($r['link_direct'])
 				{
-					$r['link'] = $link->formatLink($r['link']);
+					$r['link'] = Link::formatLink($r['link']);
 				}
 			}
 			$r['href'] = $r['_path'];
@@ -173,7 +170,7 @@ class MenuPlugin extends Plugin
 
 	public function rend()
 	{
-		$this->rh->tpl->set($this->store_to, $this->models['menu']);
+		Locator::get('tpl')->set($this->store_to, $this->models['menu']);
 	}
 
 	public function &getData()
@@ -181,13 +178,13 @@ class MenuPlugin extends Plugin
 		return $this->models['menu'];
 	}
 
-	public function &findElementById($id)
+	public function &getElementById($id)
 	{
-		$item = &$this->_findElementById($this->models['menu'], $id);
+		$item = &$this->findElementById($this->models['menu'], $id);
 		return $item;
 	}
 
-	protected function &_findElementById(&$data, $id)
+	protected function &findElementById(&$data, $id)
 	{
 		if(is_array($data))
 		{
@@ -198,7 +195,7 @@ class MenuPlugin extends Plugin
 			}
 			elseif(is_array($d['childs']))
 			{
-				if($item = &$this->_findElementById($d['childs'], $id))
+				if($item = &$this->findElementById($d['childs'], $id))
 				{
 					return $item;
 				}

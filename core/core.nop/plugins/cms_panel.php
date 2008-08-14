@@ -1,10 +1,10 @@
 <?php
 //@cms_panel.html
-	if($rh->principal->isAuth()) {
+	if(Locator::get('principal')->isAuth()) {
 		$cookieOce = $_COOKIE['oce'];
 		$getOce = RequestInfo::get('oce');
 		if ($getOce) {
-        	setcookie('oce',$getOce,time()+60*60*24*7,$rh->base_url);
+        	setcookie('oce',$getOce,time()+60*60*24*7,RequestInfo::$baseUrl, RequestInfo::$cookieDomain);
         	$oce = $getOce;
 		} else if ($cookieOce) {
             $oce = $cookieOce;

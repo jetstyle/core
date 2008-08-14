@@ -92,6 +92,7 @@ class Upload
 		 if (null === self::$instance)
 		 {
 		 	self::$instance = new self();
+		 	self::$instance->setDir(Config::get('file_dir'));
 		 }
 		 
 		 return self::$instance;
