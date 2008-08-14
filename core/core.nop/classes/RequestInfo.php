@@ -3,21 +3,29 @@
  * Работа с УРЛом
  * @author lunatic <lunatic@jetstyle.ru>
  */
-class RequestInfo	
+class RequestInfo
 {
+	const STATE_USE = 0;
+	const STATE_IGNORE = 1;
+	const METHOD_GET = "get";
+	const METHOD_POST = "post";
+
 	static public $host = '';
 	static public $hostProt = '';
-	
+
 	static public $pageUrl = '';
 	static public $baseUrl = '';
 	static public $baseFull = '';
-	
+
 	static public $baseDomain = '';
 	static public $cookieDomain = '';
-	
+
 	static private $data = array();
 	static private $params = array();
 	static private $denyForeignPosts = false;
+	static private $_compiled_ready = false;
+	static private $_compiled = array();
+	static private $values = array();
 
 	private function __construct(){}
 
@@ -25,7 +33,7 @@ class RequestInfo
 	 * Инициализация
 	 *
 	 */
-	static public function init()	
+	static public function init()
 	{
 		if (self::$denyForeignPosts)
 		{
@@ -58,12 +66,12 @@ class RequestInfo
 		self::$hostProt = "http://".$_SERVER["HTTP_HOST"];
 		self::$baseFull = "http://".self::$host.Config::get('base_url');
 		self::$baseUrl  = Config::get('base_url');
-		
+
 		self::$pageUrl = $_REQUEST['page'];
-		
+
 		self::load($_GET);
 		self::free('page');
-		
+
 		self::$baseDomain = preg_replace("/^www\./i", "", $_SERVER["SERVER_NAME"]);
 		self::$cookieDomain = strpos(self::$baseDomain, '.') === false ? false : "." . self::$baseDomain;
 	}
@@ -73,7 +81,7 @@ class RequestInfo
 	 *
 	 * @param array $values
 	 */
-	static public function load($values)	
+	static public function load($values)
 	{
 		if(!is_array($values) || empty($values))	return;
 		foreach($values AS $key => $value)
@@ -82,13 +90,13 @@ class RequestInfo
 		}
 	}
 
-	static public function free($key)	
+	static public function free($key)
 	{
 		unset(self::$data[$key]);
 	}
 
 
-	static public function get($key)	
+	static public function get($key)
 	{
 		return self::$data[$key];
 	}
@@ -105,14 +113,14 @@ class RequestInfo
 	 * @param array $key
 	 * @return string
 	 */
-	static public function hrefChange($url, $key)	
+	static public function hrefChange($url, $key)
 	{
 		if (!$url)	$url = self::$baseUrl.self::$pageUrl;
 		if (!is_array($key) || empty($key)) return $url;
 
 		$d = self::$data;
-		
-		foreach($key AS $k => $v)	
+
+		foreach($key AS $k => $v)
 		{
 			if ($d[$k])
 			{
@@ -124,7 +132,7 @@ class RequestInfo
 			}
 		}
 
-		foreach($d AS $k => $v)	
+		foreach($d AS $k => $v)
 		{
 			if ($v)
 			{
@@ -141,6 +149,42 @@ class RequestInfo
 			}
 		}
 		return $url;
+	}
+
+	public static function pack( $method=self::METHOD_GET, $bonus="", $only="" ) // -- упаковать в строку для GET/POST запроса
+	{
+		if (!self::$_compiled_ready)
+		{
+			self::$_compiled[self::METHOD_GET ] = "";
+			self::$_compiled[self::METHOD_POST] = "";
+			$f=0;
+			foreach(self::$values as $k=>$v)
+				if( $v!='' )
+					if (($only == "") || (strpos($k, $only) === 0))
+					{
+						if (is_array($v))
+						{
+							$v0 = array_map(htmlspecialchars, $v);
+							$v1 = array_map(urlencode, $v);
+						}
+						else
+						{
+							$v0 = htmlspecialchars($v);
+							$v1 = urlencode($v);
+						}
+						if ($f) $this->_compiled[self::METHOD_GET ].=$this->s; else $f=1;
+						$this->_compiled[self::METHOD_GET ] .= $k."=".$v1;
+						$this->_compiled[self::METHOD_POST] .= "<input type='hidden' name='".$k."' value='".$v0."' />\n";
+					}
+			self::$_compiled_ready = 1;
+		}
+		$data = self::$_compiled[$method];
+		if ($method == self::METHOD_POST) return $data.$bonus;
+		if ($bonus != "")
+		if ($data != "") $data=$this->q.$data.$this->s.$bonus;
+			else $data.=$this->q.$bonus;
+			else if ($data != "") $data = $this->q.$data;
+		return $data;
 	}
 }
 ?>

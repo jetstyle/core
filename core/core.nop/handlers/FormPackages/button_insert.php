@@ -1,7 +1,7 @@
 <?php
   $config = array(
         "event" => FORM_EVENT_INSERT,
-        "title" => "Добавить",
+        "title" => "Отправить!",
         "template" => "InputSubmit",
   );
 ?>

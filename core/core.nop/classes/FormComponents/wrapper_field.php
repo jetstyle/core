@@ -27,7 +27,8 @@ class FormComponent_wrapper_field extends FormComponent_abstract
    function Wrapper_Parse( $field_content )
    {
      // если есть ошибки?
-     RequestHandler::getInstance()->tpl->set( "is_valid", $this->field->validator->valid );
+     $tpl = TemplateEngine::getInstance();
+     $tpl->set( "is_valid", $this->field->validator->valid );
      if (!$this->field->validator->valid)
      {
        $msgs = array();
@@ -35,24 +36,25 @@ class FormComponent_wrapper_field extends FormComponent_abstract
        {
          foreach( $this->field->validator->validator_messages as $msg=>$text )
           $msgs[] = array( "msg" => $msg, "text" => $text );
-         $this->field->tpl->Loop( $msgs, $this->field->form->config["template_prefix"]."errors.html:List", "errors" );
+         $tpl->set('msgs',$msgs);
+         $tpl->parse($this->field->form->config["template_prefix"]."errors.html:List",'errors');
        }
-       else $this->field->tpl->Set( "errors", "" );
+       else $tpl->Set( "errors", "" );
      }
 
      // парсим обёртку
-     $this->field->tpl->Set( "field", "_".$this->field->name ); // на всякий случай
+     RequestHandler::getInstance()->tpl->set( "field", "_".$this->field->name ); // на всякий случай
 
-     $this->field->tpl->Set(
+     RequestHandler::getInstance()->tpl->set(
      		"not_empty",
      		isset($this->field->config["validator_params"]["not_empty"]) && $this->field->config["validator_params"]["not_empty"] ? 1 : 0
      );
 
-     $this->field->tpl->Set( "content",        $field_content  );
-     $this->field->tpl->Set( "wrapper_title",  isset($this->field->config["wrapper_title"]) && $this->field->config["wrapper_title"] ? $this->field->config["wrapper_title"] : "" );
-     $this->field->tpl->Set( "wrapper_desc",   isset($this->field->config["wrapper_desc"]) && $this->field->config["wrapper_desc"] ? $this->field->config["wrapper_desc"] : "" );
+     RequestHandler::getInstance()->tpl->set( "content",        $field_content  );
+     RequestHandler::getInstance()->tpl->set( "wrapper_title",  isset($this->field->config["wrapper_title"]) && $this->field->config["wrapper_title"] ? $this->field->config["wrapper_title"] : "" );
+     RequestHandler::getInstance()->tpl->set( "wrapper_desc",   isset($this->field->config["wrapper_desc"]) && $this->field->config["wrapper_desc"] ? $this->field->config["wrapper_desc"] : "" );
 
-     return $this->field->tpl->Parse(
+     return RequestHandler::getInstance()->tpl->parse(
      		(isset($this->field->form->config["template_prefix_wrappers"]) ? $this->field->form->config["template_prefix_wrappers"] : "" ).
         (isset($this->field->config["wrapper_tpl"]) ? $this->field->config["wrapper_tpl"] : "" )
      );
