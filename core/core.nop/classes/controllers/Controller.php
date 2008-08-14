@@ -124,7 +124,7 @@ abstract class Controller implements ArrayAccess
 	{
 		$status = True;
 
-		if (!Config::get('disable_db'))
+		if (!Config::get('db_disable'))
 		{
 			$this->loadPlugins();
 		}

@@ -61,7 +61,7 @@ class UnitTester
 	{
 		$this->recursive = true;
 		$this->namespaces = array('classes');
-		$this->test = new GroupTest(Config::get('project_name'));
+		$this->test = new GroupTest(Config::get('app_name'));
 		$this->reporter = new TextReporter();
 	}
 
