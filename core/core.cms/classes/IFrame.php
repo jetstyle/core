@@ -14,7 +14,13 @@ class IFrame
 	
 	public function handle()
 	{
-		Locator::get('tpl')->set( '__url', $this->config->url );
+		$tpl = &Locator::get('tpl');
+		$id = mt_rand();
+		$tpl->set( '_id', $id );
+		$tpl->set( '_iframe_number', $id );
+		$tpl->set('_class_name_1', "visible");
+		$tpl->set('_class_name_2', "invisible");
+		$tpl->set( '__url', $this->config->url );
 	}
 	
 	public function getHtml()

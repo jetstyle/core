@@ -18,7 +18,7 @@ class FormIframe extends FormFiles
 		{
 			if (is_array($this->config->href_for_iframe))
 			{
-				foreach ($this->config->href_for_iframe as $k => $href_for_iframe)
+				foreach ($this->config->href_for_iframe AS $k => $href_for_iframe)
 				{
 					$tpl->set("_iframe_number", $k);
 					$this->_parseIframe($href_for_iframe);
