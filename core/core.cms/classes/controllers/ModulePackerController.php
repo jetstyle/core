@@ -1,7 +1,8 @@
 <?php
 /**
- *  ”паковщик модулей
- *
+ *  Module packer controller.
+ * 
+ *  @author lunatic <lunatic@jetstyle.ru>
  */
 
 Finder::useClass("controllers/Controller");

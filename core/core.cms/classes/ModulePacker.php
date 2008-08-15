@@ -1,17 +1,14 @@
 <?php
 /**
- * Упаковщик модулей
+ * Module packer
  *
- * Собираем таблицы, которые используются в модуле
- * Дампим структуру таблиц в .meta/structure.sql
- * Дампим данные таблиц в .meta/data.sql
- * Дампим строчку из таблицы Toolbar в .meta/toolbar.sql
+ * Grep tabled, used in module.
+ * Dump structure into .meta/structure.sql
+ * Dump data into .meta/data.sql
+ * Dump toolbar row into .meta/toolbar.sql
  *
- * @author lunatic lunatic@jetstyle.ru
- * @created 19.06.2008
- *
+ * @author lunatic <lunatic@jetstyle.ru>
  */
-
 class ModulePacker
 {
 	protected $db = null;
@@ -26,10 +23,11 @@ class ModulePacker
 	}
 
 	/**
-	 * Упаковываем
-	 * Если имя модуля не указано, пакуем все модули
+	 * Pack.
 	 *
-	 * @param string $moduleName - optional
+	 * If module name is empty, than pack all modules.
+	 * 
+	 * @param string $moduleName
 	 */
 	public function pack($moduleName = null)
 	{
