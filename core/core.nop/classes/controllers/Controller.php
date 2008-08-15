@@ -82,7 +82,8 @@ abstract class Controller implements ArrayAccess
 			$ss = str_replace("Controller", "", get_class($this));
 			$method = str_replace('handle_', '', $this->method);
 			$siteMap = Locator::get('tpl')->getSiteMap();
-            if ($method != "default" || ( $method == "default" && isset( $siteMap[ strtolower( $ss.'/'.$method ) ]  ) ))
+
+            if ($method && ($method != "default" || ( $method == "default" && isset( $siteMap[ strtolower( $ss.'/'.$method ) ]  ) )))
 			{
 				$this->siteMap = strtolower($ss.'/'.$method);
 			}

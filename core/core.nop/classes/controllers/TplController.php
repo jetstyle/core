@@ -19,7 +19,7 @@ class TplController extends Controller
 	function handle()
 	{
         parent::handle();
-		$this->tpl->set('tpl', 'tpl');
+		Locator::get('tpl')->set('tpl', 'tpl');
         $this->siteMap = rtrim(implode("/", $this->params), "/");
 	}
 
