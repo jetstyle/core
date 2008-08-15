@@ -145,6 +145,7 @@ class DBAL
 
 	public function insert($sql)
 	{
+		$sql = $this->prepareSql($sql);
 		$res = $this->lowlevel->query($sql);
 		return $this->lowlevel->insertId();
 	}
@@ -167,8 +168,8 @@ class DBAL
 	{
 		Debug::mark('q');
 
-		//типа такой плейсхолдер
-		$sql = str_replace("??", DBAL::$prefix, $sql);
+		$sql = $this->prepareSql($sql);
+//		$sql = str_replace("??", DBAL::$prefix, $sql);
 
 		$this->handle = $this->lowlevel->query($sql, $limit, $offset);
 		$this->logQuery($sql, $limit, $offset);
@@ -246,7 +247,7 @@ class DBAL
 
 	public function prepareSql($sql)
 	{
-		return preg_replace('/((update|((insert|replace).*?into)|from|join)\s*?)(\?\?)([a-zA-Z0-9_\-]+)/i', '$1'.DBAL::$prefix.'$6', $sql, -1, $count);
+		return preg_replace('/((update|((insert|replace)\s*?(low_priority|delayed|)\s*?(into|))|from|join)\s*?)(`|)(\?\?)([a-zA-Z0-9_\-]+)([\s(`]{1})/i', '$1'.DBAL::$prefix.'$9$10', $sql, -1, $count);
 	}
 
 	protected function logQuery($sql, $limit = 0, $offset = 0)
