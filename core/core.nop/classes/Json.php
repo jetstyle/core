@@ -1,5 +1,12 @@
 <?php
-
+/**
+ * Json.
+ * 
+ * Convert data to JSON and back.
+ * 
+ * @author lunatic <lunatic@jetstyle.ru>
+ *
+ */
 class Json
 {
 	private function __construct(){}
