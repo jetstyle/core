@@ -247,7 +247,7 @@ class DBAL
 
 	public function prepareSql($sql)
 	{
-		return preg_replace('/((update|((insert|replace)\s*?(low_priority|delayed|)\s*?(into|))|from|join)\s*?)(`|)(\?\?)([a-zA-Z0-9_\-]+)([\s(`]{1})/i', '$1'.DBAL::$prefix.'$9$10', $sql, -1, $count);
+		return preg_replace('/((update|((insert|replace)\s*?(low_priority|delayed|)\s*?(into|))|from|join)\s*?)(`|)(\?\?)([a-zA-Z0-9_\-]+)([\s(`]{1}|$)/i', '$1'.DBAL::$prefix.'$9$10', $sql, -1, $count);
 	}
 
 	protected function logQuery($sql, $limit = 0, $offset = 0)
