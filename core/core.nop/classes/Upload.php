@@ -92,7 +92,7 @@ class Upload
 		 if (null === self::$instance)
 		 {
 		 	self::$instance = new self();
-		 	self::$instance->setDir(Config::get('file_dir'));
+		 	self::$instance->setDir(Config::get('files_dir'));
 		 }
 		 
 		 return self::$instance;
@@ -285,6 +285,7 @@ class Upload
 		{
 			foreach($this->ALLOW as $ext)
 			{
+				var_dump($this->dir.$file_name.'.'.$ext);
 				if(@file_exists($this->dir.$file_name.'.'.$ext))
 				{
 					break;

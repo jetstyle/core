@@ -1081,12 +1081,14 @@ class DBModel extends Model implements IteratorAggregate, ArrayAccess, Countable
 	 * Загрузить данные о файлах из аплоада
 	 *
 	 **/
-	protected function mapUpload(&$data, $info)
+	protected function mapUpload($fieldName, &$data)
 	{
 		$model =& Locator::get('upload');
 		if (!isset($model)) return;
 
-		$fname = str_replace('*', $data['id'], $info['path']);
+		$fieldinfo = &$this->foreignFields[$fieldName];
+		
+		$fname = str_replace('*', $data['id'], $fieldinfo['path']);
 
 		$file = $model->getFile($fname);
 		if ($file)
@@ -1095,8 +1097,7 @@ class DBModel extends Model implements IteratorAggregate, ArrayAccess, Countable
 			$file->height = $height;
 			$file->width = $width;
 		}
-
-		$data[$info['name']] = $file;
+		$data[$fieldName] = $file;
 	}
 
 	/**
