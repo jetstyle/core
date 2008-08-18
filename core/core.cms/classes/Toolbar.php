@@ -11,7 +11,7 @@
  	protected $goToList;
 	protected $db = null;
 	protected $tpl = null;
- 	
+
  	public function __construct()
  	{
  		$this->db = &Locator::get('db');
@@ -41,7 +41,7 @@
     	$this->goToList = $this->db->query("" .
  			"SELECT title_pre AS title, _path AS path " .
  			"FROM ??content " .
- 			"WHERE mode != '' " .
+ 			"WHERE controller != '' " .
  			"ORDER BY _level,_order " .
  		"");
  	}
@@ -62,7 +62,7 @@
 		$moduleName = $params[0];
 
 		$principal = &Locator::get('principal');
-		
+
  		while($r = $this->db->getRow($result))
  		{
  			$r['granted'] = $principal->isGrantedTo($r['href']);
