@@ -12,6 +12,8 @@
 	protected $db = null;
 	protected $tpl = null;
 
+	protected $possiblePaths = null;
+	
  	public function __construct()
  	{
  		$this->db = &Locator::get('db');
@@ -58,9 +60,8 @@
 
  	protected function constructResult($result)
  	{
- 		$params = Locator::get('controller')->getParams();
-		$moduleName = $params[0];
-
+		$paths = $this->getPossiblePaths(Locator::get('controller')->getParams());
+		
 		$principal = &Locator::get('principal');
 
  		while($r = $this->db->getRow($result))
@@ -89,7 +90,7 @@
  				}
  				$this->items['submenu'][$r['_parent']]['childs'][$r['id']] = $r;
  			}
- 			if(strlen($moduleName) > 0 && $moduleName == $r['href'])
+ 			if($r['href'] && in_array($r['href'], $paths))
  			{
  				if($this->items['main'][$r['id']])
  				{
@@ -114,6 +115,20 @@
  			}
  		}
  	}
+ 	
+ 	protected function getPossiblePaths($urlParts)
+	{
+		if ( null === $this->possiblePaths)
+		{
+			$this->possiblePaths = array();
+			do
+			{
+				$this->possiblePaths[] = implode ("/", $urlParts);
+			}
+			while (array_pop($urlParts) && $urlParts);
+		}
+		return $this->possiblePaths;
+	}
 
  }
 ?>
