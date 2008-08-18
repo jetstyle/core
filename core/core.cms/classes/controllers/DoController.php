@@ -46,10 +46,21 @@ class DoController extends Controller
 
 	function handle_default($config)
 	{
+		$params = $this->params;
+//		if ($config['mode'])
+//		{
+//			unset($params[0], $params[1]);
+//		}
+//		else
+//		{
+			unset($params[0]);
+//		}
+				
 		Finder::useClass("ModuleConstructor");
 		$moduleConstructor =& new ModuleConstructor();
-		$moduleConstructor->initialize($config['module']);
-		Locator::get('tpl')->set('module_body', $moduleConstructor->proceed($config['mode']));
+		$moduleConstructor->initialize($config['module'], $params);
+		
+		Locator::get('tpl')->set('module_body', $moduleConstructor->proceed());
 
 		$this->data['title_short'] = $moduleConstructor->getTitle();
 		$this->siteMap = 'module';

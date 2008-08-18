@@ -110,8 +110,8 @@ class TreeControl
 				}
 				$show_trash = $_GET['_show_trash'];
 
-				$this->tpl->set('_url_xml', RequestInfo::hrefChange(RequestInfo::$baseUrl."do/".$this->config->moduleName."/tree", array('action' => 'xml')));
-				$this->tpl->set('_url_connect', RequestInfo::hrefChange(RequestInfo::$baseUrl."do/".$this->config->moduleName."/tree", array('action' => 'update')));
+				$this->tpl->set('_url_xml', RequestInfo::hrefChange(RequestInfo::$baseUrl."do/".$this->config->componentPath, array('action' => 'xml')));
+				$this->tpl->set('_url_connect', RequestInfo::hrefChange(RequestInfo::$baseUrl."do/".$this->config->componentPath, array('action' => 'update')));
 				$url = RequestInfo::hrefChange('', array('id' => ''));
 				$pos = strpos($url, '?');
 				if ($pos !== false)
@@ -148,7 +148,7 @@ class TreeControl
 
 				$this->tpl->set('_tree_allow_drop_to_root', $this->config->allowDropToRoot);
 				$this->tpl->set('_tree_autoloading', $this->config->ajaxAutoLoading);
-				$this->tpl->set('_tree_autoloading_url', RequestInfo::hrefChange(RequestInfo::$baseUrl."do/".$this->config->moduleName."/tree", array('action' => 'xml', $this->idGetVar => '', 'autoload' => '1')));
+				$this->tpl->set('_tree_autoloading_url', RequestInfo::hrefChange(RequestInfo::$baseUrl."do/".$this->config->componentPath, array('action' => 'xml', $this->idGetVar => '', 'autoload' => '1')));
 
 			break;
 		}
@@ -173,7 +173,7 @@ class TreeControl
 			$this->toRoot[$c['id']] = $c['id'];
 			$c = $this->items[$c['_parent']] ;
 		} while($c);
-
+		
 		if ($this->config->ajaxAutoLoading)
 		{
 			if (0 == $treeId)
@@ -397,27 +397,27 @@ class TreeControl
 			$this->load();
 			$this->restore();
 
-			TreeControl::updateTreePathes($this->config->table_name, $this->id, $this->config->allow_empty_supertag);
+			TreeControl::updateTreePathes($this->config->table_name, $this->id, $this->config->allow_empty_supertag, $this->config->where);
 
 			return '1';
 		}
 		return '0';
 	}
 
-	public static function updateTreePathes($tableName, $id, $allow_empty_supertag = false) 
+	public static function updateTreePathes($tableName, $id, $allow_empty_supertag = false, $where = '') 
 	{
 		//$this->config->table_name replaced with $tableName
 		//$this->id replaced with $id
 		//$this->config->allow_empty_supertag replaced with allow_empty_supertag
     	//$parent_id = isset($parent_id) ? $parent_id : 1;
     	$db = &Locator::get('db');
-		$root = $db->queryOne("SELECT id,_left,_right,_path,_parent FROM ??".$tableName." WHERE id='".$id."'");
+		$root = $db->queryOne("SELECT id,_left,_right,_path,_parent FROM ??".$tableName." WHERE id='".$id."' ".($where ? " AND " . $where : "")." ");
 		if ($root) {
 			//грузим поддерево
 			$result = $db->execute("
 				SELECT id, _supertag, _parent, _path
 				FROM ??".$tableName."
-				WHERE _left>= ".$root['_left']." AND _right <= ".$root['_right']."
+				WHERE _left>= ".$root['_left']." AND _right <= ".$root['_right']." ".($where ? " AND " . $where : "")."
 			");
 
 			if ($result) {
@@ -430,7 +430,7 @@ class TreeControl
 				$parent = $db->queryOne("
 					SELECT id, _supertag, _parent, _path
 					FROM ??".$tableName."
-					WHERE id = ".$root['_parent']."
+					WHERE id = ".$root['_parent']." ".($where ? " AND " . $where : "")."
 				");
 				if ($parent) $tree['items'][$parent['id']] = $parent;
 
@@ -447,20 +447,20 @@ class TreeControl
 
 					//модифицируем узел
 					$r = $tree['items'][$id];
-
-					if ($r['_parent'] == 0 && $parent_id !== 0)	{
-						$r['_path'] = '';
-						$r['_supertag'] = '';
-					} else {
+//					if ($r['_parent'] == 0 && $parent_id !== 0)	{
+//						$r['_path'] = '';
+//						$r['_supertag'] = '';
+//					} else {
 						$parentTag = $tree['items'][ $r['_parent'] ]['_path'];
 						$r['_path'] = ($parentTag ? $parentTag.'/' : '').$r["_supertag"];
-					}
+//					}
 
 					$db->execute("UPDATE ".DBAL::$prefix.$tableName." SET _supertag='".$r["_supertag"]."',_path='".$r['_path']."' WHERE id='".$r['id']."'");
 					$tree['items'][$id] = $r;
 				}
 			}
 		}
+//		die();
 	}
 
 	protected function addNode()
@@ -496,11 +496,20 @@ class TreeControl
 			WHERE _parent = '".$node['parent']."'
 		");
 
+		if (isset($this->config->INSERT_FIELDS) && is_array($this->config->INSERT_FIELDS))
+		{
+			foreach ($this->config->INSERT_FIELDS AS $fieldName => $fieldValue) 
+			{
+				$additionFields .= ','.$fieldName;
+				$additionValues .= ','.$db->quote($fieldValue);
+			}
+		}
+		
 		$id = $db->insert("
 			INSERT INTO ". DBAL::$prefix.$this->config->table_name ."
-			(title, title_pre, _parent, _supertag, _path, _order, _state)
+			(title, title_pre, _parent, _supertag, _path, _order, _state " . $additionFields . ")
 			VALUES
-			(".$this->db->quote($node['title']).", ".$db->quote($node['title_pre']).", ".$db->quote($node['parent']).", ".$db->quote($node['supertag']).", ".$db->quote($node['_path']).", ".$db->quote($order['_max']).", 1)
+			(".$this->db->quote($node['title']).", ".$db->quote($node['title_pre']).", ".$db->quote($node['parent']).", ".$db->quote($node['supertag']).", ".$db->quote($node['_path']).", ".$db->quote($order['_max']).", 1 ".$additionValues.")
 		");
 
 		return $id;
@@ -523,7 +532,7 @@ class TreeControl
 			{
 				$db->query("
 					DELETE FROM ??". $this->config->table_name ."
-					WHERE _left >= ".$node['_left']." AND _right <= ".$node['_right']."
+					WHERE _left >= ".$node['_left']." AND _right <= ".$node['_right']." ".($this->config->where ? " AND ".$this->config->where : "")."
 				");
 			}
 			// метим
@@ -532,7 +541,7 @@ class TreeControl
 				$db->query("
 					UPDATE ??". $this->config->table_name ."
 					SET _state = 2
-					WHERE _left >= ".$node['_left']." AND _right <= ".$node['_right']."
+					WHERE _left >= ".$node['_left']." AND _right <= ".$node['_right']." ".($this->config->where ? " AND ".$this->config->where : "")."
 				");
 			}
 		}
@@ -547,7 +556,7 @@ class TreeControl
 			$result = $this->db->queryOne("
 				SELECT ".$this->idField."
 				FROM ??".$this->config->table_name."
-				WHERE _parent = 0
+				WHERE _parent = 0 " . ($this->config->where ? " AND ".$this->config->where : "") . "
 				ORDER BY _order ASC
 			");
 
