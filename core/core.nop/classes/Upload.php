@@ -285,7 +285,6 @@ class Upload
 		{
 			foreach($this->ALLOW as $ext)
 			{
-				var_dump($this->dir.$file_name.'.'.$ext);
 				if(@file_exists($this->dir.$file_name.'.'.$ext))
 				{
 					break;
