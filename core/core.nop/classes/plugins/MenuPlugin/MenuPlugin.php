@@ -70,7 +70,7 @@ class MenuPlugin extends Plugin
 	public function initialize($config = NULL)
 	{
 		parent :: initialize($config);
-				
+
 		/*
 		 * загрузим модель меню
 		 * с условием на where
@@ -126,7 +126,7 @@ class MenuPlugin extends Plugin
 				$r['current'] = 1;
 			}
 
-			if ($r['mode'] == 'link')
+			if ($r['controller'] == 'link')
 			{
 				$r['is_link'] = true;
 				if ($r['link_direct'])

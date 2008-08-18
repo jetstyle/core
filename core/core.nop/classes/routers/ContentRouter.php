@@ -1,7 +1,7 @@
 <?php
 /**
  * ContentRouter
- * 
+ *
  * @author lunatic <lunatic@jetstyle.ru>
  */
 
@@ -16,7 +16,7 @@ class ContentRouter extends BasicRouter
 		$where = array();
 		if (!isset($criteria['class']) && $criteria['url']=="")
 		{
-			$where[] = "{mode}='home'";
+			$where[] = "{controller}='home'";
 		}
 		elseif (isset($criteria['url']))
 		{
@@ -24,16 +24,16 @@ class ContentRouter extends BasicRouter
 		}
 		elseif (isset($criteria['class']))
 		{
-			$where[] = '{mode}='.DBModel::quote($this->getModeByClass($criteria['class']));
+			$where[] = '{controller}='.DBModel::quote($this->getModeByClass($criteria['class']));
 		}
-		
+
 		$where = implode(" AND ", $where);
 
 		$data = $content->loadOne($where)->getArray();
 
 		if (!empty($data))
 		{
-			$class = $this->getClassByMode($data['mode']);
+			$class = $this->getClassByMode($data['controller']);
 			$config = array (
 				'class' => $class,
 				'data' => $data,
@@ -48,7 +48,7 @@ class ContentRouter extends BasicRouter
 		}
 		return null;
 	}
-	
+
 	private function getClassByMode($mode)
 	{
 		return (($mode ? implode('', array_map(ucfirst, explode('_', $mode))) : "Content" ) .  "Controller");
@@ -61,6 +61,6 @@ class ContentRouter extends BasicRouter
 		return $res;
 	}
 
-	
+
 }
 ?>
