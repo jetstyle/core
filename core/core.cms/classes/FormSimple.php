@@ -4,7 +4,7 @@ class FormSimple
 {
 	protected $tpl = null;
 	protected $db = null;
-	
+
 	protected $config; //ссылка на объект класса ModuleConfig
 	protected $loaded = false; //грузили или нет данные?
 	protected $model = null;
@@ -32,7 +32,7 @@ class FormSimple
 		$this->config =& $config;
 		$this->tpl = &Locator::get('tpl');
 		$this->db = &Locator::get('db');
-		
+
 		if (is_array($this->config->has_one))
 		{
 			foreach($this->config->has_one AS $value)
@@ -289,7 +289,7 @@ class FormSimple
 						$data[$r[$value['fk']]] = $r['title'];
 					}
 
-					$this->config->RENDER[] = array($value['fk'], "select", $data);
+					$this->config->RENDER[] = array($value['pk'], "select", $data);
 				}
 			}
 		}
