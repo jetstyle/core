@@ -76,10 +76,10 @@ class FormFiles extends FormSimple
 
 						$file = $upload->getFile(str_replace('*', $this->id, $vv['filename']));
 
-						if($file->name_full && in_array($file->ext, $upload->GRAPHICS ) )
+						if($file['name_full'] && in_array($file['ext'], $upload->GRAPHICS ) )
 						{
 							$r = array(
-								'src' => $file->link,
+								'src' => $file['link'],
 							);
 
 							if($vv['link_to'])
@@ -90,12 +90,12 @@ class FormFiles extends FormSimple
 									{
 										$file = $upload->GetFile(str_replace('*', $this->id, $_vv['filename']));
 
-										if($file->name_full && in_array($file->ext, $upload->GRAPHICS ) )
+										if($file['name_full'] && in_array($file['ext'], $upload->GRAPHICS ) )
 										{
-											$A = getimagesize($file->name_full);
+											$A = getimagesize($file['name_full']);
 											$r['width'] = $A[0];
 											$r['height'] = $A[1];
-											$r['src_original'] = $file->link.'?popup=1';
+											$r['src_original'] = $file['link'].'?popup=1';
 											$this->tpl->setRef('file', $r);
 											$this->item[$field_file] = $this->tpl->parse($this->template_files.':image_with_link');
 										}
@@ -109,26 +109,26 @@ class FormFiles extends FormSimple
 								$this->item[$field_file] = $this->tpl->parse($this->template_files.':image');
 							}
 						}
-						else if ($file->name_full)
+						else if ($file['name_full'])
 						{
 							$r = array(
-								'filesize' => $file->size,
-								'format'   => $file->format,
-								'src'      => $file->link,
-								'name_short' =>  $file->name_short,
+								'filesize' => $file['size'],
+								'format'   => $file['format'],
+								'src'      => $file['link'],
+								'name_short' =>  $file['name_short'],
 							);
 
 							$this->tpl->setRef('file', $r);
 
-							if($file->ext == 'flv')
+							if($file['ext'] == 'flv')
 							{
 								$this->item[$field_file] = $this->tpl->parse($this->template_files.':file_video');
 							}
-							elseif($file->ext == 'mp3')
+							elseif($file['ext'] == 'mp3')
 							{
 								$this->item[$field_file] = $this->tpl->parse($this->template_files.':file_mp3');
 							}
-							elseif($file->ext == 'swf')
+							elseif($file['ext'] == 'swf')
 							{
 								$this->item[$field_file] = $this->tpl->parse($this->template_files.':file_flash');
 							}
@@ -230,9 +230,9 @@ class FormFiles extends FormSimple
 			foreach($result_arrays AS $vv)
 			{
 				$file = $upload->GetFile( str_replace('*', $this->id, $vv['filename']));
-				if($file->name_full)
+				if($file['name_full'])
 				{
-					@unlink( $file->name_full );
+					@unlink( $file['name_full'] );
 				}
 
 				if ($do_upload)
@@ -285,9 +285,9 @@ class FormFiles extends FormSimple
 					foreach($v AS $vv)
 					{
 						$file = $upload->GetFile(str_replace('*', $this->id, $vv['filename']));
-						if($file->name_full)
+						if($file['name_full'])
 						{
-							unlink($file->name_full);
+							unlink($file['name_full']);
 						}
 					}
 				}

@@ -107,9 +107,9 @@ class FormGallerySimple
 								{
 									if ($file = $upload->getFile(str_replace('*', $r['id'], $vv['filename'])))
 									{
-										$A = getimagesize($file->name_full);
+										$A = getimagesize($file['name_full']);
 										$out[$r['id']] = array(
-											'src' => $file->link,
+											'src' => $file['link'],
 											'height' => $A[1],
 											'width' => $A[0],
 //											'title' => iconv('cp1251', 'UTF-8', $r['title']),
@@ -186,9 +186,9 @@ class FormGallerySimple
 		foreach($fileArr AS $r)
 		{
 			$file = $upload->GetFile( str_replace('*', $itemId, $r['filename']));
-			if($file->name_full)
+			if($file['name_full'])
 			{
-				@unlink($file->name_full);
+				@unlink($file['name_full']);
 			}
 		}
 	}
@@ -224,9 +224,9 @@ class FormGallerySimple
 					if($id)
 					{
 						$file = $upload->GetFile( str_replace('*', $id, $r['filename']));
-						if($file->name_full)
+						if($file['name_full'])
 						{
-							@unlink($file->name_full);
+							@unlink($file['name_full']);
 						}
 					}
 
@@ -240,16 +240,16 @@ class FormGallerySimple
 					}
 
 					$file = $upload->UploadFile($input_field, str_replace('*', $new_id, $r['filename']), false, $this->buildParams($r));
-					if(!$file->name_full)
+					if(!$file['name_full'])
 					{
 						$broken = true;
 					}
 					elseif($r['show'])
 					{
-						$A = getimagesize($file->name_full);
+						$A = getimagesize($file['name_full']);
 						$params = array (
 							'id' => $new_id,
-							'src' => $file->link,
+							'src' => $file['link'],
 							'width' => $A[0],
 							'height' => $A[1],
 						);
