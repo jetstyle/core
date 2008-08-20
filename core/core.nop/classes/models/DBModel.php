@@ -1745,7 +1745,7 @@ class DBModel extends Model implements IteratorAggregate, ArrayAccess, Countable
 
 		if ($this->one)
 		{
-			if (isset($this->data[0]) && isset($this->data[0][$key]))
+			if (isset($this->data[0]))
 			{
 				return $this->data[0][$key];
 			}
