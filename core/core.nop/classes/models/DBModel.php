@@ -1087,15 +1087,15 @@ class DBModel extends Model implements IteratorAggregate, ArrayAccess, Countable
 		if (!isset($model)) return;
 
 		$fieldinfo = &$this->foreignFields[$fieldName];
-		
+
 		$fname = str_replace('*', $data['id'], $fieldinfo['path']);
 
 		$file = $model->getFile($fname);
 		if ($file)
 		{
-			list($width, $height, $type, $attr) = getimagesize($file->name_full);
-			$file->height = $height;
-			$file->width = $width;
+			list($width, $height, $type, $attr) = getimagesize($file['name_full']);
+			$file['height'] = $height;
+			$file['width'] = $width;
 		}
 		$data[$fieldName] = $file;
 	}

@@ -5,7 +5,7 @@
   * see http://in.jetstyle.ru/rocket/rocketforms
 
   FormComponent_image( &$config )
-      - $field -- $field->config instance-a поля  
+      - $field -- $field->config instance-a поля
 
   -------------------
 
@@ -34,12 +34,12 @@ class FormComponent_interface_image extends FormComponent_abstract
 	 $file =& new Upload($this->field->rh, $this->field->config['model_data_dir'] ? $this->field->config['model_data_dir'] : 'files/');
 	 if ($file->getFile($data))
      {
-	     $this->field->tpl->Set('src', $this->field->rh->ri->_base_full.'pict.php?img='.$file->current->name_full);
+	     $this->field->tpl->Set('src', $this->field->rh->ri->_base_full.'pict.php?img='.$file->current['name_full']);
 	     $this->field->tpl->Parse('forms/file.html:image', 'image');
 	 //    $this->field->tpl->Set( "interface_data", $data );
 	 }else
      {
-	 	$this->field->tpl->set('image', '');	 
+	 	$this->field->tpl->set('image', '');
 	 }
 
      return $this->field->tpl->Parse( $this->field->form->config["template_prefix_interface"].
@@ -50,7 +50,7 @@ class FormComponent_interface_image extends FormComponent_abstract
 	{
 	    return $_data. (!empty($this->field->config['model_data_name']) ? str_replace('*', '', $this->field->config['model_data_name']) : '' );
 	}
-}  
-   
+}
+
 
 ?>

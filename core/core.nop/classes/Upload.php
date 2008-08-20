@@ -53,21 +53,21 @@
  =============================================================== v.2 (Zharik)
 
  */
-class Upload 
+class Upload
 {
 
 	private static $instance = null;
-	
+
 	public $TYPES = array(); // ext => [type,word]
 	public $ALLOW = array(); // белый список расширений
 	public $DENY = array(); // чёрный список расширений
 	public $GRAPHICS = array('jpg', 'jpeg', 'gif', 'png', 'bmp');
-	
+
 	protected $dir;
 	protected $current = false; //последний загруженный/выбранный файл
 	protected $chmod = 0744; //какие права выставлять на загруженный файл
 	protected $webDir = null;
-	
+
 	protected $DIRS_SWAPPED = array(); //для DirSwap(),  DirUnSwap();
 
 	private function __construct()
@@ -75,7 +75,7 @@ class Upload
 		if (Config::get('upload_ext'))
 		{
 			$exts = explode(",", Config::get('upload_ext'));
-	
+
 			if (!empty($exts))
 			{
 				foreach ($exts as $ext)
@@ -95,19 +95,19 @@ class Upload
 		 	self::$instance = new self();
 		 	self::$instance->setDir(Config::get('files_dir'));
 		 }
-		 
+
 		 return self::$instance;
 	}
-	
+
 	public function setDir($dir)
 	{
 		$this->dir = $dir;
 		$this->webDir = (Config::get('front_end_path') ? Config::get('front_end_path') : RequestInfo::$baseUrl).str_replace(Config::get('project_dir'), '', $this->dir);
 	}
-	
+
 	public function uploadFile($_file, $file_name, $is_full_name=false, $params = NULL )
 	{
-		if(!is_array($_file))	
+		if(!is_array($_file))
 		{
 			$_file = $_FILES[ $_file ];
 		}
@@ -125,17 +125,17 @@ class Upload
 			//грузим
 
 			$this->delFile($file_name);
-			
+
 			$file_name_ext = $file_name.".".$ext;
 			$file_name_full = ( $is_full_name )? $file_name : $this->dir.$file_name_ext;
-				
+
 			$B = filesize($uploaded_file);
-				
+
 			if($params['filesize'])
 			{
 				$kill = false;
 				$size = $this->parseSizeParam($params['filesize']);
-					
+
 				if($size[0] == '')
 				{
 					if($B != $size[1])
@@ -155,7 +155,7 @@ class Upload
 				}
 
 			}
-			
+
 			// check directory
 			$dirname = dirname($file_name_full);
 			if (!is_dir($dirname))
@@ -169,11 +169,11 @@ class Upload
 			{
 				throw new Exception("Upload: directory ".str_replace(Config::get('project_dir'), '', $dirname)." is not writable");
 			}
-					
+
 			if(in_array($ext, $this->GRAPHICS) && is_array($params['size']) && (strlen($params['size'][0]) > 0 && strlen($params['size'][1]) > 0))
 			{
 				$A = getimagesize($uploaded_file);
-				
+
 				$x = $this->parseSizeParam($params['size'][0]);
 				$y = $this->parseSizeParam($params['size'][1]);
 
@@ -189,10 +189,10 @@ class Upload
 				{
 					$x[0] = $x[0] == '=' ? '==' : $x[0];
 					$y[0] = $y[0] == '=' ? '==' : $y[0];
-						
+
 					eval('$_x = ('.$A[0].$x[0].$x[1].');');
 					eval('$_y = ('.$A[1].$y[0].$y[1].');');
-						
+
 					if($_x && $_y)
 					{
 						move_uploaded_file($uploaded_file,$file_name_full);
@@ -208,13 +208,13 @@ class Upload
 			{
 				move_uploaded_file($uploaded_file,$file_name_full);
 			}
-				
+
 			if($params['to_flv'] && $ext != 'flv')
 			{
 				$this->convertToFlv($file_name_full, $this->dir.$file_name.".flv");
 				@unlink($file_name_full);
 			}
-				
+
 			chmod($file_name_full,$this->chmod);
 			$this->_current($file_name, $ext);
 			return $this->current;
@@ -224,18 +224,18 @@ class Upload
 			return false;
 		}
 	}
-	
+
 	protected function _current($file_name, $ext)
 	{
 		$file_name_ext = $file_name.".".$ext;
 		$file_name_full = $this->dir.$file_name_ext;
-		$this->current->name_full = $file_name_full;
-		$this->current->name_short = $file_name_ext;
-		$this->current->ext = strtolower($ext);
-		$this->current->format = ($this->TYPES[$ext][1] ? $this->TYPES[$ext][1] : strtolower($ext));
-		$this->current->_format = $this->TYPES[$ext][0];
-		$this->current->size = floor(100.0*@filesize($file_name_full)/1024)/100;
-		$this->current->link = $this->webDir.$this->current->name_short;
+		$this->current['name_full'] = $file_name_full;
+		$this->current['name_short'] = $file_name_ext;
+		$this->current['ext'] = strtolower($ext);
+		$this->current['format'] = ($this->TYPES[$ext][1] ? $this->TYPES[$ext][1] : strtolower($ext));
+		$this->current['_format'] = $this->TYPES[$ext][0];
+		$this->current['size'] = floor(100.0*@filesize($file_name_full)/1024)/100;
+		$this->current['link'] = $this->webDir.$this->current['name_short'];
 	}
 
 	protected function isAllowed($ext)
@@ -270,7 +270,7 @@ class Upload
 			return false;
 		}
 	}
-	
+
 	public function getFile( $file_name, $is_full_name=false )
 	{
 		$this->current = false;
@@ -290,7 +290,7 @@ class Upload
 				{
 					break;
 				}
-				else 
+				else
 				{
 					$ext = '';
 				}
@@ -305,7 +305,7 @@ class Upload
 	}
 
 	public function delFile( $file_name,  $is_full_name=false  ){
-		if( $is_full_name ) 
+		if( $is_full_name )
 		{
 			@unlink($file_name);
 		}
@@ -314,7 +314,7 @@ class Upload
 			foreach($this->ALLOW as $ext)
 			{
 				$file_name_full = $this->dir.$file_name.".".$ext;
-				if(@file_exists($file_name_full)) 
+				if(@file_exists($file_name_full))
 				{
 					unlink($file_name_full);
 				}
