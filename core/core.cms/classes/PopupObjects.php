@@ -20,7 +20,7 @@ abstract class PopupObjects
 		$this->db = &Locator::get('db');
 		
 		$this->upload =&Locator::get('upload');
-		$this->upload->setDir(Config::get('file_dir').$this->upload_dir.'/');
+		$this->upload->setDir(Config::get('files_dir').$this->upload_dir.'/');
 	}
 
 	public function setRubric($value)

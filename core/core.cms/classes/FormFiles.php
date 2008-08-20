@@ -19,7 +19,7 @@ class FormFiles extends FormSimple
 
 		//upload
 		$this->upload = &Locator::get('upload');
-		$this->upload->setDir($config->upload_dir ? Config::get('file_dir').$config->upload_dir."/" : Config::get('file_dir'));
+		$this->upload->setDir($config->upload_dir ? Config::get('files_dir').$config->upload_dir."/" : Config::get('files_dir'));
 	}
 
 	public function handle()

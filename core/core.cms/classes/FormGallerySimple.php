@@ -31,7 +31,7 @@ class FormGallerySimple
 
 		//upload
 		$this->upload = &$this->rh->upload;
-		$this->upload->setDir($config->upload_dir ? Config::get('file_dir').$config->upload_dir."/" : Config::get('file_dir'));
+		$this->upload->setDir($config->upload_dir ? Config::get('files_dir').$config->upload_dir."/" : Config::get('files_dir'));
 		//$this->web_upload_dir = $this->rh->front_end->path_rel . 'files/' . ($this->config->upload_dir ? $this->config->upload_dir . "/" : "");
 
 		$this->_FILES = &$this->config->_FILES;

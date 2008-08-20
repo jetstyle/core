@@ -66,7 +66,8 @@ class Upload
 	protected $dir;
 	protected $current = false; //последний загруженный/выбранный файл
 	protected $chmod = 0744; //какие права выставлять на загруженный файл
-
+	protected $webDir = null;
+	
 	protected $DIRS_SWAPPED = array(); //для DirSwap(),  DirUnSwap();
 
 	private function __construct()
