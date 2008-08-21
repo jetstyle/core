@@ -15,7 +15,7 @@ class ListSelect extends ListSimple
 	function Handle()
 	{
 		$db = &$this->db;
-		
+
 		$id_opts = $this->config->id_opts ? $this->config->id_opts : "id";
 		if($this->config->topic_field)
 		{
@@ -57,11 +57,13 @@ class ListSelect extends ListSimple
 				$this->tpl->set('opts_title', 'Раздел:');
 			}
 
+
+
 			$this->tpl->set('__topic_field', $this->topic_field);
-			$this->tpl->parse("select_topic.html", $this->store_to);
+			$this->tpl->parse("select_topic.html", '__select');
 		}
 
-		if((isset($_GET[$this->topic_field]) && $_GET[$this->topic_field] > 0) || $this->config->passthru)
+		if((isset($_GET[$this->topic_field]) && $_GET[$this->topic_field]) || $this->config->passthru)
 		{
 			parent::Handle();
 		}
