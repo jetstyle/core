@@ -44,8 +44,7 @@ class FormCalendar extends FormIframe	{
 		}
 	}
 
-	function Handle()	{
-		$this->YEAR = $this->config->YEAR;
+	function Handle()	{		$this->YEAR = $this->config->YEAR;
 		$this->MONTH = $this->config->MONTH;
 		$this->DAY = $this->config->DAY;
 		$this->CALENDAR_FIELDS = $this->config->CALENDAR_FIELDS ? $this->config->CALENDAR_FIELDS : array();
@@ -53,7 +52,7 @@ class FormCalendar extends FormIframe	{
 		$this->Load();
 		if( !$this->id )
 		{
-			foreach($this->CALENDAR_FIELDS AS $field)	
+			foreach($this->CALENDAR_FIELDS AS $field)
 			{
 				$this->rh->tpl->Assign('_'.$field, date($this->date_format));
 				if($this->USE_TIME)
@@ -61,10 +60,10 @@ class FormCalendar extends FormIframe	{
 					$this->rh->tpl->Assign('_'.$field.'_time', date('H:i'));
 				}
 			}
-		} 
-		else	
+		}
+		else
 		{
-			foreach($this->CALENDAR_FIELDS AS $field)	
+			foreach($this->CALENDAR_FIELDS AS $field)
 			{
 				if($this->USE_TIME)
 				{
@@ -78,6 +77,9 @@ class FormCalendar extends FormIframe	{
 			}
 		}
 
+		$this->state->keep('year');
+		$this->state->keep('month');
+
 		//по этапу
 		parent::Handle();
 	}
@@ -85,26 +87,26 @@ class FormCalendar extends FormIframe	{
 	function Update(){
 
 		$rh =& $this->rh;
-		
+
 		if($this->needUpdate())
 		{
 			if($this->YEAR)
 			{
 				$rh->GLOBALS[$this->prefix.'year'] = preg_replace($this->r_date_in, $this->r_year, $rh->GetVar($this->prefix.$this->YEAR));
-				$this->UPDATE_FIELDS[] = 'year'; 
+				$this->UPDATE_FIELDS[] = 'year';
 			}
 			if($this->MONTH)
 			{
 				$rh->GLOBALS[$this->prefix.'month'] = preg_replace($this->r_date_in, $this->r_month, $rh->GetVar($this->prefix.$this->MONTH));
-				$this->UPDATE_FIELDS[] = 'month'; 
+				$this->UPDATE_FIELDS[] = 'month';
 			}
 			if($this->DAY)
 			{
 				$rh->GLOBALS[$this->prefix.'day'] = preg_replace($this->r_date_in, $this->r_day, $rh->GetVar($this->prefix.$this->DAY));
-				$this->UPDATE_FIELDS[] = 'day'; 
+				$this->UPDATE_FIELDS[] = 'day';
 			}
-			
-			foreach($this->CALENDAR_FIELDS AS $field)	
+
+			foreach($this->CALENDAR_FIELDS AS $field)
 			{
 				if($this->USE_TIME)
 				{
@@ -122,10 +124,10 @@ class FormCalendar extends FormIframe	{
 				{
 					$date = preg_replace($this->r_date_in, $this->r_date_out_mysql, $rh->GetVar($this->prefix.$field));
 				}
-				$rh->GLOBALS[$this->prefix.$field] = $date; 
+				$rh->GLOBALS[$this->prefix.$field] = $date;
 			}
 		}
-		
+
 		return parent::Update();
 	}
 
