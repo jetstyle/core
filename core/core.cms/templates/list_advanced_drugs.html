@@ -13,8 +13,8 @@
 
 {{TPL:List_Item_sel}}
 <li id="{{*id}}">
-<div class="element-s-"><img src="{{images}}element_s.gif" width="16" height="12" align="bottom" alt="" title="" 
-/>&nbsp;{{*_title}} 
+<div class="element-s-"><img src="{{images}}element_s.gif" width="16" height="12" align="bottom" alt="" title=""
+/>&nbsp;{{*_title}}
 {{_controls}}</div>
 </li>
 {{/TPL:List_Item_sel}}
@@ -28,8 +28,8 @@
 
 {{TPL:List_Item_sel_del}}
 <li id="{{*id}}">
-<div class="element-s-"><img src="{{images}}element_s.gif" width="16" height="12" align="bottom" alt="" title="" 
-/>&nbsp;{{$_title}} 
+<div class="element-s-"><img src="{{images}}element_s.gif" width="16" height="12" align="bottom" alt="" title=""
+/>&nbsp;{{$_title}}
 {{_controls}}</div>
 </li>
 {{/TPL:List_Item_sel_del}}
@@ -41,8 +41,8 @@
 </li>
 {{/TPL:List_Item_hidden}}
 
-{{TPL:List_Item_sel_hidden}}<div class="element-s-"><img src="{{images}}element_s.gif" width="16" height="12" align="bottom" alt="" title="" 
-/>&nbsp;{{*_title}} 
+{{TPL:List_Item_sel_hidden}}<div class="element-s-"><img src="{{images}}element_s.gif" width="16" height="12" align="bottom" alt="" title=""
+/>&nbsp;{{*_title}}
 {{_controls}}</div>
 {{/TPL:List_Item_sel_hidden}}
 
@@ -75,13 +75,13 @@
 
 <script language="JavaScript" type="text/javascript">
 	   var update_timeout = null;
-       function onDrop() 
+       function onDrop()
        {
-          //var data = DragDrop.serData('g2'); 
+          //var data = DragDrop.serData('g2');
           update_timeout = setTimeout(getSort, 1500);
        }
 
-		window.onload = function() 
+		window.onload = function()
 		{
 			var list = document.getElementById("left_col");
 			DragDrop.makeListContainer( list, 'g1' );
@@ -96,28 +96,28 @@
         {
           var order = document.getElementById("order");
           order.value = DragDrop.serData('g1', null);
-		  
+
 		  findObj("group-minus-icon").src = findObj("group-minus-icon").src.replace("hide.gif", "ajax-loader-arrows.gif");;
-		  
+
           //url, table, order_values
           clearTimeout(update_timeout);
-          
-          send('{{/}}update_order', '{{table_name}}', order.value);
-          
+
+          send('', '{{table_name}}', order.value);
+
         }
 
 		function send(url, table, values)
 		{
-			var req = new Subsys_JsHttpRequest_Js(); 
-		    // Код, АВТОМАТИЧЕСКИ вызываемый при окончании загрузки. 
+			var req = new Subsys_JsHttpRequest_Js();
+		    // Код, АВТОМАТИЧЕСКИ вызываемый при окончании загрузки.
 		    // alert(typeof(values));
-		    req.onreadystatechange = function() 
+		    req.onreadystatechange = function()
 		    {
-		        if (req.readyState == 4) 
-		        { 
-		           if (req.responseText!="error" && req.responseText.length>0) 
-		           { 
-		           	   
+		        if (req.readyState == 4)
+		        {
+		           if (req.responseText!="error" && req.responseText.length>0)
+		           {
+
 		           	   //сохраниение прошло успешно
 		           	   findObj("group-minus-icon").src = findObj("group-minus-icon").src.replace("ajax-loader-arrows.gif", "hide.gif");
 		           	   return true;
@@ -127,15 +127,15 @@
 		           	   alert('Не удалось установить соедение с сервером');
 		           	   //сохранение обломалось
 		           }
-		        } 
-		    } 
-		    // Разрешаем кэширование (чтобы при одинаковых запросах 
-		    // не обращаться к серверу несколько раз). 
-		    req.caching = false; 
-		    // Подготваливаем объект. 
+		        }
+		    }
+		    // Разрешаем кэширование (чтобы при одинаковых запросах
+		    // не обращаться к серверу несколько раз).
+		    req.caching = false;
+		    // Подготваливаем объект.
 		    req.open('GET', url, true);
 		    // Посылаем данные запроса (задаются в виде хэша).
-		    
+
 		    /**
 		     *ничего страшного, там проверяется принципал
 		     *@params	tag			- таг для записи

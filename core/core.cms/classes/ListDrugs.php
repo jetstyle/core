@@ -6,9 +6,9 @@
  * @version 0.1
  */
 
-Finder::useClass('ListAdvanced');
+Finder::useClass('ListSimple');
 
-class ListDrugs extends ListAdvanced
+class ListDrugs extends ListSimple
 {
 
   var $template = 'list_advanced_drugs.html';
@@ -24,7 +24,22 @@ class ListDrugs extends ListAdvanced
 
  function handle()
  {
-    $this->tpl->set('table_name', $this->table_name);
+ 	if (RequestInfo::get('order')) {
+ 		$db = &Locator::get('db');
+    	$orders = explode(",",RequestInfo::get('order')) ;
+	    $table = RequestInfo::get('table');
+
+	    if (!empty($orders) && !empty($table))
+	    foreach ($orders as $i=>$order)
+	    {
+	        $out .= "$order = $i \n\r";
+	        $sql = "UPDATE ".$table." SET _order=".$db->quote($i)." WHERE id=".$db->quote($order);
+	        $db->execute($sql);
+	    }
+	    die($out);
+ 	}
+ 	$tpl = &Locator::get('tpl');
+    $tpl->set('table_name', Config::get('db_prefix').$this->config->table_name);
     parent::Handle();
  }
 }
