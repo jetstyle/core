@@ -397,14 +397,14 @@ class TreeControl
 			$this->load();
 			$this->restore();
 
-			TreeControl::updateTreePathes($this->config->table_name, $this->id, $this->config->allow_empty_supertag, $this->config->where);
+			$this->updateTreePathes($this->config->table_name, $this->id, $this->config->allow_empty_supertag, $this->config->where);
 
 			return '1';
 		}
 		return '0';
 	}
 
-	public static function updateTreePathes($tableName, $id, $allow_empty_supertag = false, $where = '') 
+	public static function updateTreePathes($tableName, $id, $allow_empty_supertag = false, $where = '', $noRoot=null) 
 	{
 		//$this->config->table_name replaced with $tableName
 		//$this->id replaced with $id
@@ -447,7 +447,7 @@ class TreeControl
 
 					//модифицируем узел
 					$r = $tree['items'][$id];
-					if ($r['_parent'] == 0 && $parent_id !== 0 && !$this->config->noRoot)	
+					if ($r['_parent'] == 0 && $parent_id !== 0 && !$noRoot )	
 					{
 						$r['_path'] = '';
 						$r['_supertag'] = '';
