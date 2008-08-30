@@ -447,13 +447,16 @@ class TreeControl
 
 					//модифицируем узел
 					$r = $tree['items'][$id];
-//					if ($r['_parent'] == 0 && $parent_id !== 0)	{
-//						$r['_path'] = '';
-//						$r['_supertag'] = '';
-//					} else {
+					if ($r['_parent'] == 0 && $parent_id !== 0 && !$this->config->noRoot)	
+					{
+						$r['_path'] = '';
+						$r['_supertag'] = '';
+					} 
+				    else 
+				    {
 						$parentTag = $tree['items'][ $r['_parent'] ]['_path'];
 						$r['_path'] = ($parentTag ? $parentTag.'/' : '').$r["_supertag"];
-//					}
+					}
 
 					$db->execute("UPDATE ".DBAL::$prefix.$tableName." SET _supertag='".$r["_supertag"]."',_path='".$r['_path']."' WHERE id='".$r['id']."'");
 					$tree['items'][$id] = $r;
