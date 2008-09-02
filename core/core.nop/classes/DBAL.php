@@ -72,7 +72,7 @@ class DBAL
 	protected $lowlevel;
 	protected $queryCount = 0;
 
-	private function __construct($connect = true)
+	public function __construct($connect = true)
 	{
 		DBAL::$prefix = Config::get('db_prefix');
 
