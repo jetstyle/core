@@ -101,6 +101,15 @@ class Translit
    return $string;
   }
 
+  
+	function TranslateLink($str,$cnt=20){
+		$str = Translit::UrlTranslit($str);
+		//collect words up to $cnt symbols
+		$arr = explode("_",$str);
+		$_str = "";
+		for($i=0;$i<count($arr) && strlen($_str)<$cnt;$i++) $_str .= ($_str!="" ? "_" : "" ).$arr[$i];
+		return $_str;
+	}
 
   //Bidirectional translit
   function BiDiTranslit($string, $direction=TR_ENCODE, $allow_slashes = TR_NO_SLASHES)
