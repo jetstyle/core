@@ -53,7 +53,34 @@ class Locator
 			self::$relations[$key] = array('class' => $class, 'path' => $path, 'singleton' => $singleton);
 		}
 	}
-	
+
+    /**
+     * Array wrapper for bind
+     *
+     * @param array $so
+     */
+	public static function bindArray($so)
+	{
+	    if (is_array($so))
+	    {
+		    foreach ($so AS $k => $s)
+		    {
+			    if (is_array($s))
+			    {
+				    if (!isset($s['singleton']))
+				    {
+					    $s['singleton'] = true;
+				    }
+				    Locator::bind($k, $s['path'], $s['singleton']);
+			    }
+			    else
+			    {
+				    Locator::bind($k, $s);
+			    }
+		    }
+	    }
+    }
+    	
 	/**
 	 * Get object.
 	 *
