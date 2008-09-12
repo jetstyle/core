@@ -149,6 +149,7 @@ class MessageSet
 	function numberString( $count, $items_name = "items" )
 	{
 		$numbers = $this->get( "Numbers" );
+
 		if (!isset($numbers[$items_name])) return "!define *$items_name*!";
 		$triad = $numbers[$items_name];
 

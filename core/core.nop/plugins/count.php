@@ -20,5 +20,5 @@
     $item_name = isset($params[1]) ? $params[1] : false;
     if (!$item_name) $item_name = "items";
 
-    echo $count."&nbsp;".$tpl->msg->numberString( $count, $item_name );
+    echo $count."&nbsp;".Locator::get("msg")->numberString( $count, $item_name );
 ?>
