@@ -158,7 +158,7 @@ class MenuPlugin extends Plugin
 				$childs[] = $this->items[$r];
 			}
 			$childs[0]['is_first'] = true;
-			$childs[count($keys) - 1]['is_last'] = true;
+			$childs[count($childs) - 1]['is_last'] = true;
 		}
 		return $childs;
 	}
