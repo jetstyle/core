@@ -1,5 +1,11 @@
 <?php
 //!oce
+
+if (Config::get('db_disable'))
+{
+	return '';
+}
+
 $type = $params['type'] ? $params['type'] : 'texts';
 $good = true;
 

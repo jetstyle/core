@@ -21,7 +21,7 @@ class Router
 			$this->routers = Config::get('routers');
 		}
 		
-		if (!Config::get('db_disable') && ($key = array_search('Handlers', $this->routers)))
+		if (Config::get('db_disable') && ($key = array_search('Content', $this->routers)))
 		{
 			unset($this->routers[$key]);
 		}
