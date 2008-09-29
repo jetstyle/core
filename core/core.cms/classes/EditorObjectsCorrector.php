@@ -25,6 +25,7 @@ class EditorObjectsCorrector
 	public function correct($data)
 	{
 		$data = preg_replace_callback("/<blockquote>(.*?)?<\/blockquote>/si", array($this, "correctQuotes"), $data);
+		$data = preg_replace_callback("/<ins>(.*?)?<\/ins>/si", array($this, "correctMarks"), $data);
 		$data = preg_replace_callback("/<big>(.*?)?<\/big>/si", array($this, "correctNotes"), $data);
 		$data = preg_replace_callback("/<img(.*?)?[\/]{0,1}>/si", array($this, "correctImages"), $data);
 		$data = preg_replace_callback("/<a(.*?)?>(.*?)?<\/a?>/si", array($this, "correctFiles"), $data);
@@ -40,6 +41,13 @@ class EditorObjectsCorrector
 		$r= array('text' => $matches[1]);
 		$this->tpl->setRef('*', $r);
 		return $this->tpl->parse('editor/quote.html');
+	}
+
+	protected function correctMarks($matches)
+	{
+		$r= array('text' => $matches[1]);
+		$this->tpl->setRef('*', $r);
+		return $this->tpl->parse('editor/mark.html');
 	}
 
 	protected function correctNotes($matches)
