@@ -57,26 +57,36 @@ class ListAdvanced extends ListSimple
 //    $tpl->Parse( $this->template_engine, '__picker' );
     
     //постраничный рубрикатор
-    $rh->UseClass('Arrows');
-    $this->arrows = new Arrows( $rh );
-    $this->arrows->outpice = $this->config->outpice ? $this->config->outpice : 10;
-    $this->arrows->mega_outpice = $this->config->mega_outpice ? $this->config->mega_outpice : 10;
-    $this->arrows->Setup( $this->table_name, $this->where );
-    $this->arrows->Set($this->state);
-    $this->arrows->href_suffix = $__href_suffix;
-    $this->arrows->Restore();
-    if( $this->arrows->mega_sum > 1 ){
-      $this->arrows->Parse('arrows.html','__links_all');
-      $tpl->Parse( $this->arrows_template, '__arrows' );
-    }
-    $this->_href_template .= $this->arrows->State();
-    
-    //есть потребность прятать некоторые контроли
-    $this->EVOLUTORS['controls'] = array( &$this, '_controls' );
-
+    $this->initArrows();
     //по этапу
     parent::Handle();
   }
+  
+  function initArrows()
+  {
+    $rh = $this->rh;
+    $tpl =& $rh->tpl;
+    if (!$this->arrows)
+    {
+        $rh->UseClass('Arrows');
+        $this->arrows = new Arrows( $rh );
+        $this->arrows->outpice = $this->config->outpice ? $this->config->outpice : 10;
+        $this->arrows->mega_outpice = $this->config->mega_outpice ? $this->config->mega_outpice : 10;
+        $this->arrows->Setup( $this->table_name, $this->where );
+        $this->arrows->Set($this->state);
+        $this->arrows->href_suffix = $__href_suffix;
+        $this->arrows->Restore();
+        if( $this->arrows->mega_sum > 1 ){
+          $this->arrows->Parse('arrows.html','__links_all');
+          $tpl->Parse( $this->arrows_template, '__arrows' );
+        }
+        $this->_href_template .= $this->arrows->State();
+        
+        //есть потребность прятать некоторые контроли
+        $this->EVOLUTORS['controls'] = array( &$this, '_controls' );
+    }
+  }
+  
   
   function UpdateListStruct(){
     $rh =& $this->rh;
