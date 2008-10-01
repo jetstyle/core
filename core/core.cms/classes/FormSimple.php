@@ -473,7 +473,7 @@ class FormSimple
 		$this->new_id = $this->id = $this->model->insert($this->postData);
 
 		// update order
-		$this->updateData(array('_order' => $id));
+		$this->updateData(array('_order' => $this->id));
 	}
 }
 
