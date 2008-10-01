@@ -1030,10 +1030,13 @@ class DBModel extends Model implements IteratorAggregate, ArrayAccess, Countable
 
 		if (!isset($model)) return;
 
-		$where = $model->quoteField($fieldinfo['fk']) .'='. DBModel::quote($data[$fieldinfo['pk']]);
-		$model->load($where);
+		// we need clean model for each row
+		$fmodel = clone $model;
+		
+		$where = $fmodel->quoteField($fieldinfo['fk']) .'='. DBModel::quote($data[$fieldinfo['pk']]);
+		$fmodel->load($where);
 
-		$data[$fieldName] = &$model;
+		$data[$fieldName] = &$fmodel;
 	}
 
 	/**
@@ -1047,20 +1050,23 @@ class DBModel extends Model implements IteratorAggregate, ArrayAccess, Countable
 
 		if (!isset($model)) return;
 
+		// we need clean model for each row
+		$fmodel = clone $model;
+		
 		$qt = $this->quoteName(DBAL::$prefix.$fieldinfo['through']['table']);
 
-		$sqlParts = $model->getSqlParts();
+		$sqlParts = $fmodel->getSqlParts();
 		$sqlParts['join'] .= '
 			INNER JOIN '.$qt.' AS '.$qt.'
 			ON
 			(
-				('.$model->quoteField($fieldinfo['fk']).'='.$qt.'.'.$this->quoteName($fieldinfo['through']['fk']).')
+				('.$fmodel->quoteField($fieldinfo['fk']).'='.$qt.'.'.$this->quoteName($fieldinfo['through']['fk']).')
 				 AND
 				('.$qt.'.'.$this->quoteName($fieldinfo['through']['pk']) .'='. DBModel::quote($data[$fieldinfo['pk']]).')
 			) ';
 
-		$model->loadSql(implode(' ', $sqlParts));
-		$data[$fieldName] = &$model;
+		$fmodel->loadSql(implode(' ', $sqlParts));
+		$data[$fieldName] = &$fmodel;
 	}
 
 	protected function mapHasOne($fieldName, &$data)
@@ -1694,10 +1700,7 @@ class DBModel extends Model implements IteratorAggregate, ArrayAccess, Countable
 
 	public function isForeignField($field)
 	{
-		if (isset($this->foreignFields[$field]))
-		return true;
-		else
-		return false;
+		return isset($this->foreignFields[$field]);
 	}
 
 

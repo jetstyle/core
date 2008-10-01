@@ -1,6 +1,6 @@
 <?php
 
-Finder::useClass("models/DBModel"); //здесь DataContainer
+Finder::useModel("DBModel"); //здесь DataContainer
 
 class ResultSet implements IteratorAggregate, ArrayAccess, Countable, DataContainer
 {
@@ -64,32 +64,12 @@ class ResultSet implements IteratorAggregate, ArrayAccess, Countable, DataContai
 				$this->model->loadForeignField($key, $this->data);
 			}
 
-//			$foreignFieldConf = $this->model->getForeignFieldConf($key);
-//			if ($foreignFieldConf['type'] == 'has_one')
-//			{
-//				return $this->data[$key][0];
-//			}
-//			else
-//			{
 			return $this->data[$key];
-//			}
 		}
 		elseif (isset($this->data[$key]))
 		{
 			return $this->data[$key];
 		}
-
-		/*
-		if (isset($this->data[$key]))
-		{
-			return $this->data[$key];
-		}
-		elseif ($this->model->isForeignField($key))
-		{
-			$this->model->loadForeignField($key, $this->data);
-			return $this->data[$key];
-		}
-		*/
 	}
 
 	public function offsetSet($key, $value) { $this->data[$key] = $value; }
