@@ -12,8 +12,12 @@ $link_parts = preg_split("/\s|,/", $link_str);
 
 foreach ($link_parts as $link)
 {
-	$link=trim($link);
-	$out[] = "<a href='".$link."'>".$link."</a>";
+	$href=trim($link);
+    if (strpos($href,'http://')===false)
+    {
+        $href = "http://".$href;
+    }
+	$out[] = "<a href='".$href."'>".$link."</a>";
 }
 
 if ( !empty($out) )
