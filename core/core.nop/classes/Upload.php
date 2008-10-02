@@ -412,9 +412,17 @@ class Upload
 
 				$t = imagecreatetruecolor ($new_width, $new_height);
 				imagecopyresampled ($t, $im, 0,0,0,0, $new_width, $new_height, $size[0], $size[1]);
-
+				
 				$thumbnail = imagecreatetruecolor ($thumb_size['x'], $thumb_size['y']);
-				imagecopy($thumbnail, $t, 0, 0, 0, 0, $thumb_size['x'], $thumb_size['y']);
+				
+				if ($crop == 'center')
+				{
+					imagecopy($thumbnail, $t, 0, 0, round(($new_width - $thumb_size['x']) / 2), round(($new_height - $thumb_size['y']) / 2), $thumb_size['x'], $thumb_size['y']);
+				}
+				else
+				{
+					imagecopy($thumbnail, $t, 0, 0, 0, 0, $thumb_size['x'], $thumb_size['y']);
+				}
 				imagedestroy($t);
 			}
 			imagedestroy($im);
