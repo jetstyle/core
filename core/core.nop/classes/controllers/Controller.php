@@ -251,7 +251,7 @@ abstract class Controller implements ArrayAccess
 		return $ret;
 	}
 
-	protected function &getAspect($name)
+	public function &getAspect($name)
 	{
 		$o =& $this->o_aspects[$name];
 		return $o;
