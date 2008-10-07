@@ -125,7 +125,7 @@ class RequestInfo
 	public static function hrefChange($url, $key)	
 	{
 		if (!$url)	$url = self::$baseUrl.self::$pageUrl;
-		if (!is_array($key) || empty($key)) return $url;
+		if (!is_array($key)) return $url;
 
 		$d = self::$data;
 		
