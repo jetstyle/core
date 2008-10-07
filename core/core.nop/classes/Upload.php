@@ -179,11 +179,18 @@ class Upload
 
 				if($x[0] == '' && $y[0] == '') // resize
 				{
-					$img = $this->createThumb($uploaded_file, array('x' => $x[1], 'y' => $y[1]), 1, $params['crop']);
-					if($img['error']) return false;
-					$file = fopen($file_name_full, 'w');
-					fwrite($file, $img['data']);
-					fclose($file);
+					$img = $this->createResourceFromImage($uploaded_file);
+					$thumbnail = $this->createThumb($img, array('x' => $x[1], 'y' => $y[1]), 1, $params['crop']);
+					
+					if ($params['opacity'])
+					{
+						$this->makeImageOpacity($thumbnail, $params['opacity']);
+					}
+					
+					$this->saveImageFromResource($thumbnail, $ext, $file_name_full);
+					
+					imagedestroy($thumb['data']);
+					imagedestroy($img);
 				}
 				else
 				{
@@ -335,50 +342,74 @@ class Upload
 		}else $this->dir = array_pop($this->DIRS_SWAPPED);
 	}
 
-
-	// ###################################### ReSize Image ################################# //
-	public function createThumb($filename, $thumb_size, $blur = false, $crop = false, $pl = false)
+	protected function createResourceFromImage($filename)
 	{
 		$size = getimagesize($filename);
-		$dont_resize = 0;
-		if (!$size)
-		{
-			$thumb['error']="Invalid image properties!";
-			return($thumb);
-		}
-		elseif (($size[0] <= $thumb_size['x']) && ($size[1] <= $thumb_size['y']))
-		{
-			if($pl)	{
-				$dont_resize = 1;
-			} else {
-				$thumb['data']=file_get_contents($filename);
-				return($thumb);
-			}
-		}
-
+		
+		$img = null;
+		
 		if ($size[2]==2)
 		{
-			$im = imagecreatefromjpeg ($filename);
+			$img = imagecreatefromjpeg ($filename);
 		}
 		elseif ($size[2]==1)
 		{
-			$im = imagecreatefromgif ($filename);
+			$img = imagecreatefromgif ($filename);
 		}
 		elseif ($size[2]==3)
 		{
-			$im = imagecreatefrompng ($filename);
+			$img = imagecreatefrompng ($filename);
 		}
-
-		if (!$im)
+		
+		return $img;
+	}
+	
+	protected function saveImageFromResource($resource, $type = 'jpeg', $filename)
+	{
+		switch ($type)
 		{
-			$thumb['error']="Ќевозможно создать изображение.";
-			return($thumb);
+			case 'png':
+				imagepng($resource, $filename, 2);
+			break;
+			
+			case 'gif':
+				imagegif($resource, $filename);
+			break;
+			
+			case 'jpeg':
+			case 'jpg':
+			default:
+				imagejpeg ($resource, $filename, 96);
+			break;
+		}
+	}
+	
+
+	// ###################################### ReSize Image ################################# //
+	public function createThumb($img, $thumb_size, $blur = false, $crop = false, $pl = false)
+	{
+		$size = array(
+			imagesx($img),
+			imagesy($img),
+		);
+		
+		$dont_resize = 0;
+		if (($size[0] <= $thumb_size['x']) && ($size[1] <= $thumb_size['y']))
+		{
+			if($pl)	
+			{
+				$dont_resize = 1;
+			} 
+			else 
+			{
+				return $img;
+			}
 		}
 
-		if(!$dont_resize)	{
-
-			if(!$crop)	{
-
+		if(!$dont_resize)	
+		{
+			if(!$crop)	
+			{
 				$xratio = $size[0] / $thumb_size['x'];
 				$yratio = $size[1] / $thumb_size['y'];
 				if ($xratio > $yratio)
@@ -393,7 +424,13 @@ class Upload
 				}
 
 				$thumbnail = imagecreatetruecolor ($new_width, $new_height);
-				imagecopyresampled ($thumbnail, $im, 0,0,0,0, $new_width, $new_height, $size[0], $size[1]);
+				
+				imagealphablending($thumbnail, false);
+				imagesavealpha($thumbnail, true);
+				$tColor = imagecolorallocatealpha($thumbnail, 255, 255, 255, 127);
+				imagefilledrectangle($thumbnail, 0, 0, $new_width, $new_height, $tColor);
+				
+				imagecopyresampled ($thumbnail, $img, 0,0,0,0, $new_width, $new_height, $size[0], $size[1]);
 			}
 			else
 			{
@@ -411,13 +448,27 @@ class Upload
 				}
 
 				$t = imagecreatetruecolor ($new_width, $new_height);
-				imagecopyresampled ($t, $im, 0,0,0,0, $new_width, $new_height, $size[0], $size[1]);
+				imagealphablending($t, false);
+				imagesavealpha($t, true);
+				$tColor = imagecolorallocatealpha($t, 255, 255, 255, 127);
+				imagefilledrectangle($t, 0, 0, $new_width, $new_height, $tColor);
+				
+				imagecopyresampled ($t, $img, 0,0,0,0, $new_width, $new_height, $size[0], $size[1]);
 				
 				$thumbnail = imagecreatetruecolor ($thumb_size['x'], $thumb_size['y']);
 				
-				if ($crop == 'center')
+				imagealphablending($thumbnail, false);
+				imagesavealpha($thumbnail, true);
+				$tColor = imagecolorallocatealpha($thumbnail, 255, 255, 255, 127);
+				imagefilledrectangle($thumbnail, 0, 0, $new_width, $new_height, $tColor);
+								
+				if ($crop === 'center')
 				{
 					imagecopy($thumbnail, $t, 0, 0, round(($new_width - $thumb_size['x']) / 2), round(($new_height - $thumb_size['y']) / 2), $thumb_size['x'], $thumb_size['y']);
+				}
+				elseif ($crop === 'bottom')
+				{
+					imagecopy($thumbnail, $t, 0, 0, ($new_width - $thumb_size['x']), ($new_height - $thumb_size['y']), $thumb_size['x'], $thumb_size['y']);
 				}
 				else
 				{
@@ -425,24 +476,25 @@ class Upload
 				}
 				imagedestroy($t);
 			}
-			imagedestroy($im);
 		}
-		else {
-			$thumbnail = $im;
+		else 
+		{
+			$thumbnail = $img;
 		}
 
 		// создаем плашку с размерами миниатюры. потом в нее вписываем полученное изображение
-		if($pl)	{
-
+		if($pl)	
+		{
 			$x = 0;
 			$y = 0;
 
-			if(imagesx($thumbnail) < $thumb_size['x']) {
-
+			if(imagesx($thumbnail) < $thumb_size['x']) 
+			{
 				$x = round(($thumb_size['x'] - imagesx($thumbnail)) / 2);
 			}
 
-			if (imagesy($thumbnail) < $thumb_size['y']) {
+			if (imagesy($thumbnail) < $thumb_size['y']) 
+			{
 				$y = round(($thumb_size['y'] - imagesy($thumbnail)) / 2);
 			}
 
@@ -456,32 +508,37 @@ class Upload
 		}
 
 
-		if ($blur)
-		{
-			$this->unsharpMask($thumbnail);
+//		if ($blur)
+//		{
+//			$this->unsharpMask($thumbnail);
+//		}
+
+		return $thumbnail;
+	}
+	
+	/**
+	*	$img - image resource
+	* 	$opacity - from 0 to 100
+	*/
+	protected function makeImageOpacity(&$img, $opacity = 63)
+	{
+		$w = imagesx($img);
+		$h = imagesy($img);
+		
+		$opacity = round($opacity / 100 * 127);
+		
+		for ($x = 0; $x < $w; $x++)
+		{ // each row
+			for ($y = 0; $y < $h; $y++)
+			{ // each pixel
+				$rgbColor = imagecolorsforindex($img, imagecolorat($img, $x, $y));
+				if ($rgbColor['alpha'] < 100)
+				{
+					$newColor = imagecolorallocatealpha ($img, $rgbColor['red'], $rgbColor['green'], $rgbColor['blue'], $opacity);
+					imagesetpixel ($img, $x, $y, $newColor);
+				}
+			}
 		}
-
-		ob_start();
-
-		if ($size[2]==2)
-		{
-			imagejpeg ($thumbnail, null, 96);
-		}
-		elseif ($size[2]==1)
-		{
-			imagegif($thumbnail);
-		}
-		elseif ($size[2]==3)
-		{
-			imagepng($thumbnail, null, 0);
-		}
-
-		imagedestroy($thumbnail);
-		$thumb['data'] = ob_get_contents();
-
-		ob_end_clean();
-
-		return($thumb);
 	}
 
 
