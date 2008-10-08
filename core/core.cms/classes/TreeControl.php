@@ -53,6 +53,66 @@ class TreeControl
 		$this->id = intval(RequestInfo::get($this->idGetVar));
 	}
 
+	
+	public static function updateTreePathes($tableName, $id, $allow_empty_supertag = false, $where = '', $noRoot=null) 
+	{
+    	$db = &Locator::get('db');
+		$root = $db->queryOne("SELECT id,_left,_right,_path,_parent FROM ??".$tableName." WHERE id='".$id."' ".($where ? " AND " . $where : "")." ");
+		if ($root) {
+			//грузим поддерево
+			$result = $db->execute("
+				SELECT id, _supertag, _parent, _path
+				FROM ??".$tableName."
+				WHERE _left>= ".$root['_left']." AND _right <= ".$root['_right']." ".($where ? " AND " . $where : "")."
+			");
+
+			if ($result) {
+				$tree = array('children' => array(), 'items' => array());
+				while ($r = $db->getRow($result)) {
+					$tree['children'][$r['_parent']][] = $r['id'];
+					$tree['items'][$r['id']] = $r;
+				}
+
+				$parent = $db->queryOne("
+					SELECT id, _supertag, _parent, _path
+					FROM ??".$tableName."
+					WHERE id = ".$root['_parent']." ".($where ? " AND " . $where : "")."
+				");
+				if ($parent) $tree['items'][$parent['id']] = $parent;
+
+				//обходим поддерево
+				$STACK[] = $root['id'];
+				while(count($STACK)) {
+					$id = array_pop($STACK);
+					//собираем детей
+					if (is_array($tree['children'][$id])) {
+						foreach( $tree['children'][$id] as $_id ) {
+							$STACK[] = $_id;
+						}
+					}
+
+					//модифицируем узел
+					$r = $tree['items'][$id];
+					if ($r['_parent'] == 0 && $parent_id !== 0 && !$noRoot )	
+					{
+						$r['_path'] = '';
+						$r['_supertag'] = '';
+					} 
+				    else 
+				    {
+						$parentTag = $tree['items'][ $r['_parent'] ]['_path'];
+						$r['_path'] = ($parentTag ? $parentTag.'/' : '').$r["_supertag"];
+					}
+
+					$db->execute("UPDATE ".DBAL::$prefix.$tableName." SET _supertag='".$r["_supertag"]."',_path='".$r['_path']."' WHERE id='".$r['id']."'");
+					$tree['items'][$id] = $r;
+				}
+			}
+		}
+	}
+	
+	
+	
 	public function handle()
 	{
 		$action = $_REQUEST['action'];
@@ -334,6 +394,8 @@ class TreeControl
 			$this->load();
 			$this->restore();
 
+			$this->killOutsiders();
+			
 			return $id;
 		}
 		elseif($delete = intval($_REQUEST['delete']))
@@ -348,6 +410,8 @@ class TreeControl
 					$this->load();
 					$this->restore();
 				}
+				
+				$this->killOutsiders();
 
 				return '1';
 			}
@@ -396,7 +460,9 @@ class TreeControl
 
 			$this->load();
 			$this->restore();
-
+			
+			$this->killOutsiders();
+			
 			$this->updateTreePathes($this->config->table_name, $this->id, $this->config->allow_empty_supertag, $this->config->where);
 
 			return '1';
@@ -404,67 +470,7 @@ class TreeControl
 		return '0';
 	}
 
-	public static function updateTreePathes($tableName, $id, $allow_empty_supertag = false, $where = '', $noRoot=null) 
-	{
-		//$this->config->table_name replaced with $tableName
-		//$this->id replaced with $id
-		//$this->config->allow_empty_supertag replaced with allow_empty_supertag
-    	//$parent_id = isset($parent_id) ? $parent_id : 1;
-    	$db = &Locator::get('db');
-		$root = $db->queryOne("SELECT id,_left,_right,_path,_parent FROM ??".$tableName." WHERE id='".$id."' ".($where ? " AND " . $where : "")." ");
-		if ($root) {
-			//грузим поддерево
-			$result = $db->execute("
-				SELECT id, _supertag, _parent, _path
-				FROM ??".$tableName."
-				WHERE _left>= ".$root['_left']." AND _right <= ".$root['_right']." ".($where ? " AND " . $where : "")."
-			");
-
-			if ($result) {
-				$tree = array('children' => array(), 'items' => array());
-				while ($r = $db->getRow($result)) {
-					$tree['children'][$r['_parent']][] = $r['id'];
-					$tree['items'][$r['id']] = $r;
-				}
-
-				$parent = $db->queryOne("
-					SELECT id, _supertag, _parent, _path
-					FROM ??".$tableName."
-					WHERE id = ".$root['_parent']." ".($where ? " AND " . $where : "")."
-				");
-				if ($parent) $tree['items'][$parent['id']] = $parent;
-
-				//обходим поддерево
-				$STACK[] = $root['id'];
-				while(count($STACK)) {
-					$id = array_pop($STACK);
-					//собираем детей
-					if (is_array($tree['children'][$id])) {
-						foreach( $tree['children'][$id] as $_id ) {
-							$STACK[] = $_id;
-						}
-					}
-
-					//модифицируем узел
-					$r = $tree['items'][$id];
-					if ($r['_parent'] == 0 && $parent_id !== 0 && !$noRoot )	
-					{
-						$r['_path'] = '';
-						$r['_supertag'] = '';
-					} 
-				    else 
-				    {
-						$parentTag = $tree['items'][ $r['_parent'] ]['_path'];
-						$r['_path'] = ($parentTag ? $parentTag.'/' : '').$r["_supertag"];
-					}
-
-					$db->execute("UPDATE ".DBAL::$prefix.$tableName." SET _supertag='".$r["_supertag"]."',_path='".$r['_path']."' WHERE id='".$r['id']."'");
-					$tree['items'][$id] = $r;
-				}
-			}
-		}
-//		die();
-	}
+	
 
 	protected function addNode()
 	{
@@ -636,6 +642,31 @@ class TreeControl
 		return $sql;
 	}
 
+	protected function killOutsiders()
+	{
+		$S = array($this->getRootId());
+		$IDS = array();
+		
+		while(count($S))
+		{
+			$id = array_pop($S);
+			if(is_array($this->children[$id]))
+			{
+				$S = array_merge($S,$this->children[$id]);
+			}
+			$IDS[] = $id;
+		}
+		
+		if (!empty($IDS))
+		{			
+			$this->db->execute("
+				UPDATE ??".$this->config->table_name." 
+				SET _parent = 0, _left = 0, _right = 0, _state = 2 
+				WHERE _state < 2 AND id NOT IN ('".implode("','", $IDS)."')"
+			);
+		}
+	}
+	
 	protected function restore( $parent_id=0, $left=0, $order = 0 )
 	{
 		//shortcuts
