@@ -166,6 +166,13 @@ class DBModel extends Model implements IteratorAggregate, ArrayAccess, Countable
 
 	protected $sqlParts = array();
 
+	/**
+	 * Ключ, по которому будут скомпанованы полученные данные
+	 *
+	 * @var string
+	 */
+	protected $keyField = null;
+	
 	protected $data = NULL;
 
 	/**
@@ -465,6 +472,17 @@ class DBModel extends Model implements IteratorAggregate, ArrayAccess, Countable
 
 	// ######## SETTERS ############## //
 
+	/**
+	 * Set key field
+	 * 
+	 * @param string $keyField
+	 */
+	public function setKeyField($keyField)
+	{
+		$this->keyField = $keyField;
+		return $this;
+	}
+	
 	/**
 	 * Set table alias
 	 *
@@ -821,12 +839,12 @@ class DBModel extends Model implements IteratorAggregate, ArrayAccess, Countable
 		if (is_array($data))
 		{
 			$this->data = array();
-			foreach ($data AS $row)
+			foreach ($data AS $key => $row)
 			{
 				$item = new ResultSet();
 				$item->init($this, $row);
 
-				$this->data[] = $item;
+				$this->data[$key] = $item;
 				unset($item);
 			}
 		}
@@ -1216,7 +1234,14 @@ class DBModel extends Model implements IteratorAggregate, ArrayAccess, Countable
 
 	public function selectSql($sql, $isLoad=false)
 	{
-		$data = Locator::get('db')->query($sql);
+		if ($this->keyField !== null)
+		{
+			$data = Locator::get('db')->query($sql, $this->keyField);
+		}
+		else
+		{
+			$data = Locator::get('db')->query($sql);
+		}
 
 		if ($data !== null)
 		{
