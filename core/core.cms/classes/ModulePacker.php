@@ -2,7 +2,7 @@
 /**
  * Module packer
  *
- * Grep tabled, used in module.
+ * Grep tables, used in module.
  * Dump structure into .meta/structure.sql
  * Dump data into .meta/data.sql
  * Dump toolbar row into .meta/toolbar.sql
@@ -37,7 +37,12 @@ class ModulePacker
 		}
 		else
 		{
-			$modules = array($this->getModule($moduleName));
+			$module = $this->getModule($moduleName);
+			if (!is_array($module) || empty($module))
+			{
+				return;
+			}
+			$modules = array($module);
 		}
 
 		foreach ($modules AS $module)
@@ -118,7 +123,7 @@ class ModulePacker
 	protected function getTables($moduleDir, $configName = 'defs')
 	{
 		$result = array();
-
+		
 		if (file_exists($moduleDir.'/.meta/tables'))
 		{
 			$result = file($moduleDir.'/.meta/tables', FILE_SKIP_EMPTY_LINES);
@@ -163,11 +168,18 @@ class ModulePacker
 
 	protected function getModule($href)
 	{
-		return $this->db->queryOne("
+		$module = $this->db->queryOne("
 			SELECT *
 			FROM ??toolbar
-			WHERE href = ".$this->db->quote($href)." AND LENGTH(href) > 0
+			WHERE href = ".$this->db->quote($href)." OR href LIKE ".$this->db->quote($href.'/%')." AND LENGTH(href) > 0
 		");
+		
+		if ($module['href'] != $href)
+		{
+			$module['href'] = $href;
+		}
+		
+		return $module;
 	}
 
 	protected function appendPrefixToTables($v)

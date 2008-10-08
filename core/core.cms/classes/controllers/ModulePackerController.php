@@ -16,6 +16,9 @@ class ModulePackerController extends Controller
 	);
 
 	protected $params_map = array(
+		array('default', array(
+			'module' => '[\w\-]+',
+		)),
 		array('default', array(NULL)),
 	);
 
@@ -36,7 +39,7 @@ class ModulePackerController extends Controller
 
 		Finder::useClass("ModulePacker");
 		$modulePacker =& new ModulePacker();
-		$modulePacker->pack();
+		$modulePacker->pack($config['module']);
 
 		$this->siteMap = 'module';
 	}
