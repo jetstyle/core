@@ -324,6 +324,11 @@ class DBModel extends Model implements IteratorAggregate, ArrayAccess, Countable
 		{
 			$this->autoDefineTable($className);
 		}
+		
+		if (isset($ymlConfig['autoPrefix']))
+		{
+			$this->setAutoPrefix($ymlConfig['autoPrefix']);
+		}
 	}
 
 	// ######## GETTERS ############## //
