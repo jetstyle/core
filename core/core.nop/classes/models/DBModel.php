@@ -19,6 +19,13 @@ class DBModel extends Model implements IteratorAggregate, ArrayAccess, Countable
 	protected $db = null;
 
 	/**
+	 * Автоматически добавлять префикс таблицы
+	 *
+	 * @var bool
+	 */
+	protected $autoPrefix = true;
+	
+	/**
 	 * Имя таблицы
 	 *
 	 * @var string
@@ -338,7 +345,7 @@ class DBModel extends Model implements IteratorAggregate, ArrayAccess, Countable
 	 */
 	public function getTableAlias()
 	{
-		if ($this->usePrefixedTableAsAlias)
+		if ($this->usePrefixedTableAsAlias && $this->autoPrefix)
 		{
 			return DBAL::$prefix.$this->table;
 		}
@@ -357,7 +364,7 @@ class DBModel extends Model implements IteratorAggregate, ArrayAccess, Countable
 	 */
 	public function getTableNameWithAlias()
 	{
-		return $this->quoteName(DBAL::$prefix.$this->getTableName()) .' AS '.$this->quoteName($this->getTableAlias());
+		return $this->quoteName($this->autoPrefix ? DBAL::$prefix : "".$this->getTableName()) .' AS '.$this->quoteName($this->getTableAlias());
 	}
 
 	/**
@@ -472,6 +479,16 @@ class DBModel extends Model implements IteratorAggregate, ArrayAccess, Countable
 
 	// ######## SETTERS ############## //
 
+	/**
+	 * Auto prepend prefix to table name
+	 *
+	 * @param bool $v
+	 */
+	public function setAutoPrefix($v)
+	{
+		$this->autoPrefix = $v;
+	}
+	
 	/**
 	 * Set key field
 	 * 
@@ -1379,7 +1396,7 @@ class DBModel extends Model implements IteratorAggregate, ArrayAccess, Countable
 		$fields = implode(',', array_map(array(&$this, 'quoteName'), array_keys($row)));
 		$values = implode(',', array_map(array(&$this, 'quoteValue'), $row));
 
-		$sql = ' INSERT INTO '.$this->quoteName(DBAL::$prefix.$this->getTableName())
+		$sql = ' INSERT INTO '.$this->quoteName($this->autoPrefix ? DBAL::$prefix : "".$this->getTableName())
 		.'('.$fields.')'
 		.' VALUES ('.$values.')';
 
@@ -1399,7 +1416,7 @@ class DBModel extends Model implements IteratorAggregate, ArrayAccess, Countable
 
 		$this->onBeforeUpdate($row);
 
-		$sql = ' UPDATE '.$this->quoteName(DBAL::$prefix.$this->getTableName())
+		$sql = ' UPDATE '.$this->quoteName($this->autoPrefix ? DBAL::$prefix : "".$this->getTableName())
 		.' SET '.$this->getFieldsValuesSet($row)
 		. $where;
 
@@ -1417,7 +1434,7 @@ class DBModel extends Model implements IteratorAggregate, ArrayAccess, Countable
 			$where = 'WHERE '.$this->parse($where);
 		}
 
-		$sql = 'DELETE FROM '.$this->quoteName(DBAL::$prefix.$this->getTableName()).$where;
+		$sql = 'DELETE FROM '.$this->quoteName($this->autoPrefix ? DBAL::$prefix : "".$this->getTableName()).$where;
 
 		$this->usePrefixedTableAsAlias = false;
 
@@ -1428,9 +1445,9 @@ class DBModel extends Model implements IteratorAggregate, ArrayAccess, Countable
 	{
 		switch ($truncate)
 		{
-			case True:  $sql = ' TRUNCATE TABLE ' .$this->quoteName(DBAL::$prefix.$this->getTableName());
+			case True:  $sql = ' TRUNCATE TABLE ' .$this->quoteName($this->autoPrefix ? DBAL::$prefix : "".$this->getTableName());
 			break;
-			case False: $sql = ' DELETE FROM ' .$this->quoteName(DBAL::$prefix.$this->getTableName());
+			case False: $sql = ' DELETE FROM ' .$this->quoteName($this->autoPrefix ? DBAL::$prefix : "".$this->getTableName());
 			break;
 			default:    $sql = NULL;
 		}
