@@ -182,11 +182,11 @@ class Upload
 						{
 							case 'crop':
 								$this->createThumb($image, array('x' => $value[0], 'y' => $value[1]), true);
-								$this->cropImage($image, array('x' => $value[0], 'y' => $value[1]), $value[3]);
+								$this->cropImage($image, array('x' => $value[0], 'y' => $value[1]), $value[2]);
 							break;
 							
 							case 'cropWithoutResize':
-								$this->cropImage($image, array('x' => $value[0], 'y' => $value[1]), $value[3]);
+								$this->cropImage($image, array('x' => $value[0], 'y' => $value[1]), $value[2]);
 							break;
 							
 							case 'mask':
