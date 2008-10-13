@@ -929,7 +929,7 @@ class DBModel extends Model implements IteratorAggregate, ArrayAccess, Countable
 
 			if ($total == 0)
 			{
-				return;
+				return $this;
 			}
 
 			$pager = &$this->getPager();
