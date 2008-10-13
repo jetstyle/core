@@ -180,16 +180,34 @@ class Upload
 				if($x[0] == '' && $y[0] == '') // resize
 				{
 					$img = $this->createResourceFromImage($uploaded_file);
-					$thumbnail = $this->createThumb($img, array('x' => $x[1], 'y' => $y[1]), 1, $params['crop']);
+				
+					$thumbnail = $this->createThumb($img, array('x' => $x[1], 'y' => $y[1]), $params['crop'] ? true : false);
+					
+					if ($params['mask'])
+					{
+						$this->applyMaskToImage($thumbnail, $params['mask']);
+					}
+					
+					if ($params['crop'])
+					{
+						$this->cropImage($thumbnail, array('x' => $x[1], 'y' => $y[1]), $params['crop']);
+					}
+
+					if ($params['blur'])
+					{
+						$this->unsharpMask($thumbnail, 20);
+					}
+					
+//					header('Content-type: image/png');
+//					imagepng($thumbnail);
+//					die();
 					
 					if ($params['opacity'])
 					{
 						$this->makeImageOpacity($thumbnail, $params['opacity']);
 					}
-					
+										
 					$this->saveImageFromResource($thumbnail, $ext, $file_name_full);
-					
-					imagedestroy($thumb['data']);
 					imagedestroy($img);
 				}
 				else
@@ -386,134 +404,186 @@ class Upload
 	
 
 	// ###################################### ReSize Image ################################# //
-	public function createThumb($img, $thumb_size, $blur = false, $crop = false, $pl = false)
+	public function createThumb($img, $thumbSize, $byLowerSide = false)
 	{
 		$size = array(
 			imagesx($img),
 			imagesy($img),
 		);
 		
-		$dont_resize = 0;
-		if (($size[0] <= $thumb_size['x']) && ($size[1] <= $thumb_size['y']))
+		$dontResize = 0;
+		if (($size[0] <= $thumbSize['x']) && ($size[1] <= $thumbSize['y']))
 		{
-			if($pl)	
-			{
-				$dont_resize = 1;
-			} 
-			else 
-			{
-				return $img;
-			}
+			return $img;
 		}
 
-		if(!$dont_resize)	
-		{
-			if(!$crop)	
-			{
-				$xratio = $size[0] / $thumb_size['x'];
-				$yratio = $size[1] / $thumb_size['y'];
-				if ($xratio > $yratio)
-				{
-					$new_width = round($size[0] / $xratio);
-					$new_height = round($size[1] / $xratio);
-				}
-				else
-				{
-					$new_width = round($size[0] / $yratio);
-					$new_height = round($size[1] / $yratio);
-				}
 
-				$thumbnail = imagecreatetruecolor ($new_width, $new_height);
-				
-				imagealphablending($thumbnail, false);
-				imagesavealpha($thumbnail, true);
-				$tColor = imagecolorallocatealpha($thumbnail, 255, 255, 255, 127);
-				imagefilledrectangle($thumbnail, 0, 0, $new_width, $new_height, $tColor);
-				
-				imagecopyresampled ($thumbnail, $img, 0,0,0,0, $new_width, $new_height, $size[0], $size[1]);
-			}
-			else
-			{
-				$xratio = $size[0] / $thumb_size['x'];
-				$yratio = $size[1] / $thumb_size['y'];
-				if ($xratio < $yratio)
-				{
-					$new_width = round($size[0] / $xratio);
-					$new_height = round($size[1] / $xratio);
-				}
-				else
-				{
-					$new_width = round($size[0] / $yratio);
-					$new_height = round($size[1] / $yratio);
-				}
-
-				$t = imagecreatetruecolor ($new_width, $new_height);
-				imagealphablending($t, false);
-				imagesavealpha($t, true);
-				$tColor = imagecolorallocatealpha($t, 255, 255, 255, 127);
-				imagefilledrectangle($t, 0, 0, $new_width, $new_height, $tColor);
-				
-				imagecopyresampled ($t, $img, 0,0,0,0, $new_width, $new_height, $size[0], $size[1]);
-				
-				$thumbnail = imagecreatetruecolor ($thumb_size['x'], $thumb_size['y']);
-				
-				imagealphablending($thumbnail, false);
-				imagesavealpha($thumbnail, true);
-				$tColor = imagecolorallocatealpha($thumbnail, 255, 255, 255, 127);
-				imagefilledrectangle($thumbnail, 0, 0, $new_width, $new_height, $tColor);
-								
-				if ($crop === 'center')
-				{
-					imagecopy($thumbnail, $t, 0, 0, round(($new_width - $thumb_size['x']) / 2), round(($new_height - $thumb_size['y']) / 2), $thumb_size['x'], $thumb_size['y']);
-				}
-				elseif ($crop === 'bottom')
-				{
-					imagecopy($thumbnail, $t, 0, 0, ($new_width - $thumb_size['x']), ($new_height - $thumb_size['y']), $thumb_size['x'], $thumb_size['y']);
-				}
-				else
-				{
-					imagecopy($thumbnail, $t, 0, 0, 0, 0, $thumb_size['x'], $thumb_size['y']);
-				}
-				imagedestroy($t);
-			}
-		}
-		else 
+		$xratio = $size[0] / $thumbSize['x'];
+		$yratio = $size[1] / $thumbSize['y'];
+		
+		if ( ($xratio > $yratio && !$byLowerSide) || ($xratio < $yratio))
 		{
-			$thumbnail = $img;
+			$newWidth = round($size[0] / $xratio);
+			$newHeight = round($size[1] / $xratio);
 		}
+		else
+		{
+			$newWidth = round($size[0] / $yratio);
+			$newHeight = round($size[1] / $yratio);
+		}
+		
+		$thumbnail = imagecreatetruecolor ($newWidth, $newHeight);
+		
+		imagealphablending($thumbnail, false);
+		imagesavealpha($thumbnail, true);
+		$tColor = imagecolorallocatealpha($thumbnail, 255, 255, 255, 127);
+		imagefilledrectangle($thumbnail, 0, 0, $newWidth, $newHeight, $tColor);
+		
+		imagecopyresampled ($thumbnail, $img, 0,0,0,0, $newWidth, $newHeight, $size[0], $size[1]);
+		
+//			else
+//			{
+//				$xratio = $size[0] / $size['x'];
+//				$yratio = $size[1] / $size['y'];
+//				if ($xratio < $yratio)
+//				{
+//					$new_width = round($size[0] / $xratio);
+//					$new_height = round($size[1] / $xratio);
+//				}
+//				else
+//				{
+//					$new_width = round($size[0] / $yratio);
+//					$new_height = round($size[1] / $yratio);
+//				}
+//
+//				$t = imagecreatetruecolor ($new_width, $new_height);
+//				imagealphablending($t, false);
+//				imagesavealpha($t, true);
+//				$tColor = imagecolorallocatealpha($t, 255, 255, 255, 127);
+//				imagefilledrectangle($t, 0, 0, $new_width, $new_height, $tColor);
+//				
+//				imagecopyresampled ($t, $img, 0,0,0,0, $new_width, $new_height, $size[0], $size[1]);
+//				
+//				$thumbnail = imagecreatetruecolor ($size['x'], $size['y']);
+//				
+//				imagealphablending($thumbnail, false);
+//				imagesavealpha($thumbnail, true);
+//				$tColor = imagecolorallocatealpha($thumbnail, 255, 255, 255, 127);
+//				imagefilledrectangle($thumbnail, 0, 0, $new_width, $new_height, $tColor);
+//								
+//				if ($crop === 'center')
+//				{
+//					imagecopy($thumbnail, $t, 0, 0, round(($new_width - $size['x']) / 2), round(($new_height - $size['y']) / 2), $size['x'], $size['y']);
+//				}
+//				elseif ($crop === 'bottom')
+//				{
+//					imagecopy($thumbnail, $t, 0, 0, ($new_width - $size['x']), ($new_height - $size['y']), $size['x'], $size['y']);
+//				}
+//				else
+//				{
+//					imagecopy($thumbnail, $t, 0, 0, 0, 0, $size['x'], $size['y']);
+//				}
+//				imagedestroy($t);
+//			}
 
 		// создаем плашку с размерами миниатюры. потом в нее вписываем полученное изображение
-		if($pl)	
-		{
-			$x = 0;
-			$y = 0;
-
-			if(imagesx($thumbnail) < $thumb_size['x']) 
-			{
-				$x = round(($thumb_size['x'] - imagesx($thumbnail)) / 2);
-			}
-
-			if (imagesy($thumbnail) < $thumb_size['y']) 
-			{
-				$y = round(($thumb_size['y'] - imagesy($thumbnail)) / 2);
-			}
-
-			$t = $thumbnail;
-			$thumbnail = imagecreatetruecolor ($thumb_size['x'], $thumb_size['y']);
-			$fg = ImageColorAllocate($thumbnail, 255, 255, 255);
-			imagefill($thumbnail, 0, 0, $fg);
-
-			imagecopy($thumbnail, $t, $x, $y, 0, 0, imagesx($t), imagesy($t));
-			imagedestroy($t);
-		}
-
-
-//		if ($blur)
+//		if($pl)	
 //		{
-//			$this->unsharpMask($thumbnail);
+//			$x = 0;
+//			$y = 0;
+//
+//			if(imagesx($thumbnail) < $size['x']) 
+//			{
+//				$x = round(($size['x'] - imagesx($thumbnail)) / 2);
+//			}
+//
+//			if (imagesy($thumbnail) < $size['y']) 
+//			{
+//				$y = round(($size['y'] - imagesy($thumbnail)) / 2);
+//			}
+//
+//			$t = $thumbnail;
+//			$thumbnail = imagecreatetruecolor ($size['x'], $size['y']);
+//			$fg = ImageColorAllocate($thumbnail, 255, 255, 255);
+//			imagefill($thumbnail, 0, 0, $fg);
+//
+//			imagecopy($thumbnail, $t, $x, $y, 0, 0, imagesx($t), imagesy($t));
+//			imagedestroy($t);
 //		}
 
 		return $thumbnail;
+	}
+	
+	protected function cropImage(&$img, $size, $cropType)
+	{
+		$w = imagesx($img);
+		$h = imagesy($img);
+	
+		$thumbnail = imagecreatetruecolor ($size['x'], $size['y']);
+		
+		imagealphablending($thumbnail, false);
+		imagesavealpha($thumbnail, true);
+		$tColor = imagecolorallocatealpha($thumbnail, 255, 255, 255, 127);
+		imagefilledrectangle($thumbnail, 0, 0, $size['x'], $size['y'], $tColor);
+						
+		if ($crop === 'center')
+		{
+			imagecopy($thumbnail, $img, 0, 0, round(($w - $size['x']) / 2), round(($h - $size['y']) / 2), $size['x'], $size['y']);
+		}
+		elseif ($crop === 'bottom')
+		{
+			imagecopy($thumbnail, $img, 0, 0, ($w - $size['x']), ($h - $size['y']), $size['x'], $size['y']);
+		}
+		else
+		{
+			imagecopy($thumbnail, $img, 0, 0, 0, 0, $size['x'], $size['y']);
+		}
+		imagedestroy($img);
+		$img = $thumbnail;
+	}
+	
+	protected function applyMaskToImage(&$img, $maskFilename)
+	{
+		$sourceMask = $this->createResourceFromImage($maskFilename);
+				
+		$sourceMaskSize = array(
+			'x' => imagesx($sourceMask),
+			'y' => imagesy($sourceMask)
+		);
+		
+		$maskSize = array(
+			'x' => imagesx($img),
+			'y' => imagesy($img),
+		);
+		
+		$mask = imagecreatetruecolor($maskSize['x'], $maskSize['y']);
+		imagecopyresampled ($mask, $sourceMask, 0,0,0,0, $maskSize['x'], $maskSize['y'], $sourceMaskSize['x'], $sourceMaskSize['y']);
+		imageDestroy($sourceMask);
+				
+		for ($x = 0; $x < $maskSize['x']; $x++)
+		{ // each row
+			for ($y = 0; $y < $maskSize['y']; $y++)
+			{ // each pixel
+				$maskRGBColor = imagecolorsforindex($mask, imagecolorat($mask, $x, $y));
+//				var_dump($maskRGBColor);
+//				die();
+				if ($maskRGBColor['red'] > 250 && $maskRGBColor['blue'] > 250 && $maskRGBColor['blue'] > 250)
+				{
+					$rgbColor = imagecolorsforindex($img, imagecolorat($img, $x, $y));	
+					$newColor = imagecolorallocatealpha ($img, $rgbColor['red'], $rgbColor['green'], $rgbColor['blue'], 126);
+					imagesetpixel ($img, $x, $y, $newColor);
+				}
+				
+				/*
+				$rgbColor = imagecolorsforindex($img, imagecolorat($img, $x, $y));
+				if ($rgbColor['alpha'] < 100)
+				{
+					$newColor = imagecolorallocatealpha ($img, $rgbColor['red'], $rgbColor['green'], $rgbColor['blue'], $opacity);
+					imagesetpixel ($img, $x, $y, $newColor);
+				}
+				*/
+			}
+		}
 	}
 	
 	/**
