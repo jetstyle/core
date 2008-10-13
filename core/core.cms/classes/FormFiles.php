@@ -267,6 +267,7 @@ class FormFiles extends FormSimple
 				'crop' => $d['crop'],
 				'base' => $d['base'],
 				'to_flv' => $d['convert_to_flv'],
+				'opacity' => $d['opacity'],
 			);
 	}
 
