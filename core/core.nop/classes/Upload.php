@@ -170,70 +170,112 @@ class Upload
 				throw new Exception("Upload: directory ".str_replace(Config::get('project_dir'), '', $dirname)." is not writable");
 			}
 
-			if(in_array($ext, $this->GRAPHICS) && is_array($params['size']) && (strlen($params['size'][0]) > 0 && strlen($params['size'][1]) > 0))
+			
+			if ($params['actions'] && is_array($params['actions']))
 			{
-				$A = getimagesize($uploaded_file);
-
-				$x = $this->parseSizeParam($params['size'][0]);
-				$y = $this->parseSizeParam($params['size'][1]);
-
-				if($x[0] == '' && $y[0] == '') // resize
+				if(in_array($ext, $this->GRAPHICS))
 				{
-					$img = $this->createResourceFromImage($uploaded_file);
-				
-					$thumbnail = $this->createThumb($img, array('x' => $x[1], 'y' => $y[1]), $params['crop'] ? true : false);
-					
-					if ($params['mask'])
+					$image = $this->createResourceFromImage($uploaded_file);
+					foreach ($params['actions'] AS $key => $value)
 					{
-						$this->applyMaskToImage($thumbnail, $params['mask']);
-					}
-					
-					if ($params['crop'])
-					{
-						$this->cropImage($thumbnail, array('x' => $x[1], 'y' => $y[1]), $params['crop']);
-					}
-
-					if ($params['blur'])
-					{
-						$this->unsharpMask($thumbnail, 20);
+						switch ($key)
+						{
+							case 'crop':
+								$this->createThumb($image, array('x' => $value[0], 'y' => $value[1]), true);
+								$this->cropImage($image, array('x' => $value[0], 'y' => $value[1]), $value[3]);
+							break;
+							
+							case 'cropWithoutResize':
+								$this->cropImage($image, array('x' => $value[0], 'y' => $value[1]), $value[3]);
+							break;
+							
+							case 'mask':
+								$this->applyMaskToImage($image, $value);
+							break;
+							
+							case 'opacity':
+								$this->makeImageOpacity($image, $value);
+							break;
+						}
 					}
 					
 //					header('Content-type: image/png');
-//					imagepng($thumbnail);
+//					imagepng($image);
 //					die();
 					
-					if ($params['opacity'])
-					{
-						$this->makeImageOpacity($thumbnail, $params['opacity']);
-					}
-										
-					$this->saveImageFromResource($thumbnail, $ext, $file_name_full);
-					imagedestroy($img);
+					$this->saveImageFromResource($image, $ext, $file_name_full);
 				}
 				else
 				{
-					$x[0] = $x[0] == '=' ? '==' : $x[0];
-					$y[0] = $y[0] == '=' ? '==' : $y[0];
-
-					eval('$_x = ('.$A[0].$x[0].$x[1].');');
-					eval('$_y = ('.$A[1].$y[0].$y[1].');');
-
-					if($_x && $_y)
-					{
-						move_uploaded_file($uploaded_file,$file_name_full);
-					}
-					else
-					{
-						@unlink($uploaded_file);
-						return false;
-					}
+					move_uploaded_file($uploaded_file,$file_name_full);
 				}
 			}
 			else
 			{
-				move_uploaded_file($uploaded_file,$file_name_full);
+				if(in_array($ext, $this->GRAPHICS) && is_array($params['size']) && (strlen($params['size'][0]) > 0 && strlen($params['size'][1]) > 0))
+				{
+					$A = getimagesize($uploaded_file);
+	
+					$x = $this->parseSizeParam($params['size'][0]);
+					$y = $this->parseSizeParam($params['size'][1]);
+	
+					if($x[0] == '' && $y[0] == '') // resize
+					{
+						$thumbnail = $this->createResourceFromImage($uploaded_file);
+					
+						$this->createThumb($thumbnail, array('x' => $x[1], 'y' => $y[1]), $params['crop'] ? true : false);
+						
+						if ($params['mask'])
+						{
+							$this->applyMaskToImage($thumbnail, $params['mask']);
+						}
+						
+						if ($params['crop'])
+						{
+							$this->cropImage($thumbnail, array('x' => $x[1], 'y' => $y[1]), $params['crop']);
+						}
+	
+						if ($params['blur'])
+						{
+							$this->unsharpMask($thumbnail, 20);
+						}
+						
+	//					header('Content-type: image/png');
+	//					imagepng($thumbnail);
+	//					die();
+						
+						if ($params['opacity'])
+						{
+							$this->makeImageOpacity($thumbnail, $params['opacity']);
+						}
+											
+						$this->saveImageFromResource($thumbnail, $ext, $file_name_full);
+					}
+					else
+					{
+						$x[0] = $x[0] == '=' ? '==' : $x[0];
+						$y[0] = $y[0] == '=' ? '==' : $y[0];
+	
+						eval('$_x = ('.$A[0].$x[0].$x[1].');');
+						eval('$_y = ('.$A[1].$y[0].$y[1].');');
+	
+						if($_x && $_y)
+						{
+							move_uploaded_file($uploaded_file,$file_name_full);
+						}
+						else
+						{
+							@unlink($uploaded_file);
+							return false;
+						}
+					}
+				}
+				else
+				{
+					move_uploaded_file($uploaded_file,$file_name_full);
+				}
 			}
-
+			
 			if($params['to_flv'] && $ext != 'flv')
 			{
 				$this->convertToFlv($file_name_full, $this->dir.$file_name.".flv");
@@ -404,17 +446,17 @@ class Upload
 	
 
 	// ###################################### ReSize Image ################################# //
-	public function createThumb($img, $thumbSize, $byLowerSide = false)
+	public function createThumb(&$img, $thumbSize, $byLowerSide = false)
 	{
 		$size = array(
 			imagesx($img),
 			imagesy($img),
 		);
 		
-		$dontResize = 0;
+		
 		if (($size[0] <= $thumbSize['x']) && ($size[1] <= $thumbSize['y']))
 		{
-			return $img;
+			return;
 		}
 
 
@@ -440,51 +482,6 @@ class Upload
 		imagefilledrectangle($thumbnail, 0, 0, $newWidth, $newHeight, $tColor);
 		
 		imagecopyresampled ($thumbnail, $img, 0,0,0,0, $newWidth, $newHeight, $size[0], $size[1]);
-		
-//			else
-//			{
-//				$xratio = $size[0] / $size['x'];
-//				$yratio = $size[1] / $size['y'];
-//				if ($xratio < $yratio)
-//				{
-//					$new_width = round($size[0] / $xratio);
-//					$new_height = round($size[1] / $xratio);
-//				}
-//				else
-//				{
-//					$new_width = round($size[0] / $yratio);
-//					$new_height = round($size[1] / $yratio);
-//				}
-//
-//				$t = imagecreatetruecolor ($new_width, $new_height);
-//				imagealphablending($t, false);
-//				imagesavealpha($t, true);
-//				$tColor = imagecolorallocatealpha($t, 255, 255, 255, 127);
-//				imagefilledrectangle($t, 0, 0, $new_width, $new_height, $tColor);
-//				
-//				imagecopyresampled ($t, $img, 0,0,0,0, $new_width, $new_height, $size[0], $size[1]);
-//				
-//				$thumbnail = imagecreatetruecolor ($size['x'], $size['y']);
-//				
-//				imagealphablending($thumbnail, false);
-//				imagesavealpha($thumbnail, true);
-//				$tColor = imagecolorallocatealpha($thumbnail, 255, 255, 255, 127);
-//				imagefilledrectangle($thumbnail, 0, 0, $new_width, $new_height, $tColor);
-//								
-//				if ($crop === 'center')
-//				{
-//					imagecopy($thumbnail, $t, 0, 0, round(($new_width - $size['x']) / 2), round(($new_height - $size['y']) / 2), $size['x'], $size['y']);
-//				}
-//				elseif ($crop === 'bottom')
-//				{
-//					imagecopy($thumbnail, $t, 0, 0, ($new_width - $size['x']), ($new_height - $size['y']), $size['x'], $size['y']);
-//				}
-//				else
-//				{
-//					imagecopy($thumbnail, $t, 0, 0, 0, 0, $size['x'], $size['y']);
-//				}
-//				imagedestroy($t);
-//			}
 
 		// создаем плашку с размерами миниатюры. потом в нее вписываем полученное изображение
 //		if($pl)	
@@ -510,8 +507,8 @@ class Upload
 //			imagecopy($thumbnail, $t, $x, $y, 0, 0, imagesx($t), imagesy($t));
 //			imagedestroy($t);
 //		}
-
-		return $thumbnail;
+		imagedestroy($img);
+		$img = $thumbnail;
 	}
 	
 	protected function cropImage(&$img, $size, $cropType)
