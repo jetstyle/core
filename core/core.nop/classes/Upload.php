@@ -523,11 +523,11 @@ class Upload
 		$tColor = imagecolorallocatealpha($thumbnail, 255, 255, 255, 127);
 		imagefilledrectangle($thumbnail, 0, 0, $size['x'], $size['y'], $tColor);
 						
-		if ($crop === 'center')
+		if ($cropType === 'center')
 		{
 			imagecopy($thumbnail, $img, 0, 0, round(($w - $size['x']) / 2), round(($h - $size['y']) / 2), $size['x'], $size['y']);
 		}
-		elseif ($crop === 'bottom')
+		elseif ($cropType === 'bottom')
 		{
 			imagecopy($thumbnail, $img, 0, 0, ($w - $size['x']), ($h - $size['y']), $size['x'], $size['y']);
 		}
