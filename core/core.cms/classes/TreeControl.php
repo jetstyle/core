@@ -409,10 +409,10 @@ class TreeControl
 				{
 					$this->load();
 					$this->restore();
+					
+					$this->killOutsiders();
 				}
 				
-				$this->killOutsiders();
-
 				return '1';
 			}
 			else
@@ -644,7 +644,14 @@ class TreeControl
 
 	protected function killOutsiders()
 	{
-		$S = array($this->getRootId());
+		$rootId = $this->getRootId();
+		
+		if (!$rootId)
+		{
+			return;
+		}
+		
+		$S = array($rootId);
 		$IDS = array();
 		
 		while(count($S))
@@ -652,7 +659,7 @@ class TreeControl
 			$id = array_pop($S);
 			if(is_array($this->children[$id]))
 			{
-				$S = array_merge($S,$this->children[$id]);
+				$S = array_merge($S, $this->children[$id]);
 			}
 			$IDS[] = $id;
 		}
