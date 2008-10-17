@@ -31,9 +31,10 @@ class DoController extends Controller
 		{
 			$redirectTo = RequestInfo::$baseUrl.'login'; //login page
             $redirectTo .= '?retpath='; //path to return there
-            $redirectTo .= $_SERVER['HTTPS'] ? 'https://' : 'http://';
-            $redirectTo .= $_SERVER['SERVER_NAME'].RequestInfo::hrefChange('');
-			Controller::redirect($redirectTo);
+            $retPath .= $_SERVER['HTTPS'] ? 'https://' : 'http://';
+            $retPath .= $_SERVER['SERVER_NAME'].$_SERVER['REQUEST_URI'];
+            $retPath = urlencode($retPath);
+			Controller::redirect($redirectTo.$retPath);
 		}
 
 		parent::handle();
@@ -55,11 +56,11 @@ class DoController extends Controller
 //		{
 			unset($params[0]);
 //		}
-				
+
 		Finder::useClass("ModuleConstructor");
 		$moduleConstructor =& new ModuleConstructor();
 		$moduleConstructor->initialize($config['module'], $params);
-		
+
 		Locator::get('tpl')->set('module_body', $moduleConstructor->proceed());
 
 		$this->data['title_short'] = $moduleConstructor->getTitle();

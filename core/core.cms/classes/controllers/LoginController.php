@@ -18,15 +18,16 @@ class LoginController extends Controller
 				$redirectTo = RequestInfo::get('retpath') ?
 							  RequestInfo::get('retpath') :
 							  RequestInfo::$baseUrl.'login';
-				$prp->logout($redirectTo);
-			} 
-			else 
+				$prp->logout(urldecode($redirectTo));
+			}
+			else
 			{
-				if (RequestInfo::get('retpath')) 
+				if (RequestInfo::get('retpath'))
 				{
-	            	Controller::redirect(RequestInfo::get('retpath'));
-				} 
-				else 
+					//die(RequestInfo::get('retpath'));
+	            	Controller::redirect(urldecode(RequestInfo::get('retpath')));
+				}
+				else
 				{
 					Controller::redirect(RequestInfo::$baseUrl.'start');
 				}
