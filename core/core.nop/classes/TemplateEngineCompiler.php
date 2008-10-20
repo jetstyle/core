@@ -918,8 +918,11 @@ class TemplateEngineCompiler
 
 	protected function constructValue($ks, $domain = '$tpl->domain')
 	{
-		$use_methods = false;
-
+        if (count($ks)==1 && preg_match('#^[A-Z][A-Z_]+$#', $ks[0]))
+        {
+            return $ks[0];
+        }
+			
 		foreach ($ks AS $i=>$k)
 		{
 			if (strlen($k) == 0)
@@ -927,17 +930,15 @@ class TemplateEngineCompiler
 				continue;
 			}
 
-			$func = '';
 			$args = '';
+			
 			if (preg_match('#^[0-9]+$#', $k))
 			{ // is numeric key ?
 				$args = $k;
-				$func .= 'a';
 			}
 			else
 			{
 				$args = "'".$k."'";
-				$func .= 'a';
 			}
 
 			$domain .= "[".$args."]";
