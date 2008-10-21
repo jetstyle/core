@@ -313,7 +313,9 @@ class htmlMimeMail2
     $this->html      = $html;
     $this->html_text = $text;
 
-    if (isset($images_dir)) {
+    if (isset($images_dir)) 
+    {
+      $this->html_images = array();
       $this->_findHtmlImages($images_dir);
     }
   }
