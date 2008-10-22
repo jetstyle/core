@@ -394,7 +394,7 @@ class TreeControl
 			$this->load();
 			$this->restore();
 
-			$this->killOutsiders();
+//			$this->killOutsiders();
 			
 			return $id;
 		}
@@ -410,7 +410,7 @@ class TreeControl
 					$this->load();
 					$this->restore();
 					
-					$this->killOutsiders();
+//					$this->killOutsiders();
 				}
 				
 				return '1';
@@ -461,7 +461,7 @@ class TreeControl
 			$this->load();
 			$this->restore();
 			
-			$this->killOutsiders();
+//			$this->killOutsiders();
 			
 			$this->updateTreePathes($this->config->table_name, $this->id, $this->config->allow_empty_supertag, $this->config->where);
 
