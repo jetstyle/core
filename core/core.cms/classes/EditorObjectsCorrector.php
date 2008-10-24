@@ -29,9 +29,8 @@ class EditorObjectsCorrector
 		$data = preg_replace_callback("/<big>(.*?)?<\/big>/si", array($this, "correctNotes"), $data);
 		$data = preg_replace_callback("/<img(.*?)?[\/]{0,1}>/si", array($this, "correctImages"), $data);
 		$data = preg_replace_callback("/<a(.*?)?>(.*?)?<\/a?>/si", array($this, "correctFiles"), $data);
-		/*
-		 $data = preg_replace_callback("/<table.*?class=\"(.*?)?\".*?>(.*?)?<\/table>/si", array($this, "correctTables"), $data);
-		 */
+		
+		//$data = preg_replace_callback("/<table[^>]*?class=\"([\w\s]+)\"[^>]*?>(.*?)?<\/table>/si", array($this, "correctTables"), $data);
 
 		return $data;
 	}
@@ -128,50 +127,84 @@ class EditorObjectsCorrector
 		}
 	}
 
-	
 	protected function correctTables($matches)
 	{
-		$this->rowsHead = 1;
-		$this->row = 0;
+		$this->table = array('class' => $matches[1]);
+		preg_replace_callback("/<thead>(.*?)?<\/thead>/si",array(&$this, "correctTableHead"), $matches[2], -1, $theads);
+		preg_replace_callback("/<tbody>(.*?)?<\/tbody>/si",array(&$this, "correctTableBody"), $matches[2], -1, $tbodies);
 
-		$matches[2] = preg_replace_callback("/<tr.*?>(.*?)?<\/tr>/si",array(&$this, "correctTableRows"),$matches[2]);
-
-		return '<table class="'.$matches[1].'">'.$matches[2].'</table>';
+		if (!$theads && !$tbodies)
+		{
+			$this->correctTableBody(array($matches[2]));
+		}
+		
+		$template = $matches['1'];
+		$template = preg_replace('#\s#', '_', $template);
+		$template = preg_replace('#[^\w_]#', '', $template);
+		$template = trim($template);
+		
+		$this->tpl->set('table', $this->table);
+		return $this->tpl->parse('editor/tables/'.$template);
 	}
 
+	protected function correctTableHead($matches)
+	{
+		$this->rows = array();
+		preg_replace_callback("/<tr.*?>(.*?)?<\/tr>/si",array(&$this, "correctTableRows"), $matches[0]);
+
+		if (count($this->rows) > 0)
+		{
+			$this->rows[0]['is_first'] = true;
+			$this->rows[count($this->rows) - 1]['is_last'] = true;
+			$this->table['head'] = $this->rows;
+		}
+	}
+	
+	protected function correctTableBody($matches)
+	{
+		$this->rows = array();
+		preg_replace_callback("/<tr.*?>(.*?)?<\/tr>/si",array(&$this, "correctTableRows"), $matches[0]);
+		
+		if (count($this->rows) > 0)
+		{
+			$this->rows[0]['is_first'] = true;
+			$this->rows[count($this->rows) - 1]['is_last'] = true;
+			$this->table['body'] = $this->rows;
+		}
+	}
+	
 	protected function correctTableRows($matches)
 	{
-		$this->row++;
-		$this->col = 0;
+		$this->cells = array();
+		preg_replace_callback("/<(td|th)(.*?)?>(.*?)?<\/\\1>/si", array(&$this, "correctTableCells"), $matches[1]);
 
-		$matches[1] = preg_replace_callback("/<td.*?>(.*?)?<\/td>/si",array(&$this, "correctTableCells"),$matches[1]);
-
-		return '<tr>'.$matches[1].'</tr>';
+		if (count($this->cells) > 0)
+		{
+			$this->cells[0]['is_first'] = true;
+			$this->cells[count($this->cells) - 1]['is_last'] = true;
+		}
+		
+		$this->rows[] = array('cells' => $this->cells);
 	}
 
 	protected function correctTableCells($matches)
 	{
-		$this->col++;
-
-		preg_match_all('/colspan\=.(\d)./si', $matches[0], $m);
-		$colspan = ' colspan="'.$m[1][0].'" ';
-
-		preg_match_all('/rowspan\=.(\d)./si', $matches[0], $m);
-		$rowspan = ' rowspan="'.$m[1][0].'" ';
-
-		if ($this->row == 1 && $m[1][0] > $this->rowsHead)	
+		// parse attributes
+		$attributes = array();
+		preg_match_all('/(.*?)="(.*?[^\\\])"/si', $matches[2], $paramsMatches);
+		if(is_array($paramsMatches[2]) && !empty($paramsMatches[2]))
 		{
-			$this->rowsHead = $m[1][0];
+			foreach($paramsMatches[1] AS $i => $r)
+			{
+				$attributes[trim($r)] = trim(str_replace('\"', '"', $paramsMatches[2][$i]));
+			}
 		}
-
-		if ($this->row <= $this->rowsHead) 
-		{
-			return '<th '.$colspan.$rowspan.'>'.$matches[1].'</th>';
-		}
-		else
-		{
-			return '<td '.$colspan.$rowspan.'>'.$matches[1].'</td>';
-		}
+			
+		$this->cells[] = array(
+			'attributes' => $attributes,
+			'data' => $matches[3]
+		);
 	}
+	
 }
 ?>
