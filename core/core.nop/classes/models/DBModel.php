@@ -207,12 +207,13 @@ class DBModel extends Model implements IteratorAggregate, ArrayAccess, Countable
 	public static function factory($className = '')
 	{
 		$obj = null;
-		$parts = explode(":", $className);
+		$parts = explode("/", $className);
 
 		if (count($parts)>1)
 		{
 			$className= $parts[0];
 			$fieldSet = $parts[1];
+			
 		}
 
 		if ($className)
@@ -290,10 +291,14 @@ class DBModel extends Model implements IteratorAggregate, ArrayAccess, Countable
 			}
 			else if ( isset( $ymlConfig['default'] ) )
 			{
-				$ymlConfig = $ymlConfig['default'];
+				$fieldSet = 'default';
+				$ymlConfig = $ymlConfig[ $fieldSet ];
+				
 			}
 
-			$this->setConfig($ymlConfig, $fileName);
+            $storeTo = $fileName.($fieldSet ? "/".$fieldSet : "");
+
+			$this->setConfig($ymlConfig, $fileName, $storeTo);
 			return true;
 		}
 
@@ -307,7 +312,7 @@ class DBModel extends Model implements IteratorAggregate, ArrayAccess, Countable
 	 *
 	 * @param array $ymlConfig конфиг загруженный функцией loadConfig
 	 */
-	private function setConfig( $ymlConfig, $className = '' )
+	private function setConfig( $ymlConfig, $className = '', $storeTo='' )
 	{
 		$this->setFields($ymlConfig['fields']);
 		$this->setWhere($ymlConfig['where']);
@@ -315,6 +320,8 @@ class DBModel extends Model implements IteratorAggregate, ArrayAccess, Countable
 		$this->setGroupBy($ymlConfig['group']);
 		$this->setHaving($ymlConfig['having']);
 		$this->setLimit($ymlConfig['limit']);
+		
+		$this->storeTo = $storeTo;
 
 		if ( !empty( $ymlConfig['table'] ) )
 		{
@@ -324,11 +331,14 @@ class DBModel extends Model implements IteratorAggregate, ArrayAccess, Countable
 		{
 			$this->autoDefineTable($className);
 		}
+
+		$this->setEvolutors($ymlConfig['evolutors']);
 		
 		if (isset($ymlConfig['autoPrefix']))
 		{
 			$this->setAutoPrefix($ymlConfig['autoPrefix']);
 		}
+
 	}
 
 	// ######## GETTERS ############## //
@@ -630,7 +640,6 @@ class DBModel extends Model implements IteratorAggregate, ArrayAccess, Countable
 		$this->one = $v;
 	}
 
-
 	/**
 	 * Set custom pager object. Object must implement PagerInterface
 	 *
@@ -850,8 +859,12 @@ class DBModel extends Model implements IteratorAggregate, ArrayAccess, Countable
 		return $this;
 	}
 
-	public function tpl($storeTo)
+	public function tpl($storeTo="")
 	{
+	    if ($storeTo=="")
+	    {
+	        $storeTo = $this->storeTo;
+	    }   
 		Locator::get('tpl')->setRef($storeTo, $this);
 		return $this;
 	}
@@ -860,9 +873,17 @@ class DBModel extends Model implements IteratorAggregate, ArrayAccess, Countable
 	{
 		if (is_array($data))
 		{
+			
 			$this->data = array();
+			//$this->notify("before_rows", $data);
+			
 			foreach ($data AS $key => $row)
 			{
+			//	if (!empty($this->evolutors))
+			//	{
+			//		$this->notify("foreach_row", $row);
+			//	}
+				
 				$item = new ResultSet();
 				$item->init($this, $row);
 
@@ -876,6 +897,32 @@ class DBModel extends Model implements IteratorAggregate, ArrayAccess, Countable
 		}
 		return $this;
 	}
+
+    /**
+     * Special evolutors for tree handling
+     */
+    protected function prepareChildren($items)
+    {
+        var_dump($items);
+	die('1');
+        foreach ($items as $i=>$item)
+        {
+            echo '<hr>';
+	    var_dump($item);
+            $this->children[$item['_parent']][] = $item['id'];
+        }
+    }
+    
+    protected function setChildren(&$item)
+    {
+	//var_dump( $this->children );
+	die();
+        var_dump( $item['id'], $this->children[ $item['id'] ]  );
+	echo '<hr>';
+	$item['children'] = $this->children[$item['id']];
+        
+    }
+
 
 	// ########## QUOTES ############## //
 	public function quoteValue($value)
@@ -938,7 +985,8 @@ class DBModel extends Model implements IteratorAggregate, ArrayAccess, Countable
 			$offset = $pager->getOffset();
 		}
 
-		$this->setData($this->select($where, $limit, $offset));
+        $data = $this->select($where, $limit, $offset);
+		$this->setData( $data );
 
 		$this->notify('load', array(&$this));
 
@@ -964,6 +1012,12 @@ class DBModel extends Model implements IteratorAggregate, ArrayAccess, Countable
 		{
 			$this->autoDefineTable();
 		}
+		
+		if ( $this->evolutors )
+		{
+		    $this->setEvolutors();
+		}
+		
 
 		//для всех классов с пустым fields
 		$className = get_class($this);
@@ -977,6 +1031,25 @@ class DBModel extends Model implements IteratorAggregate, ArrayAccess, Countable
 		{
 			$this->addFields($this->fields);
 		}
+	}
+	
+	protected function setEvolutors ($evolutors=null)
+	{
+	    if ($evolutors==null)
+	    {
+	        $evolutors = $this->evolutors;
+	    }
+	    else
+	        $this->evolutors = $evolutors;
+	        
+	    //запомним эволюторы, чтобы не делать notify для моделей у которых нет эволюторов
+	    if (!empty($evolutors))
+	    {
+	        foreach ( $evolutors as $k=>$evo )
+	        {
+    	        $this->registerObserver( $k,  $evo );
+    	    }
+	    }
 	}
 
 	protected function &getPager()
@@ -1055,6 +1128,13 @@ class DBModel extends Model implements IteratorAggregate, ArrayAccess, Countable
 		$this->notify('before_load', array(&$this));
 		//		$this->data = $this->selectSql($sql, true);
 		$this->setData($this->selectSql($sql, true));
+		
+            if ($this->table_name=='calculator_fields')
+            {
+            var_dump($data, $limit);
+            die('xx');
+            }
+		
 		$this->notify('load', array(&$this));
 	}
 
