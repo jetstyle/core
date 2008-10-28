@@ -29,7 +29,7 @@ class ListSelect extends ListSimple
 		else
 		{
 			$this->tpl->set('_name', $topic_field);
-			$sql = "SELECT $id_opts, CONCAT(SUBSTRING(title,1,40),'..') as title".($this->config->format_opts ? ", _level" : "")." FROM ".$this->config->table_opts." WHERE ".$this->config->where_opts.($this->config->order_opts ? " ORDER by ".$this->config->order_opts : "");
+			$sql = "SELECT $id_opts, IF(CHAR_LENGTH(title)>40,CONCAT(SUBSTRING(title,1,40),'..'),title) as title".($this->config->format_opts ? ", _level" : "")." FROM ".$this->config->table_opts." WHERE ".$this->config->where_opts.($this->config->order_opts ? " ORDER by ".$this->config->order_opts : "");
 
 			$opts = $db->query($sql);
 		}
@@ -43,7 +43,7 @@ class ListSelect extends ListSimple
 
 			foreach ($opts as $i=>$k)
 			{
-				$_opts .= "<option value='".$k[$id_opts]."'".($_GET[$this->topic_field] == $k[$id_opts] ? " selected='selected'" : '').">".($this->config->format_opts ? str_repeat("&nbsp;&nbsp;", $k['_level']-1)  : '' ).$k['title']."</option>";
+				$_opts .= "<option value='".$k[$id_opts]."'".($_GET[$this->topic_field] == $k[$id_opts] ? " selected='selected'" : '').">".($this->config->format_opts ? str_repeat("&nbsp;", ($k['_level']-1)*4)  : '' ).$k['title']."</option>";
 			}
 
 			$this->tpl->set('__options', $_opts);
