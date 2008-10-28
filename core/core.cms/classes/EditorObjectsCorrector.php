@@ -1,10 +1,10 @@
 <?php
 /**
  * Apply templates to editor objects (images, files, notes, quotes)
- * 
+ *
  * @author lunatic lunatic@jetstyle.ru
  * @created 25.05.2008 11:39
- * 
+ *
  */
 
 class EditorObjectsCorrector
@@ -29,8 +29,8 @@ class EditorObjectsCorrector
 		$data = preg_replace_callback("/<big>(.*?)?<\/big>/si", array($this, "correctNotes"), $data);
 		$data = preg_replace_callback("/<img(.*?)?[\/]{0,1}>/si", array($this, "correctImages"), $data);
 		$data = preg_replace_callback("/<a(.*?)?>(.*?)?<\/a?>/si", array($this, "correctFiles"), $data);
-		
-		//$data = preg_replace_callback("/<table[^>]*?class=\"([\w\s]+)\"[^>]*?>(.*?)?<\/table>/si", array($this, "correctTables"), $data);
+
+		/*$data = preg_replace_callback("/<table[^>]*?class=\"([\w\s]+)\"[^>]*?>(.*?)?<\/table>/si", array($this, "correctTables"), $data);*/
 
 		return $data;
 	}
@@ -66,7 +66,7 @@ class EditorObjectsCorrector
 			{
 				$res[trim($r)] = trim(str_replace('\"', '"', $paramsMatches[2][$i]));
 			}
-			
+
 			if($res['mode'] == 'file')
 			{
 				$res['fileparams'] = explode('|', $res['fileparams']);
@@ -85,13 +85,13 @@ class EditorObjectsCorrector
 
 				//return $this->tpl->Parse('typografica/link.html');
 			}
-				
+
 		}
 		return $matches[0];
 	}
 
 	protected function correctImages($matches)
-	{		
+	{
 		preg_match_all('/(.*?)="(.*?[^\\\])"/si', $matches[1], $paramsMatches);
 		if (is_array($paramsMatches[1]) && !empty($paramsMatches[1]))
 		{
@@ -107,15 +107,15 @@ class EditorObjectsCorrector
 				case 1:
 					return $this->tpl->Parse('editor/images.html:image_preview');
 					break;
-				
+
 				case 2:
 					return $this->tpl->Parse('editor/images.html:image_small');
 					break;
-				
+
 				case 3:
 					return $this->tpl->Parse('editor/images.html:image_big');
 					break;
-				
+
 				default:
 					return $matches[0];
 				break;
@@ -137,12 +137,12 @@ class EditorObjectsCorrector
 		{
 			$this->correctTableBody(array($matches[2]));
 		}
-		
+
 		$template = $matches['1'];
 		$template = preg_replace('#\s#', '_', $template);
 		$template = preg_replace('#[^\w_]#', '', $template);
 		$template = trim($template);
-		
+
 		$this->tpl->set('table', $this->table);
 		return $this->tpl->parse('editor/tables/'.$template);
 	}
@@ -159,12 +159,12 @@ class EditorObjectsCorrector
 			$this->table['head'] = $this->rows;
 		}
 	}
-	
+
 	protected function correctTableBody($matches)
 	{
 		$this->rows = array();
 		preg_replace_callback("/<tr.*?>(.*?)?<\/tr>/si",array(&$this, "correctTableRows"), $matches[0]);
-		
+
 		if (count($this->rows) > 0)
 		{
 			$this->rows[0]['is_first'] = true;
@@ -172,7 +172,7 @@ class EditorObjectsCorrector
 			$this->table['body'] = $this->rows;
 		}
 	}
-	
+
 	protected function correctTableRows($matches)
 	{
 		$this->cells = array();
@@ -183,7 +183,7 @@ class EditorObjectsCorrector
 			$this->cells[0]['is_first'] = true;
 			$this->cells[count($this->cells) - 1]['is_last'] = true;
 		}
-		
+
 		$this->rows[] = array('cells' => $this->cells);
 	}
 
@@ -199,12 +199,12 @@ class EditorObjectsCorrector
 				$attributes[trim($r)] = trim(str_replace('\"', '"', $paramsMatches[2][$i]));
 			}
 		}
-			
+
 		$this->cells[] = array(
 			'attributes' => $attributes,
 			'data' => $matches[3]
 		);
 	}
-	
+
 }
 ?>
