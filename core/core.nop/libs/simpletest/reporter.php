@@ -137,6 +137,7 @@
          *    @access public
          */
         function paintException($exception) {
+            ExceptionHandler::getInstance()->process($exception);
             parent::paintException($exception);
             print "<span class=\"fail\">Exception</span>: ";
             $breadcrumb = $this->getTestList();
@@ -147,6 +148,8 @@
                     '] in ['. $exception->getFile() .
                     ' line ' . $exception->getLine() . ']';
             print " -&gt; <strong>" . $this->_htmlEntities($message) . "</strong><br />\n";
+            
+
         }
 		
 		/**
