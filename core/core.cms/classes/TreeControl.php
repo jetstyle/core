@@ -120,16 +120,7 @@ class TreeControl
 		switch($action)
 		{
 			case 'update':
-				$title = $_REQUEST['title'];
-				$id    = $_REQUEST['itemId'];
-				if (!empty($title))
-				{
-					$res = $this->saveTitle($id, $title);
-				}
-				else
-				{
-					$res = $this->updateTreeStruct();
-				}
+				$res = $this->updateTreeStruct();
 				echo $res;
 				die();
 			break;
@@ -387,7 +378,19 @@ class TreeControl
 
 	protected function updateTreeStruct()
 	{
-		if( $_REQUEST['add'])
+		if ($_REQUEST['rename'])
+		{
+			$id = intval($_REQUEST['id']);
+			$title = trim($_REQUEST['title']);
+						
+			if ($id && strlen($title) > 0)
+			{
+				$title = iconv('utf-8', 'cp1251', $title);
+				$this->saveTitle($id, $title);
+			}
+			return '0';
+		}
+		elseif( $_REQUEST['add'])
 		{
 			$id = $this->addNode();
 
@@ -489,6 +492,7 @@ class TreeControl
 
 		$node['title_pre'] = $this->tpl->action('typografica', $node['title']);
 		$node['parent'] = intval($_REQUEST['parent']);
+		$node['before'] = intval($_REQUEST['before']);
 		$node['supertag'] = $translit->supertag($node['title'], 20);
 
 		$parentNode = $db->queryOne("
@@ -498,12 +502,39 @@ class TreeControl
 		");
 
 		$node['_path'] = $parentNode['_path'] ? $parentNode['_path'].'/'.$node['supertag'] : $node['supertag'];
-
-		$order = $db->queryOne("
-			SELECT (MAX(_order) + 1) AS _max
-			FROM ??". $this->config->table_name ."
-			WHERE _parent = '".$node['parent']."'
-		");
+		
+		$order = null;
+		
+		if($node['before'])
+		{
+			$beforeNode = $db->queryOne("
+				SELECT _parent, _order
+				FROM ??". $this->config->table_name ."
+				WHERE ".$this->idField." = '".$node['before']."'
+			");
+			
+			if (is_array($beforeNode) && is_numeric($beforeNode['_order']))
+			{
+				$db->query("
+					UPDATE ??". $this->config->table_name ."
+					SET _order = _order + 1
+					WHERE _order >= " . $db->quote($beforeNode['_order']) . " AND _parent = '" . $beforeNode['_parent'] . "'
+				");
+				
+				$order = $beforeNode['_order'];
+			}
+		}
+		
+		if (!is_numeric($order))
+		{
+			$order = $db->queryOne("
+				SELECT (MAX(_order) + 1) AS _max
+				FROM ??". $this->config->table_name ."
+				WHERE _parent = '".$node['parent']."'
+			");
+			
+			$order = intval($order['_max']);
+		}
 
 		if (isset($this->config->INSERT_FIELDS) && is_array($this->config->INSERT_FIELDS))
 		{
@@ -518,7 +549,7 @@ class TreeControl
 			INSERT INTO ". DBAL::$prefix.$this->config->table_name ."
 			(title, title_pre, _parent, _supertag, _path, _order, _state " . $additionFields . ")
 			VALUES
-			(".$this->db->quote($node['title']).", ".$db->quote($node['title_pre']).", ".$db->quote($node['parent']).", ".$db->quote($node['supertag']).", ".$db->quote($node['_path']).", ".$db->quote($order['_max']).", 1 ".$additionValues.")
+ 			(".$this->db->quote($node['title']).", ".$db->quote($node['title_pre']).", ".$db->quote($node['parent']).", ".$db->quote($node['supertag']).", ".$db->quote($node['_path']).", ".$db->quote($order).", 1 ".$additionValues.")
 		");
 
 		return $id;
@@ -636,11 +667,9 @@ class TreeControl
 
 	protected function saveTitle($id, $title)
 	{
-		$title = iconv("UTF-8", "CP1251", $title);
-		
 		$db = &$this->db;
 		
-		$sql = "UPDATE ??".$this->config->table_name." SET title_short=".$db->quote($title)." WHERE id=".$db->quote($id);
+		$sql = "UPDATE ??".$this->config->table_name." SET title=".$db->quote($title).", title_pre = ".$db->quote($this->tpl->action('typografica', $title))." WHERE id=".$db->quote($id);
 		$db->execute($sql);
 		return $sql;
 	}

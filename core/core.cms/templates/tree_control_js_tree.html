@@ -1,0 +1,58 @@
+{{!connect "jquery_latest.js"}}
+{{!connect "utils.js"}}
+{{!connect "jstree/jquery.metadata.js"}}
+{{!connect "jstree/jquery.cookie.js"}}
+<!-- {{!connect "jstree/jquery.hotkeys.js"}} -->
+{{!connect "jstree/css.js"}}
+{{!connect "jstree/jquery.listen.js"}}
+{{!connect "jstree/tree_component.js"}}
+
+{{!connect "jstree/treeControl.js"}}
+
+{{!connect "jstree/tree_component.css"}}
+
+<div class="cms-list-advanced">
+	<h3 style="margin-top:0px; margin-bottom:0px;">Меню сайта</h3>
+	{{__trash_switch}}
+	{{__filters}}
+	<a href="#" title="Показать/скрыть элементы управления" onclick="treeToggleControls(); return false;" style="float:right;"><img {{?tree_params.show_controls}}class="toggleEditTreeClass-Sel"{{/?}} src="{{images}}tree/npj_edit.gif" id="toggleEditImg"></a>	
+	<img class="block" src="{{images}}z.gif" width="1" height="10" align="top" alt="" />
+		
+	<div id="treeBox" {{?!tree_params.show_controls}}class="no-controls"{{/?}}></div>
+</div>
+
+<script language="javascript" type="text/javascript">
+	var treeControlsEnabled = {{?tree_params.show_controls}}true{{?:}}false{{/?}};
+	function treeToggleControls()
+	{
+		$('#treeBox').toggleClass('no-controls'); 
+		$('#toggleEditImg').toggleClass('toggleEditTreeClass-Sel');
+		treeControlsEnabled = !treeControlsEnabled;
+		$.cookie('tree_control_btns', treeControlsEnabled);
+	}
+	
+	jQuery(document).ready(function()
+	{
+		params = {
+			'cont' : $("#treeBox"),
+			'data' : {{tree_params.data}},
+			{{?tree_params.hide_buttons}}
+			'hide_buttons' : {{tree_params.hide_buttons}},
+			{{/?}}
+			'update_url' : '{{tree_params.update_url}}',
+			'go_url'	:  '{{tree_params.go_url}}',
+			'images_path' : '{{images}}jstree/',
+			'current_id' : '{{tree_params.current_id}}'
+		};
+		var treeControl = new TreeControl(params);
+		treeControl.process();
+		
+		//$.hotkeys.add('f2',     { disableInInput: true }, function() { tree.rename(); });			
+		//$.hotkeys.add('r',      { disableInInput: true }, function() { tree.refresh(); });
+		//$.hotkeys.add('up',     { disableInInput: true }, function() { tree.get_prev(); });
+		//$.hotkeys.add('down',   { disableInInput: true }, function() { tree.get_next(); });
+		//$.hotkeys.add('left',   { disableInInput: true }, function() { tree.get_left(); });
+		//$.hotkeys.add('right',  { disableInInput: true }, function() { tree.get_right(); });
+		//$.hotkeys.add('return', { disableInInput: true }, function() { tree.select_branch(); });
+	});
+</script>
