@@ -28,6 +28,7 @@ class FormComponent_wrapper_field extends FormComponent_abstract
    {
      // если есть ошибки?
      $tpl = Locator::get('tpl');
+     $tpl->Set( "errors", "" );
      $tpl->set( "is_valid", $this->field->validator->valid );
      if (!$this->field->validator->valid)
      {
