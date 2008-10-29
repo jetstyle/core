@@ -25,7 +25,12 @@ class ModuleConstructor
 		Finder::prependDir(Config::get('app_dir').$this->handlersType.'/'.$this->moduleName.'/');
 
 		$this->config = new ModuleConfig();
-		$this->config->read(Finder::findScript_( $this->handlersType, $this->moduleName.'/defs'));
+		$defsPath = Finder::findScript( $this->handlersType, $this->moduleName.'/defs');
+		if (!$defsPath)
+		{
+			Controller::_404();
+		}
+		$this->config->read($defsPath);
 		$this->config->moduleName = $this->moduleName;
 		
 		$this->path[] = $this->moduleName;

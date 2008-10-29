@@ -41,8 +41,10 @@
 			{{/?}}
 			'update_url' : '{{tree_params.update_url}}',
 			'go_url'	:  '{{tree_params.go_url}}',
+			'source_url':  '{{tree_params.source_url}}',
 			'images_path' : '{{images}}jstree/',
-			'current_id' : '{{tree_params.current_id}}'
+			'current_id' : '{{tree_params.current_id}}',
+			'ajax_auto_loading' : {{?tree_params.ajax_auto_loading}}true{{?:}}false{{/?}}
 		};
 		var treeControl = new TreeControl(params);
 		treeControl.process();
