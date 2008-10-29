@@ -290,15 +290,18 @@ class Form
           //это может быть объект с методом по умолчанию
           if ( is_callable( array($this->config[$handler][$k],$default_method) ) ){
             $this->config[$handler][$k]->$default_method( $event, $this );
-          }else
+          }
+	  /* НЕТ!
+	  else
           //это может быть отдельный хэндлер
           {
             $this->_ExecEventHandler( $event, $this->rh->FindScript_($this->config["event_handlers_type"], $v) );
           }
+	  */
         }
       }
    }
-
+    /* НЕТ!
    //выполнить хэндлер в отдельно области видимости
    function _ExecEventHandler( $event, $event_handler )
    {
@@ -313,6 +316,7 @@ class Form
       include($event_handler);
     }
    }
+   */
 
    // сбросить все поля формы в начальное состояние
    function Reset()
