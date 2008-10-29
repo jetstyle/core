@@ -22,25 +22,25 @@ class TreeControlJsTree extends TreeControl
 			case 'json':
 				header("Content-type: text/x-json; charset=".$this->xmlEncoding);
 				
-//				if ($this->config->ajaxAutoLoading)
-//				{
-//					if ($_GET['autoload'])
-//					{
-//						$this->load("_parent = ".$this->id);
-//						echo $this->toJSON($this->id);
-//					}
-//					else
-//					{
-//						$parents = $this->getParentsForItem($this->id ? $this->id : $this->getRootId());
-//						$this->load("_parent IN('".implode("','", $parents)."')");
-//						echo $this->toJSON();
-//					}
-//				}
-//				else
-//				{
-//					$this->load();
-//					echo $this->toJSON();
-//				}
+				$nodeId = $_GET['id'];
+				$currentId = intval($_GET['cid']);
+				
+				if ($nodeId == '0')
+				{
+					$this->id = $currentId ? $currentId : $this->getRootId();
+					$parents = $this->getParentsForItem($this->id);
+					$this->load("_parent IN('".implode("','", $parents)."')");
+					echo $this->toJSON();
+				}
+				else
+				{
+					$nodeParts = explode('-', $nodeId);
+					$nodeId = intval($nodeParts[1]);
+					$this->load("_parent = ".$nodeId);
+									
+					echo $this->toJSON($nodeId);
+				}
+				
 				die();
 			break;
 
@@ -58,8 +58,9 @@ class TreeControlJsTree extends TreeControl
 
 				$treeParams = array(
 					'current_id' => $this->id,
-					'source_url' => RequestInfo::hrefChange(RequestInfo::$baseUrl."do/".$this->config->componentPath, array('action' => 'xml')),
+					'source_url' => RequestInfo::hrefChange(RequestInfo::$baseUrl."do/".$this->config->componentPath, array('action' => 'json', $this->idGetVar => '', 'cid' => $this->id)),
 					'update_url' => RequestInfo::hrefChange(RequestInfo::$baseUrl."do/".$this->config->componentPath, array('action' => 'update')),
+					'ajax_auto_loading' => $this->config->ajaxAutoLoading,
 				);
 				
 				
@@ -91,22 +92,14 @@ class TreeControlJsTree extends TreeControl
 				if ($_COOKIE['tree_control_btns'] == 'true')
 				{
 				 	$treeParams['show_controls'] = true;
-					//$this->tpl->set("toggleEditTreeClass", "class='toggleEditTreeClass-Sel'");
 				}
 				
-				if (!$this->config->ajaxLoad)
+				if (!$this->config->ajaxAutoLoading)
 				{
-					if ($this->config->ajaxAutoLoading)
-					{
-						$parents = $this->getParentsForItem($this->id ? $this->id : $this->getRootId());
-						$this->load("_parent IN('".implode("','", $parents)."')");
-					}
-					else
-					{
-						$this->load();
-					}
-					$treeParams['data'] = $this->toJSON();
+					$this->load();
 				}
+				$treeParams['data'] = $this->toJSON();
+	
 
 				$this->tpl->set('tree_params', $treeParams);
 			break;
@@ -119,7 +112,7 @@ class TreeControlJsTree extends TreeControl
 		return $this->tpl->Parse( $this->template);
 	}
 
-	public function toJSON($treeId = 0)
+	public function toJSON($fromNode = null)
 	{
 		$this->toRoot = array();
 		$c = $this->items[ intval($this->id) ];
@@ -129,43 +122,18 @@ class TreeControlJsTree extends TreeControl
 			$c = $this->items[$c['_parent']] ;
 		} while($c);
 	
-//		$data = array();
-		
-//		if ($this->config->ajaxAutoLoading)
-//		{
-//			if (0 == $treeId)
-//			{
-//				$data = $this->treeParse($this->children[$this->items[$this->getRootId()]['_parent']]);
-//			}
-//			else
-//			{
-//				$data = $this->treeParse($this->children[$this->id]);
-//			}
-//		}
-//		else
-//		{
+		if ($this->config->ajaxAutoLoading)
+		{
+			if (!$fromNode)
+			{
+				$fromNode = $this->items[$this->getRootId()]['_parent'];
+			}
+			$data = $this->treeParse($this->children[$fromNode]);
+		}
+		else
+		{
 			$data = $this->treeParse($this->children[$this->items[$this->getRootId()]['_parent']]);
-//		}
-
-		// if ($this->config->fakeRoot)
-		// {
-		// 	$data = array(
-		// 		array(
-		// 			'data' => 'Tree root',
-		// 			'attributes' => array('id' => 'node-0', 'data' => '{type: "root", max_depth: '.$this->level_limit.'}'),
-		// 			'state' => 'open',
-		// 			'children' => $data
-		// 		),
-		// 	);
-		// }
-		// else
-		// {
-		//foreach ($data AS &$r)
-		//{
-		//	$r['attributes']['data'] = '{"max_depth": '.$this->level_limit.', level: 1, type: "'.($this->config->denyDropToRoot ? 'root' : 'node').'"}';
-		//}
-		// }
-
+		}
 
 		if (function_exists('json_encode'))
 		{
@@ -197,6 +165,21 @@ class TreeControlJsTree extends TreeControl
 		{
 			foreach($data AS $id)
 			{
+				$state = '';
+
+				if (is_array($this->children[$id]) && count($this->children[$id]))
+				{
+					$state = 'closed';
+					if (in_array($id, $this->toRoot))
+					{
+						$state = 'open';
+					}
+				}
+				elseif ($this->config->ajaxAutoLoading && ($this->items[$id]['_right'] - $this->items[$id]['_left']) > 1)
+				{
+					$state = 'closed';
+				}
+				
 				$result[] = array(
 					'data' => iconv('cp1251', 'utf-8', $this->_getTitle($this->items[$id])),
 					'attributes' => array(
@@ -205,7 +188,7 @@ class TreeControlJsTree extends TreeControl
 						'class' => ($this->items[$id]['_state'] == 1 ? 'hidden' : ($this->items[$id]['_state'] == 2 ? 'deleted' : '')),
 					),
 					'level' => $this->items[$id]['_level'],
-					'state' => ((in_array($id, $this->toRoot) && is_array($this->children[$id]) && count($this->children[$id])) > 0 ? 'open' : ''),
+					'state' => $state,
 					'children' => $this->treeParse($this->children[$id])
 				);
 			}
@@ -220,6 +203,13 @@ class TreeControlJsTree extends TreeControl
 		$_title = $_title ? $_title : 'node_'.$node[$this->idField];
 		
 		return $_title;
+	}
+	
+	protected function getParentsForItem($id)
+	{
+		$parents = parent::getParentsForItem($id);
+		$parents[] = $id;
+		return $parents;
 	}
 }
 ?>
