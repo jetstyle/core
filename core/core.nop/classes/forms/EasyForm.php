@@ -35,7 +35,7 @@
       - $conf_name -- имя пакета с конфигом поля или кнопки
       - $_config -- конфиг-массив с изменёнными параметрами
     Генерирует конифиг-массив для поля или кнопки на основе пакета.
-    Пакеты хранятся в handlers/FormPackages/:
+    Пакеты хранятся в classes/forms/packages/:
       поле: [conf_name].php
       кнопка: button_[conf_name].php
     Значения из $_config перекрывают значения из пакета.
@@ -195,10 +195,12 @@ class EasyForm{
 		{
 			include( $filename );
 		}
+		/*
 		else
 		{
 			include( Finder::findScript("handlers","forms/packages/".$conf_name) );
 		}
+		*/
 
 		if (isset($_config["easyform_override"]))
 			foreach( $_config["easyform_override"] as $v )
