@@ -111,7 +111,7 @@ class Form
            "template_buttonlist"            =>"form.html:Buttons",
            "multipart"    =>  1,
            "auto_datetime"=>  1,
-           "auto_user_id" =>  1,
+           "auto_user_id" =>  false,
            "id_field"     =>  "id",
            "active_field" =>  "active",
            "event_handlers_type" => "handlers/formevents", //IVAN
@@ -120,15 +120,16 @@ class Form
            "db_table"  => false,
            "fieldname_created_user_id"  => "_created_user_id",
            "fieldname_edited_user_id"   => "_edited_user_id",
-           "fieldname_created_datetime" => "_created_datetime",
-           "fieldname_edited_datetime"  => "_edited_datetime",
+           "fieldname_created_datetime" => "_created",
+           "fieldname_edited_datetime"  => "_modified",
            // [optional] "success_url" =>
            // [optional] "cancel_url" =>
            // [optional] "on_before_event", "on_after_event"
                               );
 
-   function Form( &$rh, $form_config=NULL )
+   public function Form( &$rh, $form_config = NULL )
    {
+
      $this->rh  = &$rh;
      $this->tpl = &$rh->tpl; // чтобы потом можно было отстроиться от "текущего" шаблонного движка.
                              // очень полезная фича
@@ -236,20 +237,14 @@ class Form
          // delete
          if ($this->processed && $this->success && $this->deleted && isset($this->config["delete_url"]) )
          {
-            Controller::Redirect( $this->config["delete_url"] );
+            Controller::redirect( $this->config["delete_url"] );
          }
          // cancel
          if ($this->processed && !$this->success && isset($this->config["cancel_url"]))
-            Controller::Redirect( $this->config["cancel_url"] );
+            Controller::redirect( $this->config["cancel_url"] );
          // success
          if ($this->processed && $this->success && isset($this->config["success_url"]))
-         {
-            $url = str_replace("*", $this->data_id, $this->config["success_url"]);
-            //var_dump($url);
-            //die();
-            ob_clean();
-            Controller::Redirect( $url );
-         }
+            Controller::redirect( $this->config["success_url"] );
        }
      }
      if (!$processed)
@@ -295,27 +290,16 @@ class Form
           //это может быть объект с методом по умолчанию
           if ( is_callable( array($this->config[$handler][$k],$default_method) ) ){
             $this->config[$handler][$k]->$default_method( $event, $this );
-          }
+          }else
           //это может быть отдельный хэндлер
-          /** 
-           * nop: Хендлеров больше нет
-          
-          else
           {
-          var_dump($this->config["event_handlers_type"]);
-          die();
-            $this->_ExecEventHandler( $event, Finder::FindScript_($this->config["event_handlers_type"], $v) );
+            $this->_ExecEventHandler( $event, $this->rh->FindScript_($this->config["event_handlers_type"], $v) );
           }
-           *
-           */
         }
       }
    }
 
    //выполнить хэндлер в отдельно области видимости
-   /**
-    * nop: больше нет
-    *
    function _ExecEventHandler( $event, $event_handler )
    {
     if ($event_handler !== false){
@@ -329,8 +313,6 @@ class Form
       include($event_handler);
     }
    }
-    *
-    */
 
    // сбросить все поля формы в начальное состояние
    function Reset()
@@ -360,7 +342,7 @@ class Form
    // парсить всякое окружение: кнопки там, прочее
    function _ParseWrapper( $content )
    {
-	 $tpl = &TemplateEngine::getInstance();
+	 $tpl = &Locator::get('tpl');
      $form_name = isset($this->config["form_name"]) ? $this->config["form_name"] : 'form_'.$this->name;
      $tpl->set(
      	"form",
@@ -556,7 +538,7 @@ class Form
       foreach($values as $k=>$v)
         $values[$k] = $db->Quote($values[$k]);
 
-      $sql = "insert into ".$this->config["db_table"];
+      $sql = "insert into ".Config::get('db_prefix').$this->config["db_table"];
       if (sizeof($fields) > 0)
         $sql.=" (".implode(",",$fields).") VALUES (".implode(",",$values).")";
 
@@ -592,14 +574,14 @@ class Form
    {
       $fields_values = array();
       foreach($fields as $k=>$v)
-        $fields_values[] = $v." = ".Locator::get("db")->Quote($values[$k]);
+        $fields_values[] = $v." = ".$this->rh->db->Quote($values[$k]);
 
       $sql = "update ".$this->config["db_table"].
              " set ".implode(",",$fields_values)." where ".
-             $this->config["id_field"]."=".Locator::get("db")->Quote($this->data_id);
+             $this->config["id_field"]."=".$this->rh->db->Quote($this->data_id);
       //$this->rh->debug->Error( $sql );
       if (sizeof($fields) == 0) return false;
-      Locator::get("db")->Query($sql);
+      $this->rh->db->Query($sql);
 
    }
    function _DbAuto( &$fields, &$values, $is_insert=false )
@@ -637,9 +619,9 @@ class Form
 
      if ($data_id == NULL) $data_id = $this->data_id;
      $sql = "select * from ".$this->config["db_table"]." where ".
-             $this->config["id_field"]."=".Locator::get("db")->Quote($data_id);
+             $this->config["id_field"]."=".$this->rh->db->Quote($data_id);
 
-     $data = Locator::get("db")->QueryOne( $sql );
+     $data = $this->rh->db->QueryOne( $sql );
      if ($data == false)
      {
        $this->data_id = 0;
@@ -661,8 +643,8 @@ class Form
        $this->fields[$k]->DbDelete( $data_id );
 
      $sql = "delete from ".$this->config["db_table"]." where ".
-             $this->config["id_field"]."=".Locator::get("db")->Quote($data_id);
-     Locator::get("db")->Query( $sql );
+             $this->config["id_field"]."=".$this->rh->db->Quote($data_id);
+     $this->rh->db->Query( $sql );
    }
 
    // загрузка из массива
