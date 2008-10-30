@@ -11,12 +11,13 @@ class SqlDump
 		$this->db = &Locator::get('db');
 	}
 	
-	public function dumpStructure($tableName, $filename = '')
+	public function dumpStructure($tableName, $tablePrefix, $filename = '')
 	{
 		$result = $this->db->query("SHOW CREATE TABLE ".$this->quoteName($tableName)."");
 		
 		if (is_array($result) && !empty($result))
 		{
+			$result[0]['Create Table'] = str_replace($tablePrefix, '%DB_PREFIX%', $result[0]['Create Table']);
 			$createSql = $result[0]['Create Table'].";\n\n";
 		}
 		else
@@ -34,7 +35,7 @@ class SqlDump
 		return $createSql;
 	}
 	
-	public function dumpData($tableName, $filename = '', $where = '')
+	public function dumpData($tableName, $tablePrefix, $filename = '', $where = '')
 	{
 		$sql = '';
 		$row = 0;
@@ -52,7 +53,7 @@ class SqlDump
 			{
 				if ($row == 0)
 				{
-					$sql .= "INSERT INTO ".$this->quoteName($tableName)."(".implode(',', array_map(array(&$this, 'quoteName'), array_keys($r))).")\nVALUES \n";
+					$sql .= "INSERT INTO ".$this->quoteName(str_replace($tablePrefix, '%DB_PREFIX%', $tableName))."(".implode(',', array_map(array(&$this, 'quoteName'), array_keys($r))).")\nVALUES \n";
 				}
 				else
 				{
