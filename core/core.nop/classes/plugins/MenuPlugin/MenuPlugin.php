@@ -23,7 +23,7 @@ class MenuPlugin extends Plugin
 	{
 		$data = &Locator::get('controller');
 		$sql = '
-			SELECT id, _path, _level, _left, _right, hide_from_menu
+			SELECT id, _path, _level, _left, _right, _parent, hide_from_menu
 			FROM ??content
 			WHERE
 				_level = ' . $level . '
@@ -52,7 +52,7 @@ class MenuPlugin extends Plugin
 		}
 
 		$sql = '
-			SELECT id, hide_from_menu
+			SELECT id, hide_from_menu, _parent
 			FROM ??content
 			WHERE _left < ' . $data['_left'] . ' AND _right >= ' . $data['_right'] . ' AND _level < '.($this->level + $this->depth).' AND _state = 0
 		';
@@ -81,15 +81,6 @@ class MenuPlugin extends Plugin
 		$current = &Locator::get('controller');
 		$parents = $this->getParentNodes();
 
-		foreach ($parents AS $p)
-		{
-			if ($p['hide_from_menu'])
-			{
-				$this->models['menu'] = array ();
-				return;
-			}
-		}
-
 		$where = array();
 
 		$where[] = '('.$menu->quoteField('_level').' >= '.DBModel::quote($this->level). ' AND '.$menu->quoteField('_level').' <'.DBModel::quote($this->level + $this->depth).')';
@@ -99,10 +90,20 @@ class MenuPlugin extends Plugin
 			case 'submenu' :
 
 				$parent = $this->getParentNodeByLevel($this->level - 1);
-				if (!$parent['id'] || $parent['hide_from_menu'])
+				if (!$parent['id'])
 				{
 					$this->models['menu'] = array ();
 					return;
+				}
+				$pid = $parent['id'];
+				while ($p = $parents[$pid])
+				{
+					if ($p['hide_from_menu'])
+					{
+						$this->models['menu'] = array ();
+						return;
+					}
+					$pid = $p['_parent'];
 				}
 
 				$where[] = $menu->quoteField('_left') .' > ' . DBModel::quote($parent['_left']);
@@ -113,7 +114,7 @@ class MenuPlugin extends Plugin
 
 		$where[] = $menu->quoteField('hide_from_menu').' = 0';
 
-		$menu->load(implode(' AND ', $where));
+		$menu = $menu->load(implode(' AND ', $where))->getArray();
 
 		foreach ($menu AS $i => $r)
 		{
