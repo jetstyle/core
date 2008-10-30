@@ -37,25 +37,25 @@ class ModulePacker
 		}
 		else
 		{
-			$module = $this->getModule($moduleName);
-			if (!is_array($module) || empty($module))
-			{
-				return;
-			}
-			$modules = array($module);
+//			$module = $this->getModule($moduleName);
+//			if (!is_array($module) || empty($module))
+//			{
+//				return;
+//			}
+			$modules = array($moduleName);
 		}
 
-		foreach ($modules AS $module)
+		foreach ($modules AS $moduleDir)
 		{
-			$this->packModule($module);
+			$this->packModule($moduleDir);
 		}
 	}
 
-	protected function packModule($module)
+	protected function packModule($moduleDir)
 	{
-		$moduleDir = Config::get('app_dir').'modules/'.$module['href'];
+		$moduleDir = Config::get('app_dir').'modules/'.$moduleDir;
 
-		if (!file_exists($moduleDir))
+		if (!file_exists($moduleDir) || !file_exists($moduleDir.'/.meta'))
 		{
 			return false;
 		}
@@ -63,12 +63,17 @@ class ModulePacker
 		$this->cleanUp($moduleDir);
 		$tables = $this->getTables($moduleDir);
 
+		$restrictions = $this->getRestrictions($moduleDir);
+		
 		if (is_array($tables) && !empty($tables))
 		{
 			foreach ($tables AS $table)
 			{
 				$this->dumpStructure($table, $moduleDir);
-				$this->dumpData($table, $moduleDir);
+				if (!isset($restrictions['no_data']))
+				{
+					$this->dumpData($table, $moduleDir);
+				}
 			}
 		}
 
@@ -83,7 +88,7 @@ class ModulePacker
 	 */
 	protected function dumpStructure($tableName, $moduleDir)
 	{
-		$this->sqlDumper->dumpStructure($tableName, $moduleDir.'/.meta/structure.sql');
+		$this->sqlDumper->dumpStructure($tableName, DBAL::$prefix, $moduleDir.'/.meta/structure.sql');
 	}
 
 	/**
@@ -94,9 +99,8 @@ class ModulePacker
 	 */
 	protected function dumpData($tableName, $moduleDir)
 	{
-		$this->sqlDumper->dumpData($tableName, $moduleDir.'/.meta/data.sql');
+		$this->sqlDumper->dumpData($tableName, DBAL::$prefix, $moduleDir.'/.meta/data.sql');
 	}
-
 
 	protected function dumpModuleRow()
 	{
@@ -159,27 +163,32 @@ class ModulePacker
 
 	protected function getModulesList()
 	{
-		return $this->db->query("
-			SELECT *
-			FROM ??toolbar
-			WHERE LENGTH(href) > 0 AND _state IN (0,1)
-		");
-	}
-
-	protected function getModule($href)
-	{
-		$module = $this->db->queryOne("
-			SELECT *
-			FROM ??toolbar
-			WHERE href = ".$this->db->quote($href)." OR href LIKE ".$this->db->quote($href.'/%')." AND LENGTH(href) > 0
-		");
+		$result = array();
 		
-		if ($module['href'] != $href)
+		if ($handle = opendir(Config::get('app_dir').'modules')) 
 		{
-			$module['href'] = $href;
+		    while (false !== ($file = readdir($handle))) 
+		    {
+		        if ($file != "." && $file != "..") 
+		        {
+		            $result[] = $file;
+		        }
+		    }
+		    closedir($handle);
 		}
 		
-		return $module;
+		return $result;
+	}
+	
+	protected function getRestrictions($moduleDir)
+	{
+		$result = array();
+		if (file_exists($moduleDir.'/.meta/no_data'))
+		{
+			$result['no_data'] = true;
+		}
+		
+		return $result;
 	}
 
 	protected function appendPrefixToTables($v)
