@@ -28,7 +28,7 @@ class TreeControl
 	public function __construct( &$config )
 	{
 		$this->config =& $config;
-		$this->config->SELECT_FIELDS = array_merge( $this->config->SELECT_FIELDS, array('_parent','_state','_left','_right','_level','_path') );
+		$this->config->SELECT_FIELDS = array_merge( $this->config->SELECT_FIELDS, array('_parent','_state','_left','_right','_level','_path','_supertag') );
 
 		if ($this->config->xmlEncoding)
 		{

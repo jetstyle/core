@@ -201,5 +201,43 @@ class TreeControlJsTree extends TreeControl
 		
 		return $_title;
 	}
+	
+	protected function addNode()
+	{
+		$id = parent::addNode();
+		Locator::get('db')->execute('
+			UPDATE ??'.$this->config->table_name.' SET _supertag = "" WHERE id = '.$id.'
+		');
+		return $id;
+	}
+	
+	protected function saveTitle($id, $title)
+	{
+		$db = &$this->db;
+		
+		$node = $this->getItem($id);
+		
+		if ($node['id'])
+		{
+			$sql = "UPDATE ??".$this->config->table_name." SET title=".$db->quote($title).", title_pre = ".$db->quote($this->tpl->action('typografica', $title));
+			
+			$supertag = '';
+			if (!$node['_supertag'])
+			{
+				Finder::useClass('Translit');
+				$translit =& new Translit();
+				$supertag = $translit->supertag($title, 20);
+				$sql .= ", _supertag = ".$db->quote($supertag);
+			}
+			
+			$sql .= " WHERE id=".$db->quote($id);
+			$db->execute($sql);
+			
+			if ($supertag)
+			{
+				$this->updateTreePathes($this->config->table_name, $node['id'], $this->config->allow_empty_supertag, $this->config->where);
+			}
+		}
+	}
 }
 ?>
