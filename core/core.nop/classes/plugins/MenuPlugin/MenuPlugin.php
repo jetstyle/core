@@ -129,10 +129,10 @@ class MenuPlugin extends Plugin
 			if ($r['controller'] == 'link')
 			{
 				$r['is_link'] = true;
-				if ($r['link_direct'])
-				{
-					$r['link'] = Link::formatLink($r['link']);
-				}
+//				if ($r['link_direct'])
+//				{
+//					$r['link'] = Link::formatLink($r['link']);
+//				}
 			}
 			$r['href'] = $r['_path'];
 			$this->childs[$r['_parent']][] = $r['id'];
