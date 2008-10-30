@@ -76,7 +76,7 @@ class MenuPlugin extends Plugin
 		 * с условием на where
 		 */
 		$menu = & DBModel::factory('Content');
-		$menu->setOrder(array('_left' => 'ASC'));
+		$menu->setOrder(array('_level' => 'ASC', '_order' => 'ASC'));
 
 		$current = &Locator::get('controller');
 		$parents = $this->getParentNodes();
