@@ -236,7 +236,18 @@ class FileCache
 		$this->fp = @fopen($this->filePath, 'w');
 		if (!$this->fp)
 		{
-			throw new Exception("Can't write to file ".$this->filePath);
+			//try to make dir
+			$pathinfo = pathinfo($this->filePath);
+			$result = @mkdir($pathinfo['dirname'], 0775, true);
+			if ($result)
+			{
+				$this->fp = @fopen($this->filePath, 'w');
+			}
+			
+			if (!$this->fp)
+			{
+				throw new Exception("Can't write to file ".$this->filePath);
+			}
 		}
 		return $this->fp;
 	}
@@ -279,14 +290,14 @@ class FileCache
 
 	protected function _write($str)
 	{
-		if ($this->fp === null) 
-		{
-			throw new Exception('FileCache:: can\'t write to file '.$this->filePath);
-		}
-		else
-		{
+//		if ($this->fp === null) 
+//		{
+//			throw new Exception('FileCache:: can\'t write to file '.$this->filePath);
+//		}
+//		else
+//		{
 			return fwrite($this->fp, $str);
-		}
+//		}
 	}
 
 }
