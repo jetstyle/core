@@ -64,40 +64,39 @@ class EasyForm{
 		"textarea,htmlarea"      => array( "wrapper.html:Div", "wrapper.html:RowSpan" ),
 	);
 
-	//конструктор
-	//возможно, сразу же построение и обработка формы
-	public function __construct(&$rh, $config=false) {
-		$this->rh =& $rh;
-		$this->tpl =& $rh->tpl;
-		if ($config) $this->Handle($config);
+	public function __construct()
+	{		$this->config = array();
+		if ($args = func_get_args())
+		{
+			foreach ($args as $arg)
+			{
+	   			if (is_string($arg))
+	   			{
+	            	$ymlFile  = Finder::findScript('classes/forms', $arg, 0, 1, 'yml');
+	   				if ( $ymlFile )
+					{
+						$arg = YamlWrapper::load($ymlFile);
+					}
+	   			}
+	   			$this->config = $this->_mergeConfig($this->config,$arg);
+			}
+		}
+		//var_dump('<pre>',$this->config,'</pre>');die;
+
+		$this->tpl =& Locator::get('tpl');
+		//if ($config) $this->Handle($config);
 	}
 
 	//построение формы, обработка формы
-	function Handle( $config,
-                    $ignore_post     =false,  $ignore_load   =false,
+	function Handle($ignore_post     =false,  $ignore_load   =false,
                     $ignore_validator=false,  $ignore_session=false )
 	{
-		$this->CreateForm( $config );
-		//поехали!
+		$this->CreateForm( $this->config );
 		return $this->form->Handle( $ignore_post, $ignore_load, $ignore_validator, $ignore_session );
  	}
 
-	function CreateForm( $configName )
+	function CreateForm($config)
 	{
-		/*if(!is_array($config))
-		{
-			throw new Exception("EasyForm::CreateForm -- \$config should be an array, now it is: <strong>[$config]</strong>");
-		}*/
-
-		//Загрузка конфига из YML-файла
-		$ymlFile  = Finder::findScript('classes/forms', $configName, 0, 1, 'yml');
-
-		if ( $ymlFile )
-		{
-			$config = YamlWrapper::load($ymlFile);
-			//var_dump('<pre>',$ymlConfig,'</pre>');
-		}
-
 		//инициализируем форму
 		$class_name = isset($config["class"]) ? $config["class"] : "Form";
 		Finder::useClass( 'forms/'.$class_name );
