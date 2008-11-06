@@ -35,6 +35,10 @@ class StartController extends Controller
 			return Controller::deny();
 		}
 
+		Finder::useClass('Toolbar');
+		$toolbar = new Toolbar();
+		Locator::get('tpl')->set('toolbar_main', $toolbar->getMainItems());
+		
 		$this->siteMap = "start";
 	}
 }

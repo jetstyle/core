@@ -30,6 +30,20 @@
     	$this->loadGoTo();
     	return $this->goToList;
  	}
+ 	
+ 	/**
+ 	 * Items on start page
+ 	 *
+ 	 */
+ 	public function getMainItems()
+ 	{
+ 		return $this->db->query("" .
+ 			"SELECT title, href " .
+ 			"FROM ??toolbar " .
+ 			"WHERE main = 1 AND LENGTH(href) > 0 AND _state = 0 " .
+ 			"ORDER BY _left ASC " .
+ 		"");
+ 	}
 
  	/**
  	 * load two levels of menu
