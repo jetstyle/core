@@ -1,7 +1,7 @@
 <?php
 /**
  * Handlers router
- * 
+ *
  * @author lunatic <lunatic@jetstyle.ru>
  */
 class HandlersRouter extends BasicRouter
@@ -20,8 +20,7 @@ class HandlersRouter extends BasicRouter
 	public function &find($criteria)
 	{
 		if (empty($criteria)) return null;
-
-		if (isset($criteria['url'])) return $this->findByUrl($criteria['url']);
+		if (array_key_exists('url',$criteria)) return $this->findByUrl($criteria['url']);
 		if (isset($criteria['class'])) return $this->findByClass($criteria['class']);
 		return null;
 	}
@@ -90,7 +89,7 @@ class HandlersRouter extends BasicRouter
 					'path' => $path,
 					'url' => $path
 				);
-				
+
 				if (Finder::findScript("classes/controllers", $class))
 				{
 					Finder::useClass("controllers/".$class);
