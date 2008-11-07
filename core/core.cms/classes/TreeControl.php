@@ -49,12 +49,12 @@ class TreeControl
 
 		$this->tpl = &Locator::get('tpl');
 		$this->db = &Locator::get('db');
-		
+
 		$this->id = intval(RequestInfo::get($this->idGetVar));
 	}
 
-	
-	public static function updateTreePathes($tableName, $id, $allow_empty_supertag = false, $where = '', $noRoot=null) 
+
+	public static function updateTreePathes($tableName, $id, $allow_empty_supertag = false, $where = '', $noRoot=null)
 	{
     	$db = &Locator::get('db');
 		$root = $db->queryOne("SELECT id,_left,_right,_path,_parent FROM ??".$tableName." WHERE id='".$id."' ".($where ? " AND " . $where : "")." ");
@@ -93,12 +93,12 @@ class TreeControl
 
 					//модифицируем узел
 					$r = $tree['items'][$id];
-					if ($r['_parent'] == 0 && $parent_id !== 0 && !$noRoot )	
+					if ($r['_parent'] == 0 && $parent_id !== 0 && !$noRoot )
 					{
 						$r['_path'] = '';
 						$r['_supertag'] = '';
-					} 
-				    else 
+					}
+				    else
 				    {
 						$parentTag = $tree['items'][ $r['_parent'] ]['_path'];
 						$r['_path'] = ($parentTag ? $parentTag.'/' : '').$r["_supertag"];
@@ -110,9 +110,9 @@ class TreeControl
 			}
 		}
 	}
-	
-	
-	
+
+
+
 	public function handle()
 	{
 		$action = $_REQUEST['action'];
@@ -224,7 +224,7 @@ class TreeControl
 			$this->toRoot[$c['id']] = $c['id'];
 			$c = $this->items[$c['_parent']] ;
 		} while($c);
-		
+
 		if ($this->config->ajaxAutoLoading)
 		{
 			if (0 == $treeId)
@@ -382,7 +382,7 @@ class TreeControl
 		{
 			$id = intval($_REQUEST['id']);
 			$title = trim($_REQUEST['title']);
-						
+
 			if ($id && strlen($title) > 0)
 			{
 				$title = iconv('utf-8', 'cp1251', $title);
@@ -398,7 +398,7 @@ class TreeControl
 			$this->restore();
 
 //			$this->killOutsiders();
-			
+
 			return $id;
 		}
 		elseif($delete = intval($_REQUEST['delete']))
@@ -412,10 +412,10 @@ class TreeControl
 				{
 					$this->load();
 					$this->restore();
-					
+
 //					$this->killOutsiders();
 				}
-				
+
 				return '1';
 			}
 			else
@@ -429,9 +429,9 @@ class TreeControl
 			$this->id = $itemId;
 			$targetId = intval($_REQUEST['target']);
 			$beforeId = intval($_REQUEST['before']);
-			
+
 			$db = &$this->db;
-			
+
 			if($beforeId)
 			{
 				$node = $db->queryOne("
@@ -463,9 +463,9 @@ class TreeControl
 
 			$this->load();
 			$this->restore();
-			
+
 //			$this->killOutsiders();
-			
+
 			$this->updateTreePathes($this->config->table_name, $this->id, $this->config->allow_empty_supertag, $this->config->where);
 
 			return '1';
@@ -473,7 +473,7 @@ class TreeControl
 		return '0';
 	}
 
-	
+
 
 	protected function addNode()
 	{
@@ -502,9 +502,9 @@ class TreeControl
 		");
 
 		$node['_path'] = $parentNode['_path'] ? $parentNode['_path'].'/'.$node['supertag'] : $node['supertag'];
-		
+
 		$order = null;
-		
+
 		if($node['before'])
 		{
 			$beforeNode = $db->queryOne("
@@ -512,7 +512,7 @@ class TreeControl
 				FROM ??". $this->config->table_name ."
 				WHERE ".$this->idField." = '".$node['before']."'
 			");
-			
+
 			if (is_array($beforeNode) && is_numeric($beforeNode['_order']))
 			{
 				$db->query("
@@ -520,11 +520,11 @@ class TreeControl
 					SET _order = _order + 1
 					WHERE _order >= " . $db->quote($beforeNode['_order']) . " AND _parent = '" . $beforeNode['_parent'] . "'
 				");
-				
+
 				$order = $beforeNode['_order'];
 			}
 		}
-		
+
 		if (!is_numeric($order))
 		{
 			$order = $db->queryOne("
@@ -532,19 +532,19 @@ class TreeControl
 				FROM ??". $this->config->table_name ."
 				WHERE _parent = '".$node['parent']."'
 			");
-			
+
 			$order = intval($order['_max']);
 		}
 
 		if (isset($this->config->INSERT_FIELDS) && is_array($this->config->INSERT_FIELDS))
 		{
-			foreach ($this->config->INSERT_FIELDS AS $fieldName => $fieldValue) 
+			foreach ($this->config->INSERT_FIELDS AS $fieldName => $fieldValue)
 			{
 				$additionFields .= ','.$fieldName;
 				$additionValues .= ','.$db->quote($fieldValue);
 			}
 		}
-		
+
 		$id = $db->insert("
 			INSERT INTO ". DBAL::$prefix.$this->config->table_name ."
 			(title, title_pre, _parent, _supertag, _path, _order, _state " . $additionFields . ")
@@ -599,7 +599,7 @@ class TreeControl
 				WHERE _parent = 0 AND _state=0 " . ($this->config->where ? " AND ".$this->config->where : "") . "
 				ORDER BY _order ASC
 			");
-			
+
 			//var_dump($result);
 			//die();
 
@@ -668,7 +668,7 @@ class TreeControl
 	protected function saveTitle($id, $title)
 	{
 		$db = &$this->db;
-		
+
 		$sql = "UPDATE ??".$this->config->table_name." SET title=".$db->quote($title).", title_pre = ".$db->quote($this->tpl->action('typografica', $title))." WHERE id=".$db->quote($id);
 		$db->execute($sql);
 		return $sql;
@@ -677,15 +677,15 @@ class TreeControl
 	protected function killOutsiders()
 	{
 		$rootId = $this->getRootId();
-		
+
 		if (!$rootId)
 		{
 			return;
 		}
-		
+
 		$S = array($rootId);
 		$IDS = array();
-		
+
 		while(count($S))
 		{
 			$id = array_pop($S);
@@ -695,23 +695,23 @@ class TreeControl
 			}
 			$IDS[] = $id;
 		}
-		
+
 		if (!empty($IDS))
-		{			
+		{
 			$this->db->execute("
-				UPDATE ??".$this->config->table_name." 
-				SET _parent = 0, _left = 0, _right = 0, _state = 2 
+				UPDATE ??".$this->config->table_name."
+				SET _parent = 0, _left = 0, _right = 0, _state = 2
 				WHERE _state < 2 AND id NOT IN ('".implode("','", $IDS)."')"
 			);
 		}
 	}
-	
-	protected function restore( $parent_id=0, $left=0, $order = 0 )
+
+	public function restore( $parent_id=0, $left=0, $order = 0 )
 	{
 		//shortcuts
 		$node =& $this->items[ $parent_id ];
 		$db = &$this->db;
-		
+
 		//_level
 		if($node[$this->idField])
 		{
