@@ -76,7 +76,7 @@ class TemplateEngineCompiler
 	protected $constructAction = "!";    // {{!text Test}}
 	protected $constructAction2 = "!!";   // {{!!text}}Test{{!!/text}}
 	protected $constructIf = "?";    // {{?var}} or {{?!var}}
-	protected $constructIfelse = "?:";   // {{?:}} 
+	protected $constructIfelse = "?:";   // {{?:}}
 	protected $constructIfend = "?/";   // {{?/}} is similar to {{/?}}
 	protected $constructObject = "#.";   // {{#obj.property}}
 	protected $constructTplt = "TPL:"; // {{TPL:Name}}...{{/TPL:Name}}
@@ -103,7 +103,7 @@ class TemplateEngineCompiler
 	public function __construct()
 	{
 		$this->tpl = &Locator::get('tpl');
-		
+
 		// compiler meta regexp
 		$this->long_regexp =
          "/(".
@@ -922,7 +922,7 @@ class TemplateEngineCompiler
         {
             return $ks[0];
         }
-			
+
 		foreach ($ks AS $i=>$k)
 		{
 			if (strlen($k) == 0)
@@ -931,7 +931,7 @@ class TemplateEngineCompiler
 			}
 
 			$args = '';
-			
+
 			if (preg_match('#^[0-9]+$#', $k))
 			{ // is numeric key ?
 				$args = $k;
@@ -1087,20 +1087,26 @@ class TemplateEngineCompiler
 
 	protected function writeToFile($fileCached, $functions, $filemode = 'w')
 	{
-		// можем ли записывать файл?
-		$this->checkWritable($fileCached);
-
-		// склеить готовый файл
-		$fp = fopen( $fileCached , $filemode);
-		fputs($fp, "<"."?php\n" );
-		foreach($functions AS $fname=>$content)
+		try
 		{
-			fputs($fp, 'if(!defined(\''.$fname.'\')){define(\''.$fname.'\', true); function '.$fname.'(&$tpl)'."\n" );
-			fputs($fp,$content);
-			fputs($fp, "}\n");
+			// можем ли записывать файл?
+			$this->checkWritable($fileCached);
+			// склеить готовый файл
+			$fp = fopen( $fileCached , $filemode);
+			fputs($fp, "<"."?php\n" );
+			foreach($functions AS $fname=>$content)
+			{
+				fputs($fp, 'if(!defined(\''.$fname.'\')){define(\''.$fname.'\', true); function '.$fname.'(&$tpl)'."\n" );
+				fputs($fp,$content);
+				fputs($fp, "}\n");
+			}
+			fputs($fp, "?".">" );
+			fclose($fp);
 		}
-		fputs($fp, "?".">" );
-		fclose($fp);
+		catch (TplException $e)
+		{
+        	if (!Config::get('no_cache')) throw $e;
+		}
 	}
 
 	protected function writeActionsToFile($fileCached, $functions, $filemode = 'w')

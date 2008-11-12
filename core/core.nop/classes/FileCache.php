@@ -2,7 +2,7 @@
 /**
  * FileCache.
  * Cache one or many files to the cache directory. Validating cache.
- * 
+ *
  * @author lunatic <lunatic@jetstyle.ru>
  */
 class FileCache
@@ -13,7 +13,7 @@ class FileCache
 	protected $fp = null;
 	protected $useHash = false;
 	protected $hash = '';
-	
+
 	public function __construct($filePath = '')
 	{
 		if ($filePath)
@@ -24,7 +24,7 @@ class FileCache
 
 	/**
 	 * Set cached filename
-	 * 
+	 *
 	 * @param string $filePath
 	 * @return void
 	 */
@@ -38,10 +38,10 @@ class FileCache
 			$this->close();
 		}
 	}
-	
+
 	/**
 	 * Add source.
-	 * 
+	 *
 	 * @param string $path
 	 * @return void
 	 */
@@ -52,7 +52,7 @@ class FileCache
 
 	/**
 	 * Add sources.
-	 * 
+	 *
 	 * @param array $data
 	 * @return void
 	 */
@@ -69,7 +69,7 @@ class FileCache
 
 	/**
 	 * Get sources, extracted from cached file.
-	 * 
+	 *
 	 * @return array
 	 */
 	public function getSources()
@@ -80,20 +80,20 @@ class FileCache
 		}
 		return $this->cacheSources;
 	}
-	
+
 	/**
 	 * Get cached filename.
-	 * 
-	 * @return string 
+	 *
+	 * @return string
 	 */
 	public function getFileName()
 	{
 		return $this->filePath;
 	}
-	
+
 	/**
 	 * Use files hash for validating cache file.
-	 * 
+	 *
 	 * @param boolean $state
 	 * @return void
 	 */
@@ -101,10 +101,10 @@ class FileCache
 	{
 		$this->useHash = $state;
 	}
-	
+
 	/**
 	 * Check, if cached filed is valid.
-	 * 
+	 *
 	 * @return boolean
 	 */
 	public function isValid()
@@ -115,14 +115,14 @@ class FileCache
 		}
 
 		$sources = &$this->sources;
-		
+
 		if (count($sources) > 0)
 		{
 			$status = True;
-			
+
 			if ($this->useHash)
 			{
-				$hash = $this->getHash();				
+				$hash = $this->getHash();
 				$cachedSources = $this->getSources();
 				if (!is_array($cachedSources) || $hash !== $cachedSources[0])
 				{
@@ -135,7 +135,7 @@ class FileCache
 
 				foreach ($sources AS $fileSource)
 				{
-					if (!is_file($fileSource) || $cachedMtime < @filemtime($fileSource)) 
+					if (!is_file($fileSource) || $cachedMtime < @filemtime($fileSource))
 					{
 						$status = False;
 						break;
@@ -147,28 +147,35 @@ class FileCache
 		{
 			$status = False;
 		}
-		
+
 		return $status;
 	}
 
 	/**
 	 * Write to file.
-	 * 
+	 *
 	 * @param string $str
 	 * @return boolean
 	 */
 	public function write($str)
 	{
-		$this->openFileForWrite();
-		
-		$this->writeHeader();
-		$this->writeLn($str);
-		$this->writeFooter();
-		$this->close();
-		
+		try
+		{
+			$this->openFileForWrite();
+
+			$this->writeHeader();
+			$this->writeLn($str);
+			$this->writeFooter();
+			$this->close();
+		}
+		catch (Exception $e)
+		{
+        	if (!Config::get('no_cache')) throw $e;
+		}
+
 		return true;
 	}
-	
+
 	protected function countHash()
 	{
 		$this->hash = '';
@@ -178,21 +185,21 @@ class FileCache
 		}
 		$this->hash = md5($this->hash);
 	}
-	
+
 	protected function getHash()
 	{
 		if (strlen($this->hash) != 32)
 		{
 			$this->countHash();
 		}
-		
+
 		return $this->hash;
 	}
-	
+
 	protected function getSourcesFromFile()
 	{
 		$this->cacheSources = array();
-		
+
 		try
 		{
 			$this->openFileForRead();
@@ -201,7 +208,7 @@ class FileCache
 		{
 			return;
 		}
-		
+
 		$str = $this->readLn(); // <?php
 		$str = $this->readLn();
 		$count = intval(substr($str, 2));
@@ -210,10 +217,10 @@ class FileCache
 		{
 			$this->cacheSources[] = substr($this->readLn(), 2);
 		}
-		
+
 		$this->close();
 	}
-	
+
 	protected function close()
 	{
 		fclose($this->fp);
@@ -243,7 +250,7 @@ class FileCache
 			{
 				$this->fp = @fopen($this->filePath, 'w');
 			}
-			
+
 			if (!$this->fp)
 			{
 				throw new Exception("Can't write to file ".$this->filePath);
@@ -268,7 +275,7 @@ class FileCache
 		{
 			array_unshift($this->sources, $this->getHash());
 		}
-		
+
 		$this->writeLn('<?php');
 		$this->writeLn('# '.count($this->sources));
 		foreach ($this->sources as $source)
@@ -290,7 +297,7 @@ class FileCache
 
 	protected function _write($str)
 	{
-//		if ($this->fp === null) 
+//		if ($this->fp === null)
 //		{
 //			throw new Exception('FileCache:: can\'t write to file '.$this->filePath);
 //		}
