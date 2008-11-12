@@ -177,13 +177,20 @@ class ExceptionHandler
 
 	private function getTrace($data)
 	{
+		$projectDir = '';
+		if (class_exists('Config'))
+		{
+			$projectDir = Config::get('project_dir');
+		}
+		
 		$res = '<ol>';
 		foreach ($data as $key => $value)
 		{
 			$res .= '<li>'.$value['class'].$value['type'].$value['function'];
 			if ($value['file'])
 			{
-				$res .= '<div class="backtrace-file">'.$value['file'].' (line: '.$value['line'].')</div></li>';
+				$value['file'] = str_replace($projectDir, '', $value['file']);
+				$res .= '<div class="backtrace-file">file: '.$value['file'].' (line: '.$value['line'].')</div></li>';
 			}
 		}
 		$res .= '</ol>';
