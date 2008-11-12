@@ -258,6 +258,19 @@ class DBModel extends Model implements IteratorAggregate, ArrayAccess, Countable
 		$this->initialize($fieldSet);
 	}
 
+	public function cleanUp()
+	{
+		$this->sqlParts = array();
+		$this->data = null;
+		if (is_array($this->foreignModels) && !empty($this->foreignModels))
+		{
+			foreach ($this->foreignModels AS &$model)
+			{
+				$model->cleanUp();
+			}
+		}
+	}
+	
 	/**
 	 * loadConfig
 	 *
@@ -968,6 +981,11 @@ class DBModel extends Model implements IteratorAggregate, ArrayAccess, Countable
 
 	public function &load($where=NULL, $limit=NULL, $offset=NULL)
 	{
+		if (!empty($this->sqlParts))
+		{
+			$this->cleanUp();
+		}
+		
 		$this->notify('before_load', array(&$this));
 
 		if ($this->pagerEnabled)
