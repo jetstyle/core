@@ -287,7 +287,7 @@ abstract class Controller implements ArrayAccess
 		}
 	}
 
-	private function &loadPlugin($name, $config)
+	protected function &loadPlugin($name, $config)
 	{
 		$aspect = NULL;
 		if (array_key_exists('__aspect', $config))
