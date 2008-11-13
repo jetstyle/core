@@ -6,9 +6,9 @@
 <tr>
   <!--td class="sep-"><img class="block" src="{{images}}seporate.gif" width="2" height="20" align="top" alt="" /></td-->
   <td>&nbsp;</td>
- 
+
   {{!for toolbar.main do=@:item sep=@:item_sep}}
-  
+
   <td class="w100">{{@dummy.html}}</td>
   <td class="sep-"><img class="block" src="{{images}}seporate.gif" width="2" height="20" align="top" alt="" /></td>
   <td nowrap="nowrap">
@@ -19,18 +19,18 @@
     		<option value="-1">выбрать</option>
         	{{!for goto do=@:goToItem}}
     	</select>
-    </span--> 
+    </span-->
     <!--a href="{{/}}login?logout=1" onclick="return confirm('¬ы действительно желаете выйти?');">выход</a-->
-  
-    <a href="#" class='underline-dashed' onclick="toggleMenu(); return false;" >перейти</span></a>
+
+    <a href="#" id="gotolink" class='underline-dashed'>перейти</span></a>
 
   </td>
   <td nowrap="nowrap">{{@blocks/user.html}}</td>
 </tr>
 </table>
-    <div class="gotomenu invis" id="gotomenu">
-    {{!for goto do=@:goToDivItem}}
-    </div>
+    <ul class="gotomenu invis" id="gotomenu">
+    	{{!for goto do=@:goToLiItem}}
+    </ul>
 {{!for toolbar.submenu do=@:subitem}}
 
 <script language="javascript">
@@ -62,12 +62,15 @@ function switchMenu(el)
 	}
 }
 
-function toggleMenu()
-{
-    //alert(findObj("gotomenu").className);
-    findObj("gotomenu").className = ( findObj("gotomenu").className == "gotomenu" ? "gotomenu invis" : "gotomenu" );
-    //alert(findObj("gotomenu").className);
-}
+$(document).ready( function() {	$('body').click(function(){    	if ($('#gotomenu').is(':visible')) $('#gotomenu').hide();
+	});
+	$('#gotolink').click(function(){
+		$('#gotomenu').toggle();
+    	return false;
+	});
+	$('#gotomenu').css('right',$(document).width() - $('#gotolink').offset().left - $('#gotolink').width());
+    $('#gotomenu').css('top',$('#gotolink').offset().top + $('#gotolink').height() + 5);
+});
 
 </script>
 
@@ -111,6 +114,6 @@ function toggleMenu()
 	<option value="{{*path}}">{{*title}}</option>
 {{/:goToItem}}
 
-{{:goToDivItem}}
-    <div><a href="{{fe_/}}{{*path}}">{{*title}}</a></div>
-{{/:goToDivItem}}
+{{:goToLiItem}}
+    <li><a target="_blank" title="ќткроетс€ в новом окне" href="{{fe_/}}{{*path}}">{{*title}}</a></li>
+{{/:goToLiItem}}
