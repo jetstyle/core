@@ -4,27 +4,33 @@
 
 <table cellspacing="0" cellpadding="0" class="cms-toolbar w100">
 <tr>
-  <td nowrap="nowrap">{{@blocks/user.html}}</td>
-  <td class="sep-"><img class="block" src="{{images}}seporate.gif" width="2" height="20" align="top" alt="" /></td>
-  <td>ћеню:</td>
-  	{{!for toolbar.main do=@:item sep=@:item_sep}}
-  </td>
+  <!--td class="sep-"><img class="block" src="{{images}}seporate.gif" width="2" height="20" align="top" alt="" /></td-->
+  <td>&nbsp;</td>
+ 
+  {{!for toolbar.main do=@:item sep=@:item_sep}}
+  
   <td class="w100">{{@dummy.html}}</td>
   <td class="sep-"><img class="block" src="{{images}}seporate.gif" width="2" height="20" align="top" alt="" /></td>
   <td nowrap="nowrap">
-    <a href="{{/}}start">основное меню</a> |
-    <span>
+    <!--a href="{{/}}start">основное меню</a> |-->
+    <!--span>
     	перейти
     	<select onchange="if (this.value != -1) window.location.href='{{fe_/}}'+this.value">
     		<option value="-1">выбрать</option>
         	{{!for goto do=@:goToItem}}
     	</select>
-    </span> |
-    <a href="{{/}}login?logout=1" onclick="return confirm('¬ы действительно желаете выйти?');">выход</a>
+    </span--> 
+    <!--a href="{{/}}login?logout=1" onclick="return confirm('¬ы действительно желаете выйти?');">выход</a-->
+  
+    <a href="#" class='underline-dashed' onclick="toggleMenu(); return false;" >перейти</span></a>
+
   </td>
+  <td nowrap="nowrap">{{@blocks/user.html}}</td>
 </tr>
 </table>
-
+    <div class="gotomenu invis" id="gotomenu">
+    {{!for goto do=@:goToDivItem}}
+    </div>
 {{!for toolbar.submenu do=@:subitem}}
 
 <script language="javascript">
@@ -33,6 +39,7 @@ var selectedNode = {{?menu_selected}}document.getElementById('menu_selected_{{me
 
 function switchMenu(el)
 {
+	findObj("gotomenu").className = 'gotomenu invisible';
 	if(subEl = document.getElementById('submenu_' + el.getAttribute('item_id')))
 	{
 		if(selectedNode)
@@ -53,6 +60,13 @@ function switchMenu(el)
 	{
 		return true;
 	}
+}
+
+function toggleMenu()
+{
+    //alert(findObj("gotomenu").className);
+    findObj("gotomenu").className = ( findObj("gotomenu").className == "gotomenu" ? "gotomenu invis" : "gotomenu" );
+    //alert(findObj("gotomenu").className);
 }
 
 </script>
@@ -96,3 +110,7 @@ function switchMenu(el)
 {{:goToItem}}
 	<option value="{{*path}}">{{*title}}</option>
 {{/:goToItem}}
+
+{{:goToDivItem}}
+    <div><a href="{{fe_/}}{{*path}}">{{*title}}</a></div>
+{{/:goToDivItem}}

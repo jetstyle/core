@@ -60,6 +60,7 @@
  			"WHERE controller != '' " .
  			"ORDER BY _level,_order " .
  		"");
+	//$this->goToList[] = array('title'=>'выход', 'path'=>'logout');
  	}
 
  	protected function getLoadResult()
@@ -128,6 +129,8 @@
  				unset($this->items['submenu'][$item['id']], $this->items['main'][$k]);
  			}
  		}
+		
+		$this->tpl->set('user', Locator::get('principal')->getUserData());
  	}
  	
  	protected function getPossiblePaths($urlParts)
