@@ -13,7 +13,7 @@
 	protected $tpl = null;
 
 	protected $possiblePaths = null;
-	
+
  	public function __construct()
  	{
  		$this->db = &Locator::get('db');
@@ -30,7 +30,7 @@
     	$this->loadGoTo();
     	return $this->goToList;
  	}
- 	
+
  	/**
  	 * Items on start page
  	 *
@@ -41,7 +41,7 @@
  			"SELECT title, href " .
  			"FROM ??toolbar " .
  			"WHERE main = 1 AND LENGTH(href) > 0 AND _state = 0 " .
- 			"ORDER BY _left ASC " .
+ 			"ORDER BY _level ASC, _order ASC " .
  		"");
  	}
 
@@ -76,7 +76,7 @@
  	protected function constructResult($result)
  	{
 		$paths = $this->getPossiblePaths(Locator::get('controller')->getParams());
-		
+
 		$principal = &Locator::get('principal');
 
  		while($r = $this->db->getRow($result))
@@ -129,10 +129,10 @@
  				unset($this->items['submenu'][$item['id']], $this->items['main'][$k]);
  			}
  		}
-		
+
 		$this->tpl->set('user', Locator::get('principal')->getUserData());
  	}
- 	
+
  	protected function getPossiblePaths($urlParts)
 	{
 		if ( null === $this->possiblePaths)
