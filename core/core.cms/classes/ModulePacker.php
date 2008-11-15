@@ -5,7 +5,6 @@
  * Grep tables, used in module.
  * Dump structure into .meta/structure.sql
  * Dump data into .meta/data.sql
- * Dump toolbar row into .meta/toolbar.sql
  *
  * @author lunatic <lunatic@jetstyle.ru>
  */
@@ -37,11 +36,6 @@ class ModulePacker
 		}
 		else
 		{
-//			$module = $this->getModule($moduleName);
-//			if (!is_array($module) || empty($module))
-//			{
-//				return;
-//			}
 			$modules = array($moduleName);
 		}
 
@@ -59,25 +53,45 @@ class ModulePacker
 		{
 			return false;
 		}
-
 		$this->cleanUp($moduleDir);
-		$tables = $this->getTables($moduleDir);
-
-		$restrictions = $this->getRestrictions($moduleDir);
+		
+		$config = array();
+		if (file_exists($moduleDir.'/.meta/config.yml'))
+		{
+			$config = YamlWrapper::load($moduleDir.'/.meta/config.yml');
+		}
+		
+		if (is_array($config['tables']))
+		{
+			$tables = $config['tables'];
+		}
+		else
+		{
+			$tables = $this->getTables($moduleDir);
+		}
 		
 		if (is_array($tables) && !empty($tables))
 		{
 			foreach ($tables AS $table)
 			{
 				$this->dumpStructure($table, $moduleDir);
-				if (!isset($restrictions['no_data']))
+				if (isset($config['no_data']))
+				{
+					if (
+						(is_array($config['no_data']) && !in_array($table, $config['no_data']))
+						||
+						(!is_array($config['no_data']) && !$config['no_data'])
+					)
+					{
+						$this->dumpData($table, $moduleDir);
+					}
+				}
+				else
 				{
 					$this->dumpData($table, $moduleDir);
 				}
 			}
 		}
-
-		$this->dumpModuleRow($module);
 	}
 
 	/**
@@ -88,7 +102,7 @@ class ModulePacker
 	 */
 	protected function dumpStructure($tableName, $moduleDir)
 	{
-		$this->sqlDumper->dumpStructure($tableName, DBAL::$prefix, $moduleDir.'/.meta/structure.sql');
+		$this->sqlDumper->dumpStructure($this->appendPrefixToTable($tableName), DBAL::$prefix, $moduleDir.'/.meta/structure.sql');
 	}
 
 	/**
@@ -99,12 +113,7 @@ class ModulePacker
 	 */
 	protected function dumpData($tableName, $moduleDir)
 	{
-		$this->sqlDumper->dumpData($tableName, DBAL::$prefix, $moduleDir.'/.meta/data.sql');
-	}
-
-	protected function dumpModuleRow()
-	{
-		//TODO: how to do this ?
+		$this->sqlDumper->dumpData($this->appendPrefixToTable($tableName), DBAL::$prefix, $moduleDir.'/.meta/data.sql');
 	}
 
 	/**
@@ -116,7 +125,6 @@ class ModulePacker
 	{
 		@unlink($dir.'/.meta/structure.sql');
 		@unlink($dir.'/.meta/data.sql');
-		@unlink($dir.'/.meta/toolbar.sql');
 	}
 
 	/**
@@ -128,19 +136,6 @@ class ModulePacker
 	{
 		$result = array();
 		
-		if (file_exists($moduleDir.'/.meta/tables'))
-		{
-			$result = file($moduleDir.'/.meta/tables', FILE_SKIP_EMPTY_LINES);
-			if ($result === false)
-			{
-				return array();
-			}
-			else
-			{
-				return array_map(array(&$this, 'appendPrefixToTables'), $result);
-			}
-		}
-
 		$config = new ModuleConfig();
 		$config->read($moduleDir.'/'.$configName.'.php');
 
@@ -155,7 +150,7 @@ class ModulePacker
 		}
 		elseif ($tableName = $config->get('table_name'))
 		{
-			$result[] = DBAL::$prefix.$tableName;
+			$result[] = $tableName;
 		}
 
 		return array_unique($result);
@@ -179,19 +174,8 @@ class ModulePacker
 		
 		return $result;
 	}
-	
-	protected function getRestrictions($moduleDir)
-	{
-		$result = array();
-		if (file_exists($moduleDir.'/.meta/no_data'))
-		{
-			$result['no_data'] = true;
-		}
-		
-		return $result;
-	}
 
-	protected function appendPrefixToTables($v)
+	protected function appendPrefixToTable($v)
 	{
 		return trim(DBAL::$prefix.$v);
 	}
