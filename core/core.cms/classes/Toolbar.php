@@ -54,12 +54,12 @@
  	}
 
  	protected function loadGoTo() {
-    	$this->goToList = $this->db->query("" .
- 			"SELECT title_pre AS title, _path AS path " .
- 			"FROM ??content " .
- 			"WHERE controller != '' " .
- 			"ORDER BY _level,_order " .
- 		"");
+    	$this->goToList = $this->db->query("
+ 			SELECT title_pre AS title, _path AS path 
+ 			FROM ??content 
+ 			WHERE controller NOT IN ('', 'content', 'link') 
+ 			ORDER BY _level,_order 
+ 		");
 	//$this->goToList[] = array('title'=>'выход', 'path'=>'logout');
  	}
 
