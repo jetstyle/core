@@ -1,0 +1,10 @@
+default:
+    table: users_sessions
+    fields: 
+        - session_hash
+        - id_hash
+        - user_id
+        - host
+        - last_activity
+        - user_agent
+        - data

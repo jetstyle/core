@@ -20,7 +20,7 @@ class StartController extends Controller
 
 	public function handle()
 	{
-		if (!Locator::get('principal')->isAuth())
+		if (!Locator::get('principal')->security('noguests'))
 		{
 			Controller::redirect(RequestInfo::$baseUrl.'login');
 		}
@@ -30,10 +30,10 @@ class StartController extends Controller
 
 	protected function handle_default($config)
 	{
-		if(!Locator::get('principal')->isGrantedTo('start') )
-		{
-			return Controller::deny();
-		}
+//		if(!Locator::get('principal')->security('cmsModules', 'start') )
+//		{
+//			return Controller::deny();
+//		}
 
 		Finder::useClass('Toolbar');
 		$toolbar = new Toolbar();

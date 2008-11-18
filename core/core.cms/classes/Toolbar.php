@@ -81,9 +81,12 @@
 
  		while($r = $this->db->getRow($result))
  		{
- 			$r['granted'] = $principal->isGrantedTo($r['href']);
-
-
+ 			$r['granted'] = false;
+ 			if ($r['href'])
+ 			{
+ 				$r['granted'] = $principal->security('cmsModules', $r['href']);
+ 			}
+ 			
  			if($r['_level'] == 1)
  			{
  				$this->items['main'][$r['id']] = $r;

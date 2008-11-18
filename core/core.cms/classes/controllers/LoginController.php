@@ -11,32 +11,37 @@ class LoginController extends Controller
 	function handle_default($config)
 	{
 		$prp = &Locator::get('principal');
-		if ($prp->isAuth())
+		
+		if ($_POST['submit'])
 		{
-			if (RequestInfo::get('logout'))
+			if ($prp->login($_POST['login'], $_POST['password']) === PrincipalInterface::AUTH)
 			{
 				$redirectTo = RequestInfo::get('retpath') ?
-							  RequestInfo::get('retpath') :
-							  RequestInfo::$baseUrl.'login';
-				$prp->logout(urldecode($redirectTo));
-			}
-			else
-			{
-				if (RequestInfo::get('retpath'))
-				{
-					//die(RequestInfo::get('retpath'));
-	            	Controller::redirect(urldecode(RequestInfo::get('retpath')));
-				}
-				else
-				{
-					Controller::redirect(RequestInfo::$baseUrl.'start');
-				}
+						  RequestInfo::get('retpath') :
+						  RequestInfo::$baseUrl.'start';
+				Controller::redirect($redirectTo);
 			}
 		}
 		else
 		{
-			$this->siteMap = 'login';
+			if ($prp->security('noguests'))
+			{
+				if (RequestInfo::get('logout'))
+				{
+					$redirectTo = RequestInfo::get('retpath') ?
+								  RequestInfo::get('retpath') :
+								  RequestInfo::$baseUrl.'login';
+					$prp->logout();
+				}
+				else
+				{
+					$redirectTo = RequestInfo::$baseUrl.'start';
+				}
+				Controller::redirect($redirectTo);
+			}
 		}
+		
+		$this->siteMap = 'login';
 	}
 }
 ?>

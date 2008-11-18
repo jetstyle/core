@@ -1,40 +1,35 @@
 <?php
 
-class Principal
-{	 
-	const RESTORED = -1;
-	const AUTH = 0;
-	const WRONG_LOGIN = 1;
-	const WRONG_PWD = 2;
-	const ALREADY_AUTH = 3;
-	const NO_CREDENTIALS = 4;
-	const NOT_IDENTIFIED = 100;
-	
-	
+Finder::useClass('principal/PrincipalInterface');
+
+class Principal implements PrincipalInterface
+{
 	protected $storageModel = null;
 	protected $sessionModel = null;
 	protected $securityModels = array();
 
 	protected $realm = '';
+//	protected $permanentStore = false;
+	protected $permanentExpireTime = 1209600;	// two weeks
 	
 	public function __construct($params = array())
 	{
-		$storageModelType = "profiles";		
+		$storageModelType = "db";		
 		$sessionModelType = 'php';
 		
-		if ($params['storageModelType'])
+		if ($params['storage']['model'])
 		{
-			$storageModelType = $params['storageModelType'];
+			$storageModelType = $params['storage']['model'];
 		}
 		
-		if ($params['sessionModelType'])
+		if ($params['session']['model'])
 		{
-			$sessionModelType = $params['sessionModelType'];
+			$sessionModelType = $params['session']['model'];
 		}
 		
 		if ($params['realm'])
 		{
-			$this->setRealm($params['realm']);
+			$this->realm = $params['realm'];
 		}
 		
 		//storage model
@@ -44,6 +39,10 @@ class Principal
 		if (!in_array('PrincipalStorageInterface', class_implements($this->storageModel)))
 		{
 			throw new JSException($className.' must implement \'PrincipalStorageInterface\'');
+		}
+		if (isset($params['storage']))
+		{
+			$this->storageModel->setParams($params['storage']);
 		}
 		$this->storageModel->setRealm($this->realm);
 		
@@ -55,20 +54,29 @@ class Principal
 		{
 			throw new JSException($className.' must implement \'PrincipalSessionInterface\'');
 		}
+		if (isset($params['session']))
+		{
+			$this->sessionModel->setParams($params['session']);
+		}
 		$this->sessionModel->setRealm($this->realm);
-		$this->sessionModel->initialize();
+		$this->sessionModel->initSession();
 		
 		$this->identify();
 	}
 
-	public function setRealm($realm)
+	public function getStorageModel()
 	{
-		$this->realm = $realm;
+		return $this->storageModel;	
+	}
+	
+	public function getSessionModel()
+	{
+		return $this->sessionModel;
 	}
 	
 	public function get($field)
 	{
-		return $this->storageModel[$field];
+		return $this->storageModel->get($field);
 	}
 	
 	public function getId()
@@ -76,35 +84,43 @@ class Principal
 		return $this->storageModel->getId();
 	}
 	
+	public function getUserData()
+	{
+		return $this->storageModel->getData();
+	}
+	
 	protected function identify()
 	{		
 		$userId = $this->sessionModel->getUserId();		
-		if ($userId)
+		if ($userId > 0)
 		{
 			$this->storageModel->loadById($userId);
 			if (!$this->storageModel->getId())
 			{
 				$userId = 0;
+				
+				// make user guest, start new guest session
 				$this->storageModel->guest();
 				$this->sessionModel->start($this->storageModel);
 			}
 		}
 		
-		// try to login, using login and pass from cookies
-		list($login, $password) = $this->getLoginAndPassFromCookies();
-		if ($login && $password)
+		if (!$userId)
 		{
-			if (!$this->login($login, $password, true))
+			// try to login, using login and pass from cookies
+			list($login, $password) = $this->getLoginAndPassFromCookies();
+			if ($login && $password)
 			{
-				$this->deleteLoginAndPassFromCookies();
+				if ($this->login($login, $password, false, true) !== PrincipalInterface::AUTH)
+				{
+					$this->deleteLoginAndPassFromCookies();
+				}
+			}
+			else
+			{
+				$this->storageModel->guest();
 			}
 		}
-		else
-		{
-			$this->storageModel->guest();
-		}
-		
-		$this->sessionModel->updateLastActivity();
 	}
 	
 	public function security( $model, $params="" )
@@ -113,7 +129,7 @@ class Principal
 		return $sm->check( $this->storageModel, $params );
 	}
 	
-	public function login( $login="", $pwd="", $fromCookie = false)
+	public function login( $login="", $pwd="", $permanent = false, $fromCookie = false)
 	{
 		if (!$login || !$pwd)
 		{
@@ -123,7 +139,7 @@ class Principal
 		// already logged in
 		if ($this->security('noguests'))
 		{
-			return self::ALREADY_AUTH;
+			$this->logout();
 		}
 		
 		// load user
@@ -138,6 +154,10 @@ class Principal
 		
 		if ($this->storageModel->checkPassword($pwd, $fromCookie))
 		{
+			if ($permanent)
+			{
+				$this->setLoginAndPassToCookies();
+			}
 			$state = self::AUTH;
 		}
 		else
@@ -153,6 +173,7 @@ class Principal
 	public function logout()
 	{
 		$this->storageModel->guest();
+		$this->deleteLoginAndPassFromCookies();
 		$this->sessionModel->start($this->storageModel);
 	}
 	
@@ -161,10 +182,10 @@ class Principal
 		return array($_COOKIE[Config::get('cookie_prefix').$this->realm.'principal_login'], $_COOKIE[Config::get('cookie_prefix').$this->realm.'principal_password']);
 	}
 	
-	protected function setLoginAndPassToCookie()
+	protected function setLoginAndPassToCookies()
 	{
-		setcookie(Config::get('cookie_prefix').$this->realm.'principal_login', $this->storageModel->getLogin(), 0, Config::exists('front_end_path') ? Config::get('front_end_path') : RequestInfo::$baseUrl, RequestInfo::$cookieDomain);
-		setcookie(Config::get('cookie_prefix').$this->realm.'principal_password', md5($this->storageModel->getPassword().$this->salt), 0, Config::exists('front_end_path') ? Config::get('front_end_path') : RequestInfo::$baseUrl, RequestInfo::$cookieDomain);
+		setcookie(Config::get('cookie_prefix').$this->realm.'principal_login', $this->storageModel->getLogin(), time() + $this->permanentExpireTime, Config::exists('front_end_path') ? Config::get('front_end_path') : RequestInfo::$baseUrl, RequestInfo::$cookieDomain);
+		setcookie(Config::get('cookie_prefix').$this->realm.'principal_password', $this->storageModel->getCookiePassword(), time() + $this->permanentExpireTime, Config::exists('front_end_path') ? Config::get('front_end_path') : RequestInfo::$baseUrl, RequestInfo::$cookieDomain);
 	}
 	
 	protected function deleteLoginAndPassFromCookies()

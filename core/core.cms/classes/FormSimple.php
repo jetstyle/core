@@ -47,21 +47,16 @@ class FormSimple
 			$this->config->UPDATE_FIELDS = $this->config->SELECT_FIELDS;
 		}
 
-		Finder::useModel('DBModel');
-		$this->model = new DBModel();
-		$this->model->setTable($config->table_name);
-		$this->model->setFields($config->SELECT_FIELDS);
+		$this->initModel();
 
 		$this->prefix = $config->moduleName.'_form_';
 
 		//настройки шаблонов
 		$this->store_to = "form_".$config->getModuleName();
-
 		if( $config->template_item )
 		{
 			$this->template_item = $config->template_item;
 		}
-
 		if(!$this->template_item)
 		{
 			$this->template_item = $config->_template_item ? $config->_template_item : $this->_template_item;
@@ -165,14 +160,22 @@ class FormSimple
 		return $this->tpl->parse($this->template);
 	}
 
+	protected function initModel()
+	{
+		Finder::useModel('DBModel');
+		$this->model = new DBModel();
+		$this->model->setTable($this->config->table_name);
+		$this->model->setFields($this->config->SELECT_FIELDS);
+	}
+	
 	protected function load()
 	{
 		if( !$this->loaded )
 		{
 			if($this->id)
 			{
-				$this->model->load($this->model->quoteField($this->idField).'='.$this->id);
-				list($this->item) = $this->model->getData();
+				$this->model->loadOne($this->model->quoteField($this->idField).'='.$this->id);
+				$this->item = $this->model->getData();
 
 				if (!$this->item[$this->idField])
 				{
@@ -261,6 +264,10 @@ class FormSimple
 			{
 				$model->setFields(array($value['fk'], 'title'));
 				$model->setOrder(array("title" => "ASC"));
+				if ($value['where'])
+				{
+					$model->where = ($model->where ? $model->where." AND " : "").$value['where'];
+				}
 				$model->load();
 
 				$data = array();

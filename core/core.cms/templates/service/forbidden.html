@@ -1,7 +1,11 @@
+{{@layouts/inner.html html_body=@:body}}
+
+{{:body}}
 <table cellspacing="0" cellpadding="0" class="cms-login w100">
   <tr>
     <td class="middle" align="center">
-      <form action='' method='post'>
+      <h1>У Вас нет прав на доступ к этой странице.</h1>
+      <form action='{{!href_to "Login"}}?retpath={{retpath}}' method='post'>
         <table cellpadding="10" class="widget" align="center"><tr><td>
         <table cellspacing="0" cellpadding="2">
           <tr>
@@ -27,3 +31,4 @@
 <script>
 	document.getElementById('login').focus();
 </script>
+{{/:body}}

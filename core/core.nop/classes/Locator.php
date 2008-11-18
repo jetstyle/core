@@ -42,7 +42,7 @@ class Locator
 	 * @param string $path path to class OR object
 	 * @param boolean $singleton
 	 */
-	public static function bind($key, $path, $singleton = true)
+	public static function bind($key, $path, $singleton = true, $params = NULL)
 	{
 		Debug::trace('Bind "'.$key.'"', 'locator');
 		if (is_object($path))
@@ -50,7 +50,12 @@ class Locator
 		else
 		{
 			$class = pathinfo($path, PATHINFO_FILENAME);
-			self::$relations[$key] = array('class' => $class, 'path' => $path, 'singleton' => $singleton);
+			self::$relations[$key] = array(
+				'class' => $class, 
+				'path' => $path, 
+				'singleton' => $singleton,
+				'params' => $params
+			);
 		}
 	}
 
@@ -71,7 +76,7 @@ class Locator
 				    {
 					    $s['singleton'] = true;
 				    }
-				    Locator::bind($k, $s['path'], $s['singleton']);
+				    Locator::bind($k, $s['path'], $s['singleton'], $s['params']);
 			    }
 			    else
 			    {
@@ -104,7 +109,14 @@ class Locator
 				}
 				else
 				{
-					self::$objs[$key] = new $class();
+					if (null !== self::$relations[$key]['params'])
+					{
+						self::$objs[$key] = new $class(self::$relations[$key]['params']);
+					}
+					else
+					{
+						self::$objs[$key] = new $class();
+					}
 				}
 			}
 			else

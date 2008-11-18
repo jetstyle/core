@@ -6,7 +6,7 @@ if (Config::get('db_disable'))
 	return '';
 }
 
-if(Locator::get('principal')->isAuth()) 
+if(Locator::get('principalCms')->security('noguests')) 
 {
 	$cookieOce = $_COOKIE['oce'];
 	$getOce = RequestInfo::get('oce');

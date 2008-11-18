@@ -1,56 +1,41 @@
 <?php
+Finder::useClass('principal/storage/PrincipalStorageInterface');
 Finder::useModel('DBModel');
-Finder::useClass('principal/PrincipalStorageInterface');
 
 class PrincipalStorageDb extends DBModel implements PrincipalStorageInterface
 {
 	protected $realm = "";
-	
-	protected $table = "users";
-	
-	protected $fields = array(
-		'id',
-		'login',
-		'password',
-		'salt'
-	);
-	
-	public $where = '{_state} = 0';
-	
+	protected $cookieSalt = "it is a good day to die"; 
 	protected $one = true;
-	
-	protected $cookieSalt = "it is good day to die"; 
-	
-	public function __construct($fieldSet = null)
-	{
-		parent::__construct($fieldSet);
 		
-		if (Config::exists('principal_salt'))
+	public function setParams($params)
+	{
+		if ($params['salt'])
 		{
-			$this->cookieSalt = Config::get('principal_salt');
+			$this->cookieSalt = $params['salt'];
 		}
 	}
 	
 	public function loadById($id)
 	{
-		self::loadOne('{id} = '.DBModel::quote($id)." AND {realm} = ".DBModel::quote($this->realm));		
+		$this->loadOne('{id} = '.self::quote($id)." AND {realm} = ".self::quote($this->realm));		
 	}
 	
 	public function loadByLogin($login)
 	{
-		self::loadOne('{login} = '.DBModel::quote($login)." AND {realm} = ".DBModel::quote($this->realm) );
+		$this->loadOne('{login} = '.self::quote($login)." AND {realm} = ".self::quote($this->realm) );
 	}
 	
 	public function checkPassword($password, $fromCookie = false)
 	{
-		$userPassword = $this->offsetGet('password');
+		$userPassword = $this->get('password');
 		if (!$fromCookie)
 		{
-			$password = md5(md5($password).$this->offsetGet('salt'));
+			$password = md5(md5($password).$this->get('salt'));
 		}
 		else
 		{
-			$userPassword = md5($userPassword.$this->salt);
+			$userPassword = md5($userPassword.$this->cookieSalt);
 		}
 		
 		if ($userPassword === $password)
@@ -63,24 +48,24 @@ class PrincipalStorageDb extends DBModel implements PrincipalStorageInterface
 		}
 	}
 	
+	public function get($key)
+	{
+		return $this[$key];
+	}
+	
 	public function getId()
 	{
-		return $this->offsetGet('id');
+		return $this->get('id');
 	}
-
-//	public function getPassword()
-//	{
-//		return $this->offsetGet('password');
-//	}
 
 	public function getCookiePassword()
 	{
-		return md5($this->offsetGet('password').$this->cookieSalt);
+		return md5($this->get('password').$this->cookieSalt);
 	}
 	
 	public function getLogin()
 	{
-		return $this->offsetGet('login');
+		return $this->get('login');
 	}
 	
 	public function setRealm($realm)
@@ -92,7 +77,37 @@ class PrincipalStorageDb extends DBModel implements PrincipalStorageInterface
 	{
 		$this->setData(array(array('id' => 0, 'login' => 'guest')));
 	}
+	
+	protected function onBeforeInsert(&$row)
+	{
+		$salt = $this->generateSalt();
+		$row['salt'] = $salt;
+		$row['password'] = md5(md5($row['password']).$salt);
+		
+		parent::onBeforeInsert($row);
+	}
+	
+	protected function onBeforeUpdate(&$row)
+	{
+		if (array_key_exists('password', $row))
+		{
+			$salt = $this->generateSalt();
+			$row['salt'] = $salt;
+			$row['password'] = md5(md5($row['password']).$salt);
+		}
+		
+		parent::onBeforeUpdate($row);
+	}
+	
+	protected function generateSalt()
+	{
+		$salt = '';
+		for ($i = 0; $i < 3; $i++)
+		{
+			$salt .= chr(rand(32, 126));
+		}
+		return $salt;
+	}
 }
-
 
 ?>

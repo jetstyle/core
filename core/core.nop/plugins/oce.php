@@ -3,10 +3,11 @@
 if (RequestInfo::get('oce') == 'off') return '';
 if (!RequestInfo::get('oce') && $_COOKIE['oce'] != 'on') return '';
 
-if(Locator::get('principal')->isAuth())
+$module = $params['module'];
+
+if(Locator::get('principalCms')->security('cmsModules', $module))
 {
 	$oce = Config::get('oce');
-	$module = $params['module'];
 	$id = (integer)$params['id'];
 
 	if( !isset($oce[$module]) )

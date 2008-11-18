@@ -327,6 +327,11 @@ class PrincipalCms
 	{
 		return $this->state==PRINCIPAL_AUTH || $this->state==PRINCIPAL_RESTORED;
 	}
+	
+	public function security()
+	{
+		return $this->isAuth();
+	}
 
 }
 ?>

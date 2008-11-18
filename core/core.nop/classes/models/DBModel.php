@@ -383,6 +383,11 @@ class DBModel extends Model implements IteratorAggregate, ArrayAccess, Countable
 		}
 	}
 
+	public function getTableFields()
+	{
+		return $this->tableFields;
+	}
+	
 	/**
 	 * Return table name with alias
 	 *
@@ -1042,6 +1047,10 @@ class DBModel extends Model implements IteratorAggregate, ArrayAccess, Countable
 		$configLoaded = false;
 		if ( $className !== 'DBModel' )
 		{
+			if (substr($className, -5) != 'Model')
+			{
+				$className .= 'Model';
+			}
 			$configLoaded = $this->loadConfig($className, $fieldSet);
 		}
 

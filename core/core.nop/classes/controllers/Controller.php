@@ -34,9 +34,18 @@ abstract class Controller implements ArrayAccess
 	
 	public static function deny()
 	{
+		$controller = &Locator::get('controller');
+		$controller->rend();
+		
 		Finder::useLib('http');
 		Http::status(403);
 		$tpl = &Locator::get('tpl');
+		
+		$retPath .= $_SERVER['HTTPS'] ? 'https://' : 'http://';
+        $retPath .= $_SERVER['SERVER_NAME'].$_SERVER['REQUEST_URI'];
+        $retPath = urlencode($retPath);
+		
+		$tpl->set('retpath', $retPath);
 		$tpl->parseSiteMap('forbidden');
 		echo $tpl->get('html');
 		die();

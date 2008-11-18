@@ -1,0 +1,36 @@
+default:
+    table: users
+    fields: 
+        - id
+        - group_id
+        - email
+        - login
+        - password
+        - name
+        - salt
+        >group: 
+            model: PrincipalStorageDbGroupsModel
+            pk: group_id
+            fk: id
+    where: {_state} = 0
+    
+cms_list:
+    table: users
+    fields: 
+        - id
+        title: login
+        
+cms:
+    table: users
+    fields: 
+        - id
+        - group_id
+        - email
+        - login
+        - password
+        - name
+        >group: 
+            model: PrincipalStorageDbGroupsModel
+            pk: group_id
+            fk: id
+    where: {_state} = 0

@@ -1,41 +1,46 @@
 <?php
-Finder::useClass('principal/PrincipalSessionInterface');
+Finder::useClass('principal/session/PrincipalSessionInterface');
 
 class PrincipalSessionPhp implements PrincipalSessionInterface
 {
-	protected $data = null;
 	protected $realm = "";
+	protected $sessionKey = "principal_session";
 	
-	public function __construct()
-	{
+	public function initSession()
+	{		
 		if (!session_id()) session_start();
-	}
-	
-	public function initialize()
-	{
-		$this->data = $_SESSION['principal_session'];
 	}
 	
 	public function getData()
 	{
-		return $this->data;
+		return $_SESSION[$this->sessionKey.$this->realm];
 	}
 	
 	public function getUserId()
 	{
-		return $this->data['user_id'];
+		return $_SESSION[$this->sessionKey.$this->realm]['user_id'];
 	}
 	
 	public function delete()
 	{
-		$_SESSION['principal_session'] = array();
+		$_SESSION[$this->sessionKey.$this->realm] = array();
 	}
 	
-	public function start(&$storageModel)
+	public function start(&$storageModel = null)
 	{
 		$this->delete();
-		$_SESSION['principal_session'] = array(
-			'user_id' => $storageModel->getId()
+		
+		if (null === $storageModel)
+		{
+			$userId = 0;
+		}
+		else
+		{
+			$userId = $storageModel->getId();
+		}
+		
+		$_SESSION[$this->sessionKey.$this->realm] = array(
+			'user_id' => $userId
 		);
 	}
 	
@@ -45,6 +50,11 @@ class PrincipalSessionPhp implements PrincipalSessionInterface
 	}
 	
 	public function updateLastActivity()
+	{
+		
+	}
+	
+	public function setParams($params)
 	{
 		
 	}

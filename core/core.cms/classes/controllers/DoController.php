@@ -27,14 +27,9 @@ class DoController extends Controller
 
 	function handle()
 	{
-		if (!Locator::get('principal')->isAuth())
+		if (!Locator::get('principal')->security('noguests'))
 		{
-			$redirectTo = RequestInfo::$baseUrl.'login'; //login page
-            $redirectTo .= '?retpath='; //path to return there
-            $retPath .= $_SERVER['HTTPS'] ? 'https://' : 'http://';
-            $retPath .= $_SERVER['SERVER_NAME'].$_SERVER['REQUEST_URI'];
-            $retPath = urlencode($retPath);
-			Controller::redirect($redirectTo.$retPath);
+			Controller::deny();
 		}
 
 		parent::handle();
@@ -48,14 +43,7 @@ class DoController extends Controller
 	function handle_default($config)
 	{
 		$params = $this->params;
-//		if ($config['mode'])
-//		{
-//			unset($params[0], $params[1]);
-//		}
-//		else
-//		{
-			unset($params[0]);
-//		}
+		unset($params[0]);
 
 		Finder::useClass("ModuleConstructor");
 		$moduleConstructor =& new ModuleConstructor();

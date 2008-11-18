@@ -3,7 +3,7 @@
   онтроль доступа "√ќ—“яћ Ќ≈Ћ№«я"
  */
 
-Finder::useClass('principal/PrincipalSecurityInterface');
+Finder::useClass('principal/security/PrincipalSecurityInterface');
 
 class PrincipalSecurityNoguests implements PrincipalSecurityInterface
 {

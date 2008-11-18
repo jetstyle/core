@@ -13,7 +13,7 @@ class ModuleConstructor
 	public function initialize($moduleName, $params = null)
 	{
 		//проеряем права
-		if( !Locator::get('principal')->isGrantedTo('do/'.$moduleName ) )
+		if( !Locator::get('principal')->security('cmsModules', $moduleName.($params ? '/'.implode('/', $params) : '') ) )
 		{
 			return Controller::deny();
 		}
@@ -121,10 +121,10 @@ class ModuleConstructor
 	protected function getConfig($name, $cfg = null)
 	{
 		//проеряем права
-		if( !Locator::get('principal')->isGrantedTo('do/'.$this->moduleName.'/'.$what ) )
-		{
-			return Controller::deny();
-		}
+//		if( !Locator::get('principal')->security('cmsModules', $this->moduleName.'/'.$name ) )
+//		{
+//			return Controller::deny();
+//		}
 
 		if ($cfg)
 		{

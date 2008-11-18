@@ -1,4 +1,5 @@
 <?php
+die('need to refactor');
 /*
 
 Хранилище профилей принципала, основанная на структуре, подобной "гостевым профилям"
@@ -18,8 +19,8 @@ PrincipalStorage_profiles( &$principal )
 
 ================================================================== v.1 (kuso@npj)
 */
-
-class PrincipalStorageProfiles extends PrincipalStorage
+Finder::useClass('principal/PrincipalStorageInterface');
+class PrincipalStorageProfiles implements PrincipalStorageInterface
 {
 	protected $profilesHash = array();
 	
