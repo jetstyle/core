@@ -128,7 +128,7 @@ class PrincipalSecurityCmsModules implements PrincipalSecurityInterface
 		
 		$db->execute("
 			DELETE FROM ".$this->tableGroupsAccess." 
-			WHERE group_id = ".$userId."
+			WHERE group_id = ".$groupId."
 		");
 	}
 	
