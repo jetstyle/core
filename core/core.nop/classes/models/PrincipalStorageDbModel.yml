@@ -29,8 +29,8 @@ cms:
         - login
         - password
         - name
+        - _state
         >group: 
             model: PrincipalStorageDbGroupsModel
             pk: group_id
             fk: id
-    where: {_state} = 0
