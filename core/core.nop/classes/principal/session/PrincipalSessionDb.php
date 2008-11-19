@@ -12,6 +12,8 @@ class PrincipalSessionDb extends DBModel implements PrincipalSessionInterface
 	protected $idHash = '';
 	protected $ip = '';
 	
+	protected $sessionData = array();
+	
 	public function initSession()
 	{		
 		$this->where = ($this->where ? $this->where." AND " : "")." {last_activity} > ".(time() - $this->expireTime);
@@ -21,20 +23,21 @@ class PrincipalSessionDb extends DBModel implements PrincipalSessionInterface
 			$this->load("{session_hash} = ".DBModel::quote($this->getSessionHash())." AND {id_hash} = ".DBModel::quote($this->getIdHash()));
 		}
 		
-		if (!$this->get('session_hash'))
+		if (!$this->offsetGet('session_hash'))
 		{
 			$this->load("{user_id} = 0 AND {id_hash} = ".DBModel::quote($this->getIdHash()));
 			
-			if (!$this->get('session_hash'))
+			if (!$this->offsetGet('session_hash'))
 			{
 				$this->start();
 			}
 		}
 		
-		if ($this->get('session_hash'))
+		if ($this->offsetGet('session_hash'))
 		{
-			$this->sessionHash = $this->get('session_hash');
+			$this->sessionHash = $this->offsetGet('session_hash');
 			$this->saveSessionHash();
+			$this->updateLastActivity();
 		}
 	}
 	
@@ -50,15 +53,51 @@ class PrincipalSessionDb extends DBModel implements PrincipalSessionInterface
 	{
 		$this->realm = $realm;
 	}
-		
+	
+	
 	public function get($key)
 	{
-		return $this[$key];
+		return $this->sessionData[$key];
 	}
+
+	public function set($key, $value = '')
+	{
+		if (is_array($key))
+		{
+			foreach ($key AS $k => $v)
+			{
+				$this->sessionData[$k] = $v;
+			}
+		}
+		else
+		{
+			$this->sessionData[$key] = $value;
+		}
 		
+		if (!$this->getSessionHash())
+		{
+			$this->start();
+		}
+		
+		$data = array('data' => serialize($this->sessionData));
+		parent::update($data, "{session_hash} = ".DBModel::quote($this->getSessionHash()));
+	}
+	
 	public function getUserId()
 	{
-		return $this->get('user_id');
+		return $this->offsetGet('user_id');
+	}
+	
+	public function &load($where=NULL, $limit=NULL, $offset=NULL)
+	{
+		parent::load($where, $limit, $offset);
+		
+		$data = $this->offsetGet('data');
+		$data = unserialize($data);
+		if (is_array($data))
+		{
+			$this->sessionData = $data;
+		}
 	}
 	
 	public function delete()
@@ -67,6 +106,8 @@ class PrincipalSessionDb extends DBModel implements PrincipalSessionInterface
 		{
 			parent::delete("{session_hash} = ".DBModel::quote($this->getSessionHash()));
 			$this->sessionHash = '';
+			$this->setData(array(array()));
+			$this->sessionData = array();
 		}
 	}
 	
@@ -96,6 +137,7 @@ class PrincipalSessionDb extends DBModel implements PrincipalSessionInterface
 		);
 		
 		$this->insert($data);
+		$this->setData(array($data));
 	}
 
 	protected function saveSessionHash()
