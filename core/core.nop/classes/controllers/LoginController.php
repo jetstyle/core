@@ -14,8 +14,7 @@ class LoginController extends Controller
 		
 		if ($_POST['submit'])
 		{
-			$permanent = Config::get('principal_permanent_login');
-			if ($prp->login($_POST['login'], $_POST['password'], $permanent ? true : false) === PrincipalInterface::AUTH)
+			if ($prp->login($_POST['login'], $_POST['password'], $_POST['permanent']) === PrincipalInterface::AUTH)
 			{
 				$redirectTo = RequestInfo::get('retpath') ?
 						  RequestInfo::get('retpath') :
