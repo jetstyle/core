@@ -117,7 +117,7 @@ class ListSimple
 
 	public function _href(&$list)
 	{
-		return RequestInfo::hrefChange('', array($this->idGetVar => $list->ITEMS[ $list->loop_index ][$this->idField]));
+		return RequestInfo::hrefChange('', array($this->idGetVar => $list->ITEMS[ $list->loop_index ][$this->idField], '_new' => ''));
 	}
 
 	public function _title(&$list)
