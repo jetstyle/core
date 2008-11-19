@@ -66,16 +66,13 @@ class PrincipalSecurityContent implements PrincipalSecurityInterface
 	
 	public function updateGroupACL($groupId, $acl)
 	{
-		$groupId = intval($groupId);
-		$db = Locator::get('db');
-		
-		$db->execute("
-			DELETE FROM ".$this->tableGroupsAccess." 
-			WHERE group_id = ".$groupId."
-		");
+		$this->deleteGroupACL($groupId);
 		
 		if (is_array($acl) && !empty($acl))
 		{
+			$groupId = intval($groupId);
+			$db = Locator::get('db');
+		
 			foreach($acl AS $nodeId)
 			{
 				$db->execute("
@@ -89,17 +86,14 @@ class PrincipalSecurityContent implements PrincipalSecurityInterface
 	}
 	
 	public function updateUserACL($userId, $acl)
-	{
-		$userId = intval($userId);
-		$db = Locator::get('db');
-		
-		$db->execute("
-			DELETE FROM ".$this->tableUsersAccess." 
-			WHERE user_id = ".$userId."
-		");
+	{		
+		$this->deleteUserACL($userId);
 		
 		if (is_array($acl) && !empty($acl))
 		{
+			$userId = intval($userId);
+			$db = Locator::get('db');
+		
 			foreach($acl AS $nodeId)
 			{
 				$db->execute("
@@ -110,6 +104,28 @@ class PrincipalSecurityContent implements PrincipalSecurityInterface
                	");
 			}
 		}
+	}
+	
+	public function deleteUserACL($userId)
+	{
+		$userId = intval($userId);
+		$db = Locator::get('db');
+		
+		$db->execute("
+			DELETE FROM ".$this->tableUsersAccess." 
+			WHERE user_id = ".$userId."
+		");
+	}
+	
+	public function deleteGroupACL($groupId)
+	{
+		$groupId = intval($groupId);
+		$db = Locator::get('db');
+		
+		$db->execute("
+			DELETE FROM ".$this->tableGroupsAccess." 
+			WHERE group_id = ".$groupId."
+		");
 	}
 	
 	protected function getACL($storageModel)

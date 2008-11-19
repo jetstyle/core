@@ -1282,9 +1282,9 @@ class DBModel extends Model implements IteratorAggregate, ArrayAccess, Countable
 
 			$where = "(" . $this->quoteField($v['pk'])." = ".$foreignModel->quoteField($v['fk']) . ")";
 
-			if ($v["where"])
+			if ($v["join_where"])
 			{
-				$where .= " AND (" . $foreignModel->parse($v["where"]) . ")";
+				$where .= " AND (" . $foreignModel->parse($v["join_where"]) . ")";
 			}
 
 

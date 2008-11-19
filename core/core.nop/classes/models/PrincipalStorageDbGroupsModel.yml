@@ -4,5 +4,3 @@ fields:
     - title
     - god
     - custom
-
-where: {_state} = 0

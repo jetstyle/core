@@ -153,6 +153,8 @@ class Form
        }
    }
 
+   
+   
    // автоматизатор "конфигов по-умолчанию"
    function StaticDefaults( $default_config, &$supplied_config )
    {
@@ -230,7 +232,7 @@ class Form
        {
          $processed = 1;
          if (!$ignore_session) $this->ToSession();
-
+         
          $this->_ProcessEvent( $event );
 
          // redirect
@@ -284,6 +286,7 @@ class Form
         foreach($this->config[$handler] as $k=>$v){
           //это может быть отдельная функиця
           //или это может быть объект с явно заданным методом
+			
           if (is_callable($this->config[$handler][$k])){
             call_user_func($this->config[$handler][$k], $event, $this);
           }else
