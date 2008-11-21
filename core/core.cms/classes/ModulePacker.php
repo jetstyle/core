@@ -74,7 +74,8 @@ class ModulePacker
 		{
 			foreach ($tables AS $table)
 			{
-				$this->dumpStructure($table, $moduleDir);
+				$dumpData = false;
+				
 				if (isset($config['no_data']))
 				{
 					if (
@@ -83,10 +84,17 @@ class ModulePacker
 						(!is_array($config['no_data']) && !$config['no_data'])
 					)
 					{
-						$this->dumpData($table, $moduleDir);
+						$dumpData = true;
 					}
 				}
 				else
+				{
+					$dumpData = true;
+				}
+				
+				$this->dumpStructure($table, $moduleDir, $dumpData);
+				
+				if ($dumpData)
 				{
 					$this->dumpData($table, $moduleDir);
 				}
@@ -100,9 +108,9 @@ class ModulePacker
 	 * @param string $tableName
 	 * @param string $moduleDir
 	 */
-	protected function dumpStructure($tableName, $moduleDir)
+	protected function dumpStructure($tableName, $moduleDir, $dumpData = false)
 	{
-		$this->sqlDumper->dumpStructure($this->appendPrefixToTable($tableName), DBAL::$prefix, $moduleDir.'/.meta/structure.sql');
+		$this->sqlDumper->dumpStructure($this->appendPrefixToTable($tableName), DBAL::$prefix, $moduleDir.'/.meta/structure.sql', $dumpData);
 	}
 
 	/**

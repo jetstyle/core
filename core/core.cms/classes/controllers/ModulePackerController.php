@@ -24,7 +24,7 @@ class ModulePackerController extends Controller
 
 	public function handle()
 	{
-		if (!Locator::get('principal')->isAuth())
+		if (!Locator::get('principal')->security('god'))
 		{
 			Controller::redirect(RequestInfo::$baseUrl.'login');
 		}
