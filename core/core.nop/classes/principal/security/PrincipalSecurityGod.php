@@ -1,12 +1,12 @@
 <?php
 Finder::useClass('principal/security/PrincipalSecurityInterface');
 
-class PrincipalSecurityCmsModulesSimple implements PrincipalSecurityInterface
+class PrincipalSecurityGod implements PrincipalSecurityInterface
 {
 	public function check( &$userData, $params="" )
 	{
 		$status = self::DENIED;
-		if ($userData->getId() > 0) 
+		if ($userData['group']['god']) 
 		{
 			$status = self::GRANTED;
 		}

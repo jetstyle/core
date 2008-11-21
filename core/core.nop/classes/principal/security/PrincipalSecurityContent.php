@@ -42,7 +42,7 @@ class PrincipalSecurityContent implements PrincipalSecurityInterface
 		}
 		
 		$debugText = 'Access to content node '.$params.': '.($status ? "<span style=\"color: green;\">GRANTED</span>" : "<span style=\"color: red;\">DENIED</span>");
-		Debug::trace($debugText, 'content access');
+		Debug::trace($debugText, 'principal');
 		return $status;
 	}
 	

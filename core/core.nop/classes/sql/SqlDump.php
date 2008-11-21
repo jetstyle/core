@@ -11,7 +11,7 @@ class SqlDump
 		$this->db = &Locator::get('db');
 	}
 	
-	public function dumpStructure($tableName, $tablePrefix, $filename = '')
+	public function dumpStructure($tableName, $tablePrefix, $filename = '', $dumpData = false)
 	{
 		$result = $this->db->query("SHOW CREATE TABLE ".$this->quoteName($tableName)."");
 		
@@ -19,6 +19,11 @@ class SqlDump
 		{
 			$result[0]['Create Table'] = str_replace($tablePrefix, '%DB_PREFIX%', $result[0]['Create Table']);
 			$createSql = $result[0]['Create Table'].";\n\n";
+			
+			if (!$dumpData)
+			{
+				$createSql = preg_replace('#AUTO_INCREMENT=\d+#', '', $createSql);
+			}
 		}
 		else
 		{

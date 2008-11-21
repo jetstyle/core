@@ -48,7 +48,7 @@ class PrincipalSecurityCmsModules implements PrincipalSecurityInterface
 		}
 		
 		$debugText = 'Access to module '.$params.': '.($status ? "<span style=\"color: green;\">GRANTED</span>" : "<span style=\"color: red;\">DENIED</span>");
-		Debug::trace($debugText, 'modules access');
+		Debug::trace($debugText, 'principal');
 		return $status;
 	}
 	
