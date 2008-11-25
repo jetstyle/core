@@ -2,7 +2,16 @@
 Finder::useClass("controllers/Controller");
 class LoginController extends Controller
 {
-	protected $plugins = array();
+	protected $plugins = array(
+/*
+		array('MenuPlugin', array(
+			'__aspect' => 'MainMenu',
+			'store_to' => 'menu',
+			'level' => 2,
+			'depth' => 1,
+		)),
+*/
+	);
 
 	protected $params_map = array(
 		array('default', array(NULL)),
