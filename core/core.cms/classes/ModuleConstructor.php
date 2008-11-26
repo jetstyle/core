@@ -39,6 +39,9 @@ class ModuleConstructor
 		{
 			$this->params = $params;
 		}
+		
+		
+		$this->title = $this->config->module_title;
 	}
 
 	public function proceed()
@@ -48,7 +51,7 @@ class ModuleConstructor
 
 	public function getTitle()
 	{
-		return $this->config->module_title;
+		return $this->title;
 	}
 
 	protected function proceedModule(&$config)
@@ -98,10 +101,16 @@ class ModuleConstructor
 					$this->path[] = $neededSubModule;
 					$result = $this->proceedModule($this->getConfig($neededSubModule, $config));
 					array_pop($this->path);
+					
+					if (isset( $this->getConfig($neededSubModule)->module_title ) )
+					    $this->title = $this->getConfig($neededSubModule)->module_title;
 					return $result;
 				}
 				else
 				{
+					if (isset( $this->getConfig($neededSubModule)->module_title ) )
+					    $this->title = $this->getConfig($neededSubModule)->module_title;
+					    
 					return $result[0];
 				}
 			}

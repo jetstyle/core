@@ -7,6 +7,8 @@ class ToolbarPlugin extends Plugin
 		'store_to',
 	);
 
+	var $title; //текущий заголовок меню
+    
 	function initialize($config = NULL)
 	{
 		parent :: initialize($config);
@@ -17,6 +19,7 @@ class ToolbarPlugin extends Plugin
 			$toolbar = new Toolbar();
 			$this->data = $toolbar->getData();
 			$this->goTo = $toolbar->getGoToList();
+			$this->title = $toolbar->getTitle();
  		}
 	}
 
@@ -25,6 +28,11 @@ class ToolbarPlugin extends Plugin
 		$tpl = &Locator::get('tpl');
 		$tpl->set($this->store_to, $this->data);
 		$tpl->set('goto', $this->goTo);
+	}
+	
+	function getTitle()
+	{
+	    return $this->title;
 	}
 }
 ?>

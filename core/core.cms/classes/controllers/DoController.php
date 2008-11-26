@@ -51,7 +51,9 @@ class DoController extends Controller
 
 		Locator::get('tpl')->set('module_body', $moduleConstructor->proceed());
 
-		$this->data['title_short'] = $moduleConstructor->getTitle();
+		$toolbar_title = Locator::get('controller')->getAspect('Toolbar')->getTitle();
+		$module_title  = $moduleConstructor->getTitle();
+		$this->data['title_short'] = $module_title ? $module_title : $toolbar_title ;
 		$this->siteMap = 'module';
 	}
 

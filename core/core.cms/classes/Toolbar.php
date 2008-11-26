@@ -108,12 +108,14 @@
  				}
  				$this->items['submenu'][$r['_parent']]['childs'][$r['id']] = $r;
  			}
+			
  			if($r['href'] && in_array($r['href'], $paths))
  			{
  				if($this->items['main'][$r['id']])
  				{
  					$this->items['main'][$r['id']]['selected'] = true;
  					$this->tpl->set('menu_selected', $r['id']);
+					$this->current_title = $r['title'];
  				}
  				else
  				{
@@ -121,7 +123,8 @@
  					$this->items['submenu'][$r['_parent']]['selected'] = true;
  					$this->items['main'][$r['_parent']]['selected'] = true;
  					$this->tpl->set('menu_selected', $r['_parent']);
- 				}
+					$this->current_title = $r['title'];
+  				}
  			}
  		}
 
@@ -150,5 +153,9 @@
 		return $this->possiblePaths;
 	}
 
+	public function getTitle()
+	{
+	    return $this->current_title;
+	}
  }
 ?>
