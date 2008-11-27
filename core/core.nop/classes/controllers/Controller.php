@@ -11,6 +11,8 @@ abstract class Controller implements ArrayAccess
 	private $o_plugins = array();
 	private $o_aspects = array();
 	
+	private $breadItems = array();
+	
 	protected $params;
 	protected $url;
 	protected $path;
@@ -33,10 +35,7 @@ abstract class Controller implements ArrayAccess
 	}
 	
 	public static function deny()
-	{
-		$controller = &Locator::get('controller');
-		$controller->rend();
-		
+	{		
 		Finder::useLib('http');
 		Http::status(403);
 		$tpl = &Locator::get('tpl');
@@ -214,7 +213,21 @@ abstract class Controller implements ArrayAccess
 		return $status;
 	}
 	
+	public function breadcrumbsWillRender($block)
+	{
+		foreach ($this->breadItems AS $r)
+		{
+			$block->addItem($r['path'], $r['title']);
+		}
+	}
 	
+	protected function addToBread($title, $path = '')
+	{
+		$this->breadItems[] = array(
+			'title' => $title,
+			'path' => $path
+		);
+	}
 	
 	private function _match_pattern($name, $pattern, $value)
 	{

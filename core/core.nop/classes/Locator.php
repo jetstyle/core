@@ -128,6 +128,65 @@ class Locator
 		return self::$objs[$key];
 	}
 	
+	public static function &getBlock($key)
+	{
+		$objKey = '__block_'.strtolower($key);
+		if (!isset(self::$objs[$objKey]))
+		{
+			// camel case to underscored
+			$configName = preg_replace('/([A-Z]+)([A-Z])/','\1_\2', $key);
+        	$configName = strtolower(preg_replace('/([a-z])([A-Z])/','\1_\2', $configName));
+			
+			$configFile = Finder::findScript('conf', $configName, 0, 1, 'yml');
+			
+			if ($configFile)
+			{			
+				$controller = Locator::get('controller');
+				$controllerClass = substr(get_class($controller), 0, -10);
+				
+			
+				$config = YamlWrapper::load($configFile);
+				
+				if (is_array($config))
+				{
+					if (isset($config[$controllerClass]) && is_array($config[$controllerClass]))
+					{
+						$config = $config[$controllerClass];
+					}
+					elseif (isset($config['default']) && is_array($config['default']))
+					{
+						$config = $config['default'];
+					}
+				}
+				else
+				{
+					$config = array();
+				}
+				
+				if ($config['class'])
+				{
+					$className = $config['class'];
+				}
+				else
+				{
+					$className = ucfirst($key).'Block';
+				}
+			}
+			else
+			{
+				$className = ucfirst($key).'Block'; 
+				$config = array();
+			}
+			
+			Finder::useClass('blocks/'.$className);
+			Debug::trace('Create block "'.$key.'"', 'locator');
+			
+			self::$objs[$objKey] = new $className($config);
+		}
+		
+		return self::$objs[$objKey];
+	}
+	
 	/**
 	 * Check existence of object 
 	 *

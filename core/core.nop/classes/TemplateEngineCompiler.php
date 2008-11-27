@@ -218,7 +218,7 @@ class TemplateEngineCompiler
 		}
 
 		$this->compiledFunctions[$this->tpl->getFuncName('site_map_system', '__get_files2functions')] = $this->templateBuildFunction('<'.'?php return unserialize(\''.str_replace("'", "\'", serialize($this->files2functions)).'\'); ?'.'>');
-
+		
 		$this->writeToFile($fileCached, $this->compiledFunctions);
 		$this->writeActionsToFile($fileCached, $this->compiledActionFunctions, 'a');
 
@@ -230,7 +230,7 @@ class TemplateEngineCompiler
 		$this->writeToFile($fileHelperCached, $helper);
 
 		$this->compileWithExternals = false;
-
+		
 		return true;
 	}
 
@@ -273,7 +273,7 @@ class TemplateEngineCompiler
 		{
 			$this->compiledFunctions = array();
 		}
-
+				
 		// 2. скомпилировать кусочки
 		foreach( $pieces AS $k=>$v )
 		{
@@ -688,9 +688,44 @@ class TemplateEngineCompiler
 				{
 					$_instant=true;
 				}
-
+				
+				$blocks = array();				 
+				foreach ($params AS $key => &$param)
+				{
+					if ($param[TE_TYPE] == TE_TYPE_TEMPLATE && preg_match("/^blocks\/(.*)\.html$/i", $param[TE_VALUE], $matches))
+					{
+						if ($pluginName[TE_VALUE] == 'include' && $key === 0)
+						{
+							$param[TE_TYPE] = TE_TYPE_STRING;
+							$param[TE_VALUE] = $matches[1];
+							$pluginName[TE_VALUE] = 'block';					
+						}
+						else
+						{
+							$blocks[$key] = $matches[1];
+							unset($params[$key]);
+						}
+						
+						if ($this->compileWithExternals)
+						{
+							$this->actionCompile('block');
+						}
+					}
+				}
+				
 				$result = '';
 				$result .= '$_ = '.$this->implodeActionParams( $params ).';';
+				
+				foreach ($blocks AS $key => $block)
+				{
+					$p = array(
+						TE_TYPE => TE_TYPE_STRING,
+						TE_VALUE => $block
+					);
+					$result .= '$__ = array('.$this->compileParam($p).');';
+					$result .= '$_["'.$key.'"] = $tpl->action("block", $__);';
+				}
+				
 				$result .= 'echo $tpl->action('.$this->compileParam($pluginName).', $_); ';
 				$instant = $result;
 			}
