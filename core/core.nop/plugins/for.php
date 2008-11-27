@@ -21,6 +21,7 @@
  	
 		$stackId = $tpl->addToStack($params);
 	 	$i=0;
+	 	$total = count($data);
 		foreach($data AS $key => $r)
 		{
 			$for = array(
@@ -29,6 +30,15 @@
 				'odd' => $i%2,				
 			);
 			$for['even'] = !$for['odd'];
+			
+			if ($i == 1)
+			{
+				$for['first'] = true;
+			}
+			elseif ($i == $total)
+			{
+				$for['last'] = true;
+			}
 			
 			$tpl->setRef('for', $for);
 			$tpl->setRef($storeTo, $r);
