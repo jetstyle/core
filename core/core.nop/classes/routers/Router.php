@@ -52,16 +52,29 @@ class Router
 		$cls = strtolower($criteria['class']);
 		$url = $criteria['url'];
 		
-		if (isset($url) && isset($this->url2controller[$url]))
+		if (isset($cls) && array_key_exists($cls, $this->cls2controller))
 		{
-			return Locator::get($this->url2controller[$url]);
+			if (null === $this->cls2controller[$cls])
+			{
+				return null;
+			}
+			else
+			{
+				return Locator::get($this->cls2controller[$cls]);
+			}
 		}
-
-		if (isset($cls) && isset($this->cls2controller[$cls]))
+		elseif (isset($url) && array_key_exists($url, $this->url2controller))
 		{
-			return Locator::get($this->cls2controller[$cls]);
+			if (null === $this->url2controller[$url])
+			{
+				return null;
+			}
+			else
+			{
+				return Locator::get($this->url2controller[$url]);
+			}
 		}
-
+		
 		if (!isset($routers))
 		{
 			$routers = &$this->getRouters();
@@ -77,18 +90,30 @@ class Router
 
 		if (null !== $page)
 		{
-			$cls = strtolower(substr(get_class($page), 0, -strlen('Controller')));
 			if (Locator::exists('controller'))
 			{
-				$id = $cls;
+				$cls = strtolower(substr(get_class($page), 0, -strlen('Controller')));
+				$id = 'controller_'.$cls;
 			}
 			else
 			{
 				$id = 'controller';
 			}
+			
 			$this->cls2controller[$cls] = $id;
 			$this->url2controller[$page['url']] = $id;
 			Locator::bind($id, $page);
+		}
+		else
+		{
+			if (isset($url))
+			{
+				$this->url2controller[$url] = null;
+			}
+			elseif (isset($cls))
+			{
+				$this->cls2controller[$cls] = null;
+			}
 		}
 
 		return $page;
