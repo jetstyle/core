@@ -309,7 +309,7 @@ class DBModel extends Model implements IteratorAggregate, ArrayAccess, Countable
 				
 			}
 
-            $storeTo = $fileName.($fieldSet ? "/".$fieldSet : "");
+			$storeTo = $fileName.($fieldSet ? "_".$fieldSet : "");
 
 			$this->setConfig($ymlConfig, $fileName, $storeTo);
 			return true;
