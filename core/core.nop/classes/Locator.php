@@ -137,7 +137,7 @@ class Locator
 			$configName = preg_replace('/([A-Z]+)([A-Z])/','\1_\2', $key);
         	$configName = strtolower(preg_replace('/([a-z])([A-Z])/','\1_\2', $configName));
 			
-			$configFile = Finder::findScript('conf', $configName, 0, 1, 'yml');
+			$configFile = Finder::findScript('conf', $configName, 0, 1, 'yml', false, 'app');
 			
 			if ($configFile)
 			{			
@@ -178,7 +178,7 @@ class Locator
 				$config = array();
 			}
 			
-			Finder::useClass('blocks/'.$className);
+			Finder::useClass('blocks/'.$className, 'app');
 			Debug::trace('Create block "'.$key.'"', 'locator');
 			
 			self::$objs[$objKey] = new $className($config);

@@ -218,7 +218,7 @@ class TemplateEngine
 		$this->skinDir = $this->rootDir.$skinName;
 		if (substr($this->skinDir, -1) != "/") $this->skinDir.="/";
 
-		Finder::prependDir($this->skinDir);
+		Finder::prependDir($this->skinDir, 'app');
 		// запомнить имя шкуры
 		$this->skinNames[] = $skinName;
 		$this->skinName = $skinName;

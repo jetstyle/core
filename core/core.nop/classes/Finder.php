@@ -82,14 +82,14 @@ function __autoload($className)
 
 class Finder {
 
-	private static $DIRS = array(); 				//информация о корневых директориях для каждого уровня
+	private static $DIRS = array('all' => array()); 				//информация о корневых директориях для каждого уровня
 
 	private static $searchHistory = array();	//информация о том, где мы пытались найти файл. Используется в случае неудачного поиска.
 	private static $searchCache = array();
 	private static $lib_dir;
 
 	//Ищет скрипт по уровням проектов.
-	public static function findScript( $type, $name, $level=0, $dr=1, $ext = 'php', $withSubDirs = false )
+	public static function findScript( $type, $name, $level=0, $dr=1, $ext = 'php', $withSubDirs = false, $scope = 'all' )
 	{
 		//проверяем входные данные
 		if (strlen($type) == 0)
@@ -106,17 +106,22 @@ class Finder {
 			return self::$searchCache[$type][$name.'.'.$ext];
 		}
 		
+		if (!is_array(self::$DIRS[$scope]))
+		{
+			return false;
+		}
+		
 		//определяем начальный уровень поиска
-		$n = count(self::$DIRS);
+		$n = count(self::$DIRS[$scope]);
 		if($level===false) $level = $n - 1;
 		$i = $level>=0 ? $level : $n - $level;
-
+		
 		self::$searchHistory = array();
 		//ищем
 		for( ; $i>=0 && $i<$n; $i+=$dr )
 		{
 			//разбор каждого уровня тут
-			$dir =& self::$DIRS[$i];
+			$dir =& self::$DIRS[$scope][$i];
 			if( !( is_array($dir) && !in_array($type,$dir) ) )
 			{
 				$fname = (is_array($dir) ? $dir[0] : $dir).$type."/".$name.'.'.$ext;
@@ -198,9 +203,9 @@ class Finder {
 
 	//newschool
 	//Тоже, что и FindScript(), но в случае не обнаружения файла вываливается с ошибкой
-	public static function findScript_( $type, $name, $level=0, $dr=1, $ext = 'php', $withSubDirs = false )
+	public static function findScript_( $type, $name, $level=0, $dr=1, $ext = 'php', $withSubDirs = false, $scope = 'all' )
 	{
-		if (!$fname = self::findScript($type,$name,$level,$dr,$ext,$withSubDirs))
+		if (!$fname = self::findScript($type,$name,$level,$dr,$ext,$withSubDirs, $scope))
 		{
 			$e = new FileNotFoundException("File not found: <b>".$name.".".$ext."</b>", self::buildSearchHistory());
 			$e->setFilename($name.".".$ext);
@@ -215,7 +220,7 @@ class Finder {
 	public static function findDir($name)
 	{
 		//определяем начальный уровень поиска
-		$n = count(self::$DIRS);
+		$n = count(self::$DIRS['all']);
 //		$level = $n - 1;
 //		$i = $level>=0 ? $level : $n - $level;
 
@@ -223,7 +228,7 @@ class Finder {
 		for( ; $i>=0 && $i<$n; $i-=1 )
 		{
 			//разбор каждого уровня тут
-			$dir = self::$DIRS[$i];
+			$dir = self::$DIRS['all'][$i];
 	  		if (is_dir($dir . $name))
 	  		{
 	  			return true;
@@ -235,9 +240,9 @@ class Finder {
 	}
 
 	//Тоже, что и FindScript_(), но кроме того инклюдим найденный скрипт
-	public static function useScript( $type, $name, $level=0, $dr=1, $ext = 'php', $withSubDirs = false, $hideExc = false ){
+	public static function useScript( $type, $name, $level=0, $dr=1, $ext = 'php', $withSubDirs = false, $hideExc = false, $scope = 'all' ){
 		$method = ($hideExc) ? "findScript" : "findScript_";
-		if ($path = self::$method($type,$name,$level,$dr,$ext,$withSubDirs))
+		if ($path = self::$method($type,$name,$level,$dr,$ext,$withSubDirs, $scope))
 		self::_useScript( $path );
 	}
 
@@ -267,19 +272,27 @@ class Finder {
 
 	public static function setDirs($DIRS) 
 	{
-		self::$DIRS = $DIRS;
+		foreach ($DIRS AS $key => $value)
+		{
+			if (!is_numeric($key))
+			{
+				self::$DIRS[$value][] = $key;
+				$value = $key;
+			}
+			self::$DIRS['all'][] = $value;
+		}
 	}
 
-	public static function useClass($name, $level = 0, $dr = 1, $ext = 'php', $withSubDirs = false, $hideExc = false) 
+	public static function useClass($name, $scope = 'all') 
 	{
 		if (class_exists($name, false)) return;
-		Finder::useScript("classes", $name, $level, $dr, $ext, $withSubDirs, $hideExc);
+		Finder::useScript("classes", $name, 0, 1, 'php', false, false, $scope);
 	}
 
-	public static function useModel($name, $level = 0, $dr = 1, $ext = 'php', $withSubDirs = false, $hideExc = false) 
+	public static function useModel($name, $scope = 'all') 
 	{
 		if (class_exists($name, false)) return;
-		self::useScript("classes/models", $name, $level, $dr, $ext, $withSubDirs, $hideExc);
+		self::useScript("classes/models", $name, 0, 1, 'php', false, false, $scope);
 	}
 
 	public static function useLib($libraryName, $fileName = "") 
@@ -292,14 +305,24 @@ class Finder {
 		Finder::useScript('libs', $libraryName . "/" . $fileName, 0, 1, 'php');
 	}
 
-	public static function prependDir($dir) 
+	public static function prependDir($dir, $scope = null) 
 	{
-		array_unshift(self::$DIRS,$dir);
+		if (null !== $scope)
+		{
+			if (!is_array(self::$DIRS[$scope])) self::$DIRS[$scope] = array();
+			array_unshift(self::$DIRS[$scope], $dir);
+		}
+		array_unshift(self::$DIRS['all'], $dir);
 	}
 
-	public static function appendDir($dir) 
+	public static function appendDir($dir, $scope = null)
 	{
-		array_push(self::$DIRS,$dir);
+		if (null !== $scope)
+		{
+			if (!is_array(self::$DIRS[$scope])) self::$DIRS[$scope] = array();
+			array_push(self::$DIRS[$scope], $dir);
+		}
+		array_push(self::$DIRS['all'], $dir);
 	}
 }
 ?>
