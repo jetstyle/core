@@ -210,7 +210,7 @@ class EditorObjectsCorrector
 		}
 		catch(FileNotFoundException $e)
 		{
-			return $this->tpl->parse('blocks/tables/'.$template);		
+			return $this->tpl->parse('editor/tables/'.$template);		
 		}
 	}
 
