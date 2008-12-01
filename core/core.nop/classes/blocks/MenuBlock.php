@@ -3,9 +3,8 @@ Finder::useClass('blocks/Block');
 class MenuBlock extends Block
 {
 	protected $parents = null;
-	protected $items = array();
-	protected $childs = array();
-
+	protected $currentNodeId = 0;
+		
 	public function addItem($item)
 	{
 		$data = &$this->getData();
@@ -22,13 +21,12 @@ class MenuBlock extends Block
 	public function markItem(&$row)
 	{
 		$parents = $this->getParentNodes();
-		$current = &Locator::get('controller');
 		
 		if ($parents[$row['id']])
 		{
 			$row['selected'] = 1;
 		}
-		elseif ($row['id'] == $current['id'])
+		elseif ($row['id'] == $this->currentNodeId)
 		{
 			$row['current'] = 1;
 		}
@@ -131,6 +129,9 @@ class MenuBlock extends Block
 			break;
 		}
 
+		$current = &Locator::get('controller');
+		$this->currentNodeId = $current['id'];
+		
 		$where[] = $menu->quoteField('hide_from_menu').' = 0';
 		$menu->registerObserver('row', array(&$this, 'markItem'));
 		$menu->loadTree(implode(' AND ', $where));
