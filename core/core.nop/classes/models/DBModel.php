@@ -1849,7 +1849,12 @@ class DBModel extends Model implements IteratorAggregate, ArrayAccess, Countable
 			foreach ($childs[$parent] AS $id)
 			{
 				$item = $items[$id];
-				$item['childs'] = $this->makeTree($id, $childs, $items);
+				$childItems = $this->makeTree($id, $childs, $items);
+				if (!empty($childItems))
+				{
+					$item['childs'] = new ResultSet();
+					$item['childs']->init($this, $childItems);
+				}
 				$result[] = $item;
 			}
 		}
