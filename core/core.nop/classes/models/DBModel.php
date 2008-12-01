@@ -204,6 +204,10 @@ class DBModel extends Model implements IteratorAggregate, ArrayAccess, Countable
 	 */
 	protected $one = false;
 
+	protected $children = array();
+	protected $treeMinLevel = 0;
+	protected $treeRootId = 0;
+	
 	public static function factory($className = '')
 	{
 		$obj = null;
@@ -262,6 +266,10 @@ class DBModel extends Model implements IteratorAggregate, ArrayAccess, Countable
 	{
 		$this->sqlParts = array();
 		$this->data = null;
+		$this->children = array();
+		$this->treeMinLevel = 0;
+		$this->treeRootId = 0;
+		
 		if (is_array($this->foreignModels) && !empty($this->foreignModels))
 		{
 			foreach ($this->foreignModels AS &$model)
@@ -344,8 +352,6 @@ class DBModel extends Model implements IteratorAggregate, ArrayAccess, Countable
 		{
 			$this->autoDefineTable($className);
 		}
-
-		$this->setEvolutors($ymlConfig['evolutors']);
 		
 		if (isset($ymlConfig['autoPrefix']))
 		{
@@ -428,6 +434,19 @@ class DBModel extends Model implements IteratorAggregate, ArrayAccess, Countable
 		return $this->foreignFields[$fieldName];
 	}
 
+	public function &getForeignModel($fieldName)
+	{
+		if (!isset($this->foreignModels[$fieldName]))
+		{
+			$this->initForeignModel($fieldName);
+		}
+		elseif (!$this->foreignFields[$fieldName]['initialized'])
+		{
+			$this->initForeignModelConfig($fieldName);
+		}
+		return $this->foreignModels[$fieldName];
+	}
+	
 	/**
 	 * Return data
 	 *
@@ -467,6 +486,11 @@ class DBModel extends Model implements IteratorAggregate, ArrayAccess, Countable
 		}
 		return $result;
 	}
+	
+//	public function getTree()
+//	{
+//		
+//	}
 
 	public function getCount($where = NULL)
 	{
@@ -590,7 +614,7 @@ class DBModel extends Model implements IteratorAggregate, ArrayAccess, Countable
 	public function setWhere($where)
 	{
 		if (!empty($where))
-		$this->where = $where;
+			$this->where = $where;
 
 		return $this;
 	}
@@ -604,9 +628,8 @@ class DBModel extends Model implements IteratorAggregate, ArrayAccess, Countable
 	public function setLimit($v)
 	{
 		if (is_numeric($v))
-		{
 			$this->limit = $v;
-		}
+			
 		return $this;
 	}
 
@@ -891,17 +914,10 @@ class DBModel extends Model implements IteratorAggregate, ArrayAccess, Countable
 	{
 		if (is_array($data))
 		{
-			
 			$this->data = array();
-			//$this->notify("before_rows", $data);
-			
+
 			foreach ($data AS $key => $row)
 			{
-			//	if (!empty($this->evolutors))
-			//	{
-			//		$this->notify("foreach_row", $row);
-			//	}
-				
 				$item = new ResultSet();
 				$item->init($this, $row);
 
@@ -915,31 +931,6 @@ class DBModel extends Model implements IteratorAggregate, ArrayAccess, Countable
 		}
 		return $this;
 	}
-
-    /**
-     * Special evolutors for tree handling
-     */
-    protected function prepareChildren($items)
-    {
-        var_dump($items);
-	die('1');
-        foreach ($items as $i=>$item)
-        {
-            echo '<hr>';
-	    var_dump($item);
-            $this->children[$item['_parent']][] = $item['id'];
-        }
-    }
-    
-    protected function setChildren(&$item)
-    {
-	//var_dump( $this->children );
-	die();
-        var_dump( $item['id'], $this->children[ $item['id'] ]  );
-	echo '<hr>';
-	$item['children'] = $this->children[$item['id']];
-        
-    }
 
 
 	// ########## QUOTES ############## //
@@ -991,7 +982,7 @@ class DBModel extends Model implements IteratorAggregate, ArrayAccess, Countable
 			$this->cleanUp();
 		}
 		
-		$this->notify('before_load', array(&$this));
+		$this->notify('will_load', array(&$this));
 
 		if ($this->pagerEnabled)
 		{
@@ -1011,7 +1002,7 @@ class DBModel extends Model implements IteratorAggregate, ArrayAccess, Countable
         $data = $this->select($where, $limit, $offset);
 		$this->setData( $data );
 
-		$this->notify('load', array(&$this));
+		$this->notify('did_load', array(&$this, &$this->data));
 
 		return $this;
 	}
@@ -1022,25 +1013,30 @@ class DBModel extends Model implements IteratorAggregate, ArrayAccess, Countable
 		return $this->load($where, 1);
 	}
 
-
-
-
+	public function &loadTree($where = NULL)
+	{
+		/**
+		 * we need to aggregate data by primary key
+		 */
+		if (!$this->keyField)
+		{
+			$this->setKeyField($this->getPk());
+		}
+		$this->registerObserver('row', array($this, 'treePrepareRow'));
+		$this->registerObserver('did_load', array($this, 'treeConstruct'));
+		
+		$this->load($where);
+		
+		return $this;
+	}
 
 	// ############# Internal realization ######################### //
-
-
 	protected function initialize($fieldSet = null)
 	{
 		if (is_null($this->table))
 		{
 			$this->autoDefineTable();
-		}
-		
-		if ( $this->evolutors )
-		{
-		    $this->setEvolutors();
-		}
-		
+		}		
 
 		//для всех классов с пустым fields
 		$className = get_class($this);
@@ -1060,25 +1056,6 @@ class DBModel extends Model implements IteratorAggregate, ArrayAccess, Countable
 		}
 	}
 	
-	protected function setEvolutors ($evolutors=null)
-	{
-	    if ($evolutors==null)
-	    {
-	        $evolutors = $this->evolutors;
-	    }
-	    else
-	        $this->evolutors = $evolutors;
-	        
-	    //запомним эволюторы, чтобы не делать notify для моделей у которых нет эволюторов
-	    if (!empty($evolutors))
-	    {
-	        foreach ( $evolutors as $k=>$evo )
-	        {
-    	        $this->registerObserver( $k,  $evo );
-    	    }
-	    }
-	}
-
 	protected function &getPager()
 	{
 		if (null === $this->pager)
@@ -1152,17 +1129,11 @@ class DBModel extends Model implements IteratorAggregate, ArrayAccess, Countable
 
 	protected function loadSql($sql)
 	{
-		$this->notify('before_load', array(&$this));
-		//		$this->data = $this->selectSql($sql, true);
+		$this->notify('will_load', array(&$this));
+
 		$this->setData($this->selectSql($sql, true));
 		
-            if ($this->table_name=='calculator_fields')
-            {
-            var_dump($data, $limit);
-            die('xx');
-            }
-		
-		$this->notify('load', array(&$this));
+		$this->notify('did_load', array(&$this));
 	}
 
 	/**
@@ -1363,20 +1334,28 @@ class DBModel extends Model implements IteratorAggregate, ArrayAccess, Countable
 
 	public function selectSql($sql, $isLoad=false)
 	{
-		if ($this->keyField !== null)
+		$this->notify('will_select_sql', array(&$sql));
+		
+		$db = &Locator::get('db');
+		$result = $db->execute($sql);
+		$data = array();
+		
+		while ($r = $db->getRow($result))
 		{
-			$data = Locator::get('db')->query($sql, $this->keyField);
-		}
-		else
-		{
-			$data = Locator::get('db')->query($sql);
+			$this->notify("row", array(&$r));
+			if (null !== $this->keyField)
+				$data[$r[$this->keyField]] = $r;
+			else
+				$data[] = $r;
 		}
 
-		if ($data !== null)
+		if (!empty($data))
 		{
 			$foreignData = $this->divideForeignDataFrom($data);
 			$this->applyDataToForeignModels($foreignData, $data);
 		}
+		
+		$this->notify('did_select_sql', array(&$data));
 
 		return $data;
 	}
@@ -1610,7 +1589,7 @@ class DBModel extends Model implements IteratorAggregate, ArrayAccess, Countable
 	{
 		$set = array();
 		foreach ($data AS $k=>$v)
-		$set[] = $this->quoteField($k) . '='. $this->quoteValue($v);
+			$set[] = $this->quoteField($k) . '='. $this->quoteValue($v);
 		return implode(',', $set);
 	}
 
@@ -1767,19 +1746,6 @@ class DBModel extends Model implements IteratorAggregate, ArrayAccess, Countable
 		return $ret;
 	}
 
-	public function &getForeignModel($fieldName)
-	{
-		if (!isset($this->foreignModels[$fieldName]))
-		{
-			$this->initForeignModel($fieldName);
-		}
-		elseif (!$this->foreignFields[$fieldName]['initialized'])
-		{
-			$this->initForeignModelConfig($fieldName);
-		}
-		return $this->foreignModels[$fieldName];
-	}
-
 	protected function initForeignModel($fieldName)
 	{
 		if (!isset($this->foreignFields[$fieldName]))
@@ -1852,12 +1818,51 @@ class DBModel extends Model implements IteratorAggregate, ArrayAccess, Countable
 		$field['initialized'] = true;
 	}
 
+	
+	/**
+	 * tree functionality
+	 */
+	protected function treePrepareRow(&$row)
+	{
+		$this->children[$row['_parent']][] = $row['id'];
+		if (!$this->treeMinLevel)
+		{
+			$this->treeMinLevel = $row['_level'];
+			$this->treeRootId = $row['_parent'];
+		}
+		elseif ($row['_level'] < $this->treeMinLevel)
+		{
+			$this->treeRootId = $row['_parent'];
+		}
+	}
+	
+	protected function treeConstruct(&$model, &$data)
+	{
+		$data = $this->makeTree($this->treeRootId, $this->children, $data);
+	}
+	
+	protected function makeTree($parent, $childs, $items)
+	{
+		$result = array();
+		if (is_array($childs[$parent]))
+		{
+			foreach ($childs[$parent] AS $id)
+			{
+				$item = $items[$id];
+				$item['childs'] = $this->makeTree($id, $childs, $items);
+				$result[] = $item;
+			}
+		}
+		return $result;
+	}
+	
+	/**
+	 * 
+	 */
 	public function isForeignField($field)
 	{
 		return isset($this->foreignFields[$field]);
 	}
-
-
 
 	/*
 	 * Реализация интерфейсов IteratorAggregate, ArrayAccess, Countable
