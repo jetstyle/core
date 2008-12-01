@@ -10,15 +10,18 @@ class LoginController extends Controller
 	{
 		$prp = &Locator::get('principal');
 		
-		if ($_POST['submit'])
+		if ($_POST['_event'])
 		{
-			if ($prp->login($_POST['login'], $_POST['password'], $_POST['permanent']) === PrincipalInterface::AUTH)
+			if ($prp->login($_POST['_login'], $_POST['_password'], $_POST['_permanent']) === PrincipalInterface::AUTH)
 			{
+			    
 				$redirectTo = RequestInfo::get('retpath') ?
 						  RequestInfo::get('retpath') :
 						  RequestInfo::$baseUrl;
+
 				Controller::redirect($redirectTo);
 			}
+
 		}
 		else
 		{
@@ -39,6 +42,12 @@ class LoginController extends Controller
 			}
 		}
 		
+			
+		Finder::useClass("forms/EasyForm");
+		$form =& new EasyForm('login',$config);
+		
+		Locator::get('tpl')->set('Form', $form->handle());
+
 		$this->siteMap = 'login';
 	}
 }
