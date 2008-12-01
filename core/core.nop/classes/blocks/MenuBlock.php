@@ -19,6 +19,28 @@ class MenuBlock extends Block
 		return $item;
 	}
 	
+	public function markItem(&$row)
+	{
+		$parents = $this->getParentNodes();
+		$current = &Locator::get('controller');
+		
+		if ($parents[$row['id']])
+		{
+			$row['selected'] = 1;
+		}
+		elseif ($row['id'] == $current['id'])
+		{
+			$row['current'] = 1;
+		}
+
+		if ($row['controller'] == 'link')
+		{
+			$row['is_link'] = true;
+		}
+		$row['href'] = $row['_path'];
+		
+	}
+	
 	protected function getParentNodeByLevel($level)
 	{
 		$data = &Locator::get('controller');
@@ -73,10 +95,9 @@ class MenuBlock extends Block
 		 * загрузим модель меню
 		 * с условием на where
 		 */
-		$menu = & DBModel::factory('Content');
+		$menu = & DBModel::factory('Content')->removeField('text');
 		$menu->setOrder(array('_level' => 'ASC', '_order' => 'ASC'));
 
-		$current = &Locator::get('controller');
 		$parents = $this->getParentNodes();
 
 		$where = array();
@@ -111,58 +132,10 @@ class MenuBlock extends Block
 		}
 
 		$where[] = $menu->quoteField('hide_from_menu').' = 0';
+		$menu->registerObserver('row', array(&$this, 'markItem'));
+		$menu->loadTree(implode(' AND ', $where));
 
-		$menu = $menu->load(implode(' AND ', $where))->getArray();
-
-		foreach ($menu AS $i => $r)
-		{
-			if ($parents[$r['id']])
-			{
-				$r['selected'] = 1;
-			}
-			elseif ($r['id'] == $current['id'])
-			{
-				$r['current'] = 1;
-			}
-
-			if ($r['controller'] == 'link')
-			{
-				$r['is_link'] = true;
-//				if ($r['link_direct'])
-//				{
-//					$r['link'] = Link::formatLink($r['link']);
-//				}
-			}
-			$r['href'] = $r['_path'];
-			$this->childs[$r['_parent']][] = $r['id'];
-			$this->items[$r['id']] = $r;
-		}
-		
-		if(!empty($this->childs))
-		{
-			$data = $this->prepare(key($this->childs));
-		}
-		else
-		{
-			$data = array();
-		}
-
-		$this->setData($data);
-		unset ($this->items, $this->childs);
-	}
-
-	protected function prepare($id)
-	{
-		$childs = array ();
-		if (is_array($this->childs[$id]))
-		{
-			foreach ($this->childs[$id] AS $r)
-			{
-				$this->items[$r]['childs'] = $this->prepare($r);
-				$childs[] = $this->items[$r];
-			}
-		}
-		return $childs;
+		$this->setData($menu);
 	}
 
 	protected function &findElementById(&$data, $id)
