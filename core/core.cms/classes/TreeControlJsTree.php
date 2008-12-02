@@ -95,12 +95,44 @@ class TreeControlJsTree extends TreeControl
 				 	$treeParams['show_controls'] = true;
 				}
 				
+				$checkTree = false;
+				
 				if (!$this->config->ajaxAutoLoading)
 				{
 					$this->load();
+					if (empty($this->children[$this->items[$this->getRootId()]['_parent']]))
+					{
+						$checkTree = true;
+					}
 				}
-				$treeParams['data'] = $this->toJSON();
+				else
+				{
+					$checkTree = true;
+				}
 	
+				if ($checkTree)
+				{
+					$result = $this->getNodesCountForRoot();
+					if (!$result['total'])
+					{
+						$this->createRootNode();
+							
+						if (!$this->config->ajaxAutoLoading)
+						{
+							$this->loaded = false;
+							$this->items = array();
+							$this->children = array();
+							$this->load();
+						}
+					}
+					// all nodes are deleted
+					elseif ($result['total'] == $result['deleted'])
+					{
+						$treeParams['all_deleted'] = true;
+					}
+				}
+				
+				$treeParams['data'] = $this->toJSON();
 
 				$this->tpl->set('tree_params', $treeParams);
 			break;
@@ -143,6 +175,42 @@ class TreeControlJsTree extends TreeControl
 		}
 	}
 
+	protected function createRootNode()
+	{
+		$_REQUEST['newtitle'] = iconv('cp1251', 'UTF-8', 'Узел дерева');
+		$id = parent::addNode();
+		
+		if ($this->config->denyDropToRoot)
+		{
+			Locator::get('db')->execute('
+				UPDATE ??'.$this->config->table_name.' SET _supertag = "", _path = "" WHERE id = '.$id.'
+			');
+		}
+		
+	}
+	
+	protected function getNodesCountForRoot()
+	{
+		$data = array('total' => 0, 'deleted' => 0);
+		
+		$result = $this->db->execute("
+			SELECT ".$this->idField.", _state
+			FROM ??".$this->config->table_name."
+			WHERE _parent = 0 AND _state>=0 " . ($this->config->where ? " AND ".$this->config->where : "") . "
+		");
+
+		while ($r = $this->db->getRow($result))
+		{
+			$data['total']++;
+			if ($r['_state'] == 2)
+			{
+				$data['deleted']++; 
+			}
+		}
+		
+		return $data;
+	}
+	
 	protected function renderTrash()
 	{
 		//render trash switcher

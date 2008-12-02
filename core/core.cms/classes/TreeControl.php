@@ -596,12 +596,9 @@ class TreeControl
 			$result = $this->db->queryOne("
 				SELECT ".$this->idField."
 				FROM ??".$this->config->table_name."
-				WHERE _parent = 0 AND _state=0 " . ($this->config->where ? " AND ".$this->config->where : "") . "
-				ORDER BY _order ASC
+				WHERE _parent = 0 AND _state IN (0,1,2) " . ($this->config->where ? " AND ".$this->config->where : "") . "
+				ORDER BY _state ASC, _order ASC
 			");
-
-			//var_dump($result);
-			//die();
 
 			if ($result[$this->idField])
 			{
