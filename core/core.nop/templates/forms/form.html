@@ -1,0 +1,27 @@
+{{TPL:Form}}
+	{{?errors}}При заполнении формы допущены ошибки{{?/}}
+	{{form}}
+	<input type="hidden" name="_event2" id="{{form_name}}_event2" value="" /> <!-- для работы кнопок-ссылок -->
+	<input type="hidden" name="{{form_present}}" value="{{form_name}}" />
+	{{?form_data_id_value}}
+		<input type="hidden" name="{{form_data_id}}" value="{{form_data_id_value}}" />
+	{{?/}}
+
+    {{content}}
+
+   	{{buttons_left}}
+	{{buttons_right}}
+  </form>
+{{/TPL:Form}}
+
+<!-- Список кнопочек для формы. Сами кнопочки -- see forms/buttons.html -->
+{{TPL:Buttons}} {{_}}
+  <div class="stopper-"></div>
+{{/TPL:Buttons}}
+{{TPL:Buttons_Empty}}{{/TPL:Buttons_Empty}}
+{{TPL:Buttons_Item}}
+ <!--div class="one-"-->
+  {{*BUTTON}}
+ <!--/div-->
+{{/TPL:Buttons_Item}}
+

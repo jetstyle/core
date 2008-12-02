@@ -5,7 +5,7 @@
     
     "interface_tpl" => "string.html:Textarea",
     "interface_tpl_params" => array(
-                                    "cols" => 40,
+                                    "cols" => 45,
                                     "rows" => 10,
                                ),
   );
