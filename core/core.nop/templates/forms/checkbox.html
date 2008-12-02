@@ -1,4 +1,8 @@
-<!-- forms/interface/checkbox.html : Р’С‹РІРѕРґ РїРѕР»СЏ РёРЅС‚РµСЂС„РµР№СЃР° "Р§РµРєР±РѕРєСЃ" -->
+<!-- forms/interface/checkbox.html : Вывод поля интерфейса "Чекбокс" -->
 {{:Checkbox}}
-<input id="{{field}}" class="checkbox-" type="checkbox" name="{{field}}" value="{{interface_data}}" {{?checked}}checked="checked" {{/?}}/>
+<div>
+	<label for="{{field}}">Запомнить</label>
+	<input id="{{field}}" class="checkbox-" type="checkbox" name="{{field}}" value="{{interface_data}}" {{?checked}}checked="checked" {{/?}}/>
+	{{errors}}
+</div>
 {{/:Checkbox}}
