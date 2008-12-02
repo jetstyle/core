@@ -1,5 +1,5 @@
 {{TPL:Form}}
-	{{?errors}}При заполнении формы допущены ошибки{{?/}}
+	{{?errors}}<p class="system-mess-">При заполнении формы допущены ошибки</p>{{?/}}
 	{{form}}
 	<input type="hidden" name="_event2" id="{{form_name}}_event2" value="" /> <!-- для работы кнопок-ссылок -->
 	<input type="hidden" name="{{form_present}}" value="{{form_name}}" />
