@@ -1354,6 +1354,10 @@ class DBModel extends Model implements IteratorAggregate, ArrayAccess, Countable
 			$foreignData = $this->divideForeignDataFrom($data);
 			$this->applyDataToForeignModels($foreignData, $data);
 		}
+		else
+		{
+			$data = null;
+		}
 		
 		$this->notify('did_select_sql', array(&$data));
 

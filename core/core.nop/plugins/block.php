@@ -16,12 +16,13 @@ catch(FileNotFoundException $e)
 	return $tpl->parse($tplName);
 }
 
-$controller = Locator::get('controller');
-
-$method = strtolower(substr($blockName,0,1)).substr($blockName,1)."WillRender";
-if (method_exists($controller, $method))
+if ($controller = Locator::get('controller', true))
 {
-	$controller->$method($block);
+	$method = strtolower(substr($blockName,0,1)).substr($blockName,1)."WillRender";
+	if (method_exists($controller, $method))
+	{
+		$controller->$method($block);
+	}
 }
 
 // default

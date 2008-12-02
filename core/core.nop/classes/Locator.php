@@ -92,7 +92,7 @@ class Locator
 	 * @param string $key
 	 * @return object
 	 */
-	public static function &get($key)
+	public static function &get($key, $safe = false)
 	{
 		if (!isset(self::$objs[$key]))
 		{
@@ -121,7 +121,14 @@ class Locator
 			}
 			else
 			{
-				throw new JSException('Object *'.$key.'* doesn\'t exist in Locator database');
+				if ($safe)
+				{
+					return null;
+				}
+				else
+				{
+					throw new JSException('Object *'.$key.'* doesn\'t exist in Locator database');
+				}
 			}
 		}
 		
