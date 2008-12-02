@@ -6,49 +6,64 @@ class LoginController extends Controller
 		array('default', array(NULL)),
 	);
 
-	function handle_default($config)
+	function handle_default()
 	{
 		$prp = &Locator::get('principal');
 		
-		if ($_POST['_event'])
+		if ($prp->security('noguests'))
 		{
-			if ($prp->login($_POST['_login'], $_POST['_password'], $_POST['_permanent']) === PrincipalInterface::AUTH)
+			if (RequestInfo::get('logout'))
 			{
-			    
 				$redirectTo = RequestInfo::get('retpath') ?
-						  RequestInfo::get('retpath') :
-						  RequestInfo::$baseUrl;
-
+							  RequestInfo::get('retpath') :
+							  RequestInfo::$baseUrl.'login';
+				$prp->logout();
 				Controller::redirect($redirectTo);
 			}
-
+			else
+			{
+				$this->siteMap = 'logout';
+				Locator::get('tpl')->set('username', $prp->get('login'));
+			}
 		}
 		else
 		{
-			if ($prp->security('noguests'))
+			Finder::useClass("forms/EasyForm");
+			$config = array();
+			$config['on_after_event'] = &$this;
+			$form =& new EasyForm('login', $config);
+			Locator::get('tpl')->set('Form', $form->handle());
+	
+			$this->siteMap = 'login';
+		}
+	}
+	
+	public function onAfterEventForm($event, $form)
+	{
+		$data = array();
+		
+		if (is_array($form->fields))
+		{
+			foreach ($form->fields AS $field)
 			{
-				if (RequestInfo::get('logout'))
-				{
-					$redirectTo = RequestInfo::get('retpath') ?
-								  RequestInfo::get('retpath') :
-								  RequestInfo::$baseUrl.'login';
-					$prp->logout();
-				}
-				else
-				{
-					$redirectTo = RequestInfo::$baseUrl;
-				}
-				Controller::redirect($redirectTo);
+				$data[$field->name] = $field->model->Model_GetDataValue();
 			}
 		}
-		
-			
-		Finder::useClass("forms/EasyForm");
-		$form =& new EasyForm('login',$config);
-		
-		Locator::get('tpl')->set('Form', $form->handle());
 
-		$this->siteMap = 'login';
+		$prp = &Locator::get('principal');
+		
+		if ($prp->login($data['login'], $data['password'], $data['permanent']) === PrincipalInterface::AUTH)
+		{
+			$redirectTo = RequestInfo::get('retpath') ?
+					  RequestInfo::get('retpath') :
+					  RequestInfo::$baseUrl;
+
+			Controller::redirect($redirectTo);
+		}
+		else
+		{
+			$form->fields[1]->validator->_Invalidate("bad_pass", "Неверное сочетание логин/пароль");
+		}
 	}
 }
 ?>

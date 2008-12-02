@@ -247,6 +247,8 @@ class Form
          // success
          if ($this->processed && $this->success && isset($this->config["success_url"]))
             Controller::redirect( $this->config["success_url"] );
+           
+         $processed = 0;
        }
      }
      if (!$processed)
