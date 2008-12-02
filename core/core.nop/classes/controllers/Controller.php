@@ -44,7 +44,17 @@ abstract class Controller implements ArrayAccess
         $retPath .= $_SERVER['SERVER_NAME'].$_SERVER['REQUEST_URI'];
         $retPath = urlencode($retPath);
 		
-		$tpl->set('retpath', $retPath);
+//		$tpl->set('retpath', $retPath);
+		
+		Finder::useClass("forms/EasyForm");
+		$config = array();
+		
+		$data = array('Login');
+		$config['action'] = $tpl->action('href_to', $data).'?retpath='.$retPath;
+		
+		$form =& new EasyForm('login', $config);
+		Locator::get('tpl')->set('Form', $form->handle());
+		
 		$tpl->parseSiteMap('forbidden');
 		echo $tpl->get('html');
 		die();

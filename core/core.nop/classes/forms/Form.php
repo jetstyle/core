@@ -136,7 +136,15 @@ class Form
 
      Finder::UseClass("forms/FormField"); // он нам стопудово понадобится
 
-     $this->action = $rh->ri->url;
+     if ($form_config['action'])
+     {
+     	$this->action = $form_config['action'];
+     }
+     else
+     {
+     	$this->action = $rh->ri->url;
+     }
+     
 
      if (!$form_config) $form_config = $this->default_config;
      else               Form::StaticDefaults($this->default_config, $form_config);
