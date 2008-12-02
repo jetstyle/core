@@ -6,15 +6,19 @@
     <td class="middle" align="center">
       <h1>У Вас нет прав на доступ к этой странице.</h1>
       <form action='{{!href_to "Login"}}?retpath={{retpath}}' method='post'>
+      	<input type='hidden' name='__form_present' value="1"/>
+      	<input type='hidden' name='_event2' value="1"/>
+      	
+      	
         <table cellpadding="10" class="widget" align="center"><tr><td>
         <table cellspacing="0" cellpadding="2">
           <tr>
             <td class="text-">Ваше имя:</td>
-            <td><input type='text' name='login' id="login"/></td>
+            <td><input type='text' name='_login' id="login"/></td>
           </tr>
           <tr>
             <td class="text-">Пароль:</td>
-            <td><input type='password' name='password' /></td>
+            <td><input type='password' name='_password' /></td>
           </tr>
           <tr>
             <td>{{@dummy.html}}</td>
