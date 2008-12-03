@@ -743,7 +743,7 @@ class TemplateEngineCompiler
 				{
 					if (count ($A) > 0)
 					{
-						$result .= ' $_r = &'.$this->parseExpression($var) .';'."\n";
+						$result .= ' $_r = '.$this->parseExpression($var) .';'."\n";
 						foreach ($A AS $stmt)
 						{
 							// FIXME:
@@ -756,7 +756,7 @@ class TemplateEngineCompiler
 
 						  		$params['_'] = array(
 						  			TE_TYPE => TE_TYPE_PHP_SCRIPT,
-						  			TE_VALUE => '&$_r',
+						  			TE_VALUE => '$_r',
 						  		);
 
 						  		$result .= ' $_='.$this->implodeActionParams( $params ).';';
