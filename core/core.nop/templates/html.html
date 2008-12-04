@@ -4,28 +4,70 @@
 
 <head>
 	<meta content="text/html; charset=windows-1251" http-equiv="Content-Type" />
-	
+
 	<meta name="Keywords" content="{{!pageKeywords}}" />
     <meta name="Description" content="{{!pageDescription}}" />
-    
+
     <title>{{!pageTitle}}</title>
     {{!connect "all.css"}}
     {{!connect "custom.css"}}
-    
-    {{!connect compile="css"}}
-    <link rel="stylesheet" href="{{css}}print.css" 
-          media="{{?html:print}}all{{?:}}print{{/?}}" type="text/css" />
+	{{!connect "screen-footer.css"}}
 	
-	{{!connect "default.js"}}
+	{{!connect "screen-forms.css"}}
+
+    {{!connect compile="css"}}
+    <link rel="stylesheet" href="{{css}}print.css"
+          media="{{?html_print}}all{{?:}}print{{/?}}" type="text/css" />
+
+    {{!connect "default.js"}}
     {{!connect "custom.js"}}
-	{{!connect compile="js"}}
+    
+    {{!connect "jquery.js"}}
+    {{!connect "jquery.ifixpng2.js"}}
+	
+    {{!connect compile="js"}}
     {{!inline compile=head}}
+    
+    <script type="text/javascript">
+	
+	$(document).ready(function () 
+	{
+	    if ($.ifixpng)
+	    {
+		$.ifixpng('{{images}}z.gif');
+		$('.button-left-, .button-right-, .input-left-, .input-text-, .input-right-, .c1-, .c2-, .c4-, .c5-' ).ifixpng();		
+	    }
+	    
+	    if($.browser.msie && $.browser.version < 7)
+	    {
+		$(function(){
+				var o = $('.button-text-');
+				var l = o.length;
+				var bgIMG = o.css('background-image');
+				if(bgIMG.indexOf(".png")!=-1){
+					var iebg = bgIMG.split('url("')[1].split('")')[0];
+					jQuery(o).css('background-image', 'none');
+					for(i = 0; i < l; i++) {
+					jQuery(o).get(i).runtimeStyle.filter = "progid:DXImageTransform.Microsoft.AlphaImageLoader(src='" + iebg + "',sizingMethod='scale')"; }
+				}
+			});
+	    }
+	});
+	
+
+	
+	</script>
+	
   </head>
-  
+
 <body id="idBody" class="debug" onload="preloadImages('{{images}}'); {{!inline compile="onload"}}">
 <a id='top' name='top'></a>
+<div id="center">
+{{!cms_panel}}
 {{HTML_body}}
-
+</div>
+{{@footer.html}}
+<img src="{{!href_to 'HTCron'}}" alt="cron" />
 {{!debug}}
 </body>
 </html>

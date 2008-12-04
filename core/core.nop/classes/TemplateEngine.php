@@ -80,6 +80,7 @@ class TemplateEngine
 		$this->skin( Config::get('tpl_skin') );
 		
 		$this->set("/", RequestInfo::$baseUrl);
+		$this->set("tpl_skin", Config::get('tpl_skin') );
 	}
 
 	public static function &getInstance()
