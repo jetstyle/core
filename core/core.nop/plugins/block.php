@@ -13,7 +13,10 @@ try
 }
 catch(FileNotFoundException $e)
 {
-	return $tpl->parse($tplName);
+	$stackId = $tpl->addToStack($params);
+	echo $tpl->parse($tplName);
+	$tpl->freeStack($stackId);
+	return;// $tpl->parse($tplName);
 }
 
 if ($controller = Locator::get('controller', true))
