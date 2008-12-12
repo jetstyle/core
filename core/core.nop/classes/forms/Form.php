@@ -364,7 +364,7 @@ class Form
      $tpl->set(
      	"form",
      	"<form action=\"".$this->action."\" ".
-     		"method=\"".RequestInfo::METHOD_POST."\" ".
+     		"method=\"".( $this->config["form_method"] ? $this->config["form_method"] : RequestInfo::METHOD_POST )."\" ".
      		"id=\"".$form_name."\"".
      		"name=\"".$form_name.'" '.
      		($this->config["form_class"] ? 'class="'.$this->config["form_class"].'"' : '' ).
