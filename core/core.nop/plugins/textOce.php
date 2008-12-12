@@ -47,7 +47,7 @@ else
 		if ( $params['referrer'] )
 		{
 		    $ref = $_SERVER['HTTP_REFERER'];
-		    $referer_where = " AND ".$db->quote($ref)." LIKE referrer ";
+		    $referer_where = " AND ".$db->quote($ref)." LIKE referer ";
 		}
 
 		
@@ -64,7 +64,7 @@ else
 		*/
 
 		//если такой записи нет - создаём её
-		if( !$r["id"] )
+		if( !$r["id"] && !$ref )
 		{
 			$r["id"] = $db->insert("INSERT INTO ".$custom['table']."(title,_supertag,_created,_modified) VALUES('$supertag','$supertag',NULL,NULL)");
 		}
