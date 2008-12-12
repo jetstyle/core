@@ -44,11 +44,27 @@ else
 	else
 	{
 		$db = &Locator::get('db');
-		$sql = "SELECT id,".$custom['field'].$custom['add_fields']." FROM ".$custom['table']." WHERE _supertag='$supertag' AND _state=0";
+		if ( $params['referrer'] )
+		{
+		    $ref = $_SERVER['HTTP_REFERER'];
+		    $referer_where = " AND ".$db->quote($ref)." LIKE referrer ";
+		}
+
+		
+		$sql = "SELECT id,".$custom['field'].$custom['add_fields']." FROM ".$custom['table']." WHERE _supertag='$supertag' AND _state=0 ".$referer_where;
 		$r = $db->queryOne($sql);
 
+		//если записи с реферером нет - ищем без него
+		/*
+		if ( !$r["id"] && $params['referrer'] )
+		{
+			$sql = "SELECT id,".$custom['field'].$custom['add_fields']." FROM ".$custom['table']." WHERE _supertag='$supertag' AND _state=0 ";
+			$r = $db->queryOne($sql);
+		}
+		*/
+
 		//если такой записи нет - создаём её
-		if(!$r["id"])
+		if( !$r["id"] )
 		{
 			$r["id"] = $db->insert("INSERT INTO ".$custom['table']."(title,_supertag,_created,_modified) VALUES('$supertag','$supertag',NULL,NULL)");
 		}
