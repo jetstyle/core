@@ -113,7 +113,8 @@ class Upload
 		}
 
 		$uploaded_file = $_file['tmp_name'];
-		if(is_uploaded_file($uploaded_file))
+		
+		if(is_uploaded_file($uploaded_file) || ( file_exists($_file['tmp_name']) && is_file($_file['tmp_name']) ) )
 		{
 			$this->current = false;
 			//клиентские данные
@@ -121,6 +122,7 @@ class Upload
 			$ext = explode(".",$_file['name']);
 			$ext = strtolower($ext[ count($ext)-1 ]);
 			//проверка на допуск
+			
 			if( !$this->isAllowed($ext) ) return false;
 			//грузим
 
