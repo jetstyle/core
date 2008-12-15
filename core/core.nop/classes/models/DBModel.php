@@ -1054,6 +1054,8 @@ class DBModel extends Model implements IteratorAggregate, ArrayAccess, Countable
 		{
 			$this->addFields($this->fields);
 		}
+		
+		$this->registerObserver('row', array(&$this, 'onRow'));
 	}
 	
 	protected function &getPager()
@@ -1103,7 +1105,7 @@ class DBModel extends Model implements IteratorAggregate, ArrayAccess, Countable
 		$config["type"] = $type;
 		$config['className'] = $className;
 		$config['initialized'] = false;
-
+		
 		$this->foreignFields[$fieldName] = $config;
 	}
 
@@ -1195,7 +1197,7 @@ class DBModel extends Model implements IteratorAggregate, ArrayAccess, Countable
 		if (!isset($model)) return;
 
 		$where = $model->quoteField($fieldinfo['fk']) .'='. DBModel::quote($data[$fieldinfo['pk']]);
-		$model->load($where);
+		$model->loadOne($where);
 
 		$data[$fieldName] = &$model;
 	}
@@ -1334,7 +1336,7 @@ class DBModel extends Model implements IteratorAggregate, ArrayAccess, Countable
 
 	public function selectSql($sql, $isLoad=false)
 	{
-		$this->notify('will_select_sql', array(&$sql));
+		$this->notify('will_select_sql', array(&$this, &$sql));
 		
 		$db = &Locator::get('db');
 		$result = $db->execute($sql);
@@ -1342,19 +1344,21 @@ class DBModel extends Model implements IteratorAggregate, ArrayAccess, Countable
 		
 		while ($r = $db->getRow($result))
 		{
-			$this->notify("row", array(&$r));
+			$this->notify("row", array(&$this, &$r));
 			if (null !== $this->keyField)
 				$data[$r[$this->keyField]] = $r;
 			else
 				$data[] = $r;
 		}
 
-		if (!empty($data))
-		{
-			$foreignData = $this->divideForeignDataFrom($data);
-			$this->applyDataToForeignModels($foreignData, $data);
-		}
-		else
+//		if (!empty($data))
+//		{
+//			$foreignData = $this->divideForeignDataFrom($data);
+//			$this->applyDataToForeignModels($foreignData, $data);
+//		}
+//		else
+
+		if (empty($data))
 		{
 			$data = null;
 		}
@@ -1362,6 +1366,21 @@ class DBModel extends Model implements IteratorAggregate, ArrayAccess, Countable
 		$this->notify('did_select_sql', array(&$data));
 
 		return $data;
+	}
+	
+	protected function onRow(&$model, &$row)
+	{
+		$this->applyDataToForeignModels($this->divideForeignDataFrom($row), $row);
+		if (is_array($this->foreignFields))
+		{
+			foreach ($this->foreignFields AS $fieldConf)
+			{
+				if ($fieldConf['type'] != 'has_one' && array_key_exists('lazy_load', $fieldConf) && !$fieldConf['lazy_load'])
+				{
+					$this->loadForeignField($fieldConf['name'], $row);
+				}
+			}
+		}
 	}
 
 	/**
@@ -1379,27 +1398,27 @@ class DBModel extends Model implements IteratorAggregate, ArrayAccess, Countable
 			return $foreignData;
 		}
 
-		foreach ($data AS $row => &$d)
+//		foreach ($data AS $row => &$d)
+//		{
+		foreach($data AS $fieldName => $fieldValue)
 		{
-			foreach($d AS $fieldName => $fieldValue)
+			if (!isset($this->tableFields[$fieldName]))
 			{
-				if (!isset($this->tableFields[$fieldName]))
+				$fieldParts = explode(':', $fieldName);
+				if (!is_array($foreignData[$fieldParts[0]]))
 				{
-					$fieldParts = explode(':', $fieldName);
-					if (!is_array($foreignData[$row][$fieldParts[0]]))
-					{
-						$foreignData[$row][$fieldParts[0]] = array();
-					}
-					$foreignData[$row][$fieldParts[0]][$fieldParts[1]] = $fieldValue;
-					unset($d[$fieldName]);
+					$foreignData[$fieldParts[0]] = array();
 				}
-			}
-
-			if (empty($foreignData))
-			{
-				return $foreignData;
+				$foreignData[$fieldParts[0]][$fieldParts[1]] = $fieldValue;
+				unset($d[$fieldName]);
 			}
 		}
+
+//			if (empty($foreignData))
+//			{
+//				return $foreignData;
+//			}
+//		}
 
 		return $foreignData;
 	}
@@ -1410,37 +1429,29 @@ class DBModel extends Model implements IteratorAggregate, ArrayAccess, Countable
 	 * @param array $data
 	 * @param array || null $modelData
 	 */
-	protected function applyDataToForeignModels($data, &$modelData = null)
+	protected function applyDataToForeignModels($data, &$row)
 	{
 		if (empty($data) || empty($this->foreignFields) || empty($this->foreignModels))
 		{
 			return;
 		}
 
-		if ($modelData === null)
+		foreach ($data AS $tableAlias => $d)
 		{
-			$modelData = &$this->data;
-		}
-
-		foreach ($data AS $row => $valuesSet)
-		{
-			foreach ($valuesSet AS $tableAlias => $d)
+			if (isset($this->foreignAlias2FieldName[$tableAlias]))
 			{
-				if (isset($this->foreignAlias2FieldName[$tableAlias]))
-				{
-					$fieldName = $this->foreignAlias2FieldName[$tableAlias];
-					$model = &$this->foreignModels[$fieldName];
+				$fieldName = $this->foreignAlias2FieldName[$tableAlias];
+				$model = &$this->foreignModels[$fieldName];
 
-					$clonedModel = clone $model;
-					$d = array($d);
+				$clonedModel = clone $model;
 
-					$clonedModel->setOne(true);
-					$clonedModel->applyDataToForeignModels(array($valuesSet), $d);
-					$clonedModel->setData($d);
-					$modelData[$row][$fieldName] = $clonedModel;
-				}
+				$clonedModel->setOne(true);
+				$clonedModel->applyDataToForeignModels($data, $d);
+				$clonedModel->setData(array($d));
+				$row[$fieldName] = $clonedModel;
 			}
 		}
+		
 	}
 
 	public function loadForeignField($fieldName, &$data)
@@ -1826,7 +1837,7 @@ class DBModel extends Model implements IteratorAggregate, ArrayAccess, Countable
 	/**
 	 * tree functionality
 	 */
-	protected function treePrepareRow(&$row)
+	protected function treePrepareRow(&$model, &$row)
 	{
 		$this->children[$row['_parent']][] = $row['id'];
 		if (!$this->treeMinLevel)
