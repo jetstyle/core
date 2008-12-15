@@ -35,7 +35,8 @@
 			{
 				$for['first'] = true;
 			}
-			elseif ($i == $total)
+			
+			if ($i == $total)
 			{
 				$for['last'] = true;
 			}
