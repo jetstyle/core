@@ -68,7 +68,7 @@ else
 		*/
 
 		//если такой записи нет - создаём её
-		if( !$r["id"] && !$ref )
+		if( !$r["id"] &&  !$params['referer']  )
 		{
 			$r["id"] = $db->insert("INSERT INTO ".$custom['table']."(title,_supertag,_created,_modified) VALUES('$supertag','$supertag',NULL,NULL)");
 		}
