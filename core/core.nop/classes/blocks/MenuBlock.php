@@ -18,7 +18,7 @@ class MenuBlock extends Block
 		return $item;
 	}
 	
-	public function markItem(&$row)
+	public function markItem(&$model, &$row)
 	{
 		$parents = $this->getParentNodes();
 		

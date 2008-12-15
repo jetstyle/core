@@ -1363,7 +1363,7 @@ class DBModel extends Model implements IteratorAggregate, ArrayAccess, Countable
 			$data = null;
 		}
 		
-		$this->notify('did_select_sql', array(&$data));
+		$this->notify('did_select_sql', array(&$this, &$data));
 
 		return $data;
 	}
