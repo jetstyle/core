@@ -148,10 +148,15 @@ class Locator
 			
 			if ($configFile)
 			{			
-				$controller = Locator::get('controller');
-				$controllerClass = substr(get_class($controller), 0, -10);
+				if ($controller = Locator::get('controller', true))
+				{
+					$controllerClass = substr(get_class($controller), 0, -10);
+				}
+				else
+				{
+					$controllerClass = '';
+				}
 				
-			
 				$config = YamlWrapper::load($configFile);
 				
 				if (is_array($config))
