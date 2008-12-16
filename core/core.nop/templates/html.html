@@ -28,38 +28,9 @@
     {{!connect "custom.js"}}
     
     {{!connect "jquery.js"}}
-    {{!connect "jquery.ifixpng2.js"}}
-	
+
     {{!connect compile="js"}}
     {{!inline compile=head}}
-    
-    <script type="text/javascript">
-	
-	$(document).ready(function () 
-	{
-	    if ($.ifixpng)
-	    {
-		$.ifixpng('{{images}}z.gif');
-		$('.button-left-, .button-right-, .input-left-, .input-text-, .input-right-, .c1-, .c2-, .c4-, .c5-, .lc, .rc, .corner--, .logo-, .menu, .attention, .quote' ).ifixpng();		
-	    }
-	    
-	    if($.browser.msie && $.browser.version < 7)
-	    {
-		$(function(){
-				var o = $('.button-text-');
-				var l = o.length;
-				var bgIMG = o.css('background-image');
-				if(bgIMG.indexOf(".png")!=-1){
-					var iebg = bgIMG.split('url("')[1].split('")')[0];
-					jQuery(o).css('background-image', 'none');
-					for(i = 0; i < l; i++) {
-					jQuery(o).get(i).runtimeStyle.filter = "progid:DXImageTransform.Microsoft.AlphaImageLoader(src='" + iebg + "',sizingMethod='scale')"; }
-				}
-			});
-	    }
-	});
-	
-	</script>
 	
   </head>
 

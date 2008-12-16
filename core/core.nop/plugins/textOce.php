@@ -47,14 +47,12 @@ else
 		if ( $params['referer'] )
 		{
 		    $ref = $_SERVER['HTTP_REFERER'];
-		    $referer_where = " AND ".$db->quote($ref)." LIKE r.title  AND t.referer_id=r.id";
+		    $referer_where = " AND (".$db->quote($ref)." LIKE r.title OR r.title='')  AND t.referer_id=r.id ORDER by r.title DESC";
 		    $sql = "SELECT t.id, t.".$custom['field']. " ".$custom['add_fields']." FROM ".$custom['table']." as t INNER JOIN ??texts_referers as r WHERE t._supertag='$supertag' AND t._state=0 ".$referer_where;
 		}
 		else
 		{
-		
 		    $sql = "SELECT id,".$custom['field'].$custom['add_fields']." FROM ".$custom['table']." WHERE _supertag='$supertag' AND _state=0 ";
-		
 		}
 		$r = $db->queryOne($sql);
 
@@ -72,6 +70,8 @@ else
 		{
 			$r["id"] = $db->insert("INSERT INTO ".$custom['table']."(title,_supertag,_created,_modified) VALUES('$supertag','$supertag',NULL,NULL)");
 		}
+		
+		
 		Config::set('__texts_'.$supertag, $r);
 	}
 
