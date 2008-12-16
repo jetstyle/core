@@ -133,7 +133,8 @@ class TreeControlJsTree extends TreeControl
 				}
 				
 				$treeParams['data'] = $this->toJSON();
-
+				$treeParams['level_limit'] = $this->level_limit;
+				
 				$this->tpl->set('tree_params', $treeParams);
 			break;
 		}
@@ -249,7 +250,7 @@ class TreeControlJsTree extends TreeControl
 					'data' => iconv('cp1251', 'utf-8', $this->_getTitle($this->items[$id])),
 					'attributes' => array(
 						'id' => 'node-'.$id, 
-						'data' => '{type: "'.( ($this->items[$id]['_level'] == 1 && $this->config->denyDropToRoot) ? 'root' : 'node').'"'.($this->items[$id]['_level'] == 1 ? ', max_depth: '.$this->level_limit : '').',path: "'.$this->items[$id]['_path'].'" }',
+						'data' => '{type: "'.( ($this->items[$id]['_level'] == 1 && $this->config->denyDropToRoot) ? 'root' : 'node').'",path: "'.$this->items[$id]['_path'].'" }',
 						'class' => ($this->items[$id]['_state'] == 1 ? 'hidden' : ($this->items[$id]['_state'] == 2 ? 'deleted' : '')),
 					),
 					'level' => $this->items[$id]['_level'],
