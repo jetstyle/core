@@ -1859,19 +1859,19 @@ class DBModel extends Model implements IteratorAggregate, ArrayAccess, Countable
 		$data = $this->makeTree($this->treeRootId, $this->children, $data);
 	}
 	
-	protected function makeTree($parent, $childs, $items)
+	protected function makeTree($parent, $children, $items)
 	{
 		$result = array();
-		if (is_array($childs[$parent]))
+		if (is_array($children[$parent]))
 		{
-			foreach ($childs[$parent] AS $id)
+			foreach ($children[$parent] AS $id)
 			{
 				$item = $items[$id];
-				$childItems = $this->makeTree($id, $childs, $items);
+				$childItems = $this->makeTree($id, $children, $items);
 				if (!empty($childItems))
 				{
-					$item['childs'] = new ResultSet();
-					$item['childs']->init($this, $childItems);
+					$item['children'] = new ResultSet();
+					$item['children']->init($this, $childItems);
 				}
 				$result[] = $item;
 			}

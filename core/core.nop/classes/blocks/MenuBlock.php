@@ -136,7 +136,7 @@ class MenuBlock extends Block
 		$menu->registerObserver('row', array(&$this, 'markItem'));
 		$menu->loadTree(implode(' AND ', $where));
 
-		$this->setData($menu);
+		$this->setData($menu->getArray());
 	}
 
 	protected function &findElementById(&$data, $id)
