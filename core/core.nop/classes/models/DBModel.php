@@ -1373,11 +1373,11 @@ class DBModel extends Model implements IteratorAggregate, ArrayAccess, Countable
 		$this->applyDataToForeignModels($this->divideForeignDataFrom($row), $row);
 		if (is_array($this->foreignFields))
 		{
-			foreach ($this->foreignFields AS $fieldConf)
+			foreach ($this->foreignFields AS $fieldName => $fieldConf)
 			{
 				if ($fieldConf['type'] != 'has_one' && array_key_exists('lazy_load', $fieldConf) && !$fieldConf['lazy_load'])
 				{
-					$this->loadForeignField($fieldConf['name'], $row);
+					$this->loadForeignField($fieldName, $row);
 				}
 			}
 		}
