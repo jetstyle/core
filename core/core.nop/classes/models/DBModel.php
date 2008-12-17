@@ -1024,9 +1024,12 @@ class DBModel extends Model implements IteratorAggregate, ArrayAccess, Countable
 		}
 		$this->registerObserver('row', array($this, 'treePrepareRow'));
 		$this->registerObserver('did_load', array($this, 'treeConstruct'));
-		
+				
 		$this->load($where);
 		
+		$this->removeObserver('row', array($this, 'treePrepareRow'));
+		$this->removeObserver('did_load', array($this, 'treeConstruct'));
+				
 		return $this;
 	}
 

@@ -91,6 +91,28 @@ class Model
 			$this->observers[$event][] = &$action;
 	}
 	
+	public function removeObserver($event, $action)
+	{
+		if ($action)
+		{
+			if (is_array($this->observers[$event]))
+			{
+				foreach ($this->observers[$event] AS $key => $value)
+				{
+					if ($value == $action)
+					{
+						unset($this->observers[$event][$key]);
+						break;
+					}
+				}
+			}
+		}
+		else
+		{
+			unset($this->observers[$event]);
+		}
+	}
+	
 	public function notify($event, $params)
 	{
 		$actions = &$this->observers[$event];
