@@ -47,8 +47,10 @@ else
 		if ( $params['referer'] )
 		{
 		    $ref = $_SERVER['HTTP_REFERER'];
-		    $referer_where = " AND (".$db->quote($ref)." LIKE r.title OR r.title='')  AND t.referer_id=r.id ORDER by r.title DESC";
-		    $sql = "SELECT t.id, t.".$custom['field']. " ".$custom['add_fields']." FROM ".$custom['table']." as t INNER JOIN ??texts_referers as r WHERE t._supertag='$supertag' AND t._state=0 ".$referer_where;
+		    
+		    $sql = "SELECT t.id, t.".$custom['field']. " ".$custom['add_fields']." FROM ".$custom['table']." as t 
+			    INNER JOIN ??texts_referers as r WHERE t._supertag='$supertag' AND t._state=0 
+			    AND (".$db->quote($ref)." LIKE r.title OR r.title='')  AND t.channel_id=r.channel_id ORDER by r.title DESC";
 		}
 		else
 		{

@@ -26,7 +26,7 @@ if(Locator::get('principalCms')->security('cmsModules', $module))
 	$tpl->set('_href', (Config::exists('cms_url') ? Config::get('cms_url') : RequestInfo::$baseUrl."cms/").str_replace('::id::',$id,$oce[$module]).'hide_toolbar=1&popup=1' );
 	$tpl->set('_width', $params['width'] ? $params['width'] : 500 );
 	$tpl->set('_height', $params['height'] ? $params['height'] : 600 );
-	$tpl->set('_title', $params['title'] ? $params['title'] : 'редактировать ('.$id.')' );
+	$tpl->set('_title', $params['title'] ? $params['title'] : 'редактировать' );
 
 	return $tpl->parse('oce.html');
 }
