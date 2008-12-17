@@ -27,8 +27,6 @@
     {{!connect "default.js"}}
     {{!connect "custom.js"}}
     
-    {{!connect "jquery.js"}}
-
     {{!connect compile="js"}}
     {{!inline compile=head}}
 	
@@ -37,9 +35,13 @@
 <body id="idBody" class="debug" onload="preloadImages('{{images}}'); {{!inline compile="onload"}}">
 <a id='top' name='top'></a>
 {{!cms_panel}}
-{{?fixed}}<div id="center">{{/?}}
-			{{HTML_body}}
-{{?fixed}}</div>{{/?}}
+{{?fixed}}
+	<div id="center">
+		{{HTML_body}}
+	</div>
+{{?:}}
+	{{HTML_body}}
+{{/?}}
 <img src="{{!href_to 'HTCron'}}" alt="cron" />
 
 {{!debug}}
