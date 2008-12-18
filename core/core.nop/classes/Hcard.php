@@ -161,6 +161,7 @@ class Hcard
 				{
 					return;
 				}
+				file_put_contents($vcardDir.'/.htaccess', "RewriteEngine off");
 			}
 			
 		    if (!$handle = fopen($vcardDir.'/'.$filename, 'w')) 
