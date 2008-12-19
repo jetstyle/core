@@ -23,7 +23,8 @@ class FormSimple
 	protected $id = 0; //id редактируемой записи
 
 	protected $supertagLimit = 20;
-
+	protected $updateSupertagAfterInsert = false;
+	
 	protected $html;
 
 	public function __construct( &$config )
@@ -276,7 +277,7 @@ class FormSimple
 					$data[$r[$value['fk']]] = $r['title'];
 				}
 
-				$this->config->RENDER[] = array($value['pk'], "select", $data);
+				$this->config->RENDER[] = array($value['pk'], "select", $data, $value['default']);
 			}
 			// думаем, что $value['name'] это имя таблицы
 			else
@@ -296,7 +297,7 @@ class FormSimple
 						$data[$r[$value['fk']]] = $r['title'];
 					}
 
-					$this->config->RENDER[] = array($value['pk'], "select", $data);
+					$this->config->RENDER[] = array($value['pk'], "select", $data, $value['default']);
 				}
 			}
 		}
@@ -451,11 +452,18 @@ class FormSimple
 			$this->postData['_supertag'] = $translit->supertag( $this->postData[$field], TR_NO_SLASHES, $limit );
 			if ($this->config->supertag_check)
 			{
-				$sql = "SELECT id, _supertag FROM ??".$this->config->table_name." WHERE _supertag=".$this->db->quote($this->postData['_supertag']);
+				$sql = "SELECT id, _supertag FROM ??".$this->config->table_name." WHERE _supertag=".$this->db->quote($this->postData['_supertag'])." AND id <> ".intval($this->id);
 				$rs = $this->db->queryOne($sql);
 				if ($rs['id'])
 				{
-					$this->postData['_supertag'] .= "_".$this->id;
+					if (!$this->id)
+					{
+						$this->updateSupertagAfterInsert = true;
+					}
+					else
+					{
+						$this->postData['_supertag'] .= '_'.$this->id;
+					}
 				}
 			}
 			$this->UPDATE_FIELDS[] = '_supertag';
@@ -480,7 +488,12 @@ class FormSimple
 		$this->new_id = $this->id = $this->model->insert($this->postData);
 
 		// update order
-		$this->updateData(array('_order' => $this->id));
+		$data = array('_order' => $this->id);
+		if ($this->updateSupertagAfterInsert)
+		{
+			$data['_supertag'] = $this->postData['_supertag'].'_'.$this->id;
+		}
+		$this->updateData($data);
 	}
 }
 
