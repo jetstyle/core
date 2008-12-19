@@ -32,7 +32,7 @@ class Hcard
 		$this->constructAddress();
 		$this->constructIM();
 		
-		$this->makeVcard();
+		//$this->makeVcard();
 	}
 	
 	public function getResultData()
@@ -169,53 +169,53 @@ class Hcard
 		    	return;
 		    }
 		
-			$vcard = "BEGIN:VCARD\nVERSION:3.0\n";
+			$vcard = "BEGIN:VCARD\r\nVERSION:3.0\r\n";
 			
-			$vcard.= "N:".$this->resultData['n']['name'].";".$this->resultData['n']['surname'].";".$this->resultData['patronymic'].";;\n";
+			$vcard.= "N:".$this->resultData['n']['surname'].";".$this->resultData['n']['name'].";".$this->resultData['patronymic'].";;\r\n";
 
 			if ($this->resultData['fn']['value'] && $this->resultData['fn']['type'] != 'org')
 			{
-				$vcard .= "FN:".$this->resultData['fn']['value']."\r";
+				$vcard .= "FN:".$this->resultData['fn']['value']."\r\n";
 			}
 			
 			if ($this->resultData['company'])
 			{
-				$vcard .= "ORG:".$this->resultData['company']."\n";
+				$vcard .= "ORG:".$this->resultData['company']."\r\n";
 			}
 			
 			if (is_array($this->resultData['tel']))
 			{
 				foreach ($this->resultData['tel'] AS $tel)
 				{
-					$vcard .= "TEL;TYPE=".$tel['type'].":".$tel['value']."\n";
+					$vcard .= "TEL;TYPE=".$tel['type'].":".$tel['value']."\r\n";
 				}
 			}
 			
 			if ($this->resultData['email'])
 			{
-				$vcard .= "EMAIL:".$this->resultData['email']."\n";
+				$vcard .= "EMAIL:".$this->resultData['email']."\r\n";
 			}
 			
 			if ($this->resultData['icq'])
 			{
-				$vcard .= "X-ICQ:".$this->resultData['icq']."\n";
+				$vcard .= "X-ICQ:".$this->resultData['icq']."\r\n";
 			}
 			
 			if ($this->resultData['jabber'])
 			{
-				$vcard .= "X-JABBER:".$this->resultData['jabber']."\n";
+				$vcard .= "X-JABBER:".$this->resultData['jabber']."\r\n";
 			}
 			
 			if ($this->resultData['image'])
 			{
-				$vcard .= "PHOTO;ENCODING=b;TYPE=".strtoupper($this->resultData['image']['ext']).":";
+				//$vcard .= "PHOTO;ENCODING=b;TYPE=".strtoupper($this->resultData['image']['ext']).":";
+				$vcard .= "PHOTO;ENCODING=b;BASE64:";
 				$vcard .= base64_encode(file_get_contents($this->resultData['image']['name_full']));
-				$vcard .= "\n";
+				$vcard .= "\r\n";
 			}
 			
 			$vcard .= "END:VCARD";
-			
-			fwrite($handle, iconv('cp1251', 'utf-16', $vcard));
+			fwrite($handle, iconv('cp1251', 'utf-8', $vcard));
 		    fclose($handle); 
 		}
 
