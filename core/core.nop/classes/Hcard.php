@@ -209,7 +209,7 @@ class Hcard
 			if ($this->resultData['image'])
 			{
 				//$vcard .= "PHOTO;ENCODING=b;TYPE=".strtoupper($this->resultData['image']['ext']).":";
-				$vcard .= "PHOTO;ENCODING=b;BASE64:";
+				$vcard .= "PHOTO;BASE64:";
 				$vcard .= base64_encode(file_get_contents($this->resultData['image']['name_full']));
 				$vcard .= "\r\n";
 			}
