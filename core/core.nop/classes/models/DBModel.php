@@ -1057,8 +1057,6 @@ class DBModel extends Model implements IteratorAggregate, ArrayAccess, Countable
 		{
 			$this->addFields($this->fields);
 		}
-		
-		$this->registerObserver('row', array(&$this, 'onRow'));
 	}
 	
 	protected function &getPager()
@@ -1154,6 +1152,7 @@ class DBModel extends Model implements IteratorAggregate, ArrayAccess, Countable
 		if (!isset($model)) return;
 
 		// we need clean model for each row
+		
 		$fmodel = clone $model;
 		
 		$where = $fmodel->quoteField($fieldinfo['fk']) .'='. DBModel::quote($data[$fieldinfo['pk']]);
@@ -1347,19 +1346,13 @@ class DBModel extends Model implements IteratorAggregate, ArrayAccess, Countable
 		
 		while ($r = $db->getRow($result))
 		{
+			$this->onRow($this, &$r);
 			$this->notify("row", array(&$this, &$r));
 			if (null !== $this->keyField)
 				$data[$r[$this->keyField]] = $r;
 			else
 				$data[] = $r;
 		}
-
-//		if (!empty($data))
-//		{
-//			$foreignData = $this->divideForeignDataFrom($data);
-//			$this->applyDataToForeignModels($foreignData, $data);
-//		}
-//		else
 
 		if (empty($data))
 		{
@@ -1400,9 +1393,7 @@ class DBModel extends Model implements IteratorAggregate, ArrayAccess, Countable
 		{
 			return $foreignData;
 		}
-
-//		foreach ($data AS $row => &$d)
-//		{
+		
 		foreach($data AS $fieldName => $fieldValue)
 		{
 			if (!isset($this->tableFields[$fieldName]))
@@ -1413,16 +1404,10 @@ class DBModel extends Model implements IteratorAggregate, ArrayAccess, Countable
 					$foreignData[$fieldParts[0]] = array();
 				}
 				$foreignData[$fieldParts[0]][$fieldParts[1]] = $fieldValue;
-				unset($d[$fieldName]);
+				unset($data[$fieldName]);
 			}
 		}
-
-//			if (empty($foreignData))
-//			{
-//				return $foreignData;
-//			}
-//		}
-
+		
 		return $foreignData;
 	}
 
