@@ -50,9 +50,12 @@
       {
         if (!is_array( $fname )) // просто файл в текущей шкуре
         {
-          $tpl->set("_",$fname);
-        $str .= $tpl->parse($template);
-      }
+          	$file = $rh->app_dir.'skins'.($rh->tpl_skin ? '/'.$rh->tpl_skin : '').'/'.$compile.'/'.$fname.'.'.$compile;
+        	$tpl->set("_",$fname);
+        	$tpl->set('_mtime', @filemtime($file));
+        	
+        	$str .= $tpl->parse($template);
+      	}
         else // файл с произвольным путём
         {
           $tpl->set("*",$fname);
