@@ -75,7 +75,33 @@ class FormSimple
 	{
 		//load data
 		$this->load();
-
+		
+		$valid = array('text');
+		
+		if ($_GET['ret'] && in_array($_GET['ret'], $valid) )
+		{
+		    header('Content-Type: text/html; charset=windows-1251');
+		    die( $this->item[ $_GET['ret'] ] );
+		}
+		else if ($this->needAjaxUpdate())
+		{
+			$this->ajax_update = true; 
+			$this->prefix = "";
+			//var_dump( $this->config->UPDATE_FIELDS, $_POST, array_intersect_key($_POST, array_flip($this->config->UPDATE_FIELDS)) );
+			//$this->ajaxValidFields;
+			
+			$this->config->UPDATE_FIELDS = array_flip( array_intersect_key($_POST, array_flip( $this->config->UPDATE_FIELDS ) ));
+			
+			$this->readPost();
+			//var_dump( $this->prefix, $this->postData ) ;
+			
+			$redirect = $this->update();
+			$this->loaded=false;
+			//$this->load();
+			
+			header('Content-Type: text/html; charset=windows-1251');
+			die($this->postData[ $_POST['ajax_update'] ]);
+		}
 		//update data
 		if ($this->needDelete())
 		{
@@ -338,6 +364,9 @@ class FormSimple
 						$_POST[$this->prefix.$fieldName] = '';
 					}
 					$this->postData[$fieldName] = $_POST[$this->prefix.$fieldName];
+					
+					if ($this->ajax_update)
+					    $this->postData[$fieldName] = iconv('UTF-8', 'CP1251', $this->postData[$fieldName]);
 					RequestInfo::free($this->prefix.$fieldName);
 				}
 			}
@@ -365,7 +394,12 @@ class FormSimple
 	{
 		$this->model->update( $data, $this->model->quoteFieldShort($this->idField).'='.DBModel::quote($this->id) );
 	}
-
+	
+	protected function needAjaxUpdate()
+	{
+		return $_POST["ajax_update"] ? true : false;
+	}
+	
 	protected function needUpdate()
 	{
 		return $_POST[$this->prefix."update"] ? true : false;
@@ -421,17 +455,24 @@ class FormSimple
 			{
 				foreach ($fields AS $field)
 				{
-					$field_pre = $field.'_pre';
-					if (!isset($this->postData[ $field_pre ]))
+					if ( $this->postData[ $field ] )
 					{
-						$this->postData[ $field_pre ] = $this->postData[ $field ];
+					    $field_pre = $field.'_pre';
+					    if (!isset($this->postData[ $field_pre ]))
+					    {
+						    $this->postData[ $field_pre ] = $this->postData[ $field ];
+					    }
+					
+					
+					    $this->postData[ $field_pre ] = $tpl->action( $filter, $this->postData[ $field_pre ]);
+					    //добавляем поле в список для сохранения
+					    $this->UPDATE_FIELDS[] = $field_pre;
 					}
-					$this->postData[ $field_pre ] = $tpl->action( $filter, $this->postData[ $field_pre ]);
-					//добавляем поле в список для сохранения
-					$this->UPDATE_FIELDS[] = $field_pre;
 				}
 			}
 		}
+		if ( $this->ajax_update )
+		    return; 
 
 		//supertag
 		if ( $this->config->supertag )
