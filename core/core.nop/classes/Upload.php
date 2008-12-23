@@ -105,6 +105,11 @@ class Upload
 		$this->webDir = (Config::get('front_end_path') ? Config::get('front_end_path') : RequestInfo::$baseUrl).str_replace(Config::get('project_dir'), '', $this->dir);
 	}
 
+	public function getDir()
+	{
+		return $this->dir;
+	}
+
 	public function uploadFile($_file, $file_name, $is_full_name=false, $params = NULL )
 	{
 		if(!is_array($_file))
