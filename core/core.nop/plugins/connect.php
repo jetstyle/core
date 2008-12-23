@@ -120,7 +120,7 @@ if ( $compile )
 		{
 			foreach( $tpl->CONNECT[$compile] as $fname )
 			{
-				$tpl->set("_",$fname);
+				$tpl->set("_", $fname);
 				$str .= $tpl->parse($template);
 			}
 		}
@@ -136,6 +136,12 @@ else
 
 	if( !isset($tpl->CONNECT[$ext]) || !is_array($tpl->CONNECT[$ext]) || !in_array($fname,$tpl->CONNECT[$ext]) )
 	{
+			if ($ext == "js")
+			{
+			    $new_name = Finder::findScript("js", $fname, 0, 1, "js");
+			    if ($new_name)
+				$fname = '../../../../'.str_replace(".js", '', $new_name);
+			}
 			$tpl->CONNECT[$ext][] = $fname;
 	}
 }

@@ -363,11 +363,15 @@ class TemplateEngine
 		}
 
 		$data = $this->siteMap[$siteMapKey];
+		
+		if (Config::get('enable_cms_panel'))
+		    $data = array_merge(array('cms_panel'=>'@blocks/cms_panel_wrapper.html'), $data ); 
+		
 		if (!$data['html'])
 		{
 			$data['html'] = '@html.html';
 		}
-
+		
 		$cacheName = preg_replace("/[^\w\x7F-\xFF\s]/", $this->templateSepfix, $siteMapKey);
 		$fileCached = Config::get('cache_dir') . $this->templateSepfix . $this->skinName . $this->templateFilePrefix .	$cacheName . ".php";
 		$fileHelperCached = Config::get('cache_dir') . $this->templateSepfix . $this->skinName . $this->templateFilePrefix .	$cacheName . "_helper.php";

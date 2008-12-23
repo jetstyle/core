@@ -1,3 +1,4 @@
+{{?*}}
 {{!connect "jquery.js"}}
 
 <style>
@@ -7,7 +8,8 @@
 .error { background-color: red }
 
 .hand   { cursor:pointer; cursor:hand; }
-.cms-save-but {
+.cms-save-but 
+{
     -x-system-font:none;
     background-color:#99FF99;
     font-family:Arial,sans-serif;
@@ -21,12 +23,9 @@
     margin-right:5px;
     padding:5px;
     float: right;
-    /*
-    width: 40px;
-    background: #99FF99 url({{images}}inplace/accept.png) no-repeat
-    */
 }
-.cms-delete-but {
+.cms-delete-but 
+{
     -x-system-font:none;
     background:#FFB8B1 none repeat scroll 0 0;
     color:#880000;
@@ -223,3 +222,4 @@ $(document).ready(
     <input id="input-cancel" name="cancel" class="cms-delete-but hand" type="button" title="Отмена" value="Отмена" />
     <input id="input-save" name="update_2" class="cms-save-but hand" type="button" title="Сохранить" value="Сохранить" />
 </div>
+{{/?}}

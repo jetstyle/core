@@ -34,7 +34,8 @@
 
 <body id="idBody" class="debug" onload="preloadImages('{{images}}'); {{!inline compile="onload"}}">
 <a id='top' name='top'></a>
-{{!cms_panel}}
+{{cms_panel}}
+
 {{?fixed}}
 	<div id="center">
 		{{HTML_body}}
@@ -42,6 +43,7 @@
 {{?:}}
 	{{HTML_body}}
 {{/?}}
+
 <img src="{{!href_to 'HTCron'}}" alt="cron" />
 
 {{!debug}}

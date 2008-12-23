@@ -126,11 +126,20 @@ class Finder {
 			{
 				$fname = (is_array($dir) ? $dir[0] : $dir).$type."/".$name.'.'.$ext;
 
+				
+		    
 				self::$searchHistory[] = $fname;
-
+				
 				if(@file_exists($fname))
 				{
 					self::$searchCache[$type][$name.'.'.$ext] = $fname;
+					if ($type=='js')
+					{
+					    $fname = str_replace(Config::get('project_dir'), '', $fname );
+					
+					
+					    //echo '<hr>'.$fname;
+					}
 					return $fname;
 				}
 
@@ -281,6 +290,7 @@ class Finder {
 			}
 			self::$DIRS['all'][] = $value;
 		}
+		//var_dump(self::$DIRS);
 	}
 
 	public static function useClass($name, $scope = 'all') 
