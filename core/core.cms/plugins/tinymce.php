@@ -22,5 +22,13 @@
       $out .= $tpl->parse($params['template'].":init");
   }
   
+  if ($params['wrap'])
+  {
+      $wrap = array( "_", $out,
+		     "title"=>$params['title'], 
+                     "closed"=>( $params['wrap']=="closed" ? 1 : 0 ) );
+      $out = $tpl->action("wrap", $params);
+  }
+  
   echo $out;
 ?>
