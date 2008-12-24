@@ -27,6 +27,9 @@
     {{!connect "default.js"}}
     {{!connect "custom.js"}}
     
+    {{!connect "jquery.js"}}
+    {{!connect "counter.js"}}
+    
     {{!connect compile="js"}}
     {{!inline compile=head}}
 	
@@ -47,5 +50,13 @@
 <img src="{{!href_to 'HTCron'}}" alt="cron" />
 
 {{!debug}}
+
+<script language="javascript" type="text/javascript">
+	counter.setBaseUrl('{{/}}');
+	var nodeId = parseInt('{{PAGE.id}}', 10);
+	counter.setNodeId(nodeId);
+	counter.trackView(nodeId, 'page');
+	counter.track();
+</script>
 </body>
 </html>
