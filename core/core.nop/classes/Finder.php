@@ -103,6 +103,7 @@ class Finder {
 
 		if (self::$searchCache[$type][$name.'.'.$ext])
 		{
+			//echo '<hr>'.self::$searchCache[$type][$name.'.'.$ext];
 			return self::$searchCache[$type][$name.'.'.$ext];
 		}
 		
@@ -132,15 +133,17 @@ class Finder {
 				
 				if(@file_exists($fname))
 				{
-					self::$searchCache[$type][$name.'.'.$ext] = $fname;
+					
 					if ($type=='js')
 					{
-					   // die(Config::get('project_dir'));
+					    //die(Config::get('project_dir'));
 					    $fname = str_replace(Config::get('project_dir'), '', $fname );
+					    //die($fname);
 					    //$fname = str_replace(Config::get('core_dir'), '', $fname );
 					
 					    //echo '<hr>'.$fname;
 					}
+					self::$searchCache[$type][$name.'.'.$ext] = $fname;
 					return $fname;
 				}
 
