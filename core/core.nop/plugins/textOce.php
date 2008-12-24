@@ -9,6 +9,7 @@ if (Config::get('db_disable'))
 $type = $params['type'] ? $params['type'] : 'texts';
 $good = true;
 
+//Любой контент
 if ($type != 'texts')
 {
 	$id = $params['id'];
@@ -26,6 +27,7 @@ if ($type != 'texts')
           'height'=>'600',
 	);
 }
+//Таблица texts
 else
 {
 	$supertag = $params['tag'] ? $params['tag'] : $params[0];
@@ -82,12 +84,15 @@ else
           'module'=>$custom['module'], 
           'id'=>$r['id'],
           'width'=>'800',
-          'height'=> $r['type']==1 ? 500 : '600',
+          'height'=> $r['type']==1 ? 500 : '600'
 	) ;
 
 	//var_dump($params);
 	echo ( $params['field'] && isset( $r[$params['field']] ) ) ? $r[$params['field']] : $r[$custom['field']];
 }
+$para['show'] = $params['show'] ? true : false;
+$para['inplace'] = $params['inplace'];
+$para['field'] = $params['field'];
 
 if ($good && !isset( $params["noedit"] ) )
 echo $tpl->action( 'oce', $para );

@@ -1,184 +1,217 @@
 {{?*}}
 {{!connect "jquery.js"}}
+{{!connect "thickbox.js"}}
+{{!connect "thickbox.css"}}
 
+<script language="javascript">
+    var refresh = function ()
+    {
+	setTimeout( function()
+		    {    
+		    //  if(close)
+		    //	popup_window.close();
+		    
+			tb_remove();
+		    
+			window.document.location.reload(); 
+		    }, 1000 
+		  );
+    }
+</script>
+
+{{?oce_on}}
 <style>
-.mceEditor { display: none; }
-.wysiwyg_tbl { height: 400px; }
-.inplace-over { background-color: #ffffcc;  }
-.error { background-color: red }
+    .mceEditors { display: none; }
+    .wysiwyg_tbl { height: 400px; }
+    .inplace-over { background-color: #ffffcc;  }
+    .error { background-color: red }
 
-.hand   { cursor:pointer; cursor:hand; }
-.cms-save-but 
-{
-    -x-system-font:none;
-    background-color:#99FF99;
-    font-family:Arial,sans-serif;
-    font-size:12px;
-    font-size-adjust:none;
-    font-stretch:normal;
-    font-style:normal;
-    font-variant:normal;
-    font-weight:normal;
-    line-height:normal;
-    margin-right:5px;
-    padding:5px;
-    float: right;
-}
-.cms-delete-but 
-{
-    -x-system-font:none;
-    background:#FFB8B1 none repeat scroll 0 0;
-    color:#880000;
-    font-family:Arial,sans-serif;
-    font-size:12px;
-    font-size-adjust:none;
-    font-stretch:normal;
-    font-style:normal;
-    font-variant:normal;
-    font-weight:normal;
-    line-height:normal;
-    margin-right:5px;
-    padding:5px;
-    float: right;
-}
+    .hand   { cursor:pointer; cursor:hand; }
+    .cms-save-but 
+    {
+	-x-system-font:none;
+	background-color:#99FF99;
+	font-family:Arial,sans-serif;
+	font-size:12px;
+	font-size-adjust:none;
+	font-stretch:normal;
+	font-style:normal;
+	font-variant:normal;
+	font-weight:normal;
+	line-height:normal;
+	margin-right:5px;
+	padding:5px;
+	float: right;
+    }
+    .cms-delete-but 
+    {
+	-x-system-font:none;
+	background:#FFB8B1 none repeat scroll 0 0;
+	color:#880000;
+	font-family:Arial,sans-serif;
+	font-size:12px;
+	font-size-adjust:none;
+	font-stretch:normal;
+	font-style:normal;
+	font-variant:normal;
+	font-weight:normal;
+	line-height:normal;
+	margin-right:5px;
+	padding:5px;
+	float: right;
+    }
 </style>
+
 <script language="javascript" type="text/javascript" src="{{/}}cms/libs/tinymce/tiny_mce.js"></script>
 <script language="javascript">
-var page_cms_url = "{{/}}cms/do/Content/form?id={{PAGE.id}}";
 
-var showEditor = function(event) 
+function showEditor(id, wysiwyg, field) 
 {
         $.get(  page_cms_url, 
-    	    {'ret': 'text'}, 
+    	    {'ret': field ? field : 'text'}, 
     	    function(data)
     	    {
     		//$("#wysiwyg").attr("value",  data);
-		tinyMCE.activeEditor.setContent(data);
-    		var editor = findObj("wysiwyg_parent");
-    		if (editor)
-    		{
-    		    editor.style.display='block';
-    		    $("div.content").addClass("invisible");
-    		    $("#inplace").removeClass("invisible");    
-    		    $("div.content").unbind('dblclick mouseout mouseover');
-        	
-    		}
+		if (wysiwyg)
+		{
+		    tinyMCE.activeEditor.setContent(data);
+		    var editor = findObj("wysiwyg_parent");
+		    if (editor)
+		    {
+			editor.style.display='block';
+			$("div.content").addClass("invisible");
+			$("#inplace_"+id).removeClass("invisible");    
+			$("div.content").unbind('click');
+			$("div.content").unbind('mouseout');
+			$("div.content").unbind('mouseover');
+		    }
+		}
+		else
+		{
+		    $("#inplace_"+field+"_"+id).children(":first").attr("value", data);
+		    $("#inplace_"+field+"_"+id).parent().removeClass("invisible"); 
+		    $("#inplace_"+field+"_"+id).parent().prev().addClass("invisible"); 
+		    
+		}
     	    }
     	);
 
 	return false;
 }
 
-function hideEditor()
+function hideEditor(id, wysiwyg, field)
 {
-    //window.console.log('hide editor');
     var editor = findObj("wysiwyg_parent");
     
     if (editor )
     {
-	if ( /*window.confirm("Сохранить?")*/ true)
+	if (wysiwyg)
 	{
-	     text = tinyMCE.activeEditor.getContent();
-	     //alert("{{/}}cms/do/Contet/form?id={{PAGE.id}}");
-	     $.post(page_cms_url, 
-		    {'text': text, 'ajax_update': 'text_pre'}, 
-		    function(data)
-		    {
-			//update text_pre
-			$("div.content").html(data);
-			
-			doHide();
-			
-		    } );
+         var text = tinyMCE.activeEditor.getContent();
+	 var params = {	'text': text, 'ajax_update': 'text_pre' };
+	 var update_inplace = function(data)
+	 {
+	    $("div.content").html(data);
+	 }
 	}
-    }
-}
-
-function doHide()
-{
-    var editor = findObj("wysiwyg_parent");
-    //hide editor
-    editor.style.display='none';
-
-    //show content
-    $("div.content").removeClass("invisible");
-    $("#inplace").addClass("invisible");
-    //bind events
-    $("div.content").mouseover ( function(){ $(this).addClass("inplace-over") } );
-    $("div.content").mouseout ( function(){ $(this).removeClass("inplace-over") } );
-    $("div.content").click( showEditor );
-}
-
-$(document).ready(
-
-    function ()
-    {
-	$("div.content").before( $("#inplace") );
-        /*
-	$.get(  "", 
-    	    {'get': 'text'}, 
+	else
+	{
+	    var field_value = $("#inplace_"+field+"_"+id).children(":first").attr("value");
+	    
+	    var params = { 'ajax_update': field+'_pre' };
+	    params[field] = field_value;
+	    var update_inplace = function(data)
+	    {
+		$("#inplace_"+field+"_"+id).parent().prev().html( data );
+	    }
+	}
+	
+	$.post( page_cms_url, 
+    	    params, 
     	    function(data)
     	    {
-    		$("#wysiwyg").attr("value",  data);
-		
-		setTimeout(initMCE, 10);
+		update_inplace(data);
+		doHide(id, wysiwyg, field);    		
     	    } );
-	*/
-	setTimeout(initMCE, 10);
-	$("#input-save").click(hideEditor);
-        $("#input-cancel").click(doHide);
     }
+}
 
-)
-
-    function initMCE()
+function doHide(id, wysiwyg, field)
+{
+    if (wysiwyg)
     {
-	    var base_url = "/";
-    	    tinyMCE.init({
-    			mode : "exact",
-    			language : "ru",
-    			theme : "advanced",
-    			elements: "wysiwyg",
-    			plugin_preview_pageurl: base_url + "cms/preview",
-    			content_css: base_url + "cms/css/editor.css",
-    			plugin_preview_width: "400",
-    			button_tile_map : false,
-    			relative_urls : false,
-    			plugins : "contextmenu,advlink,jetimages,jetfiles,jetcontent,preview",
-    			valid_elements : "+a[name|href|target|title|onclick|mode|fileparams],-strong/-b/,-em/-i,-strike,-u,#p[id|style],-ol,-ul,-li,br,img[src|alt|title|bigwidth|bigheight|bigsrc|mode|width|height|title|style],-sub,-sup,-blockquote,-table[class],-tr[rowspan],tbody,thead,tfoot,#td[colspan|rowspan],-th[colspan|rowspan],caption,-pre,address,-h1,-h2,-h3,-h4,-h5,-h6,hr,dd,dl,dt,cite,abbr,acronym,del,ins,big",
-    			theme_advanced_toolbar_location : "top",
-    			theme_advanced_resizing : true,
-    			theme_advanced_statusbar_location : "false",
-    			theme_advanced_resize_horizontal : "false",
-    			theme_advanced_toolbar_align : "left",
-    			theme_advanced_buttons1 : "link,unlink,anchor,separator,justifyleft,justifycenter,justifyright,justifyfull,formatselect,bold,italic,underline,strikethrough,sub,sup,separator,bullist,numlist,separator,jetimages,jetfiles,code",
-    			theme_advanced_buttons2 : "",
-			theme_advanced_buttons3 : "",
-    			theme_advanced_blockformats : "p,h3,address",
-			width: "100%",
-			height: "400px",
-			init_instance_callback: function(inst) { 
-			    $("div.content").mouseover ( function(){ $(this).addClass("inplace-over") } );
-			    $("div.content").mouseout ( function(){ $(this).removeClass("inplace-over") } );	
-			    $("div.content").click( showEditor );
-			}
-    		});
+	var editor = findObj("wysiwyg_parent");
+	//hide editor
+	editor.style.display='none';
 
-		tinyMCE.base_url = base_url + "cms/";
-		
-		tinyMCE.jetimages= "{{/}}cms/do/Pictures/jetimages";
-    		tinyMCE.jetfiles = "{{/}}cms/do/PicFiles/jetfiles";
-    		tinyMCE.jetcontent = base_url + "cms/jetcontent";
-		
-		$("div.col-2").ajaxError(function(event, request, settings){
-		   $(this).append("<span class='error'>Error requesting CMS. Please <a href='{{/}}cms/login'>login</a>.</span>");
-		 });
-          
+	//show content
+	$("div.content").removeClass("invisible");
+	$("#inplace_"+id).addClass("invisible");
+	//bind events
+	$("div.content").mouseover ( function(){ $(this).addClass("inplace-over") } );
+	$("div.content").mouseout ( function(){ $(this).removeClass("inplace-over") } );
+	$("div.content").click( showEditor );
+    }
+    else
+    {
+        
+        $("#inplace_"+field+"_"+id).parent().addClass("invisible"); 
+        $("#inplace_"+field+"_"+id).parent().prev().removeClass("invisible");     
+    }
+}
 
-	}
-		
+function initMCE(id)
+{
+        var base_url = "/";
+	    tinyMCE.init({
+			mode : "exact",
+			language : "ru",
+			theme : "advanced",
+			elements: "wysiwyg",
+			plugin_preview_pageurl: base_url + "cms/preview",
+			content_css: base_url + "cms/css/editor.css",
+			plugin_preview_width: "400",
+			button_tile_map : false,
+			relative_urls : false,
+			plugins : "contextmenu,advlink,jetimages,jetfiles,jetcontent,preview",
+			valid_elements : "+a[name|href|target|title|onclick|mode|fileparams],-strong/-b/,-em/-i,-strike,-u,#p[id|style],-ol,-ul,-li,br,img[src|alt|title|bigwidth|bigheight|bigsrc|mode|width|height|title|style],-sub,-sup,-blockquote,-table[class],-tr[rowspan],tbody,thead,tfoot,#td[colspan|rowspan],-th[colspan|rowspan],caption,-pre,address,-h1,-h2,-h3,-h4,-h5,-h6,hr,dd,dl,dt,cite,abbr,acronym,del,ins,big",
+			theme_advanced_toolbar_location : "top",
+			theme_advanced_resizing : true,
+			theme_advanced_statusbar_location : "false",
+			theme_advanced_resize_horizontal : "false",
+			theme_advanced_toolbar_align : "left",
+			theme_advanced_buttons1 : "link,unlink,anchor,separator,justifyleft,justifycenter,justifyright,justifyfull,formatselect,bold,italic,underline,strikethrough,sub,sup,separator,bullist,numlist,separator,jetimages,jetfiles,code",
+			theme_advanced_buttons2 : "",
+    		theme_advanced_buttons3 : "",
+			theme_advanced_blockformats : "p,h3,address",
+    		width: "100%",
+    		height: "400px",
+    		init_instance_callback: function(inst) 
+    		{ 
+    		    $("div.content").mouseover ( function(){ $(this).addClass("inplace-over") } );
+    		    $("div.content").mouseout ( function(){ $(this).removeClass("inplace-over") } );	
+    		    $("div.content").click( function(){ showEditor(id, true) } );
+    		    
+    		    $("#cms_panel_loading").addClass("invisible");
+    		    $("#cms_panel_shown").removeClass("invisible");
+    		}
+		});
 
-</script> 
+    	tinyMCE.base_url = base_url + "cms/";
+    	
+    	tinyMCE.jetimages= "{{/}}cms/do/Pictures/jetimages";
+		tinyMCE.jetfiles = "{{/}}cms/do/PicFiles/jetfiles";
+		tinyMCE.jetcontent = base_url + "cms/jetcontent";
+    	
+    	$("div.col-2").ajaxError(function(event, request, settings)
+    	{
+    	   $(this).append("<span class='error'>Error requesting CMS. Please <a href='{{/}}cms/login'>login</a>.</span>");
+    	});
+      
+
+    }
+</script>
+{{/?}} 
 
 <div class="cms-toolbar">
 	<img class="block" src="{{images}}z.gif" width="1" height="4" align="top" alt="" />
@@ -191,9 +224,12 @@ $(document).ready(
 		<td nowrap="nowrap">
 			Редактирование:
 			{{?oce_on}}
-				<strong>показано</strong> | <a href="{{oce_off_href}}">скрыть</a>
+				<img id="cms_panel_loading" class="invisible" src="{{images}}loadingAnimation.gif" />
+				<span id="cms_panel_shown">
+				    <strong>показано</strong> | <a href="{{oce_off_href}}">скрыть</a>
+				</span>
 			{{?:}}
-	            <a href="{{oce_on_href}}">показать</a> | <strong>скрыто</strong>
+				<a href="{{oce_on_href}}">показать</a> | <strong>скрыто</strong>
 			{{/?}}
 		</td>
 		<!--<td class="w100">
@@ -212,14 +248,12 @@ $(document).ready(
 			    <option value="skin4"  {{?tpl_skin=="skin4"}}selected{{/?}}>skin4</option>
 			</select>
 			</form>
-		    	<a href="{{/}}cms">CMS:управление сайтом</a> |
+			{{!textOce type="content" module="content" title="Редактировать в CMS" id=PAGE.id show="1"}}
+			|
+		    	<!--a href="{{/}}cms">CMS:управление сайтом</a> |-->
 		    	<a href="{{/}}cms/login?logout=1&retpath={{cur_url}}" onclick="return confirm('Вы действительно желаете выйти?');">выход</a>	
 		</td>
 	</tr>
 </table>
-<div id="inplace" class="invisible">
-    <textarea id="wysiwyg"  autocomplete="off"></textarea>
-    <input id="input-cancel" name="cancel" class="cms-delete-but hand" type="button" title="Отмена" value="Отмена" />
-    <input id="input-save" name="update_2" class="cms-save-but hand" type="button" title="Сохранить" value="Сохранить" />
-</div>
+
 {{/?}}

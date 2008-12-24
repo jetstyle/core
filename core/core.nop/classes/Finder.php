@@ -135,8 +135,9 @@ class Finder {
 					self::$searchCache[$type][$name.'.'.$ext] = $fname;
 					if ($type=='js')
 					{
+					   // die(Config::get('project_dir'));
 					    $fname = str_replace(Config::get('project_dir'), '', $fname );
-					
+					    //$fname = str_replace(Config::get('core_dir'), '', $fname );
 					
 					    //echo '<hr>'.$fname;
 					}
