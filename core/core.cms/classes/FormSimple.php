@@ -76,7 +76,7 @@ class FormSimple
 		//load data
 		$this->load();
 		
-		$valid = array('text');
+		$valid = array('text', 'title', 'lead');
 		
 		if ($_GET['ret'] && in_array($_GET['ret'], $valid) )
 		{
@@ -158,6 +158,9 @@ class FormSimple
 
 		if(!$this->config->hide_save_button )
 		{
+			if ($_GET['popup']==1)
+			    $tpl->set('popup', 1);
+
 			if($this->item['_state'] == 2)
 			{
 				$tpl->parse( $this->template.':restore_button', '_save_button' );

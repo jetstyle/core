@@ -1,4 +1,24 @@
-<form action='' method='post' name='{{__form_name}}' id='{{__form_name}}' enctype="multipart/form-data">
+{{?popup}}
+<script language="javascript">
+
+function saveForm()
+{
+    
+    //findObj('TB_closeWindowButton')
+    var w =  window.dialogArguments || opener || parent || top;
+    //w.document.getElementById('TB_closeWindowButton')
+    //alert( w.refresh );
+    w.refresh();
+    //w.tb_remove();
+    
+    findObj('{{__form_name}}').submit();
+    //tb_close();
+    //$(w.document.getElementById('TB_closeWindowButton')).click();
+    return false;
+}
+</script>
+{{/?}}
+<form action='' {{?popup}}onsubmit="return saveForm();"{{/?}} method='post' name='{{__form_name}}' id='{{__form_name}}' enctype="multipart/form-data">
 	<input type="hidden" name="MAX_FILE_SIZE" value="{{__max_file_size}}">
 	<input type="hidden" name="{{prefix}}update" value="1">
 
@@ -14,7 +34,11 @@
 		
 		{{:save_button}}
 			<input id="update_1" name="update_1" type="hidden"> 
-			<input id="update_2" name="update_2" class="cms-save-but hand" type="submit" value="сохранить/обновить"> 
+			{{?popup}}
+			    <input id="update_3" name="update_2" class="cms-save-but hand" type="submit" value="сохранить и закрыть"> 
+			{{?:}}
+			    <input id="update_2" name="update_2" class="cms-save-but hand" type="submit" value="сохранить/обновить"> 			
+			{{/?}}
 		{{/:save_button}}
 
 		{{:restore_button}}
