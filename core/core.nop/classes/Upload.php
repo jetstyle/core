@@ -430,6 +430,8 @@ class Upload
 		elseif ($size[2]==3)
 		{
 			$img = imagecreatefrompng ($filename);
+			imagealphablending($img, false);
+			imagesavealpha($img, true);
 		}
 
 		return $img;
