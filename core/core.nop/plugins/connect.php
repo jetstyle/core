@@ -139,11 +139,36 @@ else
 	$A = explode(".",$params[0]);
 	$ext = array_pop($A);
 	$fname = implode(".",$A);
-
-	if( !isset($tpl->CONNECT[$ext]) || !is_array($tpl->CONNECT[$ext]) || !in_array($fname,$tpl->CONNECT[$ext]) )
+	
+	if (!is_array($tpl->CONNECT))
 	{
-
+		$tpl->CONNECT = array();
+	}
+	
+	if (!is_array($tpl->CONNECT[$ext]))
+	{
+		$tpl->CONNECT[$ext] = array();
+	}
+	
+	if( !in_array($fname, $tpl->CONNECT[$ext]) )
+	{
+		if ($params['unshift'])
+		{
+			array_unshift($tpl->CONNECT[$ext], $fname);
+		}
+		else
+		{
 			$tpl->CONNECT[$ext][] = $fname;
+		}
+	}
+	elseif ($params['unshift'])
+	{
+		$key = array_search($fname, $tpl->CONNECT[$ext]);
+		if ($key)
+		{
+			unset($tpl->CONNECT[$ext][$key]);
+			array_unshift($tpl->CONNECT[$ext], $fname);
+		}
 	}
 }
 ?>

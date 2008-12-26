@@ -27,8 +27,9 @@
     {{!connect "default.js"}}
     {{!connect "custom.js"}}
     
-    {{!connect "jquery.js"}}
-    {{!connect "counter.js"}}
+    {{!connect "jquery.js" unshift="true"}}
+    
+    <!-- {{!connect "counter.js"}} -->
     
     {{!connect compile="js"}}
     {{!inline compile=head}}
@@ -37,7 +38,7 @@
 
 <body id="idBody" class="debug" onload="preloadImages('{{images}}'); {{!inline compile="onload"}}">
 <a id='top' name='top'></a>
-{{cms_panel}}
+{{!cms_panel}}
 
 {{?fixed}}
 	<div id="center">
@@ -51,6 +52,7 @@
 
 {{!debug}}
 
+<!-- 
 <script language="javascript" type="text/javascript">
 	counter.setBaseUrl('{{/}}');
 	var nodeId = parseInt('{{PAGE.id}}', 10);
@@ -58,5 +60,6 @@
 	counter.trackView(nodeId, 'page');
 	counter.track();
 </script>
+ -->
 </body>
 </html>
