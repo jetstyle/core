@@ -197,7 +197,7 @@ abstract class Controller implements ArrayAccess
 			
 				if ($this->method)
 				{
-					$this->preHandle();
+					$this->preHandle($config);
 					if ($controller)
 					{
 						$status = call_user_func_array(
@@ -212,7 +212,7 @@ abstract class Controller implements ArrayAccess
 							$config
 						);
 					}
-					$this->postHandle();
+					$this->postHandle($config);
 					break;
 				}
 			}
