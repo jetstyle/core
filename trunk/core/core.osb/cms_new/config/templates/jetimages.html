@@ -1,0 +1,197 @@
+{{TPL:item}}
+src_small[{{*i}}] = '{{*src_small}}';
+src_big[{{*i}}] = '{{*src_big}}';
+_width[{{*i}}] = '{{*width}}';
+_height[{{*i}}] = '{{*height}}';
+_title[{{*i}}] = '{{*title}}';
+_width_small[{{*i}}] = '{{*width_small}}';
+_height_small[{{*i}}] = '{{*height_small}}';
+ids[{{*i}}] = '{{*id}}';
+{{/TPL:item}}
+
+{{TPL:main}}
+<div id="images"></div>
+<script language="javascript">
+	var src_small = new Array();
+	var ids = new Array();
+	var src_big = new Array();
+	var _height = new Array();
+	var _width = new Array();
+	var _width_small = new Array();
+	var _height_small = new Array();
+	var _title = new Array();
+	var image_c = document.getElementById('images');
+	{{_data}}
+	var selected_image;
+	
+	function onImageClick(){
+	  var all = this.parentNode.parentNode;
+    if (selected_image)
+	    selected_image.parentNode.className='frame-'
+    
+	  this.parentNode.className='frame- sel-'
+	  selected_image = this;
+	}
+	
+	
+	if(image_c )
+	{
+		max_height = 0
+		for(i=0; i<_height_small.length; i++)
+		  max_height = Math.max(max_height,_height_small[i])
+
+		max_width = 0
+		for(i=0; i<_width_small.length; i++)
+		  max_width = Math.max(max_width,_width_small[i])
+		
+		for(i=0; i<src_small.length; i++)
+		{
+			var div = document.createElement('div');
+			var frame = document.createElement('div');
+			var img = document.createElement('img');
+			var title = document.createElement('div');
+
+			img.setAttribute('src', src_small[i]);
+			img.setAttribute('id', i);
+			img.style.marginTop = ''+((max_height-_height_small[i])/2-1)+'px';
+			img.onclick = onImageClick;
+
+			title.innerHTML = _title[i]
+			title.className = "title-"			
+
+			frame.appendChild(img);
+			frame.className = 'frame-';			
+			frame.style.height = ''+max_height+'px'
+			frame.style.width = ''+max_width+'px'
+
+			div.style.height = ''+(max_height+12)+'px'
+			div.style.width = ''+(max_width+12)+'px'
+
+			div.appendChild(frame);
+			div.appendChild(title);
+
+			div.className = 'img-';			
+			
+			image_c.appendChild(div);
+		}
+		var div = document.createElement('div');
+		div.style.clear = 'both';
+		image_c.appendChild(div);
+	} else {
+		var div = document.createElement('div');
+		div.innerHTML = 'нет картинок'
+		image_c.appendChild(div);
+	}
+	
+	function insertImage(el)
+	{
+		id = el.getAttribute('id');
+		els = document.getElementsByName('mode');
+		var mode = 1;
+		if(els)
+		{
+			for(i=0; i<els.length; i++)
+			{
+				if(els[i].checked)
+				{
+					mode = els[i].value;
+				}
+			}
+		}
+		
+		if(mode == 1)	
+		{
+			var h = '<img src="'+src_small[id]+'" mode="'+mode+'" bigwidth="'+_width[id]+'" bigheight="'+_height[id]+'" bigsrc="'+src_big[id]+'" title="'+_title[id]+'" width="'+_width_small[id]+'" height="'+_height_small[id]+'" />';
+		}
+		else if(mode == 2)
+		{
+			var h = '<img src="'+src_small[id]+'" mode="'+mode+'" title="'+_title[id]+'" width="'+_width_small[id]+'" height="'+_height_small[id]+'" />';
+		}
+		else
+		{
+			var h = '<img src="'+src_big[id]+'" mode="'+mode+'" title="'+_title[id]+'" width="'+_width[id]+'" height="'+_height[id]+'" />';
+		}			
+						
+		tinyMCE.selectedInstance.execCommand('mceInsertContent', false, h);
+		tinyMCEPopup.close();
+	}
+	
+</script>
+
+{{/TPL:main}}
+
+{{TPL:html}}
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html>
+<head>
+<title>{{TITLE}}</title>
+  <meta http-equiv="Content-Type" content="text/html; charset=windows-1251">
+  <script type="text/javascript" src="{{/}}libs/tinymce/tiny_mce_popup_mod.js"></script>
+	<link rel="stylesheet" href="{{css}}all.css" media="all" type="text/css" />
+	<link rel="stylesheet" href="{{css}}popup.css" media="all" type="text/css" />
+</head>
+
+<body>
+
+<div class="form">
+
+	<form name="rubric" method="get" action="">
+	  <h2 style="margin-top: 0">
+	  <label for="rubric-select">Картинки из рубрики:</label>
+		<select name="rubric" id="rubric-select" onchange="document.forms['rubric'].submit()">
+			{{rubrics}}
+		</select>
+		</h2>
+	</form>		
+
+	<div>
+		{{pages}}		
+	</div>
+
+<div class="gallery clearfix">
+  {{_images}}
+</div>
+
+<div class="group- variants-">
+  <h3>Выберите картинку,<br />
+  <small>которая вставится как</small></h3>
+
+	<input type="radio" name="mode" id="mode1" value="1" checked /> <label for="mode1">маленькая со ссылкой на большую</label>
+	<br />
+	<input type="radio" name="mode" id="mode2" value="2" /> <label for="mode2">маленькая</label>
+	<br />
+	<input type="radio" name="mode" value="3" id="mode3" /> <label for="mode3">большая</label>
+	<br />
+</div>
+
+<div class="buttons-">
+	<input type="submit" name="submit" value="Вставить" id="submit"
+	  onclick="if (selected_image) insertImage(selected_image); return false;" />
+  <input type="button" name="Закрыть" value="Закрыть" onclick="window.close();" />
+</div>
+
+</div>
+</body>
+</html>
+{{/TPL:html}}
+
+{{TPL:insert}}
+<html>
+<head>
+<title>{{TITLE}}</title>
+<meta http-equiv="Content-Type" content="text/html; charset=windows-1251">
+<script type="text/javascript" src="{{/}}libs/tinymce/tiny_mce_popup.js"></script>
+</head>
+
+<body leftmargin="0" topmargin="0" marginwidth="0" marginheight="0">
+<script language="javascript">
+
+	var image='{{image}}';
+	
+	tinyMCE.selectedInstance.execCommand('mceInsertContent', false, image);
+	tinyMCEPopup.close();
+	
+</script>
+</body>
+</html>
+{{/TPL:insert}}
