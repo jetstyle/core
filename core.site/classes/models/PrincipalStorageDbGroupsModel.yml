@@ -1,0 +1,6 @@
+table: users_groups
+fields: 
+    - id
+    - title
+    - god
+    - custom

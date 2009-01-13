@@ -1,0 +1,27 @@
+<!-- forms/buttons.html : Кнопки, какие они бывают (все разновидности) -->
+
+{{TPL:InputSubmitAsk}}
+ <input type="submit" class="submit-" name="_event" value="{{*title}}" />
+{{/TPL:InputSubmitAsk}}
+
+
+<!-- Простая кнопка, меняющая свой класс при наведении -->
+{{TPL:InputSubmit}}
+ <input type="submit" class="submit-" name="_event" value="{{*title}}"  />
+{{/TPL:InputSubmit}}
+
+{{TPL:InputSubmitS}}
+ <input type="submit" class="submit-" name="_event" value="{{*title}}" onclick="return onSaveFilterClick();" />
+{{/TPL:InputSubmitS}}
+
+{{TPL:InputSubmitConfirm}}
+ <input type="submit" class="submit-" name="_event" value="{{*title}}" onclick="return (window.confirm('Вы уверены?'));"; />
+{{/TPL:InputSubmitConfirm}}
+
+{{TPL:Link}}
+ <a class="button-" onclick="
+      document.getElementById('{{form_name}}_event2').value = '{{*title}}'
+      document.forms('{{form_name}}').submit();
+      return false;
+      " href="javascript:;">{{*title}}</a>
+{{/TPL:Link}}
