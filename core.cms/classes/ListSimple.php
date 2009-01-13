@@ -103,7 +103,7 @@ class ListSimple
 
 				$model = &$this->getModel();
 				$model->load( $where, $this->pager->getLimit(), $this->pager->getOffset());
-				$this->items = &$model->getData();
+				$this->items = $model->getArray();
 			}
 
 			$this->loaded = true;

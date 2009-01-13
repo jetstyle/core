@@ -26,10 +26,7 @@ class ListComplete extends ListSimple
 		$tpl->set('_save_string', $this->item ? 'сохранить' : 'добавить');
 		$tpl->set('prefix', $this->prefix);
 
-		if ($this->id)
-		{
-			$tpl->parse($this->template_form_delete, '__delete');
-		}
+		$this->renderDeleteButton();
 
 		$tpl->set('__form_name', $this->prefix . '_list_form');
 		$tpl->parse($this->template_form, '__form');
@@ -55,7 +52,15 @@ class ListComplete extends ListSimple
 			}
 		}
 	}
-
+	
+	protected function renderDeleteButton()
+	{
+		if ($this->id)
+		{
+			$this->tpl->parse($this->template_form_delete, '__delete');
+		}
+	}
+	
 	protected function _delete()
 	{
 		$model = &$this->getModel();
@@ -98,6 +103,15 @@ class ListComplete extends ListSimple
 		$model = &$this->getModel();
 
 		$data = array('title' => $_POST[$this->prefix.'title'], '_created' => date('Y-m-d H:i:s'));
+		
+		if (is_array($this->config->INSERT_FIELDS) && !empty($this->config->INSERT_FIELDS))
+		{
+			foreach ($this->config->INSERT_FIELDS AS $fieldName => $value)
+			{
+				$data[$fieldName] = $value;
+			}
+		}
+		
 		$this->id = $model->insert($data);
 
 		// update order
