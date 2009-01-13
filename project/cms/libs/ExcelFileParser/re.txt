@@ -1,3 +1,0 @@
-PHP Excel Parser Pro v3.0
-PHP脚本形式的Excel文件分析器，可用于在非M$系统上阅读Excel文件，将Excel文件存在数据库中 
-http://www.zakkis.ca/products/abc_excelparser/select_file.html
