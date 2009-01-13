@@ -1,0 +1,40 @@
+<script languaje='javascript'>
+<!--keep
+/*_editor_config.registerButton({
+  id        : "btest1",
+  tooltip   : "test button",
+  image     : _editor_url + "images/ed_format_bold.gif",
+  textMode  : false,
+  action    : function(editor, id) {
+								//var html = editor.getSelectedHTML();
+								//editor.insertHTML('<font color="red">'+html+'</font>');
+								tpl.Assign('text',editor.getSelectedHTML());
+								editor.insertHTML(tpl.Parse('simple_block.html'));
+//								editor.insertHTML(tpl.Parse('test.html'));
+//								var node = editor.getParentElement();
+//								node.innerHTML = 'aaa';
+//								alert(node.innerHTML);
+//								range.deleteContents();
+//								range.pasteHTML('aaa');
+//								alert(range.htmlText);
+//								alert(range.text);
+//								alert(editor.getSelectedText());
+//                editor.surroundHTML('<b>', '</b>');
+              }
+});
+_editor_config.toolbar.push([ "btest1" ]);*/
+//-->
+</script>
+
+<form action="{{/}}" method="post" id="edit" name="edit">
+<input type='hidden' name='page' value='test_htmlarea'>
+
+{{!!htmlarea input_name=text plugins=TableOperations,ContextMenu,SpellChecker}}
+<p>Гротзингер отметил, что в структуру каменистой поверхности в этом районе плато входят мелкозернистые осадочные породы, которые приняли грядообразный облик под действием водных течений, скорость которых могла варьироваться от 10 до 50 сантиметров в секунду. Глубина воды могла быть от 5 сантиметров и больше.
+<p>Горизонтальная слоистость пород, некоторые слои в структуре которых расположены под углом к другим, позволила ученым сделать вывод, что эти породы были сформированы под действием воды, а не ветра. "Грядообразные наносы, образованные ветром, выглядят совсем не так", - пояснил Гротзингер, добавив, что Opportunity обнаружил как породы, сформированные под действием воды, так и те, что образовались в результате работы ветра.
+<p>Кроме того, о том, что эти породы были сформированы в водной среде, говорит также и их химических состав. В частности, наличие в них хлора и брома. 
+{{/!!htmlarea}}
+
+<p><input type='submit' value='сохранить'></p>
+
+</form>

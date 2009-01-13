@@ -1,0 +1,19 @@
+{{TPL:calendar}}
+<form name='{{prefix}}_calendar_form' action='{{_action}}' method='get'>
+{{POST_STATE}}
+
+<select name='month' onchange='document.{{prefix}}_calendar_form.submit()'>{{_month_options}}</select>&nbsp;
+<select name='year' onchange='document.{{prefix}}_calendar_form.submit()'>{{_year_options}}</select>
+
+</form>
+{{/TPL:calendar}}
+
+<div class="cms-list-advanced">
+<div class="cms-add-form">{{__calendar}}</div>
+<img class="block" src="{{images}}z.gif" width="1" height="10" align="top" alt="" />
+{{__trash_switch}}
+{{__add_new}}
+<img class="block" src="{{images}}z.gif" width="1" height="10" align="top" alt="" />
+{{__list}}
+{{__arrows}}
+</div>

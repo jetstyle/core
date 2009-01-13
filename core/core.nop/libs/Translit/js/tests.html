@@ -1,0 +1,70 @@
+<?xml version="1" encoding="windows-1251"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="ru" lang="ru">
+  <head>
+    <title>Translit in JavaScript</title>
+    <link rel="stylesheet" href="rubrika.css" media="all" type="text/css" />
+    <script type="text/javascript" src="translit.js"></script>
+  </head>
+  <body onload=''>
+
+      <script>
+        var data = {
+            0: "Проверка/Транслита",
+            1: "Privetstvie",
+            2: "Паять",
+            3: "Подъезд",
+            4: "Смотрите зайцы -- нас много",
+            5: "Ух ты! Я даже и не знало...",
+            6:"Привет, Родина!",
+            7:"ЙухХа",
+            8:"Ыхыхых It's English text",
+            9:"Пьянь",
+            11:"(){}----____",
+            12:"Madonna - Свежия Песенки",
+            13:"5+8-4=9",
+            14:"Въезд ГЛЯНЬ, ВЪЕЗД",
+            15:"Установка mod_perl",
+            16:"Проверка__двери неразумной",
+            17:"Проверка_ дверцы",
+            18:"Кровать устала _ь",
+            19:"test__bed",
+            21:"test_ bed",
+            22:"test__ __bed",
+            23:"a_-_b-_-c",
+            24:"a - b _ c"
+                   };
+var Translit1 = new Translit();
+
+document.write( "<h2>UrlTranslit</h2>" );
+for (var i in data)
+{
+  document.write("'"+data[i]+"' <font color=gray>becomes</font> '"+Translit1.UrlTranslit(data[i], 1)+"'<br>");
+}
+
+document.write( "<h2>Supertag</h2>" );
+for (var i in data)
+{
+  document.write("'"+data[i]+"' <font color=gray>becomes</font> '"+
+    (tr = Translit1.Supertag(data[i], 1))+"'. <font color=gray>Supertag(UrlTranslit)==Supertag</font> "+
+    ((tr==Translit1.Supertag(Translit1.UrlTranslit(data[i], 1), 1))?"<font color=green>pass</font>":"<font color=red>fail</font>")+
+    "<br>");
+}
+
+document.write( "<h2>BiDi</h2>" );
+//document.write( "<font color=red>This method is not available yet</font>" );
+var slash = '';
+
+for (var i in data)
+{
+  str = data[i].replace( new RegExp( "[^"+slash+"0-9a-zA-Z\\- _а-яА-ЯёЁ]+", "g"), "");
+  document.write("'"+str+"' <font color=gray>becomes</font> '"+
+    (tr = Translit1.BiDiTranslit(str, 0, 1))+"' <font color=gray>then</font> '"+
+    (retr = Translit1.BiDiTranslit(tr, 1, 1))+"', <font color=gray>and it</font> "+ 
+    ((str==retr)?"<font color=green>pass</font>":"<font color=red>fail</font>")+
+    "<br>");
+}
+      </script>
+   
+  </body>
+</html>

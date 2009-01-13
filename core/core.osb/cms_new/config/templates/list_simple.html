@@ -1,0 +1,19 @@
+{{TPL:List_Empty}}<div class="cms-nodata-">нет данных</div>{{/TPL:List_Empty}}
+
+{{TPL:List_Item}}<div class="element-"><img src="{{images}}element.gif" width="16" height="12" align="bottom" alt="" title="" 
+/>&nbsp;<a href="{{$_href}}">{{$_title}}</a></div>{{/TPL:List_Item}}
+
+{{TPL:List_Item_sel}}<div class="element-s-"><img src="{{images}}element_s.gif" width="16" height="12" align="bottom" alt="" title="" />&nbsp;{{$_title}}</div>{{/TPL:List_Item_sel}}
+
+{{TPL:List_Separator}}{{/TPL:List_Separator}}
+
+{{TPL:TrashShow}}<div class="trash-"><a href="{{$_href}}">показать удалённые</a></div>{{/TPL:TrashShow}}
+{{TPL:TrashHide}}<div class="trash-"><a href="{{$_href}}">спрятать удалённые</a></div>{{/TPL:TrashHide}}
+
+<div class="cms-list-advanced">
+{{__trash_switch}}
+{{__filter}}
+<img class="block" src="{{images}}z.gif" width="1" height="10" align="top" alt="" />
+{{__list}}
+{{__bottom}}
+</div>
