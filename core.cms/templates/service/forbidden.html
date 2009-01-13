@@ -1,0 +1,18 @@
+{{@layouts/inner.html html_body=@:body}}
+
+{{:body}}
+<table cellspacing="0" cellpadding="0" class="cms-login w100">
+  <tr>
+    <td class="middle" align="center">
+      <h1>У Вас нет прав на доступ к этой странице.</h1>
+    	{{Form}}
+    </td>
+  </tr>
+</table>
+<script language="javascript" type="text/javascript">
+if (loginElement = document.getElementById('_login'))
+{
+	loginElement.focus();
+}
+</script>
+{{/:body}}
