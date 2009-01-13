@@ -1,0 +1,70 @@
+{{:default}}
+<span class="cms-edit">
+&uarr; 
+<a href="{{_href}}" onclick="pictwnd('{{_href}}','oce_popup','top=0,left=0,width={{_width}},height={{_height}},scrollbars=1,resizable=1');return false;" title="Редактировать вышестоящий блок" target="_blank">
+<!-- <a rel="notrack" href="{{_href}}&TB_iframe=true&width={{_width}}" class="thickbox"  title="Редактировать страницу" >-->
+    <!--a href="iframeModal.html?placeValuesBeforeTB_=savedValues&TB_iframe=true&height=200&width=300&modal=true" title="add a caption to title attribute / or leave blank" class="thickbox">Open iFrame Modal</a-->
+    {{_title}}
+</a>
+</span>
+{{/:default}}
+
+{{:inplace}}
+
+{{?wysiwyg}}
+    <div id="inplace_{{_id}}" class="invisible">
+	<textarea id="wysiwyg"  autocomplete="off"></textarea>
+	<input id="input-cancel-{{_id}}" name="cancel" class="cms-delete-but hand" type="button" title="Отмена" value="Отмена" />
+	<input id="input-save-{{_id}}" name="save" class="cms-save-but hand" type="button" title="Сохранить" value="Сохранить" />
+    </div>
+{{?:textarea}}
+    <div id="inplace_{{_field}}_{{_id}}"  class="invisible" >
+	<textarea class="w100"  autocomplete="off" ></textarea>
+	<input id="input-cancel-{{_field}}-{{_id}}" name="cancel" class="cms-delete-but hand" type="button" title="Отмена" value="Отмена" />
+	<input id="input-save-{{_field}}-{{_id}}" name="save" class="cms-save-but hand" type="button" title="Сохранить" value="Сохранить" />
+    </div>
+{{?:}}
+    <div id="inplace_{{_field}}_{{_id}}"  class="invisible" >
+	<input type="text" class="w100"  autocomplete="off" />
+	<input id="input-cancel-{{_field}}-{{_id}}" name="cancel" class="cms-delete-but hand" type="button" title="Отмена" value="Отмена" />
+	<input id="input-save-{{_field}}-{{_id}}" name="save" class="cms-save-but hand" type="button" title="Сохранить" value="Сохранить" />
+    </div>
+{{/?}}
+
+<script language="javascript">
+    var page_cms_url = "{{_href}}";
+
+    $(document).ready(
+	function ()
+	{
+	    {{?wysiwyg}}
+		$("div.content").before( $("#inplace_{{_id}}") );
+
+		setTimeout( function(){ initMCE( {{_id}} ) }, 10);
+		$("#cms_panel_loading").removeClass("invisible");
+		$("#cms_panel_shown").addClass("invisible");
+		$("#input-save-{{_id}}").click(function(){ hideEditor("{{_id}}", true) });
+		$("#input-cancel-{{_id}}").click(function(){ doHide("{{_id}}", true) } );
+	    
+	    {{?:}}
+		var cloned = $("#inplace_{{_field}}_{{_id}}").prev().clone();
+
+		$("#inplace_{{_field}}_{{_id}}").prev().mouseover ( function(){ $(this).addClass("inplace-over") } );
+		$("#inplace_{{_field}}_{{_id}}").prev().mouseout ( function(){ $(this).removeClass("inplace-over") } );
+		$("#inplace_{{_field}}_{{_id}}").prev().click( function(){ showEditor("{{_id}}", false, "{{_field}}" ) });
+
+		cloned.html("");
+		cloned.addClass( "invisible");
+		$("#inplace_{{_field}}_{{_id}}").prev().after( cloned );
+		cloned.append( $("#inplace_{{_field}}_{{_id}}") );
+		$("#inplace_{{_field}}_{{_id}}").removeClass("invisible");
+		$("#input-save-{{_field}}-{{_id}}").click(function(){ hideEditor("{{_id}}", false, "{{_field}}") });
+		$("#input-cancel-{{_field}}-{{_id}}").click(function(){ doHide("{{_id}}", false, "{{_field}}") } );
+	    {{/?}}
+
+    	}
+    );
+</script>
+
+
+{{/:inplace}}

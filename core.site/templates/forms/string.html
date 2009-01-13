@@ -1,0 +1,30 @@
+<!-- просто input для текста (Заявка на сайт, Вход на сайт, Регистрация, Подписка, Отписка) -->
+{{TPL:Plain}}
+<input id="{{field}}" class="input-plain-" type="text" name="{{field}}" value="{{interface_data}}" />
+{{/TPL:Plain}}
+
+<!--
+{{TPL:Password1}}
+<input id="{{field}}" class="input-plain-" type="password" name="{{field}}_1" id="{{field}}_1" value="" />
+{{/TPL:Password1}}
+-->
+
+<!-- input для пароля (Вход на сайт) -->
+{{TPL:Password2}}
+<input id="{{field}}" class="input-plain-" type="password" name="{{field}}" value="" />
+{{/TPL:Password2}}
+
+
+<!-- (Заявка на сайт) -->
+{{TPL:Textarea}}
+<textarea name="{{field}}" id="{{field}}"
+          {{?params_cols}}cols="{{params_cols}}"{{/?}}
+          {{?params_rows}}rows="{{params_rows}}"{{/?}}
+          {{?params_height}}style="height:{{params_height}}"{{/?}}
+          class="{{params_class}}">{{interface_data}}</textarea>
+{{/TPL:Textarea}}
+
+{{TPL:Hidden}}
+<input type="hidden" name="{{field}}" value="{{interface_data}}" />
+{{/TPL:Hidden}}
+

@@ -1,0 +1,65 @@
+<div class="vcard">
+	{{?*fn && count(*n)}}
+		{{@:fn_n}}
+	{{?:}}
+		{{@:fn}}
+	{{/?}}
+
+	{{?*image}}
+		<img class="photo" src="{{*image.link}}" alt="photo" />
+	{{/?}}
+	
+	{{?*icq}}
+		<div>
+			<img class="flower-" src="http://wwp.icq.com/scripts/online.dll?icq={{*icq}}&img=26" alt="" />
+			<a class="url" type="application/x-icq" href="http://web.icq.com/wwp?Uin={{*icq}}">{{*icq}}</a>
+		</div>
+	{{/?}}
+	
+	{{?*jabber}}
+		<div>
+			<img src="{{images}}gtalk.png" />
+			<a class="url" href="xmpp:{{*jabber}}">{{*jabber}}</a>
+		</div>		
+	{{/?}}
+	
+	{{?*email}}
+		<div>
+			E-mail: <a class="email" href="mailto:{{*email}}">{{*email}}</a>
+		</div>
+	{{/?}}
+	
+	{{!for *tel do=@:tel}}
+	
+	{{?*vcard}}<a href="{{*vcard}}"><img src="{{images}}vcard.png" /></a>{{/?}}
+</div>
+
+{{:tel *type="pref"}}
+<div class="tel">
+	<span class="type" style="display:none;">{{*type}}</span>
+	Тел.: <span class="value">{{*value}}</span>
+</div>
+{{/:tel}}
+
+{{:tel}}
+<div class="tel">
+	<span class="type">{{*type}}</span>
+	<span class="value">{{*value}}</span>
+</div>
+{{/:tel}}
+
+{{:fn_n *n.name && *n.surname}}
+	<div class="fn">{{*n.name}} {{*n.surname}}</div>
+{{/:fn_n}}
+
+{{:fn_n}}
+	<div class="fn n">
+	    {{?*n.surname}}<span class="family-name">{{*n.surname}}</span>&nbsp;{{/?}}
+	    {{?*n.name}}<span class="given-name">{{*n.name}}</span>&nbsp;{{/?}} 
+		{{?*n.patronymic}}<span class="additional-name">{{*n.patronymic}}</span>{{/?}}
+	</div>
+{{/:fn_n}}
+
+{{:fn}}
+	<div class="fn {{*fn.type}}">{{*fn.value}}</div>
+{{/:fn}}
