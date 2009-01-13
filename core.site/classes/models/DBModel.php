@@ -327,6 +327,7 @@ class DBModel extends Model implements IteratorAggregate, ArrayAccess, Countable
 			$storeTo = $fileName.($fieldSet ? "_".$fieldSet : "");
 
 			$this->setConfig($ymlConfig, $fileName, $storeTo);
+			
 			return true;
 		}
 
@@ -364,10 +365,11 @@ class DBModel extends Model implements IteratorAggregate, ArrayAccess, Countable
 		{
 			$this->setAutoPrefix($ymlConfig['autoPrefix']);
 		}
-		
+				
 		if ($ymlConfig['files'])
 		{
-			$this->files = $ymlConfig['files'];
+			$this->addFilesConfig($ymlConfig['files']);
+			$this->files = null;
 		}
 	}
 
@@ -821,10 +823,19 @@ class DBModel extends Model implements IteratorAggregate, ArrayAccess, Countable
 		return $this->addFields($fields);
 	}
 
-	public function addFilesConfig($configKey)
+	public function addFilesConfig($configKey = '')
 	{
+		if (!$configKey)
+		{
+			$configKey = $this->files;
+		}
+		
+		if (!$configKey)
+		{
+			return;
+		}
+		
 		$config = FileManager::getConfig($configKey);
-				
 		if (is_array($config))
 		{
 			foreach ($config AS $key => $conf)
@@ -1101,6 +1112,7 @@ class DBModel extends Model implements IteratorAggregate, ArrayAccess, Countable
 		if ($this->files)
 		{
 			$this->addFilesConfig($this->files);
+			$this->files = null;
 		}
 	}
 	
