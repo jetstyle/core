@@ -44,7 +44,9 @@ class FormGallerySimple
 		$this->loaded = true;
 		$tpl = & $this->rh->tpl;
 
-		$tpl->set('edit_url',  $this->config->edit_url ? $this->config->edit_url : $this->rh->url . 'resize?module='.$this->config->module_name);
+
+		if( $this->config->edit_url !== false )
+		    $tpl->set('edit_url',  $this->config->edit_url ? $this->config->edit_url : $this->rh->url . 'resize?module='.$this->config->module_name);
 		$tpl->set('ajax_url', $this->rh->url . $this->rh->url_rel);
 		$tpl->set('prefix', $this->prefix);
 
@@ -55,7 +57,6 @@ class FormGallerySimple
 		$tpl->set('prefix', $this->prefix);
 		$tpl->set('POST_STATE', $this->state->State(1));
 		$tpl->set('__form_name', $this->prefix . '_simple_form');
-
 		$tpl->set('_rubric_id', intval($this->rh->getVar($this->config->rubric_var ? $this->config->rubric_var : 'topic_id')));
 
 //		$res = $this->rh->db->Query("SELECT id, title FROM ".$this->rh->project_name."_gallery_rubrics WHERE _state = 0 ORDER BY _order ASC");
@@ -84,6 +85,8 @@ class FormGallerySimple
 		}	
 		
 		$this->rubric_id = intval($_POST['gallery_id']) ? intval($_POST['gallery_id']) : intval($_POST['rubric']);
+		
+		
 		
 		switch ($_POST['action'])
 		{
@@ -194,26 +197,36 @@ class FormGallerySimple
 
 	function handleUpload()
 	{
+		
 		$id = intval($this->rh->getVar('picid'));
 		$rubric_id = intval($this->rh->getVar($this->prefix . 'rubric'));
 		
 		$this->rubric_id = $rubric_id; 
+	
+		//var_dump($_FILES);
+		//die();
 		
 		$upload = &$this->upload;
 		
 		foreach($this->_FILES AS $input_field => $result_array)
 		{
+			//die($input_field);
+			//die($_FILES[$input_field]['tmp_name']);
 			if (is_uploaded_file($_FILES[$input_field]['tmp_name']))
 			{
 				if(!$id)
 				{
 					$order = $this->rh->db->QueryOne("SELECT MAX(_order) AS m FROM " . $this->table_name . " WHERE fid = " . $rubric_id);
 					$order = ($order['m'] > 0) ? ($order['m'] + 1) : 1;
-					$new_id = $this->rh->db->Insert("INSERT INTO " . $this->table_name . "(fid, _order) VALUES('" . $rubric_id . "', '" . $order . "')");
+					$sql = "INSERT INTO " . $this->table_name . "(fid, _order) VALUES('" . $rubric_id . "', '" . $order . "')";
+					//die($sql);
+					$new_id = $this->rh->db->Insert($sql);
 				}
 				else
 				{
 					$new_id = $id;
+					//var_dump($new_id);
+					//die();
 				}
 				
 				$broken = false;
