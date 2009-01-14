@@ -24,6 +24,8 @@ class SqlDump
 			{
 				$createSql = preg_replace('#AUTO_INCREMENT=\d+#', '', $createSql);
 			}
+			
+			$createSql = preg_replace('/^CREATE TABLE/', 'CREATE TABLE IF NOT EXISTS', $createSql);
 		}
 		else
 		{
