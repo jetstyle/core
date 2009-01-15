@@ -222,8 +222,6 @@ class EditorObjectsCorrector
 
 		if (count($this->rows) > 0)
 		{
-			$this->rows[0]['is_first'] = true;
-			$this->rows[count($this->rows) - 1]['is_last'] = true;
 			$this->table['head'] = $this->rows;
 		}
 	}
@@ -235,8 +233,6 @@ class EditorObjectsCorrector
 
 		if (count($this->rows) > 0)
 		{
-			$this->rows[0]['is_first'] = true;
-			$this->rows[count($this->rows) - 1]['is_last'] = true;
 			$this->table['body'] = $this->rows;
 		}
 	}
@@ -245,12 +241,6 @@ class EditorObjectsCorrector
 	{
 		$this->cells = array();
 		preg_replace_callback("/<(td|th)(.*?)?>(.*?)?<\/\\1>/si", array(&$this, "correctTableCells"), $matches[1]);
-
-		if (count($this->cells) > 0)
-		{
-			$this->cells[0]['is_first'] = true;
-			$this->cells[count($this->cells) - 1]['is_last'] = true;
-		}
 
 		$this->rows[] = array('cells' => $this->cells);
 	}
