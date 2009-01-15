@@ -26,6 +26,11 @@ interface PrincipalSessionInterface
 	public function delete();
 	
 	/**
+	 * Cleanup (delete old sessions)
+	 */
+	public function cleanup();
+	
+	/**
 	 * Start new session
 	 *
 	 * @param PrincipalStorage $storageModel

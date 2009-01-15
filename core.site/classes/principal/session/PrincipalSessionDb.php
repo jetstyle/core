@@ -111,6 +111,11 @@ class PrincipalSessionDb extends DBModel implements PrincipalSessionInterface
 		}
 	}
 	
+	public function cleanup()
+	{
+		parent::delete("{last_activity} < ".(time() - $this->expireTime));
+	}
+	
 	public function start(&$storageModel = null)
 	{
 		$this->delete();

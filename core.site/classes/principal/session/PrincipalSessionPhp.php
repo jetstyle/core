@@ -49,6 +49,11 @@ class PrincipalSessionPhp implements PrincipalSessionInterface
 		$this->realm = $realm;
 	}
 	
+	public function cleanup()
+	{
+		
+	}
+	
 	public function updateLastActivity()
 	{
 		
