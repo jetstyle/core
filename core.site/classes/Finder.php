@@ -127,22 +127,10 @@ class Finder {
 			{
 				$fname = (is_array($dir) ? $dir[0] : $dir).$type."/".$name.'.'.$ext;
 
-				
-		    
 				self::$searchHistory[] = $fname;
 				
 				if(@file_exists($fname))
 				{
-					
-					if ($type=='js')
-					{
-					    //die(Config::get('project_dir'));
-					    $fname = str_replace(Config::get('project_dir'), '', $fname );
-					    //die($fname);
-					    //$fname = str_replace(Config::get('core_dir'), '', $fname );
-					
-					    //echo '<hr>'.$fname;
-					}
 					self::$searchCache[$type][$name.'.'.$ext] = $fname;
 					return $fname;
 				}

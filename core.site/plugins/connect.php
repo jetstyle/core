@@ -120,14 +120,22 @@ if ( $compile )
 		{
 			foreach( $tpl->CONNECT[$compile] as $fname )
 			{
+				$tplAdd = '';
 				if ($compile == "js")
 				{
-				    $new_name = Finder::findScript("js", $fname, 0, 1, "js");
-				    if ($new_name)
-					$fname = '../../../../'.str_replace(".js", '', $new_name);
+				    $_fname = Finder::findScript("js", $fname, 0, 1, "js");
+				    
+				    if ($_fname)
+				    {
+				    	$_fname = str_replace(Config::get('project_dir'), '', $_fname );
+				    	$_fname = (Config::exists('front_end_path') ? Config::get('front_end_path') : Config::get('base_url')).$_fname;
+				    	$fname = $_fname;
+				    	$tplAdd = '_path';
+				    }
 				}
+				
 				$tpl->set("_", $fname);
-				$str .= $tpl->parse($template);
+				$str .= $tpl->parse($template.$tplAdd);
 			}
 		}
 	}
