@@ -59,12 +59,14 @@ class ExceptionHandler
 		
 		//выясняем что делать с данным exception'ом
 		$className = get_class($exceptionObj);
-		if (!isset($this->config[$className]))
+		
+		if (!$this->config[$className] && $this->config['all'])
 		{
-			$actions[EXCEPTION_SHOW] = $this->methodsByConst[EXCEPTION_SHOW];
+			$className = 'all';
 		}
-		else
-		{	
+		
+		if ($this->config[$className])
+		{
 			foreach ($this->methodsByConst AS $action => $method)
 			{
 				if ($this->config[$className] & $action)
@@ -73,7 +75,11 @@ class ExceptionHandler
 				}
 			}
 		}
-
+		else
+		{
+			$actions[EXCEPTION_SILENT] = $this->methodsByConst[EXCEPTION_SILENT];
+		}
+		
 		foreach ($actions as $method)
 		{
 			$this->$method($exceptionObj);
@@ -95,26 +101,79 @@ class ExceptionHandler
 	}
 
 	private function mail($exceptionObj)
-	{
+	{		
+		$hash = md5(serialize($exceptionObj));
+		$cacheDir = Config::get('cache_dir').'exceptions/';
+		
+		if (!file_exists($cacheDir))
+		{
+			$result = @mkdir($cacheDir, 0775, true);
+			if (!$result)
+			{
+				return;
+			}
+		}
+		
+		if (!is_writable($cacheDir))
+		{
+			return;
+		}
+		
+		$cacheFile = $cacheDir.$hash;
+		
+		if (file_exists($cacheFile))
+		{
+			$mtime = filemtime($cacheFile);
+			if ( ($mtime + 600) > time())
+			{
+				return;
+			}
+			else
+			{
+				file_put_contents($cacheFile, '');
+			}
+		}
+		else
+		{
+			file_put_contents($cacheFile, '');
+		}
+		
+		if (!Config::exists('base_url'))
+		{
+			$baseUrl = $_SERVER['SCRIPT_NAME'];
+			$baseUrl = rtrim(substr($baseUrl, 0, strrpos($baseUrl, "/") + 1), '/');
+			$baseUrl = rtrim(substr($baseUrl, 0, strrpos($baseUrl, "/") + 1), '/');
+			$baseUrl .= '/';
+		}
+		else
+		{
+			$baseUrl = Config::get('base_url');
+		}
+		
+		
 		//mail now
-		$subj = "=?windows-1251?b?" . base64_encode("Ошибка на сайте") . "?=";
-		$text = "Ошибка на сайте<br />";
-		$text .= "Url: <b>" . $_SERVER["HTTP_HOST"] . $_SERVER["REQUEST_URI"] . "</b><br />";
-		$text .= "Дата: <b>" . date("d.m.Y G:i:s") . "</b><br />";
-		$text .= $exceptionObj->__toString();
-
-		$fromaddress = "dzjuck@gmail.ru";
+		$subj = "=?windows-1251?b?" . base64_encode(rtrim($_SERVER["HTTP_HOST"].$baseUrl, '/')) . "?=";
+		$text = $this->getHtml($exceptionObj, true);
+				
+		$fromaddress = "bugs@jetstyle.ru";
+		
 		$headers = "From: =?windows-1251?b?" . base64_encode("Exception robot") . "?= <".$fromaddress.">\r\n";
 		$headers .= "Reply-To: =?windows-1251?b?" . base64_encode("Exception robot") . "?= <".$fromaddress.">\r\n";
 		$headers .= "Content-Type: text/html; charset=\"windows-1251\"";
 		$headers .= "Content-Transfer-Encoding: 8bit";
+		
+		mail('<bugs@jetstyle.ru>', $subj, $text, $headers);
 	}
 
 	private function show($exceptionObj)
 	{
 		ob_end_clean();
-		
-		echo '<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+		echo $this->getHtml($exceptionObj);		
+	}
+
+	private function getHtml($exceptionObj, $extended = false)
+	{
+		$result = '<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 				<?xml version="1" encoding="windows-1251"?>
 				<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="ru" lang="ru">
 				<head>
@@ -145,36 +204,42 @@ class ExceptionHandler
 				</head>
 				<body>';
 		
-		echo '<div class="message">';
+		$result .= '<div class="message">';
+		
+		if ($extended)
+		{
+			$result .= '<div class="date">' . date("d.m.Y H:i:s") . '</div>';
+			$result .= '<div class="url">http://'.$_SERVER["HTTP_HOST"] . $_SERVER["REQUEST_URI"].'</div>';
+			$result .= '<br />';
+		}
 		
 		if ("Exception" == get_class($exceptionObj))
 		{
-			echo $exceptionObj->getMessage();
+			$result .= $exceptionObj->getMessage();
 		}
 		else
 		{
-			echo $exceptionObj;
+			$result .= $exceptionObj;
 		}
 
-		echo "</div>";
+		$result .= "</div>";
+				
+		$result .= "<table class=\"info\"><tr><td class=\"backtrace\">";
+		$result .= "<b>Backtrace</b>:<br />";
+		$result .= $this->getTrace($exceptionObj->getTrace());
+		$result .= "</td><td class=\"detailed-info\">";
 		
-//		echo "<br class=\"clearer\" />";
-		
-		echo "<table class=\"info\"><tr><td class=\"backtrace\">";
-		echo "<b>Backtrace</b>:<br />";
-		echo $this->getTrace($exceptionObj->getTrace());
-		echo "</td><td class=\"detailed-info\">";
-		
-//		echo "<b>Info</b>:<br />";
 		if ("Exception" != get_class($exceptionObj))
 		{
-			echo $exceptionObj->getText();
+			$result .= $exceptionObj->getText();
 		}
-		echo "</td></tr></table>";
+		$result .= "</td></tr></table>";
 		
-		echo '</body></html>';
+		$result .= '</body></html>';
+		
+		return $result;
 	}
-
+	
 	private function getTrace($data)
 	{
 		$projectDir = '';
