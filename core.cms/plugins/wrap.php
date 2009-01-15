@@ -5,6 +5,8 @@
 //генерируем уникальный ID для обёртки
 $wid = $params['id'];
 
+$template = $params['template'] ? $params['template'] : "wrapper.html";
+
 while( !$wid || isset($tpl->WIDS[$wid]) )
 {
 	$wid = rand(1,1000000);
@@ -20,5 +22,5 @@ $vis = $params["cookie"]!="off" && isset($_COOKIE["c".$wid]) ? !$_COOKIE["c".$wi
 $tpl->set('_class_name_1', $vis ? "visible" : "invisible" );
 $tpl->set('_class_name_2', !$vis ? "visible" : "invisible" );
 
-return $tpl->parse( 'wrapper.html' );
+return $tpl->parse( $template );
 ?>

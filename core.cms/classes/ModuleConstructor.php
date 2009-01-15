@@ -63,6 +63,7 @@ class ModuleConstructor
 			Finder::useClass( $className );
 			Debug::trace('ModuleConstructor::InitModule - '.$this->moduleName.'/'.$className );
 
+			Locator::get('tpl')->set("module_name", $this->moduleName);
 			$config->componentPath = implode('/', $this->path);
 			
 			$cls = new $className($config);
