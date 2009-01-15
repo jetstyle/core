@@ -121,9 +121,9 @@ if ( $compile )
 			foreach( $tpl->CONNECT[$compile] as $fname )
 			{
 				$tplAdd = '';
-				if ($compile == "js")
+				if ($compile == "js" || $compile == "css" )
 				{
-				    $_fname = Finder::findScript("js", $fname, 0, 1, "js");
+				    $_fname = Finder::findScript($compile, $fname, 0, 1, $compile);
 				    
 				    if ($_fname)
 				    {
