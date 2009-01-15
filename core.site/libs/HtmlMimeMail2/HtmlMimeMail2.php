@@ -9,7 +9,7 @@
 
 require_once(dirname(__FILE__) . '/mimePart.php');
 
-class htmlMimeMail2
+class HtmlMimeMail2
 {
   /**
   * The html part of the message
@@ -89,7 +89,7 @@ class htmlMimeMail2
 * if supplied.
 */
 
-  function htmlMimeMail2()
+  function HtmlMimeMail2()
   {
     /**
         * Initialise some variables.
@@ -312,11 +312,66 @@ class htmlMimeMail2
   {
     $this->html      = $html;
     $this->html_text = $text;
-
+	
+    $this->html = preg_replace_callback("/<img(.*?)?[\/]{0,1}>/si", array($this, "correctImages"), $this->html);
+	$this->html = preg_replace_callback("/<a(.*?)?>(.*?)?<\/a?>/si", array($this, "correctHrefs"), $this->html);
+	
     if (isset($images_dir)) {
       $this->_findHtmlImages($images_dir);
     }
   }
+  
+	protected function correctHrefs($matches)
+	{
+		preg_match_all('/(.*?)=(")(|.*?[^\\\])\\2/si', $matches[1], $paramsMatches);
+		
+		$params = '';
+		
+		if(is_array($paramsMatches[3]) && !empty($paramsMatches[3]))
+		{
+			foreach($paramsMatches[1] AS $i => $r)
+			{
+				$r = trim($r);
+				$v = $paramsMatches[3][$i];
+				if ($r == 'href')
+				{
+					$v = trim($v);
+					if (substr($v, 0, 1) == '/')
+					{
+						$v = 'http://'.$_SERVER["HTTP_HOST"].$v;
+					}
+				}
+				
+				$params .= $r.'="'.$v.'" ';
+			}
+		}
+		return '<a '.$params.'>'.$matches[2].'</a>';
+	}
+	
+	protected function correctImages($matches)
+	{
+		preg_match_all('/(.*?)=(")(|.*?[^\\\])\\2/si', $matches[1], $paramsMatches);
+		$params = '';
+		
+		if(is_array($paramsMatches[3]) && !empty($paramsMatches[3]))
+		{
+			foreach($paramsMatches[1] AS $i => $r)
+			{
+				$r = trim($r);
+				$v = $paramsMatches[3][$i];
+				if ($r == 'src')
+				{
+					$v = trim($v);
+					if (substr($v, 0, 1) == '/')
+					{
+						$v = 'http://'.$_SERVER["HTTP_HOST"].$v;
+					}
+				}
+				$params .= $r.'="'.$v.'" ';
+			}
+		}
+		return '<img '.$params.' />';
+	}
 
 /**
 * Function for extracting images from
