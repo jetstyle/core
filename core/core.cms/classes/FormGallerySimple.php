@@ -119,10 +119,18 @@ class FormGallerySimple
 									}
 									else
 									{
+										$out[$r['id']] = array(
+											'src' => $this->web_upload_dir . "nofile.png", 
+											'height' => 48,
+											'width' => 48,
+//											'title' => iconv('cp1251', 'UTF-8', $r['title']),
+										);
+									/*
 										$this->delFile($v, $r['id']);
 										$this->rh->db->Query("DELETE FROM " . $this->table_name . " WHERE id = " . $r['id'] . "");
 										$need_update =  true;
 										break;
+										*/
 									}
 								}
 							}
@@ -138,6 +146,8 @@ class FormGallerySimple
 					}
 					
 				}
+				//var_dump($out);
+				//die();
 				echo $this->json($out);
 				break;
 
