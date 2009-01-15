@@ -84,13 +84,14 @@ class EditorObjectsCorrector
 
 	protected function correctFiles($matches)
 	{
-		preg_match_all('/(.*?)="(.*?[^\\\])"/si', $matches[1], $paramsMatches);
-		if(is_array($paramsMatches[2]) && !empty($paramsMatches[2]))
+		preg_match_all('/(.*?)=(")(|.*?[^\\\])\\2/si', $matches[1], $paramsMatches);
+		
+		if(is_array($paramsMatches[3]) && !empty($paramsMatches[3]))
 		{
 			$res = array();
 			foreach($paramsMatches[1] AS $i => $r)
 			{
-				$res[trim($r)] = trim(str_replace('\"', '"', $paramsMatches[2][$i]));
+				$res[trim($r)] = trim(str_replace('\"', '"', $paramsMatches[3][$i]));
 			}
 
 			if($res['mode'] == 'file')
@@ -126,13 +127,13 @@ class EditorObjectsCorrector
 
 	protected function correctImages($matches)
 	{
-		preg_match_all('/(.*?)="(.*?[^\\\])"/si', $matches[1], $paramsMatches);
-		if (is_array($paramsMatches[1]) && !empty($paramsMatches[1]))
+		preg_match_all('/(.*?)=(")(|.*?[^\\\])\\2/si', $matches[1], $paramsMatches);
+		if (is_array($paramsMatches[3]) && !empty($paramsMatches[3]))
 		{
 			$res = array();
 			foreach ($paramsMatches[1] AS $i => $r)
 			{
-				$res[trim($r)] = trim(str_replace('\"', '"', $paramsMatches[2][$i]));
+				$res[trim($r)] = trim(str_replace('\"', '"', $paramsMatches[3][$i]));
 			}
 
 			$this->tpl->setRef('*', $res);
@@ -258,12 +259,13 @@ class EditorObjectsCorrector
 	{
 		// parse attributes
 		$attributes = array();
-		preg_match_all('/(.*?)="(.*?[^\\\])"/si', $matches[2], $paramsMatches);
-		if(is_array($paramsMatches[2]) && !empty($paramsMatches[2]))
+		//preg_match_all('/(.*?)="(.*?[^\\\])"/si', $matches[2], $paramsMatches);
+		preg_match_all('/(.*?)=(")(|.*?[^\\\])\\2/si', $matches[2], $paramsMatches);
+		if(is_array($paramsMatches[3]) && !empty($paramsMatches[3]))
 		{
 			foreach($paramsMatches[1] AS $i => $r)
 			{
-				$attributes[trim($r)] = trim(str_replace('\"', '"', $paramsMatches[2][$i]));
+				$attributes[trim($r)] = trim(str_replace('\"', '"', $paramsMatches[3][$i]));
 			}
 		}
 
