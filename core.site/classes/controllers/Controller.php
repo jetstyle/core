@@ -98,6 +98,7 @@ abstract class Controller implements ArrayAccess
 		if (!$this->siteMap) 
 		{
 			$ss = str_replace("Controller", "", get_class($this));
+			$ss = Inflector::underscore($ss);
 			$method = str_replace('handle_', '', $this->method);
 			$siteMap = Locator::get('tpl')->getSiteMap();
 
