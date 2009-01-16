@@ -45,7 +45,7 @@ class Locator
 	public static function bind($key, $path, $singleton = true, $params = NULL)
 	{
 		Debug::trace('Bind "'.$key.'"', 'locator');
-		if (is_object($path))
+		if (is_object($path) || is_array($path))
 			self::$objs[$key] = $path;
 		else
 		{

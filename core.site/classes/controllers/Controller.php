@@ -28,7 +28,14 @@ abstract class Controller implements ArrayAccess
 	{
 		Finder::useLib('http');
 		Http::status(404);
+		//$this->title = "404";
+		//var_dump(Locator::get('controller'));
+		//die('xx');
 		$tpl = &Locator::get('tpl');
+		
+		$foo = array('meta_title'=>'404') ;
+		Locator::bind('controller', $foo);
+		
 		$tpl->parseSiteMap('404');
 		echo $tpl->get('html');
 		die();
@@ -41,8 +48,8 @@ abstract class Controller implements ArrayAccess
 		$tpl = &Locator::get('tpl');
 		
 		$retPath .= $_SERVER['HTTPS'] ? 'https://' : 'http://';
-        $retPath .= $_SERVER['SERVER_NAME'].$_SERVER['REQUEST_URI'];
-        $retPath = urlencode($retPath);
+		$retPath .= $_SERVER['SERVER_NAME'].$_SERVER['REQUEST_URI'];
+		$retPath = urlencode($retPath);
 		
 //		$tpl->set('retpath', $retPath);
 		
