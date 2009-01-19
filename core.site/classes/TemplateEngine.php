@@ -51,6 +51,8 @@ class TemplateEngine
 	protected $siteMap = array();
 	protected $siteMapFilename = 'site_map.yml';
 
+	protected $cleanCompiler = false;
+	
 	// ############################################## //
 
 	/**
@@ -289,6 +291,17 @@ class TemplateEngine
 	}
 
 	/**
+	 * Hack for instance=1 plugins
+	 * 
+	 * @param $v BOOL
+	 * @return void
+	 */
+	public function cleanCompiler($v)
+	{
+		$this->cleanCompiler = $v;
+	}
+	
+	/**
 	 * Получение информации о плагине
 	 *
 	 * @param string $actionName
@@ -345,8 +358,7 @@ class TemplateEngine
 	 */
 	public function parseInstant( $templateContent )
 	{
-		$this->spawnCompiler();
-		return $this->compiler->templateCompile( $templateContent, true );
+		return $this->getCompiler()->templateCompile( $templateContent, true );
 	}
 
 	/**
@@ -378,8 +390,7 @@ class TemplateEngine
 
 		if (!file_exists($fileCached) || !file_exists($fileHelperCached))
 		{
-			$this->spawnCompiler();
-			$this->compiler->compileSiteMap($data, $fileCached, $fileHelperCached);
+			$this->getCompiler()->compileSiteMap($data, $fileCached, $fileHelperCached);
 		}
 
 		// сначала получим список всех использованных в этом сайтмапе файлов и экшенов
@@ -435,8 +446,7 @@ class TemplateEngine
 
 				if ($recompile)
 				{
-					$this->spawnCompiler();
-					$this->compiler->compileSiteMap($data, $fileCached, $fileHelperCached);
+					$this->getCompiler()->compileSiteMap($data, $fileCached, $fileHelperCached);
 				}
 			}
 
@@ -508,8 +518,7 @@ class TemplateEngine
 						// 4. перекомпиляция
 						if ($recompile)
 						{
-							$this->spawnCompiler();
-							$this->compiler->compile($tplInfo, $fileCached);
+							$this->getCompiler()->compile($tplInfo, $fileCached);
 						}
 
 						// 5. парсинг-таки
@@ -603,8 +612,7 @@ class TemplateEngine
 			//откомпилировать функцию
 			if ($recompile)
 			{
-				$this->spawnCompiler();
-				$this->compiler->actionCompile( $actionInfo, $fileCached );
+				$this->getCompiler()->actionCompile( $actionInfo, $fileCached );
 			}
 
 			//подключить функцию
@@ -644,20 +652,26 @@ class TemplateEngine
 			$this->set($k, $v);
 		}
 	}
-
-	/**
-	 * Порождает компиляторскую часть
-	 *
-	 */
-	protected function spawnCompiler()
+	
+	protected function getCompiler()
 	{
-		if ( null === $this->compiler)
+		if ($this->cleanCompiler)
 		{
 			Finder::useClass("TemplateEngineCompiler");
-			$this->compiler = new TemplateEngineCompiler();
+			return new TemplateEngineCompiler();
+		}
+		else
+		{
+			if ( null === $this->compiler)
+			{
+				Finder::useClass("TemplateEngineCompiler");
+				$this->compiler = new TemplateEngineCompiler();
+			}
+			
+			return $this->compiler;
 		}
 	}
-
+	
 	// EOC{ TemplateEngine }
 }
 

@@ -341,7 +341,7 @@ class TemplateEngineCompiler
 		{
 			$actionInfo = $this->tpl->getActionInfo($actionInfo);
 		}
-
+		
 		if (!isset($this->compiledActions[$actionInfo['name']]))
 		{
 			$this->compiledActions[$actionInfo['name']] = true;
@@ -350,7 +350,7 @@ class TemplateEngineCompiler
 		{
 			return false;
 		}
-
+	
 		$funcName = $this->tpl->getActionFuncName($actionInfo['cache_name']);
 		$source = Finder::findScript_( "plugins", $actionInfo['name']);
 
@@ -398,7 +398,8 @@ class TemplateEngineCompiler
 		{
 			throw new TplException('Compiler: can\'t read file '.$source);
 		}
-
+		
+				
 		if (null === $cacheFile)
 		{
 			return $this->compiledActionFunctions;
@@ -683,9 +684,10 @@ class TemplateEngineCompiler
 				$params = $this->parseActionParams( $matches[1] );
 				$pluginName = $params['_name'];
 				unset($params['_name']);
-
-				if (in_array($params["_name"][TE_VALUE], $this->instantPlugins) || (isset($params["instant"]) && $params["instant"][TE_VALUE]))
+				
+				if (in_array($pluginName[TE_VALUE], $this->instantPlugins) || (isset($params["instant"]) && $params["instant"][TE_VALUE]))
 				{
+					unset($params["instant"]);
 					$_instant=true;
 				}
 				
@@ -791,10 +793,15 @@ class TemplateEngineCompiler
 		{
 			if ($instant)
 			{
+				$tpl->cleanCompiler(true);
+				
 				ob_start();
 				eval($instant);
 				$contents = ob_get_contents();
 				ob_end_clean();
+				
+				$tpl->cleanCompiler(false);
+				
 				return $contents;
 			}
 			else
