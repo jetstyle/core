@@ -10,7 +10,8 @@
 class EditorObjectsCorrector
 {
 	protected $tpl = null;
-
+	protected $validTableClasses = array('w100_simple', 'w100_decorated', 'w100_decorated2');
+	
 	public function __construct()
 	{
 		$this->tpl = &Locator::get('tpl');
@@ -202,7 +203,12 @@ class EditorObjectsCorrector
 		$template = preg_replace('#\s#', '_', $template);
 		$template = preg_replace('#[^\w_]#', '', $template);
 		$template = trim($template);
-
+		
+		if ( !in_array($template, $this->validTableClasses))
+		{
+		    $template = $this->validTableClasses[0];
+		}
+		
 		$this->tpl->set('table', $this->table);
 		// @TODO remove HACK
 		try
