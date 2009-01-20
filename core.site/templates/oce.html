@@ -40,7 +40,7 @@
 	    {{?wysiwyg}}
 		$("div.content").before( $("#inplace_{{_id}}") );
 
-		setTimeout( function(){ initMCE( {{_id}} ) }, 10);
+		setTimeout( function(){ initMCE( {{_id}} ) }, 100);
 		$("#cms_panel_loading").removeClass("invisible");
 		$("#cms_panel_shown").addClass("invisible");
 		$("#input-save-{{_id}}").click(function(){ hideEditor("{{_id}}", true) });
