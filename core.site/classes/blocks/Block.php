@@ -2,6 +2,7 @@
 class Block
 {
 	private $data = null;
+	private $tplParams = array();
 	protected $config = array();
 	
 	public function __construct($config = array())
@@ -24,6 +25,21 @@ class Block
 			$this->constructData();
 		}
 		return $this->data;
+	}
+	
+	/**
+	 * Params, passed to tpl
+	 * @param $params array
+	 * @return void
+	 */
+	public function setTplParams(&$params)
+	{
+		$this->tplParams = &$params;
+	}
+	
+	public function getTplParam($key)
+	{
+		return $this->tplParams[$key];
 	}
 	
 	protected function setData($data)

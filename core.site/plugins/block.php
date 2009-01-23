@@ -19,6 +19,8 @@ catch(FileNotFoundException $e)
 	return;// $tpl->parse($tplName);
 }
 
+$block->setTplParams($params);
+
 if ($controller = Locator::get('controller', true))
 {
 	$method = strtolower(substr($blockName,0,1)).substr($blockName,1)."WillRender";
