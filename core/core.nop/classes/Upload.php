@@ -165,8 +165,13 @@ class Upload {
 			
 			$file_name_ext = $file_name.".".$ext;
 			$file_name_full = ( $is_full_name )? $file_name : $this->dir.$file_name_ext;
-				
+			
 			$B = filesize($uploaded_file);
+			
+			if( $params['watermark'] )
+			{
+			    $this->drawWatermark($uploaded_file);
+			}
 				
 			if($params['filesize'])
 			{
@@ -607,6 +612,73 @@ class Upload {
 
 		return true;
 	}
+	
+	  
+  function drawWatermark($filename)
+  {
+	ini_set('max_execution_time', 0);
+  	$size = GetImageSize($filename);
+  	if ($size[2]==2)
+	{
+		$im = imagecreatefromjpeg ($filename);
+  	}
+  	elseif ($size[2]==1)
+  	{
+   		$im = imagecreatefromgif ($filename);
+  	}
+  	elseif ($size[2]==3)
+  	{
+   		$im = imagecreatefrompng ($filename);
+  	}
+	
+	if (!$im)
+	{
+		return;
+	}
+  	
+  	$watermark = imagecreatefrompng($this->dir.'watermark.png');
+
+	$insertWidth = imagesx($watermark);
+	$insertHeight = imagesy($watermark);
+	
+	$imageWidth = imagesx($im);
+	$imageHeight = imagesy($im);
+	
+	//	var_dump($imageWidth, $imageHeight);
+	//die();
+	
+	$overlapX = $imageWidth - $insertWidth - 5;
+	$overlapY = $imageHeight - $insertHeight - 5;
+	
+	imagecolortransparent($watermark, imagecolorat($watermark, 0, 0));
+	imagecopymerge($im, $watermark, $overlapX, $overlapY, 0, 0, $insertWidth, $insertHeight, 22);
+	
+	ob_start();
+	 
+	if ($size[2]==2)
+	{
+		imagejpeg ($im);
+	}
+	elseif ($size[2]==1)
+	{
+   		imagegif($im);
+	}
+  	elseif ($size[2]==3)
+  	{
+	   	imagepng($im);
+	}
+		
+	imagedestroy($watermark);
+	imagedestroy($im);
+	
+	$data = ob_get_contents();
+	
+	ob_end_clean();
+	
+	$file = fopen($filename, 'w');
+	fwrite($file, $data);
+	fclose($file);
+  }
 }
 
 ?>
