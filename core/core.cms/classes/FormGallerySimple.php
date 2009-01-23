@@ -226,9 +226,15 @@ class FormGallerySimple
 			{
 				if(!$id)
 				{
+					$sizes = getimagesize($_FILES[$input_field]['tmp_name']);
+					
+					if($sizes[0]<$sizes[1])
+					    $is_vert = 1;
+					else
+					    $is_vert = 0;				
 					$order = $this->rh->db->QueryOne("SELECT MAX(_order) AS m FROM " . $this->table_name . " WHERE fid = " . $rubric_id);
 					$order = ($order['m'] > 0) ? ($order['m'] + 1) : 1;
-					$sql = "INSERT INTO " . $this->table_name . "(fid, _order) VALUES('" . $rubric_id . "', '" . $order . "')";
+					$sql = "INSERT INTO " . $this->table_name . "(fid, _order, is_vert) VALUES('" . $rubric_id . "', '" . $order . "', '".$is_vert."')";
 					//die($sql);
 					$new_id = $this->rh->db->Insert($sql);
 				}
@@ -313,7 +319,8 @@ class FormGallerySimple
 				'size' => $d['size'],
 				'filesize' => $d['filesize'],
 				'crop' => $d['crop'],
-				'base' => $d['base'],				
+				'base' => $d['base'],
+				'watermark'=>true				
 			);
 	}
 
