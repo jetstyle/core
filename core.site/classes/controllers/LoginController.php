@@ -26,6 +26,13 @@ class LoginController extends Controller
 				Locator::get('tpl')->set('username', $prp->get('login'));
 			}
 		}
+		/*
+		else if ($prp->security('openid'))
+		{
+
+			die('LoginController:: openid  already AUTHED!');
+		}
+		*/
 		else
 		{
 			Finder::useClass("forms/EasyForm");
@@ -52,7 +59,12 @@ class LoginController extends Controller
 
 		$prp = &Locator::get('principal');
 		
-		if ($prp->login($data['login'], $data['password'], $data['permanent']) === PrincipalInterface::AUTH)
+		if ( $prp->loginOpenid( $data['openid_login'] ) )
+		{
+			die('LoginController:: openid  logged in!');
+			//die();
+		}
+		else if ($prp->login($data['login'], $data['password'], $data['permanent']) === PrincipalInterface::AUTH)
 		{
 			$redirectTo = RequestInfo::get('retpath') ?
 					  RequestInfo::get('retpath') :

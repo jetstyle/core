@@ -129,6 +129,66 @@ class Principal implements PrincipalInterface
 		return $sm->check( $this->storageModel, $params );
 	}
 	
+	public function loginOpenid($login)
+	{
+	    if (!$login )
+	    {
+			return self::WRONG_LOGIN;
+	    }
+	
+	    // already logged in
+	    /*
+	    if ($this->security('noguests'))
+	    {
+		    $this->logout();
+	    }
+	    */
+	    $r = Finder::useLib("SimpleOpenID");
+	    $openid = new SimpleOpenID();
+
+	    $openid->SetIdentity($login);
+
+	    $openid_validation_result = $openid->ValidateWithServer();
+
+	    var_dump($openid_validation_result);
+	    die();
+
+	    //var_dump($_GET['openid_identity']);
+	    if ($openid_validation_result == true)
+	    {
+	    
+	    
+	    }
+	    //[ ] если нету юзера с таким openid_url надо его как-нибудь создать
+	    /*
+	    $this->storageModel->loadByLogin( $login );
+	    if (!$this->security('noguests'))
+	    {
+		$this->storageModel->guest();
+		return self::WRONG_LOGIN;
+	    }
+	    */
+	    		
+	    $state = null;
+
+	    if ($this->storageModel->checkPassword($pwd, $fromCookie))
+	    {
+		    if ($permanent)
+		    {
+			    $this->setLoginAndPassToCookies();
+		    }
+		    $state = self::AUTH;
+	    }
+	    else
+	    {
+		    $state = self::WRONG_PWD;
+		    $this->storageModel->guest();
+	    }
+
+	    $this->sessionModel->start($this->storageModel);
+	    return $state;
+	}
+	
 	public function login( $login="", $pwd="", $permanent = false, $fromCookie = false)
 	{
 		if (!$login || !$pwd)
