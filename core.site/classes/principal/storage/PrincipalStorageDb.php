@@ -26,6 +26,11 @@ class PrincipalStorageDb extends DBModel implements PrincipalStorageInterface
 		$this->loadOne('{login} = '.self::quote($login)." AND {realm} = ".self::quote($this->realm) );
 	}
 	
+	public function loadByOpenIdUrl($login)
+	{
+		$this->loadOne('{openid_url} = '.self::quote($login)." AND {realm} = ".self::quote($this->realm) );
+	}
+	
 	public function checkPassword($password, $fromCookie = false)
 	{
 		$userPassword = $this->get('password');
