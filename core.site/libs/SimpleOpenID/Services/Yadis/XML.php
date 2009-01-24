@@ -325,6 +325,11 @@ function &Services_Yadis_getXMLParser()
     if ($__Services_Yadis_defaultParser) {
         return $__Services_Yadis_defaultParser;
     }
+    
+    $__Services_Yadis_xml_extensions = array(
+    'dom' => 'Services_Yadis_dom',
+    'domxml' => 'Services_Yadis_domxml'
+    );
 
     $p = null;
 

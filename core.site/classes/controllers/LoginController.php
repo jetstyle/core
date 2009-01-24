@@ -10,6 +10,16 @@ class LoginController extends Controller
 	{
 		$prp = &Locator::get('principal');
 		
+			
+		if($_GET['openid_mode'] == 'id_res')
+		{// Perform HTTP Request to OpenID server to validate key
+		    $this->loginOpenidProceed();
+		}
+		else if ($_GET['openid_mode'] == 'cancel')
+		{ // User Canceled your Request
+		    echo "USER CANCELED REQUEST";
+		}
+		
 		if ($prp->security('noguests'))
 		{
 			if (RequestInfo::get('logout'))
@@ -59,7 +69,7 @@ class LoginController extends Controller
 
 		$prp = &Locator::get('principal');
 		
-		if ( $prp->loginOpenid( $data['openid_login'] ) )
+		if ( $prp->loginOpenidStart( $data['openid_login'] ) )
 		{
 			die('LoginController:: openid  logged in!');
 			//die();
@@ -77,5 +87,7 @@ class LoginController extends Controller
 			$form->fields[1]->validator->_Invalidate("bad_pass", "Неверное сочетание логин/пароль");
 		}
 	}
+	
+
 }
 ?>

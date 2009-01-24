@@ -129,65 +129,109 @@ class Principal implements PrincipalInterface
 		return $sm->check( $this->storageModel, $params );
 	}
 	
-	public function loginOpenid($login)
+	public function loginOpenidStart($login)
 	{
 	    if (!$login )
 	    {
-			return self::WRONG_LOGIN;
-	    }
-	
-	    // already logged in
-	    /*
-	    if ($this->security('noguests'))
-	    {
-		    $this->logout();
-	    }
-	    */
-	    $r = Finder::useLib("SimpleOpenID");
-	    $openid = new SimpleOpenID();
-
-	    $openid->SetIdentity($login);
-
-	    $openid_validation_result = $openid->ValidateWithServer();
-
-	    var_dump($openid_validation_result);
-	    die();
-
-	    //var_dump($_GET['openid_identity']);
-	    if ($openid_validation_result == true)
-	    {
-	    
-	    
-	    }
-	    //[ ] если нету юзера с таким openid_url надо его как-нибудь создать
-	    /*
-	    $this->storageModel->loadByLogin( $login );
-	    if (!$this->security('noguests'))
-	    {
-		$this->storageModel->guest();
 		return self::WRONG_LOGIN;
 	    }
-	    */
-	    		
-	    $state = null;
-
-	    if ($this->storageModel->checkPassword($pwd, $fromCookie))
+	    	
+	    $r = Finder::useLib("SimpleOpenID");
+	    $openid = new SimpleOpenID();
+	    $openid->SetIdentity($login);
+	    $openid->SetTrustRoot(openid_TrustRoot);
+	    $openid->SetRequiredFields(array());//'fullname'
+	    //$openid->SetOptionalFields(array('dob','gender','postcode','country','language','timezone'));
+	    if ($openid->GetOpenIDServer())
 	    {
-		    if ($permanent)
-		    {
-			    $this->setLoginAndPassToCookies();
-		    }
-		    $state = self::AUTH;
+		$redirectTo = RequestInfo::get('retpath') ?
+					  RequestInfo::get('retpath') :
+					  RequestInfo::$baseUrl;
+					  
+		$openid->SetApprovedURL( $redirectTo );      // Send Response from OpenID server to this script
+		$openid->Redirect();     // This will redirect user to OpenID Server
 	    }
 	    else
 	    {
-		    $state = self::WRONG_PWD;
-		    $this->storageModel->guest();
+		$error = $openid->GetError();
+		echo "ERROR CODE: " . $error['code'] . "<br>";
+		echo "ERROR DESCRIPTION: " . $error['description'] . "<br>";
 	    }
-
-	    $this->sessionModel->start($this->storageModel);
-	    return $state;
+	    exit;
 	}
+	
+	public function loginOpenidProceed()
+	{
+		Finder::useLib("SimpleOpenID");
+	    
+		$openid = new SimpleOpenID;
+		$openid->SetIdentity($_GET['openid_identity']);
+		
+		$openid_validation_result = $openid->ValidateWithServer();
+
+		//var_dump($_GET['openid_identity']);
+		if ($openid_validation_result == true)
+		{         // OK HERE KEY IS VALID
+
+		    $normalizied_login = $openid->OpenID_Standarize( $login );
+		    var_dump($normalizied_login);
+		
+		    //[ ] check user in db
+		    $this->storageModel->loadByLogin( $login );
+    		    if(!$login)
+    		    {
+    			//[ ] new User
+    			$openid_identity = $db->escape(rtrim($_GET['openid_identity'], "/"));
+    		    } 
+    		    else 
+    		    {
+    			    $user_login = $login->user_login;
+    			    $user_pass = $login->user_pass;
+    		    }
+
+/*		    [ ] can`t autorise him 
+    		    if($current_user->Authenticate($user_login, '', $persistent, $user_pass) == false) 
+    		    {
+    			//die('xx');
+    			    die($main_smarty->get_config_vars('PLIGG_Visual_Login_Error'));
+    		    } 
+		    
+		    [ ] authorise is successfull
+		    else 
+    		    {
+    			    if(strlen($_REQUEST['return']) > 1) 
+			    {
+    				    $return = $_REQUEST['return'];
+    			    }
+			    else 
+			    {
+    				    $return =  my_pligg_base.'/';
+    			    }
+    		
+    			    define('logindetails', $username . ";" . $password . ";" . $return);
+
+    			    check_actions('login_success_pre_redirect');
+
+    			    //var_dump($username, $password);
+    			    //die('ok');
+    			    header('Location: '.$return);
+    		    }
+*/
+		}
+		else if($openid->IsError() == true)
+		{            // ON THE WAY, WE GOT SOME ERROR
+		    $error = $openid->GetError();
+		    echo "ERROR CODE: " . $error['code'] . "<br>";
+		    echo "ERROR DESCRIPTION: " . $error['description'] . "<br>";
+		}
+		else
+		{                                            // Signature Verification Failed
+		    echo "INVALID AUTHORIZATION";
+		}
+    
+		die();
+	}
+	
 	
 	public function login( $login="", $pwd="", $permanent = false, $fromCookie = false)
 	{
