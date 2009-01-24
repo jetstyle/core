@@ -69,13 +69,14 @@ class LoginController extends Controller
 
 		$prp = &Locator::get('principal');
 		
-		if ( $prp->loginOpenidStart( $data['openid_login'] ) )
+		
+		if ( $data['openid_login'] && $prp->loginOpenidStart( $data['openid_login'] ) )
 		{
 			//die('LoginController:: openid  logged in!');
 			//die();
+			$form->fields[0]->validator->_Invalidate("bad_openid", "OpenId not found there");
 		}
-		
-		if ($prp->login($data['login'], $data['password'], $data['permanent']) === PrincipalInterface::AUTH)
+		else if ($prp->login($data['login'], $data['password'], $data['permanent']) === PrincipalInterface::AUTH)
 		{
 			$redirectTo = RequestInfo::get('retpath') ?
 					  RequestInfo::get('retpath') :
@@ -85,7 +86,7 @@ class LoginController extends Controller
 		}
 		else
 		{
-			$form->fields[1]->validator->_Invalidate("bad_pass", "Неверное сочетание логин/пароль");
+			$form->fields[2]->validator->_Invalidate("bad_pass", "Неверное сочетание логин/пароль");
 		}
 	}
 	
