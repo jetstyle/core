@@ -139,7 +139,7 @@ class Principal implements PrincipalInterface
 	    $r = Finder::useLib("SimpleOpenID");
 	    $openid = new SimpleOpenID();
 	    $openid->SetIdentity($login);
-	    $openid->SetTrustRoot(openid_TrustRoot);
+	    $openid->SetTrustRoot(  RequestInfo::$baseUrl );
 	    $openid->SetRequiredFields(array());//'fullname'
 	    //$openid->SetOptionalFields(array('dob','gender','postcode','country','language','timezone'));
 	    if ($openid->GetOpenIDServer())
