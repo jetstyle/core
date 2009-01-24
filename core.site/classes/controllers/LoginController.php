@@ -13,7 +13,7 @@ class LoginController extends Controller
 			
 		if($_GET['openid_mode'] == 'id_res')
 		{// Perform HTTP Request to OpenID server to validate key
-		    $this->loginOpenidProceed();
+		    $prp->loginOpenidProceed();
 		}
 		else if ($_GET['openid_mode'] == 'cancel')
 		{ // User Canceled your Request

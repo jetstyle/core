@@ -8,6 +8,7 @@ default:
         - password
         - name
         - salt
+        - openid_url
         >group:
             join_where: {_state} = 0
             model: PrincipalStorageDbGroupsModel

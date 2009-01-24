@@ -139,14 +139,14 @@ class Principal implements PrincipalInterface
 	    $r = Finder::useLib("SimpleOpenID");
 	    $openid = new SimpleOpenID();
 	    $openid->SetIdentity($login);
-	    $openid->SetTrustRoot(  RequestInfo::$baseUrl );
+	    $openid->SetTrustRoot(  RequestInfo::$baseFull );
 	    $openid->SetRequiredFields(array());//'fullname'
 	    //$openid->SetOptionalFields(array('dob','gender','postcode','country','language','timezone'));
 	    if ($openid->GetOpenIDServer())
 	    {
 		$redirectTo = RequestInfo::get('retpath') ?
 					  RequestInfo::get('retpath') :
-					  RequestInfo::$baseUrl;
+					  RequestInfo::$baseFull."login";
 					  
 		$openid->SetApprovedURL( $redirectTo );      // Send Response from OpenID server to this script
 		$openid->Redirect();     // This will redirect user to OpenID Server
@@ -169,64 +169,52 @@ class Principal implements PrincipalInterface
 		
 		$openid_validation_result = $openid->ValidateWithServer();
 
-		//var_dump($_GET['openid_identity']);
+		//var_dump( $openid->OpenID_Standarize($_GET['openid_identity']));die();
 		if ($openid_validation_result == true)
 		{         // OK HERE KEY IS VALID
 
-		    $normalizied_login = $openid->OpenID_Standarize( $login );
-		    var_dump($normalizied_login);
+		    $normalized_login = $openid->OpenID_Standarize( $_GET['openid_identity'] );
+		    //var_dump($normalizied_login);
 		
 		    //[ ] check user in db
-		    $this->storageModel->loadByLogin( $login );
-    		    if(!$login)
+		    $this->storageModel->loadByOpenidUrl( $normalized_login );
+    		    if(! $this->storageModel->getId() )
     		    {
     			//[ ] new User
-    			$openid_identity = $db->escape(rtrim($_GET['openid_identity'], "/"));
+			$newPass = md5(time().$normalized_login);
+			$newUser = array(
+				'group_id'=>2,
+				'login'=>$normalized_login,
+				'password'=>$newPass,
+				'realm'=>'site',
+				'openid_url'=> $normalized_login
+			);
+    			$userId = $this->storageModel->insert($newUser);
+			
+			$state = $this->login($normalized_login, $newPass, true);
     		    } 
     		    else 
     		    {
-    			    $user_login = $login->user_login;
-    			    $user_pass = $login->user_pass;
+			$this->setLoginAndPassToCookies();
+			$state = self::AUTH;
+			$this->sessionModel->start($this->storageModel);
+
     		    }
-
-/*		    [ ] can`t autorise him 
-    		    if($current_user->Authenticate($user_login, '', $persistent, $user_pass) == false) 
-    		    {
-    			//die('xx');
-    			    die($main_smarty->get_config_vars('PLIGG_Visual_Login_Error'));
-    		    } 
-		    
-		    [ ] authorise is successfull
-		    else 
-    		    {
-    			    if(strlen($_REQUEST['return']) > 1) 
-			    {
-    				    $return = $_REQUEST['return'];
-    			    }
-			    else 
-			    {
-    				    $return =  my_pligg_base.'/';
-    			    }
-    		
-    			    define('logindetails', $username . ";" . $password . ";" . $return);
-
-    			    check_actions('login_success_pre_redirect');
-
-    			    //var_dump($username, $password);
-    			    //die('ok');
-    			    header('Location: '.$return);
-    		    }
-*/
+	
+		    return $state;
 		}
 		else if($openid->IsError() == true)
-		{            // ON THE WAY, WE GOT SOME ERROR
-		    $error = $openid->GetError();
-		    echo "ERROR CODE: " . $error['code'] . "<br>";
-		    echo "ERROR DESCRIPTION: " . $error['description'] . "<br>";
+		{
+		   // ON THE WAY, WE GOT SOME ERROR
+		    #$error = $openid->GetError();
+		    #echo "ERROR CODE: " . $error['code'] . "<br>";
+		    #echo "ERROR DESCRIPTION: " . $error['description'] . "<br>";
+		    return self::NO_CREDENTIALS;
 		}
 		else
 		{                                            // Signature Verification Failed
-		    echo "INVALID AUTHORIZATION";
+		    #echo "INVALID AUTHORIZATION";
+		   return self::NO_CREDENTIALS;
 		}
     
 		die();
