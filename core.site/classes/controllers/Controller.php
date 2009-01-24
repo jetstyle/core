@@ -28,14 +28,7 @@ abstract class Controller implements ArrayAccess
 	{
 		Finder::useLib('http');
 		Http::status(404);
-		//$this->title = "404";
-		//var_dump(Locator::get('controller'));
-		//die('xx');
 		$tpl = &Locator::get('tpl');
-		
-		$foo = array('meta_title'=>'404') ;
-		Locator::bind('controller', $foo);
-		
 		$tpl->parseSiteMap('404');
 		echo $tpl->get('html');
 		die();
@@ -67,8 +60,11 @@ abstract class Controller implements ArrayAccess
 		die();
 	}
 	
-	public static function redirect($url)
+	public static function redirect($url="")
 	{
+		if (empty($url))
+		    $url = RequestInfo::$baseFull . RequestInfo::$pageUrl;
+
 		if (strpos($url, "http://") !== 0)
 			$url = RequestInfo::$hostProt . $url;
 
@@ -105,7 +101,6 @@ abstract class Controller implements ArrayAccess
 		if (!$this->siteMap) 
 		{
 			$ss = str_replace("Controller", "", get_class($this));
-			$ss = Inflector::underscore($ss);
 			$method = str_replace('handle_', '', $this->method);
 			$siteMap = Locator::get('tpl')->getSiteMap();
 
@@ -205,7 +200,7 @@ abstract class Controller implements ArrayAccess
 			
 				if ($this->method)
 				{
-					$this->preHandle($config);
+					$this->preHandle();
 					if ($controller)
 					{
 						$status = call_user_func_array(
@@ -220,7 +215,7 @@ abstract class Controller implements ArrayAccess
 							$config
 						);
 					}
-					$this->postHandle($config);
+					$this->postHandle();
 					break;
 				}
 			}
