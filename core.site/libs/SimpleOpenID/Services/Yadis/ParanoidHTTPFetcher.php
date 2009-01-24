@@ -118,7 +118,7 @@ class Services_Yadis_ParanoidHTTPFetcher extends Services_Yadis_HTTPFetcher {
             $headers = $this->headers;
 
             if (!$code) {
-                trigger_error("No HTTP code returned", E_USER_WARNING);
+                //trigger_error("No HTTP code returned", E_USER_WARNING);
                 return null;
             }
 

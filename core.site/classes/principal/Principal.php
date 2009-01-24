@@ -153,9 +153,10 @@ class Principal implements PrincipalInterface
 	    }
 	    else
 	    {
-		$error = $openid->GetError();
-		echo "ERROR CODE: " . $error['code'] . "<br>";
-		echo "ERROR DESCRIPTION: " . $error['description'] . "<br>";
+		#$error = $openid->GetError();
+		#echo "ERROR CODE: " . $error['code'] . "<br>";
+		#echo "ERROR DESCRIPTION: " . $error['description'] . "<br>";
+		return self::NO_CREDENTIALS;
 	    }
 	    exit;
 	}

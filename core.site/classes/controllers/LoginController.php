@@ -17,7 +17,7 @@ class LoginController extends Controller
 		}
 		else if ($_GET['openid_mode'] == 'cancel')
 		{ // User Canceled your Request
-		    echo "USER CANCELED REQUEST";
+		    #echo "USER CANCELED REQUEST";
 		}
 		
 		if ($prp->security('noguests'))
@@ -71,10 +71,11 @@ class LoginController extends Controller
 		
 		if ( $prp->loginOpenidStart( $data['openid_login'] ) )
 		{
-			die('LoginController:: openid  logged in!');
+			//die('LoginController:: openid  logged in!');
 			//die();
 		}
-		else if ($prp->login($data['login'], $data['password'], $data['permanent']) === PrincipalInterface::AUTH)
+		
+		if ($prp->login($data['login'], $data['password'], $data['permanent']) === PrincipalInterface::AUTH)
 		{
 			$redirectTo = RequestInfo::get('retpath') ?
 					  RequestInfo::get('retpath') :
