@@ -144,10 +144,18 @@ class Form
      {
      	$this->action = $rh->ri->url;
      }
-     
 
      if (!$form_config) $form_config = $this->default_config;
      else               Form::StaticDefaults($this->default_config, $form_config);
+
+     if ($form_config['template_form'])
+     {
+	$parts = explode(":", $form_config['template_form']);
+	if (count($parts)==1)
+	{
+	    $form_config['template_form'] = "form.html:".$form_config['template_form'];
+	}
+     }
 
      $this->config = $form_config;
 
@@ -369,11 +377,8 @@ class Form
      		"name=\"".$form_name.'" '.
      		($this->config["form_class"] ? 'class="'.$this->config["form_class"].'"' : '' ).
      		($this->config["form_onsubmit"] ? "onsubmit='".$this->config["form_onsubmit"]."'" : '' ).
-     		' enctype="multipart/form-data"> '.
-     		RequestInfo::pack(METHOD_POST)
+     		' enctype="multipart/form-data"> '. RequestInfo::pack(METHOD_POST)
      );
-
-     $tpl->set( "form_clean", $this->config['form_clean'] );
 
      $tpl->set( "form_name", 'form_'.$this->name );
      $tpl->set( "form_present", $this->form_present_var );
