@@ -33,7 +33,7 @@ class CaptchaController extends Controller
 	        session_start();
         }
 
-        $captcha = new KCAPTCHA();
+        $captcha = new KCAPTCHA(Config::get("captcha_length"));
 
         if($_REQUEST[session_name()])
         {

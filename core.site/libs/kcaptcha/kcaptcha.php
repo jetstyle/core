@@ -19,7 +19,7 @@
 class KCAPTCHA{
 
 	// generates keystring and image
-	function KCAPTCHA($length=3,$rewriteWidth=0,$rewriteHeight=0){
+	function KCAPTCHA($length=null,$rewriteWidth=0,$rewriteHeight=0){
 
 		require(dirname(__FILE__).'/kcaptcha_config.php');
 		if ($rewriteWidth) $width = $rewriteWidth;

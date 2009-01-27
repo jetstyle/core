@@ -12,6 +12,7 @@ $allowed_symbols = "23456789abcdeghkmnpqsuvxyz"; #alphabet without similar symbo
 $fontsdir = 'fonts';	
 
 # CAPTCHA string length
+if (!$length)
 $length = mt_rand(3,6); # random 5 or 6
 //$length = 6;
 
