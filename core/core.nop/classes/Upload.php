@@ -165,7 +165,10 @@ class Upload {
 			
 			$file_name_ext = $file_name.".".$ext;
 			$file_name_full = ( $is_full_name )? $file_name : $this->dir.$file_name_ext;
-			
+    			if( $params['watermark'] )
+    			{
+    				    $this->drawWatermark($file_name_full);
+    			}
 			$B = filesize($uploaded_file);
 
 			if($params['filesize'])
@@ -221,10 +224,7 @@ class Upload {
 					$file = fopen($file_name_full, 'w');
 					fwrite($file, $img['data']);
 					fclose($file);
-					if( $params['watermark'] )
-					{
-						    $this->drawWatermark($file_name_full);
-					}
+					//watermark thumbs
 				}
 				else
 				{
