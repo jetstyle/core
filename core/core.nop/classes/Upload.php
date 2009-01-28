@@ -165,10 +165,12 @@ class Upload {
 			
 			$file_name_ext = $file_name.".".$ext;
 			$file_name_full = ( $is_full_name )? $file_name : $this->dir.$file_name_ext;
-    			if( $params['watermark'] )
+    			
+			if( $params['watermark'] )
     			{
-    				    $this->drawWatermark($file_name_full);
+    				    $this->drawWatermark($uploaded_file);
     			}
+			
 			$B = filesize($uploaded_file);
 
 			if($params['filesize'])
