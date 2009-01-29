@@ -100,17 +100,19 @@ abstract class Controller implements ArrayAccess
 	{
 		if (!$this->siteMap) 
 		{
-			$ss = str_replace("Controller", "", get_class($this));
-			$method = str_replace('handle_', '', $this->method);
+			Finder::useClass('Inflector');
+			$className = Inflector::underscore(str_replace("Controller", "", get_class($this)));
+			$methodName = str_replace('handle_', '', $this->method);
+			
 			$siteMap = Locator::get('tpl')->getSiteMap();
 
-            if ($method && ($method != "default" || ( $method == "default" && isset( $siteMap[ strtolower( $ss.'/'.$method ) ]  ) )))
+            if ($methodName && ($methodName != "default" || ( $methodName == "default" && isset( $siteMap[ strtolower( $className.'/'.$methodName ) ]  ) )))
 			{
-				$this->siteMap = strtolower($ss.'/'.$method);
+				$this->siteMap = strtolower($className.'/'.$methodName);
 			}
 			else
 			{
-				$this->siteMap = strtolower($ss);
+				$this->siteMap = strtolower($className);
 			}
 		}
 		
