@@ -30,7 +30,6 @@ class FormComponent_interface_image extends FormComponent_abstract
 
      $result = FormComponent_abstract::Interface_Parse();
 
-     $this->field->rh->UseClass('Upload');
 	 $file =& new Upload($this->field->rh, $this->field->config['model_data_dir'] ? $this->field->config['model_data_dir'] : 'files/');
 	 if ($file->getFile($data))
      {

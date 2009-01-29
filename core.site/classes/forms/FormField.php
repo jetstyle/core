@@ -7,7 +7,6 @@
   Вспомогательный класс.
 
   FormField( &$form, $field, &$config )
-      - $rh              -- ссылка на Form, откуда берёт ссылку на $rh, например
       - $field           -- уникальный идентификатор поля, вида: "subject", "body_r", "author_id"
       - &$config         -- ссылка на конфиг поля. Обязательно ссылка, потому что может попастся
                             массив из полей
@@ -53,8 +52,6 @@ class FormField
    function FormField( &$form, $field=NULL, &$config )
    {
      $this->form = &$form;
-     $this->rh   = &$form->rh;
-     $this->tpl  = &$form->tpl;
 
      if ($field == NULL) $field = $form->_NextInnerName();
      $this->name = $field;

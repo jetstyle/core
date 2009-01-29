@@ -7,8 +7,7 @@
 
   Управляющий класс.
 
-  EasyForm( &$rh, $config=false )
-      - $rh              -- ссылка на RH, как обычно
+  EasyForm( $config=false )
       - $config          -- конфиг-массив, если есть, то сразу запускается обработка
 
   -------------------
@@ -44,10 +43,6 @@
 
 class EasyForm{
 
-	//ссылки на окружение
-	var $rh;
-	var $tpl;
-
 	var $form; //объект класса Form
 	var $id_var_name = "_id"; //из какой переменной запроса брать ID  к записи в БД
 	var $groups = array("group","tab_list","tab_child"); //список пакетов, которые считаются группами
@@ -81,10 +76,8 @@ class EasyForm{
 	   			$this->config = $this->_mergeConfig($this->config,$arg);
 			}
 		}
-		//var_dump('<pre>',$this->config,'</pre>');die;
 
 		$this->tpl =& Locator::get('tpl');
-		//if ($config) $this->Handle($config);
 	}
 
 	//построение формы, обработка формы
@@ -100,7 +93,7 @@ class EasyForm{
 		//инициализируем форму
 		$class_name = isset($config["class"]) ? $config["class"] : "Form";
 		Finder::useClass( 'forms/'.$class_name );
-		$form =& new $class_name($this->rh, $config);
+		$form =& new $class_name($config);
 		$this->form =& $form;
 
 		//привязываем строку к БД
@@ -162,9 +155,6 @@ class EasyForm{
 
   //добавляем кнопки к форме
   function AddButtons( &$form, $config ){
-
-    if(!is_array($config))
-      $this->rh->error("EasyForm::AddButtons -- \$config should be an array, now it is: <strong>[$config]</strong>");
 
     //тут добавляем кнопки
     foreach($config as $rec)

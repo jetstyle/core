@@ -5,18 +5,18 @@
   * see http://in.jetstyle.ru/rocket/rocketforms
 
   FormComponent_options_sql( &$config )
-      - $field -- $field->config instance-a поля  
+      - $field -- $field->config instance-a поля
 
   -------------------
 
   * interface   : ПРОСТОЙ ВЫБОР. Выбор из списка через select или radio.
-  * view        : ПРОСТОЙ ВЫБОР. Выводит значение для ключа (оформляя его в шаблон) из БД по запросу 
+  * view        : ПРОСТОЙ ВЫБОР. Выводит значение для ключа (оформляя его в шаблон) из БД по запросу
                   field->config["options_sql"] = "select ... as id, ... as name from table"
 
   -------------------
 
   // Интерфейс (парсинг и обработка данных)
-  
+
   * Interface_Parse()
   * Interface_PostToArray( $post_data )
   * View_Parse( $plain_data=NULL )
@@ -31,7 +31,7 @@ class FormComponent_options_sql extends FormComponent_options
    // получим список опций из БД
    function _PrepareOptions()
    {
-     $options = $this->field->rh->db->Query( $this->field->config["options_sql"] ); 
+     $options = Locator::get('db')->query( $this->field->config["options_sql"] );
      $data = array();
      foreach( $options as $k=>$v ) $data[ $v["id"] ] = $v["name"];
      $this->field->config["options"] = isset($this->field->config["options"]) ? $this->field->config["options"] + $data : $data;
@@ -59,9 +59,9 @@ class FormComponent_options_sql extends FormComponent_options
      return parent::View_Parse( $plain_data );
    }
 
-   
+
 // EOC{ FormComponent_options_sql }
-}  
-   
+}
+
 
 ?>

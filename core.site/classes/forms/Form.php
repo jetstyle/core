@@ -8,8 +8,7 @@
 
   Управляющий класс.
 
-  Form( &$rh )
-      - $rh              -- ссылка на RH, как обычно
+  Form( $config )
 
   -------------------
 
@@ -127,12 +126,8 @@ class Form
            // [optional] "on_before_event", "on_after_event"
                               );
 
-   public function Form( &$rh, $form_config = NULL )
+   public function Form($form_config = NULL)
    {
-
-     $this->rh  = &$rh;
-     $this->tpl = &$rh->tpl; // чтобы потом можно было отстроиться от "текущего" шаблонного движка.
-                             // очень полезная фича
 
      Finder::UseClass("forms/FormField"); // он нам стопудово понадобится
 
@@ -142,7 +137,7 @@ class Form
      }
      else
      {
-     	$this->action = $rh->ri->url;
+     	$this->action = '';
      }
 
      if (!$form_config) $form_config = $this->default_config;
@@ -169,8 +164,8 @@ class Form
        }
    }
 
-   
-   
+
+
    // автоматизатор "конфигов по-умолчанию"
    function StaticDefaults( $default_config, &$supplied_config )
    {
@@ -211,7 +206,7 @@ class Form
      if (!$ignore_session) $this->FromSession();
 
      // присваиваем идетификатор форме
-     $uid = 0;
+     /*$uid = 0;
      do
      {
         //zharik@gmail.com: $_name should be initilazed before usage
@@ -221,9 +216,9 @@ class Form
 			 $uid++;
      }
      while (isset($this->rh->forms) && in_array($this->name, $this->rh->forms));
-     $this->rh->forms[] = $this->name;
+     $this->rh->forms[] = $this->name;*/
+     $this->name = $this->config['db_table']? $this->config['db_table'] : 'form';
 
-//     die(var_dump($_POST));
      //пробуем обработать пост
      if (isset($_POST[$this->form_present_var]) && ($_POST[$this->form_present_var] == 'form_'.$this->name) && !$ignore_post)
      {
@@ -248,7 +243,7 @@ class Form
        {
          $processed = 1;
          if (!$ignore_session) $this->ToSession();
-         
+
          $this->_ProcessEvent( $event );
 
          // redirect
@@ -263,7 +258,7 @@ class Form
          // success
          if ($this->processed && $this->success && isset($this->config["success_url"]))
             Controller::redirect( $this->config["success_url"] );
-           
+
          $processed = 0;
        }
      }
@@ -304,7 +299,7 @@ class Form
         foreach($this->config[$handler] as $k=>$v){
           //это может быть отдельная функиця
           //или это может быть объект с явно заданным методом
-			
+
           if (is_callable($this->config[$handler][$k])){
             call_user_func($this->config[$handler][$k], $event, $this);
           }else
@@ -312,32 +307,9 @@ class Form
           if ( is_callable( array($this->config[$handler][$k],$default_method) ) ){
             $this->config[$handler][$k]->$default_method( $event, $this );
           }
-	  /* НЕТ!
-	  else
-          //это может быть отдельный хэндлер
-          {
-            $this->_ExecEventHandler( $event, $this->rh->FindScript_($this->config["event_handlers_type"], $v) );
-          }
-	  */
         }
       }
    }
-    /* НЕТ!
-   //выполнить хэндлер в отдельно области видимости
-   function _ExecEventHandler( $event, $event_handler )
-   {
-    if ($event_handler !== false){
-
-      //создаём алиасы для обработчика
-      $rh =& $this->rh;
-      include( $this->rh->FindScript("handlers","_enviroment") );
-      $form =& $this;
-
-      //вызываем обработчик
-      include($event_handler);
-    }
-   }
-   */
 
    // сбросить все поля формы в начальное состояние
    function Reset()
@@ -450,9 +422,6 @@ class Form
      $dump_hash = array();
      foreach( $this->fields as $k=>$field )
       $dump_hash[ $field->name ] = $field->_Dump();
-
-     if ($is_error) $this->rh->debug->Error_R( $dump_hash );
-     else           $this->rh->debug->Trace_R( $dump_hash );
    }
 
    // работа в сессии
@@ -534,24 +503,18 @@ class Form
      $this->processed_event = $event;
 
      if (!$this->processed)
-      $this->rh->Redirect( $this->rh->ri->Href($this->rh->ri->url) );
+		Controller::redirect();
      else
-     {
-       $this->ResetSession(); // если успешно обработана, то сессию выкидываем
-     }
+		$this->ResetSession(); // если успешно обработана, то сессию выкидываем
    }
 
    // вставка в БД
    function DbInsert()
    {
       $db = DBAL::getInstance();
-      /*
-      var_dump($_POST);
-      die();
-      */
-      if (!$this->config["db_table"])
-        if ($this->config["db_ignore"]) return;
-        else $this->rh->debug->Error("[Form]: *db_table* form config option is not set.");
+
+      if (!$this->config["db_table"] && $this->config["db_ignore"]) return;
+      	  else throw new JSException("[Form]: *db_table* form config option is not set.");
 
       $fields = array();
       $values = array();
@@ -577,9 +540,8 @@ class Form
    }
    function DbUpdate( $data_id = NULL )
    {
-      if (!$this->config["db_table"])
-        if ($this->config["db_ignore"]) return;
-        else $this->rh->debug->Error("[Form]: *db_table* form config option is not set.");
+      if (!$this->config["db_table"] && $this->config["db_ignore"]) return;
+      	  else throw new JSException("[Form]: *db_table* form config option is not set.");
 
       if ($data_id == NULL) $data_id = $this->data_id;
 
@@ -599,19 +561,18 @@ class Form
    {
       $fields_values = array();
       foreach($fields as $k=>$v)
-        $fields_values[] = $v." = ".$this->rh->db->Quote($values[$k]);
+        $fields_values[] = $v." = ".Locator::get('db')->quote($values[$k]);
 
       $sql = "update ".$this->config["db_table"].
              " set ".implode(",",$fields_values)." where ".
-             $this->config["id_field"]."=".$this->rh->db->Quote($this->data_id);
-      //$this->rh->debug->Error( $sql );
+             $this->config["id_field"]."=".Locator::get('db')->quote($this->data_id);
       if (sizeof($fields) == 0) return false;
-      $this->rh->db->Query($sql);
+      Locator::get('db')->execute($sql);
 
    }
    function _DbAuto( &$fields, &$values, $is_insert=false )
    {
-      $user = $this->rh->principal->id;
+      $user = Locator::get('principal')->getId();
       $dt = date("Y-m-d H:i:s");
       if ($this->config["auto_user_id"])
       {
@@ -638,15 +599,13 @@ class Form
    // загрузка из БД
    function Load( $data_id = NULL )
    {
-     if (!$this->config["db_table"])
-       if ($this->config["db_ignore"]) return;
-       else $this->rh->debug->Error("[Form]: *db_table* form config option is not set.");
+     if (!$this->config["db_table"] && $this->config["db_ignore"]) return;
+      	  else throw new JSException("[Form]: *db_table* form config option is not set.");
 
      if ($data_id == NULL) $data_id = $this->data_id;
      $sql = "select * from ".$this->config["db_table"]." where ".
-             $this->config["id_field"]."=".$this->rh->db->Quote($data_id);
-
-     $data = $this->rh->db->QueryOne( $sql );
+             $this->config["id_field"]."=".Locator::get('db')->quote($data_id);
+     $data = Locator::get('db')->queryOne( $sql );
      if ($data == false)
      {
        $this->data_id = 0;
@@ -659,17 +618,16 @@ class Form
    // удаление из БД
    function DbDelete( $data_id = NULL )
    {
-     if (!$this->config["db_table"])
-       if ($this->config["db_ignore"]) return;
-       else $this->rh->debug->Error("[Form]: *db_table* form config option is not set.");
+     if (!$this->config["db_table"] && $this->config["db_ignore"]) return;
+      	  else throw new JSException("[Form]: *db_table* form config option is not set.");
 
      if ($data_id == NULL) $data_id = $this->data_id;
      foreach($this->fields as $k=>$v)
        $this->fields[$k]->DbDelete( $data_id );
 
      $sql = "delete from ".$this->config["db_table"]." where ".
-             $this->config["id_field"]."=".$this->rh->db->Quote($data_id);
-     $this->rh->db->Query( $sql );
+             $this->config["id_field"]."=".Locator::get('db')->quote($data_id);
+     Locator::get('db')->query( $sql );
    }
 
    // загрузка из массива
