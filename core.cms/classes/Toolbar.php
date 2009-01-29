@@ -55,7 +55,7 @@
 
  	protected function loadGoTo() {
     	$this->goToList = $this->db->query("
- 			SELECT title_pre AS title, _path AS path 
+ 			SELECT IF(LENGTH(title_short) > 0, title_short, title_pre) AS title, _path AS path 
  			FROM ??content 
  			WHERE controller NOT IN ('', 'content', 'link') 
  			ORDER BY _level,_order 
