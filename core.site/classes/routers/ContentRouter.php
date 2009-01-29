@@ -12,7 +12,8 @@ class ContentRouter extends BasicRouter
 		if (empty($criteria)) return null;
 
 		$content = DBModel::factory('Content');
-
+		$content->setOrder(array('_level' => 'DESC'));
+		
 		$where = array();
 		if (!isset($criteria['class']) && $criteria['url']=="")
 		{
