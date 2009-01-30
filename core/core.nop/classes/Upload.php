@@ -648,7 +648,7 @@ class Upload {
 	//	var_dump($imageWidth, $imageHeight);
 	//die();
 	
-	$overlapX = $imageWidth - $insertWidth - 10;
+	$overlapX = $imageWidth/2 - $insertWidth/2 ;
 	$overlapY = $imageHeight - $insertHeight - 5;
 	
 	imagecolortransparent($watermark, imagecolorat($watermark, 0, 0));
