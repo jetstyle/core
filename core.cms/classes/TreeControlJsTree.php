@@ -135,6 +135,8 @@ class TreeControlJsTree extends TreeControl
 				$treeParams['data'] = $this->toJSON();
 				$treeParams['level_limit'] = $this->level_limit;
 				
+				$treeParams['disable_drag'] = $this->config->disable_drag ? true : false;
+				
 				$this->tpl->set('tree_params', $treeParams);
 			break;
 		}

@@ -47,6 +47,9 @@
 			{{?tree_params.level_limit}}
 			'max_depth' : {{tree_params.level_limit}},
 			{{/?}}
+			{{?tree_params.disable_drag}}
+			'disable_drag' : true,
+			{{/?}}
 			'update_url' : '{{tree_params.update_url}}',
 			'go_url'	:  '{{tree_params.go_url}}',
 			'source_url':  '{{tree_params.source_url}}',
