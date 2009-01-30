@@ -39,8 +39,7 @@ class ModuleConstructor
 		{
 			$this->params = $params;
 		}
-		
-		
+				
 		$this->title = $this->config->module_title;
 	}
 
@@ -63,9 +62,21 @@ class ModuleConstructor
 			Finder::useClass( $className );
 			Debug::trace('ModuleConstructor::InitModule - '.$this->moduleName.'/'.$className );
 
-			Locator::get('tpl')->set("module_name", $this->moduleName);
 			$config->componentPath = implode('/', $this->path);
+
 			
+			$slashPos = strrpos($config->componentPath, '/');
+			if ($slashPos)
+			{
+				$mn = substr($config->componentPath, 0, $slashPos);
+			}
+			else
+			{
+				$mn = $config->componentPath;
+			}
+			
+			Locator::get('tpl')->set("module_name", $mn);
+						
 			$cls = new $className($config);
 			$cls->handle();
 			return $cls->getHtml();
