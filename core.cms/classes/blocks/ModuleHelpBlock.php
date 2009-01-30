@@ -14,7 +14,14 @@ class ModuleHelpBlock extends Block
 		$tag = $this->getTplParam('tag');
 		if ($tag)
 		{
-			$data = Locator::get('db')->queryOne("SELECT id, text_pre AS text FROM ??help_texts WHERE _supertag = ".Locator::get('db')->quote($tag)." AND _state = 0");
+			try
+			{
+				$data = Locator::get('db')->queryOne("SELECT id, text_pre AS text FROM ??help_texts WHERE _supertag = ".Locator::get('db')->quote($tag)." AND _state = 0");
+			}
+			catch(DBException $e)
+			{
+				//
+			}
 		}
 		
 		$this->setData($data);

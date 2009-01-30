@@ -45,7 +45,7 @@ class TreeControl
 			$this->level_limit = $this->config->level_limit;
 		}
 
-		if (!array_key_exists('addChild', $this->config->hide_buttons))
+		if (!isset($this->config->hide_buttons['addChild']))
 		{
 			$this->config->hide_buttons['addChild'][$this->level_limit] = true;
 		}
