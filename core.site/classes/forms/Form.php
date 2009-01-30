@@ -513,7 +513,8 @@ class Form
    {
       $db = DBAL::getInstance();
 
-      if (!$this->config["db_table"] && $this->config["db_ignore"]) return;
+      if (!$this->config["db_table"])
+      	if ($this->config["db_ignore"]) return;
       	  else throw new JSException("[Form]: *db_table* form config option is not set.");
 
       $fields = array();
@@ -540,7 +541,8 @@ class Form
    }
    function DbUpdate( $data_id = NULL )
    {
-      if (!$this->config["db_table"] && $this->config["db_ignore"]) return;
+      if (!$this->config["db_table"])
+      	if ($this->config["db_ignore"]) return;
       	  else throw new JSException("[Form]: *db_table* form config option is not set.");
 
       if ($data_id == NULL) $data_id = $this->data_id;
@@ -599,7 +601,8 @@ class Form
    // загрузка из БД
    function Load( $data_id = NULL )
    {
-     if (!$this->config["db_table"] && $this->config["db_ignore"]) return;
+     if (!$this->config["db_table"])
+      	if ($this->config["db_ignore"]) return;
       	  else throw new JSException("[Form]: *db_table* form config option is not set.");
 
      if ($data_id == NULL) $data_id = $this->data_id;
@@ -618,7 +621,8 @@ class Form
    // удаление из БД
    function DbDelete( $data_id = NULL )
    {
-     if (!$this->config["db_table"] && $this->config["db_ignore"]) return;
+     if (!$this->config["db_table"])
+      	if ($this->config["db_ignore"]) return;
       	  else throw new JSException("[Form]: *db_table* form config option is not set.");
 
      if ($data_id == NULL) $data_id = $this->data_id;
