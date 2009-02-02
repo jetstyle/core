@@ -652,7 +652,7 @@ class Upload {
 	$overlapY = $imageHeight - $insertHeight - 5;
 	
 	imagecolortransparent($watermark, imagecolorat($watermark, 0, 0));
-	imagecopymerge($im, $watermark, $overlapX, $overlapY, 0, 0, $insertWidth, $insertHeight, 22);
+	imagecopymerge($im, $watermark, $overlapX, $overlapY, 0, 0, $insertWidth, $insertHeight, 12);
 	
 	ob_start();
 	 
