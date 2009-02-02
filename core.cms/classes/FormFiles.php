@@ -120,6 +120,7 @@ class FormFiles extends FormSimple
 
 							$this->tpl->setRef('file', $r);
 
+							/*
 							if($file['ext'] == 'flv')
 							{
 								$this->item[$field_file] = $this->tpl->parse($this->template_files.':file_video');
@@ -134,8 +135,9 @@ class FormFiles extends FormSimple
 							}
 							else
 							{
+								*/
 								$this->item[$field_file] = $this->tpl->parse($this->template_files.':file');
-							}
+							//}
 
                             $this->item[$field_file."_down"] = $this->item[$field_file];
 						}

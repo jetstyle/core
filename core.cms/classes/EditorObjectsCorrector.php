@@ -28,6 +28,10 @@ class EditorObjectsCorrector
 		$data = preg_replace_callback("/<blockquote>(.*?)?<\/blockquote>/si", array($this, "correctQuotes"), $data);
 		$data = preg_replace_callback("/<ins>(.*?)?<\/ins>/si", array($this, "correctMarks"), $data);
 		$data = preg_replace_callback("/<big>(.*?)?<\/big>/si", array($this, "correctNotes"), $data);
+		
+		$data = preg_replace_callback("/<img([^>]*?)class=\"flash\"([^>]*?)[\/]{0,1}>/si", array($this, "correctFlash"), $data);
+		
+		// rewrite regexp. look at flash regexp
 		$data = preg_replace_callback("/<img(.*?)?[\/]{0,1}>/si", array($this, "correctImages"), $data);
 		$data = preg_replace_callback("/<a(.*?)?>(.*?)?<\/a?>/si", array($this, "correctFiles"), $data);
 
@@ -82,7 +86,75 @@ class EditorObjectsCorrector
 			return $this->tpl->parse('editor/note.html');		
 		}
 	}
+	
+	protected function correctFlash($matches)
+	{
+		$result = $matches[0];
+		
+		preg_match_all('/(.*?)=(")(|.*?[^\\\])\\2/si', $matches[1]." ".$matches[2], $paramsMatches);
+		
+		if (is_array($paramsMatches[3]) && !empty($paramsMatches[3]))
+		{
+			$params = array();
+			foreach ($paramsMatches[1] AS $i => $r)
+			{
+				$params[trim($r)] = trim(str_replace('\"', '"', $paramsMatches[3][$i]));
+			}
 
+			if ($params['id'])
+			{
+				$length = strlen($params['id']);
+				$part = 0;
+				$flashParams = array();
+				$previousLetter = '';
+				$letter = '';
+				
+				for ($i = 0; $i < $length; $i++)
+				{
+					$letter = $params['id']{$i};
+					
+					if ($letter == ';')
+					{
+						if ($previousLetter == '\\')
+						{
+							$flashParams[$part] = substr($flashParams[$part], 0, -1);
+						}
+						else
+						{
+							$part++;
+							$previousLetter = $letter;
+							continue;
+						}
+					}
+
+					$flashParams[$part] .= $letter;
+					$previousLetter = $letter;
+				}
+								
+				if (count($flashParams) == 3)
+				{
+					$params['src'] = $flashParams[0];
+					$params['width'] = intval($flashParams[1]);
+					$params['height'] = intval($flashParams[2]);
+					
+					$this->tpl->setRef('*', $params);
+					
+					// @TODO remove HACK
+					try
+					{
+						$result = $this->tpl->parse('content/blocks/flash.html');
+					}
+					catch(FileNotFoundException $e)
+					{
+						// 
+					}
+				}
+			}
+		}
+		
+		return $result;
+	}
+	
 	protected function correctFiles($matches)
 	{
 		preg_match_all('/(.*?)=(")(|.*?[^\\\])\\2/si', $matches[1], $paramsMatches);
