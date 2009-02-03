@@ -174,7 +174,7 @@ class ListSimple
 		{
 			Finder::useModel('DBModel');
 			$this->model = new DBModel();
-			$this->model->setTable($this->config->table_name);
+			$this->model->setTable($this->getTableName());
 			$this->model->setFields($this->config->SELECT_FIELDS);
 			$this->model->where = ( $_GET['_show_trash'] ? '{_state}>=0' : "{_state} <>2 " ) . ($this->config->where ? ' AND ' . $this->config->where : '') ;
 			$this->model->setOrder($this->config->order_by);
@@ -183,6 +183,18 @@ class ListSimple
 		return $this->model;
 	}
 
+	protected function getTableName()
+	{
+		if (!$this->config->table_name)
+		{
+			$pathParts = explode('/', $this->config->componentPath);
+			array_pop($pathParts);
+			$this->config->table_name = strtolower(implode('_', $pathParts));
+		}
+		
+		return $this->config->table_name;
+	}
+	
 	/**
 	 * Меняем элементы местами
 	 *

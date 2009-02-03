@@ -56,8 +56,13 @@ class ModuleConstructor
 	protected function proceedModule(&$config)
 	{
 		// real module
-		if ($config->class_name)
+		if ($config->class_name || (!$config->class_name && !isset($config->WRAPPED)))
 		{
+			if (!$config->class_name)
+			{
+				$config->class_name = implode('', array_map('ucfirst', $this->path));
+			}
+			
 			$className = $config->class_name;
 			Finder::useClass( $className );
 			Debug::trace('ModuleConstructor::InitModule - '.$this->moduleName.'/'.$className );
@@ -99,8 +104,8 @@ class ModuleConstructor
 			}
 						
 			$result = array();
-			foreach ($config->WRAPPED AS $subModule)
-			{
+			foreach ($config->WRAPPED AS $k => $subModule)
+			{				
 				$_subModule = array_pop(explode('/', $subModule));
 				if ($neededSubModule && $neededSubModule != $_subModule)
 				{
@@ -155,6 +160,8 @@ class ModuleConstructor
 		{
 			$config = clone $this->config;
 		}
+		
+		unset($config->WRAPPED);
 		
 		$config->read(Finder::findScript( $this->handlersType, $this->moduleName.'/'.$name));
 		return $config;

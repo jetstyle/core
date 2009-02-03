@@ -194,8 +194,20 @@ class FormSimple
 	{
 		Finder::useModel('DBModel');
 		$this->model = new DBModel();
-		$this->model->setTable($this->config->table_name);
+		$this->model->setTable($this->getTableName());
 		$this->model->setFields($this->config->SELECT_FIELDS);
+	}
+	
+	protected function getTableName()
+	{
+		if (!$this->config->table_name)
+		{
+			$pathParts = explode('/', $this->config->componentPath);
+			array_pop($pathParts);
+			$this->config->table_name = strtolower(implode('_', $pathParts));
+		}
+		
+		return $this->config->table_name;
 	}
 	
 	protected function load()
