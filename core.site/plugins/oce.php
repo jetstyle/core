@@ -29,6 +29,7 @@ if(Locator::get('principalCms')->security('cmsModules', $module))
 	$tpl->set('_height', $params['height'] ? $params['height'] : 600 );
 	$tpl->set('_title', $params['title'] ? $params['title'] : 'редактировать' );
 	$tpl->set('_field', $params['field'] );
+	$tpl->set('_parent', $params['container']=='parent' ? 1 : null );
 	
 	if ($params['inplace']=='wysiwyg')
 	{
@@ -36,6 +37,7 @@ if(Locator::get('principalCms')->security('cmsModules', $module))
 	}
 	else if ($params['inplace']=='textarea')
 	{
+
 	    $tpl->set('textarea', 1);
 	}
 	return $tpl->parse( $params['inplace'] ? 'oce.html:inplace' : 'oce.html:default' );

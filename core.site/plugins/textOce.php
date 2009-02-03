@@ -53,6 +53,8 @@ else
 		    $sql = "SELECT t.id, t.".$custom['field']. " ".$custom['add_fields']." FROM ".$custom['table']." as t 
 			    INNER JOIN ??texts_referers as r WHERE t._supertag='$supertag' AND t._state=0 
 			    AND (".$db->quote($ref)." LIKE r.title OR r.title='')  AND t.channel_id=r.channel_id ORDER by r.title DESC";
+		    
+		    $custom['module'] = 'textsref';
 		}
 		else
 		{
@@ -93,6 +95,7 @@ else
 $para['show'] = $params['show'] ? true : false;
 $para['inplace'] = $params['inplace'];
 $para['field'] = $params['field'];
+$para['container'] = $params['container'];
 
 if ($good && !isset( $params["noedit"] ) )
 echo $tpl->action( 'oce', $para );
