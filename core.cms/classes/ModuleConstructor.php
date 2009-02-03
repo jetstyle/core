@@ -84,6 +84,11 @@ class ModuleConstructor
 		// just a wrapper
 		elseif (is_array($config->WRAPPED))
 		{
+			if ($config->module_title)
+			{
+				$this->title = $config->module_title;
+			}
+						
 			if (count($this->params) > 0)
 			{
 				$neededSubModule = array_shift($this->params);
@@ -92,7 +97,7 @@ class ModuleConstructor
 			{
 				$neededSubModule = null;
 			}
-			
+						
 			$result = array();
 			foreach ($config->WRAPPED AS $subModule)
 			{
@@ -112,18 +117,14 @@ class ModuleConstructor
 				{
 					$this->path[] = $neededSubModule;
 					$result = $this->proceedModule($this->getConfig($neededSubModule, $config));
+					
 					array_pop($this->path);
 					
-					if (isset( $this->getConfig($neededSubModule)->module_title ) )
-					    $this->title = $this->getConfig($neededSubModule)->module_title;
 					return $result;
 				}
 				else
 				{
-					if (isset( $this->getConfig($neededSubModule)->module_title ) )
-					    $this->title = $this->getConfig($neededSubModule)->module_title;
-					    
-					return $result[0];
+   					return $result[0];
 				}
 			}
 			else
@@ -146,7 +147,6 @@ class ModuleConstructor
 //		{
 //			return Controller::deny();
 //		}
-
 		if ($cfg)
 		{
 			$config = clone $cfg;
@@ -155,7 +155,8 @@ class ModuleConstructor
 		{
 			$config = clone $this->config;
 		}
-		$config->read(Finder::findScript_( $this->handlersType, $this->moduleName.'/'.$name));
+		
+		$config->read(Finder::findScript( $this->handlersType, $this->moduleName.'/'.$name));
 		return $config;
 	}
 }
