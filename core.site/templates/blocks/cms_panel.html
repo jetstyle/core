@@ -75,10 +75,12 @@ function showEditor(id, wysiwyg, field)
     	    function(data)
     	    {
     		//$("#wysiwyg").attr("value",  data);
+		
 		if (wysiwyg)
 		{
 		    tinyMCE.activeEditor.setContent(data);
 		    var editor = findObj("wysiwyg_parent");
+		    
 		    if (editor)
 		    {
 			editor.style.display='block';
@@ -153,7 +155,7 @@ function doHide(id, wysiwyg, field)
 	//bind events
 	$("div.content").mouseover ( function(){ $(this).addClass("inplace-over") } );
 	$("div.content").mouseout ( function(){ $(this).removeClass("inplace-over") } );
-	$("div.content").click( showEditor );
+	$("div.content").click( function(){ showEditor(id, wysiwyg); } );
     }
     else
     {

@@ -30,6 +30,7 @@ if(Locator::get('principalCms')->security('cmsModules', $module))
 	$tpl->set('_title', $params['title'] ? $params['title'] : 'редактировать' );
 	$tpl->set('_field', $params['field'] );
 	$tpl->set('_parent', $params['container']=='parent' ? 1 : null );
+	$tpl->set('_thickbox', isset($params['thickbox']) ? 1 : null );
 	
 	if ($params['inplace']=='wysiwyg')
 	{
