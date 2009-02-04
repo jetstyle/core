@@ -1,3 +1,33 @@
+var debugCont = null;
+function _log(txt)
+{
+	if(window.console)
+	{
+		window.console.log(txt);
+	}
+	else
+	{
+		if(!debugCont)
+		{
+			var els = document.getElementsByTagName('body');
+			debugCont = document.createElement('div');
+			debugCont.style.width = '100%';
+			debugCont.style.height = '200px';
+			debugCont.style.border = 'red 1px solid';
+			els[0].appendChild(debugCont);
+		}
+		debugCont.innerHTML += txt + '<br />';	
+	}
+}
+
+var Class = {
+	  create: function() {
+	    return function() {
+	      this.initialize.apply(this, arguments);
+	    }
+	  }
+};
+
 var $A = Array.from = function(iterable) {
   if (!iterable) return [];
   if (iterable.toArray) {
@@ -24,6 +54,7 @@ Function.prototype.prototypeBindAsEventListener = function(object) {
   }
 };
 
+/*
 function popupIcon (icon)
 {
   alert( "Подсказка:\n\n" + icon.alt, "") ;
@@ -154,7 +185,7 @@ function cC()
     }
   return true;
 }
-
+*/
 
 function findObj(n, d) {
     var p,i,x;
@@ -185,8 +216,6 @@ function preloadPics()
     {
       picArray[preloadPics.arguments[i]] = new Image();
       picArray[preloadPics.arguments[i]].src = dir + preloadPics.arguments[i] + ".gif";
-      if (ok)
-      ok = confirm( "preload:" + dir + preloadPics.arguments[i] + ".gif" );
     }
 }
 
@@ -258,6 +287,7 @@ function getWindowSize(width,height)
 	return {'left' : left, 'top' : top, 'width' : width, 'height' : height, 'scroll' : scroll};
 }
 
+/*
 function isFlash(){
     
     var flashinstalled = 0;
@@ -321,3 +351,4 @@ function pictwnd(url,name,format){
   if(name==null) name='_blank';
   popup_window = window.open(url,name,format);
 }
+*/

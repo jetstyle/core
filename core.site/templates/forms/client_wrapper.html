@@ -1,4 +1,4 @@
-п»ї{{:title}}
+{{:title}}
   <table class="form-table client-name-layout">
       <tbody>
           <tr {{?!is_valid}}class="error-"{{/?}}>
@@ -9,7 +9,7 @@
                   <div class="inp-wrap-">{{content}}</div>
               </td>
               <!-- td id="client-number">
-                  в„–34-234
+                  №34-234
               </td-->
           </tr>
           {{?!is_valid}}
@@ -32,12 +32,12 @@
          <td class="control-" id="age-input-td">
            {{content}}
          </td>
-         <td class="label-" id="sex-label-td"><label for="_sex">РџРѕР»:</label></td>
+         <td class="label-" id="sex-label-td"><label for="_sex">Пол:</label></td>
          <td class="control-">
             <select name="_sex">
               <option value="0"></option>                    
-              <option value="1">РјСѓР¶СЃРєРѕР№</option>                    
-              <option value="2">Р¶РµРЅСЃРєРёР№</option>                    
+              <option value="1">мужской</option>                    
+              <option value="2">женский</option>                    
             </select>
          </td>
      </tr>
@@ -58,8 +58,7 @@
 
 {{:StringCalendar}}
 {{!connect "calendar/calendar.css"}}
-{{!connect "calendar/calendar_new.js"}}
-{{!connect "calendar/calendar_lang.js"}}
+{{!connect "calendar/calendar.js"}}
 
 <input class="type-text" type="text" id="{{field}}" style="width:50%" size="5"  name="{{field}}" value="{{interface_data}}" />
 <a onclick="return showCalendar('{{field}}', '%d.%m.%Y', false, true);" href="#" >
@@ -69,8 +68,8 @@
 
 {{:TripCalendar}}
 {{!connect "calendar/calendar.css"}}
-{{!connect "calendar/calendar_new.js"}}
-{{!connect "calendar/calendar_lang.js"}}
+{{!connect "calendar/calendar.js"}}
+
 
 <input class="type-text" type="text" id="{{field}}" style="width:30%" size="5"  name="{{field}}" value="{{interface_data}}" />
 <a onclick="return showCalendar('{{field}}', '%d.%m.%Y', false, true);" href="#" >
@@ -132,7 +131,7 @@
   <tbody>
       <tr>
           <td class="label-">
-            <label for="test"><strong>РњРµРЅРµРґР¶РµСЂ:</strong></label>
+            <label for="test"><strong>Менеджер:</strong></label>
           </td>
           <td class="control-">
             <select name="_manager_id">
@@ -142,7 +141,7 @@
       </tr>
       <tr>
           <td class="label-">
-            <label for="status"><strong>РЎС‚Р°С‚СѓСЃ:</strong></label>
+            <label for="status"><strong>Статус:</strong></label>
           </td>
           <td class="control-">
             <select name="_status">
@@ -155,7 +154,7 @@
       </tr>
       <tr>
           <td class="label-">
-            <label for="_client_num"><strong>РџСЂРµС„РёРєСЃ С„РёР»РёР°Р»Р°:</strong></label>
+            <label for="_client_num"><strong>Префикс филиала:</strong></label>
           </td>
           <td class="control-">
             <input type="text" name="_client_num" id="_client_num" value="{{client_num_value|escape}}" />
@@ -182,12 +181,12 @@
   			}
   		);
   	</script>
-<h3>РљРѕРЅС‚Р°РєС‚РЅР°СЏ РёРЅС„РѕСЂРјР°С†РёСЏ</h3>
+<h3>Контактная информация</h3>
 <table>
   <tbody>
       <tr {{?phone_error}}class="error-"{{/?}}>
           <td class="label-">
-            <label for="_contact_phone"><span class="mandatory">*</span>&nbsp;РўРµР»РµС„РѕРЅ:</label>
+            <label for="_contact_phone"><span class="mandatory">*</span>&nbsp;Телефон:</label>
           </td>
           <td class="control-">
             <div class="inp-wrap-"><input type="text" name="_contact_phone" id="_contact_phone" value="{{phone_value|escape}}" />
@@ -222,7 +221,7 @@
       
       <tr>
           <td class="label-">
-            <label for="_contact_index">РРЅРґРµРєСЃ:</label>
+            <label for="_contact_index">Индекс:</label>
           </td>
           <td class="control-">
             <div class="inp-wrap-"><input type="text" name="_contact_index" value="{{index_value|escape}}" /></div>
@@ -231,7 +230,7 @@
       
       <tr {{?city_error}}class="error-"{{/?}}>
           <td class="label-">
-            <label for="_contact_city"><span class="mandatory">*</span> РЎС‚СЂР°РЅР°:</label>
+            <label for="_contact_city"><span class="mandatory">*</span> Страна:</label>
           </td>
           <td class="control-">
 
@@ -244,7 +243,7 @@
 
       <tr>
           <td class="label-">
-            <label for="_contact_city">Р РµРіРёРѕРЅ:</label>
+            <label for="_contact_city">Регион:</label>
           </td>
           <td class="control-">
 	        <select name="_contact_region" id="location_2" ></select>
@@ -253,7 +252,7 @@
 
       <tr>
           <td class="label-">
-            <label for="_contact_city">Р“РѕСЂРѕРґ:</label>
+            <label for="_contact_city">Город:</label>
           </td>
           <td class="control-">
 	        <select name="_contact_city" id="location_3"></select>
@@ -269,7 +268,7 @@
 
       <tr>
           <td class="label-">
-            <label for="_contact_address">РђРґСЂРµСЃ:</label>
+            <label for="_contact_address">Адрес:</label>
           </td>
           <td class="control-">
             <div class="inp-wrap-"><input type="text" name="_contact_address" value="{{address_value|escape}}" /></div>
@@ -280,11 +279,11 @@
 {{/:contacts_fields}}
 
 {{:supplemental}}  
-<h3><label for="_descr">Р”РѕРїРѕР»РЅРёС‚РµР»СЊРЅР°СЏ РёРЅС„РѕСЂРјР°С†РёСЏ</label></h3>
+<h3><label for="_descr">Дополнительная информация</label></h3>
 <div class="inp-wrap-"><textarea name="_descr">{{descr_value|escape}}</textarea></div>
 {{/:supplemental}}
 
 {{:motivation}}
-<h3><label for="_motiv">РњРѕС‚РёРІР°С†РёСЏ РїРѕРєСѓРїРєРё</label></h3>
+<h3><label for="_motiv">Мотивация покупки</label></h3>
 <div class="inp-wrap-"><textarea name="_motiv">{{motiv_value|escape}}</textarea></div>
 {{/:motivation}}

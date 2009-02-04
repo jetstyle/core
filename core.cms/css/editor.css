@@ -1,0 +1,8 @@
+body   { font: normal 90% Arial, sans-serif; }
+h2     { font: normal 140% Arial, sans-serif; color: #d75614; border-bottom: 1px solid #d75614;}
+h3     { font: bold 115% Arial, sans-serif; color: #656565; border-bottom: 1px solid #656565;}
+
+blockquote { border: 1px solid red; padding: 5px; }
+big        { display: block; border: 1px solid green; margin-left: 40px; padding: 5px; font-size: 95%;}
+
+p, ul, ol  { border: 1px dashed #a1a1a1; }
