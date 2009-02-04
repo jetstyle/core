@@ -156,8 +156,6 @@ function travelto(x, y, quick )
   while (( (ox-cx) != 0 ) || ( (oy-cy) != 0 ));
 }
 
-var picArray = new Array();
-var preloadFlag = false;
 var ok = false;
 
 function cI()
@@ -186,6 +184,9 @@ function cC()
   return true;
 }
 */
+
+var picArray = new Array();
+var preloadFlag = false;
 
 function findObj(n, d) {
     var p,i,x;
