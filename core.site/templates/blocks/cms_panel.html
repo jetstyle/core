@@ -165,28 +165,8 @@ function doHide(id, wysiwyg, field)
     }
 }
 
-var mce_id = null;
-var inited = false;
-function preInitMCE( id )
-{
-    mce_id = id;
-    /*
-    $("div.content").mouseover ( function(){ $(this).addClass("inplace-over") } );
-    $("div.content").mouseout ( function(){ $(this).removeClass("inplace-over") } );	
-    $("div.content").click( function()
-			    {
-				$("#cms_panel_loading").removeClass("invisible");
-				//initMCE(mce_id);
-				initNewMCE(mce_id);
-			    } 
-    );
-    
-    $("#cms_panel_loading").addClass("invisible");
-    $("#cms_panel_shown").removeClass("invisible");
-    */
-    initNewMCE(id);
 
-}
+var inited = false;
 
 function initMCE(id)
 {

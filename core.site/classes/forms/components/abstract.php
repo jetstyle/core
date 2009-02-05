@@ -139,7 +139,7 @@ class FormComponent_abstract
    }
    // этот метод нужно звать, чтобы инвалидировать поле с этим валидатором.
    // $reason -- ключ для мессаджсета,
-   function _Invalidate( $reason, $msg="there is no custom message" )
+   function _Invalidate( $reason, $msg="there is no custom message", $show_general_form_error=true )
    {
 
      $this->valid=false;
@@ -155,8 +155,10 @@ class FormComponent_abstract
      //       that is a great burden for single-language sites which are common
 
      $value = $msg;//$this->field->rh->tpl->msg->Get( 'Form:Validator/'.$reason );
-     if (!empty($value) && $value != 'Form:Validator/'.$reason) $msg = $value;
+     if (!empty($value) && $value != 'Form:Validator/'.$reason) 
+	$msg = $value;
 
+     Locator::get('tpl')->set('show_general_form_error', $show_general_form_error);
      $this->validator_messages[$reason] = $msg;
    }
 

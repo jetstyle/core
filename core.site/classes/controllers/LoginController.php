@@ -62,7 +62,7 @@ class LoginController extends Controller
 		}
 		else
 		{
-			$form->fields[1]->validator->_Invalidate("bad_pass", "Неверное сочетание логин/пароль");
+			$form->fields[1]->validator->_Invalidate("bad_pass", "Неверный логин и/или пароль", false);
 		}
 	}
 }
