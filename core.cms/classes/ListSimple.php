@@ -187,8 +187,10 @@ class ListSimple
 	{
 		if (!$this->config->table_name)
 		{
+			Finder::useClass('Inflector');
 			$pathParts = explode('/', $this->config->componentPath);
 			array_pop($pathParts);
+			$pathParts = array_map(array(Inflector, 'underscore'), $pathParts);
 			$this->config->table_name = strtolower(implode('_', $pathParts));
 		}
 		
