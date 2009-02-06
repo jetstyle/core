@@ -115,6 +115,11 @@ class RequestInfo
 		self::$data[$key] = $value;
 	}
 
+	public static function href()
+	{
+		return self::hrefChange('', array());
+	}
+
 	/**
 	 * Добавление / изменение / удаление переменных из УРЛа
 	 *
@@ -125,7 +130,7 @@ class RequestInfo
 	public static function hrefChange($url, $key)	
 	{
 		if (!$url)	$url = self::$baseUrl.self::$pageUrl;
-		if (!is_array($key)) return $url;
+		if (!is_array($key)) $key = array();
 
 		$d = self::$data;
 		

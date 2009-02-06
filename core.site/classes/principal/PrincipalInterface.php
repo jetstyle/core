@@ -19,6 +19,7 @@ interface PrincipalInterface
 	public function security( $model, $params="" );
 	public function login( $login="", $pwd="", $permanent = false, $fromCookie = false);
 	public function logout();
+	public function getCheatHash();
 }
 
 ?>

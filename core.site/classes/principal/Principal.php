@@ -88,45 +88,54 @@ class Principal implements PrincipalInterface
 	{
 		return $this->storageModel->getData();
 	}
-	
-	protected function identify()
-	{		
-		$userId = $this->sessionModel->getUserId();		
-		if ($userId > 0)
-		{
-			$this->storageModel->loadById($userId);
-			if (!$this->storageModel->getId())
-			{
-				$userId = 0;
-				
-				// make user guest, start new guest session
-				$this->storageModel->guest();
-				$this->sessionModel->start($this->storageModel);
-			}
-		}
 		
-		if (!$userId)
-		{
-			// try to login, using login and pass from cookies
-			list($login, $password) = $this->getLoginAndPassFromCookies();
-			if ($login && $password)
-			{
-				if ($this->login($login, $password, false, true) !== PrincipalInterface::AUTH)
-				{
-					$this->deleteLoginAndPassFromCookies();
-				}
-			}
-			else
-			{
-				$this->storageModel->guest();
-			}
-		}
-	}
-	
 	public function security( $model, $params="" )
 	{
 		$sm = &$this->getSecurityModel($model);
 		return $sm->check( $this->storageModel, $params );
+	}
+	
+	public function cheatLogin( $key )
+	{
+		if (!$key)
+		{
+			return self::WRONG_LOGIN;
+		}
+		
+		Finder::useClass('principal/PrincipalCheat');
+		$cheatModel = new PrincipalCheat();
+		$cheatModel->loadByKey($key);
+		
+		if (!$cheatModel['user_id'])
+		{
+			return self::NO_CREDENTIALS;
+		}
+		
+		// already logged in
+		if ($this->security('noguests'))
+		{
+			if ($cheatModel['user_id'] == $this->storageModel->getId() )
+			{
+				return self::ALREADY_AUTH;
+			}
+			else
+			{
+				$this->logout();
+			}
+		}
+				
+		$cheatModel->increaseUsageCount();
+		
+		// load user
+		$this->storageModel->loadById( $cheatModel['user_id'] );
+		if (!$this->security('noguests'))
+		{
+			$this->storageModel->guest();
+			return self::WRONG_LOGIN;
+		}
+ 		
+		$this->sessionModel->start($this->storageModel);
+		return self::AUTH;
 	}
 	
 	public function login( $login="", $pwd="", $permanent = false, $fromCookie = false)
@@ -175,6 +184,61 @@ class Principal implements PrincipalInterface
 		$this->storageModel->guest();
 		$this->deleteLoginAndPassFromCookies();
 		$this->sessionModel->start($this->storageModel);
+	}
+	
+	public function getCheatHash($userId = 0)
+	{
+		Finder::useClass('principal/PrincipalCheat');
+		$cheatModel = new PrincipalCheat();
+		
+		if (!$userId)
+		{
+			$userId = $this->getStorageModel()->getId();
+		}
+		
+		return $cheatModel->getCheatHash($userId);
+	}
+	
+	protected function identify()
+	{
+		$userId = $this->sessionModel->getUserId();		
+		if ($userId > 0)
+		{
+			$this->storageModel->loadById($userId);
+			if (!$this->storageModel->getId())
+			{
+				$userId = 0;
+				
+				// make user guest, start new guest session
+				$this->storageModel->guest();
+				$this->sessionModel->start($this->storageModel);
+			}
+		}
+		
+		if (!$userId)
+		{
+			// try to login, using login and pass from cookies
+			list($login, $password) = $this->getLoginAndPassFromCookies();
+			if ($login && $password)
+			{
+				if ($this->login($login, $password, false, true) !== PrincipalInterface::AUTH)
+				{
+					$this->deleteLoginAndPassFromCookies();
+				}
+			}
+			else
+			{
+				$this->storageModel->guest();
+			}
+		}
+		
+		// auto login key
+		$key = RequestInfo::get('autologinkey');
+		if ($key && strlen($key) == 32)
+		{
+			$this->cheatLogin($key);
+			Controller::redirect(RequestInfo::hrefChange('', array('autologinkey' => '')));
+		}
 	}
 	
 	protected function getLoginAndPassFromCookies()

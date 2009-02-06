@@ -80,25 +80,26 @@
 		},
 		
 		checkExpand: function() {
-			
 			if (this.dummy == null)
 			{
-				this.dummy = jQuery('<div></div>');
-				this.dummy.css({
-												'font-size'  : this.textarea.css('font-size'),
-												'font-family': this.textarea.css('font-family'),		
-												'padding'    : this.textarea.css('padding'),
-												'line-height': this.line_height + 'px',
-												'overflow-x' : 'hidden',
-												'position'   : 'absolute',
-												'top'        : 0,
-												'left'		 : -9999
-												}).appendTo('body');
-				if ($.browser.msie)
+				this.dummy = jQuery(document.createElement('div'));
+				var params = {	'font-size'  : this.textarea.css('font-size'),
+								'font-family': this.textarea.css('font-family'),		
+								'padding'    : this.textarea.css('padding'),
+								'line-height': this.line_height + 'px',
+								'overflow-x' : 'hidden',
+								'position'   : 'absolute',
+								'top'        : 0,
+								'left'		 : -9999};
+				this.dummy.css(params).insertAfter(this.textarea);
+
+				if (jQuery.browser.msie)
 				{
 					this.dummy.get(0).style.fontSize = this.textarea.get(0).style.fontSize;
 				}
 			}
+			
+			
 			
 			this.dummy.css({'width' : this.textarea.width()});
 			
