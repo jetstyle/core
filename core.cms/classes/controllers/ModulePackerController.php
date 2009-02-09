@@ -8,13 +8,6 @@
 Finder::useClass("controllers/Controller");
 class ModulePackerController extends Controller
 {
-	protected $plugins = array(
-		array('ToolbarPlugin', array(
-			'__aspect' => 'Toolbar',
-			'store_to' => 'toolbar',
-		)),
-	);
-
 	protected $params_map = array(
 		array('default', array(
 			'module' => '[\w\-]+',
@@ -41,6 +34,8 @@ class ModulePackerController extends Controller
 		$modulePacker =& new ModulePacker();
 		$modulePacker->pack($config['module']);
 
+		Locator::get('db')->query("SET NAMES ".Config::get('db_set_encoding'));
+		
 		$this->siteMap = 'module';
 	}
 }
