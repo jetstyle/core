@@ -75,7 +75,12 @@
 
  	protected function constructResult($result)
  	{
-		$paths = $this->getPossiblePaths(Locator::get('controller')->getParams());
+		$params = array();
+ 		if (Locator::exists('controller'))
+		{
+ 			$params = Locator::get('controller')->getParams();
+		}
+		$paths = $this->getPossiblePaths($params);
 
 		$principal = &Locator::get('principal');
 

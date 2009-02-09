@@ -1,4 +1,4 @@
-{{?toolbar}}
+{{?*}}
 
 <div class="cms-toolbar"><img class="block" src="{{images}}z.gif" width="1" height="4" align="top" alt="" /></div>
 
@@ -7,31 +7,20 @@
   <!--td class="sep-"><img class="block" src="{{images}}seporate.gif" width="2" height="20" align="top" alt="" /></td-->
   <td>&nbsp;</td>
 
-  {{!for toolbar.main do=@:item sep=@:item_sep}}
+  {{!for *main do=@:item sep=@:item_sep}}
 
   <td class="w100">{{@dummy.html}}</td>
   <td class="sep-"><img class="block" src="{{images}}seporate.gif" width="2" height="20" align="top" alt="" /></td>
   <td nowrap="nowrap">
-    <!--a href="{{/}}start">основное меню</a> |-->
-    <!--span>
-    	перейти
-    	<select onchange="if (this.value != -1) window.location.href='{{fe_/}}'+this.value">
-    		<option value="-1">выбрать</option>
-        	{{!for goto do=@:goToItem}}
-    	</select>
-    </span-->
-    <!--a href="{{/}}login?logout=1" onclick="return confirm('Вы действительно желаете выйти?');">выход</a-->
-
     <a href="#" id="gotolink" class='underline-dashed'>перейти</span></a>
-
   </td>
   <td nowrap="nowrap">{{@blocks/user.html}}</td>
 </tr>
 </table>
     <ul class="gotomenu invis" id="gotomenu">
-    	{{!for goto do=@:goToLiItem}}
+    	{{!for *goto do=@:goToLiItem}}
     </ul>
-{{!for toolbar.submenu do=@:subitem}}
+{{!for *submenu do=@:subitem}}
 
 <script language="javascript">
 

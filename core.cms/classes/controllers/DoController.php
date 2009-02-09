@@ -7,13 +7,6 @@
 Finder::useClass("controllers/Controller");
 class DoController extends Controller
 {
- 	protected $plugins = array(
-		array('ToolbarPlugin', array(
-			'__aspect' => 'Toolbar',
-			'store_to' => 'toolbar',
-		)),
-	);
-
 	protected $params_map = array(
 		array('default', array(
 			'module' => '\w+',
@@ -51,9 +44,7 @@ class DoController extends Controller
 
 		Locator::get('tpl')->set('module_body', $moduleConstructor->proceed());
 
-		$toolbar_title = Locator::get('controller')->getAspect('Toolbar')->getTitle();
-		$module_title  = $moduleConstructor->getTitle();
-		$this->data['title_short'] = $module_title ? $module_title : $toolbar_title ;
+		$this->data['title_short'] = $moduleConstructor->getTitle();
 		$this->siteMap = 'module';
 	}
 
