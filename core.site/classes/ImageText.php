@@ -76,7 +76,7 @@ class ImageText
 			$this->generate();
 		}
 		
-		$ext = pathinfo($imageFile, PATHINFO_EXTENSION);
+		$ext = pathinfo($fileName, PATHINFO_EXTENSION);
 		
 		ob_start();
 		switch ($ext)
@@ -164,7 +164,7 @@ class ImageText
 		elseif ($size[2]==3)
 		{
 			$img = imagecreatefrompng ($filename);
-			imagealphablending($img, false);
+//			imagealphablending($img, true);
 			imagesavealpha($img, true);
 		}
 
