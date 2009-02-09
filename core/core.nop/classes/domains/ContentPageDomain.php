@@ -44,10 +44,21 @@ class ContentPageDomain extends BasicPageDomain
 			$where[] = 'mode='.$content->quote($this->getModeByPageClass($criteria['class']));
 		$where = implode(" AND ", $where);
 
+
+		//var_dump($where);
+		//die();
+		
 		$content->load($where);
 		$data = $content->data[0];
 
-		if (!empty($data))
+		//SEO HACK
+		$url = rtrim($criteria['url'], "/");
+		if (!empty($data) && $data['mode']=="" && $data['_path']!=$url && isset($criteria['url']) )
+		{
+		    return false;
+		    //die('11');
+		}
+		else if (!empty($data))
 		{
 			$page_cls = $this->getPageClassByMode($data['mode']);
 			$config = array (
@@ -56,6 +67,7 @@ class ContentPageDomain extends BasicPageDomain
 			'path' => $data['_path'],
 			'url' => $url,
 			);
+
 			if ($this->rh->FindScript("classes/controllers", $page_cls))
 			{
 				$this->rh->UseClass("controllers/".$page_cls);
