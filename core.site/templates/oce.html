@@ -18,8 +18,11 @@
 {{/:default}}
 
 {{:inplace}}
+    {{!connect "inplace.class.js"}}
+    
     <!-- инплейсное редактирование может быть wysiwyg, textarea, input -->
     {{?wysiwyg}}
+	
 	<div id="inplace_{{_id}}" class="invisible">
 	    <textarea id="wysiwyg"  autocomplete="off"></textarea>
 	    <input id="input-cancel-{{_id}}" name="cancel" class="cms-delete-but hand" type="button" title="Отмена" value="Отмена" />
@@ -28,8 +31,8 @@
     {{?:textarea}}
 	<div id="inplace_{{_field}}_{{_id}}"  class="invisible" >
 	    <textarea class="w100"  autocomplete="off" ></textarea>
-	    <input id="input-cancel-{{_field}}-{{_id}}" name="cancel" class="cms-delete-but hand" type="button" title="Отмена" value="Отмена" />
-	    <input id="input-save-{{_field}}-{{_id}}" name="save" class="cms-save-but hand" type="button" title="Сохранить" value="Сохранить" />
+	    <!--input id="input-cancel-{{_field}}-{{_id}}" name="cancel" class="cms-delete-but hand" type="button" title="Отмена" value="Отмена" />
+	    <input id="input-save-{{_field}}-{{_id}}" name="save" class="cms-save-but hand" type="button" title="Сохранить" value="Сохранить" /-->
 	</div>
     {{?:}}
 	<div id="inplace_{{_field}}_{{_id}}"  class="invisible" >
@@ -38,13 +41,19 @@
 	    <input id="input-save-{{_field}}-{{_id}}" name="save" class="cms-save-but hand" type="button" title="Сохранить" value="Сохранить" />
 	</div>
     {{/?}}
-
+    
+    
+{{!!inline}}
     <script language="javascript">
-	var page_cms_url = "{{_href}}";
+	//var page_cms_url = "{{_href}}";
 
 	$(document).ready(
 	    function ()
 	    {
+		var i = new Inplace( '{{editorType}}', '{{_href}}', "#inplace_{{_field}}_{{_id}}" );
+		i.init();
+
+	/*
 		{{?wysiwyg}}
 		    $("div.content").before( $("#inplace_{{_id}}") );
 
@@ -70,34 +79,14 @@
 		    $("#input-cancel-{{_field}}-{{_id}}").click(function(){ doHide("{{_id}}", false, "{{_field}}") } );
 		
 		{{?:}}
-		/*
-		    if ("{{_parent}}")
-		    {
-			var over =  $("#inplace_{{_field}}_{{_id}}").parent();
-			//console.log("#inplace_{{_field}}_{{_id}}");
-			console.log('onload input');
-		    }
-		    else
-			over = $("#inplace_{{_field}}_{{_id}}").prev();
 		    
-		    over.mouseover ( function(){ $(this).addClass("inplace-over") } );
-		    over.mouseout ( function(){ $(this).removeClass("inplace-over") } );
-		    over.click( function()
-		    { 
-			// console.log(over);
-			// console.log(this);
-			console.log('traversing');
-			// $("body").after( $("#inplace_{{_field}}_{{_id}}") );
-			// $("#inplace_{{_field}}_{{_id}}").children()[0].value=over.html(); 
-			// $("#inplace_{{_field}}_{{_id}}").removeClass("invisible")  
-		    }
-		    );
-		    */
+		    
+		  
 		{{/?}}
-
+*/
 	    }
 	);
     </script>
-
+{{/!!}}
 
 {{/:inplace}}

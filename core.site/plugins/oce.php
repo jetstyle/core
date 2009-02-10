@@ -35,12 +35,18 @@ if(Locator::get('principalCms')->security('cmsModules', $module))
 	if ($params['inplace']=='wysiwyg')
 	{
 	    $tpl->set('wysiwyg', 1);
+	    $tpl->set('editorType', 'wysiwyg' );
 	}
 	else if ($params['inplace']=='textarea')
 	{
-
 	    $tpl->set('textarea', 1);
+	    $tpl->set('editorType', 'textarea' );
 	}
+	else
+	{
+	    $tpl->set('editorType', 'input' );
+	}
+	
 	return $tpl->parse( $params['inplace'] ? 'oce.html:inplace' : 'oce.html:default' );
 }
 return '';
