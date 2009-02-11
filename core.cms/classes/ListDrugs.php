@@ -24,22 +24,20 @@ class ListDrugs extends ListSimple
 
  function handle()
  {
- 	if (RequestInfo::get('order')) {
+ 	if (RequestInfo::get('order_list')) {
  		$db = &Locator::get('db');
-    	$orders = explode(",",RequestInfo::get('order')) ;
-	    $table = RequestInfo::get('table');
+    	$orders = explode(",",$_POST['order']) ;
 
-	    if (!empty($orders) && !empty($table))
 	    foreach ($orders as $i=>$order)
 	    {
-	        $out .= "$order = $i \n\r";
-	        $sql = "UPDATE ".$table." SET _order=".$db->quote($i)." WHERE id=".$db->quote($order);
+	    	//$out .= "$order = $i \n\r";
+	        $sql = "UPDATE ??".$this->config->table_name." SET _order=".$db->quote($i)." WHERE id=".$db->quote($order);
 	        $db->execute($sql);
 	    }
-	    die($out);
+	    die('1');
  	}
  	$tpl = &Locator::get('tpl');
-    $tpl->set('table_name', Config::get('db_prefix').$this->config->table_name);
+    $tpl->set('page_url', RequestInfo::$baseUrl.RequestInfo::$pageUrl);
     parent::Handle();
  }
 }
