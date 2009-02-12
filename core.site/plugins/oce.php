@@ -1,6 +1,11 @@
 <?php
-//@oce.html
-
+/***
+ * Just parses edit-link|editor out 
+ *
+ * @oce.html
+ * 
+ *
+ */
 if (RequestInfo::get('oce') == 'off' && !$params['show'] ) return '';
 if (!RequestInfo::get('oce') && $_COOKIE['oce'] != 'on' && !$params['show']) return '';
 
