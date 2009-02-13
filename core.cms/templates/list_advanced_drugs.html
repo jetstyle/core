@@ -4,8 +4,12 @@
 
 {{TPL:List_Item}}
 <li id="{{*id}}">
-<div class="element-"><img src="{{images}}element.gif" width="16" height="12" align="bottom" alt="" title="" />&nbsp;<a href="{{*_href}}">{{*_title}}</a>
-  {{_controls}}</div>
+<div class="element-">
+	<img src="{{images}}element.gif" width="16" height="12" align="bottom" alt="" title="" />
+	{{?group_operations}}<input style="display: none" type="checkbox" value="{{*id}}" name="selected_items[]"/>{{?/}}
+	<a href="{{*_href}}">{{*_title}}</a>
+	{{_controls}}
+</div>
 </li>
 {{/TPL:List_Item}}
 
@@ -13,37 +17,57 @@
 
 {{TPL:List_Item_sel}}
 <li id="{{*id}}">
-<div class="element-s-"><img src="{{images}}element_s.gif" width="16" height="12" align="bottom" alt="" title=""
-/>&nbsp;{{*_title}}
-{{_controls}}</div>
+<div class="element-s-">
+	<img src="{{images}}element_s.gif" width="16" height="12" align="bottom" alt="" title=""/>
+	{{?group_operations}}<input style="display: none" type="checkbox" value="{{*id}}" name="selected_items[]"/>{{?/}}
+	{{*_title}}
+	{{_controls}}
+</div>
 </li>
 {{/TPL:List_Item_sel}}
 
 {{TPL:List_Item_del}}
 <li id="{{*id}}">
-<div class="element-del-"><img src="{{images}}element_trash.gif" width="16" height="12" align="bottom" alt="" title="Удалённый элемент" />&nbsp;<a href="{{*_href}}">{{*_title}}</a>
-  {{_controls}}</div>
+<div class="element-del-">
+	<img src="{{images}}element_trash.gif" width="16" height="12" align="bottom" alt="" title="Удалённый элемент" />
+	{{?group_operations}}<input style="display: none" type="checkbox" value="{{*id}}" name="selected_items[]"/>{{?/}}
+	<a href="{{*_href}}">{{*_title}}</a>
+	{{_controls}}
+</div>
 </li>
 {{/TPL:List_Item_del}}
 
 {{TPL:List_Item_sel_del}}
 <li id="{{*id}}">
-<div class="element-s-"><img src="{{images}}element_trash.gif" width="16" height="12" align="bottom" alt="" title=""
-/>&nbsp;{{*_title}}
-{{_controls}}</div>
+<div class="element-s-">
+	<img src="{{images}}element_trash.gif" width="16" height="12" align="bottom" alt="" title=""/>
+	{{?group_operations}}<input style="display: none" type="checkbox" value="{{*id}}" name="selected_items[]"/>{{?/}}
+	{{*_title}}
+	{{_controls}}
+</div>
 </li>
 {{/TPL:List_Item_sel_del}}
 
 {{TPL:List_Item_hidden}}
 <li id="{{*id}}">
-<div class="element-hiden-"><img src="{{images}}element_hiden.gif" width="16" height="12" align="bottom" alt="" title="Скрытый элемент" />&nbsp;<a href="{{*_href}}">{{*_title}}</a>
-  {{_controls}}</div>
+<div class="element-hiden-">
+	<img src="{{images}}element_hiden.gif" width="16" height="12" align="bottom" alt="" title="Скрытый элемент" />
+	{{?group_operations}}<input style="display: none" type="checkbox" value="{{*id}}" name="selected_items[]"/>{{?/}}
+	<a href="{{*_href}}">{{*_title}}</a>
+	{{_controls}}
+</div>
 </li>
 {{/TPL:List_Item_hidden}}
 
-{{TPL:List_Item_sel_hidden}}<div class="element-s-"><img src="{{images}}element_s.gif" width="16" height="12" align="bottom" alt="" title=""
-/>&nbsp;{{*_title}}
-{{_controls}}</div>
+{{TPL:List_Item_sel_hidden}}
+<li id="{{*id}}">
+<div class="element-s-">
+	<img src="{{images}}element_s.gif" width="16" height="12" align="bottom" alt="" title=""/>
+	{{?group_operations}}<input style="display: none" type="checkbox" value="{{*id}}" name="selected_items[]"/>{{?/}}
+	{{*_title}}
+	{{_controls}}
+</div>
+</li>
 {{/TPL:List_Item_sel_hidden}}
 
 {{TPL:List_Separator}}{{/TPL:List_Separator}}
@@ -85,11 +109,40 @@
 	        			order += this.id+',';
 	       			});
 	       			order = order.substr(0, order.length-1);
-	       			$.post('{{page_url}}?order_list=true', {'order': order}, function(data) {
+	       			$.post('{{page_url}}?order_list=true', {'order_items': order}, function(data) {
 						if (data != '1') alert(data);
 	       			},'text');
 	        	}
+			});
+			$('#toggleGroupSelect').click(function(){
+				if ($('#left_col li input:checkbox:visible')[0]) {                 	$('#left_col li input:checkbox').hide();
+                 	$('#toggleGroupSelect').text('выбрать несколько');
+                 	$('#groupSelectActions').hide();
+				} else {					$('#left_col li input:checkbox').show();
+					$('#toggleGroupSelect').text('отменить выбор нескольких');
+					$('#groupSelectActions').show();
+				}
+            	return false;			});
+			$('#groupSelectAll').click(function(){
+				$('#left_col li input:checkbox').attr('checked', 'checked');
+            	return false;
+			});
+			$('#groupSelectNothing').click(function(){
+				$('#left_col li input:checkbox').attr('checked', false);
+            	return false;
+			});
+			$('#groupDelete').click(function(){
+                this.href += '&items_list='+getItems();
+			});
+			$('#groupRestore').click(function(){
+                this.href += '&items_list='+getItems();
 			});		});
+		function getItems(action) {        	var items = '';
+			$('#left_col li input:checked').each(function() {
+	        	items += this.value+',';
+	       	});
+	       	return items.substr(0, items.length-1);
+		}
 </script>
 
 
@@ -103,6 +156,15 @@
 {{__filter}}
 {{__trash_switch}}
 {{__add_new}}
+{{?group_operations}}
+	<a id="toggleGroupSelect" href="">выбрать несколько</a><br/>
+	<span id="groupSelectActions" style="display: none">
+		выбрать <a id="groupSelectAll" href="">всё</a> /
+		<a id="groupSelectNothing" href="">ничего</a><br/>
+		<a id="groupDelete" href="{{group_delete_url}}">удалить выбранные</a><br/>
+		<a id="groupRestore" href="{{group_restore_url}}">восстановить выбранные</a><br/>
+	</span>
+{{?/}}
 <img class="block" src="{{images}}z.gif" width="1" height="10" align="top" alt="" />
 
 <input type="hidden" name="order" id="order" value="" />

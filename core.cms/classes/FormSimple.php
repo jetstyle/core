@@ -88,6 +88,7 @@ class FormSimple
 			$this->ajax_update = true; 
 			$this->prefix = "";
 			//var_dump( $this->config->UPDATE_FIELDS, $_POST, array_intersect_key($_POST, array_flip($this->config->UPDATE_FIELDS)) );
+			//die();
 			//$this->ajaxValidFields;
 			
 			$this->config->UPDATE_FIELDS = array_flip( array_intersect_key($_POST, array_flip( $this->config->UPDATE_FIELDS ) ));
