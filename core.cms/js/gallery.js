@@ -1,10 +1,14 @@
-var Gallery = {
+Gallery = Class.create();
+Gallery.prototype = {
 
 	baseUrl: '',
 	selectedItems: [],
 	lastSelected: null,
 
+	initialize: function(){},
+
 	init: function() {
+		var self = this;
 		$('#gallery').sortable({
         	start: function(e,ui) {
             	$(ui.helper[0]).find('img.control').hide();
@@ -13,43 +17,44 @@ var Gallery = {
         	stop: function() {
         		var order = '';
         		$('#gallery div.gallery-image').each(function() {
-        			order += Gallery.getId(this)+',';
+        			order += self.getId(this)+',';
        			});
        			order = order.substr(0, order.length-1);
-       			$.post(Gallery.baseUrl, {'action': 'reorder','order': order},function(data) {
+       			$.post(self.baseUrl, {'action': 'reorder','order': order},function(data) {
 					if (data != '1') alert(data);
        			},'text');
         	},
         	items: '> div.gallery-image'
 		});
 		//control for upload images
-		imagesUploadSettings.upload_url = Gallery.baseUrl+'?id='+Gallery.rubricId+'&session_hash='+Gallery.sessionHash;
-		imagesUploadSettings.flash_url = Gallery.imagesUrl+"swfupload.swf";
-		imagesUploadSettings.button_width = Gallery.thumbWidth;
-		imagesUploadSettings.button_height = Gallery.thumbHeight;
-		Gallery.swfUpload = new SWFUpload(imagesUploadSettings);
+		imagesUploadSettings.upload_url = this.baseUrl+'?id='+this.rubricId+'&session_hash='+this.sessionHash;
+		imagesUploadSettings.flash_url = this.imagesUrl+"swfupload.swf";
+		imagesUploadSettings.button_width = this.thumbWidth;
+		imagesUploadSettings.button_height = this.thumbHeight;
+		this.swfUpload = new SWFUpload(imagesUploadSettings);
+		this.swfUpload.customSettings.gallery = this;
 		//control for replace one image
-		imageOneUploadSettings.upload_url = Gallery.baseUrl+'?id='+Gallery.rubricId+'&session_hash='+Gallery.sessionHash;
-		imageOneUploadSettings.flash_url = Gallery.imagesUrl+"swfupload.swf";
-		Gallery.swfUploadOne = new SWFUpload(imageOneUploadSettings);
+		imageOneUploadSettings.upload_url = this.baseUrl+'?id='+this.rubricId+'&session_hash='+this.sessionHash;
+		imageOneUploadSettings.flash_url = this.imagesUrl+"swfupload.swf";
+		this.swfUploadOne = new SWFUpload(imageOneUploadSettings);
+		this.swfUploadOne.customSettings.gallery = this;
 		//control buttons
 		$('#gallery div.gallery-image').each(function() {
-        	Gallery.initImage(this);
+        	self.initImage(this);
        	});
        	//edit image form
-       	$('#editImageOK').click(Gallery.editImageTitle);
-  		$('#editImageTitle').keypress(function(e){  			if (e.which == 13) {  				Gallery.editImageTitle();  				return false;
+       	$('#editImageOK').click(this.editImageTitle.prototypeBind(this));
+  		$('#editImageTitle').keypress(function(e){  			if (e.which == 13) {  				self.editImageTitle();  				return false;
   			}  		});
   		$(document).click(function(){
   			$('#editImageForm:visible').hide();
-  			Gallery.clearSelected();
+  			self.clearSelected();
   		});
   		$('#editImageForm').click(function(){
   			return false;
   		});
   		//progress bar position
-  		$('#progressCont').css('margin-top', (Gallery.thumbHeight-40)+'px');
-  		//$('#fileCounter').css('margin-top', (Gallery.thumbHeight-30)+'px');
+  		$('#progressCont').css('margin-top', (this.thumbHeight-40)+'px');
   		//refresh page on forbidden
   		$.ajaxSetup({
         	'error': function(XMLHttpRequest, textStatus, errorThrown) {
@@ -60,13 +65,23 @@ var Gallery = {
 	},
 
 	initImage: function(image) {
-		$(image).find('img:first').click(Gallery.itemClick);
-    	$(image).find('img.gallery-delete').parent().click(Gallery.deleteImage);
-    	$(image).find('div.image-title').click(Gallery.showEditImageForm);
+		$(image).find('img:first').click(this.itemClick.prototypeBind(
+    		this,
+    		$(image).find('img:first')[0]
+    	));
+    	$(image).find('img.gallery-delete').parent().click(this.deleteImage.prototypeBind(
+    		this,
+    		$(image).find('img.gallery-delete')[0]
+    	));
+    	$(image).find('div.image-title').click(this.showEditImageForm.prototypeBind(
+    		this,
+    		$(image).find('div.image-title')
+    	));
     	tb_init($(image).find('a.popup').get(0));
+    	var self = this;
     	$(image).hover(
         	function(event) {
-        		Gallery.lastOveredImageId = this.id;
+        		self.lastOveredImageId = this.id;
                 $(this).find('img.gallery-delete')
                 	   .css('left',$(this).offset().left+$(this).width()-24-5-$('#gallery').offset().left)
                 	   .css('top',$(this).offset().top+5-$('#gallery').offset().top)
@@ -92,25 +107,26 @@ var Gallery = {
 		);
 	},
 
-	itemClick: function(e) {
-		var id = Gallery.getId($(this).parent()[0]);
+	itemClick: function(img, e) {
+		var id = this.getId($(img).parent()[0]);
 		if (e.ctrlKey) {
-			var index = Gallery.isSelected(id);
+			var index = this.isSelected(id);
 			if (index != -1)
-				Gallery.deleteSelected(index);
-			else	        	Gallery.addSelected(id);
-		} else if (e.shiftKey) {        	if (Gallery.lastSelected) {            	var items = [];
-            	var clickedEl = $(this).parent()[0];
-            	var lastClickedEl = $('#image'+Gallery.lastSelected)[0];
+				this.deleteSelected(index);
+			else	        	this.addSelected(id);
+		} else if (e.shiftKey) {        	if (this.lastSelected) {            	var items = [];
+            	var clickedEl = $(img).parent()[0];
+            	var lastClickedEl = $('#image'+this.lastSelected)[0];
             	var clickedIndex = $('div.gallery-image').index(clickedEl);
             	var lastClickedIndex = $('div.gallery-image').index(lastClickedEl);
             	var fromIndex = Math.min(clickedIndex, lastClickedIndex);
             	var toIndex = Math.max(clickedIndex, lastClickedIndex);
-            	$('div.gallery-image:gt('+(fromIndex-1)+'):lt('+(toIndex-fromIndex+1)+')').each(function(){					items.push(Gallery.getId(this));            	});
-            	Gallery.addSelectedAr(items);
-        	} else {            	Gallery.setSelected(id);
+            	var self = this;
+            	$('div.gallery-image:gt('+(fromIndex-1)+'):lt('+(toIndex-fromIndex+1)+')').each(function(){					items.push(self.getId(this));            	});
+            	this.addSelectedAr(items);
+        	} else {            	this.setSelected(id);
         	}
-		} else {        	Gallery.setSelected(id);
+		} else {        	this.setSelected(id);
 		}
 		return false;
 	},
@@ -120,25 +136,26 @@ var Gallery = {
 		return element.id.match(/([0-9]+)$/)[0];
 	},
 
-	deleteImage: function()
+	deleteImage: function(deleteBtn)
 	{
-		var message = Gallery.selectedItems.length > 0 ? 'Удалить все выбранные картинки?' : 'Удалить?';
+		var message = this.selectedItems.length > 0 ? 'Удалить все выбранные картинки?' : 'Удалить?';
 		if (!confirm(message)) return false;
 		var items = '';
-		if (Gallery.selectedItems.length > 0) {           	items = Gallery.selectedItems.join(',');
+		if (this.selectedItems.length > 0) {           	items = this.selectedItems.join(',');
 		} else {
-    		items = Gallery.getId(this.parentNode);
+    		items = this.getId(deleteBtn.parentNode.parentNode);
     	}
-    	$.post(Gallery.baseUrl, {'action': 'delete','items': items}, function(data)
+    	var self = this;
+    	$.post(this.baseUrl, {'action': 'delete','items': items}, function(data)
 		{
        		if (data == '1')
 			{
-				if (Gallery.selectedItems.length > 0) {                	for (var i=0; i<Gallery.selectedItems.length; i++)
-                		$('#image'+Gallery.selectedItems[i]).remove();
-                	Gallery.selectedItems[i] = [];
-                 	Gallery.lastSelected = null;
+				if (self.selectedItems.length > 0) {                	for (var i=0; i<self.selectedItems.length; i++)
+                		$('#image'+self.selectedItems[i]).remove();
+                	self.selectedItems[i] = [];
+                 	self.lastSelected = null;
 				} else {
-					$('#image'+id).remove();
+					$('#image'+items).remove();
 				}
 			}
 		},'text');
@@ -151,18 +168,18 @@ var Gallery = {
            	'title': $('#editImageTitle').attr('value'),
            	'id': $('#editImageId').attr('value')
     	};
-       	$.post(Gallery.baseUrl, values, function(data) {
+       	$.post(this.baseUrl, values, function(data) {
 			$('#image'+values.id+' div.image-title').text(values.title);
 			if (data != '1') alert(data);
     	},'text');
     	$('#editImageForm').hide();
   	},
 
-	showEditImageForm: function() {
-		$('#editImageForm').css('left',$(this).offset().left-15);
-		$('#editImageForm').css('top',$(this).offset().top-35);
-		$('#editImageTitle').attr('value',$(this).text());
-		$('#editImageId').attr('value',Gallery.getId($(this).parent().get(0)));
+	showEditImageForm: function(title) {
+		$('#editImageForm').css('left',$(title).offset().left-15);
+		$('#editImageForm').css('top',$(title).offset().top-35);
+		$('#editImageTitle').attr('value',$(title).text());
+		$('#editImageId').attr('value',this.getId($(title).parent().get(0)));
     	$('#editImageForm').show();
     	$('#editImageTitle').focus();
     	return false;
@@ -228,9 +245,9 @@ var imagesUploadSettings = {
 		if (numFilesSelected > 0) this.startUpload();
 	},
 	upload_start_handler: function() {
-		Gallery.uploadUpdateFileCounter(this.getStats());
+		this.customSettings.gallery.uploadUpdateFileCounter(this.getStats());
 		$('#progressCont').show();
-		$('#addImageButton').css('backgroundImage','url('+Gallery.imagesUrl+'gallery/ajax-loader-arrows.gif)');
+		$('#addImageButton').css('backgroundImage','url('+this.customSettings.gallery.imagesUrl+'gallery/ajax-loader-arrows.gif)');
 		return true
 	},
 	upload_progress_handler: function(file, bytesLoaded, bytesTotal) {
@@ -244,16 +261,16 @@ var imagesUploadSettings = {
 		if (data.indexOf('ok,')==0) {
            	$('#addImageButton').before(data.substring(3));
            	$('#gallery div.gallery-image:last .image-title').html('Заголовок');
-			Gallery.initImage($('#gallery div.gallery-image').get().reverse()[0]);
+			this.customSettings.gallery.initImage($('#gallery div.gallery-image').get().reverse()[0]);
 		} else {
            	location.reload(true);
 		}
 	},
 	upload_complete_handler: function() {
 		var stats = this.getStats();
-		Gallery.uploadUpdateFileCounter(stats);
+		this.customSettings.gallery.uploadUpdateFileCounter(stats);
 		if (stats.files_queued === 0) {
-			$('#addImageButton').css('backgroundImage','url('+Gallery.imagesUrl+'gallery/add.png)');
+			$('#addImageButton').css('backgroundImage','url('+this.customSettings.gallery.imagesUrl+'gallery/add.png)');
 			$('#fileCounter').text('').hide();
 			$('#progressCont').hide();
 			stats.successful_uploads = stats.upload_errors = stats.upload_cancelled = 0;
@@ -282,14 +299,17 @@ var imageOneUploadSettings = {
 	button_action: SWFUpload.BUTTON_ACTION.SELECT_FILE,
 
 	file_dialog_complete_handler: function(numFilesSelected, numFilesQueued) {
-		if (numFilesSelected > 0) {			Gallery.swfUploadOne.removePostParam('item_id');
-			Gallery.swfUploadOne.addPostParam('item_id',Gallery.getId($('#'+Gallery.lastOveredImageId).get(0)));			this.startUpload();
+		if (numFilesSelected > 0) {			this.customSettings.gallery.swfUploadOne.removePostParam('item_id');
+			this.customSettings.gallery.swfUploadOne.addPostParam(
+				'item_id',
+				this.customSettings.gallery.getId($('#'+this.customSettings.gallery.lastOveredImageId).get(0))
+			);			this.startUpload();
 		}
 	},
 	upload_start_handler: function() {
-		Gallery.uploadUpdateFileCounter(this.getStats());
+		this.customSettings.gallery.uploadUpdateFileCounter(this.getStats());
 		$('#progressCont').show();
-		$('#addImageButton').css('backgroundImage','url('+Gallery.imagesUrl+'gallery/ajax-loader-arrows.gif)');
+		$('#addImageButton').css('backgroundImage','url('+this.customSettings.gallery.imagesUrl+'gallery/ajax-loader-arrows.gif)');
 		return true
 	},
 	upload_progress_handler: function(file, bytesLoaded, bytesTotal) {
@@ -301,17 +321,17 @@ var imageOneUploadSettings = {
 	upload_error_handler: function(file, errorCode, message) {},
 	upload_success_handler: function(file, data) {
 		if (data.indexOf('ok,')==0) {
-           	$('#'+Gallery.lastOveredImageId+' img').get(0).src += '?'+Math.random;
-			Gallery.initImage($('#gallery div.gallery-image').get().reverse()[0]);
+           	$('#'+this.customSettings.gallery.lastOveredImageId+' img').get(0).src += '?'+Math.random;
+			this.customSettings.gallery.initImage($('#gallery div.gallery-image').get().reverse()[0]);
 		} else {
            	location.reload(true);
 		}
 	},
 	upload_complete_handler: function() {
 		var stats = this.getStats();
-		Gallery.uploadUpdateFileCounter(stats);
+		this.customSettings.gallery.uploadUpdateFileCounter(stats);
 		if (stats.files_queued === 0) {
-			$('#addImageButton').css('backgroundImage','url('+Gallery.imagesUrl+'gallery/add.png)');
+			$('#addImageButton').css('backgroundImage','url('+this.customSettings.gallery.imagesUrl+'gallery/add.png)');
 			$('#fileCounter').text('').hide();
 			$('#progressCont').hide();
 			stats.successful_uploads = stats.upload_errors = stats.upload_cancelled = 0;
