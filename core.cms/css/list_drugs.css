@@ -2,4 +2,9 @@
 }
 
 #left_col li {	background: white;
+	cursor: move;
+}
+
+a.overed {
+	background: #B2B4BF;
 }
