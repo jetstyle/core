@@ -5,34 +5,27 @@ Inplace = function( editorType, cmsUrl, inplaceObject, field )
     
     //инплейсный объект - редактор+кнопки
     this.inplaceObject = $(inplaceObject);
-    
-    if ( this.inplaceObject.length )
-	this.initContainer(true);
-    
+        
     this.field  = field ? field : 'text';
 }
 
 Inplace.prototype = 
 {
     editorType: 'input',
-    
+
     cmsUrl: '',
     field: 'text',
-    
+
     container: null,
-    
+
     validTypes: ['input', 'textarea', 'wysiwyg'],
 
     init: function()
     {
+	this.initContainer(true);
+	this.initButtons();
+        this.bindAll();
 
-	if (this.container)
-	{
-	    this.bindAll();
-	    
-	    this.saveButton.click(   this.save.prototypeBind(this)   );
-	    this.cancelButton.click( this.cancel.prototypeBind(this) );
-	}
     },
 
     edit: function()
@@ -44,127 +37,142 @@ Inplace.prototype =
     	this.unbindAll();	
     },
 
-    loadDataToInplaceEditor: function(field, hide)
+    loadDataToInplaceEditor: function()
     {
-	if (!hide)
-	    this.showIndicator();
+        this.showIndicator();
 
-	$.get(  this.cmsUrl, 
-		{ 'ret': this.field }, 
-		    function(data)
-		    {
-			this.setEditorData(data);
-		    
-		    
-			if ( ! this.inplaceContainer )
-			{
-			    this.inplaceContainer = this.container.clone().empty().append( $( this.inplaceObject ) );
-		    
-			    //–€дом с контейнером создаем его пустой клон, с инплейсным редактором
-			    this.container.parent().append( this.inplaceContainer );
-			}
-		    
-			//show inplaceObject and its container
-			$( this.inplaceObject ).add( this.inplaceContainer ).removeClass("invisible");
+        if (this.cacheData )
+	{
+            this.onLoad( this.cacheData );            
+	}
+        else
+	{
+	        $.get(  this.cmsUrl, 
+		            { 'ret': this.field }, 
+                    this.onLoad.prototypeBind(this), 'html'
+	        );
+	}
+    },
 
-			//контейнер спр€чем
-			this.container.addClass("invisible");
-			this.hideIndicator();
+    onLoad: function (data)
+    {
+        this.setEditorData(data);
+                
+        if ( ! this.inplaceContainer )
+        {
+            this.inplaceContainer = this.container.clone().empty().append( $( this.inplaceObject ) ).css("padding", "0").removeClass("inplace-over");
+        
+            //–€дом с контейнером создаем его пустой клон, с инплейсным редактором
+            //this.container.parent().append( this.inplaceContainer );
+	    this.container.after( this.inplaceContainer );
+        }
+        
+        //show inplaceObject and its container
+        $( this.inplaceObject ).add( this.inplaceContainer ).removeClass("invisible");
 
-		    }.prototypeBind(this), 'html'
-	    );
+        //контейнер спр€чем
+        this.container.addClass("invisible");
+        this.hideIndicator();
+
     },
 
     setEditorData: function( data )
     {
-	if ( this.editorType=='input' || this.editorType=='textarea' )
-	{
-	    $( this.inplaceObject ).children(":first").attr("value", data);    
-	}
-	else
-	{
-	    $( this.inplaceObject ).children(":first").attr("value", data); 
-	    
-	    if (!this.inited)
+	    if ( this.editorType=='' || this.editorType=='textarea' )
 	    {
-		tinyMCE.execCommand("mceAddControl", true, $( this.inplaceObject ).children(":first").attr("id") );
-		this.inited = true;
+	        $( this.inplaceObject ).children(":first").children(":first").attr("value", data);    
 	    }
 	    else
-		this.mceInstance.activeEditor.setContent( data );
-	}
+	    {
+	        $( this.inplaceObject ).children(":first").attr("value", data); 
+	        
+	        if (!this.inited)
+	        {
+		        tinyMCE.execCommand("mceAddControl", true, $( this.inplaceObject ).children(":first").attr("id") );
+		        this.inited = true;
+	        }
+	        else
+		        this.mceInstance.activeEditor.setContent( data );
+	    }
     },
     
     getEditorData: function( data )
     {
-	if ( this.editorType=='input' || this.editorType=='textarea' )
-	{
-	    return $( this.inplaceObject ).children(":first").attr("value");
-	}
-	else
-	{
-	    return  this.mceInstance.activeEditor.getContent();
-	}
+	    if ( this.editorType=='' || this.editorType=='textarea' )
+	    {
+	        return $( this.inplaceObject ).children(":first").children(":first").attr("value");
+	    }
+	    else
+	    {
+	        return  this.mceInstance.activeEditor.getContent();
+	    }
     },
-    
-    showIndicator: function( parent )
+
+    showIndicator: function( before )
     {
-	if (parent)
-	    parent.append( $("#cms_panel_loading").css('display', 'block').removeClass('invisible') );
+	this.container.removeClass("inplace-over");
+
+	if (before)
+            before.before( $("#cms_panel_loading").css('padding', "0 5px 0 0").css('display', '').removeClass('invisible') );
 	else
-	    this.container.append( $("#cms_panel_loading").css('display', 'block').removeClass('invisible') );
+            this.container.append( $("#cms_panel_loading").css('padding', 5).css('display', 'block').removeClass('invisible') );
+
+        this.saveButton.addClass("invisible");
+        this.cancelButton.addClass("invisible");
     },
     
     hideIndicator: function()
     {
 	$("#cms_panel_loading").addClass('invisible');
+        this.saveButton.removeClass("invisible");
+        this.cancelButton.removeClass("invisible");
     },
 
     save: function()
     {
-	this.showIndicator( this.saveButton.parent() );
-	var params =  {'ajax_update': this.field+'_pre'};
-	params[ this.field ] = this.getEditorData();
+	    this.showIndicator( this.saveButton );
 
-	self = this;
+	    var params =  {'ajax_update': this.field+'_pre'};
+	    params[ this.field ] = this.getEditorData();
 
-	$.post( this.cmsUrl, 
-	    params, 
-    	    this.onSave.prototypeBind( this )
-	);
+	    $.post( this.cmsUrl, 
+	        params, this.onSave.prototypeBind( this )
+	    );
     },
     
     onSave: function(data)
     {
-	this.hideIndicator(); 
-	this.container.html( data );
-	this.cancel();
+	    this.hideIndicator(); 
+	    this.container.html( data );
+	    this.cancel();
     }, 
 	    
     
     cancel: function()
     {
-	//спр€чем inplaceObject и его клонированный контйентер
-	$( this.inplaceObject ).add( this.inplaceContainer ).addClass("invisible");
+	    this.cacheData = this.getEditorData();
+    
+	    //спр€чем inplaceObject и его клонированный контйентер
+	    $( this.inplaceObject ).add( this.inplaceContainer ).addClass("invisible");
 
-	//оригинальный контейнер покажем
-	this.container.removeClass("invisible inplace-over");
-	this.bindAll();
+	    //оригинальный контейнер покажем
+	    this.container.removeClass("invisible inplace-over");
+	    this.bindAll();
     },
 
     bindAll: function()
     {
-	this.container.click( this.edit.prototypeBind( this ) );
-    	this.container.mouseover( function(){ $(this).addClass("inplace-over")    } );
-	this.container.mouseout ( function(){ $(this).removeClass("inplace-over") } );
+	    this.container.click( this.edit.prototypeBind( this ) );
+	    this.container.mouseover( function(){ $(this).addClass("inplace-over")    } );
+	    this.container.mouseout ( function(){ $(this).removeClass("inplace-over") } );
 
     },
 
     unbindAll: function()
     {
-	this.container.unbind('click');
-    	this.container.unbind('mouseover');
-    	this.container.unbind('mouseout');
+	    this.container.unbind('click');
+        this.container.unbind('mouseover');
+        this.container.unbind('mouseout');
     },
 
     initContainer: function(parent)
@@ -175,21 +183,29 @@ Inplace.prototype =
 	else 
 	    this.container = $( this.inplaceObject ).prev();
 
-	    
 	if ( this.editorType == "wysiwyg" )
 	{
 	    textarea_id = this.inplaceObject.children(":first").attr("id");
-	    
-	    //this.loadDataToInplaceEditor(null, true);
+
 	    setTimeout( this.initMCE.prototypeBind(this, textarea_id),  100 );
 	}
-	
+    },
+    
+    initButtons: function()
+    {
 	//bind buttons
 	this.saveButton = $(document.createElement("input")).val("—охранить").attr("type", "button").addClass("cms-save-but hand");
 	this.cancelButton = $(document.createElement("input")).val("ќтменить").attr("type", "button").addClass("cms-delete-but hand");
 
+        this.buttons = $(document.createElement("div")).append( this.saveButton, this.cancelButton ).css("padding-top", "8px").css("float", "right");
+        //.css("padding-right", "5px").css("width", "300px");
+
+	    
+        this.saveButton.click(   this.save.prototypeBind(this)   );
+        this.cancelButton.click( this.cancel.prototypeBind(this) );
+	
 	//append buttons
-	this.inplaceObject.append( this.cancelButton, this.saveButton );
+	this.inplaceObject.append( this.buttons );
     },
     
     
@@ -220,7 +236,7 @@ Inplace.prototype =
     		theme_advanced_buttons3 : "",
 		theme_advanced_blockformats : "p,h3,address",
     		width: "100%",
-    		height: "400px",
+    		height: "600px",
 		
 		/*
 		init_instance_callback: function(inst) 

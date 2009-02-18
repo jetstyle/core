@@ -34,7 +34,8 @@ function tb_show(caption, url, imageGroup) {//function called when the user clic
 		if (typeof document.body.style.maxHeight === "undefined") {//if IE 6
 			$("body","html").css({height: "100%", width: "100%"});
 			$("html").css("overflow","hidden");
-			if (document.getElementById("TB_HideSelect") === null) {//iframe to hide select elements in ie6
+			if (document.getElementById("TB_HideSelect") === null) 
+			{//iframe to hide select elements in ie6
 				$("body").append("<iframe id='TB_HideSelect'></iframe><div id='TB_overlay'></div><div id='TB_window'></div>");
 				$("#TB_overlay").click(tb_remove);
 			}
@@ -190,6 +191,7 @@ function tb_show(caption, url, imageGroup) {//function called when the user clic
 			ajaxContentH = TB_HEIGHT - 45;
 			
 			if(url.indexOf('TB_iframe') != -1){// either iframe or ajax window		
+					saved = false;
 					urlNoQuery = url.split('TB_');
 					$("#TB_iframeContent").remove();
 					if(params['modal'] != "true"){//iframe no modal
@@ -260,9 +262,17 @@ function tb_show(caption, url, imageGroup) {//function called when the user clic
 }
 
 //helper functions below
-function tb_showIframe(){
+function tb_showIframe()
+{
 	$("#TB_load").remove();
 	$("#TB_window").css({display:"block"});
+	
+//	console.log(  $("#TB_iframeContent").attr('src') );
+	if (saved == true)
+	    tb_remove();
+	    
+	saved = true;
+	//onTBRemove();
 }
 
 var tb_remove = function () {
@@ -274,8 +284,14 @@ var tb_remove = function () {
 		$("body","html").css({height: "auto", width: "auto"});
 		$("html").css("overflow","");
 	}
+	
+	if (onTBRemove)
+	    onTBRemove();
+	
 	document.onkeydown = "";
 	document.onkeyup = "";
+	
+	saved = false;
 	return false;
 }
 

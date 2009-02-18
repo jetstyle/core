@@ -168,7 +168,7 @@ class FormSimple
 			}
 			else
 			{
-				$tpl->parse( $this->template.':save_button', '_save_button' );
+				$tpl->parse( $this->template.':save_button'.( $this->config->ajax_save ? '_norefresh' : ''), '_save_button' );
 			}
 		}
 
@@ -183,6 +183,10 @@ class FormSimple
 				$tpl->parse( $this->template.':send_button', '_send_button' );
 			}
 		}
+		
+		
+		if ( $this->item['id']>0 )
+		    $tpl->set( 'ajax_url', RequestInfo::href() ); 
 	}
 
 	public function getHtml()
