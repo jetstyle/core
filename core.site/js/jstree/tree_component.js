@@ -274,31 +274,31 @@ function tree_component () {
 				}
 				str += ">" + data.data + "</a>";
 
-				str += '<img class="tree-edit" src="'+ this.images_path +'edit.png" ';
+				str += '<img title="Редактировать" class="tree-edit" src="'+ this.images_path +'edit.png" ';
 				if (this.settings['hide_buttons']['edit'] === true || ( this.settings['hide_buttons']['edit'] && this.settings['hide_buttons']['edit'][data.level] === true))
 				{
-					str += 'style="display: none;"';
+					str += 'hidden="hidden"';
 				}
 				str += '/>';
 
-				str += '<img class="tree-child-add" src="'+ this.images_path +'addChild.png" width="15" height="13" ';
+				str += '<img title="Добавить внутрь" class="tree-child-add" src="'+ this.images_path +'addChild.png" width="15" height="13" ';
 				if (this.settings['hide_buttons']['addChild'] === true || ( this.settings['hide_buttons']['addChild'] && this.settings['hide_buttons']['addChild'][data.level] === true))
 				{
-					str += 'style="display: none;"';
+					str += 'hidden="hidden"';
 				}
 				str += '/>';
 
-				str += '<img class="tree-brother-add" src="'+ this.images_path +'add.png" width="15" height="13" ';
+				str += '<img title="Добавить рядом" class="tree-brother-add" src="'+ this.images_path +'add.png" width="15" height="13" ';
 				if (this.settings['hide_buttons']['addBrother'] === true || (this.settings['hide_buttons']['addBrother'] && this.settings['hide_buttons']['addBrother'][data.level] === true))
 				{
-					str += 'style="display: none;"';
+					str += 'hidden="hidden"';
 				}
 				str += '/>';
 
-				str += '<img class="tree-delete" src="'+ this.images_path +'del.png" ';
+				str += '<img title="Удалить" class="tree-delete" src="'+ this.images_path +'del.png" ';
 				if (this.settings['hide_buttons']['del'] === true || (this.settings['hide_buttons']['del'] && this.settings['hide_buttons']['del'][data.level] === true))
 				{
-					str += 'style="display: none;"';
+					str += 'hidden="hidden"';
 				}
 				str += '/>';
 
@@ -466,6 +466,21 @@ function tree_component () {
 						_this.hovered.children("a").removeClass("hover");
 						_this.hovered = false;
 					}
+				})
+
+				$(this.container).find('li').hover(
+					function(){
+						$(this).find('>img[hidden!=hidden]').show();
+		             	$(this).parent().siblings('img[hidden!=hidden]').hide();
+		             	return false;
+					},
+					function(){
+		             	$(this).find('>img[hidden!=hidden]').hide();
+					}
+				);
+
+				$(this.container).find('li > a').mouseover(function(){
+					$(this).siblings('img[hidden!=hidden]').show();
 				});
 
 				// ATTACH DRAG & DROP ONLY IF NEEDED
@@ -1160,6 +1175,21 @@ function tree_component () {
 
 			$li.append(str);
 
+			$li.hover(
+				function(){
+					$(this).find('>img[hidden!=hidden]').show();
+	             	$(this).parent().siblings('img[hidden!=hidden]').hide();
+	             	return false;
+				},
+				function(){
+	             	$(this).find('>img[hidden!=hidden]').hide();
+				}
+			);
+
+			$li.find('>a').mouseover(function(){
+				$(this).siblings('img[hidden!=hidden]').show();
+			});
+
 			if (afterSelected === true)
 			{
 				this.moved($li,this.selected.children("a:eq(0)"),"after",true);
@@ -1381,34 +1411,46 @@ function tree_component () {
 
 			if (this.settings['hide_buttons']['edit'] !== undefined && this.settings['hide_buttons']['edit'] !== true)
 			{
-				if (this.settings['hide_buttons']['edit'][currentLevel])
+				if (this.settings['hide_buttons']['edit'][currentLevel]) {
 					node.children('img.tree-edit').get(0).style.display = 'none';
-				else
+					node.children('img.tree-edit').attr('hidden','hidden');
+				} else {
 					node.children('img.tree-edit').get(0).style.display = '';
+					node.children('img.tree-edit').removeAttr('hidden');
+				}
 			}
 
 			if (this.settings['hide_buttons']['addChild'] !== undefined && this.settings['hide_buttons']['addChild'] !== true)
 			{
-				if (this.settings['hide_buttons']['addChild'][currentLevel])
+				if (this.settings['hide_buttons']['addChild'][currentLevel]) {
 					node.children('img.tree-child-add').get(0).style.display = 'none';
-				else
+					node.children('img.tree-child-add').attr('hidden','hidden');
+				} else {
 					node.children('img.tree-child-add').get(0).style.display = '';
+					node.children('img.tree-child-add').removeAttr('hidden');
+				}
 			}
 
 			if (this.settings['hide_buttons']['addBrother'] !== undefined && this.settings['hide_buttons']['addBrother'] !== true)
 			{
-				if (this.settings['hide_buttons']['addBrother'][currentLevel])
+				if (this.settings['hide_buttons']['addBrother'][currentLevel]) {
 					node.children('img.tree-brother-add').get(0).style.display = 'none';
-				else
+					node.children('img.tree-brother-add').attr('hidden','hidden');
+				} else {
 					node.children('img.tree-brother-add').get(0).style.display = '';
+					node.children('img.tree-brother-add').removeAttr('hidden');
+				}
 			}
 
 			if (this.settings['hide_buttons']['del'] !== undefined && this.settings['hide_buttons']['del'] !== true)
 			{
-				if (this.settings['hide_buttons']['del'][currentLevel])
+				if (this.settings['hide_buttons']['del'][currentLevel]) {
 					node.children('img.tree-delete').get(0).style.display = 'none';
-				else
+					node.children('img.tree-delete').get(0).style.display = 'none';
+				} else {
 					node.children('img.tree-delete').get(0).style.display = '';
+					node.children('img.tree-delete').removeAttr('hidden');
+				}
 			}
 
 			if (!this.container.hasClass('no-controls'))
