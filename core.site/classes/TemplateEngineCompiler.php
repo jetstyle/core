@@ -171,7 +171,7 @@ class TemplateEngineCompiler
 			throw new TplException('TplCompiler: $data empty');
 		}
 
-		$this->compileWithExternals = true;
+		$this->compileWithExternals = false;
 
 		$this->compiledFunctions = array();
 		$this->compiledActionFunctions = array();
@@ -292,14 +292,13 @@ class TemplateEngineCompiler
 					//THIS IS DIRTY KOSTYLI
 					if ( strpos($k, "auto_")===0 )
 					{
-					    //var_dump($tplInfo['tpl']);
-					    //die();
 					    $auto=$tplInfo['tpl'].".html:".$k;
 					    
-					    //Locator::get('tpl')->parse($tplInfo['tpl'].".html:".$k, $k);
+					    //echo '<h2>1. remember subtpl: '.$auto.'</h2>';
 					}
 					else $auto = false;
 
+					
 					 // мы тут первый и последний раз. это {{:tpl}}
 					 $fbody = $body;
 					 $singlePattern = True; break;
@@ -332,6 +331,7 @@ class TemplateEngineCompiler
 			 }
 		}
 		
+		//die();
 		//var_dump($this->compiledFunctions);
 
 
@@ -348,6 +348,16 @@ class TemplateEngineCompiler
 		return true;
 	}
 
+	function getAuto()
+	{
+	    foreach($this->auto as $k=>$v)
+	    {
+		$ret .= " ".str_replace("auto_", "", $k)."=@".$v;
+	    
+	    }
+	    return $ret;
+	}
+	
 
 	/**
 	 * Компиляция плагина
@@ -703,6 +713,17 @@ class TemplateEngineCompiler
 			elseif (preg_match($this->action_regexp, $thing, $matches))
 			{
 				$params = $this->parseActionParams( $matches[1] );
+				/*
+				if($params[0][1]=='include_tpls.html:external_template_for_auto')
+				{
+				    
+				    if ( isset($this->auto["auto_".$var]) )
+				    {
+					//var_dump($params);
+				        //echo '<h2>2. replace {{auto_'.$var.'}} </h2>';	    
+					//    $result .= ' echo $tpl->parse("'.$this->auto["auto_".$var].'") ;';
+				    }
+				}*/
 				$pluginName = $params['_name'];
 				unset($params['_name']);
 				
@@ -712,6 +733,7 @@ class TemplateEngineCompiler
 					$_instant=true;
 				}
 				
+				//blocks/*
 				$blocks = array();				 
 				foreach ($params AS $key => &$param)
 				{
@@ -721,7 +743,8 @@ class TemplateEngineCompiler
 						{
 							$param[TE_TYPE] = TE_TYPE_STRING;
 							$param[TE_VALUE] = $matches[1];
-							$pluginName[TE_VALUE] = 'block';					
+							$pluginName[TE_VALUE] = 'block';
+											
 						}
 						else
 						{
@@ -734,8 +757,24 @@ class TemplateEngineCompiler
 							$this->actionCompile('block');
 						}
 					}
+					//nop else if ($param[TE_TYPE] == TE_TYPE_TEMPLATE && preg_match("/^layouts\/(.*)\.html/i", $param[TE_VALUE], $matches))
+					///{
+					    
+					    
+					//}
+					//var_dump($param[TE_VALUE], preg_match("/^layouts\/(.*)\.html$/i", $param[TE_VALUE], $matches));
+					//var_dump( preg_match("/^layouts\/(.*)\.html$/i", $param[TE_VALUE], $matches) );
 				}
 				
+				//nop
+				if ($this->auto)
+				{
+				    $auto_params = ($this->parseActionParams( $this->getAuto() ));
+				    unset($auto_params['_name']);
+				    $params = array_merge($auto_params, $params);
+				
+				//var_dump($params);
+				}
 				$result = '';
 				$result .= '$_ = '.$this->implodeActionParams( $params ).';';
 				
@@ -802,16 +841,12 @@ class TemplateEngineCompiler
 					}
 					else
 					{
-						if ( isset($this->auto[$var]) /* $var=="auto_name"*/ )
-						{
-						    //var_dump($this->auto[$var]);
-						    //die();
-						    //$result .= $this->compiledFunctions[ $this->auto[$var] ]."\n";
-						    //$result .= '$_ = array( "0" => "@'..':included_template_for_auto"); echo $tpl->action('.$this->compileParam('include').', $_); ';
-						    
-						    $result .= ' echo $tpl->parse("'.$this->auto[$var].'") ;';
-						}
-						else
+						//nop if ( isset($this->auto["auto_".$var]) /* $var=="auto_name"*/ )
+						//{
+						    //echo '<h2>2. replace {{auto_'.$var.'}} </h2>';	    
+						//    $result .= ' echo $tpl->parse("'.$this->auto["auto_".$var].'") ;';
+						//}
+						//else
 						    $result .= ' echo '.$this->parseExpression($var) .';'."\n";
 					}
 					
