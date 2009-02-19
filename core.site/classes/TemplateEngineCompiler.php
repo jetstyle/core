@@ -289,17 +289,6 @@ class TemplateEngineCompiler
 				 $body = $vv[1];
 				 if (empty($fbody) && empty($args))
 				 {
-					//THIS IS DIRTY KOSTYLI
-					if ( strpos($k, "auto_")===0 )
-					{
-					    //var_dump($tplInfo['tpl']);
-					    //die();
-					    $auto=$tplInfo['tpl'].".html:".$k;
-					    
-					    //Locator::get('tpl')->parse($tplInfo['tpl'].".html:".$k, $k);
-					}
-					else $auto = false;
-
 					 // мы тут первый и последний раз. это {{:tpl}}
 					 $fbody = $body;
 					 $singlePattern = True; break;
@@ -325,11 +314,6 @@ class TemplateEngineCompiler
 			 $this->files2functions[$tplInfo['tpl'].'.html'.(($k=="@")?"":":".$k)] = $funcName;
 			 $this->compiledFunctions[ $funcName ] = $this->templateBuildFunction( $this->templateCompile($fbody) );
 			 
-			 if ($auto)
-			 {
-			    //var_dump($funcName);
-			    $this->auto[$k] = $auto;
-			 }
 		}
 		
 		//var_dump($this->compiledFunctions);
@@ -802,17 +786,7 @@ class TemplateEngineCompiler
 					}
 					else
 					{
-						if ( isset($this->auto[$var]) /* $var=="auto_name"*/ )
-						{
-						    //var_dump($this->auto[$var]);
-						    //die();
-						    //$result .= $this->compiledFunctions[ $this->auto[$var] ]."\n";
-						    //$result .= '$_ = array( "0" => "@'..':included_template_for_auto"); echo $tpl->action('.$this->compileParam('include').', $_); ';
-						    
-						    $result .= ' echo $tpl->parse("'.$this->auto[$var].'") ;';
-						}
-						else
-						    $result .= ' echo '.$this->parseExpression($var) .';'."\n";
+						$result .= ' echo '.$this->parseExpression($var) .';'."\n";
 					}
 					
 
