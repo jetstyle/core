@@ -4,8 +4,12 @@
 
 {{TPL:List_Item}}
 <li id="{{*id}}">
-<div class="element-"><img src="{{images}}element.gif" width="16" height="12" align="bottom" alt="" title="" />&nbsp;<a href="{{*_href}}">{{*_title}}</a>
-  {{_controls}}</div>
+<div class="element-">
+	<img src="{{images}}element.gif" width="16" height="12" align="bottom" alt="" title="" />
+	{{?group_operations}}<input style="display: none" type="checkbox" value="{{*id}}" name="selected_items[]"/>{{?/}}
+	<a href="{{*_href}}">{{*_title}}</a>
+	{{_controls}}
+</div>
 </li>
 {{/TPL:List_Item}}
 
@@ -13,37 +17,57 @@
 
 {{TPL:List_Item_sel}}
 <li id="{{*id}}">
-<div class="element-s-"><img src="{{images}}element_s.gif" width="16" height="12" align="bottom" alt="" title=""
-/>&nbsp;{{*_title}}
-{{_controls}}</div>
+<div class="element-s-">
+	<img src="{{images}}element_s.gif" width="16" height="12" align="bottom" alt="" title=""/>
+	{{?group_operations}}<input style="display: none" type="checkbox" value="{{*id}}" name="selected_items[]"/>{{?/}}
+	{{*_title}}
+	{{_controls}}
+</div>
 </li>
 {{/TPL:List_Item_sel}}
 
 {{TPL:List_Item_del}}
 <li id="{{*id}}">
-<div class="element-del-"><img src="{{images}}element_trash.gif" width="16" height="12" align="bottom" alt="" title="Удалённый элемент" />&nbsp;<a href="{{*_href}}">{{*_title}}</a>
-  {{_controls}}</div>
+<div class="element-del-">
+	<img src="{{images}}element_trash.gif" width="16" height="12" align="bottom" alt="" title="Удалённый элемент" />
+	{{?group_operations}}<input style="display: none" type="checkbox" value="{{*id}}" name="selected_items[]"/>{{?/}}
+	<a href="{{*_href}}">{{*_title}}</a>
+	{{_controls}}
+</div>
 </li>
 {{/TPL:List_Item_del}}
 
 {{TPL:List_Item_sel_del}}
 <li id="{{*id}}">
-<div class="element-s-"><img src="{{images}}element_s.gif" width="16" height="12" align="bottom" alt="" title=""
-/>&nbsp;{{*_title}}
-{{_controls}}</div>
+<div class="element-s-">
+	<img src="{{images}}element_trash.gif" width="16" height="12" align="bottom" alt="" title=""/>
+	{{?group_operations}}<input style="display: none" type="checkbox" value="{{*id}}" name="selected_items[]"/>{{?/}}
+	{{*_title}}
+	{{_controls}}
+</div>
 </li>
 {{/TPL:List_Item_sel_del}}
 
 {{TPL:List_Item_hidden}}
 <li id="{{*id}}">
-<div class="element-hiden-"><img src="{{images}}element_hiden.gif" width="16" height="12" align="bottom" alt="" title="Скрытый элемент" />&nbsp;<a href="{{*_href}}">{{*_title}}</a>
-  {{_controls}}</div>
+<div class="element-hiden-">
+	<img src="{{images}}element_hiden.gif" width="16" height="12" align="bottom" alt="" title="Скрытый элемент" />
+	{{?group_operations}}<input style="display: none" type="checkbox" value="{{*id}}" name="selected_items[]"/>{{?/}}
+	<a href="{{*_href}}">{{*_title}}</a>
+	{{_controls}}
+</div>
 </li>
 {{/TPL:List_Item_hidden}}
 
-{{TPL:List_Item_sel_hidden}}<div class="element-s-"><img src="{{images}}element_s.gif" width="16" height="12" align="bottom" alt="" title=""
-/>&nbsp;{{*_title}}
-{{_controls}}</div>
+{{TPL:List_Item_sel_hidden}}
+<li id="{{*id}}">
+<div class="element-s-">
+	<img src="{{images}}element_s.gif" width="16" height="12" align="bottom" alt="" title=""/>
+	{{?group_operations}}<input style="display: none" type="checkbox" value="{{*id}}" name="selected_items[]"/>{{?/}}
+	{{*_title}}
+	{{_controls}}
+</div>
+</li>
 {{/TPL:List_Item_sel_hidden}}
 
 {{TPL:List_Separator}}{{/TPL:List_Separator}}
@@ -63,92 +87,84 @@
 {{TPL:TrashShow}}<div class="trash-"><a href="{{_href}}">показать удалённые</a></div>{{/TPL:TrashShow}}
 {{TPL:TrashHide}}<div class="trash-"><a href="{{_href}}">спрятать удалённые</a></div>{{/TPL:TrashHide}}
 
-{{!connect "dragable_items.css"}}
-{{!connect "dragable_lists.css"}}
+<!--{{!connect "dragable_items.css"}}
+{{!connect "dragable_lists.css"}}-->
 
-{{!connect "dk.js"}}
+<!--{{!connect "dk.js"}}
 {{!connect "coordinates.js"}}
 {{!connect "drag.js"}}
 {{!connect "dragdrop.js"}}
-{{!connect "default.js"}}
+{{!connect "default.js"}}-->
+
+{{!connect "jquery.js"}}
+{{!connect "jquery-ui-personalized-1.5.2.js"}}
+{{!connect "list_drugs.css"}}
 
 
 <script language="JavaScript" type="text/javascript">
-	   var update_timeout = null;
-       function onDrop()
-       {
-          //var data = DragDrop.serData('g2');
-          update_timeout = setTimeout(getSort, 1500);
-       }
-
-		window.onload = function()
-		{
-			var list = document.getElementById("left_col");
-			DragDrop.makeListContainer( list, 'g1' );
-			list.onDragOver = function() { this.style["background"] = "#EEE"; };
-			list.onDragOut = function() {this.style["background"] = "none"; };
-
-			list.onDragDrop = function() {onDrop(); };
-		};
-
-
-        function getSort()
-        {
-          var order = document.getElementById("order");
-          order.value = DragDrop.serData('g1', null);
-
-		  findObj("group-minus-icon").src = findObj("group-minus-icon").src.replace("hide.gif", "ajax-loader-arrows.gif");;
-
-          //url, table, order_values
-          clearTimeout(update_timeout);
-
-          send('', '{{table_name}}', order.value);
-
-        }
-
-		function send(url, table, values)
-		{
-			var req = new Subsys_JsHttpRequest_Js();
-		    // Код, АВТОМАТИЧЕСКИ вызываемый при окончании загрузки.
-		    // alert(typeof(values));
-		    req.onreadystatechange = function()
-		    {
-		        if (req.readyState == 4)
-		        {
-		           if (req.responseText!="error" && req.responseText.length>0)
-		           {
-
-		           	   //сохраниение прошло успешно
-		           	   findObj("group-minus-icon").src = findObj("group-minus-icon").src.replace("ajax-loader-arrows.gif", "hide.gif");
-		           	   return true;
-		           }
-		           else
-		           {
-		           	   alert('Не удалось установить соедение с сервером');
-		           	   //сохранение обломалось
-		           }
-		        }
-		    }
-		    // Разрешаем кэширование (чтобы при одинаковых запросах
-		    // не обращаться к серверу несколько раз).
-		    req.caching = false;
-		    // Подготваливаем объект.
-		    req.open('GET', url, true);
-		    // Посылаем данные запроса (задаются в виде хэша).
-
-		    /**
-		     *ничего страшного, там проверяется принципал
-		     *@params	tag			- таг для записи
-		     *@filename id			- id строки для удалиния
-		     */
-		    var q = { 'order': values, 'table': table };
-		    req.send( q );
+		$(document).ready(function(){
+			var lastOvered = null;			$('#left_col').sortable({
+	        	stop: function(e, ui) {
+	        		if (lastOvered) {
+	        			var index = {{per_page}}-1;
+                    	window.location.href = lastOvered.href + '&index='+index+'&order_list=1&item_id=' + ui.item.attr('id');
+                 	} else {
+		       			$.post('{{page_url}}?order_list=true', {		       					'item_id': ui.item.attr('id'),
+		       					'index': $('#left_col li').index(ui.item),
+		       					'ajax_load': 1,
+		       					'{{page_var}}': '{{page_num}}'
+		       				}, function(data) {
+								if (data != '1') alert(data);
+		       				},'text'
+		       			);
+	       			}
+	        	},
+	        	start: function(e, ui) {	      			ui.helper.css({'opacity': '0.3', 'cursor': 'pointer'});
+	        	},
+	        	sort: function(e, ui) {                	if ($('.cms-arrow')[0]) {                    	$('.cms-arrow a').each(function(){                    		if (
+                    			e.pageX > $(this).offset().left &&
+                    			e.pageX < $(this).offset().left + $(this).width() &&
+                    			e.pageY > $(this).offset().top &&
+                    			e.pageY < $(this).offset().top + $(this).height()
+                    		) {                            	$(this).addClass('overed');
+                            	lastOvered = this;
+                            	return false;
+                    		} else {                            	if (lastOvered == this) {                            		$(this).removeClass('overed');
+                            		lastOvered = null;
+                            	}
+                    		}                    	});
+                	}
+	        	}
+			});
+			$('#toggleGroupSelect').click(function(){
+				if ($('#left_col li input:checkbox:visible')[0]) {                 	$('#left_col li input:checkbox').hide();
+                 	$('#toggleGroupSelect').text('выбрать несколько');
+                 	$('#groupSelectActions').hide();
+				} else {					$('#left_col li input:checkbox').show();
+					$('#toggleGroupSelect').text('отменить выбор нескольких');
+					$('#groupSelectActions').show();
+				}
+            	return false;			});
+			$('#groupSelectAll').click(function(){
+				$('#left_col li input:checkbox').attr('checked', 'checked');
+            	return false;
+			});
+			$('#groupSelectNothing').click(function(){
+				$('#left_col li input:checkbox').attr('checked', false);
+            	return false;
+			});
+			$('#groupDelete').click(function(){
+                this.href += '&items_list='+getItems();
+			});
+			$('#groupRestore').click(function(){
+                this.href += '&items_list='+getItems();
+			});		});
+		function getItems(action) {        	var items = '';
+			$('#left_col li input:checked').each(function() {
+	        	items += this.value+',';
+	       	});
+	       	return items.substr(0, items.length-1);
 		}
-        function showValue()
-        {
-          order = document.getElementById("order");
-          alert(order.value);
-        }
 </script>
 
 
@@ -162,6 +178,15 @@
 {{__filter}}
 {{__trash_switch}}
 {{__add_new}}
+{{?group_operations}}
+	<a id="toggleGroupSelect" href="">выбрать несколько</a><br/>
+	<span id="groupSelectActions" style="display: none">
+		выбрать <a id="groupSelectAll" href="">всё</a> /
+		<a id="groupSelectNothing" href="">ничего</a><br/>
+		<a id="groupDelete" href="{{group_delete_url}}">удалить выбранные</a><br/>
+		<a id="groupRestore" href="{{group_restore_url}}">восстановить выбранные</a><br/>
+	</span>
+{{?/}}
 <img class="block" src="{{images}}z.gif" width="1" height="10" align="top" alt="" />
 
 <input type="hidden" name="order" id="order" value="" />

@@ -1,0 +1,25 @@
+    .mceEditors { display: none; }
+    .wysiwyg_tbl { height: 400px; }
+    .inplace-over { background-color: #ffffcc;  }
+    .error { background-color: red }
+
+    .hand   { cursor:pointer; cursor:hand; }
+    .w98{
+        width: 98%;
+    }
+
+    .cms-save-but 
+    {
+/*
+	-x-system-font:none;
+	background-color:#99FF99;
+*/
+	font-family:Arial,sans-serif;
+	font-size:12px;
+    }
+    .cms-delete-but 
+    {
+	color:#880000;
+	font-family:Arial,sans-serif;
+	font-size:12px;
+    }
