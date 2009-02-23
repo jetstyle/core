@@ -2,6 +2,10 @@
 Finder::useClass("controllers/Controller");
 class PageTrackerController extends Controller
 {
+	//block views
+	const BANNERS = 'banners';
+	const ANNOUNCES = 'announces';
+	
 	protected $viewsByDay = array();
 	
 	
@@ -21,25 +25,48 @@ class PageTrackerController extends Controller
 
 	public function handle_default(){}
 	
-	public function handle_view()
+	/**
+	 * @param
+	 *
+	 */
+	public function handle_view($config)
 	{
+		$db = Locator::get('db');
+	
+		$content_id = $config['nid'] ? $config['nid'] : $_GET['nid'];
+		$obj_id = $config['oid'] ? $config['oid'] : $_GET['oid'];
+		$url  = $config['url'] ? $config['url'] : $_GET['url'];
+		$type = $config['type'] ? $config['type'] : $_GET['type'];
+	
 		Finder::useClass('pageTracker/PageTrackerSession');
 		$sess = new PageTrackerSession();
 		$sess->initSession();
 				
-		$db = Locator::get('db');
+		if (is_array($obj_id))
+		{
+		    foreach ($obj_id as $oid)
+			$vals[] =	"(NOW(), 
+				".$db->quote($sess['hash']).",
+				".$db->quote($type).", 
+				".$db->quote($url).", 
+				".intval($content_id).", 
+				".intval($oid).")";
+		    $values = implode(",", $vals);
+		}
+		else
+		    $values =	"(NOW(), 
+				".$db->quote($sess['hash']).",
+				".$db->quote($type).", 
+				".$db->quote($url).", 
+				".intval($content_id).", 
+				".intval($obj_id).")";
+				
+				
+		
 		$db->execute("
 			INSERT INTO ??stat_dirty_views
 			(`datetime`, `session_hash`, `type`, `url`, `content_id`, `obj_id`)
-			VALUES
-			(
-				NOW(), 
-				".$db->quote($sess['hash']).",
-				".$db->quote($_GET['type']).", 
-				".$db->quote($_GET['url']).", 
-				".intval($_GET['nid']).", 
-				".intval($_GET['oid'])."
-			)
+			VALUES	$values			
 		");
 	}
 	
