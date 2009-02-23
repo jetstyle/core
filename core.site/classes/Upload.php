@@ -177,7 +177,10 @@ class Upload
 				throw new Exception("Upload: directory ".str_replace(Config::get('project_dir'), '', $dirname)." is not writable");
 			}
 
-
+			/**
+			 * TODO: document this part 
+			 *
+			 */
 			if ($params['actions'] && is_array($params['actions']))
 			{
 				if(in_array($ext, $this->GRAPHICS))
@@ -415,6 +418,11 @@ class Upload
 
 	protected function createResourceFromImage($filename)
 	{
+		if (!function_exists("getimagesize"))
+		{
+		    throw new Exception("Upload: no GD extension installed");
+		}
+		
 		$size = getimagesize($filename);
 
 		$img = null;
