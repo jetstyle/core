@@ -418,7 +418,7 @@ class Upload
 
 	protected function createResourceFromImage($filename)
 	{
-		if (!function_exists("getimagesize"))
+		if (!function_exists("getimagesize") || !function_exists("imagecreatefromjpeg"))
 		{
 		    throw new Exception("Upload: no GD extension installed");
 		}
