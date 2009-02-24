@@ -9,7 +9,7 @@ if (Config::get('db_disable'))
 $type = $params['type'] ? $params['type'] : 'texts';
 $good = true;
 
-//Любой контент
+//Любой контент. Но мы его не выводим, только ссылку на редактирование
 if ($type != 'texts')
 {
 	$id = $params['id'];
@@ -26,6 +26,7 @@ if ($type != 'texts')
           'width'=>'800',
           'height'=>'600',
 	);
+
 }
 //Таблица texts
 else
@@ -71,7 +72,7 @@ else
 		}
 		*/
 
-		//если такой записи нет - создаём её
+		//если такой записи нет И не используется реферер - создаём её
 		if( !$r["id"] &&  !$params['referer']  )
 		{
 			$r["id"] = $db->insert("INSERT INTO ".$custom['table']."(title,_supertag,_created,_modified) VALUES('$supertag','$supertag',NULL,NULL)");
@@ -89,15 +90,15 @@ else
           'height'=> $r['type']==1 ? 500 : '600'
 	) ;
 
-	//var_dump($params);
-	echo ( $params['field'] && isset( $r[$params['field']] ) ) ? $r[$params['field']] : $r[$custom['field']];
+	$content = ( $params['field'] && isset( $r[$params['field']] ) ) ? $r[$params['field']] : $r[$custom['field']];
+	echo $content;
 }
 $para['show'] = $params['show'] ? true : false;
 $para['inplace'] = $params['inplace'];
 $para['field'] = $params['field'];
-$para['container'] = $params['container'];
+
 $para['thickbox'] = $params['thickbox'];
 
 if ($good && !isset( $params["noedit"] ) )
-echo $tpl->action( 'oce', $para );
+    echo $tpl->action( 'oce', $para );
 ?>

@@ -236,7 +236,7 @@ abstract class Controller implements ArrayAccess
 		}
 	}
 	
-	protected function addToBread($title, $path = '')
+	public function addToBread($title, $path = '')
 	{
 		$this->breadItems[] = array(
 			'title' => $title,
