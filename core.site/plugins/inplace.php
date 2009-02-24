@@ -51,7 +51,7 @@ if (!$params['field'])
 
 
 //Любой контент. Но мы его не выводим, только ссылку на редактирование
-if ($params['module'] != 'texts')
+if ($params['module'] != 'texts' && $params['module'] != 'textsref')
 {
 	$id = $params['id'];
 	if(!$id)
@@ -73,6 +73,7 @@ if ($params['module'] != 'texts')
 else
 {
 	$supertag = $params['tag'] ? $params['tag'] : $params[0];
+//	echo 'tags';
 	if(!$supertag)
 		$supertag = $tpl->get( $params["var"] );
 	if(!$supertag)

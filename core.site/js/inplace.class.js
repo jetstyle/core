@@ -4,8 +4,7 @@ Inplace = function( editorType, cmsUrl, inplaceObject, field )
     this.cmsUrl = cmsUrl;
     
     //инплейсный объект - редактор+кнопки
-    this.inplaceObject = $(inplaceObject);
-        
+    this.inplaceObject = $(inplaceObject); 
     this.field  = field ? field : 'text';
 }
 
@@ -69,7 +68,9 @@ Inplace.prototype =
         
         //show inplaceObject and its container
         $( this.inplaceObject ).add( this.inplaceContainer ).removeClass("invisible");
-
+	
+	//width fix
+	$( this.inplaceObject ).css("width", $( this.inplaceObject ).children(":first").children(":first").width()+16 );
         //контейнер спр€чем
         this.container.addClass("invisible");
         this.hideIndicator();
@@ -123,7 +124,8 @@ Inplace.prototype =
     
     hideIndicator: function()
     {
-	$("#cms_panel_loading").addClass('invisible');
+	//console.log( $("#cms_panel_loading") );
+	$("#cms_panel_loading").css('display', '').addClass('invisible');
         this.saveButton.removeClass("invisible");
         this.cancelButton.removeClass("invisible");
     },
@@ -142,7 +144,7 @@ Inplace.prototype =
     
     onSave: function(data)
     {
-	    this.hideIndicator(); 
+	    
 	    this.container.html( data );
 	    this.cancel();
     }, 
@@ -150,8 +152,9 @@ Inplace.prototype =
     
     cancel: function()
     {
+	    this.hideIndicator(); 
 	    this.cacheData = this.getEditorData();
-    
+
 	    //спр€чем inplaceObject и его клонированный контйентер
 	    $( this.inplaceObject ).add( this.inplaceContainer ).addClass("invisible");
 
@@ -170,7 +173,7 @@ Inplace.prototype =
 
     unbindAll: function()
     {
-	    this.container.unbind('click');
+	this.container.unbind('click');
         this.container.unbind('mouseover');
         this.container.unbind('mouseout');
     },
@@ -197,7 +200,7 @@ Inplace.prototype =
 	this.saveButton = $(document.createElement("input")).val("—охранить").attr("type", "button").addClass("cms-save-but hand");
 	this.cancelButton = $(document.createElement("input")).val("ќтменить").attr("type", "button").addClass("cms-delete-but hand");
 
-        this.buttons = $(document.createElement("div")).append( this.saveButton, this.cancelButton ).css("padding-top", "8px").css("float", "right");
+        this.buttons = $(document.createElement("div")).append( this.saveButton, this.cancelButton ).css("padding-top", "8px").css("float", "right");//.css("padding-left", "10px");
         //.css("padding-right", "5px").css("width", "300px");
 
 	    
