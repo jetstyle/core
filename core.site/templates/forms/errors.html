@@ -1,17 +1,18 @@
 {{TPL:List}}
-  <ul class="errors">
+  <!--<ul class="errors">-->
     {{!for msgs do=@:List_Item}}
-  </ul>
+  <!--</ul>-->
 {{/TPL:List}}
 
 {{TPL:List_Empty}}
 {{/TPL:List_Empty}}
 
 {{TPL:List_Item}}
-  <li>
+  <!--<li>-->
   <!-- for developer`s purposes
     <small>[{{*msg}}]</small>
     -->
-  {{*text}}</li>
+  <p class="system-mess-">{{*text}}</p>
+  <!--</li>-->
 {{/TPL:List_Item}}
 
