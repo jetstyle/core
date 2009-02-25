@@ -265,8 +265,7 @@ function tree_component () {
 						str += " style='background-image:url(\"" + data.icons[this.settings.languages[i]] + "\");' ";
 					str += ">" + data.data[this.settings.languages[i]] + "</a>";
 				}
-			}
-			else {
+			} else {
 				str += "<a href='#' ";
 				if (data.icon)
 				{
@@ -468,18 +467,14 @@ function tree_component () {
 					}
 				})
 
-				$(this.container).find('li').hover(
-					function(){
-						$(this).find('>img[hidden!=hidden]').show();
-		             	$(this).parent().siblings('img[hidden!=hidden]').hide();
-		             	return false;
-					},
-					function(){
-		             	$(this).find('>img[hidden!=hidden]').hide();
-					}
-				);
-
-				$(this.container).find('li > a').mouseover(function(){
+				$('#treeBox li').livequery('mouseover',	function(){
+					$(this).find('>img[hidden!=hidden]').show();
+		           	$(this).parent().siblings('img[hidden!=hidden]').hide();
+		           	return false;
+				}).livequery('mouseout', function(){
+		           	$(this).find('>img[hidden!=hidden]').hide();
+				});
+				$('#treeBox li > a').livequery('mouseover', function(){
 					$(this).siblings('img[hidden!=hidden]').show();
 				});
 
