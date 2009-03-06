@@ -30,14 +30,14 @@ class TreeControlJsTree extends TreeControl
 					$this->id = $currentId ? $currentId : $this->getRootId();
 					$parents = $this->getParentsForItem($this->id);
 					$parents[] = $this->id;
-					$this->load("_parent IN('".implode("','", $parents)."')");
+					$this->loadByParents($parents);
 					echo $this->toJSON();
 				}
 				else
 				{
-					$nodeParts = explode('-', $nodeId);
-					$nodeId = intval($nodeParts[1]);
-					$this->load("_parent = ".$nodeId);
+					$this->loadByParents(array($nodeId));
+
+					$nodeId = str_replace('node-', '', $nodeId);
 
 					echo $this->toJSON($nodeId);
 				}
@@ -142,6 +142,16 @@ class TreeControlJsTree extends TreeControl
 		}
 	}
 
+	protected function loadByParents($parents)
+	{
+		foreach($parents as &$parent)
+		{
+        	$parent = str_replace('node-', '', $parent);
+		}
+		$where = empty($parents) ? '' : "_parent IN (".implode(',',$parents).")";
+    	$this->load($where);
+	}
+
 	public function getHtml()
 	{
 		$this->renderTrash();
@@ -151,12 +161,14 @@ class TreeControlJsTree extends TreeControl
 	public function toJSON($fromNode = null)
 	{
 		$this->toRoot = array();
-		$c = $this->items[ intval($this->id) ];
+		$c = $this->items[ $this->id ];
 		do
 		{
 			$this->toRoot[$c['id']] = $c['id'];
 			$c = $this->items[$c['_parent']] ;
 		} while($c);
+
+		//print_r($this->children);
 
 		if ($fromNode)
 		{
@@ -243,7 +255,7 @@ class TreeControlJsTree extends TreeControl
 						$state = 'open';
 					}
 				}
-				elseif ($this->config->ajaxAutoLoading && ($this->items[$id]['_right'] - $this->items[$id]['_left']) > 1)
+				elseif ($this->config->ajaxAutoLoading && $this->items[$id]['has_children'])
 				{
 					$state = 'closed';
 				}
@@ -314,6 +326,12 @@ class TreeControlJsTree extends TreeControl
 				$this->updateTreePathes($this->config->table_name, $node['id'], $this->config->allow_empty_supertag, $this->config->where);
 			}
 		}
+	}
+
+	public function getItems($parent)
+	{
+     	$this->loadByParents(array($parent));
+     	return array('items'=>$this->items, 'children'=>$this->children);
 	}
 }
 ?>

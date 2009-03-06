@@ -183,10 +183,10 @@ class FormSimple
 				$tpl->parse( $this->template.':send_button', '_send_button' );
 			}
 		}
-		
-		
+
+
 		if ( $this->item['id']>0 )
-		    $tpl->set( 'ajax_url', RequestInfo::href() ); 
+		    $tpl->set( 'ajax_url', RequestInfo::href() );
 	}
 
 	public function getHtml()
@@ -217,7 +217,7 @@ class FormSimple
 		return $this->config->table_name;
 	}
 
-	protected function load()
+	public function load()
 	{
 		if( !$this->loaded )
 		{
@@ -351,7 +351,7 @@ class FormSimple
 		}
 	}
 
-	protected function delete()
+	public function delete()
 	{
 		if ($this->item['_state'] <= 1 )
 		{
@@ -557,6 +557,11 @@ class FormSimple
 			$data['_supertag'] = $this->postData['_supertag'].'_'.$this->id;
 		}
 		$this->updateData($data);
+	}
+
+	public function setId($id)
+	{
+     	$this->id = $id;
 	}
 }
 
