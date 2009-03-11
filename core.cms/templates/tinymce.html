@@ -1,11 +1,25 @@
 {{TPL:instance}}
-	<textarea name="{{f.name}}" id="{{f.name}}" class="w100" style="height: 300px;" >{{f.value}}</textarea>
+	<textarea name="{{f.name}}" id="{{f.name}}" class="w100" style="display: none; height: 300px;" >{{f.value}}</textarea>
+	<div id="{{f.name}}_placeholder" style="height: 175px;
+				background:url({{images}}loadingAnimation.gif) no-repeat center center;
+				border: 1px solid;
+				padding-top: 125px;
+				text-align: center">
+		Загрузка редактора
+	</div>
 {{/TPL:instance}}
 
 {{TPL:init}}
 	<script language="javascript" type="text/javascript" src="{{/}}libs/tinymce/tiny_mce.js"></script>
 	<script language="javascript" type="text/javascript">
-		
+
+		function tinyMceInit() {
+			$('{{rich_editors}}'.split(',')).each(function(){
+				$('#'+this+'_placeholder').hide();
+            	$('#'+this+'_parent').show();
+			});
+		}
+
 		tinyMCE.init({
 			mode : "exact",
 			language : "ru",
@@ -14,18 +28,21 @@
 			content_css: "{{css}}editor.css",
 			button_tile_map : true,
 			relative_urls : false,
-			plugins : "table,contextmenu,advlink,jetimages,jetfiles,jetcontent,jetbuttons,jetflash,quote,note,preview",
+			plugins : "table,contextmenu,paste,advlink,jetimages,jetfiles,jetcontent,jetbuttons,jetflash,quote,note,preview",
 			valid_elements : "+a[name|href|target|title|onclick|mode|fileparams],-strong/-b/,-em/-i,-strike,-u,#p[id],-ol,-ul,-li,br,img[id|class|src|alt|title|bigwidth|bigheight|bigsrc|mode|width|height|title|style],small,-sub,-sup,-blockquote,-table[class],-tr[rowspan|align],tbody,thead,tfoot,#td[colspan|rowspan|align],-th[colspan|rowspan|align],caption,-pre,address,-h1,-h2,-h3,-h4,-h5,-h6,hr,dd,dl,dt,cite,abbr,acronym,del,ins,big",
 			theme_advanced_toolbar_location : "top",
 			theme_advanced_resizing : true,
 			theme_advanced_statusbar_location : "bottom",
 			theme_advanced_resize_horizontal : false,
 			theme_advanced_toolbar_align : "left",
-			theme_advanced_buttons1 : "cut,copy,paste,separator,undo,redo,separator,link,jetcontent,unlink,anchor,separator,jetimages,jetfiles,jetflash,jetbuttons,note,quote",
+			theme_advanced_buttons1 : "cut,copy,paste,pasteword,separator,undo,redo,separator,link,jetcontent,unlink,anchor,separator,jetimages,jetfiles,jetflash,jetbuttons,note,quote",
 			theme_advanced_buttons2 : "formatselect,bold,italic,strikethrough,sub,sup,separator,bullist,numlist,separator,tablecontrols,help,code",
 			theme_advanced_buttons3 : "",
 			theme_advanced_blockformats : "p,h2,h3,address",
-			width: "100%"
+			width: "100%",
+			paste_auto_cleanup_on_paste: $.browser.msie,
+			paste_use_dialog: true,
+			oninit: 'tinyMceInit'
 		});
 
 		tinyMCE.base_url = "{{/}}";

@@ -41,19 +41,26 @@ class MenuBlock extends Block
 	
 	protected function getParentNodeByLevel($level)
 	{
-		$data = &Locator::get('controller');
-		$sql = '
-			SELECT id, _path, _level, _left, _right, _parent, hide_from_menu
-			FROM ??content
-			WHERE
-				_level = ' . $level . '
-					AND
-				(_left <= ' . $data['_left'] . ' AND _right >= ' . $data['_right'] . ')
-					AND
-				_state = 0
-		';
-
-		return Locator::get('db')->queryOne($sql);
+		$result = array();
+		
+		if (Locator::exists('controller'))
+		{
+			$data = &Locator::get('controller');
+			$sql = '
+				SELECT id, _path, _level, _left, _right, _parent, hide_from_menu
+				FROM ??content
+				WHERE
+					_level = ' . $level . '
+						AND
+					(_left <= ' . $data['_left'] . ' AND _right >= ' . $data['_right'] . ')
+						AND
+					_state = 0
+			';
+	
+			$result = Locator::get('db')->queryOne($sql);
+		}
+		
+		return $result;
 	}
 
 	protected function getParentNodes()
@@ -63,25 +70,33 @@ class MenuBlock extends Block
 			return $this->parents;
 		}
 
-		$data = &Locator::get('controller');
+		if (Locator::exists('controller'))
+		{
+			$data = &Locator::get('controller');
+		}
+		else
+		{
+			$data = array();
+		}
 
 		if (!$data['id'])
 		{
 			$this->parents = array();
-			return $this->parents;
 		}
-
-		$sql = '
-			SELECT id, hide_from_menu, _parent
-			FROM ??content
-			WHERE _left < ' . $data['_left'] . ' AND _right >= ' . $data['_right'] . ' AND _level < '.($this->config['level'] + $this->config['depth']).' AND _state = 0
-		';
-
-		$this->parents = Locator::get('db')->query($sql, "id");
-
-		if ($this->parents === null)
+		else
 		{
-			$this->parents = array();
+			$sql = '
+				SELECT id, hide_from_menu, _parent
+				FROM ??content
+				WHERE _left < ' . $data['_left'] . ' AND _right >= ' . $data['_right'] . ' AND _level < '.($this->config['level'] + $this->config['depth']).' AND _state = 0
+			';
+	
+			$this->parents = Locator::get('db')->query($sql, "id");
+	
+			if ($this->parents === null)
+			{
+				$this->parents = array();
+			}
 		}
 
 		return $this->parents;
@@ -129,8 +144,11 @@ class MenuBlock extends Block
 			break;
 		}
 
-		$current = &Locator::get('controller');
-		$this->currentNodeId = $current['id'];
+		if (Locator::exists('controller'))
+		{
+			$current = &Locator::get('controller');
+			$this->currentNodeId = $current['id'];
+		}
 		
 		$where[] = $menu->quoteField('hide_from_menu').' = 0';
 		$menu->registerObserver('row', array(&$this, 'markItem'));

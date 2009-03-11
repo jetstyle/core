@@ -30,29 +30,15 @@ if(Locator::get('principalCms')->security('cmsModules', $module))
 	$tpl->set('_module', $module);
 	$tpl->set('_id', $id);
 	$tpl->set('_href', (Config::exists('cms_url') ? Config::get('cms_url') : RequestInfo::$baseUrl."cms/").str_replace('::id::',$id,$oce[$module]).'hide_toolbar=1&popup=1' );
-	$tpl->set('_width', $params['width'] ? $params['width'] : 500 );
+	$tpl->set('_width', $params['width'] ? $params['width'] : 800 );
 	$tpl->set('_height', $params['height'] ? $params['height'] : 600 );
 	$tpl->set('_title', $params['title'] ? $params['title'] : 'редактировать' );
 	$tpl->set('_field', $params['field'] );
-	$tpl->set('_parent', $params['container']=='parent' ? 1 : null );
-	$tpl->set('_thickbox', isset($params['thickbox']) ? 1 : null );
+	$tpl->set('_popup', isset($params['popup']) ? 1 : null );
 	
-	if ($params['inplace']=='wysiwyg')
-	{
-	    $tpl->set('wysiwyg', 1);
-	    $tpl->set('editorType', 'wysiwyg' );
-	}
-	else if ($params['inplace']=='textarea')
-	{
-	    $tpl->set('textarea', 1);
-	    $tpl->set('editorType', 'textarea' );
-	}
-	else
-	{
-	    $tpl->set('editorType', 'input' );
-	}
+
 	
-	return $tpl->parse( $params['inplace'] ? 'oce.html:inplace' : 'oce.html:default' );
+	return $tpl->parse( 'oce.html' );
 }
 return '';
 ?>

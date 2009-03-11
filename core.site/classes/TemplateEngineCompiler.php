@@ -313,7 +313,12 @@ class TemplateEngineCompiler
 			 $funcName = $this->tpl->getFuncName($tplInfo['cache_name'], ($k=="@")?"":$k);
 			 $this->files2functions[$tplInfo['tpl'].'.html'.(($k=="@")?"":":".$k)] = $funcName;
 			 $this->compiledFunctions[ $funcName ] = $this->templateBuildFunction( $this->templateCompile($fbody) );
+			 
 		}
+		
+		//var_dump($this->compiledFunctions);
+
+
 
 		if (null === $fileCached)
 		{
@@ -743,6 +748,7 @@ class TemplateEngineCompiler
 
 				if (strlen($var) > 0)
 				{
+					//{{var|plugin}}
 					if (count ($A) > 0)
 					{
 						$result .= ' $_r = '.$this->parseExpression($var) .';'."\n";
@@ -773,6 +779,7 @@ class TemplateEngineCompiler
 						}
 						$result .= 'echo $_r; ';
 					}
+					//{{var=value}}
 					elseif (strpos($var, '=') !== false)
 					{
 						$result = ' '.$this->parseExpression($var) .';'."\n";
@@ -781,6 +788,7 @@ class TemplateEngineCompiler
 					{
 						$result .= ' echo '.$this->parseExpression($var) .';'."\n";
 					}
+					
 
 					$instant = $result;
 				}

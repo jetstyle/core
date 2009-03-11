@@ -102,16 +102,38 @@
 
 
 <script language="JavaScript" type="text/javascript">
-		$(document).ready(function(){			$('#left_col').sortable({
-	        	stop: function() {
-	        		var order = '';
-	        		$('#left_col li').each(function() {
-	        			order += this.id+',';
-	       			});
-	       			order = order.substr(0, order.length-1);
-	       			$.post('{{page_url}}?order_list=true', {'order_items': order}, function(data) {
-						if (data != '1') alert(data);
-	       			},'text');
+		$(document).ready(function(){
+			var lastOvered = null;			$('#left_col').sortable({
+	        	stop: function(e, ui) {
+	        		if (lastOvered) {
+	        			var index = {{per_page}}-1;
+                    	window.location.href = lastOvered.href + '&index='+index+'&order_list=1&item_id=' + ui.item.attr('id');
+                 	} else {
+		       			$.post('{{page_url}}?order_list=true', {		       					'item_id': ui.item.attr('id'),
+		       					'index': $('#left_col li').index(ui.item),
+		       					'ajax_load': 1,
+		       					'{{page_var}}': '{{page_num}}'
+		       				}, function(data) {
+								if (data != '1') alert(data);
+		       				},'text'
+		       			);
+	       			}
+	        	},
+	        	start: function(e, ui) {	      			ui.helper.css({'opacity': '0.3', 'cursor': 'pointer'});
+	        	},
+	        	sort: function(e, ui) {                	if ($('.cms-arrow')[0]) {                    	$('.cms-arrow a').each(function(){                    		if (
+                    			e.pageX > $(this).offset().left &&
+                    			e.pageX < $(this).offset().left + $(this).width() &&
+                    			e.pageY > $(this).offset().top &&
+                    			e.pageY < $(this).offset().top + $(this).height()
+                    		) {                            	$(this).addClass('overed');
+                            	lastOvered = this;
+                            	return false;
+                    		} else {                            	if (lastOvered == this) {                            		$(this).removeClass('overed');
+                            		lastOvered = null;
+                            	}
+                    		}                    	});
+                	}
 	        	}
 			});
 			$('#toggleGroupSelect').click(function(){

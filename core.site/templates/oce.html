@@ -1,59 +1,17 @@
-
 <!-- обычная ссылка _редактировать_ -->
-{{:default}}
 <span class="cms-edit">
 &uarr; 
 
-    {{?_thickbox}}
+    {{?_popup}}
+	<!--- pictwnd not defined ??? --->
+	<a href="{{_href}}" onclick="pictwnd('{{_href}}','oce_popup','top=0,left=0,width={{_width}},height={{_height}},scrollbars=1,resizable=1');return false;" title="Редактировать вышестоящий блок" target="_blank">
+	    {{_title}}
+	</a>
+
+    {{?:}}
 	<a rel="notrack" href="{{_href}}&TB_iframe=true&width={{_width}}" class="thickbox"  title="Редактировать страницу" >
 	<!--a href="iframeModal.html?placeValuesBeforeTB_=savedValues&TB_iframe=true&height=200&width=300&modal=true" title="add a caption to title attribute / or leave blank" class="thickbox">Open iFrame Modal</a-->
 	    {{_title}}
 	</a>    
-    {{?:}}
-	<a href="{{_href}}" onclick="pictwnd('{{_href}}','oce_popup','top=0,left=0,width={{_width}},height={{_height}},scrollbars=1,resizable=1');return false;" title="Редактировать вышестоящий блок" target="_blank">
-	    {{_title}}
-	</a>
     {{/?}}
 </span>
-{{/:default}}
-
-{{:inplace}}
-    {{!connect "inplace.class.js"}}
-    
-    <!-- инплейсное редактирование может быть wysiwyg, textarea, input -->
-    {{?wysiwyg}}
-	{{?!wysiwyg_included}}
-	    {{!!inline}}
-		<script language="javascript" type="text/javascript" src="{{/}}cms/libs/tinymce/tiny_mce.js"></script>
-	    
-	    {{/!!}}
-	    {{wysiwyg_included="1"}}
-	{{/?}}
-	
-	<div id="inplace_{{_field}}_{{_id}}" class="invisible">
-	    <textarea autocomplete="off" id="textarea_{{_field}}_{{_id}}">aaaa</textarea>
-	</div>
-    {{?:textarea}}
-	<div id="inplace_{{_field}}_{{_id}}"  class="invisible" >
-	    <textarea class="w100"  autocomplete="off" ></textarea>
-	</div>
-    {{?:}}
-	<div id="inplace_{{_field}}_{{_id}}"  class="invisible" >
-	    <input type="text" class="w100"  autocomplete="off" />
-	</div>
-    {{/?}}
-    
-    <!-- INIT INPLACE -->
-    {{!!inline}}
-	<script language="javascript">
-	    $(document).ready(
-		function ()
-		{
-		    var i = new Inplace( '{{editorType}}', '{{_href}}', "#inplace_{{_field}}_{{_id}}" );
-		    i.init();
-		}
-	    );
-	</script>
-    {{/!!}}
-
-{{/:inplace}}

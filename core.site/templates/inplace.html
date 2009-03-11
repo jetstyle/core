@@ -1,0 +1,53 @@
+    {{!connect "inplace.css"}}
+    {{!connect "inplace.class.js"}}
+    
+    <!-- инплейсное редактирование может быть wysiwyg, textarea, input -->
+    {{?*editor=="wysiwyg"}}
+	    {{?!wysiwyg_included}}
+	        {{!!inline}}
+		    <script language="javascript" type="text/javascript" src="{{/}}cms/libs/tinymce/tiny_mce.js"></script>	        
+	        {{/!!}}
+	        {{wysiwyg_included="1"}}
+	    {{/?}}
+	
+	    <div id="inplace_{{*module}}_{{*field}}_{{*id}}" class="invisible">
+		    <textarea autocomplete="off" id="textarea_{{*module}}_{{*field}}_{{*id}}" ></textarea>
+	    </div>
+    {{?:*editor=="textarea"}}
+	    <div id="inplace_{{*module}}_{{*field}}_{{*id}}"  class="invisible" >
+		<div class="p-shadow">
+	            <textarea {{?*rows}}rows="{{*rows}}"{{/?}} {{?*cols}}cols="{{*cols}}"{{/?}} autocomplete="off" ></textarea>
+		</div>
+	    </div>
+    {{?:}}
+	<span id="inplace_{{*module}}_{{*field}}_{{*id}}"  class="invisible" >
+	    <div class="p-shadow">
+	        <input type="text" class="w98"  autocomplete="off" />
+	    </div>
+	</span>
+
+<!-- skin button
+{{!connect "screen-forms.css"}}
+<br /><br />
+
+<div class="button-">
+	<span class="button-left-">&nbsp;</span>
+	<input type="submit" value="Сохранить" name="_event" class="submit- button-text-" />
+	<span class="button-right-">&nbsp;</span>
+</div>
+-->
+    {{/?}}
+    
+    
+    <!-- INIT INPLACE -->
+    {{!!inline}}
+	<script language="javascript">
+	    $(document).ready(
+		function ()
+		{
+		    var i = new Inplace( '{{*editor}}', '{{*href}}', "#inplace_{{*module}}_{{*field}}_{{*id}}", "{{*field}}" );
+		    i.init();
+		}
+	    );
+	</script>
+    {{/!!}}
