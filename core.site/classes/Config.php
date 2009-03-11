@@ -37,6 +37,17 @@ final class Config
 	}
 	
 	/**
+	 * Get all add from store
+	 * 
+	 * @static
+	 * @return array
+	 */
+	public static function getAll()
+	{
+		return self::$data;
+	}
+	
+	/**
 	 * Set data to store
 	 * 
 	 * @static

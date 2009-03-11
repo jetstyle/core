@@ -301,7 +301,17 @@ abstract class Controller implements ArrayAccess
 
 	protected function postHandle()
 	{
-		
+		//set colors
+		$config = Config::getAll();
+		$colors = array();
+		foreach ($config as $name => $value)
+		{
+			if (strpos($name, 'colors_') === 0)
+			{
+				$colors[str_replace('colors_', '', $name)] = $value;	
+			}
+		}
+		Locator::get('tpl')->set('colors', $colors);
 	}
 
 	private function loadPlugins()

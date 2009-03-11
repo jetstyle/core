@@ -203,7 +203,7 @@ class FormSimple
 		$this->model->setFields($this->config->SELECT_FIELDS);
 	}
 
-	protected function getTableName()
+	public function getTableName()
 	{
 		if (!$this->config->table_name)
 		{

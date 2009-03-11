@@ -115,7 +115,7 @@ TreeControl.prototype = {
 	},
 
 	onrenameCallback : function(NODE) {
-		var id = NODE.getAttribute('id').split('-')[1];
+		var id = NODE.id.replace('node-', '');
 		$.post(this.params.update_url, {'rename' : 1, 'id' : id, 'title' : NODE.childNodes[0].innerHTML});
 	},
 

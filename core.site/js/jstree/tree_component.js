@@ -274,31 +274,40 @@ function tree_component () {
 				str += ">" + data.data + "</a>";
 
 				str += '<img title="Ğåäàêòèğîâàòü" class="tree-edit" src="'+ this.images_path +'edit.png" ';
-				if (this.settings['hide_buttons']['edit'] === true || ( this.settings['hide_buttons']['edit'] && this.settings['hide_buttons']['edit'][data.level] === true))
+				if (!data.custom_buttons)
 				{
-					str += 'hidden="hidden"';
+					if (this.settings['hide_buttons']['edit'] === true || ( this.settings['hide_buttons']['edit'] && this.settings['hide_buttons']['edit'][data.level] === true))
+						str += 'hidden="hidden"';
 				}
+				else if (data.hide_buttons && data.hide_buttons.edit) str += 'hidden="hidden"';
 				str += '/>';
 
 				str += '<img title="Äîáàâèòü âíóòğü" class="tree-child-add" src="'+ this.images_path +'addChild.png" width="15" height="13" ';
-				if (this.settings['hide_buttons']['addChild'] === true || ( this.settings['hide_buttons']['addChild'] && this.settings['hide_buttons']['addChild'][data.level] === true))
+				if (!data.custom_buttons)
 				{
-					str += 'hidden="hidden"';
+					if (this.settings['hide_buttons']['addChild'] === true || ( this.settings['hide_buttons']['addChild'] && this.settings['hide_buttons']['addChild'][data.level] === true))
+						str += 'hidden="hidden"';
 				}
+				else if (data.hide_buttons && data.hide_buttons.addChild) str += 'hidden="hidden"';
+					
 				str += '/>';
 
 				str += '<img title="Äîáàâèòü ğÿäîì" class="tree-brother-add" src="'+ this.images_path +'add.png" width="15" height="13" ';
-				if (this.settings['hide_buttons']['addBrother'] === true || (this.settings['hide_buttons']['addBrother'] && this.settings['hide_buttons']['addBrother'][data.level] === true))
+				if (!data.custom_buttons)
 				{
-					str += 'hidden="hidden"';
+					if (this.settings['hide_buttons']['addBrother'] === true || (this.settings['hide_buttons']['addBrother'] && this.settings['hide_buttons']['addBrother'][data.level] === true))
+						str += 'hidden="hidden"';
 				}
+				else if (data.hide_buttons && data.hide_buttons.addBrother) str += 'hidden="hidden"';
 				str += '/>';
 
 				str += '<img title="Óäàëèòü" class="tree-delete" src="'+ this.images_path +'del.png" ';
-				if (this.settings['hide_buttons']['del'] === true || (this.settings['hide_buttons']['del'] && this.settings['hide_buttons']['del'][data.level] === true))
+				if (!data.custom_buttons)
 				{
-					str += 'hidden="hidden"';
+					if (this.settings['hide_buttons']['del'] === true || (this.settings['hide_buttons']['del'] && this.settings['hide_buttons']['del'][data.level] === true))
+						str += 'hidden="hidden"';
 				}
+				else if (data.hide_buttons && data.hide_buttons.del) str += 'hidden="hidden"';
 				str += '/>';
 
 			}

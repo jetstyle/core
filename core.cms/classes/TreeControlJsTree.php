@@ -270,6 +270,8 @@ class TreeControlJsTree extends TreeControl
 					'level' => $this->items[$id]['_level'],
 					'state' => $state,
 					'children' => $this->treeParse($this->children[$id]),
+					'custom_buttons' => $this->items[$id]['custom_buttons'],
+					'hide_buttons' => $this->items[$id]['hide_buttons'],
 				);
 				if (
 					$this->config->customIconsField &&

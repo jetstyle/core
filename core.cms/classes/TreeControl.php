@@ -385,7 +385,7 @@ class TreeControl
 	{
 		if ($_REQUEST['rename'])
 		{
-			$id = intval($_REQUEST['id']);
+			$id = $_REQUEST['id'];
 			$title = trim($_REQUEST['title']);
 
 			if ($id && strlen($title) > 0)
