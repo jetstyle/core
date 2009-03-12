@@ -52,7 +52,7 @@ class MenuBlock extends Block
 				WHERE
 					_level = ' . $level . '
 						AND
-					(_left <= ' . $data['_left'] . ' AND _right >= ' . $data['_right'] . ')
+					(_left <= ' . intval($data['_left']) . ' AND _right >= ' . intval($data['_right']) . ')
 						AND
 					_state = 0
 			';
