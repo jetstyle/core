@@ -578,7 +578,6 @@ class Form
             else
                 $model = $this->config["db_model"];
             $data = array_combine($fields, $values);
-            var_dump($data);
             $model->update($data, '{'.$this->config["id_field"].'} = '.Locator::get('db')->quote($dataId));
         }
         
@@ -688,6 +687,14 @@ class Form
    {
      $this->data_id = $data_id;
    }
+   
+    public function &getFieldByName($name)
+    {
+        foreach ($this->fields as $k => $field)
+        {
+            if ($field->name == $name) return $this->fields[$k];
+        }
+    }
 
 
    var $_inner_name_counter = 0;
