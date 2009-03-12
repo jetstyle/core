@@ -51,18 +51,25 @@ class FormComponent_model_filters extends FormComponent_model_plain
      $data = $this->model_data;
      $filtered = array();
      $params = array();
-     foreach( $this->field->config["model_filters"] as $k=>$v )
+     if (!empty($this->field->config["model_filters"]) )
      {
-       // разветвление. Можно брать не из предыдущего, а из любого фильтра
-       if (isset($this->field->config["model_filters_from"]) &&
-           isset($this->field->config["model_filters_from"][$k]))
-         $params["_"] = $filtered[ $this->field->config["model_filters_from"][$k] ];
-       else
-       $params["_"] = $data;
+	 foreach( $this->field->config["model_filters"] as $k=>$v )
+	 {
+	   // разветвление. Можно брать не из предыдущего, а из любого фильтра
+	   if (isset($this->field->config["model_filters_from"]) &&
+	       isset($this->field->config["model_filters_from"][$k]))
+	     $params["_"] = $filtered[ $this->field->config["model_filters_from"][$k] ];
+	   else
+	     $params["_"] = $data;
 
-       $filtered[$k] = $data = $this->field->tpl->Action( $v, $params );
+	   $filtered[$k] = $data = $this->field->tpl->Action( $v, $params );
+	 }
      }
-
+     else
+     {
+	 $filtered = array( $data );
+     }
+     
      $result = array();
      FormComponent_model_plain::Model_ToArray( &$result );
      foreach( $this->field->config["model_filtered"] as $k=>$v )

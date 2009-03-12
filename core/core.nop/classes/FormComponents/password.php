@@ -34,8 +34,8 @@ class FormComponent_password extends FormComponent_model_plain
    {
      FormComponent_abstract::Validate();
 
-     if ($this->field->config["password_optional"] &&
-         ($this->post_value1 == "") && ($this->post_value2 == ""))
+     if ( ($this->field->config["password_optional"] &&
+         ($this->post_value1 == "") && ($this->post_value2 == "")) || $this->field->config["skip_check"] )
      {
        $this->valid = true;
      }
@@ -96,6 +96,8 @@ class FormComponent_password extends FormComponent_model_plain
       $this->post_value1 = rtrim($post_data["_".$this->field->name."_1"]);
       $this->post_value2 = rtrim($post_data["_".$this->field->name."_2"]);
 
+
+
       if ($this->field->config["password_optional"] && $this->post_value1 == "")
         return array();
       else
@@ -105,6 +107,13 @@ class FormComponent_password extends FormComponent_model_plain
 
    }
 
+   function Model_DbUpdate( $data_id, &$fields, &$values )
+   {
+	if(!empty($this->post_value1))
+	{
+	    return $this->Model_DbInsert( $fields, $values );
+	}
+   }
 // EOC{ FormComponent_password }
 }  
    

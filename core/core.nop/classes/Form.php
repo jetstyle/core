@@ -338,7 +338,7 @@ class Form
      $form_name = isset($this->config["form_name"]) ? $this->config["form_name"] : 'form_'.$this->name;
      $this->tpl->Set( "form", 
       $this->rh->ri->Form( 
-        $this->action, METHOD_POST, ' id="'.$form_name.'" name="'.$form_name.'" enctype="multipart/form-data" '
+        $this->action, METHOD_POST, ' id="'.$form_name.'" name="'.$form_name.( $this->config["form_class"] ? '" class="'.$this->config["form_class"].'"' : '').( $this->config["autocomplete"] ? '" autocomplete="'.$this->config["autocomplete"].'"' : ''). ' enctype="multipart/form-data" '
       )
      );
      $this->tpl->Set( "form_name", 'form_'.$this->name );
