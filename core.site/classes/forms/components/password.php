@@ -37,6 +37,7 @@ class FormComponent_password extends FormComponent_model_plain
 		if ($this->field->config["password_optional"] &&
 		($this->post_value1 == "") && ($this->post_value2 == ""))
 		{
+			unset($this->model_data);
 			$this->valid = true;
 		}
 		else
@@ -87,6 +88,11 @@ class FormComponent_password extends FormComponent_model_plain
 		// если в массиве нет этого поля, значит и забирать его из массива не надо!
 		if (!isset($a[ $this->field->name ])) return;
 		else return parent::Model_LoadFromArray( $a );
+	}
+	
+	function Model_DbUpdate( $data_id, &$fields, &$values )
+	{
+		if ($this->post_value1) return $this->Model_DbInsert( $fields, $values );
 	}
 
 

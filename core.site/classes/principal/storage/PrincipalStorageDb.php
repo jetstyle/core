@@ -119,6 +119,8 @@ class PrincipalStorageDb extends DBModel implements PrincipalStorageInterface
 	
 	protected function onBeforeUpdate(&$row)
 	{
+		if ($row['password'] == '') unset($row['password']);
+		
 		if (array_key_exists('password', $row))
 		{
 			$salt = $this->generateSalt();

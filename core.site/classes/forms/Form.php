@@ -404,7 +404,9 @@ class Form
      $this->AssignId( @$post_data[ $this->data_id_var ] ); //IVAN
 
      foreach($this->fields as $k=>$field)
+     {
        $this->fields[$k]->LoadFromPost( $post_data );
+     }
    }
 
    // валидация всех полей формы
@@ -508,115 +510,155 @@ class Form
 		$this->ResetSession(); // если успешно обработана, то сессию выкидываем
    }
 
-   // вставка в БД
-   function DbInsert()
-   {
-      $db = DBAL::getInstance();
-
-      if (!$this->config["db_table"])
-      	if ($this->config["db_ignore"]) return;
-      	  else throw new JSException("[Form]: *db_table* form config option is not set.");
-
-      $fields = array();
-      $values = array();
-      foreach($this->fields as $k=>$v)
-        $this->fields[$k]->DbInsert( $fields, $values );
-
-      $this->_DbAuto( $fields, $values, true );
-
-      foreach($values as $k=>$v)
-        $values[$k] = $db->Quote($values[$k]);
-
-      $sql = "insert into ".Config::get('db_prefix').$this->config["db_table"];
-      if (sizeof($fields) > 0)
-        $sql.=" (".implode(",",$fields).") VALUES (".implode(",",$values).")";
-
-      $this->data_id = $db->Insert($sql);
-
-//      if (!$this->data_id)
-//        die($sql);
-
-      foreach($this->fields as $k=>$v)
-        $this->fields[$k]->DbAfterInsert( $this->data_id );
-   }
-   function DbUpdate( $data_id = NULL )
-   {
-      if (!$this->config["db_table"])
-      	if ($this->config["db_ignore"]) return;
-      	  else throw new JSException("[Form]: *db_table* form config option is not set.");
-
-      if ($data_id == NULL) $data_id = $this->data_id;
-
-      $fields = array();
-      $values = array();
-      foreach($this->fields as $k=>$v)
-        $this->fields[$k]->DbUpdate( $data_id, $fields, $values );
-
-      $this->_DbAuto( $fields, $values );
-
-      $this->_DbUpdate( $fields, $values );
-
-      foreach($this->fields as $k=>$v)
-        $this->fields[$k]->DbAfterUpdate( $data_id );
-   }
-   function _DbUpdate ( &$fields, &$values )
-   {
-      $fields_values = array();
-      foreach($fields as $k=>$v)
-        $fields_values[] = $v." = ".Locator::get('db')->quote($values[$k]);
-
-      $sql = "update ".$this->config["db_table"].
-             " set ".implode(",",$fields_values)." where ".
-             $this->config["id_field"]."=".Locator::get('db')->quote($this->data_id);
-      if (sizeof($fields) == 0) return false;
-      Locator::get('db')->execute($sql);
-
-   }
-   function _DbAuto( &$fields, &$values, $is_insert=false )
-   {
-      $user = Locator::get('principal')->getId();
-      $dt = date("Y-m-d H:i:s");
-      if ($this->config["auto_user_id"])
-      {
-        if ($is_insert)
+    // вставка в БД
+    function dbInsert()
+    {
+        if (!$this->config["db_table"] && !$this->config["db_model"])
+            if ($this->config["db_ignore"])
+                return;
+            else
+                throw new JSException("[Form]: *db_table* form config option is not set.");
+                
+        $fields = array();
+        $values = array();
+        foreach($this->fields as $k=>$v)
+            $this->fields[$k]->dbInsert( $fields, $values );
+            
+        $this->_dbAuto( $fields, $values, true );
+        
+        if ($this->config["db_table"])
         {
-          $fields[] = $this->config["fieldname_created_user_id"];//"_created_user_id";
-          $values[] = $user;
+            $db = &Locator::get('db');
+            foreach($values as $k=>$v)
+                $values[$k] = $db->quote($values[$k]);
+            $sql = "insert into ".Config::get('db_prefix').$this->config["db_table"];
+            if (sizeof($fields) > 0)
+                $sql.=" (".implode(",",$fields).") VALUES (".implode(",",$values).")";
+            $this->data_id = $db->insert($sql);
         }
-        $fields[] = $this->config["fieldname_edited_user_id"];//"_edited_user_id";
-        $values[] = $user;
-      }
-      if ($this->config["auto_datetime"])
-      {
-        if ($is_insert)
+        else
         {
-          $fields[] = $this->config["fieldname_created_datetime"];//"_created_datetime";
-          $values[] = $dt;
+            if (is_string($this->config["db_model"]))
+                $model = DBModel::factory($this->config["db_model"]);
+            else
+                $model = $this->config["db_model"];
+            $data = array_combine($fields, $values);
+            $this->data_id = $model->insert($data);
         }
-        $fields[] = $this->config["fieldname_edited_datetime"];//"_edited_datetime";
-        $values[] = $dt;
-      }
+        
+        foreach($this->fields as $k=>$v)
+            $this->fields[$k]->dbAfterInsert( $this->data_id );
+    }
+   
+    function dbUpdate( $dataId = NULL )
+    {
+        if (!$this->config["db_table"] && !$this->config["db_model"])
+            if ($this->config["db_ignore"])
+                return;
+            else
+                throw new JSException("[Form]: *db_table* form config option is not set.");
+                
+        if ($dataId == NULL) $dataId = $this->data_id;
+        
+        $fields = array();
+        $values = array();
+        foreach($this->fields as $k=>$v)
+            $this->fields[$k]->dbUpdate( $dataId, $fields, $values );
+            
+        $this->_dbAuto( $fields, $values );
+        
+        if ($this->config["db_table"])
+        {
+            $this->_DbUpdate( $fields, $values );
+        }
+        else
+        {
+            if (is_string($this->config["db_model"]))
+                $model = DBModel::factory($this->config["db_model"]);
+            else
+                $model = $this->config["db_model"];
+            $data = array_combine($fields, $values);
+            var_dump($data);
+            $model->update($data, '{'.$this->config["id_field"].'} = '.Locator::get('db')->quote($dataId));
+        }
+        
+        foreach($this->fields as $k=>$v)
+            $this->fields[$k]->DbAfterUpdate( $data_id );
+    }
+    
+    function _dbUpdate ( &$fields, &$values )
+    {
+        $fields_values = array();
+        foreach($fields as $k=>$v)
+            $fields_values[] = $v." = ".Locator::get('db')->quote($values[$k]);
+            
+        $sql = "update ".$this->config["db_table"].
+               " set ".implode(",",$fields_values)." where ".
+               $this->config["id_field"]."=".Locator::get('db')->quote($this->data_id);
+        if (sizeof($fields) == 0) return false;
+        Locator::get('db')->execute($sql);
    }
+   
+    function _dbAuto( &$fields, &$values, $is_insert=false )
+    {
+        $user = Locator::get('principal')->getId();
+        $dt = date("Y-m-d H:i:s");
+        if ($this->config["auto_user_id"])
+        {
+            if ($is_insert)
+            {
+                $fields[] = $this->config["fieldname_created_user_id"];//"_created_user_id";
+                $values[] = $user;
+            }
+            $fields[] = $this->config["fieldname_edited_user_id"];//"_edited_user_id";
+            $values[] = $user;
+        }
+        if ($this->config["auto_datetime"])
+        {
+            if ($is_insert)
+            {
+                $fields[] = $this->config["fieldname_created_datetime"];//"_created_datetime";
+                $values[] = $dt;
+            }
+            $fields[] = $this->config["fieldname_edited_datetime"];//"_edited_datetime";
+            $values[] = $dt;
+        }
+    }
 
-   // загрузка из БД
-   function Load( $data_id = NULL )
-   {
-     if (!$this->config["db_table"])
-      	if ($this->config["db_ignore"]) return;
-      	  else throw new JSException("[Form]: *db_table* form config option is not set.");
-
-     if ($data_id == NULL) $data_id = $this->data_id;
-     $sql = "select * from ".$this->config["db_table"]." where ".
-             $this->config["id_field"]."=".Locator::get('db')->quote($data_id);
-     $data = Locator::get('db')->queryOne( $sql );
-     if ($data == false)
-     {
-       $this->data_id = 0;
-       return;
-     }
-     foreach($this->fields as $k=>$v)
-       $this->fields[$k]->DbLoad( $data );
-   }
+    // загрузка из БД
+    function load( $dataId = NULL )
+    {
+        if (!$this->config["db_table"] && !$this->config["db_model"])
+            if ($this->config["db_ignore"])
+                return;
+            else
+                throw new JSException("[Form]: *db_table* form config option is not set.");
+                
+        if ($dataId == NULL) $dataId = $this->data_id;
+        
+        if ($this->config["db_table"])
+        {
+            $sql = "select * from ".$this->config["db_table"]." where ".
+                    $this->config["id_field"]."=".Locator::get('db')->quote($dataId);
+            $data = Locator::get('db')->queryOne( $sql );    
+        }
+        else
+        {
+            if (is_string($this->config["db_model"]))
+                $model = DBModel::factory($this->config["db_model"]);
+            else
+                $model = $this->config["db_model"];
+            $data = $model->loadOne('{'.$this->config["id_field"].'} = '.Locator::get('db')->quote($dataId))->getArray();
+        }
+        
+        if ($data == false)
+        {
+            $this->data_id = 0;
+            return;
+        }
+        foreach($this->fields as $k=>$v)
+            $this->fields[$k]->DbLoad( $data );
+    }
 
    // удаление из БД
    function DbDelete( $data_id = NULL )
