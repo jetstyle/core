@@ -173,74 +173,98 @@ class ExceptionHandler
 
 	private function getHtml($exceptionObj, $extended = false)
 	{
-		$result = '<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
-				<?xml version="1" encoding="windows-1251"?>
-				<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="ru" lang="ru">
-				<head>
-					<style type="text/css">
-						* {
-							margin: 0; padding: 0;
-							font-size: 100.01%; }
-						html { }
-						body {
-							padding: 20px; 
-							font-family: Arial, sans-serif; }
-						
-						ol {padding-top: 20px;}
-						ol li {margin-bottom: 15px;}
-						
-						.info td {vertical-align: top;}
-						
-						.backtrace {padding-top: 30px; padding-left: 20px; min-width: 500px;}
-						.backtrace .backtrace-file {font-size: 80%; margin-top: 5px;}
-						
-						.detailed-info {padding-top: 30px; padding-left: 30px;}
-						
-						.clearer {clear: both;}
-						tt { color:#666600; background:#ffffcc; padding: 5px; font-family: Arial, sans-serif;}
-						.warning {color: red; font-weight: bold;}
-						.source {margin-top: 5px; background-color: #EAEAEA; padding: 10px; font-family: Arial, sans-serif;}
-					</style>
-				</head>
-				<body>';
-		
-		$result .= '<div class="message">';
-		
-		if ($extended)
+		if (!$extended && defined('COMMAND_LINE') && COMMAND_LINE)
 		{
-			$result .= '<div class="date">' . date("d.m.Y H:i:s") . '</div>';
-			$result .= '<div class="url">http://'.$_SERVER["HTTP_HOST"] . $_SERVER["REQUEST_URI"].'</div>';
-			$result .= '<br />';
-		}
-		
-		if ("Exception" == get_class($exceptionObj))
-		{
-			$result .= $exceptionObj->getMessage();
+			$result = '';
+			if ("Exception" == get_class($exceptionObj))
+			{
+				$result .= $exceptionObj->getMessage();
+			}
+			else
+			{
+				$result .= $exceptionObj;
+			}
+			$result .= "\n\n";
+			
+			if ("Exception" != get_class($exceptionObj))
+			{
+				$result .= $exceptionObj->getText();
+				$result .= "\n\n";
+			}
+			
+			$result .= $this->getTrace($exceptionObj->getTrace(), true);
 		}
 		else
 		{
-			$result .= $exceptionObj;
-		}
+			$result = '<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+					<?xml version="1" encoding="windows-1251"?>
+					<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="ru" lang="ru">
+					<head>
+						<style type="text/css">
+							* {
+								margin: 0; padding: 0;
+								font-size: 100.01%; }
+							html { }
+							body {
+								padding: 20px; 
+								font-family: Arial, sans-serif; }
 
-		$result .= "</div>";
-				
-		$result .= "<table class=\"info\"><tr><td class=\"backtrace\">";
-		$result .= "<b>Backtrace</b>:<br />";
-		$result .= $this->getTrace($exceptionObj->getTrace());
-		$result .= "</td><td class=\"detailed-info\">";
-		
-		if ("Exception" != get_class($exceptionObj))
-		{
-			$result .= $exceptionObj->getText();
+							ol {padding-top: 20px;}
+							ol li {margin-bottom: 15px;}
+
+							.info td {vertical-align: top;}
+
+							.backtrace {padding-top: 30px; padding-left: 20px; min-width: 500px;}
+							.backtrace .backtrace-file {font-size: 80%; margin-top: 5px;}
+
+							.detailed-info {padding-top: 30px; padding-left: 30px;}
+
+							.clearer {clear: both;}
+							tt { color:#666600; background:#ffffcc; padding: 5px; font-family: Arial, sans-serif;}
+							.warning {color: red; font-weight: bold;}
+							.source {margin-top: 5px; background-color: #EAEAEA; padding: 10px; font-family: Arial, sans-serif;}
+						</style>
+					</head>
+					<body>';
+
+			$result .= '<div class="message">';
+
+			if ($extended)
+			{
+				$result .= '<div class="date">' . date("d.m.Y H:i:s") . '</div>';
+				$result .= '<div class="url">http://'.$_SERVER["HTTP_HOST"] . $_SERVER["REQUEST_URI"].'</div>';
+				$result .= '<br />';
+			}
+
+			if ("Exception" == get_class($exceptionObj))
+			{
+				$result .= $exceptionObj->getMessage();
+			}
+			else
+			{
+				$result .= $exceptionObj;
+			}
+
+			$result .= "</div>";
+
+			$result .= "<table class=\"info\"><tr><td class=\"backtrace\">";
+			$result .= "<b>Backtrace</b>:<br />";
+			$result .= $this->getTrace($exceptionObj->getTrace());
+			$result .= "</td><td class=\"detailed-info\">";
+
+			if ("Exception" != get_class($exceptionObj))
+			{
+				$result .= $exceptionObj->getText();
+			}
+			$result .= "</td></tr></table>";
+
+			$result .= '</body></html>';
 		}
-		$result .= "</td></tr></table>";
-		
-		$result .= '</body></html>';
 		
 		return $result;
 	}
 	
-	private function getTrace($data)
+	private function getTrace($data, $plain = false)
 	{
 		$projectDir = '';
 		if (class_exists('Config'))
@@ -248,17 +272,36 @@ class ExceptionHandler
 			$projectDir = Config::get('project_dir');
 		}
 		
-		$res = '<ol>';
-		foreach ($data as $key => $value)
+		if ($plain)
 		{
-			$res .= '<li>'.$value['class'].$value['type'].$value['function'];
-			if ($value['file'])
+			$i = count($data);
+			foreach ($data as $key => $value)
 			{
-				$value['file'] = str_replace($projectDir, '', $value['file']);
-				$res .= '<div class="backtrace-file">file: '.$value['file'].' (line: '.$value['line'].')</div></li>';
+				$res .= $i--.'. '.$value['class'].$value['type'].$value['function'];
+				if ($value['file'])
+				{
+					$value['file'] = str_replace($projectDir, '', $value['file']);
+					$res .= "\n";
+					$res .= 'file: '.$value['file'].' (line: '.$value['line'].')';
+				}
+				$res .= "\n\n";
 			}
 		}
-		$res .= '</ol>';
+		else
+		{
+			$res = '<ol>';
+			foreach ($data as $key => $value)
+			{
+				$res .= '<li>'.$value['class'].$value['type'].$value['function'];
+				if ($value['file'])
+				{
+					$value['file'] = str_replace($projectDir, '', $value['file']);
+					$res .= '<div class="backtrace-file">file: '.$value['file'].' (line: '.$value['line'].')</div></li>';
+				}
+			}
+			$res .= '</ol>';
+		}
+		
 		return $res;
 	}
 }

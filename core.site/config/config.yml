@@ -1,5 +1,1 @@
-principal_storage_model: db
-principal_security_models: 
-        - tree
-        - role
-        - noguests
+tpl_compile:     1
