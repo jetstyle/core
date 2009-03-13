@@ -300,6 +300,7 @@ abstract class Controller implements ArrayAccess
 	}
 
 	//TODO: save to cache
+	//extract it
 	protected function postHandle()
 	{
 		//set colors
@@ -318,9 +319,17 @@ abstract class Controller implements ArrayAccess
 		}
 		
 		//var_dump($grid);
+
+
 		$view = array("colors"=> $colors,
 		              "grid"  => $grid);
 
+		if ($logo = Locator::get('upload')->getFile("logo"))
+		{
+		    $view['logo'] = $logo;   
+		}
+		
+		//var_dump($view);
 		Locator::get('tpl')->set('View', $view);
 	}
 
