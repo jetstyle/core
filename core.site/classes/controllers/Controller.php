@@ -299,6 +299,7 @@ abstract class Controller implements ArrayAccess
 
 	}
 
+	//TODO: save to cache
 	protected function postHandle()
 	{
 		//set colors
@@ -310,8 +311,17 @@ abstract class Controller implements ArrayAccess
 			{
 				$colors[str_replace('colors_', '', $name)] = $value;	
 			}
+			else if (strpos($name, 'grid_') === 0)
+			{
+				$grid[str_replace('grid_', '', $name)] = $value;	
+			}
 		}
-		Locator::get('tpl')->set('colors', $colors);
+		
+		//var_dump($grid);
+		$view = array("colors"=> $colors,
+		              "grid"  => $grid);
+
+		Locator::get('tpl')->set('View', $view);
 	}
 
 	private function loadPlugins()
