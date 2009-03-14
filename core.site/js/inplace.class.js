@@ -5,6 +5,7 @@ Inplace = function( editorType, cmsUrl, inplaceObject, field )
     
     //инплейсный объект - редактор+кнопки
     this.inplaceObject = $(inplaceObject); 
+    this.inplaceObjectID = inplaceObject;
     this.field  = field ? field : 'text';
 }
 
@@ -29,6 +30,7 @@ Inplace.prototype =
 
     edit: function()
     {
+	
     	//загрузим в редактор содержимое редактируемого контейнера 
 	this.loadDataToInplaceEditor();
 
@@ -55,8 +57,6 @@ Inplace.prototype =
 
     onLoad: function (data)
     {
-        this.setEditorData(data);
-                
         if ( ! this.inplaceContainer )
         {
             this.inplaceContainer = this.container.clone().empty().append( $( this.inplaceObject ) ).css("padding", "0").removeClass("inplace-over");
@@ -70,11 +70,16 @@ Inplace.prototype =
         $( this.inplaceObject ).add( this.inplaceContainer ).removeClass("invisible");
 	
 	//width fix
-	$( this.inplaceObject ).css("width", $( this.inplaceObject ).children(":first").children(":first").width()+16 );
+	if (this.editorType!='wysiwyg')
+	    $( this.inplaceObject ).css("width", $( this.inplaceObject ).children(":first").children(":first").width()+16 ).css("z-index", 1000);
+	
         //контейнер спр€чем
         this.container.addClass("invisible");
-        this.hideIndicator();
 
+	// важно, что после манипул€ций с домом
+        this.setEditorData(data);
+	
+        this.hideIndicator();
     },
 
     setEditorData: function( data )
@@ -86,14 +91,25 @@ Inplace.prototype =
 	    else
 	    {
 	        $( this.inplaceObject ).children(":first").attr("value", data); 
-	        
+
 	        if (!this.inited)
-	        {
-		        tinyMCE.execCommand("mceAddControl", true, $( this.inplaceObject ).children(":first").attr("id") );
+	        {	/*
+			for(id in tinyMCE.editors)
+			{
+			    console.log('Remove: ' + id );
+			    tinyMCE.execCommand('mceFocus', false, id );     
+			    tinyMCE.execCommand('mceRemoveControl', false, id);
+			}			
+			console.log(tinyMCE.editors);
+			*/
+			var textarea_id = $( this.inplaceObject ).children(":first").attr("id");
+//			console.log('mceAddControl '+ textarea_id );
+			
+		        tinyMCE.execCommand("mceAddControl", true, textarea_id );
 		        this.inited = true;
 	        }
 	        else
-		        this.mceInstance.activeEditor.setContent( data );
+		        tinyMCE.activeEditor.setContent( data );
 	    }
     },
     
@@ -105,7 +121,7 @@ Inplace.prototype =
 	    }
 	    else
 	    {
-	        return  this.mceInstance.activeEditor.getContent();
+	        return tinyMCE.activeEditor.getContent();
 	    }
     },
 
@@ -152,15 +168,24 @@ Inplace.prototype =
     
     cancel: function()
     {
-	    this.hideIndicator(); 
 	    this.cacheData = this.getEditorData();
 
+/*
+	    if (this.editorType=='wysiwyg')
+	    {
+		tinyMCE.activeEditor.remove();
+		this.inited = false;
+    	    }
+*/
 	    //спр€чем inplaceObject и его клонированный контйентер
 	    $( this.inplaceObject ).add( this.inplaceContainer ).addClass("invisible");
 
 	    //оригинальный контейнер покажем
 	    this.container.removeClass("invisible inplace-over");
+	    
 	    this.bindAll();
+	    
+	    this.hideIndicator(); 
     },
 
     bindAll: function()
@@ -190,7 +215,8 @@ Inplace.prototype =
 	{
 	    textarea_id = this.inplaceObject.children(":first").attr("id");
 
-	    setTimeout( this.initMCE.prototypeBind(this, textarea_id),  100 );
+	    //setTimeout( this.initMCE.prototypeBind(this, textarea_id),  100 );
+	    preInitMce(textarea_id);
 	}
     },
     
@@ -200,9 +226,12 @@ Inplace.prototype =
 	this.saveButton = $(document.createElement("input")).val("—охранить").attr("type", "button").addClass("cms-save-but hand");
 	this.cancelButton = $(document.createElement("input")).val("ќтменить").attr("type", "button").addClass("cms-delete-but hand");
 
-        this.buttons = $(document.createElement("div")).append( this.saveButton, this.cancelButton ).css("padding-top", "8px").css("float", "right");//.css("padding-left", "10px");
-        //.css("padding-right", "5px").css("width", "300px");
+        this.buttons = $(document.createElement("div")).append( this.saveButton, this.cancelButton ).css("padding-top", "8px");//;
 
+	if (this.editorType=="wysiwyg")
+	    $(this.buttons).css("padding-left", "8px");
+	else
+	    $(this.buttons).css("float", "right");
 	    
         this.saveButton.click(   this.save.prototypeBind(this)   );
         this.cancelButton.click( this.cancel.prototypeBind(this) );
@@ -210,11 +239,28 @@ Inplace.prototype =
 	//append buttons
 	this.inplaceObject.append( this.buttons );
     },
-    
-    
-    initMCE: function(textarea_id)
+
+}
+
+var mce_ids = [];
+var mce_timer = false
+    function preInitMce(textarea_id)
     {
+	mce_ids.push(textarea_id);
+	
+	if (!mce_timer)
+	{
+	    setTimeout( initMCE, 1000 );
+	    mce_timer = true;
+	}
+    }
+
+    function initMCE()
+    {
+	var textarea_id = mce_ids;
+//	console.log('init please '+textarea_id);
 	var base_url = '/';
+//	var self = this;
 	tinyMCE.init({
 		mode : "none",
 		theme : "advanced",
@@ -239,28 +285,36 @@ Inplace.prototype =
     		theme_advanced_buttons3 : "",
 		theme_advanced_blockformats : "p,h3,address",
     		width: "100%",
-    		height: "600px",
+    		///height: "600px",
 		
-		/*
-		init_instance_callback: function(inst) 
-    		{ 
-		    console.log('mce inited!');
-
-    		}.prototypeBind(this)
-		*/
-	});
+		
+		init_instance_callback: this.onMCEInit.prototypeBind(self)
+		});
 	
 	tinyMCE.jetimages= "{{/}}cms/do/Pictures/jetimages";
 	tinyMCE.jetfiles = "{{/}}cms/do/PicFiles/jetfiles";
 	tinyMCE.jetcontent = base_url + "cms/jetcontent";
 	
     	tinyMCE.base_url = base_url + "cms/";
-	this.mceInstance = tinyMCE;
+//	this.mceInstance = tinyMCE;
     	/*
 	$("div.col-2").ajaxError(function(event, request, settings)
     	{
     	   $(this).append("<span class='error'>Error requesting CMS. Please <a href='{{/}}cms/login'>login</a>.</span>");
     	});
 	*/
+    };
+    
+    function onMCEInit(inst)  
+    {
+	    inst.resizeToContent(); 
+//    	    console.log('mce inited!!! '+inst.id);
+    	    //append buttons
+    	    //console.log( $(inst.getContainer()).width() );
+    	    //console.log( this );
+	    //<tr class="mceFirst"><td class="mceToolbar mceLeft mceFirst mceLast"></td></tr>
+	    //console.log( $(".mceLast") );
+    	    //$(inst.getContainer()).append( this.buttons );
+	    //$( this.buttons ).css("padding-left", "8px").css("float", "");
+	    //$( this.buttons ).css("width", $(inst.getContainer()).width() );
     }
-}
