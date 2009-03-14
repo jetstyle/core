@@ -82,6 +82,10 @@ class RegisterController extends Controller
 		$data['key'] = $key;
 		$form->config['db_model']->update($data, '{id} = '.DBModel::quote($form->data_id));
 		$this->sendActivationMail($form->data_id, $form->getFieldByName('email')->model->model_data, $key);
+		
+		$login = $form->getFieldByName('login')->model->model_data;
+		$password = $form->getFieldByName('password')->model->model_data;
+		Locator::get('principal')->login($login, $password);
 	}
 	
 	public function profileBeforeEvent($event, $form)

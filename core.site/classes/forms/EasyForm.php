@@ -72,8 +72,12 @@ class EasyForm {
 					{
 						$arg = YamlWrapper::load($ymlFile);
 					}
+					else
+					{
+						throw new FileNotFoundException('classes/forms/'.$arg.'.yml');
+					}
 	   			}
-	   			$this->config = $this->_mergeConfig($this->config,$arg);
+	   			$this->config = $this->_mergeConfig($this->config, $arg);
 			}
 		}
 
