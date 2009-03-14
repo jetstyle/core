@@ -236,6 +236,7 @@ Inplace.prototype =
         this.saveButton.click(   this.save.prototypeBind(this)   );
         this.cancelButton.click( this.cancel.prototypeBind(this) );
 	
+	console.log('initButtons '+this.buttons);
 	//append buttons
 	this.inplaceObject.append( this.buttons );
     },
