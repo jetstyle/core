@@ -41,7 +41,7 @@
 
 */
 
-class EasyForm{
+class EasyForm {
 
 	var $form; //объект класса Form
 	var $id_var_name = "_id"; //из какой переменной запроса брать ID  к записи в БД
@@ -72,8 +72,12 @@ class EasyForm{
 					{
 						$arg = YamlWrapper::load($ymlFile);
 					}
+					else
+					{
+						throw new FileNotFoundException('classes/forms/'.$arg.'.yml');
+					}
 	   			}
-	   			$this->config = $this->_mergeConfig($this->config,$arg);
+	   			$this->config = $this->_mergeConfig($this->config, $arg);
 			}
 		}
 

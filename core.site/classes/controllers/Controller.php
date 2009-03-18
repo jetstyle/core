@@ -299,9 +299,38 @@ abstract class Controller implements ArrayAccess
 
 	}
 
+	//TODO: save to cache
+	//extract it
 	protected function postHandle()
 	{
+		//set colors
+		$config = Config::getAll();
+		$colors = array();
+		foreach ($config as $name => $value)
+		{
+			if (strpos($name, 'colors_') === 0)
+			{
+				$colors[str_replace('colors_', '', $name)] = $value;	
+			}
+			else if (strpos($name, 'grid_') === 0)
+			{
+				$grid[str_replace('grid_', '', $name)] = $value;	
+			}
+		}
 		
+		//var_dump($grid);
+
+
+		$view = array("colors"=> $colors,
+		              "grid"  => $grid);
+
+		if ($logo = Locator::get('upload')->getFile("logo"))
+		{
+		    $view['logo'] = $logo;   
+		}
+		
+		//var_dump($view);
+		Locator::get('tpl')->set('View', $view);
 	}
 
 	private function loadPlugins()

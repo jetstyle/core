@@ -5,6 +5,9 @@
 // underscored to camel case
 $blockName = str_replace(" ","",ucwords(str_replace("_"," ",$params[0])));;
 $tplName = 'blocks/'.$params[0].'.html';
+
+Debug::trace('Blocks: parse block '.$params[0], 'blocks');
+
 unset($params[0]);
 
 try

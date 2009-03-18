@@ -19,7 +19,7 @@ function tree_component () {
 				url		: false,		// FALSE or STRING - url to document to be used (async or not)
 				json	: false			// FALSE or OBJECT if type is JSON and async is false - the tree dump as json
 			},
-			dflt		: false,		// FALSE or STRING 
+			dflt		: false,		// FALSE or STRING
 			languages	: [],			// ARRAY of string values (which will be used as CSS classes - si they must be valid)
 			path		: false,		// FALSE or STRING (if false - will be autodetected)
 			images_path : false,
@@ -53,13 +53,13 @@ function tree_component () {
 				// before focus  - should return true | false
 				beforechange: function(NODE,TREE_OBJ) { return true },
 				// before move   - should return true | false
-				beforemove  : function(NODE,REF_NODE,TYPE,TREE_OBJ) { return true }, 
+				beforemove  : function(NODE,REF_NODE,TYPE,TREE_OBJ) { return true },
 				// before create - should return true | false
-				beforecreate: function(NODE,REF_NODE,TYPE,TREE_OBJ) { return true }, 
+				beforecreate: function(NODE,REF_NODE,TYPE,TREE_OBJ) { return true },
 				// before rename - should return true | false
-				beforerename: function(NODE,LANG,TREE_OBJ) { return true }, 
+				beforerename: function(NODE,LANG,TREE_OBJ) { return true },
 				// before delete - should return true | false
-				beforedelete: function(NODE,TREE_OBJ) { return true }, 
+				beforedelete: function(NODE,TREE_OBJ) { return true },
 
 				onchange	: function(NODE,TREE_OBJ) { },					// focus changed
 				onrename	: function(NODE,LANG,TREE_OBJ) { },				// node renamed ISNEW - TRUE|FALSE, current language
@@ -110,20 +110,20 @@ function tree_component () {
 				delete opts.lang;
 			}
 			this.settings		= $.extend({},this.settings,opts);
-						
+
 			// PATH TO IMAGES AND XSL
 			if(this.settings.path == false) {
 				this.path = "";
-				$("script").each( function () { 
+				$("script").each( function () {
 					if(this.src.toString().match(/tree_component.js$/)) {
 						_this.path = this.src.toString().replace("tree_component.js", "");
 					}
 				});
 			}
 			else this.path = this.settings.path;
-			
+
 			this.images_path = this.settings.images_path;
-			
+
 			// DEAL WITH LANGUAGE VERSIONS
 			this.current_lang	= this.settings.languages && this.settings.languages.length ? this.settings.languages[0] : false;
 			if(this.settings.languages && this.settings.languages.length) {
@@ -148,15 +148,15 @@ function tree_component () {
 
 			this.hovered = false;
 			this.locked = false;
-			
-			
+
+
 			// CREATE DUMMY FOR MOVING
 			if(this.settings.rules.draggable != "none" && this.settings.rules.dragrules != "none") {
 				var _this = this;
 				$("<img>")
 					.attr({
-						id		: "marker", 
-						src	: _this.images_path + "marker.gif" 
+						id		: "marker",
+						src	: _this.images_path + "marker.gif"
 					})
 					.css({
 						height		: "5px",
@@ -261,43 +261,55 @@ function tree_component () {
 			if(this.settings.languages.length) {
 				for(var i = 0; i < this.settings.languages.length; i++) {
 					str += "<a href='#' class='" + this.settings.languages[i] + "' ";
-					if(data.icons && data.icons[this.settings.languages[i]]) 
+					if(data.icons && data.icons[this.settings.languages[i]])
 						str += " style='background-image:url(\"" + data.icons[this.settings.languages[i]] + "\");' ";
 					str += ">" + data.data[this.settings.languages[i]] + "</a>";
 				}
-			}
-			else {
+			} else {
 				str += "<a href='#' ";
+				if (data.icon)
+				{
+					str += 'style="background-image:url('+this.images_path+data.icon+')"'
+				}
 				str += ">" + data.data + "</a>";
-			
-				str += '<img class="tree-edit" src="'+ this.images_path +'edit.png" ';
-				if (this.settings['hide_buttons']['edit'] === true || ( this.settings['hide_buttons']['edit'] && this.settings['hide_buttons']['edit'][data.level] === true))
+
+				str += '<img title="Редактировать" class="tree-edit" src="'+ this.images_path +'edit.png" ';
+				if (!data.custom_buttons)
 				{
-					str += 'style="display: none;"';
+					if (this.settings['hide_buttons']['edit'] === true || ( this.settings['hide_buttons']['edit'] && this.settings['hide_buttons']['edit'][data.level] === true))
+						str += 'hidden="hidden"';
 				}
+				else if (data.hide_buttons && data.hide_buttons.edit) str += 'hidden="hidden"';
 				str += '/>';
-				
-				str += '<img class="tree-child-add" src="'+ this.images_path +'addChild.png" width="15" height="13" ';
-				if (this.settings['hide_buttons']['addChild'] === true || ( this.settings['hide_buttons']['addChild'] && this.settings['hide_buttons']['addChild'][data.level] === true))
+
+				str += '<img title="Добавить внутрь" class="tree-child-add" src="'+ this.images_path +'addChild.png" width="15" height="13" ';
+				if (!data.custom_buttons)
 				{
-					str += 'style="display: none;"';
+					if (this.settings['hide_buttons']['addChild'] === true || ( this.settings['hide_buttons']['addChild'] && this.settings['hide_buttons']['addChild'][data.level] === true))
+						str += 'hidden="hidden"';
 				}
+				else if (data.hide_buttons && data.hide_buttons.addChild) str += 'hidden="hidden"';
+					
 				str += '/>';
-				
-				str += '<img class="tree-brother-add" src="'+ this.images_path +'add.png" width="15" height="13" ';
-				if (this.settings['hide_buttons']['addBrother'] === true || (this.settings['hide_buttons']['addBrother'] && this.settings['hide_buttons']['addBrother'][data.level] === true))
+
+				str += '<img title="Добавить рядом" class="tree-brother-add" src="'+ this.images_path +'add.png" width="15" height="13" ';
+				if (!data.custom_buttons)
 				{
-					str += 'style="display: none;"';
+					if (this.settings['hide_buttons']['addBrother'] === true || (this.settings['hide_buttons']['addBrother'] && this.settings['hide_buttons']['addBrother'][data.level] === true))
+						str += 'hidden="hidden"';
 				}
+				else if (data.hide_buttons && data.hide_buttons.addBrother) str += 'hidden="hidden"';
 				str += '/>';
-				
-				str += '<img class="tree-delete" src="'+ this.images_path +'del.png" ';
-				if (this.settings['hide_buttons']['del'] === true || (this.settings['hide_buttons']['del'] && this.settings['hide_buttons']['del'][data.level] === true))
+
+				str += '<img title="Удалить" class="tree-delete" src="'+ this.images_path +'del.png" ';
+				if (!data.custom_buttons)
 				{
-					str += 'style="display: none;"';
+					if (this.settings['hide_buttons']['del'] === true || (this.settings['hide_buttons']['del'] && this.settings['hide_buttons']['del'][data.level] === true))
+						str += 'hidden="hidden"';
 				}
+				else if (data.hide_buttons && data.hide_buttons.del) str += 'hidden="hidden"';
 				str += '/>';
-				
+
 			}
 			if(data.children && data.children.length) {
 				str += '<ul>';
@@ -351,8 +363,8 @@ function tree_component () {
 			if(!this.li_height) this.li_height = 18;
 
 			this.container
-				.bind("click", function (event) { 
-					event.stopPropagation(); 
+				.bind("click", function (event) {
+					event.stopPropagation();
 					return true;
 				})
 				.listen("click", "li", function(event) { // WHEN CLICK IS ON THE ARROW
@@ -361,60 +373,60 @@ function tree_component () {
 				})
 				.listen("click", "a", function (event) { // WHEN CLICK IS ON THE TEXT OR ICON
 					if(_this.locked) {
-						event.preventDefault(); 
+						event.preventDefault();
 						event.target.blur();
 						return _this.error("LOCKED");
 					}
 					_this.select_branch.apply(_this, [event.target, event.ctrlKey || _this.settings.rules.multiple == "on"]);
-					
+
 					_this.settings.callback.onclk.call(null, _this.get_node(event.target).get(0), _this);
-					
+
 					if(_this.inp) { _this.inp.blur(); }
-					event.preventDefault(); 
+					event.preventDefault();
 					event.target.blur();
 					return false;
 				})
-				.listen("click", "img.tree-edit", function (event) { 
+				.listen("click", "img.tree-edit", function (event) {
 					if(_this.locked) {
-						event.preventDefault(); 
+						event.preventDefault();
 						return _this.error("LOCKED");
 					}
 					_this.selected = _this.get_node(event.target);
 					_this.rename();
-					
-					event.preventDefault(); 
+
+					event.preventDefault();
 					return false;
 				})
-				.listen("click", "img.tree-child-add", function (event) { 
+				.listen("click", "img.tree-child-add", function (event) {
 					if(_this.locked) {
-						event.preventDefault(); 
+						event.preventDefault();
 						//event.target.blur();
 						return _this.error("LOCKED");
 					}
 					_this.selected = _this.get_node(event.target);
 					_this.create();
-					
-					event.preventDefault(); 
+
+					event.preventDefault();
 					return false;
 				})
-				.listen("click", "img.tree-brother-add", function (event) { 
+				.listen("click", "img.tree-brother-add", function (event) {
 					if(_this.locked) {
-						event.preventDefault(); 
+						event.preventDefault();
 						return _this.error("LOCKED");
 					}
 					_this.selected = _this.get_node(event.target);
 					_this.create(null, true);
 
-					event.preventDefault(); 
+					event.preventDefault();
 					return false;
 				})
-				.listen("click", "img.tree-delete", function (event) { 
+				.listen("click", "img.tree-delete", function (event) {
 					if(_this.locked) {
-						event.preventDefault(); 
+						event.preventDefault();
 						return _this.error("LOCKED");
 					}
 					var node = _this.get_node(event.target);
-					
+
 					if (node.hasClass('deleted'))
 					{
 						if (window.confirm('Удалить окончательно?'))
@@ -433,18 +445,18 @@ function tree_component () {
 						}
 					}
 
-					event.preventDefault(); 
+					event.preventDefault();
 					return false;
 				})
 				.listen("dblclick", "a", function (event) { // WHEN DOUBLECLICK ON TEXT OR ICON
 					if(_this.locked) {
-						event.preventDefault(); 
+						event.preventDefault();
 						event.stopPropagation();
 						event.target.blur();
 						return _this.error("LOCKED");
 					}
 					_this.settings.callback.ondblclk.call(null, _this.get_node(event.target).get(0), _this);
-					event.preventDefault(); 
+					event.preventDefault();
 					event.stopPropagation();
 					event.target.blur();
 				})
@@ -462,6 +474,17 @@ function tree_component () {
 						_this.hovered.children("a").removeClass("hover");
 						_this.hovered = false;
 					}
+				})
+
+				$('#treeBox li').livequery('mouseover',	function(){
+					$(this).find('>img[hidden!=hidden]').show();
+		           	$(this).parent().siblings('img[hidden!=hidden]').hide();
+		           	return false;
+				}).livequery('mouseout', function(){
+		           	$(this).find('>img[hidden!=hidden]').hide();
+				});
+				$('#treeBox li > a').livequery('mouseover', function(){
+					$(this).siblings('img[hidden!=hidden]').show();
 				});
 
 				// ATTACH DRAG & DROP ONLY IF NEEDED
@@ -499,7 +522,7 @@ function tree_component () {
 								}
 							}
 							obj.blur();
-							event.preventDefault(); 
+							event.preventDefault();
 							event.stopPropagation();
 							return false;
 						});
@@ -526,7 +549,7 @@ function tree_component () {
 							_this.isdown	= false;
 							_this.appended	= false;
 							_this.container.find("li.dragged").removeClass("dragged");
-							event.preventDefault(); 
+							event.preventDefault();
 							event.stopPropagation();
 							return false;
 						})
@@ -557,7 +580,7 @@ function tree_component () {
 								if(!_this.settings.rules.multitree && cnt.get(0) != _this.container.get(0)) return false;
 
 								if(event.target.tagName == "A" ) {
-									var goTo = { 
+									var goTo = {
 										x : ($(event.target).offset({scroll : false}).left - 1),
 										y : (event.pageY - cnt.offset({scroll : false}).top)
 									}
@@ -618,7 +641,7 @@ function tree_component () {
 							}
 							return true;
 						});
-				} 
+				}
 				// ENDIF OF DRAG & DROP FUNCTIONS
 		},
 		checkMove : function (NODES, REF_NODE, TYPE) {
@@ -654,12 +677,12 @@ function tree_component () {
 				//window.console.log(NODES);
 				if(TYPE == "inside")	nd = REF_NODE.parents("li:eq(0)");
 				else					nd = REF_NODE.parents("li:eq(1)");
-				
+
 				function getMaxDepth(data)
 				{
 					var depth = 1;
 					var subDepth = 0;
-					data.each(function (i) 
+					data.each(function (i)
 					{
 						t = $(this);
 						t = t.children("ul:eq(0)");
@@ -671,7 +694,7 @@ function tree_component () {
 					});
 					return depth + subDepth;
 				}
-								
+
 				// CHECK FOR MAXDEPTH UP THE CHAIN
 				var incr = getMaxDepth(NODES);
 				/*
@@ -688,8 +711,8 @@ function tree_component () {
 					incr = Math.max(i,incr);
 				});
 				*/
-				
-				if(nd.size()) 
+
+				if(nd.size())
 				{
 					// VALID CHILDREN CHECK
 					if(typeof nd.metadata()["valid_children"] != "undefined") {
@@ -705,9 +728,9 @@ function tree_component () {
 					if(typeof nd.metadata()["max_children"] != "undefined") {
 						if((nd.children("ul:eq(0)").children("li").not(".dragged").size() + NODES.size()) > nd.metadata().max_children) return this.error("MOVE: MAX CHILDREN REACHED");
 					}
-					
+
 					var ok = true;
-					
+
 					nd.parents("li").each(function(i) {
 						if(ok == false) return false;
 						if($(this).metadata().max_depth) {
@@ -716,7 +739,7 @@ function tree_component () {
 					});
 					if(ok == false) return this.error("MOVE: MAX_DEPTH REACHED");
 				}
-				
+
 				if (this.settings.max_depth)
 				{
 					var total = REF_NODE.parents("li").length - 1;
@@ -724,8 +747,8 @@ function tree_component () {
 					if (TYPE == 'inside')
 					{
 						total += 1;
-					}				
-						
+					}
+
 					if (total > this.settings.max_depth)
 					{
 						ok = false;
@@ -735,7 +758,7 @@ function tree_component () {
 			}
 			return true;
 		},
-		
+
 		// USED AFTER REFRESH
 		reselect : function () {
 			var _this = this;
@@ -795,11 +818,11 @@ function tree_component () {
 			if(this.settings.rules.metadata) {
 				$.metadata.setType("attr", this.settings.rules.metadata);
 				return obj.metadata().type;
-			} 
+			}
 			else return obj.attr(this.settings.rules.type_attr);
 		},
 		// SCROLL CONTAINER WHILE DRAGGING
-		scrollCheck : function (x,y, cntr) { 
+		scrollCheck : function (x,y, cntr) {
 			var _this = this;
 			if(!cntr) {
 				var cnt = _this.container;
@@ -851,7 +874,7 @@ function tree_component () {
 				}
 				return false;
 			}
-			else 
+			else
 				return ($.inArray(this.get_type(nodes),this.settings.rules[rule]) != -1) ? true : false;
 		},
 		hover_branch : function (obj) {
@@ -954,7 +977,7 @@ function tree_component () {
 			if(this.locked) return this.error("LOCKED");
 			var obj = this.get_node(obj);
 			if(obj.hasClass("closed"))	return this.open_branch(obj);
-			if(obj.hasClass("open"))	return this.close_branch(obj); 
+			if(obj.hasClass("open"))	return this.close_branch(obj);
 		},
 		open_branch : function (obj, disable_animation, callback) {
 			if(this.locked) return this.error("LOCKED");
@@ -968,15 +991,15 @@ function tree_component () {
 				if(this.settings.data.type == "xml_flat" || this.settings.data.type == "xml_nested") {
 					var xsl = (this.settings.data.type == "xml_flat") ? "flat.xsl" : "nested.xsl";
 					var str = (this.settings.data.url.indexOf("?") == -1) ? "?id=" + encodeURIComponent(obj.attr("id")) : "&id=" + encodeURIComponent(obj.attr("id"));
-					obj.children("ul:eq(0)").getTransform(this.path + xsl, this.settings.data.url + str, { repl : true, callback: function (str, json) { 
+					obj.children("ul:eq(0)").getTransform(this.path + xsl, this.settings.data.url + str, { repl : true, callback: function (str, json) {
 							if(str.length < 10) {
 								obj.removeClass("closed").removeClass("open").addClass("leaf").children("ul").remove();
 								if(callback) callback.call();
 								return;
 							}
-							_this.open_branch.apply(_this, [obj]); 
+							_this.open_branch.apply(_this, [obj]);
 							if(callback) callback.call();
-						} 
+						}
 					});
 				}
 				else {
@@ -1029,7 +1052,7 @@ function tree_component () {
 					_this.set_cookie("open");
 					$(this).css("display","");
 				});
-			} 
+			}
 			else {
 				obj.removeClass("open").addClass("closed");
 				this.set_cookie("open");
@@ -1053,7 +1076,7 @@ function tree_component () {
 			var _this = this;
 			$(this.container).find("li.open").each( function () { _this.close_branch(this); });
 		},
-		show_lang : function (i) { 
+		show_lang : function (i) {
 			if(this.locked) return this.error("LOCKED");
 			if(this.settings.languages[i] == this.current_lang) return true;
 			var st = false;
@@ -1088,7 +1111,7 @@ function tree_component () {
 					if( (this.selected.children("ul:eq(0)").children("li").size() + 1) > this.selected.metadata().max_children) return this.error("CREATE: MAX_CHILDREN REACHED");
 				}
 				var ok = true;
-				
+
 				if (this.settings.max_depth !== undefined)
 				{
 					var total = this.selected.parents("li").length + 1;
@@ -1134,28 +1157,43 @@ function tree_component () {
 			}
 			else { $li.append("<a href='#'>" + (this.settings.lang.new_node || "New folder") + "</a>"); }
 			$li.addClass("leaf hidden");
-			
+
 			var currentLevel = this.selected.parents("li").length + 1;
 			if (afterSelected !== true)
 			{
 				currentLevel++;
 			}
-						
-			str = '';		
+
+			str = '';
 			str += '<img class="tree-edit" src="'+ this.images_path +'edit.png" ';
 			str += '/>';
-			
+
 			str += '<img class="tree-child-add" src="'+ this.images_path +'addChild.png" width="15" height="13" ';
 			str += '/>';
-			
+
 			str += '<img class="tree-brother-add" src="'+ this.images_path +'add.png" width="15" height="13" ';
 			str += '/>';
-			
+
 			str += '<img class="tree-delete" src="'+ this.images_path +'del.png" ';
 			str += '/>';
-			
+
 			$li.append(str);
-			
+
+			$li.hover(
+				function(){
+					$(this).find('>img[hidden!=hidden]').show();
+	             	$(this).parent().siblings('img[hidden!=hidden]').hide();
+	             	return false;
+				},
+				function(){
+	             	$(this).find('>img[hidden!=hidden]').hide();
+				}
+			);
+
+			$li.find('>a').mouseover(function(){
+				$(this).siblings('img[hidden!=hidden]').show();
+			});
+
 			if (afterSelected === true)
 			{
 				this.moved($li,this.selected.children("a:eq(0)"),"after",true);
@@ -1195,15 +1233,15 @@ function tree_component () {
 					.bind("mousedown",		function (event) { event.stopPropagation(); })
 					.bind("mouseup",		function (event) { event.stopPropagation(); })
 					.bind("click",			function (event) { event.stopPropagation(); })
-					.bind("keyup",			function (event) { 
+					.bind("keyup",			function (event) {
 							var key = event.keyCode || event.which;
 							if(key == 27) { this.blur(); return }
 							if(key == 13) { this.blur(); return }
 						});
 				_this.inp.blur(function(event) {
-						if(this.value == "") this.value == last_value; 
-						$(obj).html( $(obj).parent().find("input").eq(0).attr("value") ).get(0).style.display = ""; 
-						$(obj).prevAll("span").remove(); 
+						if(this.value == "") this.value == last_value;
+						$(obj).html( $(obj).parent().find("input").eq(0).attr("value") ).get(0).style.display = "";
+						$(obj).prevAll("span").remove();
 						_this.settings.callback.onrename.call(null, _this.get_node(obj).get(0), _this.current_lang, _this);
 						_this.inp = false;
 					});
@@ -1370,50 +1408,62 @@ function tree_component () {
 				$parent.children("li.last").removeClass("last");
 				$parent.children("li:last").addClass("last");
 			}
-			
+
 			//
 			var node = this.get_node(what);
 			var currentLevel = node.parents("li").length + 1;
 
 			if (this.settings['hide_buttons']['edit'] !== undefined && this.settings['hide_buttons']['edit'] !== true)
 			{
-				if (this.settings['hide_buttons']['edit'][currentLevel])
+				if (this.settings['hide_buttons']['edit'][currentLevel]) {
 					node.children('img.tree-edit').get(0).style.display = 'none';
-				else
+					node.children('img.tree-edit').attr('hidden','hidden');
+				} else {
 					node.children('img.tree-edit').get(0).style.display = '';
+					node.children('img.tree-edit').removeAttr('hidden');
+				}
 			}
-			
+
 			if (this.settings['hide_buttons']['addChild'] !== undefined && this.settings['hide_buttons']['addChild'] !== true)
 			{
-				if (this.settings['hide_buttons']['addChild'][currentLevel])
+				if (this.settings['hide_buttons']['addChild'][currentLevel]) {
 					node.children('img.tree-child-add').get(0).style.display = 'none';
-				else
+					node.children('img.tree-child-add').attr('hidden','hidden');
+				} else {
 					node.children('img.tree-child-add').get(0).style.display = '';
+					node.children('img.tree-child-add').removeAttr('hidden');
+				}
 			}
-			
+
 			if (this.settings['hide_buttons']['addBrother'] !== undefined && this.settings['hide_buttons']['addBrother'] !== true)
 			{
-				if (this.settings['hide_buttons']['addBrother'][currentLevel])
+				if (this.settings['hide_buttons']['addBrother'][currentLevel]) {
 					node.children('img.tree-brother-add').get(0).style.display = 'none';
-				else
+					node.children('img.tree-brother-add').attr('hidden','hidden');
+				} else {
 					node.children('img.tree-brother-add').get(0).style.display = '';
+					node.children('img.tree-brother-add').removeAttr('hidden');
+				}
 			}
-			
+
 			if (this.settings['hide_buttons']['del'] !== undefined && this.settings['hide_buttons']['del'] !== true)
 			{
-				if (this.settings['hide_buttons']['del'][currentLevel])
+				if (this.settings['hide_buttons']['del'][currentLevel]) {
 					node.children('img.tree-delete').get(0).style.display = 'none';
-				else
+					node.children('img.tree-delete').get(0).style.display = 'none';
+				} else {
 					node.children('img.tree-delete').get(0).style.display = '';
+					node.children('img.tree-delete').removeAttr('hidden');
+				}
 			}
-			
+
 			if (!this.container.hasClass('no-controls'))
 			{
 				this.container.toggleClass("no-controls");
 				this.container.toggleClass("no-controls");
 			}
 			//
-			
+
 			if(is_new && how != "inside") where = this.get_node(where).parents("li:eq(0)");
 			if(is_copy)		this.settings.callback.oncopy.call(null, this.get_node(what).get(0), this.get_node(where).get(0), how, this)
 			else if(is_new)	this.settings.callback.oncreate.call(null, this.get_node(what).get(0), this.get_node(where).get(0), this.settings.insertAt, this);

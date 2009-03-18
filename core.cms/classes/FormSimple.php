@@ -203,7 +203,7 @@ class FormSimple
 		$this->model->setFields($this->config->SELECT_FIELDS);
 	}
 
-	protected function getTableName()
+	public function getTableName()
 	{
 		if (!$this->config->table_name)
 		{
@@ -217,7 +217,7 @@ class FormSimple
 		return $this->config->table_name;
 	}
 
-	protected function load()
+	public function load()
 	{
 		if( !$this->loaded )
 		{
@@ -225,7 +225,6 @@ class FormSimple
 			{
 				$this->model->loadOne($this->model->quoteField($this->idField).'='.$this->id);
 				$this->item = $this->model->getData();
-
 				if (!$this->item[$this->idField])
 				{
 					Controller::redirect(RequestInfo::hrefChange('', array($this->idGetVar => '')));
@@ -351,7 +350,7 @@ class FormSimple
 		}
 	}
 
-	protected function delete()
+	public function delete()
 	{
 		if ($this->item['_state'] <= 1 )
 		{
@@ -416,12 +415,12 @@ class FormSimple
 	{
 		$this->model->update( $data, $this->model->quoteFieldShort($this->idField).'='.DBModel::quote($this->id) );
 	}
-	
+
 	protected function needAjaxUpdate()
 	{
 		return $_POST["ajax_update"] ? true : false;
 	}
-	
+
 	protected function needUpdate()
 	{
 		return $_POST[$this->prefix."update"] ? true : false;
@@ -557,6 +556,11 @@ class FormSimple
 			$data['_supertag'] = $this->postData['_supertag'].'_'.$this->id;
 		}
 		$this->updateData($data);
+	}
+
+	public function setId($id)
+	{
+     	$this->id = $id;
 	}
 }
 

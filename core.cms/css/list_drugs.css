@@ -1,4 +1,6 @@
 #left_col {	list-style: none;
+	padding: 0;
+	margin: 0;
 }
 
 #left_col li {	background: white;

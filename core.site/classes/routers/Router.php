@@ -16,7 +16,7 @@ class Router
 
 	private function __construct()
 	{
-		if (Config::get('routers'))
+		if (Config::exists('routers'))
 		{
 			$this->routers = Config::get('routers');
 		}
@@ -45,7 +45,20 @@ class Router
 	{
 		return self::getInstance()->find(array('class' => $class));
 	}
-
+	
+	public function addRouter($router)
+	{
+		if (!in_array($router, $this->routers))
+			$this->routers[] = $router;
+	}
+	
+	public function removeRouter($router)
+	{
+		$key = array_search($router, $this->routers);
+		if ($key !== false)
+			unset($this->routers[$key]);
+	}
+	
 	public function &find($criteria, $routers=NULL)
 	{
 		$page = NULL;

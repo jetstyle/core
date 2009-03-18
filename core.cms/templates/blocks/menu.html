@@ -54,11 +54,11 @@ function switchMenu(el)
 $(document).ready( function() {	$('body').click(function(){    	if ($('#gotomenu').is(':visible')) $('#gotomenu').hide();
 	});
 	$('#gotolink').click(function(){
+		$('#gotomenu').css('right',$(document).width() - $('#gotolink').offset().left - $('#gotolink').width());
+	    $('#gotomenu').css('top',$('#gotolink').offset().top + $('#gotolink').height() + 5);
 		$('#gotomenu').toggle();
     	return false;
 	});
-	$('#gotomenu').css('right',$(document).width() - $('#gotolink').offset().left - $('#gotolink').width());
-    $('#gotomenu').css('top',$('#gotolink').offset().top + $('#gotolink').height() + 5);
 });
 
 </script>
@@ -78,11 +78,11 @@ $(document).ready( function() {	$('body').click(function(){    	if ($('#gotome
 <br class="clearer">
 
 {{:item *selected}}
-	<td class="selected-" nowrap="nowrap"><a href="{{!href_to 'Do/module' *}}" id="menu_selected_{{*id}}" item_id="{{*id}}" onclick="return switchMenu(this);">{{*title}}</a></td>
+	<td class="selected-" nowrap="nowrap"><a href="{{!href_to 'Do/module' *}}" id="menu_selected_{{*id}}" item_id="{{*id}}">{{*title}}</a></td>
 {{/:item}}
 
 {{:item}}
-	<td class="item-" nowrap="nowrap"><a href="{{!href_to 'Do/module' *}}" item_id="{{*id}}" onclick="return switchMenu(this);">{{*title}}</a></td>
+	<td class="item-" nowrap="nowrap"><a href="{{!href_to 'Do/module' *}}" item_id="{{*id}}">{{*title}}</a></td>
 {{/:item}}
 
 {{:item_sep}}

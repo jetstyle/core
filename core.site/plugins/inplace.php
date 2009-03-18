@@ -9,7 +9,8 @@ $controller = Locator::get('controller');
 
 if ( !isset($params['module']) )
 {
-    if ( in_array($controller['controller'], array('home', 'content', '' ) ) )
+
+    if ( in_array($controller['controller'], array('home', 'content', 'catalogue_simple', 'feedback' ) ) )
     {
 	 $params['module']='content';
 	 $params['id']= $controller['id'];

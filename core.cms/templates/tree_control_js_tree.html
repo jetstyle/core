@@ -3,6 +3,7 @@
 <!-- {{!connect "jstree/jquery.hotkeys.js"}} -->
 {{!connect "jstree/css.js"}}
 {{!connect "jstree/jquery.listen.js"}}
+{{!connect "jstree/jquery.livequery.js"}}
 {{!connect "jstree/tree_component.js"}}
 
 {{!connect "jstree/treeControl.js"}}
@@ -12,15 +13,15 @@
 <div class="cms-list-advanced">
 	{{__trash_switch}}
 	{{__filters}}
-	<a href="#" title="Показать/скрыть элементы управления" onclick="treeToggleControls(); return false;" style="float:right;"><img {{?tree_params.show_controls}}class="toggleEditTreeClass-Sel"{{/?}} src="{{images}}tree/npj_edit.gif" id="toggleEditImg"></a>		
+	<!--<a href="#" title="Показать/скрыть элементы управления" onclick="treeToggleControls(); return false;" style="float:right;"><img {{?tree_params.show_controls}}class="toggleEditTreeClass-Sel"{{/?}} src="{{images}}tree/npj_edit.gif" id="toggleEditImg"></a>-->
 	<img class="block" src="{{images}}z.gif" width="1" height="10" align="top" alt="" />
-	
+
 	{{?tree_params.all_deleted}}
 		<div>
 			Все узлы в дереве удалены. {{__trash_switch}}.
 		</div>
 	{{/?}}
-		
+
 	<div id="treeBox" {{?!tree_params.show_controls}}class="no-controls"{{/?}}></div>
 </div>
 
@@ -29,12 +30,12 @@
 	var treeControl;
 	function treeToggleControls()
 	{
-		$('#treeBox').toggleClass('no-controls'); 
+		$('#treeBox').toggleClass('no-controls');
 		$('#toggleEditImg').toggleClass('toggleEditTreeClass-Sel');
 		treeControlsEnabled = !treeControlsEnabled;
 		$.cookie('tree_control_btns', treeControlsEnabled);
 	}
-	
+
 	jQuery(document).ready(function()
 	{
 		params = {
@@ -58,8 +59,23 @@
 		};
 		treeControl = new TreeControl(params);
 		treeControl.process();
-		
-		//$.hotkeys.add('f2',     { disableInInput: true }, function() { tree.rename(); });			
+
+		/*$('#treeBox li').hover(
+			function(){
+				$(this).find('>img[hidden!=hidden]').show();
+             	$(this).parent().siblings('img[hidden!=hidden]').hide();
+             	return false;
+			},
+			function(){
+             	$(this).find('>img[hidden!=hidden]').hide();
+			}
+		);
+
+		$('#treeBox li a').mouseover(function(){
+			$(this).siblings('img[hidden!=hidden]').show();
+		});*/
+
+		//$.hotkeys.add('f2',     { disableInInput: true }, function() { tree.rename(); });
 		//$.hotkeys.add('r',      { disableInInput: true }, function() { tree.refresh(); });
 		//$.hotkeys.add('up',     { disableInInput: true }, function() { tree.get_prev(); });
 		//$.hotkeys.add('down',   { disableInInput: true }, function() { tree.get_next(); });
