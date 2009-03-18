@@ -217,7 +217,7 @@ class FormSimple
 		return $this->config->table_name;
 	}
 
-	public function load()
+	protected function load()
 	{
 		if( !$this->loaded )
 		{
@@ -351,7 +351,7 @@ class FormSimple
 		}
 	}
 
-	public function delete()
+	protected function delete()
 	{
 		if ($this->item['_state'] <= 1 )
 		{
@@ -416,12 +416,12 @@ class FormSimple
 	{
 		$this->model->update( $data, $this->model->quoteFieldShort($this->idField).'='.DBModel::quote($this->id) );
 	}
-
+	
 	protected function needAjaxUpdate()
 	{
 		return $_POST["ajax_update"] ? true : false;
 	}
-
+	
 	protected function needUpdate()
 	{
 		return $_POST[$this->prefix."update"] ? true : false;
@@ -557,11 +557,6 @@ class FormSimple
 			$data['_supertag'] = $this->postData['_supertag'].'_'.$this->id;
 		}
 		$this->updateData($data);
-	}
-
-	public function setId($id)
-	{
-     	$this->id = $id;
 	}
 }
 

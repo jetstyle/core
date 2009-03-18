@@ -1,24 +1,10 @@
 {{TPL:instance}}
-	<textarea name="{{f.name}}" id="{{f.name}}" class="w100" style="display: none; height: 300px;" >{{f.value}}</textarea>
-	<div id="{{f.name}}_placeholder" style="height: 175px;
-				background:url({{images}}loadingAnimation.gif) no-repeat center center;
-				border: 1px solid;
-				padding-top: 125px;
-				text-align: center">
-		Загрузка редактора
-	</div>
+	<textarea name="{{f.name}}" id="{{f.name}}" class="w100" style="height: 300px;" >{{f.value}}</textarea>
 {{/TPL:instance}}
 
 {{TPL:init}}
 	<script language="javascript" type="text/javascript" src="{{/}}libs/tinymce/tiny_mce.js"></script>
 	<script language="javascript" type="text/javascript">
-
-		function tinyMceInit() {
-			$('{{rich_editors}}'.split(',')).each(function(){
-				$('#'+this+'_placeholder').hide();
-            	$('#'+this+'_parent').show();
-			});
-		}
 
 		tinyMCE.init({
 			mode : "exact",
@@ -41,8 +27,7 @@
 			theme_advanced_blockformats : "p,h2,h3,address",
 			width: "100%",
 			paste_auto_cleanup_on_paste: $.browser.msie,
-			paste_use_dialog: true,
-			oninit: 'tinyMceInit'
+			paste_use_dialog: true
 		});
 
 		tinyMCE.base_url = "{{/}}";

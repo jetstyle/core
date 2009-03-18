@@ -3,7 +3,7 @@
 class ListSimple
 {
 	protected $tpl;
-
+	
 	protected $config;		//ссылка на объект класса ModuleConfig
 	protected $items;
 	protected $pager;
@@ -37,10 +37,10 @@ class ListSimple
 	public function __construct( &$config )
 	{
 		$this->config =& $config;
-
+	
 		$this->db = &Locator::get('db');
 		$this->tpl = &Locator::get('tpl');
-
+		
 		if ($this->config->perPage)
 		{
 			$this->perPage = $this->config->perPage;
@@ -193,10 +193,10 @@ class ListSimple
 			$pathParts = array_map(array(Inflector, 'underscore'), $pathParts);
 			$this->config->table_name = strtolower(implode('_', $pathParts));
 		}
-
+		
 		return $this->config->table_name;
 	}
-
+	
 	/**
 	 * Меняем элементы местами
 	 *
@@ -244,14 +244,6 @@ class ListSimple
 			$this->tpl->set('pager', $this->pager->getPages());
 			$this->tpl->parse('blocks/pager.html', '__arrows');
 		}
-	}
-
-	public function getAllItems($where = '')
-	{
-    	$model = &$this->getModel();
-    	$model->where = $where;
-		$model->load();
-		return $model->getArray();
 	}
 }
 

@@ -9,7 +9,7 @@ class ModuleConstructor
 	protected $handlersType = 'modules';
 	protected $params = array();
 	protected $path = array();
-
+	
 	public function initialize($moduleName, $params = null)
 	{
 		//проеряем права
@@ -32,14 +32,14 @@ class ModuleConstructor
 		}
 		$this->config->read($defsPath);
 		$this->config->moduleName = $this->moduleName;
-
+		
 		$this->path[] = $this->moduleName;
-
+		
 		if (is_array($params))
 		{
 			$this->params = $params;
 		}
-
+				
 		$this->title = $this->config->module_title;
 	}
 
@@ -62,14 +62,14 @@ class ModuleConstructor
 			{
 				$config->class_name = implode('', array_map('ucfirst', $this->path));
 			}
-
+			
 			$className = $config->class_name;
 			Finder::useClass( $className );
 			Debug::trace('ModuleConstructor::InitModule - '.$this->moduleName.'/'.$className );
 
 			$config->componentPath = implode('/', $this->path);
 
-
+			
 			$slashPos = strrpos($config->componentPath, '/');
 			if ($slashPos)
 			{
@@ -79,9 +79,9 @@ class ModuleConstructor
 			{
 				$mn = $config->componentPath;
 			}
-
+			
 			Locator::get('tpl')->set("module_name", $mn);
-
+						
 			$cls = new $className($config);
 			$cls->handle();
 			return $cls->getHtml();
@@ -93,7 +93,7 @@ class ModuleConstructor
 			{
 				$this->title = $config->module_title;
 			}
-
+						
 			if (count($this->params) > 0)
 			{
 				$neededSubModule = array_shift($this->params);
@@ -102,10 +102,10 @@ class ModuleConstructor
 			{
 				$neededSubModule = null;
 			}
-
+						
 			$result = array();
 			foreach ($config->WRAPPED AS $k => $subModule)
-			{
+			{				
 				$_subModule = array_pop(explode('/', $subModule));
 				if ($neededSubModule && $neededSubModule != $_subModule)
 				{
@@ -115,16 +115,16 @@ class ModuleConstructor
 				$result[] = $this->proceedModule($this->getConfig($subModule, $config));
 				array_pop($this->path);
 			}
-
+			
 			if ($neededSubModule)
 			{
 				if (empty($result))
 				{
 					$this->path[] = $neededSubModule;
 					$result = $this->proceedModule($this->getConfig($neededSubModule, $config));
-
+					
 					array_pop($this->path);
-
+					
 					return $result;
 				}
 				else
@@ -160,9 +160,9 @@ class ModuleConstructor
 		{
 			$config = clone $this->config;
 		}
-
+		
 		unset($config->WRAPPED);
-
+		
 		$config->read(Finder::findScript( $this->handlersType, $this->moduleName.'/'.$name));
 		return $config;
 	}

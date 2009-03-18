@@ -28,7 +28,6 @@ class ListDrugs extends ListSimple
  	{
  		$itemId = intval($_GET['item_id'] ? $_GET['item_id'] : $_POST['item_id']);
  		$page = intval($_GET[$this->pageVar] ? $_GET[$this->pageVar] : $_POST[$this->pageVar]);
- 		if (!$page) $page = 1;
  		$destIndex = intval($_GET['index'] ? $_GET['index'] : $_POST['index']) + ($page - 1) * $this->perPage;
 
  	    $db = &Locator::get('db');

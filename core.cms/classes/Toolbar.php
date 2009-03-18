@@ -55,10 +55,10 @@
 
  	protected function loadGoTo() {
     	$this->goToList = $this->db->query("
- 			SELECT IF(LENGTH(title_short) > 0, title_short, title_pre) AS title, _path AS path
- 			FROM ??content
- 			WHERE controller NOT IN ('', 'content', 'link')
- 			ORDER BY _level,_order
+ 			SELECT IF(LENGTH(title_short) > 0, title_short, title_pre) AS title, _path AS path 
+ 			FROM ??content 
+ 			WHERE controller NOT IN ('', 'content', 'link') 
+ 			ORDER BY _level,_order 
  		");
 	//$this->goToList[] = array('title'=>'выход', 'path'=>'logout');
  	}
@@ -91,7 +91,7 @@
  			{
  				$r['granted'] = $principal->security('cmsModules', $r['href']);
  			}
-
+ 			
  			if($r['_level'] == 1)
  			{
  				$this->items['main'][$r['id']] = $r;
@@ -113,7 +113,7 @@
  				}
  				$this->items['submenu'][$r['_parent']]['childs'][$r['id']] = $r;
  			}
-
+			
  			if($r['href'] && in_array($r['href'], $paths))
  			{
  				if($this->items['main'][$r['id']])
@@ -135,12 +135,6 @@
 
  		foreach($this->items['main'] AS $k => $item)
  		{
- 			$children = $this->items['submenu'][$item['id']]['childs'];
- 			if (!empty($children))
- 			{
-            	$firstChild = array_shift($children);
-            	$this->items['main'][$k]['href'] = $firstChild['href'];
- 			}
  			if(!$item['granted'])
  			{
  				unset($this->items['submenu'][$item['id']], $this->items['main'][$k]);

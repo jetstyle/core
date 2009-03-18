@@ -21,27 +21,27 @@ class TreeControlJsTree extends TreeControl
 
 			case 'json':
 				header("Content-type: text/x-json; charset=".$this->xmlEncoding);
-
+				
 				$nodeId = $_GET['id'];
 				$currentId = intval($_GET['cid']);
-
+				
 				if ($nodeId == '0')
 				{
 					$this->id = $currentId ? $currentId : $this->getRootId();
 					$parents = $this->getParentsForItem($this->id);
 					$parents[] = $this->id;
-					$this->loadByParents($parents);
+					$this->load("_parent IN('".implode("','", $parents)."')");
 					echo $this->toJSON();
 				}
 				else
 				{
-					$this->loadByParents(array($nodeId));
-
-					$nodeId = str_replace('node-', '', $nodeId);
-
+					$nodeParts = explode('-', $nodeId);
+					$nodeId = intval($nodeParts[1]);
+					$this->load("_parent = ".$nodeId);
+									
 					echo $this->toJSON($nodeId);
 				}
-
+				
 				die();
 			break;
 
@@ -63,8 +63,8 @@ class TreeControlJsTree extends TreeControl
 					'update_url' => RequestInfo::hrefChange(RequestInfo::$baseUrl."do/".$this->config->componentPath, array('action' => 'update')),
 					'ajax_auto_loading' => $this->config->ajaxAutoLoading,
 				);
-
-
+				
+				
 				$url = RequestInfo::hrefChange('', array('id' => ''));
 				$pos = strpos($url, '?');
 				if ($pos !== false)
@@ -94,9 +94,9 @@ class TreeControlJsTree extends TreeControl
 				{
 				 	$treeParams['show_controls'] = true;
 				}
-
+				
 				$checkTree = false;
-
+				
 				if (!$this->config->ajaxAutoLoading)
 				{
 					$this->load();
@@ -109,14 +109,14 @@ class TreeControlJsTree extends TreeControl
 				{
 					$checkTree = true;
 				}
-
+	
 				if ($checkTree)
 				{
 					$result = $this->getNodesCountForRoot();
 					if (!$result['total'])
 					{
 						$this->createRootNode();
-
+							
 						if (!$this->config->ajaxAutoLoading)
 						{
 							$this->loaded = false;
@@ -131,25 +131,15 @@ class TreeControlJsTree extends TreeControl
 						$treeParams['all_deleted'] = true;
 					}
 				}
-
+				
 				$treeParams['data'] = $this->toJSON();
 				$treeParams['level_limit'] = $this->level_limit;
-
+				
 				$treeParams['disable_drag'] = $this->config->disable_drag ? true : false;
-
+				
 				$this->tpl->set('tree_params', $treeParams);
 			break;
 		}
-	}
-
-	protected function loadByParents($parents)
-	{
-		foreach($parents as &$parent)
-		{
-        	$parent = str_replace('node-', '', $parent);
-		}
-		$where = empty($parents) ? '' : "_parent IN (".implode(',',$parents).")";
-    	$this->load($where);
 	}
 
 	public function getHtml()
@@ -161,15 +151,13 @@ class TreeControlJsTree extends TreeControl
 	public function toJSON($fromNode = null)
 	{
 		$this->toRoot = array();
-		$c = $this->items[ $this->id ];
+		$c = $this->items[ intval($this->id) ];
 		do
 		{
 			$this->toRoot[$c['id']] = $c['id'];
 			$c = $this->items[$c['_parent']] ;
 		} while($c);
-
-		//print_r($this->children);
-
+	
 		if ($fromNode)
 		{
 			$data = $this->treeParse($this->children[$fromNode]);
@@ -194,20 +182,20 @@ class TreeControlJsTree extends TreeControl
 	{
 		$_REQUEST['newtitle'] = iconv('cp1251', 'UTF-8', 'Узел дерева');
 		$id = parent::addNode();
-
+		
 		if ($this->config->denyDropToRoot)
 		{
 			Locator::get('db')->execute('
 				UPDATE ??'.$this->config->table_name.' SET _supertag = "", _path = "" WHERE id = '.$id.'
 			');
 		}
-
+		
 	}
-
+	
 	protected function getNodesCountForRoot()
 	{
 		$data = array('total' => 0, 'deleted' => 0);
-
+		
 		$result = $this->db->execute("
 			SELECT ".$this->idField.", _state
 			FROM ??".$this->config->table_name."
@@ -219,13 +207,13 @@ class TreeControlJsTree extends TreeControl
 			$data['total']++;
 			if ($r['_state'] == 2)
 			{
-				$data['deleted']++;
+				$data['deleted']++; 
 			}
 		}
-
+		
 		return $data;
 	}
-
+	
 	protected function renderTrash()
 	{
 		//render trash switcher
@@ -255,41 +243,36 @@ class TreeControlJsTree extends TreeControl
 						$state = 'open';
 					}
 				}
-				elseif ($this->config->ajaxAutoLoading && $this->items[$id]['has_children'])
+				elseif ($this->config->ajaxAutoLoading && ($this->items[$id]['_right'] - $this->items[$id]['_left']) > 1)
 				{
 					$state = 'closed';
 				}
-
+				
 				$result[] = array(
 					'data' => iconv('cp1251', 'utf-8', $this->_getTitle($this->items[$id])),
 					'attributes' => array(
-						'id' => 'node-'.$id,
+						'id' => 'node-'.$id, 
 						'data' => '{type: "'.( ($this->items[$id]['_level'] == 1 && $this->config->denyDropToRoot) ? 'root' : 'node').'",path: "'.$this->items[$id]['_path'].'" }',
 						'class' => ($this->items[$id]['_state'] == 1 ? 'hidden' : ($this->items[$id]['_state'] == 2 ? 'deleted' : '')),
 					),
 					'level' => $this->items[$id]['_level'],
 					'state' => $state,
-					'children' => $this->treeParse($this->children[$id]),
+					'children' => $this->treeParse($this->children[$id])
 				);
-				if (
-					$this->config->customIconsField &&
-					$this->config->customIcons[$this->items[$id]['controller']]
-				)
-					$result[count($result)-1]['icon'] = $this->config->customIcons[$this->items[$id]['controller']];
 			}
 		}
 
 		return $result;
 	}
-
+	
 	protected function _getTitle(&$node)
 	{
 		$_title = $node['title_short'] ? $node['title_short'] : $node['title'];
 		$_title = $_title ? $_title : 'node_'.$node[$this->idField];
-
+		
 		return $_title;
 	}
-
+	
 	protected function addNode()
 	{
 		$id = parent::addNode();
@@ -298,17 +281,17 @@ class TreeControlJsTree extends TreeControl
 		');
 		return $id;
 	}
-
+	
 	protected function saveTitle($id, $title)
 	{
 		$db = &$this->db;
-
+		
 		$node = $this->getItem($id);
-
+		
 		if ($node['id'])
 		{
 			$sql = "UPDATE ??".$this->config->table_name." SET title=".$db->quote($title).", title_pre = ".$db->quote($this->tpl->action('typografica', $title));
-
+			
 			$supertag = '';
 			if (!$node['_supertag'])
 			{
@@ -317,21 +300,15 @@ class TreeControlJsTree extends TreeControl
 				$supertag = $translit->supertag($title, 20);
 				$sql .= ", _supertag = ".$db->quote($supertag);
 			}
-
+			
 			$sql .= " WHERE id=".$db->quote($id);
 			$db->execute($sql);
-
+			
 			if ($supertag)
 			{
 				$this->updateTreePathes($this->config->table_name, $node['id'], $this->config->allow_empty_supertag, $this->config->where);
 			}
 		}
-	}
-
-	public function getItems($parent)
-	{
-     	$this->loadByParents(array($parent));
-     	return array('items'=>$this->items, 'children'=>$this->children);
 	}
 }
 ?>

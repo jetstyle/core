@@ -318,7 +318,6 @@ class TreeControl
 			{
 				while ($r = $db->getRow($result))
 				{
-					$r['has_children'] = $r['_right'] - $r['_left'] > 1;
 					$this->items[$r[$this->idField]] = $r;
 					$this->children[$r['_parent']][] = $r[$this->idField];
 				}
@@ -406,7 +405,7 @@ class TreeControl
 
 			return $id;
 		}
-		elseif($delete = $_REQUEST['delete'])
+		elseif($delete = intval($_REQUEST['delete']))
 		{
 			$node = $this->deleteNode($delete);
 

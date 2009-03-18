@@ -62,13 +62,3 @@ div#addImageButton {
 	position: absolute;
 	display: none;
 }
-
-#fileCounter {
-	font-size: 12px;
-	text-align: center;
-}
-
-#progressCont {
-	margin-left: auto;
-	margin-right: auto;
-}
