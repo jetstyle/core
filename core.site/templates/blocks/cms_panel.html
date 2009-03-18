@@ -32,7 +32,7 @@
       padding: 0 6px 6px 0;
     }
 
-    .p-shadow textarea, .p-shadow input 
+    .p-shadow textarea, .p-shadow input
     {
       padding: 6px;
       margin: -6px 6px 6px -6px !important;
@@ -69,6 +69,7 @@
 	  		<img class="block" src="{{images}}cms_seporate.gif" width="2" height="20" align="top" alt="" />
 	  	</td>-->
 		<td style="text-align: right;">
+			<!--
 			<form action="" method="get" style=" display: inline">
 			skin: 
 			<select name="skin" onchange="this.parentNode.submit();">
@@ -80,9 +81,10 @@
 			    <option value="base1"  {{?tpl_skin=="base1"}}selected{{/?}}>base1</option>
 			</select>
 			</form>
+			-->
 			{{!textOce type="content" module="content" title="–едактировать в CMS" id=PAGE.id show="1"}}
 			|
-		    	<!--a href="{{/}}cms">CMS:управление сайтом</a> |-->
+		    	<a href="{{/}}cms">CMS</a>
 		    	<a rel="notrack" href="{{/}}cms/login?logout=1&retpath={{cur_url}}" onclick="return confirm('¬ы действительно желаете выйти?');">выход</a>	
 		</td>
 	</tr>

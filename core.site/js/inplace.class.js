@@ -71,7 +71,7 @@ Inplace.prototype =
 	
 	//width fix
 	if (this.editorType!='wysiwyg')
-	    $( this.inplaceObject ).css("width", $( this.inplaceObject ).children(":first").children(":first").width()+16 ).css("z-index", 1000);
+	    $( this.inplaceObject ).css("width", $( this.inplaceObject ).children(":first").children(":first").width()+16 );
 	
         //контейнер спр€чем
         this.container.addClass("invisible");
@@ -211,6 +211,8 @@ Inplace.prototype =
 	else 
 	    this.container = $( this.inplaceObject ).prev();
 
+	this.inplaceObject.css("z-index", 1000).css("position", "relative");
+
 	if ( this.editorType == "wysiwyg" )
 	{
 	    textarea_id = this.inplaceObject.children(":first").attr("id");
@@ -236,7 +238,6 @@ Inplace.prototype =
         this.saveButton.click(   this.save.prototypeBind(this)   );
         this.cancelButton.click( this.cancel.prototypeBind(this) );
 	
-	console.log('initButtons '+this.buttons);
 	//append buttons
 	this.inplaceObject.append( this.buttons );
     },
