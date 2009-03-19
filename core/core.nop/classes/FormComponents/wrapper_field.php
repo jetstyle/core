@@ -26,18 +26,23 @@ class FormComponent_wrapper_field extends FormComponent_abstract
    // оформление вокруг поля
    function Wrapper_Parse( $field_content )
    {
+     $this->field->tpl->Set( "errors", "" );
      // если есть ошибки?
      $this->field->tpl->Set( "is_valid", $this->field->validator->valid );
      if (!$this->field->validator->valid)
      {
        $msgs = array();
+
        if (is_array($this->field->validator->validator_messages))
        {
          foreach( $this->field->validator->validator_messages as $msg=>$text )
-          $msgs[] = array( "msg" => $msg, "text" => $text );
+	    $msgs[] = array( "msg" => $msg, "text" => $text );
+
          $this->field->tpl->Loop( $msgs, $this->field->form->config["template_prefix"]."errors.html:List", "errors" );
+	 //var_dump( $this->field->form->config["template_prefix"]."errors.html:List" );
        }
-       else $this->field->tpl->Set( "errors", "" );
+         
+      // var_dump( $this->field->validator->validator_messages );
      }
 
      // парсим обёртку
