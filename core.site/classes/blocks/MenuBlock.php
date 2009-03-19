@@ -142,6 +142,22 @@ class MenuBlock extends Block
 				$where[] = $menu->quoteField('_right') .' < ' . DBModel::quote($parent['_right']);
 
 			break;
+		
+			case 'siblings' :
+
+				if (Locator::exists('controller'))
+				{
+					$current = &Locator::get('controller');
+				}
+				else
+				{
+					$this->data = array();
+					return;
+				}
+				$where = array();
+				$where[] = $menu->quoteField('_parent') .' = ' . DBModel::quote($current['_parent']);
+
+			break;
 		}
 
 		if (Locator::exists('controller'))
