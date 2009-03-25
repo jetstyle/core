@@ -48,7 +48,8 @@ class FormComponent_options extends FormComponent_view_plain
      
      //собственно рендеринг
      $result = FormComponent_abstract::Interface_Parse();
-     return $this->field->tpl->loop( $A2, $this->field->form->config["template_prefix_interface"].
+     Locator::get("tpl")->set("_options", $A2);
+     return Locator::get("tpl")->parse( $this->field->form->config["template_prefix_interface"].
                                       $this->field->config["interface_tpl"] );
    }
    // преобразование из поста в массив для загрузки моделью
