@@ -88,90 +88,85 @@ define( "FORM_EVENT_AUTO",   "auto");   // insert/update based on $data_id
 
 class Form
 {
-   var $name; // имя формы
-   var $form_present_var = "__form_present";
-   var $data_id_var = "__form_data_id";
-   var $data_id=0;      // строка, ассоциированная с формой. 0 -- значит нет такой
-   var $hash=array();   // очень удобный способ доступа к полям
-   var $fields=array(); // очень неудобный способ доступа к полям
-   var $buttons=array();// хранилище "кнопок"
-   var $action; // куда уходить по посту формы
+    var $name; // имя формы
+    var $form_present_var = "__form_present";
+    var $data_id_var = "__form_data_id";
+    var $data_id=0;      // строка, ассоциированная с формой. 0 -- значит нет такой
+    var $hash=array();   // очень удобный способ доступа к полям
+    var $fields=array(); // очень неудобный способ доступа к полям
+    var $buttons=array();// хранилище "кнопок"
+    var $action; // куда уходить по посту формы
+    
+    var $valid = true; // флаг валидности формы
+    
+    var $default_config = array(
+            "template_prefix"           =>"forms/",
+            "template_prefix_button"    =>"forms/buttons.html:",
+            "template_prefix_views"     =>"forms/views.html:",
+            "template_prefix_wrappers"  =>"forms/",
+            "template_prefix_interface" =>"forms/",
+            "template_prefix_group"     =>"forms/",
+            "template_form"                  =>"form.html:Form",
+            "template_buttonlist"            =>"form.html:Buttons",
+            "multipart"    =>  1,
+            "auto_datetime"=>  1,
+            "auto_user_id" =>  false,
+            "id_field"     =>  "id",
+            "active_field" =>  "active",
+            "event_handlers_type" => "handlers/formevents", //IVAN
+            "default_event" => FORM_EVENT_AUTO,
+            "db_ignore" => false,
+            "db_table"  => false,
+            "fieldname_created_user_id"  => "_created_user_id",
+            "fieldname_edited_user_id"   => "_edited_user_id",
+            "fieldname_created_datetime" => "_created",
+            "fieldname_edited_datetime"  => "_modified",
+            // [optional] "success_url" =>
+            // [optional] "cancel_url" =>
+            // [optional] "on_before_event", "on_after_event"
+    );
 
-   var $valid = true; // флаг валидности формы
+    public function form($form_config = NULL)
+    {
 
-   var $default_config = array(
-           "template_prefix"           =>"forms/",
-           "template_prefix_button"    =>"forms/buttons.html:",
-           "template_prefix_views"     =>"forms/views.html:",
-           "template_prefix_wrappers"  =>"forms/",
-           "template_prefix_interface" =>"forms/",
-           "template_prefix_group"     =>"forms/",
-           "template_form"                  =>"form.html:Form",
-           "template_buttonlist"            =>"form.html:Buttons",
-           "multipart"    =>  1,
-           "auto_datetime"=>  1,
-           "auto_user_id" =>  false,
-           "id_field"     =>  "id",
-           "active_field" =>  "active",
-           "event_handlers_type" => "handlers/formevents", //IVAN
-           "default_event" => FORM_EVENT_AUTO,
-           "db_ignore" => false,
-           "db_table"  => false,
-           "fieldname_created_user_id"  => "_created_user_id",
-           "fieldname_edited_user_id"   => "_edited_user_id",
-           "fieldname_created_datetime" => "_created",
-           "fieldname_edited_datetime"  => "_modified",
-           // [optional] "success_url" =>
-           // [optional] "cancel_url" =>
-           // [optional] "on_before_event", "on_after_event"
-                              );
+        Finder::UseClass("forms/FormField"); // он нам стопудово понадобится
 
-   public function Form($form_config = NULL)
-   {
+        if ($form_config['action'])
+            $this->action = $form_config['action'];
+        else
+            $this->action = '';
 
-     Finder::UseClass("forms/FormField"); // он нам стопудово понадобится
+        if (!$form_config)
+            $form_config = $this->default_config;
+        else
+            Form::StaticDefaults($this->default_config, $form_config);
 
-     if ($form_config['action'])
-     {
-     	$this->action = $form_config['action'];
-     }
-     else
-     {
-     	$this->action = '';
-     }
+        if ($form_config['template_form'])
+        {
+            $parts = explode(":", $form_config['template_form']);
+            if (count($parts)==1)
+            {
+                $form_config['template_form'] = "form.html:".$form_config['template_form'];
+            }
+        }
 
-     if (!$form_config) $form_config = $this->default_config;
-     else               Form::StaticDefaults($this->default_config, $form_config);
+        $this->config = $form_config;
 
-     if ($form_config['template_form'])
-     {
-	$parts = explode(":", $form_config['template_form']);
-	if (count($parts)==1)
-	{
-	    $form_config['template_form'] = "form.html:".$form_config['template_form'];
-	}
-     }
+        $a = array( "on_before_event", "on_after_event" );
+        foreach($a as $v)
+        if (isset($form_config[$v]) && !is_array($form_config[$v]))
+        {
+            $this->config[$v] = array();
+            $this->config[$v][] = $form_config[$v];
+        }
+    }
 
-     $this->config = $form_config;
-
-     // eventhandl.
-     $a = array( "on_before_event", "on_after_event" );
-     foreach($a as $v)
-       if (isset($form_config[$v]) && !is_array($form_config[$v]))
-       {
-         $this->config[$v] = array();
-         $this->config[$v][] = $form_config[$v];
-       }
-   }
-
-
-
-   // автоматизатор "конфигов по-умолчанию"
-   function StaticDefaults( $default_config, &$supplied_config )
-   {
-     foreach( $default_config as $k=>$v )
-       if (!isset($supplied_config[$k])) $supplied_config[$k] = $v;
-   }
+    // автоматизатор "конфигов по-умолчанию"
+    function staticDefaults( $default_config, &$supplied_config )
+    {
+        foreach( $default_config as $k=>$v )
+            if (!isset($supplied_config[$k])) $supplied_config[$k] = $v;
+    }
 
    // Добавить поле
    function &AddField( $field_name = NULL, $config )
@@ -217,7 +212,7 @@ class Form
      }
      while (isset($this->rh->forms) && in_array($this->name, $this->rh->forms));
      $this->rh->forms[] = $this->name;*/
-     $this->name = $this->config['db_table']? $this->config['db_table'] : 'form';
+     $this->name = $this->config['name']? $this->config['name'] : 'form';
 
      //пробуем обработать пост
      if (isset($_POST[$this->form_present_var]) && ($_POST[$this->form_present_var] == 'form_'.$this->name) && !$ignore_post)
@@ -463,12 +458,12 @@ class Form
      switch( $_event )
      {
        case FORM_EVENT_INSERT:
-                              $this->DbInsert();
+                              $this->dbInsert();
                               $this->success   = true;
                               $this->processed = true;
                               break;
        case FORM_EVENT_UPDATE:
-                              $this->DbUpdate();
+                              $this->dbUpdate();
                               $this->success   = true;
                               $this->processed = true;
                               break;
@@ -596,7 +591,7 @@ class Form
                $this->config["id_field"]."=".Locator::get('db')->quote($this->data_id);
         if (sizeof($fields) == 0) return false;
         Locator::get('db')->execute($sql);
-   }
+    }
    
     function _dbAuto( &$fields, &$values, $is_insert=false )
     {

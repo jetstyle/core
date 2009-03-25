@@ -109,6 +109,14 @@ class RequestInfo
 	{
 		return self::$data[$key];
 	}
+	
+	public static function getAll()	
+	{
+		$data = array();
+		foreach (self::$data as $name => $value)
+			$data[] = array('name' => $name, 'value' => $value);
+		return $data;
+	}
 
 	public static function set($key, $value)
 	{
@@ -200,7 +208,7 @@ class RequestInfo
 			self::$_compiled[self::METHOD_GET ] = "";
 			self::$_compiled[self::METHOD_POST] = "";
 			$f=0;
-			foreach(self::$values as $k=>$v)
+			foreach(self::$data as $k=>$v)
 				if( $v!='' )
 					if (($only == "") || (strpos($k, $only) === 0))
 					{
@@ -214,18 +222,20 @@ class RequestInfo
 							$v0 = htmlspecialchars($v);
 							$v1 = urlencode($v);
 						}
-						if ($f) $this->_compiled[self::METHOD_GET ].=$this->s; else $f=1;
-						$this->_compiled[self::METHOD_GET ] .= $k."=".$v1;
-						$this->_compiled[self::METHOD_POST] .= "<input type='hidden' name='".$k."' value='".$v0."' />\n";
+						if ($f) self::$_compiled[self::METHOD_GET ] .= '&'; else $f=1;
+						self::$_compiled[self::METHOD_GET ] .= $k."=".$v1;
+						self::$_compiled[self::METHOD_POST] .= "<input type='hidden' name='".$k."' value='".$v0."' />\n";
 					}
 			self::$_compiled_ready = 1;
 		}
 		$data = self::$_compiled[$method];
 		if ($method == self::METHOD_POST) return $data.$bonus;
-		if ($bonus != "")
-		if ($data != "") $data=$this->q.$data.$this->s.$bonus;
-			else $data.=$this->q.$bonus;
-			else if ($data != "") $data = $this->q.$data;
+		if ($bonus)
+		{
+			if ($data) $data = '?'.$data.'&'.$bonus;
+				else $data .= '?'.$bonus;
+		}
+		else if ($data) $data = '?'.$data;
 		return $data;
 	}
 	
