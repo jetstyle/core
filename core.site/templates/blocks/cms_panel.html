@@ -43,10 +43,8 @@
 
 {{/?}} 
 
-<div class="cms-toolbar">
-	<img class="block" src="{{images}}z.gif" width="1" height="4" align="top" alt="" />
-</div>
-<table style="border-top: 4px #F0F2ED solid; position: absolute; top: 0;" cellspacing="0" cellpadding="0" class="cms-toolbar w100">
+
+<table style="border-top: 4px #F0F2ED solid; position: absolute; top: 0; z-index: 1000;" cellspacing="0" cellpadding="0" class="cms-toolbar w100">
 	<tr>
 		<!--<td nowrap="nowrap">
 			Вы &mdash; <strong>admin</strong>: бог
@@ -84,7 +82,7 @@
 			-->
 			{{!textOce type="content" module="content" title="Редактировать в CMS" id=PAGE.id show="1"}}
 			|
-		    	<a href="{{/}}cms">CMS</a>
+		    	<a href="{{/}}cms">CMS</a> | {{!oce module="config"}} | 
 		    	<a rel="notrack" href="{{/}}cms/login?logout=1&retpath={{cur_url}}" onclick="return confirm('Вы действительно желаете выйти?');">выход</a>	
 		</td>
 	</tr>
