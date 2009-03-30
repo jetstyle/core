@@ -23,3 +23,7 @@
 	font-family:Arial,sans-serif;
 	font-size:12px;
     }
+.cms-delete-but, .cms-save-but {
+  padding: 6px;
+  margin: -6px 6px 6px -6px !important;
+  margin: 0; }
