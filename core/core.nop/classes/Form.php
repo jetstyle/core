@@ -338,7 +338,10 @@ class Form
      $form_name = isset($this->config["form_name"]) ? $this->config["form_name"] : 'form_'.$this->name;
      $this->tpl->Set( "form", 
       $this->rh->ri->Form( 
-        $this->action, METHOD_POST, ' id="'.$form_name.'" name="'.$form_name.( $this->config["form_class"] ? '" class="'.$this->config["form_class"].'"' : '').( $this->config["autocomplete"] ? '" autocomplete="'.$this->config["autocomplete"].'"' : ''). ' enctype="multipart/form-data" '
+        $this->action, METHOD_POST, ' id="'.$form_name.'" name="'.$form_name.( $this->config["form_class"] ? '" class="'.$this->config["form_class"].'"' : '').
+	( $this->config["autocomplete"] ? '" autocomplete="'.$this->config["autocomplete"].'"' : ''). 
+	($this->config["form_onsubmit"] ? "onsubmit='".$this->config["form_onsubmit"]."'" : '' ).
+	' enctype="multipart/form-data" '
       )
      );
      $this->tpl->Set( "form_name", 'form_'.$this->name );
@@ -348,6 +351,8 @@ class Form
      $this->tpl->Set( "content", $content );
      $this->tpl->Set( "data_id", $this->data_id );
      $this->tpl->Set( "buttons", $this->_ParseButtons() );
+     
+     $this->tpl->Set( "form_descr", $this->config['form_descr'] );
      return $this->tpl->Parse( $this->config["template_prefix"].$this->config["template_form"]);
      
    }
