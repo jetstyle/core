@@ -58,7 +58,7 @@ class TreeControlJsTree extends TreeControl
 				$show_trash = $_GET['_show_trash'];
 
 				$treeParams = array(
-					'current_id' => $this->id,
+					'current_id' => ($_GET['full_id'] ? $_GET['full_id'] : 'node-'.$this->id),
 					'source_url' => RequestInfo::hrefChange(RequestInfo::$baseUrl."do/".$this->config->componentPath, array('action' => 'json', $this->idGetVar => '', 'cid' => $this->id)),
 					'update_url' => RequestInfo::hrefChange(RequestInfo::$baseUrl."do/".$this->config->componentPath, array('action' => 'update')),
 					'ajax_auto_loading' => $this->config->ajaxAutoLoading,
@@ -264,7 +264,7 @@ class TreeControlJsTree extends TreeControl
 					'data' => iconv('cp1251', 'utf-8', $this->_getTitle($this->items[$id])),
 					'attributes' => array(
 						'id' => 'node-'.$id,
-						'data' => '{type: "'.( ($this->items[$id]['_level'] == 1 && $this->config->denyDropToRoot) ? 'root' : 'node').'",path: "'.$this->items[$id]['_path'].'" }',
+						'data' => '{type: "'.( ($this->items[$id]['_level'] == 1 && $this->config->denyDropToRoot) ? 'root' : 'node').'",path: "'.$this->items[$id]['_path'].'",form_config: "'.$this->items[$id]['form_config'].'"}',
 						'class' => ($this->items[$id]['_state'] == 1 ? 'hidden' : ($this->items[$id]['_state'] == 2 ? 'deleted' : '')),
 					),
 					'level' => $this->items[$id]['_level'],

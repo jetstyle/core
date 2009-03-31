@@ -225,7 +225,6 @@ class FormSimple
 			{
 				$this->model->loadOne($this->model->quoteField($this->idField).'='.$this->id);
 				$this->item = $this->model->getData();
-
 				if (!$this->item[$this->idField])
 				{
 					Controller::redirect(RequestInfo::hrefChange('', array($this->idGetVar => '')));

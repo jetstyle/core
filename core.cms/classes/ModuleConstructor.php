@@ -23,6 +23,11 @@ class ModuleConstructor
 
 		// add module dir to DIRS stack
 		Finder::prependDir(Config::get('app_dir').$this->handlersType.'/'.$this->moduleName.'/', 'app');
+		if ($_GET['form_config'])
+		{
+			$formModuleName = substr($_GET['form_config'], 0, strpos($_GET['form_config'], '/'));
+			Finder::prependDir(Config::get('app_dir').$this->handlersType.'/'.$formModuleName.'/', 'app');
+		}
 
 		$this->config = new ModuleConfig();
 		$defsPath = Finder::findScript( $this->handlersType, $this->moduleName.'/defs');
@@ -64,6 +69,7 @@ class ModuleConstructor
 			}
 
 			$className = $config->class_name;
+			
 			Finder::useClass( $className );
 			Debug::trace('ModuleConstructor::InitModule - '.$this->moduleName.'/'.$className );
 
@@ -81,9 +87,12 @@ class ModuleConstructor
 			}
 
 			Locator::get('tpl')->set("module_name", $mn);
+			
+			//if ($className != 'TreeControlJsTreeContent') {var_dump('<pre>', $config, '</pre>');die;}
 
 			$cls = new $className($config);
 			$cls->handle();
+			
 			return $cls->getHtml();
 		}
 		// just a wrapper
@@ -162,8 +171,16 @@ class ModuleConstructor
 		}
 
 		unset($config->WRAPPED);
-
-		$config->read(Finder::findScript( $this->handlersType, $this->moduleName.'/'.$name));
+		
+		if ($name == 'form' && $_GET['form_config'])
+		{
+			$fileName = str_replace('.php', '', $_GET['form_config']);
+			$config->read(Finder::findScript( $this->handlersType, $fileName ));
+		}
+		else
+		{
+			$config->read(Finder::findScript( $this->handlersType, $this->moduleName.'/'.$name));
+		}
 		return $config;
 	}
 }

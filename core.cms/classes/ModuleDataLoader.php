@@ -22,13 +22,6 @@ class ModuleDataLoader {
 		{
         	$this->moduleName = $moduleName;
 		}
-	    /*else
-	    {
-			$moduleDir = dirname(dirname(__FILE__));
-			$matches = array();
-			preg_match('|[\w\d]*$|', $moduleDir, $matches);
-			$this->moduleName = $matches[0];
-	    }*/
 	}
 
 	public function getData($parent)
@@ -45,6 +38,7 @@ class ModuleDataLoader {
 			$item['_level'] = $parentRow['_level']+1;
 			$item['custom_buttons'] = true;
 			$item['hide_buttons']['addChild'] = true;
+			$item['form_config'] = $this->moduleName.'/'.$this->formPath;
          	$items[$item['id']] = $item;
         	$children[$parent][] = $item['id'];
         }
@@ -73,14 +67,17 @@ class ModuleDataLoader {
 		
 		$itemForm = $this->getObject($this->formPath);
 		
-		//var_dump(intval($itemParts[count($itemParts)-1]));
-		
 		$db = &Locator::get('db');
 		$db->execute("
 			UPDATE ??".$itemForm->getTableName()."
 			SET title = ".$db->quote($title).", title_pre = ".$db->quote($titlePre)."
 			WHERE id = ".intval($itemParts[count($itemParts)-1])."
 		");
+	}
+	
+	public function getParentsForItem($itemId)
+	{
+		return array();
 	}
 
 	protected function getObject($configPath)
