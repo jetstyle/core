@@ -282,7 +282,11 @@ class Finder {
 			}
 			self::$DIRS['all'][] = $value;
 		}
-		//var_dump(self::$DIRS);
+	}
+	
+	public static function replaceDirs($DIRS) 
+	{
+		self::$DIRS = $DIRS;		
 	}
 
 	public static function useClass($name, $scope = 'all') 
