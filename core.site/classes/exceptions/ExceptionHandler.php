@@ -64,12 +64,12 @@ class ExceptionHandler
 		{
 			$className = 'all';
 		}
-		
+	
 		if ($this->config[$className])
 		{
 			foreach ($this->methodsByConst AS $action => $method)
 			{
-				if ($this->config[$className] & $action)
+				if ($this->config[$className] & $action )
 				{
 					$actions[$action] = $method;
 				}
@@ -87,8 +87,20 @@ class ExceptionHandler
 
 		if (!$actions[EXCEPTION_IGNORE])
 		{
-			die();
+			die('');
 		}
+	}
+	
+	public function getMethod($exceptionObj)
+	{
+		$className = get_class($exceptionObj);
+		
+		if (!$this->config[$className] && $this->config['all'])
+		{
+			$className = 'all';
+		}
+		
+		return	$this->config[$className];
 	}
 
 	private function ignore($exceptionObj)
