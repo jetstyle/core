@@ -47,6 +47,11 @@ class FormSimple
 		{
 			$this->config->UPDATE_FIELDS = $this->config->SELECT_FIELDS;
 		}
+		
+		if (!isset($this->config->supertag_check))
+		{
+			$this->config->supertag_check = true;
+		}
 
 		$this->initModel();
 
@@ -512,6 +517,7 @@ class FormSimple
 			Finder::useClass('Translit');
 			$translit =& new Translit();
 			$this->postData['_supertag'] = $translit->supertag( $this->postData[$field], TR_NO_SLASHES, $limit );
+			
 			if ($this->config->supertag_check)
 			{
 				$sql = "SELECT id, _supertag FROM ??".$this->config->table_name." WHERE _supertag=".$this->db->quote($this->postData['_supertag'])." AND id <> ".intval($this->id);
