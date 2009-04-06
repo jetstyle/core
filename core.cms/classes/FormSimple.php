@@ -48,7 +48,7 @@ class FormSimple
 			$this->config->UPDATE_FIELDS = $this->config->SELECT_FIELDS;
 		}
 		
-		if (!isset($this->config->supertag_check))
+		if (!isset($this->config->supertag_check) && !isset($this->config->supertag_path_check))
 		{
 			$this->config->supertag_check = true;
 		}
@@ -489,7 +489,6 @@ class FormSimple
 						    $this->postData[ $field_pre ] = $this->postData[ $field ];
 					    }
 
-
 					    $this->postData[ $field_pre ] = $tpl->action( $filter, $this->postData[ $field_pre ]);
 					    //добавляем поле в список для сохранения
 					    $this->UPDATE_FIELDS[] = $field_pre;
@@ -501,7 +500,7 @@ class FormSimple
 		    return;
 
 		//supertag
-		if ( $this->config->supertag )
+		if ( $this->config->supertag)
 		{
 			if ( is_array($this->config->supertag) )
 			{
@@ -514,13 +513,25 @@ class FormSimple
 				$limit = $this->supertagLimit;
 			}
 
-			Finder::useClass('Translit');
-			$translit =& new Translit();
-			$this->postData['_supertag'] = $translit->supertag( $this->postData[$field], TR_NO_SLASHES, $limit );
-			
-			if ($this->config->supertag_check)
+			if ($_POST[$this->prefix . '_supertag'] == '')
 			{
-				$sql = "SELECT id, _supertag FROM ??".$this->config->table_name." WHERE _supertag=".$this->db->quote($this->postData['_supertag'])." AND id <> ".intval($this->id);
+				Finder::useClass('Translit');
+				$translit =& new Translit();
+				$this->postData['_supertag'] = $translit->supertag( $this->postData[$field], TR_NO_SLASHES, $limit );		
+			}
+			
+			if ($this->config->supertag_check || $this->config->supertag_path_check)
+			{
+				$sql = "SELECT id, _supertag
+				        FROM ??".$this->config->table_name."
+						WHERE  _supertag=".$this->db->quote($this->postData['_supertag'])." AND id <> ".intval($this->id);
+						
+				if ($this->config->supertag_path_check)
+				{
+					$item = $this->db->queryOne("SELECT _parent FROM ??".$this->config->table_name." WHERE id = ".intval($this->id));
+					$sql .= ' AND _parent = '.intval($item['_parent']);
+				}
+				
 				$rs = $this->db->queryOne($sql);
 				if ($rs['id'])
 				{
@@ -557,6 +568,7 @@ class FormSimple
 
 		// update order
 		$data = array('_order' => $this->id);
+		
 		if ($this->updateSupertagAfterInsert)
 		{
 			$data['_supertag'] = $this->postData['_supertag'].'_'.$this->id;
