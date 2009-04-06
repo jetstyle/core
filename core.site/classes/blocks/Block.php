@@ -4,6 +4,7 @@ class Block
 	private $data = null;
 	private $tplParams = array();
 	protected $config = array();
+
 	
 	public function __construct($config = array())
 	{
@@ -22,7 +23,21 @@ class Block
 	{
 		if (null === $this->data)
 		{
+		    try
+		    {
 			$this->constructData();
+		    }
+		    catch( Exception $e )
+		    {
+			//Exceptions not to ignore
+			$processExceptions = array(EXCEPTION_MAIL, EXCEPTION_MAIL | EXCEPTION_SILENT);
+	
+			if ( in_array( ExceptionHandler::getInstance()->getMethod($e), $processExceptions  ) )
+			{
+			    ExceptionHandler::getInstance()->process($e);
+			}
+			$this->data = null;
+		    }
 		}
 		return $this->data;
 	}

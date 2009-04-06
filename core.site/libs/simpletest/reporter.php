@@ -49,7 +49,7 @@
             print "</style>\n";
             print "</head>\n<body>\n";
             print "<h1>$test_name</h1>\n";
-            flush();
+            //flush();
         }
 
         /**
@@ -216,7 +216,7 @@
                 header('Content-type: text/plain');
             }
             print "$test_name\n";
-            flush();
+            //flush();
         }
 
         /**
@@ -296,7 +296,7 @@
          */
         function paintFormattedMessage($message) {
             print "$message\n";
-            flush();
+            //flush();
         }
     }
 

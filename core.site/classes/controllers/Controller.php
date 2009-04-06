@@ -202,7 +202,9 @@ abstract class Controller implements ArrayAccess
 			
 				if ($this->method)
 				{
-					$this->preHandle();
+					//QUICKSTART-790
+					$this->params_mapped = $matches;
+					$this->preHandle( $matches );
 					if ($controller)
 					{
 						$status = call_user_func_array(
@@ -217,7 +219,7 @@ abstract class Controller implements ArrayAccess
 							$config
 						);
 					}
-					$this->postHandle();
+					$this->postHandle( $matches );
 					break;
 				}
 			}
@@ -294,14 +296,17 @@ abstract class Controller implements ArrayAccess
 		return $o;
 	}
 
-	protected function preHandle()
+	protected function preHandle($config)
 	{
 
 	}
 
-	//TODO: save to cache
-	//extract it
-	protected function postHandle()
+	/**
+	 * TODO: 
+	 *  - save to cache
+	 *  - extract it, контроллеру не надо делать работу View
+	 */
+	protected function postHandle($config)
 	{
 		//set colors
 		$config = Config::getAll();
@@ -372,6 +377,10 @@ abstract class Controller implements ArrayAccess
 		return $o;
 	}
 
+	/**
+	 * TODO:
+	 *  - extract to view
+	 */
 	protected function rend()
 	{
 		if (is_array($this->o_plugins))
@@ -384,6 +393,7 @@ abstract class Controller implements ArrayAccess
 		
 		if (!empty($this->data))
 		{
+			$this->data['params'] = $this->params_mapped;
 			Locator::get('tpl')->set('PAGE', $this->data);
 		}
 	}

@@ -37,6 +37,8 @@ class MenuBlock extends Block
 		}
 		$row['href'] = $row['_path'];
 		
+		if ($this->config['force_nbsp'])
+		    $row['title_short'] = str_replace( " ", "&nbsp;", $row['title_short'] );
 	}
 	
 	protected function getParentNodeByLevel($level)
