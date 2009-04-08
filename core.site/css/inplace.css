@@ -29,7 +29,7 @@
   margin: 0; }
   
   
-.change-color {
+.change-color-bg, .change-color-text {
 	cursor: pointer;
 	position: absolute;
 }
