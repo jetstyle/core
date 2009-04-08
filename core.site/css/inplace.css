@@ -27,3 +27,23 @@
   padding: 6px;
   margin: -6px 6px 6px -6px !important;
   margin: 0; }
+  
+  
+.change-color {
+	cursor: pointer;
+	position: absolute;
+}
+
+#webPalette {
+	position: absolute;
+	width: 288px;
+	display: none;
+	z-index: 1000;
+	border: 1px solid;
+}
+#webPalette div {
+	width: 16px;
+	height: 16px;
+	float: left;
+	cursor: pointer;
+}

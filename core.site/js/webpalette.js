@@ -11,16 +11,22 @@ WebPalette.prototype = {
         this.settings = settings;
         _this = this;
         $('#'+this.elementId+' div').mouseover(function(){
-            _this.settings.colorChange(
-                _this.normalizeColor($(this).css('background-color'))
-            );    
+            if (_this.settings.colorChange) {
+                _this.settings.colorChange(
+                    _this.normalizeColor($(this).css('background-color'))
+                );
+            }
         });
         $('#'+this.elementId+' div').click(function(){
-            _this.settings.colorClick();
+            if (_this.settings.colorClick) {
+                _this.settings.colorClick(
+                    _this.normalizeColor($(this).css('background-color'))
+                );
+            }
             return false;
         });
         $('#'+this.elementId).mouseout(function(){
-            if (_this.visibility) _this.settings.colorChange(false);
+            if (_this.visibility && _this.settings.colorChange) _this.settings.colorChange(false);
         });
     },
     
@@ -35,8 +41,15 @@ WebPalette.prototype = {
         $('#'+this.elementId).hide();   
     },
     
-    show: function()
+    show: function(snapTo)
     {
+        console.log($(document).height());
+        if ($(snapTo).offset().left + $(snapTo).width() + $('#'+this.elementId).width() + 3 > $(document).width()) {
+            $('#'+this.elementId).css('left', $(snapTo).offset().left - $('#'+this.elementId).width() - 3);   
+        } else {
+            $('#'+this.elementId).css('left', $(snapTo).offset().left + $(snapTo).width() + 3);   
+        }
+		$('#'+this.elementId).css('top', $(snapTo).offset().top - 1);
         this.visibility = true;
         $('#'+this.elementId).show();   
     },
