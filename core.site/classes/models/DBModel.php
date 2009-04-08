@@ -26,7 +26,7 @@ class DBModel extends Model implements IteratorAggregate, ArrayAccess, Countable
 	protected $autoPrefix = true;
 	
 	/**
-	 * Имя таблицы
+	 * �?мя таблицы
 	 *
 	 * @var string
 	 **/
@@ -594,13 +594,8 @@ class DBModel extends Model implements IteratorAggregate, ArrayAccess, Countable
 		$this->updateTableAlias();
 		$this->bannedTableAliases[] = $this->getTableAlias();
 
-		if (is_array($this->foreignModels) && !empty($this->foreignModels))
-		{
-			foreach ($this->foreignModels AS &$model)
-			{
-				$model->setBannedTableAliases($this->bannedTableAliases);
-			}
-		}
+        $this->updateForeignModelAliases();
+
 		return $this;
 	}
 
@@ -894,9 +889,8 @@ class DBModel extends Model implements IteratorAggregate, ArrayAccess, Countable
 	public function addForeignModel($fieldName, &$model)
 	{
 		$this->foreignModels[$fieldName] = &$model;
-
-		$model->setBannedTableAliases($this->bannedTableAliases);
-		//		$this->bannedTableAliases[] = $model->getTableAlias();
+        $this->foreignModels[$fieldName]->setBannedTableAliases(&$this->bannedTableAliases);
+        
 		return $this;
 	}
 
@@ -981,7 +975,10 @@ class DBModel extends Model implements IteratorAggregate, ArrayAccess, Countable
 		{
 			$this->cleanUp();
 		}
-		
+
+        $this->bannedTableAliases = array($this->getTableAlias());
+        $this->updateForeignModelAliases();
+
 		$this->notify('will_load', array(&$this));
 
 		if ($this->pagerEnabled)
@@ -1758,12 +1755,8 @@ class DBModel extends Model implements IteratorAggregate, ArrayAccess, Countable
 		}
 
 		$field = &$this->foreignFields[$fieldName];
-		$model = & DBModel::factory($field['className']);
-		$model->setBannedTableAliases($this->bannedTableAliases);
-		//$this->bannedTableAliases[] = $model->getTableAlias();
-
-		$this->foreignModels[$fieldName] = &$model;
-
+		$this->foreignModels[$fieldName] = DBModel::factory($field['className']);
+        $this->foreignModels[$fieldName]->setBannedTableAliases(&$this->bannedTableAliases);
 		$this->initForeignModelConfig($fieldName);
 	}
 
@@ -1821,7 +1814,22 @@ class DBModel extends Model implements IteratorAggregate, ArrayAccess, Countable
 		$field['initialized'] = true;
 	}
 
-	
+	protected function updateForeignModelAliases()
+    {
+        if (is_array($this->foreignModels) && !empty($this->foreignModels))
+		{
+			foreach ($this->foreignModels AS $fieldName => &$model)
+			{
+                $conf = $this->getForeignFieldConf($fieldName);
+                if ($conf['type'] == 'has_one')
+                {
+                    $model->setBannedTableAliases(&$this->bannedTableAliases);
+                }   
+			}
+		}
+    }
+
+
 	/**
 	 * tree functionality
 	 */
