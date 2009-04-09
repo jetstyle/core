@@ -340,7 +340,7 @@ class TreeControl
 		");
 	}
 
-	protected function getParentsForItem($id)
+	public function getParentsForItem($id)
 	{
 		$parents = array();
 

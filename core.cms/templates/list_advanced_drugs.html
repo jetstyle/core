@@ -170,33 +170,31 @@
 
 <!-- -->
 <div class="cms-list-advanced">
-{{__arrows}}
-<img class="block" src="{{images}}z.gif" width="1" height="10" align="top" alt="" />
-{{__form}}
-{{__logs}}
-{{__picker}}
-{{__filter}}
-{{__trash_switch}}
-{{__add_new}}
-{{?group_operations}}
-	<a id="toggleGroupSelect" href="">выбрать несколько</a><br/>
-	<span id="groupSelectActions" style="display: none">
-		выбрать <a id="groupSelectAll" href="">всё</a> /
-		<a id="groupSelectNothing" href="">ничего</a><br/>
-		<a id="groupDelete" href="{{group_delete_url}}">удалить выбранные</a><br/>
-		<a id="groupRestore" href="{{group_restore_url}}">восстановить выбранные</a><br/>
-	</span>
-{{?/}}
-<img class="block" src="{{images}}z.gif" width="1" height="10" align="top" alt="" />
-
-<input type="hidden" name="order" id="order" value="" />
-<ul id="left_col" class="sortable boxy">
-{{__list}}
-</ul>
-
-{{__bottom}}
-<img class="block" src="{{images}}z.gif" width="1" height="10" align="top" alt="" />
-{{__arrows}}
+	<div class="toolbar">
+		{{__form}}
+		{{__logs}}
+		{{__picker}}
+		{{__filter}}
+		{{__trash_switch}}
+		{{__add_new}}
+		{{?group_operations}}
+			<a id="toggleGroupSelect" href="">выбрать несколько</a><br/>
+			<span id="groupSelectActions" style="display: none">
+				выбрать <a id="groupSelectAll" href="">всё</a> /
+				<a id="groupSelectNothing" href="">ничего</a><br/>
+				<a id="groupDelete" href="{{group_delete_url}}">удалить выбранные</a><br/>
+				<a id="groupRestore" href="{{group_restore_url}}">восстановить выбранные</a><br/>
+			</span>
+		{{?/}}
+	</div>
+	<input type="hidden" name="order" id="order" value="" />
+	{{__arrows}}
+	<ul id="left_col" class="sortable boxy">
+		{{__list}}
+	</ul>
+	{{__bottom}}
+	<img class="block" src="{{images}}z.gif" width="1" height="10" align="top" alt="" />
+	{{__arrows}}
 </div>
 <!-- -->
 {{TPL:Form}}

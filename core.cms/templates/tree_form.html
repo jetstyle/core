@@ -1,20 +1,39 @@
 <img class="block" src="{{images}}z.gif" width="1" height="5" align="top" alt="" />
+<!--<h1 class="cms-content-title-">Разделы сайта</h1>-->
 <table cellspacing="0" cellpadding="0" class="w100">
 <tr>
   <td><img class="block" src="{{images}}z.gif" width="2" height="1" align="top" alt="" /></td>
   <td width="34%" style="font-size: 80%">
     {{wrapped.0}}
   </td>
-  <td width="6" style="background: #F0F2ED; cursor: pointer;" id="separator"><img class="block" src="{{images}}z.gif" width="6" height="1" align="top" alt="" /></td>
-  <td width="65%">{{wrapped.1}}</td>
+  <td width="6" style="background: #F0F2ED; cursor: pointer;" id="separator" class="separator-">
+    <!--<img class="separator- block" src="{{images}}z.gif" width="6" height="1" align="top" alt="" />-->
+    <div class="arrow-"></div>
+  </td>
+  <td width="65%">
+    {{wrapped.1}}
+  </td>
   <!--td><img class="block" src="{{images}}z.gif" width="5" height="1" align="top" alt="" /></td-->
 </tr>
 </table>
 
 <script type="text/javascript">
-	$(document).ready(function(){		$('#separator').hover(function(){			$(this).css('background', '#E4E6E1');		}, function(){			$(this).css('background', '#F0F2ED');		}).toggle(function(){			$(this).prev('td').hide();
-			$(this).next('td').attr('width', '100%');		}, function(){			$(this).prev('td').show();
+	$(document).ready(function(){
+		$('#separator').hover(function(){
+			$(this).css('background', '#E4E6E1');
+			$('.arrow-').css("border-color", "#F0F2ED #06498D #F0F2ED #06498D");
+		}, function(){
+			$(this).css('background', '#F0F2ED');
+			$('.arrow-').css("border-color", "#F0F2ED #000 #F0F2ED #000");
+		}).toggle(function(){
+			$(this).prev('td').hide();
+			$(this).next('td').attr('width', '100%');
+			$('.arrow-').css("margin", "0 -4px 0 1px");
+		}, function(){
+			$(this).prev('td').show();
+			$('.arrow-').css("margin", "0 1px 0 -4px");
 			$(this).next('td').attr('width', '65%');
-		});	});
+		});
+	});
 </script>
 

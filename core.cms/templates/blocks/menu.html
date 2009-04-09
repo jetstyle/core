@@ -51,7 +51,9 @@ function switchMenu(el)
 	}
 }
 
-$(document).ready( function() {	$('body').click(function(){    	if ($('#gotomenu').is(':visible')) $('#gotomenu').hide();
+$(document).ready( function() {
+	$('body').click(function(){
+    	if ($('#gotomenu').is(':visible')) $('#gotomenu').hide();
 	});
 	$('#gotolink').click(function(){
 		$('#gotomenu').css('right',$(document).width() - $('#gotolink').offset().left - $('#gotolink').width());
@@ -90,7 +92,7 @@ $(document).ready( function() {	$('body').click(function(){    	if ($('#gotome
 {{/:item_sep}}
 
 {{:subitem_item *selected}}
-	<h1>{{*title}}</h1>
+	{{*title}}
 {{/:subitem_item}}
 
 {{:subitem_item}}

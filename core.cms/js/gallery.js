@@ -21,7 +21,7 @@ Gallery.prototype = {
        			});
        			order = order.substr(0, order.length-1);
        			$.post(self.baseUrl, {'action': 'reorder','order': order},function(data) {
-					if (data != '1') alert(data);
+					if (data != '1') alert('Ошибка!');
        			},'text');
         	},
         	items: '> div.gallery-image'
@@ -44,8 +44,12 @@ Gallery.prototype = {
        	});
        	//edit image form
        	$('#editImageOK').click(this.editImageTitle.prototypeBind(this));
-  		$('#editImageTitle').keypress(function(e){  			if (e.which == 13) {  				self.editImageTitle();  				return false;
-  			}  		});
+  		$('#editImageTitle').keypress(function(e){
+  			if (e.which == 13) {
+  				self.editImageTitle();
+  				return false;
+  			}
+  		});
   		$(document).click(function(){
   			$('#editImageForm:visible').hide();
   			self.clearSelected();
@@ -58,7 +62,7 @@ Gallery.prototype = {
   		//refresh page on forbidden
   		$.ajaxSetup({
         	'error': function(XMLHttpRequest, textStatus, errorThrown) {
-            	alert(textStatus);
+            	alert('Ошибка!');
 				location.reload(true);
         	}
   		});
@@ -101,7 +105,8 @@ Gallery.prototype = {
                     event.pageY <= $(this).offset().top ||
                     event.pageX >= $(this).offset().left + $(this).width() ||
                     event.pageY >= $(this).offset().top + $(this).height()
-        		) {                	$(this).find('img.control').hide();
+        		) {
+                	$(this).find('img.control').hide();
         		}
         	}
 		);
@@ -113,8 +118,11 @@ Gallery.prototype = {
 			var index = this.isSelected(id);
 			if (index != -1)
 				this.deleteSelected(index);
-			else	        	this.addSelected(id);
-		} else if (e.shiftKey) {        	if (this.lastSelected) {            	var items = [];
+			else
+	        	this.addSelected(id);
+		} else if (e.shiftKey) {
+        	if (this.lastSelected) {
+            	var items = [];
             	var clickedEl = $(img).parent()[0];
             	var lastClickedEl = $('#image'+this.lastSelected)[0];
             	var clickedIndex = $('div.gallery-image').index(clickedEl);
@@ -122,11 +130,15 @@ Gallery.prototype = {
             	var fromIndex = Math.min(clickedIndex, lastClickedIndex);
             	var toIndex = Math.max(clickedIndex, lastClickedIndex);
             	var self = this;
-            	$('div.gallery-image:gt('+(fromIndex-1)+'):lt('+(toIndex-fromIndex+1)+')').each(function(){					items.push(self.getId(this));            	});
+            	$('div.gallery-image:gt('+(fromIndex-1)+'):lt('+(toIndex-fromIndex+1)+')').each(function(){
+					items.push(self.getId(this));
+            	});
             	this.addSelectedAr(items);
-        	} else {            	this.setSelected(id);
+        	} else {
+            	this.setSelected(id);
         	}
-		} else {        	this.setSelected(id);
+		} else {
+        	this.setSelected(id);
 		}
 		return false;
 	},
@@ -141,7 +153,8 @@ Gallery.prototype = {
 		var message = this.selectedItems.length > 0 ? 'Удалить все выбранные картинки?' : 'Удалить?';
 		if (!confirm(message)) return false;
 		var items = '';
-		if (this.selectedItems.length > 0) {           	items = this.selectedItems.join(',');
+		if (this.selectedItems.length > 0) {
+           	items = this.selectedItems.join(',');
 		} else {
     		items = this.getId(deleteBtn.parentNode.parentNode);
     	}
@@ -150,7 +163,8 @@ Gallery.prototype = {
 		{
        		if (data == '1')
 			{
-				if (self.selectedItems.length > 0) {                	for (var i=0; i<self.selectedItems.length; i++)
+				if (self.selectedItems.length > 0) {
+                	for (var i=0; i<self.selectedItems.length; i++)
                 		$('#image'+self.selectedItems[i]).remove();
                 	self.selectedItems[i] = [];
                  	self.lastSelected = null;
@@ -170,7 +184,7 @@ Gallery.prototype = {
     	};
        	$.post(this.baseUrl, values, function(data) {
 			$('#image'+values.id+' div.image-title').text(values.title);
-			if (data != '1') alert(data);
+			if (data != '1') alert("Ошибка!");
     	},'text');
     	$('#editImageForm').hide();
   	},
@@ -186,7 +200,8 @@ Gallery.prototype = {
 	},
 
 	uploadUpdateFileCounter: function(stats) {
-		var fileUploaded = stats.successful_uploads + stats.upload_errors + stats.upload_cancelled;    	$('#fileCounter').show().text(
+		var fileUploaded = stats.successful_uploads + stats.upload_errors + stats.upload_cancelled;
+    	$('#fileCounter').show().text(
     		'Закачано файлов ' + fileUploaded + '/' + (fileUploaded + stats.files_queued)
     	);
 	},
@@ -198,7 +213,8 @@ Gallery.prototype = {
 	},
 
 	addSelected: function(id) {
-    	if (-1 == this.isSelected(id)) {    		this.selectedItems.push(id);
+    	if (-1 == this.isSelected(id)) {
+    		this.selectedItems.push(id);
 			$('#image'+id).css('opacity','0.4');
     		this.lastSelected = id;
     	}
@@ -210,7 +226,8 @@ Gallery.prototype = {
 	},
 
 	addSelectedAr: function(ids) {
-		for(var i=0; i<ids.length; i++) {        	this.addSelected(ids[i]);
+		for(var i=0; i<ids.length; i++) {
+        	this.addSelected(ids[i]);
 		}
 	},
 
@@ -222,7 +239,8 @@ Gallery.prototype = {
 	},
 
 	clearSelected: function() {
-		var selLength = this.selectedItems.length;    	for(var i=0; i<selLength; i++) {
+		var selLength = this.selectedItems.length;
+    	for(var i=0; i<selLength; i++) {
 			this.deleteSelected(0);
 		}
 	}
@@ -241,7 +259,8 @@ var imagesUploadSettings = {
 	button_window_mode: SWFUpload.WINDOW_MODE.TRANSPARENT,
 	button_cursor: SWFUpload.CURSOR.HAND,
 
-	file_dialog_complete_handler: function(numFilesSelected, numFilesQueued) {		$('#SWFUpload_0').blur();
+	file_dialog_complete_handler: function(numFilesSelected, numFilesQueued) {
+		$('#SWFUpload_0').blur();
 		if (numFilesSelected > 0) this.startUpload();
 	},
 	upload_start_handler: function() {
@@ -256,7 +275,10 @@ var imagesUploadSettings = {
 			Math.round(($('#progressCont').width()-2)*(bytesLoaded / bytesTotal))
 		);
 	},
-	upload_error_handler: function(file, errorCode, message) {},
+	upload_error_handler: function(file, errorCode, message) {
+		alert('Ошибка!');
+		location.reload(true);
+	},
 	upload_success_handler: function(file, data) {
 		if (data.indexOf('ok,')==0) {
            	$('#addImageButton').before(data.substring(3));
@@ -299,11 +321,13 @@ var imageOneUploadSettings = {
 	button_action: SWFUpload.BUTTON_ACTION.SELECT_FILE,
 
 	file_dialog_complete_handler: function(numFilesSelected, numFilesQueued) {
-		if (numFilesSelected > 0) {			this.customSettings.gallery.swfUploadOne.removePostParam('item_id');
+		if (numFilesSelected > 0) {
+			this.customSettings.gallery.swfUploadOne.removePostParam('item_id');
 			this.customSettings.gallery.swfUploadOne.addPostParam(
 				'item_id',
 				this.customSettings.gallery.getId($('#'+this.customSettings.gallery.lastOveredImageId).get(0))
-			);			this.startUpload();
+			);
+			this.startUpload();
 		}
 	},
 	upload_start_handler: function() {
@@ -318,7 +342,10 @@ var imageOneUploadSettings = {
 			Math.round(($('#progressCont').width()-2)*(bytesLoaded / bytesTotal))
 		);
 	},
-	upload_error_handler: function(file, errorCode, message) {},
+	upload_error_handler: function(file, errorCode, message) {
+		alert('Ошибка!');
+		location.reload(true);	
+	},
 	upload_success_handler: function(file, data) {
 		if (data.indexOf('ok,')==0) {
            	$('#'+this.customSettings.gallery.lastOveredImageId+' img').get(0).src += '?'+Math.random;

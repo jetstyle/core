@@ -67,8 +67,6 @@ class ModuleDataLoader {
 		
 		$itemForm = $this->getObject($this->formPath);
 		
-		//var_dump(intval($itemParts[count($itemParts)-1]));
-		
 		$db = &Locator::get('db');
 		$db->execute("
 			UPDATE ??".$itemForm->getTableName()."
