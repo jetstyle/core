@@ -50,6 +50,12 @@ else
 
 $params[$storeTo] = $block->getData();
 $stackId = $tpl->addToStack($params);
-echo $tpl->parse($tplName);
+if ($params['ret'])
+{
+	$res = $tpl->parse($tplName);
+	$tpl->freeStack($stackId);
+	return $res;
+}
+else echo $tpl->parse($tplName);
 $tpl->freeStack($stackId);
 ?>
