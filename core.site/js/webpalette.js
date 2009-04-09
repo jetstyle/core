@@ -43,13 +43,14 @@ WebPalette.prototype = {
     
     show: function(snapTo)
     {
-        console.log($(document).height());
-        if ($(snapTo).offset().left + $(snapTo).width() + $('#'+this.elementId).width() + 3 > $(document).width()) {
-            $('#'+this.elementId).css('left', $(snapTo).offset().left - $('#'+this.elementId).width() - 3);   
-        } else {
-            $('#'+this.elementId).css('left', $(snapTo).offset().left + $(snapTo).width() + 3);   
+        if (snapTo) {
+            if ($(snapTo).offset().left + $(snapTo).width() + $('#'+this.elementId).width() + 3 > $(document).width()) {
+                $('#'+this.elementId).css('left', $(snapTo).offset().left - $('#'+this.elementId).width() - 3);   
+            } else {
+                $('#'+this.elementId).css('left', $(snapTo).offset().left + $(snapTo).width() + 3);   
+            }
+            $('#'+this.elementId).css('top', $(snapTo).offset().top - 1);   
         }
-		$('#'+this.elementId).css('top', $(snapTo).offset().top - 1);
         this.visibility = true;
         $('#'+this.elementId).show();   
     },
