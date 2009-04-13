@@ -312,8 +312,7 @@ var mce_timer = false
 	tinyMCE.jetcontent = base_url + "cms/jetcontent";
 	
     	tinyMCE.base_url = base_url + "cms/";
-	
-	alert(tinyMCE.jetimages);
+
 //	this.mceInstance = tinyMCE;
     	/*
 	$("div.col-2").ajaxError(function(event, request, settings)
