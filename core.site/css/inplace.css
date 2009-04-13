@@ -47,3 +47,27 @@
 	float: left;
 	cursor: pointer;
 }
+
+.groupWrapper {
+	border: 2px solid;
+	padding: 5px;
+}
+
+.widget {
+	border: 1px dashed;
+}
+
+.widgetHeader {
+	color: white;
+	background: black;
+	cursor: pointer;
+}
+
+#addWidgetWindow {
+	position: absolute;
+	display: none;
+	background: white;
+	border: 1px solid;
+	width: 300px;
+	height: 200px;
+}
