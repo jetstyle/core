@@ -4,7 +4,7 @@ class Block
 	private $data = null;
 	private $tplParams = array();
 	protected $config = array();
-
+	protected $alwaysLoad = false;
 	
 	public function __construct($config = array())
 	{
@@ -21,7 +21,7 @@ class Block
 
 	public function &getData()
 	{
-		if (null === $this->data)
+		if (null === $this->data || $this->alwaysLoad)
 		{
 		    try
 		    {

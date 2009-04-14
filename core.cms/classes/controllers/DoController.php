@@ -41,7 +41,8 @@ class DoController extends Controller
 		$params = $this->params;
 		unset($params[0]);
 		
-		$current = Locator::get('db')->queryOne("SELECT title FROM ??toolbar WHERE href=".Locator::get('db')->quote( $config['module'] ) );
+		$sql = "SELECT title FROM ??toolbar WHERE href=".Locator::get('db')->quote( implode("/",$config) ) ;
+		$current = Locator::get('db')->queryOne($sql);
 		Locator::get('tpl')->set('module_title', $current['title']);
 		
 		Finder::useClass("ModuleConstructor");
