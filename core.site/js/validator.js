@@ -28,7 +28,7 @@ Validator.prototype = {
 		collectItems : function()
 		{
 			this.objs = new Array();
-			var els = $('[@validate]', this.f).get();
+			var els = $('[validate]', this.f).get();
 			for(i in els)
 			{
 				this.objs[this.objs.length] = new ValidatorItem(els[i], this.instant);
