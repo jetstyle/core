@@ -31,12 +31,12 @@
 			$('.arrow-').css("border-color", "#F0F2ED #000 #F0F2ED #000");
 		}).toggle(function(){
 			$(this).prev('td').hide();
-			$(this).next('td').attr('width', '100%');
+			$(this).next('td').next('td').attr('width', '100%');
 			$('.arrow-').css("margin", "0 -4px 0 1px");
 		}, function(){
 			$(this).prev('td').show();
 			$('.arrow-').css("margin", "0 1px 0 -4px");
-			$(this).next('td').attr('width', '65%');
+			$(this).next('td').next('td').attr('width', '65%');
 		});
 	});
 </script>
