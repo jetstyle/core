@@ -36,6 +36,11 @@ class Block
 			{
 			    ExceptionHandler::getInstance()->process($e);
 			}
+			else if ( $_GET['debug'] )
+			{
+			    ExceptionHandler::getInstance()->process($e);
+			}
+			
 			$this->data = null;
 		    }
 		}
