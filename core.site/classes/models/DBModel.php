@@ -1,13 +1,13 @@
 <?php
 
-//РёРЅС‚РµСЂС„РµР№СЃ РїРѕР»СѓС‡РµРЅРёСЏ РґР°РЅС‹С… РѕС‚ РѕР±СЉРµРєС‚Р°. РёСЃРїРѕР»СЊР·СѓРµС‚СЃСЏ РІ Controller::add_config, РЅСѓ Рё РІРѕРѕР±С‰Рµ РІРµР·РґРµ РіРґРµ РЅР°РґРѕ РѕРїСЂРµРґРµР»РёС‚СЊ РєРѕСЃРёС‚ Р»Рё РѕР±СЉРµРєС‚ РїРѕРґ РјР°СЃСЃРёРІ. (СЃ) dz
+//интерфейс получения даных от объекта. используется в Controller::add_config, ну и вообще везде где надо определить косит ли объект под массив. (с) dz
 interface DataContainer
 {
 	public function &getData();
 }
 
 /**
- * РљР»Р°СЃСЃ DBModel - Р±Р°Р·РѕРІС‹Р№ РєР»Р°СЃСЃ РјРѕРґРµР»РµРє, С…СЂР°РЅСЏС‰РёС… С‡РµРіРѕ-С‚Рѕ РІ Р‘Р”
+ * Класс DBModel - базовый класс моделек, хранящих чего-то в БД
  *
  */
 Finder::useClass('models/Model');
@@ -19,36 +19,36 @@ class DBModel extends Model implements IteratorAggregate, ArrayAccess, Countable
 	protected $db = null;
 
 	/**
-	 * РђРІС‚РѕРјР°С‚РёС‡РµСЃРєРё РґРѕР±Р°РІР»СЏС‚СЊ РїСЂРµС„РёРєСЃ С‚Р°Р±Р»РёС†С‹
+	 * Автоматически добавлять префикс таблицы
 	 *
 	 * @var bool
 	 */
 	protected $autoPrefix = true;
 	
 	/**
-	 * Р?РјСЏ С‚Р°Р±Р»РёС†С‹
+	 * Имя таблицы
 	 *
 	 * @var string
 	 **/
 	protected $table = NULL;
 
 	/**
-	 * РђР»РёР°СЃ С‚Р°Р±Р»РёС†С‹
+	 * Алиас таблицы
 	 *
 	 * @var string
 	 **/
 	protected $tableAlias = NULL;
 
 	/**
-	 * РђР»РёР°СЃС‹ С‚Р°Р±Р»РёС†, РєРѕС‚РѕСЂС‹Рµ РЅРµР»СЊР·СЏ РёСЃРїРѕР»СЊР·РѕРІР°С‚СЊ
+	 * Алиасы таблиц, которые нельзя использовать
 	 *
 	 * @var array
 	 **/
 	protected $bannedTableAliases = array();
 
 	/**
-	 * РњР°СЃСЃРёРІ РїРѕР»РµР№, Р·Р°РґР°РЅРЅС‹Р№ РїРѕР»СЊР·РѕРІР°С‚РµР»РµРј
-	 * Р­С‚Рё РїРѕР»СЏ РїР°СЂСЃСЏС‚СЃСЏ Рё РїСЂРµРІСЂР°С‰Р°СЋС‚СЃСЏ РІ $tableFields Рё $foreignFields
+	 * Массив полей, заданный пользователем
+	 * Эти поля парсятся и превращаются в $tableFields и $foreignFields
 	 *
 	 * ex.:
 	 * $fields = array(
@@ -106,28 +106,28 @@ class DBModel extends Model implements IteratorAggregate, ArrayAccess, Countable
 	protected $fields = array();
 
 	/**
-	 * РџРѕР»СЏ С‚Р°Р±Р»РёС†С‹
+	 * Поля таблицы
 	 *
 	 * @var array
 	 **/
 	protected $tableFields = array();
 
 	/**
-	 * Р’РЅРµС€РЅРёРµ РїРѕР»СЏ
+	 * Внешние поля
 	 *
 	 * @var array
 	 **/
 	protected $foreignFields = array();
 
 	/**
-	 * РњР°СЃСЃРёРІ РѕР±СЉРµРєС‚РѕРІ РјРѕРґРµР»РµР№ РґР»СЏ РІРЅРµС€РЅРёС… РєР»СЋС‡РµР№
+	 * Массив объектов моделей для внешних ключей
 	 *
 	 * @var array
 	 **/
 	protected $foreignModels = array();
 
 	/**
-	 * РЈСЃР»РѕРІРёРµ where Р·Р°РїСЂРѕСЃР°
+	 * Условие where запроса
 	 *
 	 * ex.:
 	 * $where = '{id} = 1 AND {_state} = 0';
@@ -137,28 +137,28 @@ class DBModel extends Model implements IteratorAggregate, ArrayAccess, Countable
 	public $where = '';
 
 	/**
-	 * РїР°СЂР°РјРµС‚СЂС‹ GROUP BY Р·Р°РїСЂРѕСЃР°
+	 * параметры GROUP BY запроса
 	 *
 	 * @var string
 	 **/
 	protected $group = NULL;
 
 	/**
-	 * РїР°СЂР°РјРµС‚СЂС‹ ORDER BY Р·Р°РїСЂРѕСЃР°
+	 * параметры ORDER BY запроса
 	 *
 	 * @var array
 	 **/
 	protected $order = array();
 
 	/**
-	 * РїР°СЂР°РјРµС‚СЂ LIMIT Р·Р°РїСЂРѕСЃР°
+	 * параметр LIMIT запроса
 	 *
 	 * @var int
 	 **/
 	protected $limit = NULL;
 
 	/**
-	 * РїР°СЂР°РјРµС‚СЂ offcet Р·Р°РїСЂРѕСЃР°
+	 * параметр offcet запроса
 	 *
 	 * @var int
 	 **/
@@ -174,7 +174,7 @@ class DBModel extends Model implements IteratorAggregate, ArrayAccess, Countable
 	protected $sqlParts = array();
 
 	/**
-	 * РљР»СЋС‡, РїРѕ РєРѕС‚РѕСЂРѕРјСѓ Р±СѓРґСѓС‚ СЃРєРѕРјРїР°РЅРѕРІР°РЅС‹ РїРѕР»СѓС‡РµРЅРЅС‹Рµ РґР°РЅРЅС‹Рµ
+	 * Ключ, по которому будут скомпанованы полученные данные
 	 *
 	 * @var string
 	 */
@@ -183,22 +183,22 @@ class DBModel extends Model implements IteratorAggregate, ArrayAccess, Countable
 	protected $data = NULL;
 
 	/**
-	 * Р’ РЅРµРєРѕС‚РѕСЂС‹С… СЃР»СѓС‡Р°СЏС… (РЅР°РїСЂРёРјРµСЂ РїСЂРё СѓРґР°Р»РµРЅРёРё РёР»Рё Р°РїРґРµР№С‚Рµ) РЅР°Рј РЅСѓР¶РЅРѕ РёСЃРїРѕР»СЊР·РѕРІР°С‚СЊ РёРјСЏ С‚Р°Р±Р»РёС†С‹ РєР°Рє РїСЂРµС„РёРєСЃ
+	 * В некоторых случаях (например при удалении или апдейте) нам нужно использовать имя таблицы как префикс
 	 *
 	 * @var boolean
 	 */
 	protected $usePrefixedTableAsAlias = false;
 
 	/**
-	 * РђСЃСЃРѕС†РёР°С‚РёРІРЅС‹Р№ РјР°СЃРёРёРІ Р°Р»РёР°СЃ С‚Р°Р±Р»РёС†С‹ => РёРјСЏ РїРѕР»СЏ
+	 * Ассоциативный масиив алиас таблицы => имя поля
 	 *
 	 * @var array
 	 */
 	protected $foreignAlias2FieldName = array();
 
 	/**
-	 * РњРѕРґРµР»СЊ СЃРѕРґРµСЂР¶РёС‚ РѕРґРЅСѓ РµРґРёРЅСЃС‚РІРµРЅРЅСѓСЋ Р·Р°РїРёСЃСЊ, Р·Р°РіСЂСѓР¶РµРЅРЅСѓСЋ С‡РµСЂРµР· РјРµС‚РѕРґ self::loadOne()
-	 * Р”Р°РЅРЅС‹Рµ РґРѕСЃС‚СѓРїРЅС‹ С‡РµСЂРµР· model[field] РІРјРµСЃС‚Рѕ model[0][field]
+	 * Модель содержит одну единственную запись, загруженную через метод self::loadOne()
+	 * Данные доступны через model[field] вместо model[0][field]
 	 *
 	 * @var boolean
 	 */
@@ -232,7 +232,7 @@ class DBModel extends Model implements IteratorAggregate, ArrayAccess, Countable
 			$className = get_class(self);
 		}
 
-		//РµСЃС‚СЊ php-РєР»Р°СЃСЃ РјРѕРґРµР»Рё
+		//есть php-класс модели
 		$classFile = Finder::findScript('classes/models', $className);
 		if ( $classFile )
 		{
@@ -282,10 +282,10 @@ class DBModel extends Model implements IteratorAggregate, ArrayAccess, Countable
 	/**
 	 * loadConfig
 	 *
-	 * Р·Р°РіСЂСѓР·РєР° С„Р°Р№Р»Р° СЃ РєРѕРЅС„РёРіРѕРј
+	 * загрузка файла с конфигом
 	 *
-	 * @param string $className		РёРјСЏ С„Р°Р№Р»Р° РєРѕРЅС„РёРіР° РёР· РєР°С‚Р°Р»РѕРіР° classes/models
-	 * @param string $fieldSet		РёРјСЏ РЅР°Р±РѕСЂР° РїРѕР»РµР№ РёР· РєРѕРЅС„РёРіР°
+	 * @param string $className		имя файла конфига из каталога classes/models
+	 * @param string $fieldSet		имя набора полей из конфига
 	 * @return boolean
 	 */
 	public function loadConfig( $fileName, $fieldSet = null )
@@ -329,9 +329,9 @@ class DBModel extends Model implements IteratorAggregate, ArrayAccess, Countable
 	/**
 	 * setConfig
 	 *
-	 * СѓСЃС‚Р°РЅРѕРІРєР° РїРѕР»РµР№ РєРѕРЅС„РёРіР° РІ РјРѕРґРµР»СЊ
+	 * установка полей конфига в модель
 	 *
-	 * @param array $ymlConfig РєРѕРЅС„РёРі Р·Р°РіСЂСѓР¶РµРЅРЅС‹Р№ С„СѓРЅРєС†РёРµР№ loadConfig
+	 * @param array $ymlConfig конфиг загруженный функцией loadConfig
 	 */
 	private function setConfig( $ymlConfig, $className = '', $storeTo='' )
 	{
@@ -1038,7 +1038,7 @@ class DBModel extends Model implements IteratorAggregate, ArrayAccess, Countable
 			$this->autoDefineTable();
 		}		
 
-		//РґР»СЏ РІСЃРµС… РєР»Р°СЃСЃРѕРІ СЃ РїСѓСЃС‚С‹Рј fields
+		//для всех классов с пустым fields
 		$className = get_class($this);
 		$configLoaded = false;
 		if ( $className !== 'DBModel' )
@@ -1137,7 +1137,7 @@ class DBModel extends Model implements IteratorAggregate, ArrayAccess, Countable
 	}
 
 	/**
-	 * РѕРґРёРЅ - РєРѕ - РјРЅРѕРіРёРј
+	 * один - ко - многим
 	 *
 	 * @return void
 	 **/
@@ -1159,7 +1159,7 @@ class DBModel extends Model implements IteratorAggregate, ArrayAccess, Countable
 	}
 
 	/**
-	 * РјРЅРѕРіРёРµ РєРѕ РјРЅРѕРіРёРј
+	 * многие ко многим
 	 *
 	 **/
 	protected function mapMany2Many($fieldName, &$data)
@@ -1203,7 +1203,7 @@ class DBModel extends Model implements IteratorAggregate, ArrayAccess, Countable
 
 
 	/**
-	 * Р—Р°РіСЂСѓР·РёС‚СЊ РґР°РЅРЅС‹Рµ Рѕ С„Р°Р№Р»Р°С… РёР· Р°РїР»РѕР°РґР°
+	 * Загрузить данные о файлах из аплоада
 	 *
 	 **/
 	protected function mapUpload($fieldName, &$data)
@@ -1226,7 +1226,7 @@ class DBModel extends Model implements IteratorAggregate, ArrayAccess, Countable
 	}
 
 	/**
-	 * РЎС‚СЂРѕРёС‚ join РґР»СЏ has_one
+	 * Строит join для has_one
 	 *
 	 * @return string
 	 **/
@@ -1377,7 +1377,7 @@ class DBModel extends Model implements IteratorAggregate, ArrayAccess, Countable
 	}
 
 	/**
-	 * РћС‚РґРµР»РµРЅРёРµ РґР°РЅРЅС‹С… РІРЅРµС€РЅРёС… РјРѕРґРµР»РµР№ РѕС‚ РґР°РЅРЅС‹С… С‚РµРєСѓС‰РµР№ РјРѕРґРµР»Рё
+	 * Отделение данных внешних моделей от данных текущей модели
 	 *
 	 * @param array $data
 	 * @return array
@@ -1409,7 +1409,7 @@ class DBModel extends Model implements IteratorAggregate, ArrayAccess, Countable
 	}
 
 	/**
-	 * Р—Р°РїРѕР»РЅРµРЅРёРµ РґР°РЅРЅС‹РјРё РІРЅРµС€РЅРёС… РјРѕРґРµР»РµР№
+	 * Заполнение данными внешних моделей
 	 *
 	 * @param array $data
 	 * @param array || null $modelData
@@ -1469,7 +1469,7 @@ class DBModel extends Model implements IteratorAggregate, ArrayAccess, Countable
 	}
 
 	/**
-	 * Р”РѕР±Р°РІР»РµРЅРёРµ СЃС‚СЂРѕС‡РєРё РІ С‚Р°Р±Р»РёС†Сѓ
+	 * Добавление строчки в таблицу
 	 *
 	 * $row = array(
 	 * 		'fieldName' => 'value',
@@ -1881,7 +1881,7 @@ class DBModel extends Model implements IteratorAggregate, ArrayAccess, Countable
 	}
 
 	/*
-	 * Р РµР°Р»РёР·Р°С†РёСЏ РёРЅС‚РµСЂС„РµР№СЃРѕРІ IteratorAggregate, ArrayAccess, Countable
+	 * Реализация интерфейсов IteratorAggregate, ArrayAccess, Countable
 	 *
 	 */
 
