@@ -1798,6 +1798,11 @@ class DBModel extends Model implements IteratorAggregate, ArrayAccess, Countable
 		{
 			$model->setOrder($field['order']);
 		}
+		
+		if (isset($field['limit']))
+		{
+			$model->setLimit($field['limit']);
+		}
 
 		if (isset($field['where']))
 		{
