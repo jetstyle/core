@@ -40,7 +40,11 @@ class DoController extends Controller
 	{
 		$params = $this->params;
 		unset($params[0]);
-
+		
+		$sql = "SELECT title FROM ??toolbar WHERE href=".Locator::get('db')->quote( implode("/",$config) ) ;
+		$current = Locator::get('db')->queryOne($sql);
+		Locator::get('tpl')->set('module_title', $current['title']);
+		
 		Finder::useClass("ModuleConstructor");
 		$moduleConstructor =& new ModuleConstructor();
 		$moduleConstructor->initialize($config['module'], $params);

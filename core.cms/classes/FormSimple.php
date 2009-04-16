@@ -91,7 +91,9 @@ class FormSimple
 		else if ($this->needAjaxUpdate())
 		{
 			$this->ajax_update = true;
+			
 			$this->prefix = "";
+			
 			//var_dump( $this->config->UPDATE_FIELDS, $_POST, array_intersect_key($_POST, array_flip($this->config->UPDATE_FIELDS)) );
 			//die();
 			//$this->ajaxValidFields;

@@ -87,7 +87,7 @@ class ModuleConstructor
 			}
 
 			Locator::get('tpl')->set("module_name", $mn);
-			
+
 			//if ($className != 'TreeControlJsTreeContent') {var_dump('<pre>', $config, '</pre>');die;}
 
 			$cls = new $className($config);

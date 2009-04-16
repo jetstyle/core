@@ -1,5 +1,6 @@
 {{!connect "custom.js"}}
 
+
 <form action=''  method='post' name='{{__form_name}}' id='{{__form_name}}' enctype="multipart/form-data">
 	<input type="hidden" name="MAX_FILE_SIZE" value="{{__max_file_size}}" />
 	<input type="hidden" name="{{prefix}}update" value="1" />
@@ -45,3 +46,48 @@
 	
 	</td></tr></table>
 </form>
+
+
+<script language="javascript">
+
+if(window.location.search.match("&popup=1"))
+{
+    $("#update_2").click( function()
+	{
+		data = {};
+	       $("input", "#{{__form_name}}").each(function (a,b,c)
+		{
+		    //console.log(b.name);
+		    if (b.type!="submit" || b.name=="update_2")
+			data[b.name.replace(/{{prefix}}/, "")  ] = getVal(b);
+		}
+	       );
+	       data['ajax_update'] = "1";
+	       data['prefix'] = "{{prefix}}";
+	       //console.log (data);
+	       
+	       $.post("{{ajax_url}}", data, function(returned)
+	       {
+		    top.tb_remove();
+	       }
+	       );
+	       return false;
+	}
+    );
+}
+
+function getVal(el)
+{
+    var ret;
+    if (el.type == "checkbox")
+    {
+	ret = el.checked ? el.value : null;
+    }
+    else 
+    {
+	ret = el.value;
+    }
+    return ret;
+
+}
+</script>
