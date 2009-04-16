@@ -48,11 +48,25 @@ Inplace.prototype =
 	}
         else
 	{
-	        $.get(  this.cmsUrl, 
+		$(document).ajaxError( 
+    			    function(event, request, settings)
+    			    {
+			       onTBRemove = this.__get.prototypeBind(this);
+    			       tb_show("Авторизация", base_url+"cms/login/ajax?TB_iframe=true&width=247&height=84&onremove=true", "");
+    			    }.prototypeBind(this)
+		);
+	        this.__get();
+		
+	}
+    },
+    
+    __get: function ()
+    {
+	    $.get(  this.cmsUrl, 
 		            { 'ret': this.field }, 
                     this.onLoad.prototypeBind(this), 'html'
 	        );
-	}
+		
     },
 
     onLoad: function (data)
@@ -293,11 +307,12 @@ var mce_timer = false
 		init_instance_callback: this.onMCEInit.prototypeBind(self)
 		});
 	
-	tinyMCE.jetimages= "{{/}}cms/do/Pictures/jetimages";
-	tinyMCE.jetfiles = "{{/}}cms/do/PicFiles/jetfiles";
+	tinyMCE.jetimages= base_url + "cms/do/Pictures/jetimages";
+	tinyMCE.jetfiles = base_url + "cms/do/PicFiles/jetfiles";
 	tinyMCE.jetcontent = base_url + "cms/jetcontent";
 	
     	tinyMCE.base_url = base_url + "cms/";
+
 //	this.mceInstance = tinyMCE;
     	/*
 	$("div.col-2").ajaxError(function(event, request, settings)

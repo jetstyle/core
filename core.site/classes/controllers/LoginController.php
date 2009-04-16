@@ -1,13 +1,16 @@
 <?php
+
 Finder::useClass("controllers/Controller");
 class LoginController extends Controller
 {
 	protected $params_map = array(
+		array('default', array("ajax"=>"ajax")),
 		array('default', array(NULL)),
 	);
 
-	function handle_default()
+	function handle_default($params)
 	{
+
 		$prp = &Locator::get('principal');
 		
 		if ($prp->security('noguests'))
@@ -28,6 +31,9 @@ class LoginController extends Controller
 		}
 		else
 		{
+			if ($params["ajax"])
+			    Locator::get('tpl')->set('ajax', true);
+			
 			Finder::useClass("forms/EasyForm");
 			$config = array();
 			$config['on_after_event'] = &$this;

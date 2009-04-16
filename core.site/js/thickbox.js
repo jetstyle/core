@@ -4,9 +4,9 @@
  * Copyright (c) 2007 cody lindley
  * Licensed under the MIT License: http://www.opensource.org/licenses/mit-license.php
 */
-		  
-var tb_pathToImage = "/app/skins/default/images/loadingAnimation.gif";
 
+var tb_pathToImage = "/app/skins/default/images/loadingAnimation.gif";
+var onTBRemove = null;
 /*!!!!!!!!!!!!!!!!! edit below this line at your own risk !!!!!!!!!!!!!!!!!!!!!!!*/
 
 //on page load call tb_init
@@ -189,12 +189,15 @@ function tb_show(caption, url, imageGroup) {//function called when the user clic
 			TB_HEIGHT = (params['height']*1) + 40 || 440; //defaults to 440 if no paramaters were added to URL
 			ajaxContentW = TB_WIDTH - 30;
 			ajaxContentH = TB_HEIGHT - 45;
+			TB_NEED_REMOVE = (params['onremove'] ? true : null);
 			
 			if(url.indexOf('TB_iframe') != -1){// either iframe or ajax window		
 					saved = false;
 					urlNoQuery = url.split('TB_');
 					$("#TB_iframeContent").remove();
-					if(params['modal'] != "true"){//iframe no modal
+					$("#TB_title").remove();
+					if(params['modal'] != "true")
+					{//iframe no modal
 						$("#TB_window").append("<div id='TB_title'><div id='TB_ajaxWindowTitle'>"+caption+"</div><div id='TB_closeAjaxWindow'><a href='#' id='TB_closeWindowButton' title='Close'>close</a> or Esc Key</div></div><iframe frameborder='0' hspace='0' src='"+urlNoQuery[0]+"' id='TB_iframeContent' name='TB_iframeContent"+Math.round(Math.random()*1000)+"' onload='tb_showIframe()' style='width:"+(ajaxContentW + 29)+"px;height:"+(ajaxContentH + 17)+"px;' > </iframe>");
 					}else{//iframe modal
 					$("#TB_overlay").unbind();
@@ -216,7 +219,7 @@ function tb_show(caption, url, imageGroup) {//function called when the user clic
 					}
 			}
 					
-			$("#TB_closeWindowButton").click(tb_remove);
+			$("#TB_closeWindowButton").click(function(){ tb_remove(true); } );
 			
 				if(url.indexOf('TB_inline') != -1){	
 					$("#TB_ajaxContent").append($('#' + params['inlineId']).children());
@@ -275,7 +278,7 @@ function tb_showIframe()
 	//onTBRemove();
 }
 
-var tb_remove = function () {
+var tb_remove = function (close) {
  	$("#TB_imageOff").unbind("click");
 	$("#TB_closeWindowButton").unbind("click");
 	$("#TB_window").fadeOut("fast",function(){$('#TB_window,#TB_overlay,#TB_HideSelect').trigger("unload").unbind().remove();});
@@ -285,7 +288,7 @@ var tb_remove = function () {
 		$("html").css("overflow","");
 	}
 	
-	if (onTBRemove)
+	if (TB_NEED_REMOVE && onTBRemove && !close)
 	    onTBRemove();
 	
 	document.onkeydown = "";

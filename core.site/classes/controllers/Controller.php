@@ -334,7 +334,8 @@ abstract class Controller implements ArrayAccess
 		    $view['logo'] = $logo;   
 		}
 		
-		//var_dump($view);
+		$view["config_title"] = $config['project_title'];
+		
 		Locator::get('tpl')->set('View', $view);
 	}
 

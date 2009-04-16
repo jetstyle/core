@@ -49,8 +49,8 @@
 }
 
 .groupWrapper {
-	border: 2px solid;
-	padding: 5px;
+	border: 0px solid;
+	padding-bottom: 10px;
 }
 
 .widget {
@@ -58,8 +58,19 @@
 }
 
 .widgetHeader {
+	
+	float: right;
+	/*background: black;
+	cursor: pointer;
+	color: white;
+	*/
+}
+
+.widgetDelete {
+	/*
 	color: white;
 	background: black;
+	*/
 	cursor: pointer;
 }
 

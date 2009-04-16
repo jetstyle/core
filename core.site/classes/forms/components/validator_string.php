@@ -78,6 +78,14 @@ class FormComponent_validator_string extends FormComponent_validator_base
        else
        if (isset($this->validator_params["is_http"]) && !$http)
            $this->_Invalidate( "not_http", "Значение должно быть адресом сайта" );
+       if (isset($this->validator_params["is_date"]))
+       {
+         $dateArray = strptime($value, '%d.%m.%Y');
+         if ($dateArray === false)
+         {
+            $this->_Invalidate( "date_wrong", "Неверный формат даты" );
+         }   
+       }
      }
 
      return $this->valid;
