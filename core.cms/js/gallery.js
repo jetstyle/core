@@ -268,7 +268,6 @@ var imagesUploadSettings = {
 		if (numFilesSelected > 0) this.startUpload();
 	},
 	upload_start_handler: function() {
-		alert('upload start');
 		this.customSettings.gallery.uploadUpdateFileCounter(this.getStats());
 		$('#progressCont').show();
 		$('#addImageButton').css('backgroundImage','url('+this.customSettings.gallery.imagesUrl+'gallery/ajax-loader-arrows.gif)');
