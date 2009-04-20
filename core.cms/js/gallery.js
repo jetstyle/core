@@ -31,11 +31,13 @@ Gallery.prototype = {
 		imagesUploadSettings.flash_url = this.imagesUrl+"swfupload.swf";
 		imagesUploadSettings.button_width = this.thumbWidth;
 		imagesUploadSettings.button_height = this.thumbHeight;
+		imagesUploadSettings.file_types = this.fileExtensions;
 		this.swfUpload = new SWFUpload(imagesUploadSettings);
 		this.swfUpload.customSettings.gallery = this;
 		//control for replace one image
 		imageOneUploadSettings.upload_url = this.baseUrl+'?id='+this.rubricId+'&session_hash='+this.sessionHash;
 		imageOneUploadSettings.flash_url = this.imagesUrl+"swfupload.swf";
+		imageOneUploadSettings.file_types = this.fileExtensions;
 		this.swfUploadOne = new SWFUpload(imageOneUploadSettings);
 		this.swfUploadOne.customSettings.gallery = this;
 		//control buttons
@@ -81,22 +83,25 @@ Gallery.prototype = {
     		this,
     		$(image).find('div.image-title')
     	));
-    	tb_init($(image).find('a.popup').get(0));
+		if ($(image).find('a.popup').get(0))
+		{
+			tb_init($(image).find('a.popup').get(0));	
+		}
     	var self = this;
     	$(image).hover(
         	function(event) {
         		self.lastOveredImageId = this.id;
                 $(this).find('img.gallery-delete')
-                	   .css('left',$(this).offset().left+$(this).width()-24-5-$('#gallery').offset().left)
-                	   .css('top',$(this).offset().top+5-$('#gallery').offset().top)
+                	   .css('left',$(this).offset().left+$(this).width()-24-5)
+                	   .css('top',$(this).offset().top+5)
                 	   .show();
                 $(this).find('img.gallery-edit').add('#replaceFileButton')
-                	   .css('left',$(this).offset().left+$(this).width()-(24+5)*2-$('#gallery').offset().left)
-                	   .css('top',$(this).offset().top+5-$('#gallery').offset().top)
+                	   .css('left',$(this).offset().left+$(this).width()-(24+5)*2)
+                	   .css('top',$(this).offset().top+5)
                 	   .show();
                 $(this).find('img.gallery-zoom')
-                	   .css('left',$(this).offset().left+$(this).width()-(24+5)*3-$('#gallery').offset().left)
-                	   .css('top',$(this).offset().top+5-$('#gallery').offset().top)
+                	   .css('left',$(this).offset().left+$(this).width()-(24+5)*3)
+                	   .css('top',$(this).offset().top+5)
                 	   .show();
         	},
         	function (event) {
@@ -247,9 +252,8 @@ Gallery.prototype = {
 };
 
 var imagesUploadSettings = {
-	file_size_limit:  "2 MB",
-	file_types:       '*.jpg;*.jpeg;*.gif;*.png',
-	file_types_description: "Графические файлы",
+	file_size_limit:  "8 MB",
+	file_types_description: "Допустимые типы файлов",
 
 	post_params: {
 		'swfupload_user_agent': navigator.userAgent || navigator.vendor || window.opera
@@ -264,6 +268,7 @@ var imagesUploadSettings = {
 		if (numFilesSelected > 0) this.startUpload();
 	},
 	upload_start_handler: function() {
+		alert('upload start');
 		this.customSettings.gallery.uploadUpdateFileCounter(this.getStats());
 		$('#progressCont').show();
 		$('#addImageButton').css('backgroundImage','url('+this.customSettings.gallery.imagesUrl+'gallery/ajax-loader-arrows.gif)');
@@ -304,9 +309,8 @@ var imagesUploadSettings = {
 };
 
 var imageOneUploadSettings = {
-	file_size_limit:  "2 MB",
-	file_types:       '*.jpg;*.jpeg;*.gif;*.png',
-	file_types_description: "Графические файлы",
+	file_size_limit:  "8 MB",
+	file_types_description: "Допутимые типы файлов",
 
 	post_params: {
 		'swfupload_user_agent': navigator.userAgent || navigator.vendor || window.opera,
@@ -348,8 +352,20 @@ var imageOneUploadSettings = {
 	},
 	upload_success_handler: function(file, data) {
 		if (data.indexOf('ok,')==0) {
-           	$('#'+this.customSettings.gallery.lastOveredImageId+' img').get(0).src += '?'+Math.random;
-			this.customSettings.gallery.initImage($('#gallery div.gallery-image').get().reverse()[0]);
+			var ext = file.name.match(/\.(\w+)$/)[1];
+			var isImageFile = false;
+			var imageExts = ['jpg','jpeg','gif','png'];
+			for($i=0; $i<imageExts.length; $i++) {
+				if (imageExts[$i] == ext) isImageFile = true;
+			}
+			if (isImageFile) {
+				$('#'+this.customSettings.gallery.lastOveredImageId+' img').get(0).src += '?'+Math.random();
+			}
+           	else
+			{
+				$('#'+this.customSettings.gallery.lastOveredImageId+' img').get(0).src = '/cms/skins/images/file_icons/'+ext+'.gif';
+			}
+			//this.customSettings.gallery.initImage($('#gallery div.gallery-image').get().reverse()[0]);
 		} else {
            	location.reload(true);
 		}

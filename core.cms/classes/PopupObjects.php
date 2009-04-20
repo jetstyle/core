@@ -53,7 +53,7 @@ abstract class PopupObjects
 		$result = $this->db->execute("
 			SELECT id, title
 			FROM ??".$this->table."
-			WHERE ".($this->rubricId ? "topic_id =".$this->db->quote($this->rubricId)." AND " : "")." _state = 0
+			WHERE ".($this->rubricId ? "rubric_id =".$this->db->quote($this->rubricId)." AND " : "")." _state = 0
 			LIMIT ".$this->pager->getOffset().",".$this->pager->getLimit()."
 		");
 
@@ -100,7 +100,7 @@ abstract class PopupObjects
 		$res = $this->db->queryOne("
 			SELECT COUNT(id) AS total
 			FROM ??".$this->table."
-			WHERE ".($this->rubricId ? "topic_id =".$this->db->quote($this->rubricId)." AND " : "")." _state = 0
+			WHERE ".($this->rubricId ? "rubric_id =".$this->db->quote($this->rubricId)." AND " : "")." _state = 0
 		");
 
 		return intval($res['total']);
