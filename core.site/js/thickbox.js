@@ -285,7 +285,7 @@ var tb_remove = function () {
 		$("html").css("overflow","");
 	}
 	
-	if (onTBRemove)
+	if (typeof(onTBRemove) != 'undefined')
 	    onTBRemove();
 	
 	document.onkeydown = "";
