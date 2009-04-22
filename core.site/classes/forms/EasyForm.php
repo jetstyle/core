@@ -60,7 +60,8 @@ class EasyForm {
 	);
 
 	public function __construct()
-	{		$this->config = array();
+	{
+		$this->config = array();
 		if ($args = func_get_args())
 		{
 			foreach ($args as $arg)
@@ -161,20 +162,23 @@ class EasyForm {
   function AddButtons( &$form, $config ){
 
     //тут добавляем кнопки
-    foreach($config as $rec)
+    if (is_array($config))
     {
-      //формируем конфиг для кнопки
-      $rec_cfg = false;
-      if( is_array($rec) )
-      {
-        $rec_cfg = $rec[1];
-        $rec = $rec[0];
-      }
+        foreach($config as $rec)
+        {
+          //формируем конфиг для кнопки
+          $rec_cfg = false;
+          if( is_array($rec) )
+          {
+            $rec_cfg = $rec[1];
+            $rec = $rec[0];
+          }
 
-      $conf = $this->ConstructConfig( "button_".$rec, $rec_cfg, $rec );
+          $conf = $this->ConstructConfig( "button_".$rec, $rec_cfg, $rec );
 
-      //создаём кнопку
-      $field =& $form->AddButton( $conf );
+          //создаём кнопку
+          $field =& $form->AddButton( $conf );
+        }
     }
   }
 
