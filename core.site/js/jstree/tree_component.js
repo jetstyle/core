@@ -1099,6 +1099,7 @@ function tree_component () {
 			if(this.locked) return this.error("LOCKED");
 			// NOTHING SELECTED
 			if(!this.selected) return this.error("CREATE: NO NODE SELECTED");
+            
 			if(!this.check("creatable", this.selected)) return this.error("CREATE: CANNOT CREATE IN NODE");
 
 			var t = type || this.get_type();
@@ -1112,25 +1113,20 @@ function tree_component () {
 				}
 				var ok = true;
 
-				if (this.settings.max_depth !== undefined)
+                if (this.settings.max_depth !== undefined)
 				{
-					var total = this.selected.parents("li").length + 1;
+					var total = this.selected.parents("li").length;
 					if (total >= this.settings.max_depth)
 					{
 						ok = false;
 					}
 				}
 
-				/*
-				this.selected.parents("li").each(function(i) {
-					if($(this).metadata().max_depth) {
-						if( (i + 1) >= $(this).metadata().max_depth) {
-							ok = false;
-						}
-					}
-				});*/
 				if(!ok) return this.error("CREATE: MAX_DEPTH REACHED");
 			}
+
+            
+
 			if(this.selected.hasClass("closed") && !afterSelected) {
 				var _this = this;
 				return this.open_branch(this.selected, true, function () { _this.create.apply(_this, [type]); } );
