@@ -28,7 +28,7 @@
   margin: -6px 6px 6px -6px !important;
   margin: 0; }
   
-  
+/* customization params */
 .change-color-bg, .change-color-text {
 	cursor: pointer;
 	position: absolute;
@@ -48,37 +48,7 @@
 	cursor: pointer;
 }
 
-.groupWrapper {
-	border: 0px solid;
-	padding-bottom: 10px;
-}
-
-.widget {
-	border: 1px dashed;
-}
-
-.widgetHeader {
-	
-	float: right;
-	/*background: black;
-	cursor: pointer;
-	color: white;
-	*/
-}
-
-.widgetDelete {
-	/*
-	color: white;
-	background: black;
-	*/
-	cursor: pointer;
-}
-
-#addWidgetWindow {
-	position: absolute;
-	display: none;
-	background: white;
-	border: 1px solid;
-	width: 300px;
-	height: 200px;
+.ocelink a:link, .ocelink a:visited {
+    border-bottom:1px dashed #000000;
+    text-decoration:none;
 }

@@ -31,11 +31,13 @@ class LoginController extends Controller
 		}
 		else
 		{
-			if ($params["ajax"])
-			    Locator::get('tpl')->set('ajax', true);
-			
-			Finder::useClass("forms/EasyForm");
 			$config = array();
+			if ($params["ajax"])
+			{
+			    Locator::get('tpl')->set('ajax', true);
+			}
+			Finder::useClass("forms/EasyForm");
+			
 			$config['on_after_event'] = &$this;
 			$form =& new EasyForm('login', $config);
 			Locator::get('tpl')->set('Form', $form->handle());

@@ -272,8 +272,8 @@ function tb_showIframe()
 	$("#TB_window").css({display:"block"});
 	
 //	console.log(  $("#TB_iframeContent").attr('src') );
-	if (saved == true)
-	    tb_remove();
+	//if (saved == true)
+	//    tb_remove();
 	    
 	saved = true;
 	//onTBRemove();
