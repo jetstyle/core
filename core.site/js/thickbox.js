@@ -186,6 +186,9 @@ function tb_show(caption, url, imageGroup) {//function called when the user clic
 			var queryString = url.replace(/^[^\?]+\??/,'');
 			var params = tb_parseQuery( queryString );
 
+			//console.log(params);
+			//saved = params['saved'];
+
 			TB_WIDTH = (params['width']*1) + 30 || 630; //defaults to 630 if no paramaters were added to URL
 			TB_HEIGHT = (params['height']*1) + 40 || 440; //defaults to 440 if no paramaters were added to URL
 			ajaxContentW = TB_WIDTH - 30;
@@ -193,7 +196,7 @@ function tb_show(caption, url, imageGroup) {//function called when the user clic
 			TB_NEED_REMOVE = (params['onremove'] ? true : null);
 			
 			if(url.indexOf('TB_iframe') != -1){// either iframe or ajax window		
-					saved = false;
+					//saved = false;
 					urlNoQuery = url.split('TB_');
 					$("#TB_iframeContent").remove();
 					$("#TB_title").remove();
@@ -272,10 +275,11 @@ function tb_showIframe()
 	$("#TB_window").css({display:"block"});
 	
 //	console.log(  $("#TB_iframeContent").attr('src') );
+	//console.log( saved );
 	//if (saved == true)
 	//    tb_remove();
 	    
-	saved = true;
+	//saved = true;
 	//onTBRemove();
 }
 
@@ -295,7 +299,7 @@ var tb_remove = function (close) {
 	document.onkeydown = "";
 	document.onkeyup = "";
 	
-	saved = false;
+	//saved = false;
 	return false;
 }
 

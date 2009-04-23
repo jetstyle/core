@@ -1,4 +1,33 @@
 {{?ajax}}
+    <script language="javascript">
+	function onSubmit()
+	{
+	    var data = {};
+	    $("input", "#form_form").each(function (a,b,c)
+	    {
+		if (b.type!="submit")
+		    data[ b.name  ] = b.value;
+	    }
+	    );
+	    
+	    $.post( base_url+"login/ajax", data, function( ret )
+	    {
+		if (ret=="200")
+		{
+		    //window.location.assign( window.location + "?saved=1" );
+		    top.tb_remove();
+		}
+		else
+		{
+		    $("#TB_ajaxWindowTitle", top.document).css("color", "red").html( ret );
+		}
+	    }	
+	    );
+	    
+	}
+    
+    </script>
+
     <div class="cms-login">
 	    {{Form}}
     </div>

@@ -78,7 +78,10 @@ $(document).ready( function()
 	       
 		   $.post("{{ajax_url}}", data, function(returned)
 		   {
-			top.tb_remove();
+			if ( top.onTBRemove )
+			    top.onTBRemove();
+			else
+			    top.tb_remove();
 		   }
 		   );
 		   return false;

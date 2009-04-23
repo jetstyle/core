@@ -35,6 +35,8 @@ class LoginController extends Controller
 			if ($params["ajax"])
 			{
 			    Locator::get('tpl')->set('ajax', true);
+			    
+			    $config['form_onsubmit'] = "onSubmit(); return false;";
 			}
 			Finder::useClass("forms/EasyForm");
 			
@@ -66,10 +68,19 @@ class LoginController extends Controller
 					  RequestInfo::get('retpath') :
 					  RequestInfo::$baseUrl;
 
+			if ($this->params[0]=="ajax")
+			{
+			    die("200");
+			}
+
 			Controller::redirect($redirectTo);
 		}
 		else
 		{
+			if ($this->params[0]=="ajax")
+			{
+			    die("Неверный логин/пароль");
+			}
 			$form->fields[1]->validator->_Invalidate("bad_pass", "Неверный логин и/или пароль", false);
 		}
 	}
