@@ -83,6 +83,16 @@ class FormSimple
 
 		$valid = array('text', 'title', 'lead');
 
+		//form in iframe thickbox
+		if ( $_GET["popup"] )
+		{
+
+			$iframe = array("css_buttons_class"=>"iframe-buttons-",
+					"height"=>( $_GET["height"]>0 ? ($_GET["height"]-80)."px" : "360px") );//thickbox default height(440) - buttons heoght
+			Locator::get("tpl")->set( "iframe", $iframe );
+		}
+
+
 		if ($_GET['ret'] && in_array($_GET['ret'], $valid) )
 		{
 		    header('Content-Type: text/html; charset=windows-1251');

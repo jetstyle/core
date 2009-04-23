@@ -7,11 +7,20 @@
 	<input type="hidden" name="{{__form_name}}_url" value="{{ajax_url}}" />
 
 	<table cellpadding="0" cellspacing="0" style="width: 100%"><tr><td class="cms-form-block">
+	
+	{{?iframe}}
+	    <div style="overflow-x: hidden; overflow-y: auto; height: {{iframe.height}}">
+	{{/?}}
+
 	{{!!form_simple}}
 		{{___form}}
 	{{/!!}}
 
-	<div class="cms-form-buttons">
+	{{?iframe}}
+	    </div>
+	{{/?}}
+	
+	<div class="cms-form-buttons {{iframe.css_buttons_class}}">
 		{{:save_button_norefresh}}
 			<input id="update_1" name="update_1" class="cms-save-but hand" type="button" value="сохранить без перезагрузки" onclick="saveForm('{{__form_name}}'); return false;"> 
 		{{/:save_button_norefresh}}
@@ -49,32 +58,34 @@
 
 
 <script language="javascript">
-
-if(window.location.search.match("&popup=1"))
+$(document).ready( function()
 {
-    $("#update_2").click( function()
-	{
-		data = {};
-	       $("input", "#{{__form_name}}").each(function (a,b,c)
-		{
-		    //console.log(b.name);
-		    if (b.type!="submit" || b.name=="update_2")
-			data[b.name.replace(/{{prefix}}/, "")  ] = getVal(b);
-		}
-	       );
-	       data['ajax_update'] = "1";
-	       data['prefix'] = "{{prefix}}";
-	       //console.log (data);
+    if(window.location.search.match("&popup=1"))
+    {
+	$("#update_2").click( function()
+	    {
+		    data = {};
+		   $("input", "#{{__form_name}}").each(function (a,b,c)
+		    {
+			//console.log(b.name);
+			if (b.type!="submit" || b.name=="update_2")
+			    data[b.name.replace(/{{prefix}}/, "")  ] = getVal(b);
+		    }
+		   );
+		   data['ajax_update'] = "1";
+		   data['prefix'] = "{{prefix}}";
+		   //console.log (data);
 	       
-	       $.post("{{ajax_url}}", data, function(returned)
-	       {
-		    top.tb_remove();
-	       }
-	       );
-	       return false;
-	}
-    );
-}
+		   $.post("{{ajax_url}}", data, function(returned)
+		   {
+			top.tb_remove();
+		   }
+		   );
+		   return false;
+	    }
+	);
+    }
+});
 
 function getVal(el)
 {
