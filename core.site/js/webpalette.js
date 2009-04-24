@@ -4,7 +4,7 @@ WebPalette.prototype = {
     elementId: null,
     visibility: false,
     
-    initialize : function(settings)
+    initialize: function(settings)
     {
         this.elementId = settings.id;
         this.generate(settings.id);
@@ -29,7 +29,7 @@ WebPalette.prototype = {
         $('#'+this.elementId).mouseout(function(){
             if (_this.visibility && _this.settings.colorChange) _this.settings.colorChange(false);
         });
-        if (typeof(Pipette) != 'undefined') {
+        if (typeof(Pipette) != 'undefined' && $.support.cssFloat) {
             var pipetteSettings = {'colorChoose': this.settings.colorClick};
             this.pipette = new Pipette(pipetteSettings);
         }
