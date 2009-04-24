@@ -30,7 +30,10 @@ Pipette.prototype = {
         var pixel = _this.context.getImageData(e.pageX - $(this).offset().left, e.pageY - $(this).offset().top, 1, 1).data;
         var hexColor = '#';
         for(var i=0; i<3; i++)
+        {
+            hexColor += pixel[i] < 16 ? '0' : '';
             hexColor += parseInt(pixel[i], 10).toString(16);
+        }
         _this.settings.colorChoose(hexColor);
         e.stopPropagation();
     },
