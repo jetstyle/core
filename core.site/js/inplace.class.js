@@ -255,7 +255,7 @@ Inplace.prototype =
 	
 	//append buttons
 	this.inplaceObject.append( this.buttons );
-    },
+    }
 
 }
 

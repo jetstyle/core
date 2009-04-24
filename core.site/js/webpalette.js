@@ -9,8 +9,9 @@ WebPalette.prototype = {
         this.elementId = settings.id;
         this.generate(settings.id);
         this.settings = settings;
-        _this = this;
+        var _this = this;
         $('#'+this.elementId+' div').mouseover(function(){
+            //console.log(_this);
             if (_this.settings.colorChange) {
                 _this.settings.colorChange(
                     _this.normalizeColor($(this).css('background-color'))
@@ -28,6 +29,10 @@ WebPalette.prototype = {
         $('#'+this.elementId).mouseout(function(){
             if (_this.visibility && _this.settings.colorChange) _this.settings.colorChange(false);
         });
+        if (typeof(Pipette) != 'undefined') {
+            var pipetteSettings = {'colorChoose': this.settings.colorClick};
+            this.pipette = new Pipette(pipetteSettings);
+        }
     },
     
     getElement: function()
@@ -38,7 +43,8 @@ WebPalette.prototype = {
     hide: function()
     {
         this.visibility = false;
-        $('#'+this.elementId).hide();   
+        $('#'+this.elementId).hide();
+        if (this.pipette) this.pipette.turnOff();
     },
     
     show: function(snapTo)
@@ -52,7 +58,8 @@ WebPalette.prototype = {
             $('#'+this.elementId).css('top', $(snapTo).offset().top - 1);   
         }
         this.visibility = true;
-        $('#'+this.elementId).show();   
+        $('#'+this.elementId).show();
+        if (this.pipette) this.pipette.turnOn();
     },
     
     generate: function(contId)
