@@ -47,8 +47,13 @@
 	float: left;
 	cursor: pointer;
 }
+.cms-edit{
+    color: #CC0000 !important;
 
-.ocelink a:link, .ocelink a:visited {
-    border-bottom:1px dashed #000000;
-    text-decoration:none;
+}
+
+a.ocelink:link, a.ocelink:visited {
+    color: #CC0000 !important;
+    border-bottom: 1px dashed #CC0000;
+    text-decoration:none !important;
 }

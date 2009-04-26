@@ -44,6 +44,7 @@ class Locator
 	 */
 	public static function bind($key, $path, $singleton = true, $params = NULL)
 	{
+		    
 		Debug::trace('Bind "'.$key.'"', 'locator');
 		if (is_object($path) || is_array($path))
 			self::$objs[$key] = $path;
@@ -57,6 +58,22 @@ class Locator
 				'params' => $params
 			);
 		}
+	}
+	
+	/**
+	 * Reset bindings, for Unit Tests only
+	 *
+	 */
+	public static function reset()
+	{
+		foreach (self::$relations as $key=>$rel)
+		{
+		    if ($rel["singleton"] && method_exists(self::$objs[$key], "delete") )
+			self::$objs[ $key ]->delete();
+		}
+
+		self::$relations = array();
+		self::$objs = array();
 	}
 
     /**
@@ -98,7 +115,9 @@ class Locator
 		{
 			if (isset(self::$relations[$key]))
 			{
-				Finder::useClass(self::$relations[$key]['path']);
+			
+
+				Finder::useClass( self::$relations[$key]['path'] );
 				$class = self::$relations[$key]['class'];
 				
 				Debug::trace('Create "'.$key.'"', 'locator');
@@ -116,6 +135,7 @@ class Locator
 					else
 					{
 						self::$objs[$key] = new $class();
+
 					}
 				}
 			}

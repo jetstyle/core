@@ -94,6 +94,13 @@ class TemplateEngine
 		
 		return self::$instance;
 	}
+
+	//for Locator::reset()
+	public static function delete()
+	{
+	    self::$instance = null;
+	}
+	
 	
 	public function setCompileMode($mode)
 	{
