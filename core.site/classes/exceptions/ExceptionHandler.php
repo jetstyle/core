@@ -39,6 +39,41 @@ class ExceptionHandler
 
 	private $silentDieMsg =  "К сожалению, произошла ошибка.";
 
+    private $htmlBegin = '<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+					<?xml version="1" encoding="windows-1251"?>
+					<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="ru" lang="ru">
+					<head>
+						<style type="text/css">
+							* {
+								margin: 0; padding: 0;
+								font-size: 100.01%; }
+							html { }
+							body {
+								padding: 20px;
+								font-family: Arial, sans-serif; }
+
+							ol {padding-top: 20px;}
+							ol li {margin-bottom: 15px;}
+
+							.info td {vertical-align: top;}
+
+							.backtrace {padding-top: 30px; padding-left: 20px; min-width: 500px;}
+							.backtrace .backtrace-file {font-size: 80%; margin-top: 5px;}
+
+							.detailed-info {padding-top: 30px; padding-left: 30px;}
+
+							.clearer {clear: both;}
+							tt { color:#666600; background:#ffffcc; padding: 5px; font-family: Arial, sans-serif;}
+							.warning {color: red; font-weight: bold;}
+							.source {margin-top: 5px; background-color: #EAEAEA; padding: 10px; font-family: Arial, sans-serif;}
+
+                            .example { color:#666600; background:#ffffcc; padding: 0 2px; font-size:115% }
+						</style>
+					</head>
+					<body>';
+
+    private $htmlEnd = '</body></html>';
+
 	static public function getInstance()
 	{
 		if (self::$instance === null)
@@ -109,7 +144,22 @@ class ExceptionHandler
 
 	private function silent($exceptionObj)
 	{
-		echo $this->silentDieMsg;
+        $result = $this->htmlBegin;
+        
+        $result .= '<div class="message">';
+        $result .= $this->silentDieMsg;
+        $result .= '</div>';
+
+        if (method_exists($exceptionObj, 'getHumanText'))
+        {
+            $result .= '<br />';
+            $result .= '<div class="message">';
+            $result .= $exceptionObj->getHumanText();
+            $result .= '</div>';
+        }
+
+        $result .= $this->htmlEnd;
+        echo $result;
 	}
 
 	private function mail($exceptionObj)
@@ -208,36 +258,7 @@ class ExceptionHandler
 		}
 		else
 		{
-			$result = '<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
-					<?xml version="1" encoding="windows-1251"?>
-					<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="ru" lang="ru">
-					<head>
-						<style type="text/css">
-							* {
-								margin: 0; padding: 0;
-								font-size: 100.01%; }
-							html { }
-							body {
-								padding: 20px; 
-								font-family: Arial, sans-serif; }
-
-							ol {padding-top: 20px;}
-							ol li {margin-bottom: 15px;}
-
-							.info td {vertical-align: top;}
-
-							.backtrace {padding-top: 30px; padding-left: 20px; min-width: 500px;}
-							.backtrace .backtrace-file {font-size: 80%; margin-top: 5px;}
-
-							.detailed-info {padding-top: 30px; padding-left: 30px;}
-
-							.clearer {clear: both;}
-							tt { color:#666600; background:#ffffcc; padding: 5px; font-family: Arial, sans-serif;}
-							.warning {color: red; font-weight: bold;}
-							.source {margin-top: 5px; background-color: #EAEAEA; padding: 10px; font-family: Arial, sans-serif;}
-						</style>
-					</head>
-					<body>';
+			$result = $this->htmlBegin;
 
 			$result .= '<div class="message">';
 
@@ -270,7 +291,7 @@ class ExceptionHandler
 			}
 			$result .= "</td></tr></table>";
 
-			$result .= '</body></html>';
+			$result .= $this->htmlEnd;
 		}
 		
 		return $result;

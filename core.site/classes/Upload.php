@@ -169,12 +169,16 @@ class Upload
 			{
 				if (!$this->createDir($dirname))
 				{
-					throw new Exception("Upload: can't create directory ".str_replace(Config::get('project_dir'), '', $dirname));
+					$dirname = str_replace(Config::get('project_dir'), '', $dirname);
+                    $humanMessage = 'Нет прав для создания директории <span class="example">'.$dirname.'</span>';
+                    throw new JSException("Upload: can't create directory ".$dirname, '', $humanMessage);
 				}
 			}
 			elseif (!is_writable($dirname))
 			{
-				throw new Exception("Upload: directory ".str_replace(Config::get('project_dir'), '', $dirname)." is not writable");
+				$dirname = str_replace(Config::get('project_dir'), '', $dirname);
+                $humanMessage = 'Нет прав для записи файлов в директорию <span class="example">'.$dirname.'</span>';
+                throw new JSException("Upload: directory ".$dirname." is not writable", '', $humanMessage);
 			}
 
 			/**
@@ -420,7 +424,8 @@ class Upload
 	{
 		if (!function_exists("getimagesize") || !function_exists("imagecreatefromjpeg"))
 		{
-		    throw new Exception("Upload: no GD extension installed");
+            $humanMessage = 'Не установлено расширения GD для PHP для работы с графикой.';
+            throw new JSException("Upload: no GD extension installed", '', $humanMessage);
 		}
 		
 		$size = getimagesize($filename);

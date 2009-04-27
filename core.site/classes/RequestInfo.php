@@ -57,7 +57,7 @@ class RequestInfo
 
 					if (!preg_match('#' . $thishost . '$#siU', $refhost))
 					{
-						throw new Exception("POST requests from foreign hosts are not allowed.");
+						throw new JSException("POST requests from foreign hosts are not allowed.");
 					}
 				}
 			}

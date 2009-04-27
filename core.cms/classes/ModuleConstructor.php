@@ -150,7 +150,7 @@ class ModuleConstructor
 		}
 		else
 		{
-			throw new Exception("ModuleConstructor: error read config for module ".$this->moduleName);
+            throw new JSException("ModuleConstructor: error read config for module ".$this->moduleName);
 		}
 	}
 
