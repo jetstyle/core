@@ -9,13 +9,15 @@ Pipette.prototype = {
     },
     
     turnOn: function() {
-        $('img').bind('mouseover', {'_this': this}, this.imageMouseOver);
-        $('img').bind('click', {'_this': this}, this.imageClick);
+        $('img').bind('mouseover', {'_this': this}, this.imageMouseOver)
+                .bind('click', {'_this': this}, this.imageClick)
+                .css('cursor', 'crosshair');
     },
     
     turnOff: function() {
-        $('img').unbind('mouseover', this.imageMouseOver);
-        $('img').unbind('click', this.imageClick);
+        $('img').unbind('mouseover', this.imageMouseOver)
+                .unbind('click', this.imageClick)
+                .css('cursor', 'default');
     },
     
     imageMouseOver: function(e) {
