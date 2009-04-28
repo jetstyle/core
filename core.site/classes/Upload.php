@@ -537,6 +537,11 @@ class Upload
 		$w = imagesx($img);
 		$h = imagesy($img);
 
+        if ( ($w <= $size['x']) && ($h <= $size['y']) )
+        {
+            return;
+        }
+
 		$thumbnail = imagecreatetruecolor ($size['x'], $size['y']);
 
 		imagealphablending($thumbnail, false);
