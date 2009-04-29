@@ -52,6 +52,15 @@
 	{{HTML_body}}
 {{/?}}
 
+{{?oce_on}}
+	<script language="javascript" type="text/javascript">
+		$(document).ajaxError(function(event, request, settings){
+			if (request.status == 403);
+				tb_show("", base_url+"cms/login/ajax?TB_iframe=true&width=247&height=84&onremove=true", "");
+		});
+	</script>
+{{?/}}
+
 <img src="{{!href_to 'HTCron'}}" alt="" />
 {{@blocks/google_analytics.html}}
 
