@@ -23,7 +23,7 @@
       - $button_config -- массив-конфиг кнопки
 
   * _RegisterField( &$field ) - записывает в $form->hash[$field->name] ссылку на это поле.
-                                НЕ ДЛЯ ВНЕШНЕГО ИСПОЛЬЗОВАНИЯ
+                                НЕ ДЛЯ ВНЕШНЕГО �?СПОЛЬЗОВАН�?Я
 
   // Процессинг формы !! Самое главное
 
@@ -50,7 +50,7 @@
 
   * Reset() - Сбрасывает форму в "незаполненное" состояние
 
-  // Изменение в БД
+  // �?зменение в БД
 
   - DbDelete( $data_id=NULL ) -- удаляет соотв. строку из БД,
       - true, if success
@@ -349,7 +349,7 @@ class Form
      		"name=\"".$form_name.'" '.
      		($this->config["form_class"] ? 'class="'.$this->config["form_class"].'"' : '' ).
      		($this->config["form_onsubmit"] ? "onsubmit='".$this->config["form_onsubmit"]."'" : '' ).
-     		' enctype="multipart/form-data"> '. RequestInfo::pack(METHOD_POST)
+     		' enctype="multipart/form-data"> '. RequestInfo::pack(RequestInfo::METHOD_POST)
      );
 
      $tpl->set( "form_name", 'form_'.$this->name );
