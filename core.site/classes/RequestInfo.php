@@ -193,16 +193,16 @@ class RequestInfo
 		return $url;
 	}
 	
-	public static function pack( $method=self::METHOD_GET, $bonus="", $only="" ) // -- упаковать в строку для GET/POST запроса
+	public static function pack( $method=self::METHOD_GET, $filter = array() ) // -- упаковать в строку для GET/POST запроса
 	{
 		if (!self::$_compiled_ready)
 		{
 			self::$_compiled[self::METHOD_GET ] = "";
 			self::$_compiled[self::METHOD_POST] = "";
 			$f=0;
-			foreach(self::$values as $k=>$v)
-				if( $v!='' )
-					if (($only == "") || (strpos($k, $only) === 0))
+			foreach(self::$data AS $k=>$v)
+				if( $v != '' )
+					if (!count($filter) || in_array($k, $filter))
 					{
 						if (is_array($v))
 						{
@@ -214,19 +214,13 @@ class RequestInfo
 							$v0 = htmlspecialchars($v);
 							$v1 = urlencode($v);
 						}
-						if ($f) $this->_compiled[self::METHOD_GET ].=$this->s; else $f=1;
-						$this->_compiled[self::METHOD_GET ] .= $k."=".$v1;
-						$this->_compiled[self::METHOD_POST] .= "<input type='hidden' name='".$k."' value='".$v0."' />\n";
+						if ($f) self::$_compiled[self::METHOD_GET ] .= '&'; else $f=1;
+						self::$_compiled[self::METHOD_GET ] .= $k."=".$v1;
+						self::$_compiled[self::METHOD_POST] .= "<input type='hidden' name='".$k."' value='".$v0."' />\n";
 					}
 			self::$_compiled_ready = 1;
 		}
-		$data = self::$_compiled[$method];
-		if ($method == self::METHOD_POST) return $data.$bonus;
-		if ($bonus != "")
-		if ($data != "") $data=$this->q.$data.$this->s.$bonus;
-			else $data.=$this->q.$bonus;
-			else if ($data != "") $data = $this->q.$data;
-		return $data;
+		return self::$_compiled[$method];
 	}
 	
 	private static function fuckQuotes(&$a)
