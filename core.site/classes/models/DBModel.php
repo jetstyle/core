@@ -1277,8 +1277,11 @@ class DBModel extends Model implements IteratorAggregate, ArrayAccess, Countable
 			.	     ")"
 			;
 
-			$fieldsSql .= "," . $foreignModel->getFieldsForJoin();
-
+			$fieldsForJoin  = $foreignModel->getFieldsForJoin();
+            if ( $fieldsForJoin )
+            {
+                $fieldsSql .= "," . $fieldsForJoin;
+            }
 
 			// foreign joins
 			$foreignSql = $foreignModel->buildJoin();
