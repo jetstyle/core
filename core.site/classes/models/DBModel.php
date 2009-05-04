@@ -960,7 +960,29 @@ class DBModel extends Model implements IteratorAggregate, ArrayAccess, Countable
 	 **/
 	public function quoteField($name)
 	{
-		return $this->quoteName($this->getTableAlias()).'.'.$this->quoteName($name);
+		$result = '';
+        $pos = strpos($name, '.');
+        if ($pos === false)
+        {
+            $result = $this->quoteName($this->getTableAlias()).'.'.$this->quoteName($name);
+        }
+        else
+        {
+            $field = substr($name, $pos + 1);
+            $modelName = substr($name, 0, $pos);
+
+            $model = &$this->getForeignModel($modelName);
+            if ($model)
+            {
+                $result = $model->quoteField($field);
+            }
+            else
+            {
+                $result = $this->quoteName($field);
+            }
+        }
+
+        return $result;
 	}
 
 	public function quoteFieldShort($name)
@@ -1056,7 +1078,7 @@ class DBModel extends Model implements IteratorAggregate, ArrayAccess, Countable
 		}
 	}
 	
-	protected function &getPager()
+	public function &getPager()
 	{
 		if (null === $this->pager)
 		{
@@ -1252,30 +1274,33 @@ class DBModel extends Model implements IteratorAggregate, ArrayAccess, Countable
 				continue;
 			}
 
-			$where = "(" . $this->quoteField($v['pk'])." = ".$foreignModel->quoteField($v['fk']) . ")";
+            $joinWhere = $v["join_where"];
+            if ($joinWhere)
+            {
+                $joinWhere = $this->parse($joinWhere);
+            }
 
-			if ($v["join_where"])
-			{
-				$where .= " AND (" . $foreignModel->parse($v["join_where"]) . ")";
-			}
+            if ($v['pk'] && $v['fk'])
+            {
+                $where = "(" . $this->quoteField($v['pk'])." = ".$foreignModel->quoteField($v['fk']) . ")";
 
+                if ( $joinWhere )
+                    $where .= " AND (" . $joinWhere . ")";
+            }
+            elseif ($joinWhere)
+            {
+                $where = $joinWhere;
+            }
 
 			if ($foreignModel->where)
 			{
 				$whereSql .= ($whereSql ? " AND " : "")." (" . $foreignModel->parse($foreignModel->where) . ")";
 			}
 
+			$joinSql .=	(($v['join'] == 'inner') ? " INNER " : " LEFT "	) ."JOIN " . $foreignModel->getTableNameWithAlias();
 
-			$joinSql .=
-			(($v['join'] == 'inner')
-			? " INNER JOIN "
-			: " LEFT JOIN "
-			)
-			. $foreignModel->getTableNameWithAlias()
-			.	" ON ("
-			.		  $where
-			.	     ")"
-			;
+            if ( $where )
+               $joinSql .= " ON (".$where.") ";
 
 			$fieldsForJoin  = $foreignModel->getFieldsForJoin();
             if ( $fieldsForJoin )
@@ -1739,7 +1764,8 @@ class DBModel extends Model implements IteratorAggregate, ArrayAccess, Countable
 	 */
 	protected function parse($str)
 	{
-		$str = preg_replace_callback('#{([^}]+)}#', array(&$this, 'parseCallback'), $str);
+        $pattern = '#{([^}]+)}#';
+        $str = preg_replace_callback($pattern, array(&$this, 'parseCallback'), $str);
 		return $str;
 	}
 
