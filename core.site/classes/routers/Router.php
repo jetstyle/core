@@ -45,6 +45,39 @@ class Router
 	{
 		return self::getInstance()->find(array('class' => $class));
 	}
+
+    public static function linkTo($class, $params = null)
+    {
+        if (strpos($class, '/') !== false)
+        {
+            $classParams = explode('/', $class, 2);
+        }
+        else
+        {
+            $classParams = explode('::', $class, 2);
+        }
+
+        if (count($classParams) == 2)
+        {
+            list($pageÑlass, $itemClass) = $classParams;
+        }
+        else
+        {
+            $pageÑlass = $class;
+            $itemClass = NULL;
+        }
+
+        if ($p = self::findByClass($pageÑlass))
+        {
+            $url = $p->url_to($itemClass, $params);
+        }
+        else
+        {
+            $url = null;
+        }
+
+        return $url;
+    }
 	
 	public function addRouter($router)
 	{
