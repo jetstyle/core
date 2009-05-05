@@ -46,8 +46,8 @@ class Block
 		}
 		return $this->data;
 	}
-	
-	/**
+
+    /**
 	 * Params, passed to tpl
 	 * @param $params array
 	 * @return void
@@ -56,12 +56,28 @@ class Block
 	{
 		$this->tplParams = &$params;
 	}
-	
+
 	public function getTplParam($key)
 	{
 		return $this->tplParams[$key];
 	}
-	
+
+    protected function getParam($key)
+    {
+        if (isset($this->tplParams[$key]))
+        {
+            return $this->tplParams[$key];
+        }
+        elseif ($this->config[$key])
+        {
+            return $this->config[$key];
+        }
+        else
+        {
+            return null;
+        }
+    }
+
 	protected function setData($data)
 	{
 		$this->data = $data;
