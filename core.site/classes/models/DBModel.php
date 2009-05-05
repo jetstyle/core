@@ -1835,12 +1835,19 @@ class DBModel extends Model implements IteratorAggregate, ArrayAccess, Countable
 
 		if (isset($field['where']))
 		{
-			if ($model->where)
-			{
-				$model->where .= ' AND ';
-			}
+			if ($field['where'] === false)
+            {
+                $model->where = '';
+            }
+            elseif ($field['where'])
+            {
+                if ($model->where)
+                {
+                    $model->where .= ' AND ';
+                }
 
-			$model->where .= $field['where'];
+                $model->where .= $field['where'];
+            }
 		}
 
 		$this->foreignAlias2FieldName[$model->getTableAlias()] = $fieldName;
