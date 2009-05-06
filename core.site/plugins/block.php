@@ -2,11 +2,20 @@
 /**
  * 
  */
-// underscored to camel case
-$blockName = str_replace(" ","",ucwords(str_replace("_"," ",$params[0])));;
-$tplName = 'blocks/'.$params[0].'.html';
+$blockParts = explode('::', $params[0]);
 
-Debug::trace('Blocks: parse block '.$params[0], 'blocks');
+if (count($blockParts) > 1)
+{
+    $blockName = str_replace(" ", "", ucwords($blockParts[0]." ".str_replace("_"," ",$blockParts[1])));;
+    $tplName = $blockParts[0].'/blocks/'.$blockParts[1].'.html';
+}
+else
+{
+    $blockName = str_replace(" ","",ucwords(str_replace("_"," ",$blockParts[0])));;
+    $tplName = 'blocks/'.$blockParts[0].'.html';
+}
+
+Debug::trace('Blocks: parse block '.$tplName, 'blocks');
 
 unset($params[0]);
 
@@ -19,43 +28,39 @@ catch(FileNotFoundException $e)
 	$stackId = $tpl->addToStack($params);
 	echo $tpl->parse($tplName);
 	$tpl->freeStack($stackId);
-	return;// $tpl->parse($tplName);
+	return;
 }
 
 $block->setTplParams($params);
 
-if ($controller = Locator::get('controller', true))
+$storeTo = $block->getParam('store_to');
+if (!$storeTo)
 {
-	$method = strtolower(substr($blockName,0,1)).substr($blockName,1)."WillRender";
-	if (method_exists($controller, $method))
-	{
-		$controller->$method($block);
-	}
+    $storeTo = '*';
 }
 
-// default
-$storeTo = '*';
-if ($params['store_to'])
+$controller = Locator::get('controller', true);
+$blockName = get_class($block);
+$blockName = strtolower(substr($blockName,0,1)).substr($blockName, 1, -5);
+
+if ($controller)
 {
-	$storeTo = $params['store_to'];
-}
-else
-{
-	$config = $block->getConfig();
-	if ($config['store_to'])
-	{
-		$storeTo = $config['store_to'];
-	}
+    $method = $blockName."WillRender";
+    if (method_exists($controller, $method))
+    {
+        $controller->$method($block);
+    }
 }
 
 $params[$storeTo] = $block->getData();
+
 $stackId = $tpl->addToStack($params);
-if ($params['ret'])
-{
-	$res = $tpl->parse($tplName);
-	$tpl->freeStack($stackId);
-	return $res;
-}
-else echo $tpl->parse($tplName);
+$res = $tpl->parse($tplName);
 $tpl->freeStack($stackId);
+
+if ($block->getParam('ret'))
+    return $res;
+else
+    echo $res;
+    
 ?>

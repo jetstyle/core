@@ -132,7 +132,7 @@ class TemplateEngine
 			foreach ($data AS $name => &$value)
 			{
 				$this->stack[$stackId][$name] = $this->domain[$name];
-				if ($value{0} == '@')
+				if ($value{0} === '@')
 				{
 					$this->domain[$name] = $this->parse(substr($value, 1));
 				}

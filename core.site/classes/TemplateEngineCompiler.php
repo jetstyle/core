@@ -699,17 +699,17 @@ class TemplateEngineCompiler
 				$blocks = array();				 
 				foreach ($params AS $key => &$param)
 				{
-					if ($param[TE_TYPE] == TE_TYPE_TEMPLATE && preg_match("/^blocks\/(.*)\.html$/i", $param[TE_VALUE], $matches))
+					if ($param[TE_TYPE] == TE_TYPE_TEMPLATE && preg_match("/^(([a-zA-Z0-9_-]+)\/)?blocks\/(.*)\.html$/i", $param[TE_VALUE], $matches))
 					{
-						if ($pluginName[TE_VALUE] == 'include' && $key === 0)
+                        if ($pluginName[TE_VALUE] == 'include' && $key === 0)
 						{
-							$param[TE_TYPE] = TE_TYPE_STRING;
-							$param[TE_VALUE] = $matches[1];
+                            $param[TE_TYPE] = TE_TYPE_STRING;
+							$param[TE_VALUE] = ($matches[2] ? $matches[2].'::' : '').$matches[3];
 							$pluginName[TE_VALUE] = 'block';					
 						}
 						else
 						{
-							$blocks[$key] = $matches[1];
+							$blocks[$key] = ($matches[2] ? $matches[2].'::' : '').$matches[3];
 							unset($params[$key]);
 						}
 						

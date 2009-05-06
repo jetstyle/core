@@ -25,23 +25,23 @@ class Block
 		{
 		    try
 		    {
-			$this->constructData();
+                $this->constructData();
 		    }
 		    catch( Exception $e )
 		    {
-			//Exceptions not to ignore
-			$processExceptions = array(EXCEPTION_MAIL, EXCEPTION_MAIL | EXCEPTION_SILENT);
+                //Exceptions not to ignore
+                $processExceptions = array(EXCEPTION_MAIL, EXCEPTION_MAIL | EXCEPTION_SILENT);
 	
-			if ( in_array( ExceptionHandler::getInstance()->getMethod($e), $processExceptions  ) )
-			{
-			    ExceptionHandler::getInstance()->process($e);
-			}
-			else if ( $_GET['debug'] )
-			{
-			    ExceptionHandler::getInstance()->process($e);
-			}
-			
-			$this->data = null;
+                if ( in_array( ExceptionHandler::getInstance()->getMethod($e), $processExceptions  ) )
+                {
+                    ExceptionHandler::getInstance()->process($e);
+                }
+                else if ( $_GET['debug'] )
+                {
+                    ExceptionHandler::getInstance()->process($e);
+                }
+
+                $this->data = null;
 		    }
 		}
 		return $this->data;
@@ -62,7 +62,7 @@ class Block
 		return $this->tplParams[$key];
 	}
 
-    protected function getParam($key)
+    public function getParam($key)
     {
         if (isset($this->tplParams[$key]))
         {
