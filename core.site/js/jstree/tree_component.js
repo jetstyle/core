@@ -273,13 +273,13 @@ function tree_component () {
 				}
 				str += ">" + data.data + "</a>";
 
-				str += '<img title="Редактировать" class="tree-edit" src="'+ this.images_path +'edit.png" ';
+				str += '<img title="Удалить" class="tree-delete" src="'+ this.images_path +'del.png" ';
 				if (!data.custom_buttons)
 				{
-					if (this.settings['hide_buttons']['edit'] === true || ( this.settings['hide_buttons']['edit'] && this.settings['hide_buttons']['edit'][data.level] === true))
+					if (this.settings['hide_buttons']['del'] === true || (this.settings['hide_buttons']['del'] && this.settings['hide_buttons']['del'][data.level] === true))
 						str += 'hidden="hidden"';
 				}
-				else if (data.hide_buttons && data.hide_buttons.edit) str += 'hidden="hidden"';
+				else if (data.hide_buttons && data.hide_buttons.del) str += 'hidden="hidden"';
 				str += '/>';
 
 				str += '<img title="Добавить внутрь" class="tree-child-add" src="'+ this.images_path +'addChild.png" width="15" height="13" ';
@@ -289,7 +289,7 @@ function tree_component () {
 						str += 'hidden="hidden"';
 				}
 				else if (data.hide_buttons && data.hide_buttons.addChild) str += 'hidden="hidden"';
-					
+
 				str += '/>';
 
 				str += '<img title="Добавить рядом" class="tree-brother-add" src="'+ this.images_path +'add.png" width="15" height="13" ';
@@ -301,13 +301,13 @@ function tree_component () {
 				else if (data.hide_buttons && data.hide_buttons.addBrother) str += 'hidden="hidden"';
 				str += '/>';
 
-				str += '<img title="Удалить" class="tree-delete" src="'+ this.images_path +'del.png" ';
+				str += '<img title="Редактировать" class="tree-edit" src="'+ this.images_path +'edit.png" ';
 				if (!data.custom_buttons)
 				{
-					if (this.settings['hide_buttons']['del'] === true || (this.settings['hide_buttons']['del'] && this.settings['hide_buttons']['del'][data.level] === true))
+					if (this.settings['hide_buttons']['edit'] === true || ( this.settings['hide_buttons']['edit'] && this.settings['hide_buttons']['edit'][data.level] === true))
 						str += 'hidden="hidden"';
 				}
-				else if (data.hide_buttons && data.hide_buttons.del) str += 'hidden="hidden"';
+				else if (data.hide_buttons && data.hide_buttons.edit) str += 'hidden="hidden"';
 				str += '/>';
 
 			}
@@ -1099,7 +1099,7 @@ function tree_component () {
 			if(this.locked) return this.error("LOCKED");
 			// NOTHING SELECTED
 			if(!this.selected) return this.error("CREATE: NO NODE SELECTED");
-            
+
 			if(!this.check("creatable", this.selected)) return this.error("CREATE: CANNOT CREATE IN NODE");
 
 			var t = type || this.get_type();
@@ -1125,7 +1125,7 @@ function tree_component () {
 				if(!ok) return this.error("CREATE: MAX_DEPTH REACHED");
 			}
 
-            
+
 
 			if(this.selected.hasClass("closed") && !afterSelected) {
 				var _this = this;
