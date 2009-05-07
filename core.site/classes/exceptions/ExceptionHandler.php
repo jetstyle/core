@@ -3,10 +3,12 @@
   Класс обработки исключений.
 */
 
-define("EXCEPTION_IGNORE", 1);
-define("EXCEPTION_SILENT", 2);
-define("EXCEPTION_MAIL",   4);
-define("EXCEPTION_SHOW",   8);
+define("EXCEPTION_IGNORE",      1);
+define("EXCEPTION_SILENT",      2);
+define("EXCEPTION_MAIL",        4);
+define("EXCEPTION_SHOW",        8);
+define("EXCEPTION_LOG",         16);
+define("EXCEPTION_VERBOSE_LOG", 32);
 
 class ExceptionHandler
 {
@@ -18,7 +20,7 @@ class ExceptionHandler
 	 * ex.
 	 * $config = array(
 	 * 	'FileNotFoundException' => EXCEPTION_SHOW,
-	 * 	'DbException' => EXCEPTION_MAIL + EXCEPTION_SILENT
+	 * 	'DbException' => EXCEPTION_MAIL | EXCEPTION_SILENT
 	 * );
 	 *
 	 * @var array
@@ -35,6 +37,8 @@ class ExceptionHandler
 	                                EXCEPTION_SILENT => "silent",
 	                                EXCEPTION_MAIL   => "mail",
 	                                EXCEPTION_SHOW   => "show",
+                                    EXCEPTION_LOG    => "log",
+                                    EXCEPTION_VERBOSE_LOG => "verboseLog",
                                    );
 
 	private $silentDieMsg =  "К сожалению, произошла ошибка.";
@@ -163,9 +167,9 @@ class ExceptionHandler
 	}
 
 	private function mail($exceptionObj)
-	{		
+	{
 		$hash = md5(serialize($exceptionObj));
-		$cacheDir = Config::get('cache_dir').'exceptions/';
+		$cacheDir = Config::get('cache_dir').'exceptions/mail/';
 		
 		if (!file_exists($cacheDir))
 		{
@@ -227,75 +231,166 @@ class ExceptionHandler
 		mail('<bugs@jetstyle.ru>', $subj, $text, $headers);
 	}
 
+    private function verboseLog($exceptionObj)
+    {
+        $dir = Config::get('cache_dir').'exceptions/'.date('Y/m/d').'/';
+
+		if (!file_exists($dir))
+		{
+			$result = @mkdir($dir, 0775, true);
+			if (!$result)
+			{
+				return;
+			}
+		}
+
+		if (!is_writable($dir))
+		{
+			return;
+		}
+
+        $className = get_class($exceptionObj);
+        $className = preg_replace('/([A-Z]+)([A-Z])/','\1_\2', $className);
+        $className = strtolower(preg_replace('/([a-z])([A-Z])/','\1_\2', $className));
+
+        $file = $dir.date('H_i').'_'.$className.'';
+
+        if (file_exists($file))
+        {
+            return;
+        }
+
+        $text = $this->getPlain($exceptionObj, true);
+
+        file_put_contents($file, $text);
+    }
+
+    private function log($exceptionObj)
+    {
+        $dir = Config::get('cache_dir').'exceptions/';
+
+		if (!file_exists($dir))
+		{
+			$result = @mkdir($dir, 0775, true);
+			if (!$result)
+			{
+				return;
+			}
+		}
+
+		if (!is_writable($dir))
+		{
+			return;
+		}
+
+        $file = $dir.'log';
+
+        if ($handle = fopen($file, 'a'))
+        {
+             $text = date('d.m.Y H:i:s').' ';
+
+            if ("Exception" == get_class($exceptionObj))
+            {
+                $text .= $exceptionObj->getMessage();
+            }
+            else
+            {
+                $text .= $exceptionObj;
+            }
+
+            $text .= "\r\n";
+
+            fwrite($handle, $text);
+            fclose($handle);
+        }
+    }
+
 	private function show($exceptionObj)
 	{
 		ob_end_clean();
-		echo $this->getHtml($exceptionObj);		
+        if (defined('COMMAND_LINE') && COMMAND_LINE)
+        {
+            echo $this->getPlain($exceptionObj);
+        }
+        else
+        {
+            echo $this->getHtml($exceptionObj);
+        }
+		
 	}
 
 	private function getHtml($exceptionObj, $extended = false)
 	{
-		if (!$extended && defined('COMMAND_LINE') && COMMAND_LINE)
-		{
-			$result = '';
-			if ("Exception" == get_class($exceptionObj))
-			{
-				$result .= $exceptionObj->getMessage();
-			}
-			else
-			{
-				$result .= $exceptionObj;
-			}
-			$result .= "\n\n";
-			
-			if ("Exception" != get_class($exceptionObj))
-			{
-				$result .= $exceptionObj->getText();
-				$result .= "\n\n";
-			}
-			
-			$result .= $this->getTrace($exceptionObj->getTrace(), true);
-		}
-		else
-		{
-			$result = $this->htmlBegin;
+        $result = $this->htmlBegin;
 
-			$result .= '<div class="message">';
+        $result .= '<div class="message">';
 
-			if ($extended)
-			{
-				$result .= '<div class="date">' . date("d.m.Y H:i:s") . '</div>';
-				$result .= '<div class="url">http://'.$_SERVER["HTTP_HOST"] . $_SERVER["REQUEST_URI"].'</div>';
-				$result .= '<br />';
-			}
+        if ($extended)
+        {
+            $result .= '<div class="date">' . date("d.m.Y H:i:s") . '</div>';
+            $result .= '<div class="url">http://'.$_SERVER["HTTP_HOST"] . $_SERVER["REQUEST_URI"].'</div>';
+            $result .= '<br />';
+        }
 
-			if ("Exception" == get_class($exceptionObj))
-			{
-				$result .= $exceptionObj->getMessage();
-			}
-			else
-			{
-				$result .= $exceptionObj;
-			}
+        if ("Exception" == get_class($exceptionObj))
+        {
+            $result .= $exceptionObj->getMessage();
+        }
+        else
+        {
+            $result .= $exceptionObj;
+        }
 
-			$result .= "</div>";
+        $result .= "</div>";
 
-			$result .= "<table class=\"info\"><tr><td class=\"backtrace\">";
-			$result .= "<b>Backtrace</b>:<br />";
-			$result .= $this->getTrace($exceptionObj->getTrace());
-			$result .= "</td><td class=\"detailed-info\">";
+        $result .= "<table class=\"info\"><tr><td class=\"backtrace\">";
+        $result .= "<b>Backtrace</b>:<br />";
+        $result .= $this->getTrace($exceptionObj->getTrace());
+        $result .= "</td><td class=\"detailed-info\">";
 
-			if ("Exception" != get_class($exceptionObj))
-			{
-				$result .= $exceptionObj->getText();
-			}
-			$result .= "</td></tr></table>";
+        if ("Exception" != get_class($exceptionObj))
+        {
+            $result .= $exceptionObj->getText();
+        }
+        $result .= "</td></tr></table>";
 
-			$result .= $this->htmlEnd;
-		}
+        $result .= $this->htmlEnd;
 		
 		return $result;
 	}
+
+    private function getPlain($exceptionObj, $extended = false)
+    {
+        $result = '';
+
+        if ($extended)
+        {
+            $result .= date("d.m.Y H:i:s");
+            $result .= "\r\n";
+            $result .= 'http://'.$_SERVER["HTTP_HOST"] . $_SERVER["REQUEST_URI"];
+            $result .= "\r\n";
+            $result .= "\r\n";
+        }
+
+        if ("Exception" == get_class($exceptionObj))
+        {
+            $result .= $exceptionObj->getMessage();
+        }
+        else
+        {
+            $result .= $exceptionObj;
+        }
+        $result .= "\n\n";
+
+        if ("Exception" != get_class($exceptionObj))
+        {
+            $result .= $exceptionObj->getText();
+            $result .= "\n\n";
+        }
+
+        $result .= $this->getTrace($exceptionObj->getTrace(), true);
+        return $result;
+    }
 	
 	private function getTrace($data, $plain = false)
 	{
