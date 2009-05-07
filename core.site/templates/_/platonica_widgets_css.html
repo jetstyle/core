@@ -24,7 +24,7 @@
 	background: #fff;
 	border: 1px #DDD solid;
 	/* for corners */
-	position: relative;
+	position: relative; width: 100%;
 	_display: inline-block;
 	margin-top: 25px;
 }
@@ -64,7 +64,8 @@
 
 /* platonica single widget */
 .widget .content- {
-  padding: 0px 15px 20px; }
+  padding: 0px 15px 20px;
+  overflow: hidden; }
 
 .widget .wgt-bg- {
         position: absolute; overflow: hidden;
@@ -118,8 +119,9 @@
         display: block; }
 
 .widget .actionspanel-container- {
-        position: relative; float: right; display: none;
-        margin: -23px -1px 0 0; padding-bottom: 5px; border: solid #ddd; border-width: 1px 1px 0 0;
+        display: none;
+        position: absolute; right: -1px; top: -23px;
+        padding-bottom: 5px; border: solid #ddd; border-width: 1px 1px 0 0;
         background: #fff; cursor: move; }
 
 .widget .actionspanel-container- .ap-bl- {
