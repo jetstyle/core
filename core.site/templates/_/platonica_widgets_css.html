@@ -1,6 +1,7 @@
 
 .groupWrapper {
-	border: 0px solid;	
+	border: 0px solid;
+	margin-bottom: -32767px; padding-bottom: 32767px;
 }
 
 .widgetAdd
@@ -20,12 +21,11 @@
 }
 
 .widget {
-	background: #FFF;
+	background: #fff;
 	border: 1px #DDD solid;
-	padding: 0px 15px 20px;
 	/* for corners */
 	position: relative;
-	display: inline-block;
+	_display: inline-block;
 	margin-top: 25px;
 }
 
@@ -63,7 +63,8 @@
 
 
 /* platonica single widget */
-
+.widget .content- {
+  padding: 0px 15px 20px; }
 
 .widget .wgt-bg- {
         position: absolute; overflow: hidden;
@@ -118,7 +119,7 @@
 
 .widget .actionspanel-container- {
         position: relative; float: right; display: none;
-        margin: -23px -16px 0 0; padding-bottom: 5px; border: solid #ddd; border-width: 1px 1px 0 0;
+        margin: -23px -1px 0 0; padding-bottom: 5px; border: solid #ddd; border-width: 1px 1px 0 0;
         background: #fff; cursor: move; }
 
 .widget .actionspanel-container- .ap-bl- {
