@@ -163,7 +163,7 @@ class ListSimple
 		{
 			//ссылка на новое
 			$this->tpl->set( '_add_new_href', RequestInfo::hrefChange('', array($this->idGetVar => '', '_new' => 1)));
-			$this->tpl->set( '_add_new_title', $this->config->get('add_new_title') ? $this->config->get('add_new_title') : 'создать новый элемент' );
+			$this->tpl->set( '_add_new_title', $this->config->get('add_new_title') );
 			$this->tpl->Parse( $this->template_new, '__add_new' );
 		}
 	}
