@@ -219,15 +219,27 @@ class Form
      $this->rh->forms[] = $this->name;*/
      $this->name = $this->config['db_table']? $this->config['db_table'] : 'form';
 
-     //пробуем обработать пост
-     if (isset($_POST[$this->form_present_var]) && ($_POST[$this->form_present_var] == 'form_'.$this->name) && !$ignore_post)
+     $postData = null;
+
+     if (isset($_POST[$this->form_present_var]) && ($_POST[$this->form_present_var] == 'form_'.$this->name))
      {
-       $this->LoadFromPost( $_POST );
+         $postData = &$_POST;
+     }
+     elseif (isset($_GET[$this->form_present_var]) && ($_GET[$this->form_present_var] == 'form_'.$this->name))
+     {
+         $postData = &$_GET;
+     }
+
+     //пробуем обработать пост
+     if (is_array($postData) && !$ignore_post)
+     {
+       $this->LoadFromPost( $postData );
 
        // get event
-       $event_name = $_POST["_event"];
+       $event_name = $postData["_event"];
+       /*
        if ($_POST["_event2"])
-         $event_name = $_POST["_event2"];
+         $event_name = $_POST["_event2"];*/
        $event = $this->buttons[$event_name];
 
        if (!$event) $event = $this->config["default_event"];
@@ -349,7 +361,7 @@ class Form
      		"name=\"".$form_name.'" '.
      		($this->config["form_class"] ? 'class="'.$this->config["form_class"].'"' : '' ).
      		($this->config["form_onsubmit"] ? "onsubmit='".$this->config["form_onsubmit"]."'" : '' ).
-     		' enctype="multipart/form-data"> '. RequestInfo::pack(RequestInfo::METHOD_POST)
+     		' enctype="multipart/form-data"> '/*. RequestInfo::pack(RequestInfo::METHOD_POST)*/
      );
 
      $tpl->set( "form_name", 'form_'.$this->name );
