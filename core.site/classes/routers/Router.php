@@ -14,6 +14,8 @@ class Router
 	protected $url2controller = array();				// cache
 	protected $cls2controller = array();				// cache
 
+	protected $rootControllerLoaded = false;
+
 	private function __construct()
 	{
 		if (Config::exists('routers'))
@@ -48,7 +50,7 @@ class Router
 
     public static function linkTo($class, $params = null)
     {
-        if (strpos($class, '/') !== false)
+		if (strpos($class, '/') !== false)
         {
             $classParams = explode('/', $class, 2);
         }
@@ -59,15 +61,15 @@ class Router
 
         if (count($classParams) == 2)
         {
-            list($pageÑlass, $itemClass) = $classParams;
+            list($pageClass, $itemClass) = $classParams;
         }
         else
         {
-            $pageÑlass = $class;
+            $pageClass = $class;
             $itemClass = NULL;
         }
 
-        if ($p = self::findByClass($pageÑlass))
+        if ($p = self::findByClass($pageClass))
         {
             $url = $p->url_to($itemClass, $params);
         }
@@ -136,7 +138,7 @@ class Router
 
 		if (null !== $page)
 		{
-			if (Locator::exists('controller'))
+			if ($this->rootControllerLoaded)
 			{
 				$cls = strtolower(substr(get_class($page), 0, -strlen('Controller')));
 				$id = 'controller_'.$cls;
@@ -161,6 +163,9 @@ class Router
 				$this->cls2controller[$cls] = null;
 			}
 		}
+
+		if (!$this->rootControllerLoaded)
+			$this->rootControllerLoaded = true;
 
 		return $page;
 	}

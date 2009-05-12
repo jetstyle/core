@@ -26,34 +26,49 @@ abstract class Controller implements ArrayAccess
 	
 	public static function _404()
 	{
-		Finder::useLib('http');
-		Http::status(404);
-		$tpl = &Locator::get('tpl');
-		$tpl->parseSiteMap('404');
-		echo $tpl->get('html');
+		Finder::useClass('routers/CommandLineRouter');
+		$clr = new CommandLineRouter();
+		$router = &Router::getInstance();
+		$controller = &$router->find(array('class' => 'Response'), array($clr));
+		
+		if ($controller)
+		{
+			$controller->setParams(array('404'));
+			$controller->handle();
+			$tpl = &Locator::get('tpl');
+			$tpl->parseSiteMap($controller->getSiteMap());
+			$result = $tpl->get('html');
+		}
+		else
+		{
+			$result = '404';
+		}
+		
+		echo $result;
 		die();
 	}
 	
 	public static function deny()
 	{		
-		Finder::useLib('http');
-		Http::status(403);
-		$tpl = &Locator::get('tpl');
+		Finder::useClass('routers/CommandLineRouter');
+		$clr = new CommandLineRouter();
+		$router = &Router::getInstance();
+		$controller = &$router->find(array('class' => 'Response'), array($clr));
 		
-		$retPath .= $_SERVER['HTTPS'] ? 'https://' : 'http://';
-		$retPath .= $_SERVER['SERVER_NAME'].$_SERVER['REQUEST_URI'];
-		$retPath = urlencode($retPath);
+		if ($controller)
+		{
+			$controller->setParams(array('403'));
+			$controller->handle();
+			$tpl = &Locator::get('tpl');
+			$tpl->parseSiteMap($controller->getSiteMap());
+			$result = $tpl->get('html');
+		}
+		else
+		{
+			$result = '403';
+		}
 		
-		Finder::useClass("forms/EasyForm");
-
-        $config = array();
-        $config['action'] = Router::linkTo('Login').'?retpath='.$retPath;
-		$form =& new EasyForm('login', $config);
-		
-        $tpl->set('Form', $form->handle());
-		$tpl->parseSiteMap('forbidden');
-		echo $tpl->get('html');
-        
+		echo $result;
 		die();
 	}
 	

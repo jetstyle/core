@@ -21,7 +21,7 @@ class CommandLineRouter extends BasicRouter
 			{
 				$class .= 'Controller';
 			}
-						
+			
 			if ($path = Finder::findScript("classes/controllers", $class))
 			{
 				$config = array (
