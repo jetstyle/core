@@ -83,6 +83,8 @@ class ListSimple
 		$list->issel_function = array( &$this, '_current' );
 		$list->parse( $this->template_list, '__list' );
 
+        Locator::get('tpl')->set('module_name', $this->config->getModuleName());
+
 		$this->renderPager();
 	}
 

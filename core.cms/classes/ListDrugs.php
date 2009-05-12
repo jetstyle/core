@@ -35,7 +35,8 @@ class ListDrugs extends ListSimple
  		$destItem = $db->query(
  			"SELECT _order FROM ??".$this->config->table_name." ORDER BY _order LIMIT 1 OFFSET ".$destIndex
  		);
- 		if (!$destItem[0]['_order']) {        	$destItem = $db->query(
+ 		if (!$destItem[0]['_order']) {
+        	$destItem = $db->query(
 	 			"SELECT _order FROM ??".$this->config->table_name." ORDER BY _order DESC LIMIT 1"
 	 		);
  		}
@@ -72,8 +73,10 @@ class ListDrugs extends ListSimple
         $items = $this->loadItems($_GET['items_list']);
         $deleteItems = $updateItems = array();
 	    foreach ($items as $i=>$item)
-	    	if ($item['_state'] == 2)            	$deleteItems[] = $item['id'];
-	    	else                $updateItems[] = $item['id'];
+	    	if ($item['_state'] == 2)
+            	$deleteItems[] = $item['id'];
+	    	else
+                $updateItems[] = $item['id'];
       	if (!empty($deleteItems))
       		$db->execute("DELETE FROM ??".$this->config->table_name." WHERE id IN (".implode(',',$deleteItems).")");
       	if (!empty($updateItems))
@@ -113,9 +116,11 @@ class ListDrugs extends ListSimple
     parent::Handle();
  }
 
-	function loadItems($items) {		$db = &Locator::get('db');
+	function loadItems($items) {
+		$db = &Locator::get('db');
 		$items = explode(',',$items);
-		foreach ($items as &$item) {        	$item = intval($item);
+		foreach ($items as &$item) {
+        	$item = intval($item);
 		}
 		$items = implode(',',$items);
     	$items = $db->query("
