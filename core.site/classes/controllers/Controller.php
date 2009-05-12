@@ -101,9 +101,7 @@ abstract class Controller implements ArrayAccess
 			$className = Inflector::underscore(str_replace("Controller", "", get_class($this)));
 			$methodName = str_replace('handle_', '', $this->method);
 			
-			$siteMap = Locator::get('tpl')->getSiteMap();
-
-            if ($methodName && ($methodName != "default" || ( $methodName == "default" && isset( $siteMap[ strtolower( $className.'/'.$methodName ) ]  ) )))
+            if ( $methodName && !in_array($methodName, array('index', 'default')) )
 			{
 				$this->siteMap = strtolower($className.'/'.$methodName);
 			}
@@ -149,7 +147,9 @@ abstract class Controller implements ArrayAccess
 		{
 			$this->loadPlugins();
 		}
-
+		
+		$matches = array();
+		
 		if (is_array($this->params_map))
 		{
 			foreach ($this->params_map as $v)
@@ -161,7 +161,6 @@ abstract class Controller implements ArrayAccess
 				{
 					foreach ($v AS $pattern)
 					{
-						$matches = array();
 						if (True === $this->_match_url($this->params, $pattern, &$matches))
 						{
 							if (isset($pattern[0]) && $pattern[0] === null )
@@ -183,44 +182,49 @@ abstract class Controller implements ArrayAccess
 								if (method_exists($controller, $method))
 								{
 									$this->method = $method;
-									$config = array($matches);
 									break;
 								}
 							}
 							else
 							{
 								$this->method = 'handle_'.$action;
-								$config = array($matches);
 								break;
 							}
 						}
+						$matches = array();
 					}
 				}
 			
 				if ($this->method)
 				{
-					//QUICKSTART-790
-					$this->params_mapped = $matches;
-					$this->preHandle( $matches );
-					if ($controller)
-					{
-						$status = call_user_func_array(
-							array(&$controller, $this->method),
-							$config
-						);
-					}
-					else
-					{
-						$status = call_user_func_array(
-							array(&$this, $this->method),
-							$config
-						);
-					}
-					$this->postHandle( $matches );
 					break;
 				}
 			}
 		}
+
+		//QUICKSTART-790
+		$this->params_mapped = $matches;
+		$this->preHandle( $matches );
+		
+		if ($this->method)
+		{
+			if ($controller)
+			{
+				$status = call_user_func_array(
+					array(&$controller, $this->method),
+					array($matches)
+				);
+			}
+			else
+			{
+				$status = call_user_func_array(
+					array(&$this, $this->method),
+					array($matches)
+				);
+			}
+		}
+		
+		$this->postHandle( $matches );
 		
 		$this->rend();
 

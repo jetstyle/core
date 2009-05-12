@@ -376,13 +376,89 @@ class TemplateEngine
 	 */
 	public function parseSiteMap($siteMapKey)
 	{
-		if (!isset($this->siteMap[$siteMapKey]))
-		{
-			throw new TplException('Sitemap "'.$siteMapKey.'" not found');
-		}
+        if (!$siteMapKey)
+        {
+            throw new TplException('Sitemap key is empty');
+        }
 
-		$data = $this->siteMap[$siteMapKey];
-		
+        if (isset($this->siteMap[$siteMapKey]) && !$this->siteMap[$siteMapKey]['views'])
+        {
+            $data = $this->siteMap[$siteMapKey];
+        }
+        else
+        {
+            $siteMapKeyParts = explode('/', $siteMapKey);
+            if (count($siteMapKeyParts) <= 2)
+            {
+                // sanitize
+                foreach ($siteMapKeyParts AS $k => $v)
+                {
+                    if (!preg_match('/^[a-zA-Z0-9_\-]+$/', $v))
+                    {
+                        unset($siteMapKeyParts[$k]);
+                    }
+                }
+                
+                $siteMapKeyPartsCount = count($siteMapKeyParts);
+                
+                if ($siteMapKeyPartsCount)
+                {
+                    if ( $siteMapKeyPartsCount == 1 )
+                    {
+                        $siteMapKeyParts[] = 'index';
+                    }
+                    elseif ($siteMapKeyParts[1] == 'default')
+                    {
+                        $siteMapKeyParts[1] = 'index';
+                    }
+                                        
+					if (isset($this->siteMap[$siteMapKeyParts[0]]))
+                    {
+                        $data = $this->siteMap[$siteMapKeyParts[0]];
+						$views = $data['views'];
+                        unset($data['views']);
+    
+                        if (is_array($views))
+                        {
+                            foreach ($views AS $viewKey => $viewData)
+                            {
+                                if ($siteMapKeyParts[1] == $viewKey && is_array($viewData))
+                                {
+                                    $data = array_merge($data, $viewData);
+									break;
+                                }
+                                // elseif (is_numeric($viewKey) && $viewData == $siteMapKeyParts[1])
+                                // {
+                                // 
+                                // }
+                            }
+                        }
+                    }
+					else
+					{
+						$data = array();
+					}
+					
+					if (!$data['HTML_body'])
+                    {
+                        $filePath = implode('/', $siteMapKeyParts);
+
+                        if (!Finder::findScript( "templates", $filePath, 0, 1, "html" ))
+                        {
+                            throw new TplException('Can\'t find HTML_body template "'.$filePath.'.html" for sitemap "'.htmlentities($siteMapKey, ENT_COMPAT, 'cp1251').'".');
+                        }
+                        
+                        $data['HTML_body'] = '@'.$filePath.'.html';
+                    }
+                }
+            }
+        }
+
+        if (!$data || empty($data))
+        {
+            throw new TplException('Sitemap "'.htmlentities($siteMapKey, ENT_COMPAT, 'cp1251').'" not found');
+        }
+
 		if (Config::get('enable_cms_panel'))
 		    $data = array_merge(array('cms_panel'=>'@blocks/cms_panel_wrapper.html'), $data ); 
 		
