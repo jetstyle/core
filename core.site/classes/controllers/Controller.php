@@ -339,11 +339,12 @@ abstract class Controller implements ArrayAccess
 			}
 		}
 
-		//var_dump($grid);
+		//var_dump(Config::get('header_bg_repeat'));
 
 
 		$view = array("colors"=> $colors,
-		              "grid"  => $grid);
+		              "grid"  => $grid,
+					  "header_bg_repeat" => Config::get('header_bg_repeat'));
 
 		if ($logo = Locator::get('upload')->getFile("logo"))
 		{
