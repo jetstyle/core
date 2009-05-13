@@ -8,7 +8,7 @@
         width: 98%;
     }
 
-    .cms-save-but 
+    .cms-save-but
     {
 /*
 	-x-system-font:none;
@@ -17,7 +17,7 @@
 	font-family:Arial,sans-serif;
 	font-size:12px;
     }
-    .cms-delete-but 
+    .cms-delete-but
     {
 	color:#880000;
 	font-family:Arial,sans-serif;
@@ -27,7 +27,7 @@
   padding: 6px;
   margin: -6px 6px 6px -6px !important;
   margin: 0; }
-  
+
 /* customization params */
 .change-color-bg, .change-color-text {
 	cursor: pointer;
@@ -38,7 +38,7 @@
 	position: absolute;
 	width: 288px;
 	display: none;
-	z-index: 1000;
+	z-index: 1100;
 	border: 1px solid;
 }
 #webPalette div {
