@@ -12,9 +12,10 @@ Pipette.prototype = {
         $('img:not(.change-color-text):not(.change-color-bg)').bind('mouseover', {'_this': this}, this.imageMouseOver)
                 .bind('click', {'_this': this}, this.imageClick)
                 .css('cursor', 'crosshair');
-        /*$('body').mouseover(function(){
-            console.log(getComputedStyle(this, 'background'));
-        });*/
+        $('body').mouseover(function(){
+            var cs = window.getComputedStyle(this, "");
+            console.log(cs.getPropertyValue("background-color"));
+        });
     },
 
     turnOff: function() {

@@ -57,10 +57,9 @@
     	$this->goToList = $this->db->query("
  			SELECT IF(LENGTH(title_short) > 0, title_short, title_pre) AS title, _path AS path
  			FROM ??content
- 			WHERE controller NOT IN ('', 'content', 'link')
+ 			WHERE controller NOT IN ('', 'content', 'link') AND _state = 0
  			ORDER BY _level,_order
  		");
-	//$this->goToList[] = array('title'=>'выход', 'path'=>'logout');
  	}
 
  	protected function getLoadResult()
