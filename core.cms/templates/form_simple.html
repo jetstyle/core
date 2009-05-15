@@ -68,7 +68,6 @@ $(document).ready( function()
                 if (b.type!="submit" || b.name=="update_2")
                     data[b.name.replace(/{{prefix}}/, "")  ] = getVal(b);
             });
-            console.log(data);
             data['ajax_update'] = "1";
             data['prefix'] = "{{prefix}}";
 
