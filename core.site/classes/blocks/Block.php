@@ -5,12 +5,12 @@ class Block
 	private $tplParams = array();
 	protected $config = array();
 	protected $alwaysLoad = false;
-	
+
 	public function __construct($config = array())
 	{
 		$this->config = $config;
 	}
-	
+
 	/**
 	 * Вернуть конфиг
 	 */
@@ -31,7 +31,7 @@ class Block
 		    {
                 //Exceptions not to ignore
                 $processExceptions = array(EXCEPTION_MAIL, EXCEPTION_MAIL | EXCEPTION_SILENT);
-	
+
                 if ( in_array( ExceptionHandler::getInstance()->getMethod($e), $processExceptions  ) )
                 {
                     ExceptionHandler::getInstance()->process($e);
@@ -70,7 +70,11 @@ class Block
         }
         elseif ($this->config[$key])
         {
-            return $this->config[$key];
+            //если конфиг блока содиржит параметры для cms
+            if (is_array($this->config[$key]) && isset($this->config[$key]['value']))
+                return $this->config[$key]['value'];
+            else
+                return $this->config[$key];
         }
         else
         {
@@ -82,10 +86,10 @@ class Block
 	{
 		$this->data = $data;
 	}
-	
+
 	protected function constructData()
 	{
-		
+
 	}
 }
 ?>

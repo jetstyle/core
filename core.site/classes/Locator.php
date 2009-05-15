@@ -1,11 +1,11 @@
 <?php
 /**
  * Locator.
- * 
- * The Service Locator pattern centralizes distributed service object lookups, 
- * provides a centralized point of control, and may act as a cache that eliminates redundant lookups. 
+ *
+ * The Service Locator pattern centralizes distributed service object lookups,
+ * provides a centralized point of control, and may act as a cache that eliminates redundant lookups.
  * It also encapsulates any vendor-specific features of the lookup process.
- * 
+ *
  * @author lunatic <lunatic@jetstyle.ru>
  */
 class Locator
@@ -18,7 +18,7 @@ class Locator
 	 * @var array
 	 */
 	private static $objs = array();
-	
+
 	/**
 	 * Relations between keys and classes
 	 *
@@ -27,14 +27,14 @@ class Locator
 	 * @var array
 	 */
 	private static $relations = array();
-	
+
 	/**
 	 * Static usage only.
-	 * 
+	 *
 	 * @access private
 	 */
 	private function __construct(){	}
-		
+
 	/**
 	 * Bind key and object.
 	 *
@@ -44,7 +44,7 @@ class Locator
 	 */
 	public static function bind($key, $path, $singleton = true, $params = NULL)
 	{
-		    
+
 		Debug::trace('Bind "'.$key.'"', 'locator');
 		if (is_object($path) || is_array($path))
 			self::$objs[$key] = $path;
@@ -52,14 +52,14 @@ class Locator
 		{
 			$class = pathinfo($path, PATHINFO_FILENAME);
 			self::$relations[$key] = array(
-				'class' => $class, 
-				'path' => $path, 
+				'class' => $class,
+				'path' => $path,
 				'singleton' => $singleton,
 				'params' => $params
 			);
 		}
 	}
-	
+
 	/**
 	 * Reset bindings, for Unit Tests only
 	 *
@@ -102,7 +102,7 @@ class Locator
 		    }
 	    }
     }
-    	
+
 	/**
 	 * Get object.
 	 *
@@ -115,13 +115,13 @@ class Locator
 		{
 			if (isset(self::$relations[$key]))
 			{
-			
+
 
 				Finder::useClass( self::$relations[$key]['path'] );
 				$class = self::$relations[$key]['class'];
-				
+
 				Debug::trace('Create "'.$key.'"', 'locator');
-				
+
 				if (self::$relations[$key]['singleton'])
 				{
 					eval('self::$objs[$key] = & '.$class.'::getInstance();');
@@ -151,23 +151,23 @@ class Locator
 				}
 			}
 		}
-		
+
 		return self::$objs[$key];
 	}
-	
-	public static function &getBlock($key)
+
+	public static function &getBlock($key, $forceCreate=false)
 	{
 		$objKey = '__block_'.strtolower($key);
-		if (!isset(self::$objs[$objKey]))
+		if (!isset(self::$objs[$objKey]) || $forceCreate)
 		{
 			// camel case to underscored
 			$configName = preg_replace('/([A-Z]+)([A-Z])/','\1_\2', $key);
         	$configName = strtolower(preg_replace('/([a-z])([A-Z])/','\1_\2', $configName));
-			
+
 			$configFile = Finder::findScript('conf', $configName, 0, 1, 'yml', false, 'app');
-			
+
 			if ($configFile)
-			{			
+			{
 				if ($controller = Locator::get('controller', true))
 				{
 					$controllerClass = substr(get_class($controller), 0, -10);
@@ -176,9 +176,9 @@ class Locator
 				{
 					$controllerClass = '';
 				}
-				
+
 				$config = YamlWrapper::load($configFile);
-				
+
 				if (is_array($config))
 				{
 					if (isset($config[$controllerClass]) && is_array($config[$controllerClass]))
@@ -194,7 +194,7 @@ class Locator
 				{
 					$config = array();
 				}
-				
+
 				if ($config['class'])
 				{
 					$className = $config['class'];
@@ -206,21 +206,21 @@ class Locator
 			}
 			else
 			{
-				$className = ucfirst($key).'Block'; 
+				$className = ucfirst($key).'Block';
 				$config = array();
 			}
-			
+
 			Finder::useClass('blocks/'.$className, 'app');
 			Debug::trace('Create block "'.$key.'"', 'locator');
-			
+
 			self::$objs[$objKey] = new $className($config);
 		}
-		
+
 		return self::$objs[$objKey];
 	}
-	
+
 	/**
-	 * Check existence of object 
+	 * Check existence of object
 	 *
 	 * @param string $key
 	 * @return boolean

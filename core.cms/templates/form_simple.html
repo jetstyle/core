@@ -61,21 +61,20 @@
 $(document).ready( function()
 {
     if(window.location.search.match("&popup=1")) {
-        //console.log(;
         $("#{{__form_name}}").submit( function() {
-            tinymce.EditorManager.triggerSave();
-            //for (editor in tinymce.EditorManager.editors) editor.save();
+            if (typeof(tinymce) != 'undefined') tinymce.EditorManager.triggerSave();
             data = {};
             $(":input", "#{{__form_name}}").each(function (a,b,c) {
                 if (b.type!="submit" || b.name=="update_2")
                     data[b.name.replace(/{{prefix}}/, "")  ] = getVal(b);
             });
+            console.log(data);
             data['ajax_update'] = "1";
             data['prefix'] = "{{prefix}}";
 
             $.post("{{ajax_url}}", data, function(returned) {
                 if ( top.onTBRemove) top.onTBRemove();
-                    else top.tb_remove();
+                   else top.tb_remove();
             });
         	return false;
         });

@@ -1,6 +1,6 @@
 <?php
 /**
- * 
+ *
  */
 $blockParts = explode('::', $params[0]);
 
@@ -21,7 +21,7 @@ unset($params[0]);
 
 try
 {
-	$block = Locator::getBlock($blockName);
+	$block = Locator::getBlock($blockName, $params['force_create']);
 }
 catch(FileNotFoundException $e)
 {
@@ -62,5 +62,5 @@ if ($block->getParam('ret'))
     return $res;
 else
     echo $res;
-    
+
 ?>

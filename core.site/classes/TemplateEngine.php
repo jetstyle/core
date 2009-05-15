@@ -1,7 +1,7 @@
 <?php
 /**
  * TemplateEngine.
- * 
+ *
  * @author JetStyle team
  *
  */
@@ -10,9 +10,9 @@ class TemplateEngine
 	const COMPILE_NEVER = 0;
 	const COMPILE_SMART = 1;
 	const COMPILE_ALWAYS = 2;
-	
+
 	private static $instance = null;
-	
+
 	public $domain = array();
 
 	protected $compiler = null;
@@ -52,12 +52,12 @@ class TemplateEngine
 	protected $siteMapFilename = 'site_map.yml';
 
 	protected $cleanCompiler = false;
-	
+
 	// ############################################## //
 
 	/**
 	 * Singletone
-	 * 
+	 *
 	 * @access private
 	 */
 	private function __construct()
@@ -67,20 +67,20 @@ class TemplateEngine
 			$this->rootHref = RequestInfo::$baseUrl.Config::get('app_name').'/skins/';
 		}
 		$this->rootDir = Config::get('app_dir').'skins/';
-		
+
 		if (Config::exists('tpl_compile'))
 		{
 			$this->compileMode = Config::get('tpl_compile');
 		}
-		
+
 		if (Config::get('use_fixtures'))
 		{
 			$this->loadFixtures();
 		}
-		
+
 		// выбрать шкуру
 		$this->skin( Config::get('tpl_skin') );
-		
+
 		$this->set("/", RequestInfo::$baseUrl);
 		$this->set("tpl_skin", Config::get('tpl_skin') );
 	}
@@ -91,7 +91,7 @@ class TemplateEngine
 		{
 			self::$instance = new self();
 		}
-		
+
 		return self::$instance;
 	}
 
@@ -100,13 +100,13 @@ class TemplateEngine
 	{
 	    self::$instance = null;
 	}
-	
-	
+
+
 	public function setCompileMode($mode)
 	{
 		$this->compileMode = $mode;
 	}
-	
+
 	public function get( $key ) // -- получить значение (намеренно без ссылки)
 	{ return isset($this->domain[$key]) ? $this->domain[$key] : "" ; }
 
@@ -211,7 +211,7 @@ class TemplateEngine
 	{
 		return $this->skinName;
 	}
-	
+
 	public function getSkinDir()
 	{
 		return $this->skinDir;
@@ -299,7 +299,7 @@ class TemplateEngine
 
 	/**
 	 * Hack for instance=1 plugins
-	 * 
+	 *
 	 * @param $v BOOL
 	 * @return void
 	 */
@@ -307,7 +307,7 @@ class TemplateEngine
 	{
 		$this->cleanCompiler = $v;
 	}
-	
+
 	/**
 	 * ѕолучение информации о плагине
 	 *
@@ -398,9 +398,9 @@ class TemplateEngine
                         unset($siteMapKeyParts[$k]);
                     }
                 }
-                
+
                 $siteMapKeyPartsCount = count($siteMapKeyParts);
-                
+
                 if ($siteMapKeyPartsCount)
                 {
                     if ( $siteMapKeyPartsCount == 1 )
@@ -411,13 +411,13 @@ class TemplateEngine
                     {
                         $siteMapKeyParts[1] = 'index';
                     }
-                                        
+
 					if (isset($this->siteMap[$siteMapKeyParts[0]]))
                     {
                         $data = $this->siteMap[$siteMapKeyParts[0]];
 						$views = $data['views'];
                         unset($data['views']);
-    
+
                         if (is_array($views))
                         {
                             foreach ($views AS $viewKey => $viewData)
@@ -429,7 +429,7 @@ class TemplateEngine
                                 }
                                 // elseif (is_numeric($viewKey) && $viewData == $siteMapKeyParts[1])
                                 // {
-                                // 
+                                //
                                 // }
                             }
                         }
@@ -438,7 +438,7 @@ class TemplateEngine
 					{
 						$data = array();
 					}
-					
+
 					if (!$data['HTML_body'])
                     {
                         $filePath = implode('/', $siteMapKeyParts);
@@ -447,7 +447,7 @@ class TemplateEngine
                         {
                             throw new TplException('Can\'t find HTML_body template "'.$filePath.'.html" for sitemap "'.htmlentities($siteMapKey, ENT_COMPAT, 'cp1251').'".');
                         }
-                        
+
                         $data['HTML_body'] = '@'.$filePath.'.html';
                     }
                 }
@@ -460,13 +460,13 @@ class TemplateEngine
         }
 
 		if (Config::get('enable_cms_panel'))
-		    $data = array_merge(array('cms_panel'=>'@blocks/cms_panel_wrapper.html'), $data ); 
-		
+		    $data = array_merge(array('cms_panel'=>'@blocks/cms_panel_wrapper.html'), $data );
+
 		if (!$data['html'])
 		{
 			$data['html'] = '@html.html';
 		}
-		
+
 		$cacheName = preg_replace("/[^\w\x7F-\xFF\s]/", $this->templateSepfix, $siteMapKey);
 		$fileCached = Config::get('cache_dir') . $this->templateSepfix . $this->skinName . $this->templateFilePrefix .	$cacheName . ".php";
 		$fileHelperCached = Config::get('cache_dir') . $this->templateSepfix . $this->skinName . $this->templateFilePrefix .	$cacheName . "_helper.php";
@@ -721,7 +721,7 @@ class TemplateEngine
 			$this->siteMap = YamlWrapper::load($this->skinDir.$this->siteMapFilename);
 		}
 	}
-	
+
 	protected function loadFixtures()
 	{
 		Finder::useClass('Fixtures');
@@ -735,7 +735,7 @@ class TemplateEngine
 			$this->set($k, $v);
 		}
 	}
-	
+
 	protected function getCompiler()
 	{
 		if ($this->cleanCompiler)
@@ -750,7 +750,7 @@ class TemplateEngine
 				Finder::useClass("TemplateEngineCompiler");
 				$this->compiler = new TemplateEngineCompiler();
 			}
-			
+
 			return $this->compiler;
 		}
 	}
