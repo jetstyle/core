@@ -14,10 +14,11 @@
 		    <textarea autocomplete="off" id="textarea_{{*module}}_{{*field}}_{{*id}}" ></textarea>
 	    </div>
     {{?:*editor=="textarea"}}
-	    <div id="inplace_{{*module}}_{{*field}}_{{*id}}"  class="invisible" >
-		<div class="p-shadow">
-	            <textarea {{?*rows}}rows="{{*rows}}"{{/?}} {{?*cols}}cols="{{*cols}}"{{/?}} autocomplete="off" ></textarea>
-		</div>
+      <div id="inplace_{{*module}}_{{*field}}_{{*id}}"  class="invisible">
+  	    <div class="p-shadow">          
+      	    <textarea {{?*rows}}rows="{{*rows}}"{{/?}} {{?*cols}}cols="{{*cols}}"{{/?}} autocomplete="off" ></textarea>
+      	    <div class="shaddow-b"><div class="corner-br"></div></div>
+      	</div>
 	    </div>
     {{?:}}
 	<span id="inplace_{{*module}}_{{*field}}_{{*id}}"  class="invisible" >

@@ -75,7 +75,7 @@ Inplace.prototype =
         if ( ! this.inplaceContainer )
         {
             this.inplaceContainer = this.container.clone().empty().append( $( this.inplaceObject ) ).css("padding", "0").removeClass("inplace-over");
-        
+            
             //Рядом с контейнером создаем его пустой клон, с инплейсным редактором
             //this.container.parent().append( this.inplaceContainer );
 	    this.container.after( this.inplaceContainer );
@@ -227,6 +227,8 @@ Inplace.prototype =
 	    this.container = $( this.inplaceObject ).prev();
 
 	this.inplaceObject.css("z-index", 1000).css("position", "relative");
+	var dif = this.container.width() - this.inplaceObject.width();
+	if(dif){ this.inplaceObject.css("margin-left", dif); }
 
 	if ( this.editorType == "wysiwyg" )
 	{
@@ -243,7 +245,7 @@ Inplace.prototype =
 	this.saveButton = $(document.createElement("input")).val("Сохранить").attr("type", "button").addClass("cms-save-but hand");
 	this.cancelButton = $(document.createElement("input")).val("Отменить").attr("type", "button").addClass("cms-delete-but hand");
 
-        this.buttons = $(document.createElement("div")).append( this.saveButton, this.cancelButton ).css("padding-top", "8px");//;
+  this.buttons = $(document.createElement("div")).append( this.saveButton, this.cancelButton ).css("padding-top", "8px");//;
 
 	if (this.editorType=="wysiwyg")
 	    $(this.buttons).css("padding-left", "8px");

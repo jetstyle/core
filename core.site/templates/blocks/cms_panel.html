@@ -17,27 +17,26 @@
 <style>
     .p-shadow
     {
-      /*width: 90%;*/
-      
-      background: #eee;/*url( {{images}}shadowAlpha.png ) no-repeat bottom right !important;*/
-      /*background: url( {{images}}shadow.gif ) no-repeat bottom right;*/
-      margin: 10px 0 0 10px !important;
-      margin: 10px 0 0 5px;
+      position: relative;
+      padding: 0 6px 0 0;
+      background: url( {{images}}shaddow-r.png ) 100% 0 repeat-y;
     }
 
-    .p-shadow div
+    .p-shadow .corner-br
     {
-      background: none !important;
-      background: url( {{images}}shadow2.gif ) no-repeat left top;
-      padding: 0 !important;
-      padding: 0 6px 6px 0;
+      width: 100%; height: 6px;
+      background: url( {{images}}shaddow-b.png ) repeat-x 100% 0;
+    }
+    
+    .p-shadow .shaddow-b
+    {
+      width: 100%; height: 6px; padding: 0 6px 0 0;
+      background: url( {{images}}shaddow-br.png ) 100% 0 no-repeat;
     }
 
     .p-shadow textarea, .p-shadow input
     {
-      padding: 6px;
-      margin: -6px 6px 6px -6px !important;
-      margin: 0;
+      padding: 6px; margin: 0 0 0 -4px;
     }
     
     {{@_/platonica_widgets_css.html}}
