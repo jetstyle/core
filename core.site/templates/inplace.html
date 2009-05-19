@@ -15,15 +15,20 @@
 	    </div>
     {{?:*editor=="textarea"}}
       <div id="inplace_{{*module}}_{{*field}}_{{*id}}"  class="invisible">
-  	    <div class="p-shadow">          
-      	    <textarea {{?*rows}}rows="{{*rows}}"{{/?}} {{?*cols}}cols="{{*cols}}"{{/?}} autocomplete="off" ></textarea>
-      	    <div class="shaddow-b"><div class="corner-br"></div></div>
+  	    <div class="p-shadow">
+            <div class="shaddow-r">
+              <textarea {{?*rows}}rows="{{*rows}}"{{/?}} {{?*cols}}cols="{{*cols}}"{{/?}} autocomplete="off" ></textarea>
+      	    </div>
+      	    <div class="shaddow-b"><div class="shaddow-br"></div></div>
       	</div>
 	    </div>
     {{?:}}
 	<span id="inplace_{{*module}}_{{*field}}_{{*id}}"  class="invisible" >
 	    <div class="p-shadow">
-	        <input type="text" class="w98"  autocomplete="off" />
+        <div class="shaddow-r">
+          <input type="text" autocomplete="off" />
+	      </div>
+	      <div class="shaddow-b"><div class="shaddow-br"></div></div>
 	    </div>
 	</span>
 

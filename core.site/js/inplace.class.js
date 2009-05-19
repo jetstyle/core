@@ -86,7 +86,7 @@ Inplace.prototype =
 	
 	//width fix
 	if (this.editorType!='wysiwyg')
-	    $( this.inplaceObject ).css("width", $( this.inplaceObject ).children(":first").children(":first").width()+16 );
+	    $( this.inplaceObject ).css( "width", $( this.inplaceObject ).children(":first").children(":first").width()-6 );
 	
         //контейнер спр€чем
         this.container.addClass("invisible");
@@ -101,11 +101,11 @@ Inplace.prototype =
     {
 	    if ( this.editorType=='' || this.editorType=='textarea' )
 	    {
-	        $( this.inplaceObject ).children(":first").children(":first").attr("value", data);    
+	        $( this.inplaceObject ).children(":first").children(":first").children(":first").attr("value", data);    
 	    }
 	    else
 	    {
-	        $( this.inplaceObject ).children(":first").attr("value", data); 
+	        $( this.inplaceObject ).children(":first").children(":first").attr("value", data); 
 
 	        if (!this.inited)
 	        {	/*
@@ -117,7 +117,7 @@ Inplace.prototype =
 			}			
 			console.log(tinyMCE.editors);
 			*/
-			var textarea_id = $( this.inplaceObject ).children(":first").attr("id");
+			var textarea_id = $( this.inplaceObject ).children(":first").children(":first").attr("id");
 //			console.log('mceAddControl '+ textarea_id );
 			
 		        tinyMCE.execCommand("mceAddControl", true, textarea_id );
@@ -132,7 +132,7 @@ Inplace.prototype =
     {
 	    if ( this.editorType=='' || this.editorType=='textarea' )
 	    {
-	        return $( this.inplaceObject ).children(":first").children(":first").attr("value");
+	        return $( this.inplaceObject ).children(":first").children(":first").children(":first").attr("value");
 	    }
 	    else
 	    {
