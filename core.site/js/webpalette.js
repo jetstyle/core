@@ -3,7 +3,7 @@ WebPalette.prototype = {
 
     elementId: null,
     visibility: false,
-    
+
     initialize: function(settings)
     {
         this.elementId = settings.id;
@@ -34,34 +34,34 @@ WebPalette.prototype = {
             this.pipette = new Pipette(pipetteSettings);
         }
     },
-    
+
     getElement: function()
     {
-        return $('#'+this.elementId).get(0);    
+        return $('#'+this.elementId).get(0);
     },
-    
+
     hide: function()
     {
         this.visibility = false;
         $('#'+this.elementId).hide();
         if (this.pipette) this.pipette.turnOff();
     },
-    
+
     show: function(snapTo)
     {
         if (snapTo) {
             if ($(snapTo).offset().left + $(snapTo).width() + $('#'+this.elementId).width() + 3 > $(document).width()) {
-                $('#'+this.elementId).css('left', $(snapTo).offset().left - $('#'+this.elementId).width() - 3);   
+                $('#'+this.elementId).css('left', $(snapTo).offset().left - $('#'+this.elementId).width() - 3);
             } else {
-                $('#'+this.elementId).css('left', $(snapTo).offset().left + $(snapTo).width() + 3);   
+                $('#'+this.elementId).css('left', $(snapTo).offset().left + $(snapTo).width() + 3);
             }
-            $('#'+this.elementId).css('top', $(snapTo).offset().top - 1);   
+            $('#'+this.elementId).css('top', $(snapTo).offset().top - 1);
         }
         this.visibility = true;
         $('#'+this.elementId).show();
-        if (this.pipette) this.pipette.turnOn();
+        if (this.pipette) this.pipette.turnOn($(snapTo).hasClass('change-color-bg') ? 'background-color' : 'color');
     },
-    
+
     generate: function(contId)
     {
         var color = 0;
@@ -81,12 +81,12 @@ WebPalette.prototype = {
         }
         $('#'+contId).html(html).addClass('webPalette');
     },
-    
+
     dec2hex: function(dec)
     {
         return parseInt(dec, 10).toString(16);
     },
-    
+
     normalizeColor: function(color)
     {
         if (color.indexOf('rgb(') == 0)
@@ -96,7 +96,7 @@ WebPalette.prototype = {
         }
         return color;
     },
-    
+
     padString: function(string, symbol, length)
     {
         string = '' + string;
@@ -106,5 +106,5 @@ WebPalette.prototype = {
         }
         return string;
     }
-    
+
 };

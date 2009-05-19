@@ -8,20 +8,27 @@ Pipette.prototype = {
         this.context = this.canvas.getContext('2d');
     },
 
-    turnOn: function() {
-        $('img:not(.change-color-text):not(.change-color-bg)').bind('mouseover', {'_this': this}, this.imageMouseOver)
-                .bind('click', {'_this': this}, this.imageClick)
-                .css('cursor', 'crosshair');
-        $('body').mouseover(function(){
-            var cs = window.getComputedStyle(this, "");
-            console.log(cs.getPropertyValue("background-color"));
-        });
+    turnOn: function(property) {
+        this.property = property;
+        $('img:not(.change-color-text):not(.change-color-bg)')
+                .bind('mouseover', {'_this': this}, this.imageMouseOver)
+                .bind('mousemove', {'_this': this}, this.imageMouseMove)
+                .bind('click', {'_this': this}, this.imageClick);
+        $('body').bind('mouseover', {'_this': this}, this.elementMouseOver)
+                 .bind('click', {'_this': this}, this.elementClick)
+                 .css('cursor', 'crosshair');
+        //$('body').append($('<div id="pipetteColorSample">').css({position:'absolute', left:0, top:0, width:16, height: 16}));
     },
 
     turnOff: function() {
-        $('img:not(.change-color-text):not(.change-color-bg)').unbind('mouseover', this.imageMouseOver)
+        $('img:not(.change-color-text):not(.change-color-bg)')
+                .unbind('mouseover', this.imageMouseOver)
+                .unbind('mousemove', this.imageMouseMove)
                 .unbind('click', this.imageClick)
-                .css('cursor', 'default');
+        $('body').unbind('mouseover', this.elementMouseOver)
+                 .unbind('click', this.elementClick)
+                 .css('cursor', '');
+        //$('#pipetteColorSample').remove();
     },
 
     imageMouseOver: function(e) {
@@ -31,21 +38,46 @@ Pipette.prototype = {
         _this.context.drawImage(this, 0, 0);
     },
 
-    imageClick: function(e){
+    imageMouseMove: function(e) {
         _this = e.data._this;
-        var pixel = _this.context.getImageData(e.pageX - $(this).offset().left, e.pageY - $(this).offset().top, 1, 1).data;
+        //$('#pipetteColorSample').css(_this.property, _this.getColorInPoint(this, e.pageX, e.pageY));
+    },
+
+    imageClick: function(e) {
+        _this = e.data._this;
+        _this.settings.colorChoose(_this.getColorInPoint(this, e.pageX, e.pageY));
+        e.stopPropagation();
+        return false;
+    },
+
+    elementMouseOver: function(e) {
+        _this = e.data._this;
+        var parents = $.merge([e.target], $(e.target).parents());
+        for (var i=0; i<parents.length; i++) {
+            if ($(parents[i]).css(_this.property) != 'transparent') {
+                //$('#pipetteColorSample').css(_this.property, $(parents[i]).css(_this.property));
+                break;
+            }
+        }
+        return false;
+    },
+
+    elementClick: function(e) {
+        _this = e.data._this;
+        _this.settings.colorChoose($('#pipetteColorSample').css(_this.property));
+        e.stopPropagation();
+        return false;
+    },
+
+    getColorInPoint: function(el, x, y) {
+        var pixel = this.context.getImageData(x - $(el).offset().left, y - $(el).offset().top, 1, 1).data;
         var hexColor = '#';
         for(var i=0; i<3; i++)
         {
             hexColor += pixel[i] < 16 ? '0' : '';
             hexColor += parseInt(pixel[i], 10).toString(16);
         }
-        _this.settings.colorChoose(hexColor);
-        e.stopPropagation();
-    },
-
-    documentMouseMove: function() {
-
+        return hexColor;
     }
 
 };
