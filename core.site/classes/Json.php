@@ -18,7 +18,7 @@ class Json
         if (is_array ($input))
 		{
 			$keys = array_keys($input);
-            if ($keys[0] == 0 && $keys[count($keys) - 1] == count($keys) - 1)
+            if ($keys[0] === 0 && $keys[count($keys) - 1] === count($keys) - 1)
             {
                 $result = self::encodeAsArray($input);
             }

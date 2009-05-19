@@ -106,6 +106,15 @@ class DBModel extends Model implements IteratorAggregate, ArrayAccess, Countable
 	protected $fields = array();
 
 	/**
+	 * Key of files config
+	 * ex. news (supposed, that config is in cms/modules/News/files.yml)
+	 * ex. news/items (supposed, that config is in cms/modules/News/conf/items/files.yml)
+	 *
+	 * @var string
+	 */
+	protected $files = '';
+
+	/**
 	 * Поля таблицы
 	 *
 	 * @var array
@@ -208,6 +217,11 @@ class DBModel extends Model implements IteratorAggregate, ArrayAccess, Countable
 	protected $treeMinLevel = 0;
 	protected $treeRootId = 0;
 	
+	private $loadedConfigFileName = '';
+	
+	private $preCollectIds = false;
+	private $ids = array();
+	
 	public static function factory($className = '')
 	{
 		$obj = null;
@@ -242,6 +256,7 @@ class DBModel extends Model implements IteratorAggregate, ArrayAccess, Countable
 		else
 		{
 			$model = new DBModel();
+			
 			if (!$model->loadConfig( $className, $fieldSet ))
 			{
 				throw new JSException('DBModel: can\'t find model "'.$className.'"'. ($fieldSet ? " with field set \"".$fieldSet."\"" : ""));
@@ -269,6 +284,7 @@ class DBModel extends Model implements IteratorAggregate, ArrayAccess, Countable
 		$this->children = array();
 		$this->treeMinLevel = 0;
 		$this->treeRootId = 0;
+		$this->ids = array();
 		
 		if (is_array($this->foreignModels) && !empty($this->foreignModels))
 		{
@@ -318,7 +334,9 @@ class DBModel extends Model implements IteratorAggregate, ArrayAccess, Countable
 			}
 
 			$storeTo = $fileName.($fieldSet ? "_".$fieldSet : "");
-
+			
+			$this->loadedConfigFileName = $fileName;
+			
 			$this->setConfig($ymlConfig, $fileName, $storeTo);
 			return true;
 		}
@@ -357,7 +375,12 @@ class DBModel extends Model implements IteratorAggregate, ArrayAccess, Countable
 		{
 			$this->setAutoPrefix($ymlConfig['autoPrefix']);
 		}
-
+		
+		if ($ymlConfig['files'])
+		{
+			$this->addFilesConfig($ymlConfig['files']);
+			$this->files = null;
+		}
 	}
 
 	// ######## GETTERS ############## //
@@ -799,6 +822,57 @@ class DBModel extends Model implements IteratorAggregate, ArrayAccess, Countable
 		return $this;
 	}
 
+	public function addFilesConfig($configKey = '')
+	{
+		if (!$configKey)
+		{
+			$configKey = $this->files;
+		}
+
+		if (!$configKey)
+		{
+			return;
+		}
+
+		$params = array();
+
+		if (is_array($configKey))
+		{
+			$params = $configKey;
+			$configKey = $configKey['config'];
+			unset($params['config']);
+		}
+
+		$config = FileManager::getConfig($configKey);
+		
+		if (is_array($config))
+		{
+			foreach ($config AS $key => $conf)
+			{
+				$fieldConfig = $params;
+				$fieldConfig['type'] = 'file';
+				$fieldConfig['conf'] = $configKey.':'.$key;
+				
+				$this->addField($key, $fieldConfig);
+
+				// subconfigs
+				if (is_array($conf['previews']))
+				{
+					foreach ($conf['previews'] AS $subKey => $subConf)
+					{
+						$fieldConfig = $params;
+						$fieldConfig['type'] = 'file';
+						$fieldConfig['conf'] = $configKey.':'.$key.'/'.$subKey;
+						$fieldConfig['parent'] = $key;
+
+						$this->addField($key.'_'.$subKey, $fieldConfig);
+					}
+				}
+
+			}
+		}
+	}
+
 	public function setFields($fields)
 	{
 		$this->clearFields();
@@ -881,6 +955,11 @@ class DBModel extends Model implements IteratorAggregate, ArrayAccess, Countable
 						);
 					}
 				}
+			}
+			
+			if (is_array($config) && array_key_exists('lazy_load', $config) && $config['lazy_load'] === false)
+			{
+				$this->preCollectIds = true;
 			}
 		}
 		return $this;
@@ -1076,6 +1155,12 @@ class DBModel extends Model implements IteratorAggregate, ArrayAccess, Countable
 		{
 			$this->addFields($this->fields);
 		}
+		
+		if ($this->files)
+		{
+			$this->addFilesConfig($this->files);
+			$this->files = null;
+		}
 	}
 	
 	public function &getPager()
@@ -1206,6 +1291,16 @@ class DBModel extends Model implements IteratorAggregate, ArrayAccess, Countable
 				('.$qt.'.'.$this->quoteName($fieldinfo['through']['pk']) .'='. DBModel::quote($data[$fieldinfo['pk']]).')
 			) ';
 
+		if ($fieldinfo['through']['order'] && is_array($fieldinfo['through']['order']))
+		{
+			$orderArr = array();
+			foreach ($fieldinfo['through']['order'] AS $orderField => $orderDir)
+			{
+				$orderArr[] = $qt.'.'.$this->quoteName($orderField).' '.$orderDir;
+			}
+			$sqlParts['order'] = 'ORDER BY '.implode(', ', $orderArr);
+		}
+
 		$fmodel->loadSql(implode(' ', $sqlParts));
 		$data[$fieldName] = &$fmodel;
 	}
@@ -1246,7 +1341,40 @@ class DBModel extends Model implements IteratorAggregate, ArrayAccess, Countable
 		}
 		$data[$fieldName] = $file;
 	}
-
+	
+	protected function mapFile($fieldName, &$data)
+	{
+		Finder::useClass('FileManager');
+		$fieldinfo = &$this->foreignFields[$fieldName];
+		
+		$isId = false;
+				
+		if ($this->loadedConfigFileName == 'FilesModel' || get_class($this) == 'FilesModel')
+		{
+			$isId = true;
+		}
+		
+		if ($fieldinfo['parent'])
+		{
+			$parent = &$this->foreignFields[$fieldinfo['parent']];
+		}
+		else
+		{
+			$parent = &$fieldinfo;
+		}
+		
+		if (!$parent['cached'])
+		{
+			if (is_array($this->ids) && !empty($this->ids))
+			{
+				FileManager::precache($parent['conf'], $this->ids, $isId);
+			}
+			$parent['cached'] = true;
+		}
+		
+		$data[$fieldName] = FileManager::getFile($fieldinfo['conf'], $data['id'], $isId);
+	}
+	
 	/**
 	 * Строит join для has_one
 	 *
@@ -1369,14 +1497,39 @@ class DBModel extends Model implements IteratorAggregate, ArrayAccess, Countable
 		$result = $db->execute($sql);
 		$data = array();
 		
-		while ($r = $db->getRow($result))
+		if ($this->preCollectIds)
 		{
-			$this->onRow($this, &$r);
-			$this->notify("row", array(&$this, &$r));
-			if (null !== $this->keyField)
-				$data[$r[$this->keyField]] = $r;
-			else
-				$data[] = $r;
+			$tmpData = array();
+			
+			while ($r = $db->getRow($result))
+			{
+				$this->ids[] = $r[$this->getPk()];
+				$tmpData[] = $r;
+			}
+			
+			foreach ($tmpData AS $r)
+			{
+				$this->onRow($this, &$r);
+				$this->notify("row", array(&$this, &$r));
+				if (null !== $this->keyField)
+					$data[$r[$this->keyField]] = $r;
+				else
+					$data[] = $r;
+			}
+		}
+		else
+		{
+			while ($r = $db->getRow($result))
+			{
+				$this->onRow($this, &$r);
+				$this->notify("row", array(&$this, &$r));
+				if (null !== $this->keyField)
+					$data[$r[$this->keyField]] = $r;
+				else
+					$data[] = $r;
+				
+				$this->ids[] = $r[$this->getPk()];
+			}
 		}
 
 		if (empty($data))
@@ -2051,6 +2204,5 @@ class DBModel extends Model implements IteratorAggregate, ArrayAccess, Countable
 
 		return $res;
 	}
-	}
-
-	?>
+}
+?>

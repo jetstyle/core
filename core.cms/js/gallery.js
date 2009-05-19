@@ -4,6 +4,7 @@ Gallery.prototype = {
 	baseUrl: '',
 	selectedItems: [],
 	lastSelected: null,
+	formPrefix: '',
 
 	initialize: function(){},
 
@@ -20,26 +21,30 @@ Gallery.prototype = {
         			order += self.getId(this)+',';
        			});
        			order = order.substr(0, order.length-1);
-       			$.post(self.baseUrl, {'action': 'reorder','order': order},function(data) {
-					if (data != '1') alert('Ошибка!');
-       			},'text');
+       			$.post(self.baseUrl + '?id='+self.rubricId, {'action': 'reorder','order': order},function(data) {
+					if (!data.ok) alert('Ошибка!');
+       			},'json');
         	},
         	items: '> div.gallery-image'
 		});
+        
 		//control for upload images
 		imagesUploadSettings.upload_url = this.baseUrl+'?id='+this.rubricId+'&session_hash='+this.sessionHash;
 		imagesUploadSettings.flash_url = this.imagesUrl+"swfupload.swf";
 		imagesUploadSettings.button_width = this.thumbWidth;
 		imagesUploadSettings.button_height = this.thumbHeight;
 		imagesUploadSettings.file_types = this.fileExtensions;
+		imagesUploadSettings.file_post_name = this.formPrefix + "Filedata";
 		this.swfUpload = new SWFUpload(imagesUploadSettings);
 		this.swfUpload.customSettings.gallery = this;
 		//control for replace one image
 		imageOneUploadSettings.upload_url = this.baseUrl+'?id='+this.rubricId+'&session_hash='+this.sessionHash;
 		imageOneUploadSettings.flash_url = this.imagesUrl+"swfupload.swf";
 		imageOneUploadSettings.file_types = this.fileExtensions;
+		imageOneUploadSettings.file_post_name = this.formPrefix + "Filedata";
 		this.swfUploadOne = new SWFUpload(imageOneUploadSettings);
 		this.swfUploadOne.customSettings.gallery = this;
+		
 		//control buttons
 		$('#gallery div.gallery-image').each(function() {
         	self.initImage(this);
@@ -65,7 +70,7 @@ Gallery.prototype = {
   		$.ajaxSetup({
         	'error': function(XMLHttpRequest, textStatus, errorThrown) {
             	alert('Ошибка!');
-				location.reload(true);
+				//location.reload(true);
         	}
   		});
 	},
@@ -164,9 +169,9 @@ Gallery.prototype = {
     		items = this.getId(deleteBtn.parentNode.parentNode);
     	}
     	var self = this;
-    	$.post(this.baseUrl, {'action': 'delete','items': items}, function(data)
+    	$.post(this.baseUrl + '?id=' + this.rubricId, {'action': 'delete','items': items}, function(data)
 		{
-       		if (data == '1')
+       		if (data.ok)
 			{
 				if (self.selectedItems.length > 0) {
                 	for (var i=0; i<self.selectedItems.length; i++)
@@ -177,7 +182,7 @@ Gallery.prototype = {
 					$('#image'+items).remove();
 				}
 			}
-		},'text');
+		},'json');
    		return false;
 	},
 
@@ -189,8 +194,8 @@ Gallery.prototype = {
     	};
        	$.post(this.baseUrl, values, function(data) {
 			$('#image'+values.id+' div.image-title').text(values.title);
-			if (data != '1') alert("Ошибка!");
-    	},'text');
+			if (!data.ok) alert("Ошибка!");
+    	},'json');
     	$('#editImageForm').hide();
   	},
 
@@ -284,8 +289,18 @@ var imagesUploadSettings = {
 		location.reload(true);
 	},
 	upload_success_handler: function(file, data) {
-		if (data.indexOf('ok,')==0) {
-           	$('#addImageButton').before(data.substring(3));
+
+		try
+		{
+			eval('data = ' + data + ';');
+		}
+		catch (err)
+		{
+			data = {};
+		}
+		
+		if (data.ok) {
+           	$('#addImageButton').before(data.html);
            	$('#gallery div.gallery-image:last .image-title').html('Заголовок');
 			this.customSettings.gallery.initImage($('#gallery div.gallery-image').get().reverse()[0]);
 		} else {
@@ -309,7 +324,7 @@ var imagesUploadSettings = {
 
 var imageOneUploadSettings = {
 	file_size_limit:  "8 MB",
-	file_types_description: "Допутимые типы файлов",
+	file_types_description: "Допустимые типы файлов",
 
 	post_params: {
 		'swfupload_user_agent': navigator.userAgent || navigator.vendor || window.opera,
@@ -350,22 +365,31 @@ var imageOneUploadSettings = {
 		location.reload(true);
 	},
 	upload_success_handler: function(file, data) {
-		if (data.indexOf('ok,')==0) {
-			var ext = file.name.match(/\.(\w+)$/)[1];
-			var isImageFile = false;
-			var imageExts = ['jpg','jpeg','gif','png'];
-			for($i=0; $i<imageExts.length; $i++) {
-				if (imageExts[$i] == ext) isImageFile = true;
-			}
-			if (isImageFile) {
-				$('#'+this.customSettings.gallery.lastOveredImageId+' img').get(0).src += '?'+Math.random();
-			}
-           	else
-			{
-				$('#'+this.customSettings.gallery.lastOveredImageId+' img').get(0).src = '/cms/skins/images/file_icons/'+ext+'.gif';
-			}
-			//this.customSettings.gallery.initImage($('#gallery div.gallery-image').get().reverse()[0]);
-		} else {
+
+        try
+		{
+			eval('data = ' + data + ';');
+		}
+		catch (err)
+		{
+			data = {};
+		}
+
+		if (data.ok)
+        {
+			if (data.picture.is_image)
+            {
+                $('#'+this.customSettings.gallery.lastOveredImageId+' img').get(0).src = data.picture_thumb.link;
+            }
+            else
+            {
+                $('#'+this.customSettings.gallery.lastOveredImageId+' img').get(0).src = base_url + 'skins/images/file_icons/'+data.picture.ext+'.gif';
+            }
+
+			this.customSettings.gallery.initImage($('#gallery div.gallery-image').get().reverse()[0]);
+		} 
+        else
+        {
            	location.reload(true);
 		}
 	},
