@@ -53,7 +53,7 @@ Inplace.prototype =
     			    {
 				this.hideIndicator();
 				onTBRemove = this.__get.prototypeBind(this);
-				tb_show("Авторизация", base_url+"cms/login/ajax?TB_iframe=true&width=247&height=84&onremove=true", "");
+				tb_show("Авторизация", base_url+"cms/login/ajax?TB_iframe=true&width=264&height=90&onremove=true", "");
     			    }.prototypeBind(this)
 		);
 	        this.__get();
