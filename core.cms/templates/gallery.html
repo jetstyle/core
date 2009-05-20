@@ -24,7 +24,7 @@
 </script>
 
 <div id="gallery">
-	<h4>Управление изображениями</h4>
+	<h4>{{?gallery_title}}{{gallery_title}}{{?:}}Управление изображениями{{/?}}</h4>
 	{{!for *gallery_items do=@:gallery_item}}
 
 	{{:gallery_item *picture && *picture.is_image && *picture_thumb}}
