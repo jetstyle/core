@@ -339,21 +339,14 @@ abstract class Controller implements ArrayAccess
 			}
 		}
 
-		//var_dump(Config::get('header_bg_repeat'));
-
-
 		$view = array("colors"=> $colors,
 		              "grid"  => $grid,
 					  "header_bg_repeat" => Config::get('header_bg_repeat'));
 
-		if ($logo = Locator::get('upload')->getFile("logo"))
-		{
-		    $view['logo'] = $logo;
-		}
-		if ($headerBg = Locator::get('upload')->getFile("header_bg"))
-		{
-		    $view['header_bg'] = $headerBg;
-		}
+        Finder::useClass('FileManager');
+
+        $view['logo'] = FileManager::getFile('Config:logo/small', 1);
+        $view['header_bg'] = FileManager::getFile('Config:bg', 1);
 
 		$view["config_title"] = $config['project_title'];
 
