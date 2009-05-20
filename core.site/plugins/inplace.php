@@ -5,6 +5,11 @@ if (Config::get('db_disable'))
 	return '';
 }
 
+if (!Locator::exists('controller'))
+{
+	return '';
+}
+
 $controller = Locator::get('controller');
 
 if ( !isset($params['module']) )
