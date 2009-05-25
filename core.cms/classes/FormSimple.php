@@ -383,7 +383,7 @@ class FormSimple
 		}
 	}
 
-	protected function restore()
+	public function restore()
 	{
 		$this->updateData(array('_state' => 0));
 		return true;

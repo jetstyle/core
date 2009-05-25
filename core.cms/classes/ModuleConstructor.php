@@ -69,7 +69,7 @@ class ModuleConstructor
 			}
 
 			$className = $config->class_name;
-			
+
 			Finder::useClass( $className );
 			Debug::trace('ModuleConstructor::InitModule - '.$this->moduleName.'/'.$className );
 
@@ -92,7 +92,7 @@ class ModuleConstructor
 
 			$cls = new $className($config);
 			$cls->handle();
-			
+
 			return $cls->getHtml();
 		}
 		// just a wrapper
@@ -171,13 +171,22 @@ class ModuleConstructor
 		}
 
 		unset($config->WRAPPED);
-		
+
 		if ($name == 'form' && $_GET['form_config'])
 		{
 			$fileName = str_replace('.php', '', $_GET['form_config']);
 			$config->read(Finder::findScript( $this->handlersType, $fileName ));
 		}
-		else
+        //some another dirty hack insted of slick and glossy module's API :*-(
+		elseif (substr($name, -4) == 'list' || substr($name, -4) == 'tree')
+        {
+            $config->read(Finder::findScript( $this->handlersType, $this->moduleName.'/'.$name));
+            $formName = substr($name, 0, strlen($name)-4).'form';
+            $formConfig = clone $config;
+            $formConfig->read(Finder::findScript( $this->handlersType, $this->moduleName.'/'.$formName));
+            $config->formConfig = $formConfig;
+        }
+        else
 		{
 			$config->read(Finder::findScript( $this->handlersType, $this->moduleName.'/'.$name));
 		}

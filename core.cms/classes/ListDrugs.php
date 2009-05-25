@@ -67,9 +67,9 @@ class ListDrugs extends ListSimple
         else
         	Controller::redirect(RequestInfo::hrefChange('',array('id'=>$itemId, 'order_list'=>'', 'items_id'=>'', 'index'=>'')));
  	}
- 	if ($_GET['delete_list'])
+ 	if ($_POST['delete_list'])
  	{
- 		$db = &Locator::get('db');
+ 		/*$db = &Locator::get('db');
         $items = $this->loadItems($_GET['items_list']);
         $deleteItems = $updateItems = array();
 	    foreach ($items as $i=>$item)
@@ -81,18 +81,32 @@ class ListDrugs extends ListSimple
       		$db->execute("DELETE FROM ??".$this->config->table_name." WHERE id IN (".implode(',',$deleteItems).")");
       	if (!empty($updateItems))
       		$db->execute("UPDATE ??".$this->config->table_name." SET _state = _state + 1  WHERE id IN (".implode(',',$updateItems).")");
-      	Controller::redirect(RequestInfo::hrefChange('',array('delete_list'=>'', 'items_list'=>'')));
+      	Controller::redirect(RequestInfo::hrefChange('',array('delete_list'=>'', 'items_list'=>'')));*/
+        Finder::useClass($this->config->formConfig->class_name);
+        $config = $this->config->formConfig;
+        $items = explode(',', $_POST['delete_list']);
+        foreach ($items as $id)
+        {
+            $form = new $config->class_name($config);
+            $form->setId($id);
+            $form->load();
+            $form->delete();
+        }
+        die('1');
  	}
- 	if ($_GET['restore_list'])
+ 	if ($_POST['restore_list'])
  	{
- 		$db = &Locator::get('db');
-        $items = $this->loadItems($_GET['items_list']);
-        $updateItems = array();
-	    foreach ($items as $i=>$item)
-			if ($item['_state'] > 0) $updateItems[] = $item['id'];
-      	if (!empty($updateItems))
-      		$db->execute("UPDATE ??".$this->config->table_name." SET _state = _state - 1  WHERE id IN (".implode(',',$updateItems).")");
-      	Controller::redirect(RequestInfo::hrefChange('',array('restore_list'=>'', 'items_list'=>'')));
+ 		Finder::useClass($this->config->formConfig->class_name);
+        $config = $this->config->formConfig;
+        $items = explode(',', $_POST['restore_list']);
+        foreach ($items as $id)
+        {
+            $form = new $config->class_name($config);
+            $form->setId($id);
+            $form->load();
+            $form->restore();
+        }
+        die('1');
  	}
  	/*if ($_GET['move_id'])
  	{

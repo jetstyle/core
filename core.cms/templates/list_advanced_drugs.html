@@ -159,10 +159,24 @@
             	return false;
 			});
 			$('#groupDelete').click(function(){
-                this.href += '&items_list='+getItems();
+                if (confirm('¬ы уверены что хотите удалить выбранное?')) {
+                    $.post('{{page_url}}', {
+                            'delete_list': getItems()
+                        }, function(data) {
+                            if (data != '1') alert(data); else window.location.reload(true);
+                        },'text'
+                    );
+                }
+                return false;
 			});
 			$('#groupRestore').click(function(){
-                this.href += '&items_list='+getItems();
+                $.post('{{page_url}}', {
+                    	'restore_list': getItems()
+                    }, function(data) {
+						if (data != '1') alert(data); else window.location.reload(true);
+		       		},'text'
+		       	);
+                return false;
 			});
 		});
 		function getItems(action) {
