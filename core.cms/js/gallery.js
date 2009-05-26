@@ -27,7 +27,7 @@ Gallery.prototype = {
         	},
         	items: '> div.gallery-image'
 		});
-        
+
 		//control for upload images
 		imagesUploadSettings.upload_url = this.baseUrl+'?id='+this.rubricId+'&session_hash='+this.sessionHash;
 		imagesUploadSettings.flash_url = this.imagesUrl+"swfupload.swf";
@@ -44,7 +44,7 @@ Gallery.prototype = {
 		imageOneUploadSettings.file_post_name = this.formPrefix + "Filedata";
 		this.swfUploadOne = new SWFUpload(imageOneUploadSettings);
 		this.swfUploadOne.customSettings.gallery = this;
-		
+
 		//control buttons
 		$('#gallery div.gallery-image').each(function() {
         	self.initImage(this);
@@ -70,7 +70,7 @@ Gallery.prototype = {
   		$.ajaxSetup({
         	'error': function(XMLHttpRequest, textStatus, errorThrown) {
             	alert('Ошибка!');
-				//location.reload(true);
+				location.reload(true);
         	}
   		});
 	},
@@ -124,7 +124,7 @@ Gallery.prototype = {
 
 	itemClick: function(img, e) {
 		var id = this.getId($(img).parent()[0]);
-		if (e.ctrlKey) {
+		if (e.ctrlKey || e.metaKey) {
 			var index = this.isSelected(id);
 			if (index != -1)
 				this.deleteSelected(index);
@@ -140,7 +140,7 @@ Gallery.prototype = {
             	var fromIndex = Math.min(clickedIndex, lastClickedIndex);
             	var toIndex = Math.max(clickedIndex, lastClickedIndex);
             	var self = this;
-            	$('div.gallery-image:gt('+(fromIndex-1)+'):lt('+(toIndex-fromIndex+1)+')').each(function(){
+            	$('div.gallery-image:eq('+fromIndex+')').add('div.gallery-image:gt('+fromIndex+'):lt('+(toIndex-fromIndex)+')').each(function(){
 					items.push(self.getId(this));
             	});
             	this.addSelectedAr(items);
@@ -298,7 +298,7 @@ var imagesUploadSettings = {
 		{
 			data = {};
 		}
-		
+
 		if (data.ok) {
            	$('#addImageButton').before(data.html);
            	$('#gallery div.gallery-image:last .image-title').html('Заголовок');
@@ -387,7 +387,7 @@ var imageOneUploadSettings = {
             }
 
 			this.customSettings.gallery.initImage($('#gallery div.gallery-image').get().reverse()[0]);
-		} 
+		}
         else
         {
            	location.reload(true);
