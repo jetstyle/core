@@ -217,7 +217,16 @@ class Form
      }
      while (isset($this->rh->forms) && in_array($this->name, $this->rh->forms));
      $this->rh->forms[] = $this->name;*/
-     $this->name = $this->config['db_table']? $this->config['db_table'] : 'form';
+     if ($this->config['db_table'])
+     {
+         $this->name = $this->config['db_table'];
+     }
+     else
+     {
+         if (!Config::get('last_form_id')) Config::set('last_form_id', 1);
+         $this->name = 'form'.Config::get('last_form_id');
+         Config::set('last_form_id', Config::get('last_form_id')+1);
+     }
 
      $postData = null;
 
@@ -530,14 +539,14 @@ class Form
                 return;
             else
                 throw new JSException("[Form]: *db_table* form config option is not set.");
-                
+
         $fields = array();
         $values = array();
         foreach($this->fields as $k=>$v)
             $this->fields[$k]->dbInsert( $fields, $values );
-            
+
         $this->_dbAuto( $fields, $values, true );
-        
+
         if ($this->config["db_table"])
         {
             $db = &Locator::get('db');
@@ -557,11 +566,11 @@ class Form
             $data = array_combine($fields, $values);
             $this->data_id = $model->insert($data);
         }
-        
+
         foreach($this->fields as $k=>$v)
             $this->fields[$k]->dbAfterInsert( $this->data_id );
     }
-   
+
     function dbUpdate( $dataId = NULL )
     {
         if (!$this->config["db_table"] && !$this->config["db_model"])
@@ -569,16 +578,16 @@ class Form
                 return;
             else
                 throw new JSException("[Form]: *db_table* form config option is not set.");
-                
+
         if ($dataId == NULL) $dataId = $this->data_id;
-        
+
         $fields = array();
         $values = array();
         foreach($this->fields as $k=>$v)
             $this->fields[$k]->dbUpdate( $dataId, $fields, $values );
-            
+
         $this->_dbAuto( $fields, $values );
-        
+
         if ($this->config["db_table"])
         {
             $this->_DbUpdate( $fields, $values );
@@ -592,24 +601,24 @@ class Form
             $data = array_combine($fields, $values);
             $model->update($data, '{'.$this->config["id_field"].'} = '.Locator::get('db')->quote($dataId));
         }
-        
+
         foreach($this->fields as $k=>$v)
             $this->fields[$k]->DbAfterUpdate( $data_id );
     }
-    
+
     function _dbUpdate ( &$fields, &$values )
     {
         $fields_values = array();
         foreach($fields as $k=>$v)
             $fields_values[] = $v." = ".Locator::get('db')->quote($values[$k]);
-            
+
         $sql = "update ".$this->config["db_table"].
                " set ".implode(",",$fields_values)." where ".
                $this->config["id_field"]."=".Locator::get('db')->quote($this->data_id);
         if (sizeof($fields) == 0) return false;
         Locator::get('db')->execute($sql);
    }
-   
+
     function _dbAuto( &$fields, &$values, $is_insert=false )
     {
         $user = Locator::get('principal')->getId();
@@ -644,14 +653,14 @@ class Form
                 return;
             else
                 throw new JSException("[Form]: *db_table* form config option is not set.");
-                
+
         if ($dataId == NULL) $dataId = $this->data_id;
-        
+
         if ($this->config["db_table"])
         {
             $sql = "select * from ".$this->config["db_table"]." where ".
                     $this->config["id_field"]."=".Locator::get('db')->quote($dataId);
-            $data = Locator::get('db')->queryOne( $sql );    
+            $data = Locator::get('db')->queryOne( $sql );
         }
         else
         {
@@ -661,7 +670,7 @@ class Form
                 $model = $this->config["db_model"];
             $data = $model->loadOne('{'.$this->config["id_field"].'} = '.Locator::get('db')->quote($dataId))->getArray();
         }
-        
+
         if ($data == false)
         {
             $this->data_id = 0;
@@ -699,7 +708,7 @@ class Form
    {
      $this->data_id = $data_id;
    }
-   
+
     public function &getFieldByName($name)
     {
         foreach ($this->fields as $k => $field)
