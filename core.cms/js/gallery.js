@@ -338,12 +338,15 @@ var imageOneUploadSettings = {
 	button_cursor: SWFUpload.CURSOR.HAND,
 	button_action: SWFUpload.BUTTON_ACTION.SELECT_FILE,
 
+	file_dialog_start_handler: function() {
+		this.customSettings.gallery.editedItemId = this.customSettings.gallery.lastOveredImageId;
+	},
 	file_dialog_complete_handler: function(numFilesSelected, numFilesQueued) {
 		if (numFilesSelected > 0) {
 			this.customSettings.gallery.swfUploadOne.removePostParam('item_id');
 			this.customSettings.gallery.swfUploadOne.addPostParam(
 				'item_id',
-				this.customSettings.gallery.getId($('#'+this.customSettings.gallery.lastOveredImageId).get(0))
+				this.customSettings.gallery.getId($('#'+this.customSettings.gallery.editedItemId).get(0))
 			);
 			this.startUpload();
 		}
@@ -379,11 +382,11 @@ var imageOneUploadSettings = {
         {
 			if (data.picture.is_image)
             {
-                $('#'+this.customSettings.gallery.lastOveredImageId+' img').get(0).src = data.picture_thumb.link;
+                $('#'+this.customSettings.gallery.editedItemId+' img').get(0).src = data.picture_thumb.link;
             }
             else
             {
-                $('#'+this.customSettings.gallery.lastOveredImageId+' img').get(0).src = base_url + 'skins/images/file_icons/'+data.picture.ext+'.gif';
+                $('#'+this.customSettings.gallery.editedItemId+' img').get(0).src = base_url + 'skins/images/file_icons/'+data.picture.ext+'.gif';
             }
 
 			this.customSettings.gallery.initImage($('#gallery div.gallery-image').get().reverse()[0]);
