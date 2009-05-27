@@ -12,32 +12,32 @@
     {{!connect "all.css"}}
     {{!connect "custom.css"}}
 	{{!connect "screen-footer.css"}}
-	
+
 	{{!connect "screen-forms.css"}}
 	{{!connect "screen-tables.css"}}
 	{{!connect "screen-layouts.css"}}
 	{{!connect "screen-blocks.css"}}
 	{{!connect "screen-contact.css"}}
 	{{!connect "screen-news.css"}}
-	{{!connect "thickbox.css"}}    
+	{{!connect "thickbox.css"}}
     {{!connect compile="css"}}
     <link rel="stylesheet" href="{{css}}print.css"
           media="{{?html_print}}all{{?:}}print{{/?}}" type="text/css" />
 
     {{!connect "default.js"}}
     {{!connect "custom.js"}}
-    
+
     {{!connect "jquery.js" unshift="true"}}
-    {{!connect "thickbox.js"}}    
+    {{!connect "thickbox.js"}}
     <!-- {{!connect "counter.js"}} -->
-    
+
     {{!connect compile="js"}}
     {{!inline compile="head"}}
-	
+
 	<script language="javascript" type="text/javascript">
 		var base_url = "{{/}}";
 	</script>
-	
+
   </head>
 
 <body id="idBody" class="debug" onload="preloadImages('{{images}}'); {{!inline compile="onload"}}">
@@ -55,8 +55,10 @@
 {{?oce_on}}
 	<script language="javascript" type="text/javascript">
 		$(document).ajaxError(function(event, request, settings){
-			if (request.status == 403);
-				tb_show("", base_url+"cms/login/ajax?TB_iframe=true&width=247&height=84&onremove=true", "");
+			if (request.status == 403) {
+				//tb_remove();
+				tb_show("", base_url+"cms/login/ajax?TB_iframe=true&width=264&height=90&onremove=true", "");
+			}
 		});
 	</script>
 {{?/}}

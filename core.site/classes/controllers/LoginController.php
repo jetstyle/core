@@ -12,7 +12,7 @@ class LoginController extends Controller
 	{
 
 		$prp = &Locator::get('principal');
-		
+
 		if ($prp->security('noguests'))
 		{
 			if (RequestInfo::get('logout'))
@@ -35,23 +35,23 @@ class LoginController extends Controller
 			if ($params["ajax"])
 			{
 			    Locator::get('tpl')->set('ajax', true);
-			    
+
 			    $config['form_onsubmit'] = "onSubmit(); return false;";
 			}
 			Finder::useClass("forms/EasyForm");
-			
+
 			$config['on_after_event'] = &$this;
 			$form =& new EasyForm('login', $config);
 			Locator::get('tpl')->set('Form', $form->handle());
-	
+
 			$this->siteMap = 'login';
 		}
 	}
-	
+
 	public function onAfterEventForm($event, $form)
 	{
 		$data = array();
-		
+
 		if (is_array($form->fields))
 		{
 			foreach ($form->fields AS $field)
@@ -61,7 +61,7 @@ class LoginController extends Controller
 		}
 
 		$prp = &Locator::get('principal');
-		
+
 		if ($prp->login($data['login'], $data['password'], $data['permanent']) === PrincipalInterface::AUTH)
 		{
 			$redirectTo = RequestInfo::get('retpath') ?
