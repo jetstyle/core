@@ -43,14 +43,11 @@
 
 <!-- == Обычный такой список, для полей врапперы вида Row* == -->
 {{TPL:List}}
- <table class="w100 rows-" cellspacing="5" cellpadding="0" border="0">
-  <!-- hardcore padding
-  <tr><td>{{~!dummy w=200}}</td><td class="w100">{{~!dummy}}</td></tr>
-  -->
-   {{_}}
- </table>
+ <div>
+   {{!for fields do=@:List_Item}}
+ </div>
 {{/TPL:List}}
-{{TPL:List_Empty}} {{/TPL:List_Empty}}
+
 {{TPL:List_Item}} {{*field}} {{/TPL:List_Item}}
 
 
