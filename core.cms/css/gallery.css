@@ -34,11 +34,11 @@ div#addImageButton {
 	float: left;
 	width: 100px;
 	height: 100px;
+	_position: relative;
 }
 
 .swfupload {
 	position: absolute;
-	_position: static;
 }
 
 #gallery img.control {
