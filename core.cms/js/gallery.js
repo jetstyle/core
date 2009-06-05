@@ -344,7 +344,7 @@ var imageOneUploadSettings = {
 	},
 	upload_error_handler: function(file, errorCode, message) {
 		alert('Ошибка!');
-		location.reload(true);	
+		location.reload(true);
 	},
 	upload_success_handler: function(file, data) {
 		if (data.indexOf('ok,')==0) {

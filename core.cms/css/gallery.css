@@ -32,10 +32,13 @@ div#addImageButton {
 	margin: 0;
 	border: 1px solid;
 	float: left;
+	width: 100px;
+	height: 100px;
 }
 
 .swfupload {
-	
+	position: absolute;
+	_position: static;
 }
 
 #gallery img.control {
