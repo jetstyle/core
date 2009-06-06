@@ -101,7 +101,7 @@ SWFUpload.prototype.initSettings = function () {
 	this.ensureDefault = function (settingName, defaultValue) {
 		this.settings[settingName] = (this.settings[settingName] == undefined) ? defaultValue : this.settings[settingName];
 	};
-	
+
 	// Upload backend settings
 	this.ensureDefault("upload_url", "");
 	this.ensureDefault("file_post_name", "Filedata");

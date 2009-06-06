@@ -9,7 +9,7 @@ default:
         - name
         - salt
         >group:
-            join_where: {_state} = 0
+            join_where: {group._state} = 0
             model: PrincipalStorageDbGroupsModel
             pk: group_id
             fk: id

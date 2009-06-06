@@ -14,9 +14,11 @@ class Router
 	protected $url2controller = array();				// cache
 	protected $cls2controller = array();				// cache
 
+	protected $rootControllerLoaded = false;
+
 	private function __construct()
 	{
-		if (Config::get('routers'))
+		if (Config::exists('routers'))
 		{
 			$this->routers = Config::get('routers');
 		}
@@ -46,6 +48,52 @@ class Router
 		return self::getInstance()->find(array('class' => $class));
 	}
 
+    public static function linkTo($class, $params = null)
+    {
+		if (strpos($class, '/') !== false)
+        {
+            $classParams = explode('/', $class, 2);
+        }
+        else
+        {
+            $classParams = explode('::', $class, 2);
+        }
+
+        if (count($classParams) == 2)
+        {
+            list($pageClass, $itemClass) = $classParams;
+        }
+        else
+        {
+            $pageClass = $class;
+            $itemClass = NULL;
+        }
+
+        if ($p = self::findByClass($pageClass))
+        {
+            $url = $p->url_to($itemClass, $params);
+        }
+        else
+        {
+            $url = null;
+        }
+
+        return $url;
+    }
+	
+	public function addRouter($router)
+	{
+		if (!in_array($router, $this->routers))
+			$this->routers[] = $router;
+	}
+	
+	public function removeRouter($router)
+	{
+		$key = array_search($router, $this->routers);
+		if ($key !== false)
+			unset($this->routers[$key]);
+	}
+	
 	public function &find($criteria, $routers=NULL)
 	{
 		$page = NULL;
@@ -90,7 +138,7 @@ class Router
 
 		if (null !== $page)
 		{
-			if (Locator::exists('controller'))
+			if ($this->rootControllerLoaded)
 			{
 				$cls = strtolower(substr(get_class($page), 0, -strlen('Controller')));
 				$id = 'controller_'.$cls;
@@ -115,6 +163,9 @@ class Router
 				$this->cls2controller[$cls] = null;
 			}
 		}
+
+		if (!$this->rootControllerLoaded)
+			$this->rootControllerLoaded = true;
 
 		return $page;
 	}

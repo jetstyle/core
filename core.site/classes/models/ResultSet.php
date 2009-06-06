@@ -26,7 +26,7 @@ class ResultSet implements IteratorAggregate, ArrayAccess, Countable, DataContai
 		{
 			foreach ($this->data AS $k => $v)
 			{
-				if (is_object($v))
+				if (is_object($v) && method_exists($v, 'getArray'))
 				{
 					$result[$k] = $v->getArray();
 				}

@@ -1,31 +1,39 @@
 <?php
 
-abstract class PopupObjects
+class PopupObjects
 {
 	protected $db = null;
 	protected $upload = null;
 	protected $rubricId = 0;			// текуща€ рубрика
 	protected $rubrics = array();		// массив со всеми рубриками array(0 => array('id' => 0, 'title' => 'hello'), ....)
 	protected $rubricsLoaded = false;
-	protected $rubricsTable = "pictures_topics";
-	protected $table = "pictures";
-	protected $items = array();
-	protected $pager = null;
-	protected $pageVar = "p";
+	protected $rubricsTable = "files_rubrics";
+	protected $rubricsTypeId = 0;
 
-	public function __construct($fileConfig)
-	{
-		include($fileConfig);
-		
+	protected $items = array();
+	
+	protected $model = null;
+
+	protected $configKey = '';
+
+	public function __construct()
+	{		
 		$this->db = &Locator::get('db');
-		
-		$this->upload =&Locator::get('upload');
-		$this->upload->setDir(Config::get('files_dir').$this->upload_dir.'/');
 	}
 
 	public function setRubric($value)
 	{
 		$this->rubricId = $value;
+	}
+	
+	public function setRubricsTypeId($value)
+	{
+		$this->rubricsTypeId = $value;
+	}
+	
+	public function setConfigKey($value)
+	{
+		$this->configKey = $value;
 	}
 
 	public function getRubrics()
@@ -40,70 +48,87 @@ abstract class PopupObjects
 
 	public function getItems()
 	{
-		$total = $this->getItemsCount();
+		$model = &$this->getModel();
+		
+		$total = $model->getCount();		
 		if (0 == $total)
 		{
 			return $this->items;
 		}
 
-		Finder::useClass('Pager');
-		$this->pager = new Pager();
-		$this->pager->setup(intval(RequestInfo::get($this->pageVar)), $total, 8, 5);
-
-		$result = $this->db->execute("
-			SELECT id, title
-			FROM ??".$this->table."
-			WHERE ".($this->rubricId ? "topic_id =".$this->db->quote($this->rubricId)." AND " : "")." _state = 0
-			LIMIT ".$this->pager->getOffset().",".$this->pager->getLimit()."
-		");
-
-		if ($result)
-		{
-            while ($r = $this->db->getRow($result))
-    		{
-    			if ($data = $this->getFile($r))
-				{
-					$this->items[] = $data;
-				}
-    		}
-		}
-
-		return $this->items;
+		$model->load();
+		
+		return $model->getArray();
 	}
 
 	public function getPages()
 	{
-		if (null !== $this->pager)
+		return $this->getModel()->getPages();
+	}
+	
+	protected function &getModel()
+	{
+		if (!$this->model)
 		{
-			return $this->pager->getPages();
+			Finder::useModel('DBModel');
+			$this->model = DBModel::factory('FilesModel/cms_list');
+			
+			$this->model->where = $this->model->where . ($this->where ? ($this->model->where ? ' AND ' : '') . $this->where : '') ;
+			
+			$this->model->enablePager();
+			$this->model->setPagerPerPage(8);
+			
+			$this->model->addFilesConfig(array('config' => $this->configKey, 'lazy_load' => false));
+			
+			$files2rubricsModel = &$this->model->getForeignModel('rubric');
+			$files2rubricsModel->where = $files2rubricsModel->where.( $files2rubricsModel->where ? " AND " : "" ). "{rubric.type_id} = ".DBModel::quote($this->rubricsTypeId);
+			
+			$this->model->setOrder('{rubric._order} ASC');
+			
+			if ($this->rubricId)
+			{
+				// condition on rubric
+				$files2rubricsModel->where = $files2rubricsModel->where.( $files2rubricsModel->where ? " AND " : "" ). "{rubric_id} = ".DBModel::quote($this->rubricId);
+			}
 		}
-		else
-		{
-			return array();
+
+		return $this->model;
+	}
+
+	public function handlePost()
+	{		
+		if (is_uploaded_file($_FILES['file']['tmp_name']))
+		{			
+			$rubricId = intval($_POST['rubric']);
+			if (!$rubricId)
+			{
+				Locator::get('tpl')->set('file_err', 'ѕоле "–убрика" об€зательно дл€ заполнени€');
+				return;
+			}
+			
+			$file = FileManager::getFile($this->configKey.':picture');
+
+			try
+			{						
+				$file->upload($_FILES['file']);
+			}
+			catch(UploadException $e)
+			{
+				Locator::get('tpl')->set('file_err', $e->getMessage());
+			}
+			
+			if ($file['id'])
+			{
+				$file->addToRubric($rubricId);
+
+				$data = array(
+					'title' => $_POST['title'],
+					'title_pre' => Locator::get('tpl')->action('typografica', $_POST['title'])
+				);
+				
+				$file->updateData($data);
+			}
 		}
-	}
-
-	public function setTable($value)
-	{
-		$this->table = $value;
-	}
-
-	public function setRubricsTable($value)
-	{
-		$this->rubricsTable = $value;
-	}
-
-	abstract protected function getFile($data);
-
-	protected function getItemsCount()
-	{
-		$res = $this->db->queryOne("
-			SELECT COUNT(id) AS total
-			FROM ??".$this->table."
-			WHERE ".($this->rubricId ? "topic_id =".$this->db->quote($this->rubricId)." AND " : "")." _state = 0
-		");
-
-		return intval($res['total']);
 	}
 
 	protected function loadRubrics()
@@ -111,7 +136,7 @@ abstract class PopupObjects
 		$this->rubrics = $this->db->query("
 			SELECT id, title
 			FROM ??".$this->rubricsTable."
-			WHERE _state = 0
+			WHERE type_id = ".$this->db->quote($this->rubricsTypeId)." AND _state = 0
 		", "id");
 
 		// mark current rubric

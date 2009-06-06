@@ -24,7 +24,7 @@ class FormSimple
 
 	protected $supertagLimit = 20;
 	protected $updateSupertagAfterInsert = false;
-	
+
 	protected $html;
 
 	public function __construct( &$config )
@@ -46,6 +46,11 @@ class FormSimple
 		if (!$this->config->UPDATE_FIELDS)
 		{
 			$this->config->UPDATE_FIELDS = $this->config->SELECT_FIELDS;
+		}
+
+		if (!isset($this->config->supertag_check) && !isset($this->config->supertag_path_check))
+		{
+			$this->config->supertag_check = true;
 		}
 
 		$this->initModel();
@@ -75,9 +80,19 @@ class FormSimple
 	{
 		//load data
 		$this->load();
-		
+
 		$valid = array('text', 'title', 'lead');
-		
+
+		//form in iframe thickbox
+		if ( $_GET["popup"] )
+		{
+
+			$iframe = array("css_buttons_class"=>"iframe-buttons-",
+					"height"=>( $_GET["height"]>0 ? ($_GET["height"]-80)."px" : "360px") );//thickbox default height(440) - buttons heoght
+			Locator::get("tpl")->set( "iframe", $iframe );
+		}
+
+
 		if ($_GET['ret'] && in_array($_GET['ret'], $valid) )
 		{
 		    header('Content-Type: text/html; charset=windows-1251');
@@ -85,21 +100,23 @@ class FormSimple
 		}
 		else if ($this->needAjaxUpdate())
 		{
-			$this->ajax_update = true; 
+			$this->ajax_update = true;
+
 			$this->prefix = "";
+
 			//var_dump( $this->config->UPDATE_FIELDS, $_POST, array_intersect_key($_POST, array_flip($this->config->UPDATE_FIELDS)) );
 			//die();
 			//$this->ajaxValidFields;
-			
+
 			$this->config->UPDATE_FIELDS = array_flip( array_intersect_key($_POST, array_flip( $this->config->UPDATE_FIELDS ) ));
-			
+
 			$this->readPost();
 			//var_dump( $this->prefix, $this->postData ) ;
-			
+
 			$redirect = $this->update();
 			$this->loaded=false;
 			//$this->load();
-			
+
 			header('Content-Type: text/html; charset=windows-1251');
 			die($this->postData[ $_POST['ajax_update'] ]);
 		}
@@ -168,7 +185,7 @@ class FormSimple
 			}
 			else
 			{
-				$tpl->parse( $this->template.':save_button', '_save_button' );
+				$tpl->parse( $this->template.':save_button'.( $this->config->ajax_save ? '_norefresh' : ''), '_save_button' );
 			}
 		}
 
@@ -183,6 +200,10 @@ class FormSimple
 				$tpl->parse( $this->template.':send_button', '_send_button' );
 			}
 		}
+
+
+		if ( $this->item['id']>0 )
+		    $tpl->set( 'ajax_url', RequestInfo::href() );
 	}
 
 	public function getHtml()
@@ -198,8 +219,8 @@ class FormSimple
 		$this->model->setTable($this->getTableName());
 		$this->model->setFields($this->config->SELECT_FIELDS);
 	}
-	
-	protected function getTableName()
+
+	public function getTableName()
 	{
 		if (!$this->config->table_name)
 		{
@@ -209,11 +230,11 @@ class FormSimple
 			$pathParts = array_map(array(Inflector, 'underscore'), $pathParts);
 			$this->config->table_name = strtolower(implode('_', $pathParts));
 		}
-		
+
 		return $this->config->table_name;
 	}
-	
-	protected function load()
+
+	public function load()
 	{
 		if( !$this->loaded )
 		{
@@ -221,7 +242,6 @@ class FormSimple
 			{
 				$this->model->loadOne($this->model->quoteField($this->idField).'='.$this->id);
 				$this->item = $this->model->getData();
-
 				if (!$this->item[$this->idField])
 				{
 					Controller::redirect(RequestInfo::hrefChange('', array($this->idGetVar => '')));
@@ -347,7 +367,7 @@ class FormSimple
 		}
 	}
 
-	protected function delete()
+	public function delete()
 	{
 		if ($this->item['_state'] <= 1 )
 		{
@@ -363,7 +383,7 @@ class FormSimple
 		}
 	}
 
-	protected function restore()
+	public function restore()
 	{
 		$this->updateData(array('_state' => 0));
 		return true;
@@ -382,7 +402,7 @@ class FormSimple
 						$_POST[$this->prefix.$fieldName] = '';
 					}
 					$this->postData[$fieldName] = $_POST[$this->prefix.$fieldName];
-					
+
 					if ($this->ajax_update)
 					    $this->postData[$fieldName] = iconv('UTF-8', 'CP1251', $this->postData[$fieldName]);
 					RequestInfo::free($this->prefix.$fieldName);
@@ -412,12 +432,12 @@ class FormSimple
 	{
 		$this->model->update( $data, $this->model->quoteFieldShort($this->idField).'='.DBModel::quote($this->id) );
 	}
-	
+
 	protected function needAjaxUpdate()
 	{
 		return $_POST["ajax_update"] ? true : false;
 	}
-	
+
 	protected function needUpdate()
 	{
 		return $_POST[$this->prefix."update"] ? true : false;
@@ -473,15 +493,14 @@ class FormSimple
 			{
 				foreach ($fields AS $field)
 				{
-					if ( $this->postData[ $field ] )
+					if ( isset($this->postData[ $field ]) )
 					{
 					    $field_pre = $field.'_pre';
 					    if (!isset($this->postData[ $field_pre ]))
 					    {
 						    $this->postData[ $field_pre ] = $this->postData[ $field ];
 					    }
-					
-					
+
 					    $this->postData[ $field_pre ] = $tpl->action( $filter, $this->postData[ $field_pre ]);
 					    //добавляем поле в список для сохранения
 					    $this->UPDATE_FIELDS[] = $field_pre;
@@ -490,10 +509,10 @@ class FormSimple
 			}
 		}
 		if ( $this->ajax_update )
-		    return; 
+		    return;
 
 		//supertag
-		if ( $this->config->supertag )
+		if ( $this->config->supertag)
 		{
 			if ( is_array($this->config->supertag) )
 			{
@@ -506,12 +525,25 @@ class FormSimple
 				$limit = $this->supertagLimit;
 			}
 
-			Finder::useClass('Translit');
-			$translit =& new Translit();
-			$this->postData['_supertag'] = $translit->supertag( $this->postData[$field], TR_NO_SLASHES, $limit );
-			if ($this->config->supertag_check)
+			if ($_POST[$this->prefix . '_supertag'] == '')
 			{
-				$sql = "SELECT id, _supertag FROM ??".$this->config->table_name." WHERE _supertag=".$this->db->quote($this->postData['_supertag'])." AND id <> ".intval($this->id);
+				Finder::useClass('Translit');
+				$translit =& new Translit();
+				$this->postData['_supertag'] = $translit->supertag( $this->postData[$field], TR_NO_SLASHES, $limit );
+			}
+
+			if ($this->config->supertag_check || $this->config->supertag_path_check)
+			{
+				$sql = "SELECT id, _supertag
+				        FROM ??".$this->config->table_name."
+						WHERE  _supertag=".$this->db->quote($this->postData['_supertag'])." AND id <> ".intval($this->id);
+
+				if ($this->config->supertag_path_check)
+				{
+					$item = $this->db->queryOne("SELECT _parent FROM ??".$this->config->table_name." WHERE id = ".intval($this->id));
+					$sql .= ' AND _parent = '.intval($item['_parent']);
+				}
+
 				$rs = $this->db->queryOne($sql);
 				if ($rs['id'])
 				{
@@ -548,11 +580,17 @@ class FormSimple
 
 		// update order
 		$data = array('_order' => $this->id);
+
 		if ($this->updateSupertagAfterInsert)
 		{
 			$data['_supertag'] = $this->postData['_supertag'].'_'.$this->id;
 		}
 		$this->updateData($data);
+	}
+
+	public function setId($id)
+	{
+     	$this->id = $id;
 	}
 }
 

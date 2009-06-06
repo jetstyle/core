@@ -244,8 +244,8 @@ class FileCache
 		if (!$this->fp)
 		{
 			//try to make dir
-			$pathinfo = pathinfo($this->filePath);
-			$result = @mkdir($pathinfo['dirname'], 0775, true);
+			$pathInfo = pathinfo($this->filePath);
+			$result = @mkdir($pathInfo['dirname'], 0775, true);
 			if ($result)
 			{
 				$this->fp = @fopen($this->filePath, 'w');
@@ -253,7 +253,15 @@ class FileCache
 
 			if (!$this->fp)
 			{
-				throw new Exception("Can't write to file ".$this->filePath);
+                $dirName = $pathInfo['dirname'];
+                if (method_exists('Config', 'get'))
+                {
+                    $dirName = str_replace(Config::get('project_dir'), '', $dirName);
+                }
+                $humanMessage = 'Невозможно записать файл <span class="example">'.$pathInfo['basename'].'</span> в директорию <span class="example">'.$dirName.'</span>.';
+                $humanMessage .= '<br />';
+                $humanMessage .= 'Убедитесь, что запись файлов в данную папку разрешена.';
+                throw new JSException("Can't write to file ".$this->filePath, '', $humanMessage);
 			}
 		}
 		return $this->fp;
@@ -264,7 +272,7 @@ class FileCache
 		$this->fp = @fopen($this->filePath, 'r');
 		if (!$this->fp)
 		{
-			throw new Exception("Can't open file ".$this->filePath);
+			throw new JSException("Can't open file ".$this->filePath);
 		}
 		return $this->fp;
 	}
@@ -297,14 +305,7 @@ class FileCache
 
 	protected function _write($str)
 	{
-//		if ($this->fp === null)
-//		{
-//			throw new Exception('FileCache:: can\'t write to file '.$this->filePath);
-//		}
-//		else
-//		{
-			return fwrite($this->fp, $str);
-//		}
+		return fwrite($this->fp, $str);
 	}
 
 }

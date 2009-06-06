@@ -12,6 +12,9 @@ class DoController extends Controller
 			'module' => '\w+',
 			'mode' => '\w+',
 		)),
+		array('pack_modules', array(
+			'pack_modules' => 'pack_modules',
+		)),
 		array('default', array(
 			'module' => '\w+',
 		)),
@@ -20,11 +23,11 @@ class DoController extends Controller
 
 	function handle()
 	{
-		if (!Locator::get('principal')->security('noguests'))
+		if ((!defined('COMMAND_LINE') || !COMMAND_LINE) && !Locator::get('principal')->security('noguests'))
 		{
 			Controller::deny();
 		}
-
+		
 		parent::handle();
 	}
 
@@ -37,7 +40,11 @@ class DoController extends Controller
 	{
 		$params = $this->params;
 		unset($params[0]);
-
+		
+		$sql = "SELECT title FROM ??toolbar WHERE href=".Locator::get('db')->quote( implode("/",$config) ) ;
+		$current = Locator::get('db')->queryOne($sql);
+		Locator::get('tpl')->set('module_title', $current['title']);
+		
 		Finder::useClass("ModuleConstructor");
 		$moduleConstructor =& new ModuleConstructor();
 		$moduleConstructor->initialize($config['module'], $params);
@@ -46,6 +53,16 @@ class DoController extends Controller
 
 		$this->data['title_short'] = $moduleConstructor->getTitle();
 		$this->siteMap = 'module';
+	}
+	
+	function handle_pack_modules($config)
+	{
+		// force UTF8
+		Locator::get('db')->query("SET NAMES utf8");
+
+		Finder::useClass("ModulePacker");
+		$modulePacker =& new ModulePacker();
+		$modulePacker->pack();
 	}
 
 	public function url_to($cls=NULL, $item=NULL)

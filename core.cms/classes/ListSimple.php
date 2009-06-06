@@ -3,7 +3,7 @@
 class ListSimple
 {
 	protected $tpl;
-	
+
 	protected $config;		//ссылка на объект класса ModuleConfig
 	protected $items;
 	protected $pager;
@@ -37,10 +37,10 @@ class ListSimple
 	public function __construct( &$config )
 	{
 		$this->config =& $config;
-	
+
 		$this->db = &Locator::get('db');
 		$this->tpl = &Locator::get('tpl');
-		
+
 		if ($this->config->perPage)
 		{
 			$this->perPage = $this->config->perPage;
@@ -82,6 +82,8 @@ class ListSimple
 		$list->EVOLUTORS['controls'] = array( &$this, '_controls' );
 		$list->issel_function = array( &$this, '_current' );
 		$list->parse( $this->template_list, '__list' );
+
+        Locator::get('tpl')->set('module_name', $this->config->getModuleName());
 
 		$this->renderPager();
 	}
@@ -163,7 +165,7 @@ class ListSimple
 		{
 			//ссылка на новое
 			$this->tpl->set( '_add_new_href', RequestInfo::hrefChange('', array($this->idGetVar => '', '_new' => 1)));
-			$this->tpl->set( '_add_new_title', $this->config->get('add_new_title') ? $this->config->get('add_new_title') : 'создать новый элемент' );
+			$this->tpl->set( '_add_new_title', $this->config->get('add_new_title') );
 			$this->tpl->Parse( $this->template_new, '__add_new' );
 		}
 	}
@@ -193,10 +195,10 @@ class ListSimple
 			$pathParts = array_map(array(Inflector, 'underscore'), $pathParts);
 			$this->config->table_name = strtolower(implode('_', $pathParts));
 		}
-		
+
 		return $this->config->table_name;
 	}
-	
+
 	/**
 	 * Меняем элементы местами
 	 *
@@ -244,6 +246,14 @@ class ListSimple
 			$this->tpl->set('pager', $this->pager->getPages());
 			$this->tpl->parse('blocks/pager.html', '__arrows');
 		}
+	}
+
+	public function getAllItems($where = '')
+	{
+    	$model = &$this->getModel();
+    	$model->where = $where;
+		$model->load();
+		return $model->getArray();
 	}
 }
 

@@ -313,7 +313,12 @@ class TemplateEngineCompiler
 			 $funcName = $this->tpl->getFuncName($tplInfo['cache_name'], ($k=="@")?"":$k);
 			 $this->files2functions[$tplInfo['tpl'].'.html'.(($k=="@")?"":":".$k)] = $funcName;
 			 $this->compiledFunctions[ $funcName ] = $this->templateBuildFunction( $this->templateCompile($fbody) );
+			 
 		}
+		
+		//var_dump($this->compiledFunctions);
+
+
 
 		if (null === $fileCached)
 		{
@@ -694,17 +699,17 @@ class TemplateEngineCompiler
 				$blocks = array();				 
 				foreach ($params AS $key => &$param)
 				{
-					if ($param[TE_TYPE] == TE_TYPE_TEMPLATE && preg_match("/^blocks\/(.*)\.html$/i", $param[TE_VALUE], $matches))
+					if ($param[TE_TYPE] == TE_TYPE_TEMPLATE && preg_match("/^(([a-zA-Z0-9_-]+)\/)?blocks\/(.*)\.html$/i", $param[TE_VALUE], $matches))
 					{
-						if ($pluginName[TE_VALUE] == 'include' && $key === 0)
+                        if ($pluginName[TE_VALUE] == 'include' && $key === 0)
 						{
-							$param[TE_TYPE] = TE_TYPE_STRING;
-							$param[TE_VALUE] = $matches[1];
+                            $param[TE_TYPE] = TE_TYPE_STRING;
+							$param[TE_VALUE] = ($matches[2] ? $matches[2].'::' : '').$matches[3];
 							$pluginName[TE_VALUE] = 'block';					
 						}
 						else
 						{
-							$blocks[$key] = $matches[1];
+							$blocks[$key] = ($matches[2] ? $matches[2].'::' : '').$matches[3];
 							unset($params[$key]);
 						}
 						
@@ -743,6 +748,7 @@ class TemplateEngineCompiler
 
 				if (strlen($var) > 0)
 				{
+					//{{var|plugin}}
 					if (count ($A) > 0)
 					{
 						$result .= ' $_r = '.$this->parseExpression($var) .';'."\n";
@@ -773,6 +779,7 @@ class TemplateEngineCompiler
 						}
 						$result .= 'echo $_r; ';
 					}
+					//{{var=value}}
 					elseif (strpos($var, '=') !== false)
 					{
 						$result = ' '.$this->parseExpression($var) .';'."\n";
@@ -781,6 +788,7 @@ class TemplateEngineCompiler
 					{
 						$result .= ' echo '.$this->parseExpression($var) .';'."\n";
 					}
+					
 
 					$instant = $result;
 				}

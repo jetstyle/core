@@ -1,4 +1,4 @@
-<?
+<?php
 /**
  * @author nop
  *
@@ -57,7 +57,14 @@ class ListSelect extends ListSimple
 				$this->tpl->set('opts_title', 'Раздел:');
 			}
 
-
+            if ($this->config->varsToSave && is_array($this->config->varsToSave))
+            {
+                $this->tpl->set('__request_packed', RequestInfo::pack(RequestInfo::METHOD_POST, $this->config->varsToSave));
+            }
+            else
+            {
+                $this->tpl->set('__request_packed', '');
+            }
 
 			$this->tpl->set('__topic_field', $this->topic_field);
 			$this->tpl->parse("select_topic.html", '__select');
