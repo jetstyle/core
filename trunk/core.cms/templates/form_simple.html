@@ -1,0 +1,105 @@
+{{!connect "custom.js"}}
+
+
+<form action=''  method='post' name='{{__form_name}}' id='{{__form_name}}' enctype="multipart/form-data">
+	<input type="hidden" name="MAX_FILE_SIZE" value="{{__max_file_size}}" />
+	<input type="hidden" name="{{prefix}}update" value="1" />
+	<input type="hidden" name="{{__form_name}}_url" value="{{ajax_url}}" />
+
+	<table cellpadding="0" cellspacing="0" style="width: 100%">
+	<tr>
+	    <td class="cms-form-block">
+
+	    {{?iframe}}
+		<div style="overflow-x: hidden; overflow-y: auto; height: {{iframe.height}}">
+	    {{/?}}
+
+	    {{!!form_simple}}
+		    {{___form}}
+	    {{/!!}}
+
+	    {{?iframe}}
+		</div>
+		<div class="{{iframe.css_buttons_class}}">
+	    {{/?}}
+
+	    <div class="cms-form-buttons">
+		    {{:save_button_norefresh}}
+			    <input id="update_1" name="update_1" class="cms-save-but hand" type="button" value="сохранить без перезагрузки" onclick="saveForm('{{__form_name}}'); return false;">
+		    {{/:save_button_norefresh}}
+
+		    {{:save_button}}
+			    <input id="update_1" name="update_1" type="hidden">
+			    <input id="update_2" name="update_2" class="cms-save-but hand" type="submit" value="сохранить/обновить">
+		    {{/:save_button}}
+
+		    {{:restore_button}}
+			    <input name="{{prefix}}restore" class="cms-save-but hand" type="submit" value="восстановить">
+		    {{/:restore_button}}
+
+		    {{_save_button}}
+
+		    {{:send_button}}
+			    <input name="{{prefix}}send" class="cms-save-but hand" type="submit" value="отправить">
+		    {{/:send_button}}
+
+		    {{:send_button_disabled}}
+			    <input name="{{prefix}}send" class="cms-save-but hand" type="submit" disabled="disabled" value="отправлено">
+		    {{/:send_button_disabled}}
+
+		    {{_send_button}}
+
+		    {{:delete_button}}
+			    <input type="submit" class="cms-delete-but hand" name="{{prefix}}delete" value="{{__delete_title}}" onclick="return confirm('{{__delete_title}}?');">
+		    {{/:delete_button}}
+
+		    {{_delete_button}}
+	    </div>
+	    {{?iframe}}
+		</div>
+	    {{/?}}
+
+	    </td>
+	</tr>
+	</table>
+</form>
+
+
+<script language="javascript">
+$(document).ready( function()
+{
+    if(window.location.search.match("&popup=1")) {
+        $("#{{__form_name}}").submit( function() {
+            if (typeof(tinymce) != 'undefined') tinymce.EditorManager.triggerSave();
+            data = {};
+            $(":input", "#{{__form_name}}").each(function (a,b,c) {
+                if (b.type!="submit" || b.name=="update_2")
+                    data[b.name.replace(/{{prefix}}/, "")  ] = getVal(b);
+            });
+            data['ajax_update'] = "1";
+            data['prefix'] = "{{prefix}}";
+
+            $.post("{{ajax_url}}", data, function(returned) {
+                if ( top.onTBRemove) top.onTBRemove();
+                   else top.tb_remove();
+            });
+        	return false;
+        });
+    }
+});
+
+function getVal(el)
+{
+    var ret;
+    if (el.type == "checkbox")
+    {
+	ret = el.checked ? el.value : null;
+    }
+    else
+    {
+	ret = el.value;
+    }
+    return ret;
+
+}
+</script>

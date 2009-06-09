@@ -1,0 +1,27 @@
+{{:DefaultStringWrapper}}
+	<div>
+		<label for="{{field}}">{{wrapper_title}}</label>
+		{{content}}
+		{{errors}}
+	</div>
+{{/:DefaultStringWrapper}}
+
+{{:DefaultTextWrapper}}
+	<div>
+		<label for="{{field}}">{{wrapper_title}}</label>
+		{{content}}
+		{{errors}}
+	</div>
+{{/:DefaultTextWrapper}}
+
+{{:Div}}
+<div>{{wrapper_title}}</div>
+{{content}}
+
+{{/:Div}}
+
+{{:None}}{{/:None}}
+
+{{:Passthru}}
+	{{content}}
+{{/:Passthru}}

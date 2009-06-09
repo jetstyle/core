@@ -1,0 +1,4 @@
+default:
+    table: stat_dirty_sess
+    fields: 
+        - hash

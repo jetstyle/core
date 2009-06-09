@@ -1,0 +1,89 @@
+<!-- use: {{@blocks/module_help.html tag="module name here"}} -->
+
+{{?* && *node}}
+	<a href="#TB_inline?width=660&height=550&inlineId=moduleHelp" class="thickbox" >
+		<img src="{{images}}question.png" width="16" height="16" alt="Справка"  title="Справка" />
+	</a>
+	<span id="moduleHelp" class="invisible">
+		<ul class="help-menu">
+			{{!for *menu do=@:item}}
+		</ul>
+				
+		{{:item *current}}
+			<li>
+				<span class="current" module="{{*module_href}}">{{*title}}</span>
+				{{?*children}}
+					<ul>
+						{{!for *children do=@:item}}
+					</ul>
+				{{/?}}
+			</li>
+		{{/:item}}
+		
+		{{:item}}
+			<li>
+				<span module="{{*module_href}}">{{*title}}</span>
+				{{?*children}}
+					<ul>
+						{{!for *children do=@:item}}
+					</ul>
+				{{/?}}
+			</li>
+		{{/:item}}
+		
+		
+		<img src="{{images}}ajax-loader-arrows.gif" id="help_loading" class="invisible" />
+			
+		<div id="help_data_cont" class="help-content">
+			<div id="help_{{*node.module_href}}">
+				{{*node.text}}
+			</div>
+		</div>
+		
+	</span>
+	
+	<script type="text/javascript" charset="utf-8">
+		var helpLoadingAnim = null;
+		var helpLoading = false;
+		
+		jQuery(document).ready(function() {
+			helpLoadingAnim = $("#help_loading");
+			$("span", "ul.help-menu").click(helpMenuClick);
+		});
+		
+		function helpMenuClick () {
+			if (helpLoading || $(this).hasClass('current'))
+				return;
+			
+			var moduleHref = $(this).attr('module');
+			
+			var currentModuleHref = $("span.current", "ul.help-menu").removeClass('current').attr('module');
+			$(document.getElementById('help_' + currentModuleHref)).hide();
+			
+			$(this).addClass('current');
+			
+			var help;
+			if (help = document.getElementById('help_' + moduleHref))
+			{
+				$(help).show();
+				return;
+			}
+			
+			helpLoading = true;
+			helpLoadingAnim.insertAfter(this).removeClass('invisible');
+						
+			$.get('{{*help_url}}', {'module' : moduleHref}, function(result) {
+				helpLoading = false;
+				helpLoadingAnim.addClass('invisible');
+				var div = document.createElement('div');
+				div.innerHTML = result;
+				div.setAttribute('id', "help_" + moduleHref);
+				div.style.display = 'none';
+				$("#help_data_cont").append(div);
+				$(div).show();
+			});
+		}
+		
+		
+	</script>
+{{/?}}

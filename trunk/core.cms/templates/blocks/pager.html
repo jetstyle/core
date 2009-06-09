@@ -1,0 +1,28 @@
+{{?pager.pages}}
+<div class="cms-arrow">
+	Страницы:
+			{{?pager.prev_page}}
+			<a href="{{pager.prev_page}}">&larr;</a>
+  			{{?:}}
+				&larr;
+			{{/?}}
+			
+			{{!for pager.pages do=@:page}}
+		
+			{{?pager.next_page}}
+				<a href="{{pager.next_page}}">&rarr;</a>
+  			{{?:}}
+				&rarr;
+			{{/?}}
+	
+	{{:page *current}}
+		<strong>{{*num}}</strong>
+	{{/:page}}
+	
+	{{:page}}
+		<a href="{{*url}}">{{*num}}</a>
+	{{/:page}}
+	
+	{{:page_sep}}&nbsp;&nbsp;{{/:page_sep}}
+</div>
+{{/?}}
