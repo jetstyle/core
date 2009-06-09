@@ -1,57 +1,13 @@
 <!-- forms/group.html : Шаблоны списка "полей" внутри группы -->
 
-<!-- CCR custom groups -->
-
-{{TPL:SimpleList}}
-{{_}}
-{{/TPL:SimpleList}}
-{{TPL:SimpleList_empty}}{{/TPL:SimpleList_empty}}
-{{TPL:SimpleList_item}}{{*field}}{{/TPL:SimpleList_item}}
-
-<!-- for left-right columns in Users -->
-{{TPL:UserList}}
-<tr class="contacts">
-   {{_}}
-</tr>
-
-{{/TPL:UserList}}
-{{TPL:UserList_Empty}} {{/TPL:UserList_Empty}}
-{{TPL:UserList_Item}} {{*field}} {{/TPL:UserList_Item}}
-
-<!--  -->
-{{TPL:UserDescrList}}
-  <tr class="pre_area">
-  	<td colspan="2"></td>
-  	<td colspan="2"><label for="{{field}}">{{wrapper_title}}</label></td>
-	</tr>
-  <tr class="area">
-     {{_}}
-  </tr>
-{{/TPL:UserDescrList}}
-{{TPL:UserDescrList_Empty}} {{/TPL:UserDescrList_Empty}}
-{{TPL:UserDescrList_Item}} {{*field}} {{/TPL:UserDescrList_Item}}
-
-{{TPL:UserDescrGroup}}
-  <tr class="pre_area">
-    <td colspan="2"></td>
-    <td colspan="2"><label for="{{field}}">{{wrapper_title}}</label></td>
-  </tr>
-	{{_}}
-{{/TPL:UserDescrGroup}}
-<!-- /end of CCR groups -->
-
-
 <!-- == Обычный такой список, для полей врапперы вида Row* == -->
 {{TPL:List}}
- <table class="w100 rows-" cellspacing="5" cellpadding="0" border="0">
-  <!-- hardcore padding
-  <tr><td>{{~!dummy w=200}}</td><td class="w100">{{~!dummy}}</td></tr>
-  -->
-   {{_}}
- </table>
+ <div>
+   {{!for fields do=@:List_Item}}
+ </div>
 {{/TPL:List}}
-{{TPL:List_Empty}} {{/TPL:List_Empty}}
-{{TPL:List_Item}} {{*field}} {{/TPL:List_Item}}
+
+{{TPL:List_Item}}{{*field}}{{/TPL:List_Item}}
 
 
 <!-- == Список для "Табсов" (внутри него -- группы) == -->

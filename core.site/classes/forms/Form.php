@@ -1,103 +1,103 @@
 <?php
 /*
 
-  Ğ¤Ğ¾Ñ€Ğ¼-Ğ¿Ñ€Ğ¾Ñ†ĞµÑÑĞ¾Ñ€:
-  * Ğ³ĞµĞ½ĞµÑ€Ğ°Ñ†Ğ¸Ñ, Ğ¾Ğ±Ñ€Ğ°Ğ±Ğ¾Ñ‚ĞºĞ° Ğ¸ Ğ²Ğ°Ğ»Ğ¸Ğ´Ğ°Ñ†Ğ¸Ñ Ğ¿Ñ€Ğ¾ÑÑ‚Ñ‹Ñ… Ğ¸ ÑĞ»Ğ¾Ğ¶Ğ½Ñ‹Ñ… Ñ„Ğ¾Ñ€Ğ¼
-  * ÑĞ¾Ñ…Ñ€Ğ°Ğ½ĞµĞ½Ğ¸Ğµ Ğ² Ğ‘Ğ” Ğ¸ Ñ‡Ñ‚ĞµĞ½Ğ¸Ğµ Ğ¾Ñ‚Ñ‚ÑƒĞ´Ğ°
+  Ôîğì-ïğîöåññîğ:
+  * ãåíåğàöèÿ, îáğàáîòêà è âàëèäàöèÿ ïğîñòûõ è ñëîæíûõ ôîğì
+  * ñîõğàíåíèå â ÁÄ è ÷òåíèå îòòóäà
   * see http://in.jetstyle.ru/rocket/rocketforms
 
-  Ğ£Ğ¿Ñ€Ğ°Ğ²Ğ»ÑÑÑ‰Ğ¸Ğ¹ ĞºĞ»Ğ°ÑÑ.
+  Óïğàâëÿşùèé êëàññ.
 
   Form( $config )
 
   -------------------
 
-  // ĞšĞ¾Ğ½ÑÑ‚Ñ€ÑƒĞ¸Ñ€Ğ¾Ğ²Ğ°Ğ½Ğ¸Ğµ Ñ„Ğ¾Ñ€Ğ¼Ñ‹
+  // Êîíñòğóèğîâàíèå ôîğìû
 
-  * &AddField( $field_name, $config ) - ĞŸÑ€Ğ¸Ğ²ÑĞ·Ğ°Ñ‚ÑŒ Ğ¿Ğ¾Ğ»Ğµ Ğ² Ñ„Ğ¾Ñ€Ğ¼Ñƒ. Ğ”ĞµĞ»Ğ°ĞµÑ‚ Ğ²ĞµÑÑŒ handshaking Ñ ÑĞ¾Ğ·Ğ´Ğ°Ğ½Ğ¸ĞµĞ¼ Ğ¿Ğ¾Ğ»Ñ
-      - $field_name -- Ñ‡Ñ‚Ğ¾ Ğ·Ğ° Ğ¿Ğ¾Ğ»Ğµ
-      - $config     -- ĞºĞ¾Ğ½Ñ„Ğ¸Ğ³ÑƒÑ€Ğ°Ñ†Ğ¸Ñ, Ğ°Ğ³Ğ°.
-  * &_AddField( &$field_object ) - ĞŸÑ€Ğ¸Ğ²ÑĞ·Ğ°Ñ‚ÑŒ Ğ¿Ğ¾Ğ»Ğµ, ÑÑƒÑ‰ĞµÑÑ‚Ğ²ÑƒÑÑ‰ĞµĞµ ĞºĞ°Ğº Ğ¾Ğ±ÑŠĞµĞºÑ‚
+  * &AddField( $field_name, $config ) - Ïğèâÿçàòü ïîëå â ôîğìó. Äåëàåò âåñü handshaking ñ ñîçäàíèåì ïîëÿ
+      - $field_name -- ÷òî çà ïîëå
+      - $config     -- êîíôèãóğàöèÿ, àãà.
+  * &_AddField( &$field_object ) - Ïğèâÿçàòü ïîëå, ñóùåñòâóşùåå êàê îáúåêò
 
-  * &AddButton( $button_config ) - Ğ·Ğ°Ñ€ĞµĞ³Ğ¸ÑÑ‚Ñ€Ğ¸Ñ€Ğ¾Ğ²Ğ°Ñ‚ÑŒ ĞºĞ½Ğ¾Ğ¿ĞºÑƒ
-      - $button_config -- Ğ¼Ğ°ÑÑĞ¸Ğ²-ĞºĞ¾Ğ½Ñ„Ğ¸Ğ³ ĞºĞ½Ğ¾Ğ¿ĞºĞ¸
+  * &AddButton( $button_config ) - çàğåãèñòğèğîâàòü êíîïêó
+      - $button_config -- ìàññèâ-êîíôèã êíîïêè
 
-  * _RegisterField( &$field ) - Ğ·Ğ°Ğ¿Ğ¸ÑÑ‹Ğ²Ğ°ĞµÑ‚ Ğ² $form->hash[$field->name] ÑÑÑ‹Ğ»ĞºÑƒ Ğ½Ğ° ÑÑ‚Ğ¾ Ğ¿Ğ¾Ğ»Ğµ.
-                                ĞĞ• Ğ”Ğ›Ğ¯ Ğ’ĞĞ•Ğ¨ĞĞ•Ğ“Ğ Ğ?Ğ¡ĞŸĞĞ›Ğ¬Ğ—ĞĞ’ĞĞĞ?Ğ¯
+  * _RegisterField( &$field ) - çàïèñûâàåò â $form->hash[$field->name] ññûëêó íà ıòî ïîëå.
+                                ÍÅ ÄËß ÂÍÅØÍÅÃÎ ?ÑÏÎËÜÇÎÂÀÍ?ß
 
-  // ĞŸÑ€Ğ¾Ñ†ĞµÑÑĞ¸Ğ½Ğ³ Ñ„Ğ¾Ñ€Ğ¼Ñ‹ !! Ğ¡Ğ°Ğ¼Ğ¾Ğµ Ğ³Ğ»Ğ°Ğ²Ğ½Ğ¾Ğµ
+  // Ïğîöåññèíã ôîğìû !! Ñàìîå ãëàâíîå
 
   * Handle( $ignore_post=false, $ignore_load=false, $ignore_validator=false, $ignore_session=false )
-      - $ignore_* -- Ğ¸Ğ³Ğ½Ğ¾Ñ€Ğ¸Ñ€Ğ¾Ğ²Ğ°Ñ‚ÑŒ Ñ‚Ğµ Ğ¸Ğ»Ğ¸ Ğ¸Ğ½Ñ‹Ğµ ÑÑ‚Ğ°Ğ¿Ñ‹ ÑÑ†ĞµĞ½Ğ°Ñ€Ğ¸Ñ Ğ¿Ñ€Ğ¾Ñ†ĞµÑÑĞ¸Ğ½Ğ³Ğ°
-      - false, ĞµÑĞ»Ğ¸ Ñ€ĞµĞ·ÑƒĞ»ÑŒÑ‚Ğ°Ñ‚ -- Ğ½Ğµ Ğ¾Ñ‚Ğ¿Ğ°Ñ€ÑĞµĞ½Ğ½Ğ°Ñ Ñ„Ğ¾Ñ€Ğ¼Ğ° (Ğ¸Ğ½Ñ‹Ğ¼Ğ¸ ÑĞ»Ğ¾Ğ²Ğ°Ğ¼Ğ¸, ĞµÑĞ»Ğ¸ Ğ½ĞµÑ‚ Ñ€ĞµĞ´Ğ¸Ñ€ĞµĞºÑ‚Ğ°, Ğ½Ğ¾ ÑĞ¾Ğ±Ñ‹Ñ‚Ğ¸Ğµ Ğ¿Ñ€Ğ¾Ğ¸Ğ·Ğ¾ÑˆĞ»Ğ¾
+      - $ignore_* -- èãíîğèğîâàòü òå èëè èíûå ıòàïû ñöåíàğèÿ ïğîöåññèíãà
+      - false, åñëè ğåçóëüòàò -- íå îòïàğñåííàÿ ôîğìà (èíûìè ñëîâàìè, åñëè íåò ğåäèğåêòà, íî ñîáûòèå ïğîèçîøëî
 
   * ProcessEvent( $event_code ) -- proceed event as we hit one of the buttons
                                    useful for programmatical control
 
-  * _ExecEventHandler($event,$event_handler) - Ğ²Ñ‹Ğ¿Ğ¾Ğ»Ğ½ÑĞµÑ‚ Ñ…ÑĞ½Ğ´Ğ»ĞµÑ€ Ğ² Ğ¾Ñ‚Ğ´ĞµĞ»ÑŒĞ½Ğ¾ Ğ·Ğ¾Ğ½Ğµ Ğ²Ğ¸Ğ´Ğ¸Ğ¼Ğ¾ÑÑ‚Ğ¸
-      - $event -- Ñ‚ĞµĞºÑƒÑ‰ĞµĞµ ÑĞ¾Ğ±Ñ‹Ñ‚Ğ¸Ğµ
-      - $event_handler -- Ğ¿Ğ¾Ğ»Ğ½Ñ‹Ğ¹ Ğ¿ÑƒÑ‚ÑŒ Ğ´Ğ¾ Ñ„Ğ°Ğ¹Ğ»Ğ° Ñ…ÑĞ½Ğ´Ğ»ĞµÑ€Ğ°
+  * _ExecEventHandler($event,$event_handler) - âûïîëíÿåò õıíäëåğ â îòäåëüíî çîíå âèäèìîñòè
+      - $event -- òåêóùåå ñîáûòèå
+      - $event_handler -- ïîëíûé ïóòü äî ôàéëà õıíäëåğà
 
-  // ĞĞ°ÑÑ‚Ñ€Ğ¾Ğ¹ĞºĞ° Ñ„Ğ¾Ñ€Ğ¼Ñ‹
+  // Íàñòğîéêà ôîğìû
 
-  - AssignId( $data_id ) - ÑÑ‚Ğ°Ğ²Ğ¸Ñ‚ Ñ„Ğ¾Ñ€Ğ¼Ğµ Ğ² ÑĞ¾Ğ¾Ñ‚Ğ²ĞµÑ‚ÑÑ‚Ğ²Ğ¸Ğµ ÑÑ‚Ñ€Ğ¾ĞºÑƒ Ğ² Ğ‘Ğ”
+  - AssignId( $data_id ) - ñòàâèò ôîğìå â ñîîòâåòñòâèå ñòğîêó â ÁÄ
 
-  * Load( $data_id=NULL ) - Ğ·Ğ°Ğ³Ñ€ÑƒĞ¶Ğ°ĞµÑ‚ Ñ„Ğ¾Ñ€Ğ¼Ñƒ Ğ¸Ğ· Ğ‘Ğ”
-      - $data_id -- ĞµÑĞ»Ğ¸ NULL, Ñ‚Ğ¾ Ğ±ĞµÑ€Ñ‘Ñ‚ this->data_id
+  * Load( $data_id=NULL ) - çàãğóæàåò ôîğìó èç ÁÄ
+      - $data_id -- åñëè NULL, òî áåğ¸ò this->data_id
 
-  * LoadFromArray( $a ) - Ğ·Ğ°Ğ³Ñ€ÑƒĞ¶Ğ°ĞµÑ‚ Ñ„Ğ¾Ñ€Ğ¼Ñƒ Ğ¸Ğ· Ğ¼Ğ°ÑÑĞ¸Ğ²Ğ°
-      - $a -- Ğ¼Ğ°ÑÑĞ¸Ğ², Ğ¸Ğ· ĞºĞ¾Ñ‚Ğ¾Ñ€Ğ¾Ğ³Ğ¾ Ğ·Ğ°Ğ³Ñ€ÑƒĞ¶Ğ°Ñ‚ÑŒ
+  * LoadFromArray( $a ) - çàãğóæàåò ôîğìó èç ìàññèâà
+      - $a -- ìàññèâ, èç êîòîğîãî çàãğóæàòü
 
-  * Reset() - Ğ¡Ğ±Ñ€Ğ°ÑÑ‹Ğ²Ğ°ĞµÑ‚ Ñ„Ğ¾Ñ€Ğ¼Ñƒ Ğ² "Ğ½ĞµĞ·Ğ°Ğ¿Ğ¾Ğ»Ğ½ĞµĞ½Ğ½Ğ¾Ğµ" ÑĞ¾ÑÑ‚Ğ¾ÑĞ½Ğ¸Ğµ
+  * Reset() - Ñáğàñûâàåò ôîğìó â "íåçàïîëíåííîå" ñîñòîÿíèå
 
-  // Ğ?Ğ·Ğ¼ĞµĞ½ĞµĞ½Ğ¸Ğµ Ğ² Ğ‘Ğ”
+  // ?çìåíåíèå â ÁÄ
 
-  - DbDelete( $data_id=NULL ) -- ÑƒĞ´Ğ°Ğ»ÑĞµÑ‚ ÑĞ¾Ğ¾Ñ‚Ğ². ÑÑ‚Ñ€Ğ¾ĞºÑƒ Ğ¸Ğ· Ğ‘Ğ”,
+  - DbDelete( $data_id=NULL ) -- óäàëÿåò ñîîòâ. ñòğîêó èç ÁÄ,
       - true, if success
-      - Ğ¿Ñ€ĞµĞ¶Ğ´Ğµ ÑƒĞ´Ğ°Ğ»ĞµĞ½Ğ¸Ñ ÑÑ‚Ñ€Ğ¾ĞºĞ¸ Ğ´Ğ¾Ğ»Ğ¶Ğ½Ğ¾ Ğ²Ñ‹Ğ·Ğ²Ğ°Ñ‚ÑŒ DbDelete Ğ²ÑĞµÑ… Ğ¿Ğ¾Ğ»ĞµĞ¹
-  - DbInsert()                -- Ğ²ÑÑ‚Ğ°Ğ²Ğ»ÑĞµÑ‚ Ñ‚ĞµĞºÑƒÑ‰ĞµĞµ ÑĞ¾ÑÑ‚Ğ¾ÑĞ½Ğ¸Ğµ Ñ„Ğ¾Ñ€Ğ¼Ñ‹ Ğ² Ğ‘Ğ”, Ğ²Ğ¾Ğ·Ğ²Ñ€Ğ°Ñ‰Ğ°ĞµÑ‚ $data_id
-  - DbUpdate( $data_id=NULL ) -- Ğ¸ÑĞ¿Ñ€Ğ°Ğ²Ğ»ÑĞµÑ‚ ÑÑ‚Ñ€Ğ¾ĞºÑƒ Ğ² Ğ‘Ğ”, Ğ²Ğ¾Ğ·Ğ²Ñ€Ğ°Ñ‰Ğ°ĞµÑ‚ $data_id
-  - _DbUpdate( &$fields, &$values ) -- Ñ„Ğ¾Ñ€Ğ¼Ğ¸Ñ€ÑƒĞµÑ‚ sql-Ğ·Ğ°Ğ¿Ñ€Ğ¾Ñ Ğ¸ Ğ¾Ñ‚Ğ¿Ñ€Ğ°Ğ²Ğ»ÑĞµÑ‚ ĞµĞ³Ğ¾ Ğ² Ğ‘Ğ”
-  - _DbAuto( &$fields, &$values ) -- Ğ´Ğ¾Ğ±Ğ°Ğ²Ğ»ÑĞµÑ‚ Ğ² $fields, $values Ğ°Ğ²Ñ‚Ğ¾Ğ¼Ğ°Ñ‚Ğ¸Ñ‡ĞµÑĞºĞ¸ ÑĞ³ĞµĞ½ĞµÑ€Ğ¸Ñ€Ğ¾Ğ²Ğ°Ğ½Ğ½Ñ‹Ğµ Ğ¿Ğ¾Ğ»Ñ
+      - ïğåæäå óäàëåíèÿ ñòğîêè äîëæíî âûçâàòü DbDelete âñåõ ïîëåé
+  - DbInsert()                -- âñòàâëÿåò òåêóùåå ñîñòîÿíèå ôîğìû â ÁÄ, âîçâğàùàåò $data_id
+  - DbUpdate( $data_id=NULL ) -- èñïğàâëÿåò ñòğîêó â ÁÄ, âîçâğàùàåò $data_id
+  - _DbUpdate( &$fields, &$values ) -- ôîğìèğóåò sql-çàïğîñ è îòïğàâëÿåò åãî â ÁÄ
+  - _DbAuto( &$fields, &$values ) -- äîáàâëÿåò â $fields, $values àâòîìàòè÷åñêè ñãåíåğèğîâàííûå ïîëÿ
 
-  // ĞŸĞ°Ñ€ÑĞ¸Ğ½Ğ³, Ğ¸Ğ½Ğ¾Ğ³Ğ´Ğ° Ğ¼Ğ¾Ğ¶Ğ½Ğ¾ Ğ¾Ñ‚Ğ´ĞµĞ»ÑŒĞ½Ğ¾ Ğ¿Ğ¾Ğ»ÑŒĞ·Ğ¾Ğ²Ğ°Ñ‚ÑŒ
+  // Ïàğñèíã, èíîãäà ìîæíî îòäåëüíî ïîëüçîâàòü
 
   * Parse()
   * ParsePreview()
 
-  // Ğ’ÑĞ¿Ğ¾Ğ¼Ğ¾Ğ³Ğ°Ñ‚ĞµĞ»ÑŒĞ½Ñ‹Ğµ Ğ¼ĞµÑ‚Ğ¾Ğ´Ñ‹
+  // Âñïîìîãàòåëüíûå ìåòîäû
 
-  * StaticDefaults( $default_config, &$supplied_config ) - ÑÑ‚Ğ°Ñ‚Ğ¸Ñ‡Ğ½Ñ‹Ğ¹ Ğ¼ĞµÑ‚Ğ¾Ğ´, Ğ¼Ğ¾Ğ´Ğ¸Ñ„Ğ¸Ñ†Ğ¸Ñ€ÑƒĞµÑ‚
-                                                            supplied_config Ğ¿Ğ¾ Ğ´ĞµÑ„Ğ¾Ğ»Ñ‚Ğ½Ğ¾Ğ¼Ñƒ
-                                                            (Ğ²Ñ‹ÑÑ‚Ğ°Ğ²Ğ»ÑÑ Ğ²ÑĞµ Ğ¿Ğ¾Ğ»Ñ, ĞºĞ¾Ñ‚Ğ¾Ñ€Ñ‹Ğµ
-                                                            Ğ¾Ñ‚ÑÑƒÑ‚ÑÑ‚Ğ²ÑƒÑÑ‚ Ğ² ÑÑƒĞ¿Ğ¿Ğ»Ğ¸ĞµĞ´Ğµ
+  * StaticDefaults( $default_config, &$supplied_config ) - ñòàòè÷íûé ìåòîä, ìîäèôèöèğóåò
+                                                            supplied_config ïî äåôîëòíîìó
+                                                            (âûñòàâëÿÿ âñå ïîëÿ, êîòîğûå
+                                                            îòñóòñòâóşò â ñóïïëèåäå
   * _ParseWrapper( $content )
   * _ParseButtons()
 
 
 ================================================================== v.0 (kuso@npj)
 */
-define( "FORM_EVENT_OK",     "ok");     // Ğ½Ğ¸Ñ‡ĞµĞ³Ğ¾ Ğ½Ğµ Ğ´ĞµĞ»Ğ°ĞµĞ¼, Ğ¿ĞµÑ€ĞµÑ…Ğ¾Ğ´ Ğ¿Ğ¾ "success_url", if redirect
-define( "FORM_EVENT_CANCEL", "cancel"); // Ğ¾Ñ‚Ğ¼ĞµĞ½Ğ°, Ğ¿ĞµÑ€ĞµÑ…Ğ¾Ğ´ Ğ¿Ğ¾ "cancel_url", if redirect
-define( "FORM_EVENT_RESET",  "reset");  // ÑĞ±Ñ€Ğ¾Ñ ÑĞ¾ÑÑ‚Ğ¾ÑĞ½Ğ¸Ñ Ñ„Ğ¾Ñ€Ğ¼Ñ‹ Ğº ÑÑ‚Ğ°Ñ€Ñ‚Ğ¾Ğ²Ğ¾Ğ¼Ñƒ
-define( "FORM_EVENT_INSERT", "insert"); // Ğ²ÑÑ‚Ğ°Ğ²ĞºĞ° Ğ² Ğ‘Ğ”, Ğ¿ĞµÑ€ĞµÑ…Ğ¾Ğ´ Ğ¿Ğ¾ "success_url", if redirect
-define( "FORM_EVENT_UPDATE", "update"); // Ğ¿Ñ€Ğ°Ğ²ĞºĞ° Ğ² Ğ‘Ğ”, Ğ¿ĞµÑ€ĞµÑ…Ğ¾Ğ´ Ğ¿Ğ¾ "success_url", if redirect
-define( "FORM_EVENT_UPDATE_CLIENT", "update_client"); // Ğ¿Ñ€Ğ°Ğ²ĞºĞ° Ğ² Ğ‘Ğ”, Ğ¿ĞµÑ€ĞµÑ…Ğ¾Ğ´ Ğ¿Ğ¾ "success_url", if redirect
-define( "FORM_EVENT_DELETE", "delete"); // ÑƒĞ´Ğ°Ğ»Ğ¸Ñ‚ÑŒ Ğ²ÑÑ‘ Ğ¸Ğ· Ğ‘Ğ”, Ğ¿ĞµÑ€ĞµÑ…Ğ¾Ğ´ Ğ¿Ğ¾ "success_url", if redirect
+define( "FORM_EVENT_OK",     "ok");     // íè÷åãî íå äåëàåì, ïåğåõîä ïî "success_url", if redirect
+define( "FORM_EVENT_CANCEL", "cancel"); // îòìåíà, ïåğåõîä ïî "cancel_url", if redirect
+define( "FORM_EVENT_RESET",  "reset");  // ñáğîñ ñîñòîÿíèÿ ôîğìû ê ñòàğòîâîìó
+define( "FORM_EVENT_INSERT", "insert"); // âñòàâêà â ÁÄ, ïåğåõîä ïî "success_url", if redirect
+define( "FORM_EVENT_UPDATE", "update"); // ïğàâêà â ÁÄ, ïåğåõîä ïî "success_url", if redirect
+define( "FORM_EVENT_UPDATE_CLIENT", "update_client"); // ïğàâêà â ÁÄ, ïåğåõîä ïî "success_url", if redirect
+define( "FORM_EVENT_DELETE", "delete"); // óäàëèòü âñ¸ èç ÁÄ, ïåğåõîä ïî "success_url", if redirect
 define( "FORM_EVENT_AUTO",   "auto");   // insert/update based on $data_id
 
 class Form
 {
-   var $name; // Ğ¸Ğ¼Ñ Ñ„Ğ¾Ñ€Ğ¼Ñ‹
+   var $name; // èìÿ ôîğìû
    var $form_present_var = "__form_present";
    var $data_id_var = "__form_data_id";
-   var $data_id=0;      // ÑÑ‚Ñ€Ğ¾ĞºĞ°, Ğ°ÑÑĞ¾Ñ†Ğ¸Ğ¸Ñ€Ğ¾Ğ²Ğ°Ğ½Ğ½Ğ°Ñ Ñ Ñ„Ğ¾Ñ€Ğ¼Ğ¾Ğ¹. 0 -- Ğ·Ğ½Ğ°Ñ‡Ğ¸Ñ‚ Ğ½ĞµÑ‚ Ñ‚Ğ°ĞºĞ¾Ğ¹
-   var $hash=array();   // Ğ¾Ñ‡ĞµĞ½ÑŒ ÑƒĞ´Ğ¾Ğ±Ğ½Ñ‹Ğ¹ ÑĞ¿Ğ¾ÑĞ¾Ğ± Ğ´Ğ¾ÑÑ‚ÑƒĞ¿Ğ° Ğº Ğ¿Ğ¾Ğ»ÑĞ¼
-   var $fields=array(); // Ğ¾Ñ‡ĞµĞ½ÑŒ Ğ½ĞµÑƒĞ´Ğ¾Ğ±Ğ½Ñ‹Ğ¹ ÑĞ¿Ğ¾ÑĞ¾Ğ± Ğ´Ğ¾ÑÑ‚ÑƒĞ¿Ğ° Ğº Ğ¿Ğ¾Ğ»ÑĞ¼
-   var $buttons=array();// Ñ…Ñ€Ğ°Ğ½Ğ¸Ğ»Ğ¸Ñ‰Ğµ "ĞºĞ½Ğ¾Ğ¿Ğ¾Ğº"
-   var $action; // ĞºÑƒĞ´Ğ° ÑƒÑ…Ğ¾Ğ´Ğ¸Ñ‚ÑŒ Ğ¿Ğ¾ Ğ¿Ğ¾ÑÑ‚Ñƒ Ñ„Ğ¾Ñ€Ğ¼Ñ‹
+   var $data_id=0;      // ñòğîêà, àññîöèèğîâàííàÿ ñ ôîğìîé. 0 -- çíà÷èò íåò òàêîé
+   var $hash=array();   // î÷åíü óäîáíûé ñïîñîá äîñòóïà ê ïîëÿì
+   var $fields=array(); // î÷åíü íåóäîáíûé ñïîñîá äîñòóïà ê ïîëÿì
+   var $buttons=array();// õğàíèëèùå "êíîïîê"
+   var $action; // êóäà óõîäèòü ïî ïîñòó ôîğìû
 
-   var $valid = true; // Ñ„Ğ»Ğ°Ğ³ Ğ²Ğ°Ğ»Ğ¸Ğ´Ğ½Ğ¾ÑÑ‚Ğ¸ Ñ„Ğ¾Ñ€Ğ¼Ñ‹
+   var $valid = true; // ôëàã âàëèäíîñòè ôîğìû
 
    var $default_config = array(
            "template_prefix"           =>"forms/",
@@ -129,7 +129,7 @@ class Form
    public function Form($form_config = NULL)
    {
 
-     Finder::UseClass("forms/FormField"); // Ğ¾Ğ½ Ğ½Ğ°Ğ¼ ÑÑ‚Ğ¾Ğ¿ÑƒĞ´Ğ¾Ğ²Ğ¾ Ğ¿Ğ¾Ğ½Ğ°Ğ´Ğ¾Ğ±Ğ¸Ñ‚ÑÑ
+     Finder::UseClass("forms/FormField"); // îí íàì ñòîïóäîâî ïîíàäîáèòñÿ
 
      if ($form_config['action'])
      {
@@ -166,14 +166,14 @@ class Form
 
 
 
-   // Ğ°Ğ²Ñ‚Ğ¾Ğ¼Ğ°Ñ‚Ğ¸Ğ·Ğ°Ñ‚Ğ¾Ñ€ "ĞºĞ¾Ğ½Ñ„Ğ¸Ğ³Ğ¾Ğ² Ğ¿Ğ¾-ÑƒĞ¼Ğ¾Ğ»Ñ‡Ğ°Ğ½Ğ¸Ñ"
+   // àâòîìàòèçàòîğ "êîíôèãîâ ïî-óìîë÷àíèş"
    function StaticDefaults( $default_config, &$supplied_config )
    {
      foreach( $default_config as $k=>$v )
        if (!isset($supplied_config[$k])) $supplied_config[$k] = $v;
    }
 
-   // Ğ”Ğ¾Ğ±Ğ°Ğ²Ğ¸Ñ‚ÑŒ Ğ¿Ğ¾Ğ»Ğµ
+   // Äîáàâèòü ïîëå
    function &AddField( $field_name = NULL, $config )
    {
      $f = &new FormField( $this, $field_name, $config );
@@ -186,26 +186,26 @@ class Form
      return $field_object;
    }
 
-   // Ğ”Ğ¾Ğ±Ğ°Ğ²Ğ¸Ñ‚ÑŒ ĞºĞ½Ğ¾Ğ¿ĞºÑƒ
+   // Äîáàâèòü êíîïêó
    function &AddButton( $button_config )
    {
      $this->buttons[$button_config["title"]] = $button_config;
      return $this->buttons[$button_config["title"]];
    }
 
-   // Ğ¡ĞĞœĞĞ¯ Ğ¡Ğ¢Ğ ĞĞ¨ĞĞĞ¯ ĞŸĞ ĞĞ¦Ğ•Ğ”Ğ£Ğ Ğ --------------------------------------------------------
-   //zharik: Ğ½Ñƒ, Ñ‚ĞµĞ¿ĞµÑ€ÑŒ Ğ¾Ğ½Ğ° Ğ½Ğµ Ñ‚Ğ°ĞºĞ°Ñ ÑƒĞ¶ Ğ¸ ÑÑ‚Ñ€Ğ°ÑˆĞ½Ğ°Ñ 8))
+   // ÑÀÌÀß ÑÒĞÀØÍÀß ÏĞÎÖÅÄÓĞÀ --------------------------------------------------------
+   //zharik: íó, òåïåğü îíà íå òàêàÿ óæ è ñòğàøíàÿ 8))
    function Handle( $ignore_post     =false,  $ignore_load   =false,
                     $ignore_validator=false,  $ignore_session=false )
    {
      $processed = false;
 
-     //Ğ¸Ğ½Ğ¸Ñ†Ğ¸Ğ°Ğ»Ğ¸Ğ·Ğ°Ñ†Ğ¸Ñ Ğ·Ğ½Ğ°Ñ‡ĞµĞ½Ğ¸Ğ¹ Ğ¿Ğ¾Ğ»ĞµĞ¹
-     if ($this->data_id && !$ignore_load) $this->Load();  // Ğ¿Ñ€Ğ¾Ğ±ÑƒĞµĞ¼ Ğ·Ğ°Ğ³Ñ€ÑƒĞ·Ğ¸Ñ‚ÑŒ
-     if (!$this->data_id || $ignore_load) $this->Reset(); // ÑƒÑÑ‚Ğ°Ğ½Ğ°Ğ²Ğ»Ğ¸Ğ²Ğ°ĞµĞ¼ default-Ğ·Ğ½Ğ°Ñ‡ĞµĞ½Ğ¸Ñ
+     //èíèöèàëèçàöèÿ çíà÷åíèé ïîëåé
+     if ($this->data_id && !$ignore_load) $this->Load();  // ïğîáóåì çàãğóçèòü
+     if (!$this->data_id || $ignore_load) $this->Reset(); // óñòàíàâëèâàåì default-çíà÷åíèÿ
      if (!$ignore_session) $this->FromSession();
 
-     // Ğ¿Ñ€Ğ¸ÑĞ²Ğ°Ğ¸Ğ²Ğ°ĞµĞ¼ Ğ¸Ğ´ĞµÑ‚Ğ¸Ñ„Ğ¸ĞºĞ°Ñ‚Ğ¾Ñ€ Ñ„Ğ¾Ñ€Ğ¼Ğµ
+     // ïğèñâàèâàåì èäåòèôèêàòîğ ôîğìå
      /*$uid = 0;
      do
      {
@@ -239,7 +239,7 @@ class Form
          $postData = &$_GET;
      }
 
-     //Ğ¿Ñ€Ğ¾Ğ±ÑƒĞµĞ¼ Ğ¾Ğ±Ñ€Ğ°Ğ±Ğ¾Ñ‚Ğ°Ñ‚ÑŒ Ğ¿Ğ¾ÑÑ‚
+     //ïğîáóåì îáğàáîòàòü ïîñò
      if (is_array($postData) && !$ignore_post)
      {
        $this->LoadFromPost( $postData );
@@ -313,18 +313,18 @@ class Form
      $this->_ChooseEventHandler( $event, "on_after_event", "OnAfterEventForm" );
    }
 
-   //Ğ²Ñ‹Ğ±Ğ¸Ñ€Ğ°ĞµĞ¼, ĞºĞ°ĞºĞ¾Ğ¹ Ğ¾Ğ±Ñ€Ğ°Ğ±Ğ¾Ñ‚Ñ‡Ğ¸Ğº ÑĞ¾Ğ±Ñ‹Ñ‚Ğ¸Ñ Ğ·Ğ°Ğ¿ÑƒÑĞºĞ°Ñ‚ÑŒ
+   //âûáèğàåì, êàêîé îáğàáîò÷èê ñîáûòèÿ çàïóñêàòü
    function _ChooseEventHandler( $event, $handler, $default_method )
    {
       if (isset($this->config[$handler])){
         foreach($this->config[$handler] as $k=>$v){
-          //ÑÑ‚Ğ¾ Ğ¼Ğ¾Ğ¶ĞµÑ‚ Ğ±Ñ‹Ñ‚ÑŒ Ğ¾Ñ‚Ğ´ĞµĞ»ÑŒĞ½Ğ°Ñ Ñ„ÑƒĞ½ĞºĞ¸Ñ†Ñ
-          //Ğ¸Ğ»Ğ¸ ÑÑ‚Ğ¾ Ğ¼Ğ¾Ğ¶ĞµÑ‚ Ğ±Ñ‹Ñ‚ÑŒ Ğ¾Ğ±ÑŠĞµĞºÑ‚ Ñ ÑĞ²Ğ½Ğ¾ Ğ·Ğ°Ğ´Ğ°Ğ½Ğ½Ñ‹Ğ¼ Ğ¼ĞµÑ‚Ğ¾Ğ´Ğ¾Ğ¼
+          //ıòî ìîæåò áûòü îòäåëüíàÿ ôóíêèöÿ
+          //èëè ıòî ìîæåò áûòü îáúåêò ñ ÿâíî çàäàííûì ìåòîäîì
 
           if (is_callable($this->config[$handler][$k])){
             call_user_func($this->config[$handler][$k], $event, $this);
           }else
-          //ÑÑ‚Ğ¾ Ğ¼Ğ¾Ğ¶ĞµÑ‚ Ğ±Ñ‹Ñ‚ÑŒ Ğ¾Ğ±ÑŠĞµĞºÑ‚ Ñ Ğ¼ĞµÑ‚Ğ¾Ğ´Ğ¾Ğ¼ Ğ¿Ğ¾ ÑƒĞ¼Ğ¾Ğ»Ñ‡Ğ°Ğ½Ğ¸Ñ
+          //ıòî ìîæåò áûòü îáúåêò ñ ìåòîäîì ïî óìîë÷àíèş
           if ( is_callable( array($this->config[$handler][$k],$default_method) ) ){
             $this->config[$handler][$k]->$default_method( $event, $this );
           }
@@ -332,14 +332,14 @@ class Form
       }
    }
 
-   // ÑĞ±Ñ€Ğ¾ÑĞ¸Ñ‚ÑŒ Ğ²ÑĞµ Ğ¿Ğ¾Ğ»Ñ Ñ„Ğ¾Ñ€Ğ¼Ñ‹ Ğ² Ğ½Ğ°Ñ‡Ğ°Ğ»ÑŒĞ½Ğ¾Ğµ ÑĞ¾ÑÑ‚Ğ¾ÑĞ½Ğ¸Ğµ
+   // ñáğîñèòü âñå ïîëÿ ôîğìû â íà÷àëüíîå ñîñòîÿíèå
    function Reset()
    {
      foreach($this->fields as $field)
        $field->model->Model_SetDefault();
    }
 
-   // Ğ¿Ğ°Ñ€ÑĞ¸Ğ½Ğ³ Ñ„Ğ¾Ñ€Ğ¼Ñ‹ Ğ² ÑĞ²Ğ¾Ñ‘Ğ¼ Ğ¾Ğ±Ñ‹Ñ‡Ğ½Ğ¾Ğ¼ ÑĞ¾ÑÑ‚Ğ¾ÑĞ½Ğ¸Ğ¸
+   // ïàğñèíã ôîğìû â ñâî¸ì îáû÷íîì ñîñòîÿíèè
    function Parse()
    {
      $result = "";
@@ -348,7 +348,7 @@ class Form
      return $this->_ParseWrapper( $result );
    }
 
-   // Ğ¿Ğ°Ñ€ÑĞ¸Ğ½Ğ³ Ñ„Ğ¾Ñ€Ğ¼Ñ‹ "Ñ‚Ğ¾Ğ»ÑŒĞºĞ¾ Ğ´Ğ»Ñ Ñ‡Ñ‚ĞµĞ½Ğ¸Ñ", Ğ±ĞµĞ· ĞºĞ½Ğ¾Ğ¿Ğ¾Ğº
+   // ïàğñèíã ôîğìû "òîëüêî äëÿ ÷òåíèÿ", áåç êíîïîê
    function ParsePreview()
    {
      $result = "";
@@ -357,7 +357,7 @@ class Form
      return $result;
    }
 
-   // Ğ¿Ğ°Ñ€ÑĞ¸Ñ‚ÑŒ Ğ²ÑÑĞºĞ¾Ğµ Ğ¾ĞºÑ€ÑƒĞ¶ĞµĞ½Ğ¸Ğµ: ĞºĞ½Ğ¾Ğ¿ĞºĞ¸ Ñ‚Ğ°Ğ¼, Ğ¿Ñ€Ğ¾Ñ‡ĞµĞµ
+   // ïàğñèòü âñÿêîå îêğóæåíèå: êíîïêè òàì, ïğî÷åå
    function _ParseWrapper( $content )
    {
 	 $tpl = &Locator::get('tpl');
@@ -381,7 +381,7 @@ class Form
      $tpl->set( "data_id", $this->data_id );
      $tpl->set( "buttons", $this->_ParseButtons() );
 
-     //Ğ¾Ñ‚Ğ¿Ğ°Ñ€ÑĞ¸Ñ‚ÑŒ ĞºĞ½Ğ¾Ğ¿ĞºĞ¸ Ğ¿Ğ¾ Ğ¾Ñ‚Ğ´ĞµĞ»ÑŒĞ½Ğ¾ÑÑ‚Ğ¸
+     //îòïàğñèòü êíîïêè ïî îòäåëüíîñòè
      $tpl->set( "buttons_left",  $this->_ParseButtons(0) );
      $tpl->set( "buttons_right", $this->_ParseButtons(1) );
 
@@ -389,7 +389,7 @@ class Form
 
    }
 
-   // Ğ¿Ğ°Ñ€ÑĞ¸Ğ½Ğ³ ĞºĞ½Ğ¾Ğ¿Ğ¾Ğº
+   // ïàğñèíã êíîïîê
    function _ParseButtons($index=null)
    {
      $tpl = &TemplateEngine::getInstance();
@@ -398,7 +398,7 @@ class Form
      {
        $tpl->SetRef( "*", $button );
 
-       //Ğ¾Ñ‚Ğ¿Ğ°Ñ€ÑĞ¸Ñ‚ÑŒ ÑĞ¿ĞµÑ†Ğ¸Ğ°Ğ»ÑŒĞ½ÑƒÑ ĞºĞ½Ğ¾Ğ¿ĞºÑƒ Ğ² Ğ½ÑƒĞ¶Ğ½Ğ¾Ğµ Ğ¼ĞµÑÑ‚Ğ¾
+       //îòïàğñèòü ñïåöèàëüíóş êíîïêó â íóæíîå ìåñòî
        if (!empty($button['store_to']))
        {
          $tpl->Parse( $this->config["template_prefix_button"].$button["template"], $button['store_to'] );
@@ -407,7 +407,7 @@ class Form
            $result[]["BUTTON"] = $tpl->Parse( $this->config["template_prefix_button"].$button["template"] );
      }
 
-     //Ğ¾Ñ‚Ğ¿Ğ°Ñ€ÑĞ¸Ñ‚ÑŒ Ñ‚Ğ¾Ğ»ÑŒĞºĞ¾ Ğ¾Ğ´Ğ½Ñƒ ĞºĞ½Ğ¾Ğ¿ĞºÑƒ
+     //îòïàğñèòü òîëüêî îäíó êíîïêó
      if ($index!==null)
      {
        $tpl->setRef('*', $result[$index]);
@@ -419,7 +419,7 @@ class Form
        return $tpl->set('buttons', $result, $this->config["template_prefix"].$this->config["template_buttonlist"] );
    }
 
-   // Ğ·Ğ°Ğ³Ñ€ÑƒĞ·ĞºĞ° Ğ¸Ğ· Ñ„Ğ¾Ñ€Ğ¼Ñ‹
+   // çàãğóçêà èç ôîğìû
    function LoadFromPost( $post_data )
    {
      $this->AssignId( @$post_data[ $this->data_id_var ] ); //IVAN
@@ -430,16 +430,16 @@ class Form
      }
    }
 
-   // Ğ²Ğ°Ğ»Ğ¸Ğ´Ğ°Ñ†Ğ¸Ñ Ğ²ÑĞµÑ… Ğ¿Ğ¾Ğ»ĞµĞ¹ Ñ„Ğ¾Ñ€Ğ¼Ñ‹
+   // âàëèäàöèÿ âñåõ ïîëåé ôîğìû
    function Validate()
    {
      $this->valid = true;
      foreach($this->fields as $k=>$field)
-       $this->valid = $this->fields[$k]->Validate() && $this->valid; // Ğ²Ğ°Ğ¶Ğ½Ğ¾, Ñ‡Ñ‚Ğ¾ Ğ¸Ğ¼ĞµĞ½Ğ½Ğ¾ Ğ² Ñ‚Ğ°ĞºĞ¾Ğ¼ Ğ¿Ğ¾Ñ€ÑĞ´ĞºĞµ
+       $this->valid = $this->fields[$k]->Validate() && $this->valid; // âàæíî, ÷òî èìåííî â òàêîì ïîğÿäêå
      return $this->valid;
    }
 
-   // Ğ”ĞĞœĞŸ Ğ¤ĞĞ ĞœĞ«
+   // ÄÀÌÏ ÔÎĞÌÛ
    function _Dump( $is_error=1 )
    {
      $dump_hash = array();
@@ -447,7 +447,7 @@ class Form
       $dump_hash[ $field->name ] = $field->_Dump();
    }
 
-   // Ñ€Ğ°Ğ±Ğ¾Ñ‚Ğ° Ğ² ÑĞµÑÑĞ¸Ğ¸
+   // ğàáîòà â ñåññèè
    function FromSession()
    {
      $key = "form_".$this->config["db_table"];
@@ -468,7 +468,7 @@ class Form
      $_SESSION[ "form_".$this->config["db_table"] ] = "";
    }
 
-   // Ğ¾Ğ±Ñ€Ğ°Ğ±Ğ¾Ñ‚ĞºĞ° ÑĞ¾Ğ±Ñ‹Ñ‚Ğ¸Ñ, Ğ°Ğ³Ğ° (Ğ²ÑÑ‚Ğ°Ğ²ĞºĞ°/Ñ€ĞµĞ´Ğ°ĞºÑ‚Ğ¸Ñ€Ğ¾Ğ²Ğ°Ğ½Ğ¸Ğµ)
+   // îáğàáîòêà ñîáûòèÿ, àãà (âñòàâêà/ğåäàêòèğîâàíèå)
    function HandleEvent( $event = FORM_EVENT_AUTO )
    {
      if (is_array($event)) $_event = $event["event"];
@@ -528,10 +528,10 @@ class Form
      if (!$this->processed)
 		Controller::redirect();
      else
-		$this->ResetSession(); // ĞµÑĞ»Ğ¸ ÑƒÑĞ¿ĞµÑˆĞ½Ğ¾ Ğ¾Ğ±Ñ€Ğ°Ğ±Ğ¾Ñ‚Ğ°Ğ½Ğ°, Ñ‚Ğ¾ ÑĞµÑÑĞ¸Ñ Ğ²Ñ‹ĞºĞ¸Ğ´Ñ‹Ğ²Ğ°ĞµĞ¼
+		$this->ResetSession(); // åñëè óñïåøíî îáğàáîòàíà, òî ñåññèş âûêèäûâàåì
    }
 
-    // Ğ²ÑÑ‚Ğ°Ğ²ĞºĞ° Ğ² Ğ‘Ğ”
+    // âñòàâêà â ÁÄ
     function dbInsert()
     {
         if (!$this->config["db_table"] && !$this->config["db_model"])
@@ -645,7 +645,7 @@ class Form
         }
     }
 
-    // Ğ·Ğ°Ğ³Ñ€ÑƒĞ·ĞºĞ° Ğ¸Ğ· Ğ‘Ğ”
+    // çàãğóçêà èç ÁÄ
     function load( $dataId = NULL )
     {
         if (!$this->config["db_table"] && !$this->config["db_model"])
@@ -680,7 +680,7 @@ class Form
             $this->fields[$k]->DbLoad( $data );
     }
 
-   // ÑƒĞ´Ğ°Ğ»ĞµĞ½Ğ¸Ğµ Ğ¸Ğ· Ğ‘Ğ”
+   // óäàëåíèå èç ÁÄ
    function DbDelete( $data_id = NULL )
    {
      if (!$this->config["db_table"])
@@ -696,14 +696,14 @@ class Form
      Locator::get('db')->query( $sql );
    }
 
-   // Ğ·Ğ°Ğ³Ñ€ÑƒĞ·ĞºĞ° Ğ¸Ğ· Ğ¼Ğ°ÑÑĞ¸Ğ²Ğ°
+   // çàãğóçêà èç ìàññèâà
    function LoadFromArray( $data )
    {
      foreach($this->fields as $k=>$v)
        $this->fields[$k]->LoadFromArray( $data );
    }
 
-   // ÑÑ‚Ğ°Ğ²Ğ¸Ğ¼ Ñ„Ğ¾Ñ€Ğ¼Ğµ Ğ² ÑĞ¾Ğ¾Ñ‚Ğ²ĞµÑ‚ÑÑ‚Ğ²Ğ¸Ğµ ÑÑ‚Ñ€Ğ¾ĞºÑƒ Ğ² Ğ‘Ğ”
+   // ñòàâèì ôîğìå â ñîîòâåòñòâèå ñòğîêó â ÁÄ
    function AssignId( $data_id )
    {
      $this->data_id = $data_id;

@@ -118,44 +118,49 @@ class EasyForm {
 	//добавляем поля к форме или группе
 	protected function addFields(&$form, $config, $is_field=false) {
 		//тут добавляем поля
-    	foreach($config as $name=>$rec)
-    	{
-      		//формируем конфиг для поля
-			if( is_array($rec) )
-			{
-				$pack_name = $rec['extends_from'];
-				$conf = $rec;
-				/*if (isset($rec[1]))
-					if (is_array($rec[1])) $conf = $rec[1];
-						else $conf = array( "model_default" => $rec[1] );
-				else $conf = array();*/
-			}
-			else
-			{
-				$pack_name = $rec;
-				$conf = array();
-			}
-			//определяем wrapper_tpl
-			if(!isset($conf["wrapper_tpl"]))
-				foreach($this->wrapper_tpl as $k=>$v)
-				{
-					if(in_array($pack_name, explode(",",$k)))
-					{
-						$conf["wrapper_tpl"] = $v[ $is_field ? 1 : 0 ];
-						break;
-					}
-				}
-			//генерируем конфиг для поля
-			$conf = $this->ConstructConfig( $pack_name, $conf, false, $name );
-			//создаём поле
-			if($is_field)
-				$field =& $form->model->Model_AddField( $name, $conf );
-			else
-				$field =& $form->AddField( $name, $conf );
-			//если указан пакет группы, обрабатываем вложение
-			if(in_array($rec[0],$this->groups))
-				$this->AddFields($field, $rec[2], true);
-		}
+        if ($config)
+        {
+            foreach ($config AS $name => $rec)
+            {
+                //формируем конфиг для поля
+                if ( is_array($rec) )
+                {
+                    $pack_name = $rec['extends_from'];
+                    $conf = $rec;
+                    /*if (isset($rec[1]))
+                        if (is_array($rec[1])) $conf = $rec[1];
+                            else $conf = array( "model_default" => $rec[1] );
+                    else $conf = array();*/
+                }
+                else
+                {
+                    $pack_name = $rec;
+                    $conf = array();
+                }
+                //определяем wrapper_tpl
+                if (!isset($conf["wrapper_tpl"]))
+                    foreach ($this->wrapper_tpl as $k=>$v)
+                    {
+                        if (in_array($pack_name, explode(",",$k)))
+                        {
+                            $conf["wrapper_tpl"] = $v[ $is_field ? 1 : 0 ];
+                            break;
+                        }
+                    }
+                //генерируем конфиг для поля
+                $conf = $this->ConstructConfig( $pack_name, $conf, false, $name );
+                //создаём поле
+                if ($is_field)
+                    $field =& $form->model->Model_AddField( $name, $conf );
+                else
+                    $field =& $form->AddField( $name, $conf );
+                //если указан пакет группы, обрабатываем вложение
+                if (in_array($pack_name, $this->groups))
+                {
+                    $this->AddFields($field, $conf['fields'], true);
+                }
+            }
+        }
 	}
 
   //добавляем кнопки к форме
