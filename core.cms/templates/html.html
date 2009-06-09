@@ -4,22 +4,33 @@
   <head>
     <title>{{!pageTitle}}</title>
     <meta http-equiv="Content-Type" content="text/html; charset=windows-1251" />
-    
+
     {{!connect "cms.css" unshift="tru"}}
     {{!connect compile="css"}}
-          
+
     {{!connect "default.js" unshift="true"}}
     {{!connect "jquery.js" unshift="true"}}
-    
+
     {{!connect compile="js"}}
-    
+
     {{html_head}}
-    
+
     <script language="javascript" type="text/javascript">
 		var base_url = "{{/}}";
 	</script>
+    <script language="javascript" type="text/javascript">
+		$(document).ajaxError(function(event, request, settings){
+			if (request.status == 403) {
+				//tb_remove();
+				tb_show("", base_url+"login/ajax?TB_iframe=true&width=264&height=90&onremove=true", "");
+                onTBRemove = function(){
+                    location.reload(true);
+                }
+			}
+		});
+	</script>
   </head>
-  
+
 <body onload="{{html_onload}}" {{body_class}}>
 
 {{HTML_body}}
