@@ -106,17 +106,17 @@ class Finder {
 			//echo '<hr>'.self::$searchCache[$type][$name.'.'.$ext];
 			return self::$searchCache[$type][$name.'.'.$ext];
 		}
-		
+
 		if (!is_array(self::$DIRS[$scope]))
 		{
 			return false;
 		}
-		
+
 		//определяем начальный уровень поиска
 		$n = count(self::$DIRS[$scope]);
 		if($level===false) $level = $n - 1;
 		$i = $level>=0 ? $level : $n - $level;
-		
+
 		self::$searchHistory = array();
 		//ищем
 		for( ; $i>=0 && $i<$n; $i+=$dr )
@@ -128,7 +128,7 @@ class Finder {
 				$fname = (is_array($dir) ? $dir[0] : $dir).$type."/".$name.'.'.$ext;
 
 				self::$searchHistory[] = $fname;
-				
+
 				if(@file_exists($fname))
 				{
 					self::$searchCache[$type][$name.'.'.$ext] = $fname;
@@ -158,7 +158,7 @@ class Finder {
 		return self::$DIRS;
 	}
 
-	public static function getPluralizeDir($classname) 
+	public static function getPluralizeDir($classname)
 	{
 		Finder::useClass("Inflector");
 		$words = preg_split('/[A-Z]/', $classname);
@@ -166,7 +166,7 @@ class Finder {
 		$last_word = strtolower($last_word);
 		return Inflector :: pluralize($last_word);
 	}
-	
+
 	private static function recursiveFind($dir, $name)
 	{
 		if ($handle = @opendir($dir))
@@ -271,7 +271,7 @@ class Finder {
 		return $out;
 	}
 
-	public static function setDirs($DIRS) 
+	public static function setDirs($DIRS)
 	{
 		foreach ($DIRS AS $key => $value)
 		{
@@ -283,25 +283,25 @@ class Finder {
 			self::$DIRS['all'][] = $value;
 		}
 	}
-	
-	public static function replaceDirs($DIRS) 
+
+	public static function replaceDirs($DIRS)
 	{
-		self::$DIRS = $DIRS;		
+		self::$DIRS = $DIRS;
 	}
 
-	public static function useClass($name, $scope = 'all') 
+	public static function useClass($name, $scope = 'all')
 	{
 		if (class_exists($name, false)) return;
 		Finder::useScript("classes", $name, 0, 1, 'php', false, false, $scope);
 	}
 
-	public static function useModel($name, $scope = 'all') 
+	public static function useModel($name, $scope = 'all')
 	{
 		if (class_exists($name, false)) return;
 		self::useScript("classes/models", $name, 0, 1, 'php', false, false, $scope);
 	}
 
-	public static function useLib($libraryName, $fileName = "") 
+	public static function useLib($libraryName, $fileName = "")
 	{
 		if ($fileName == "")
 		{
@@ -311,7 +311,7 @@ class Finder {
 		Finder::useScript('libs', $libraryName . "/" . $fileName, 0, 1, 'php');
 	}
 
-	public static function prependDir($dir, $scope = null) 
+	public static function prependDir($dir, $scope = null)
 	{
 		if (null !== $scope)
 		{

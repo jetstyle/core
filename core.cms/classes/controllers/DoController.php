@@ -27,7 +27,7 @@ class DoController extends Controller
 		{
 			Controller::deny();
 		}
-		
+
 		parent::handle();
 	}
 
@@ -40,21 +40,25 @@ class DoController extends Controller
 	{
 		$params = $this->params;
 		unset($params[0]);
-		
+
 		$sql = "SELECT title FROM ??toolbar WHERE href=".Locator::get('db')->quote( implode("/",$config) ) ;
 		$current = Locator::get('db')->queryOne($sql);
 		Locator::get('tpl')->set('module_title', $current['title']);
-		
-		Finder::useClass("ModuleConstructor");
-		$moduleConstructor =& new ModuleConstructor();
-		$moduleConstructor->initialize($config['module'], $params);
 
-		Locator::get('tpl')->set('module_body', $moduleConstructor->proceed());
+		Finder::useClass("ModuleConstructor");
+        $modulePath = $config['module'].( $params ? '/'.implode('/', $params) : '' );
+		$moduleConstructor = ModuleConstructor::factory($modulePath);
+        //echo '<pre>';
+        //print_r($moduleConstructor);
+        //echo '</pre>';
+        //die();
+
+		Locator::get('tpl')->set('module_body', $moduleConstructor->getHtml());
 
 		$this->data['title_short'] = $moduleConstructor->getTitle();
 		$this->siteMap = 'module';
 	}
-	
+
 	function handle_pack_modules($config)
 	{
 		// force UTF8

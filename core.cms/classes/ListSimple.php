@@ -41,23 +41,23 @@ class ListSimple
 		$this->db = &Locator::get('db');
 		$this->tpl = &Locator::get('tpl');
 
-		if ($this->config->perPage)
+		if ($this->config['perPage'])
 		{
-			$this->perPage = $this->config->perPage;
+			$this->perPage = $this->config['perPage'];
 		}
 
-		if ($this->config->frameSize)
+		if ($this->config['frameSize'])
 		{
-			$this->frameSize = $frameSize;
+			$this->frameSize = $this->config['frameSize'];
 		}
 
-		$this->config->SELECT_FIELDS[] = '_order';
-		$this->config->SELECT_FIELDS[] = '_state';
+		$this->config['fields'][] = '_order';
+		$this->config['fields'][] = '_state';
 
-		$this->storeTo = "list_".$config->getModuleName();
+		$this->storeTo = "list_".$config['module_name'];
 		$this->id = intval(RequestInfo::get($this->idGetVar));
 
-		$this->prefix = $config->moduleName.'_list_';
+		$this->prefix = $this->config['module_name'].'_list_';
 	}
 
 	public function handle()
@@ -83,7 +83,7 @@ class ListSimple
 		$list->issel_function = array( &$this, '_current' );
 		$list->parse( $this->template_list, '__list' );
 
-        Locator::get('tpl')->set('module_name', $this->config->getModuleName());
+        Locator::get('tpl')->set('module_name', $this->config['module_name']);
 
 		$this->renderPager();
 	}
@@ -136,7 +136,7 @@ class ListSimple
 
 	public function _controls(&$list)
 	{
-		if( !$this->config->HIDE_CONTROLS['exchange'] )
+		if( !$this->config['hide_controls']['exchange'] )
 		{
 			return $this->tpl->parse( $list->tpl_item.'_Exchange' );
 		}
@@ -151,7 +151,7 @@ class ListSimple
 	protected function renderTrash()
 	{
 		//render trash switcher
-		if (!$this->config->HIDE_CONTROLS['show_trash'])
+		if (!$this->config['hide_controls']['show_trash'])
 		{
 			$show_trash = $_GET['_show_trash'];
 			$this->tpl->set( '_show_trash_href', RequestInfo::hrefChange('', array('_show_trash' => !$show_trash)));
@@ -161,11 +161,11 @@ class ListSimple
 
 	protected function renderAddNew()
 	{
-		if (!$this->config->HIDE_CONTROLS['add_new'])
+		if (!$this->config['hide_controls']['add_new'])
 		{
 			//ссылка на новое
 			$this->tpl->set( '_add_new_href', RequestInfo::hrefChange('', array($this->idGetVar => '', '_new' => 1)));
-			$this->tpl->set( '_add_new_title', $this->config->get('add_new_title') );
+			$this->tpl->set( '_add_new_title', $this->config['add_new_title'] );
 			$this->tpl->Parse( $this->template_new, '__add_new' );
 		}
 	}
@@ -177,9 +177,9 @@ class ListSimple
 			Finder::useModel('DBModel');
 			$this->model = new DBModel();
 			$this->model->setTable($this->getTableName());
-			$this->model->setFields($this->config->SELECT_FIELDS);
-			$this->model->where = ( $_GET['_show_trash'] ? '{_state}>=0' : "{_state} <>2 " ) . ($this->config->where ? ' AND ' . $this->config->where : '') ;
-			$this->model->setOrder($this->config->order_by);
+			$this->model->setFields($this->config['fields']);
+			$this->model->where = ( $_GET['_show_trash'] ? '{_state}>=0' : "{_state} <>2 " ) . ($this->config['where'] ? ' AND ' . $this->config['where'] : '') ;
+			$this->model->setOrder($this->config['order_by']);
 		}
 
 		return $this->model;
@@ -187,16 +187,16 @@ class ListSimple
 
 	protected function getTableName()
 	{
-		if (!$this->config->table_name)
+		if (!$this->config['table'])
 		{
 			Finder::useClass('Inflector');
-			$pathParts = explode('/', $this->config->componentPath);
+			$pathParts = explode('/', $this->config['componentPath']);
 			array_pop($pathParts);
 			$pathParts = array_map(array(Inflector, 'underscore'), $pathParts);
-			$this->config->table_name = strtolower(implode('_', $pathParts));
+			$this->config['table'] = strtolower(implode('_', $pathParts));
 		}
 
-		return $this->config->table_name;
+		return $this->config['table'];
 	}
 
 	/**
