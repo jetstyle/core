@@ -28,7 +28,8 @@ class Json
 				}
 			}
 		}
-		return "{" . implode(",", $out) . "}";
+
+		return "{" . str_replace(array("\n", "\r"), '', implode(",", $out)) . "}";
 	}
 	
 	public static function decode($input)
