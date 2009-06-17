@@ -59,9 +59,9 @@ class TreeControlJsTree extends TreeControl
 
 				$treeParams = array(
 					'current_id' => ($_GET['full_id'] ? $_GET['full_id'] : 'node-'.$this->id),
-					'source_url' => RequestInfo::hrefChange(RequestInfo::$baseUrl."do/".$this->config->componentPath, array('action' => 'json', $this->idGetVar => '', 'cid' => $this->id)),
-					'update_url' => RequestInfo::hrefChange(RequestInfo::$baseUrl."do/".$this->config->componentPath, array('action' => 'update')),
-					'ajax_auto_loading' => $this->config->ajaxAutoLoading,
+					'source_url' => RequestInfo::hrefChange(RequestInfo::$baseUrl."do/".$this->config['module_path'], array('action' => 'json', $this->idGetVar => '', 'cid' => $this->id)),
+					'update_url' => RequestInfo::hrefChange(RequestInfo::$baseUrl."do/".$this->config['module_path'], array('action' => 'update')),
+					'ajax_auto_loading' => $this->config['ajaxAutoLoading'],
 				);
 
 
@@ -82,12 +82,12 @@ class TreeControlJsTree extends TreeControl
 
 				if (function_exists('json_encode'))
 				{
-					$treeParams['hide_buttons'] = json_encode($this->config->hide_buttons);
+					$treeParams['hide_buttons'] = json_encode($this->config['hide_buttons']);
 				}
 				else
 				{
 					Finder::useClass('Json');
-					$treeParams['hide_buttons'] = Json::encode($this->config->hide_buttons);
+					$treeParams['hide_buttons'] = Json::encode($this->config['hide_buttons']);
 				}
 
 				if ($_COOKIE['tree_control_btns'] == 'true')
@@ -97,7 +97,7 @@ class TreeControlJsTree extends TreeControl
 
 				$checkTree = false;
 
-				if (!$this->config->ajaxAutoLoading)
+				if (!$this->config['ajaxAutoLoading'])
 				{
 					$this->load();
 					if (empty($this->children[$this->items[$this->getRootId()]['_parent']]))
@@ -117,7 +117,7 @@ class TreeControlJsTree extends TreeControl
 					{
 						$this->createRootNode();
 
-						if (!$this->config->ajaxAutoLoading)
+						if (!$this->config['ajaxAutoLoading'])
 						{
 							$this->loaded = false;
 							$this->items = array();
@@ -135,7 +135,7 @@ class TreeControlJsTree extends TreeControl
 				$treeParams['data'] = $this->toJSON();
 				$treeParams['level_limit'] = $this->level_limit;
 
-				$treeParams['disable_drag'] = $this->config->disable_drag ? true : false;
+				$treeParams['disable_drag'] = $this->config['disable_drag'] ? true : false;
 
 				$this->tpl->set('tree_params', $treeParams);
 			break;
@@ -195,10 +195,10 @@ class TreeControlJsTree extends TreeControl
 		$_REQUEST['newtitle'] = iconv('cp1251', 'UTF-8', 'Узел дерева');
 		$id = parent::addNode();
 
-		if ($this->config->denyDropToRoot)
+		if ($this->config['denyDropToRoot'])
 		{
 			Locator::get('db')->execute('
-				UPDATE ??'.$this->config->table_name.' SET _supertag = "", _path = "" WHERE id = '.$id.'
+				UPDATE ??'.$this->config['table'].' SET _supertag = "", _path = "" WHERE id = '.$id.'
 			');
 		}
 
@@ -210,8 +210,8 @@ class TreeControlJsTree extends TreeControl
 
 		$result = $this->db->execute("
 			SELECT ".$this->idField.", _state
-			FROM ??".$this->config->table_name."
-			WHERE _parent = 0 AND _state>=0 " . ($this->config->where ? " AND ".$this->config->where : "") . "
+			FROM ??".$this->config['table']."
+			WHERE _parent = 0 AND _state>=0 " . ($this->config['where'] ? " AND ".$this->config['where'] : "") . "
 		");
 
 		while ($r = $this->db->getRow($result))
@@ -229,7 +229,7 @@ class TreeControlJsTree extends TreeControl
 	protected function renderTrash()
 	{
 		//render trash switcher
-		if (!$this->config->HIDE_CONTROLS['show_trash'])
+		if (!$this->config['hide_controls']['show_trash'])
 		{
 			$show_trash = $_GET['_show_trash'];
 			$this->tpl->set( '_show_trash_href', RequestInfo::hrefChange('', array('_show_trash' => !$show_trash)));
@@ -255,7 +255,7 @@ class TreeControlJsTree extends TreeControl
 						$state = 'open';
 					}
 				}
-				elseif ($this->config->ajaxAutoLoading && $this->items[$id]['has_children'])
+				elseif ($this->config['ajaxAutoLoading'] && $this->items[$id]['has_children'])
 				{
 					$state = 'closed';
 				}
@@ -264,7 +264,7 @@ class TreeControlJsTree extends TreeControl
 					'data' => iconv('cp1251', 'utf-8', $this->_getTitle($this->items[$id])),
 					'attributes' => array(
 						'id' => 'node-'.$id,
-						'data' => '{type: "'.( ($this->items[$id]['_level'] == 1 && $this->config->denyDropToRoot) ? 'root' : 'node').'",path: "'.$this->items[$id]['_path'].'",form_config: "'.$this->items[$id]['form_config'].'"}',
+						'data' => '{type: "'.( ($this->items[$id]['_level'] == 1 && $this->config['denyDropToRoot']) ? 'root' : 'node').'",path: "'.$this->items[$id]['_path'].'",form_config: "'.$this->items[$id]['form_config'].'"}',
 						'class' => ($this->items[$id]['_state'] == 1 ? 'hidden' : ($this->items[$id]['_state'] == 2 ? 'deleted' : '')),
 					),
 					'level' => $this->items[$id]['_level'],
@@ -274,10 +274,10 @@ class TreeControlJsTree extends TreeControl
 					'hide_buttons' => $this->items[$id]['hide_buttons'],
 				);
 				if (
-					$this->config->customIconsField &&
-					$this->config->customIcons[$this->items[$id]['controller']]
+					$this->config['customIconsField'] &&
+					$this->config['customIcons'][$this->items[$id]['controller']]
 				)
-					$result[count($result)-1]['icon'] = $this->config->customIcons[$this->items[$id]['controller']];
+					$result[count($result)-1]['icon'] = $this->config['customIcons'][$this->items[$id]['controller']];
 			}
 		}
 
@@ -296,7 +296,7 @@ class TreeControlJsTree extends TreeControl
 	{
 		$id = parent::addNode();
 		Locator::get('db')->execute('
-			UPDATE ??'.$this->config->table_name.' SET _supertag = "" WHERE id = '.$id.'
+			UPDATE ??'.$this->config['table'].' SET _supertag = "" WHERE id = '.$id.'
 		');
 		return $id;
 	}
@@ -309,7 +309,7 @@ class TreeControlJsTree extends TreeControl
 
 		if ($node['id'])
 		{
-			$sql = "UPDATE ??".$this->config->table_name." SET title=".$db->quote($title).", title_pre = ".$db->quote($this->tpl->action('typografica', $title));
+			$sql = "UPDATE ??".$this->config['table']." SET title=".$db->quote($title).", title_pre = ".$db->quote($this->tpl->action('typografica', $title));
 
 			$supertag = '';
 			if (!$node['_supertag'])
@@ -325,7 +325,7 @@ class TreeControlJsTree extends TreeControl
 
 			if ($supertag)
 			{
-				$this->updateTreePathes($this->config->table_name, $node['id'], $this->config->allow_empty_supertag, $this->config->where);
+				$this->updateTreePathes($this->config['table'], $node['id'], $this->config['allow_empty_supertag'], $this->config['where']);
 			}
 		}
 	}

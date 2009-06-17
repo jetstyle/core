@@ -11,49 +11,63 @@ class ModuleConstructor
     private $config;
     private $children;
 
-	public static function factory($modulePath)
-	{
-		if( !Locator::get('principal')->security('cmsModules', $modulePath) )
+    public function __construct($modulePath) {
+        if( !Locator::get('principal')->security('cmsModules', $modulePath) )
 		{
 			return Controller::deny();
 		}
 
-        $node = new ModuleConstructor();
+        $this->modulePath = $modulePath;
+        $this->modulePathParts = explode('/', $modulePath);
+        $this->moduleName = $this->modulePathParts[0];
 
-		$node->modulePath = $modulePath;
-        $node->modulePathParts = explode('/', $modulePath);
-        $node->moduleName = $node->modulePathParts[0];
+        Finder::prependDir(Config::get('app_dir').$this->handlersType.'/'.$this->moduleName.'/', 'app');
 
-        Finder::prependDir(Config::get('app_dir').$node->handlersType.'/'.$node->moduleName.'/', 'app');
-
-        $ymlFile  = Finder::findScript($node->handlersType, $node->moduleName.'/config', 0, 1, 'yml') ;
+        $ymlFile  = Finder::findScript($this->handlersType, $this->moduleName.'/config', 0, 1, 'yml') ;
 		if ( $ymlFile )
 		{
-			$node->config = YamlWrapper::load($ymlFile);
-            $pathParts = $node->modulePathParts;
+			$this->config = YamlWrapper::load($ymlFile);
+            $this->config['module_name'] = $this->moduleName;
+            $this->config['module_path'] = $this->modulePath;
+
+            $pathParts = $this->modulePathParts;
             array_shift($pathParts);
             foreach ($pathParts as $part)
-                $node->config = $node->config[$part];
-            if (is_array($node->config))
             {
-                foreach ($node->config as $key => $child)
+                foreach ($this->config as $key => $value)
                 {
-                    if ($node->config['class'])
+                    if (!(is_array($value) && $value['class']) && !$this->config[$part][$key])
+                    {
+                        $this->config[$part][$key] = $this->config[$key];
+                    }
+                }
+                $this->config = $this->config[$part];
+            }
+            if (is_array($this->config))
+            {
+                foreach ($this->config as $key => $child)
+                {
+                    if ($this->config['class'])
                     {
 
                     }
                     elseif (is_array($child) && $child['class'])
                     {
-                        $node->children[$key] = ModuleConstructor::factory($node->modulePath.'/'.$key);
-                        unset($node->config[$key]);
+                        $this->children[$key] = ModuleConstructor::factory($this->modulePath.'/'.$key);
+                        unset($this->config[$key]);
                     }
                 }
             }
         }
         else
         {
-            throw new JSException('ModuleConstructor: can\'t find config in module '.$node->moduleName);
+            throw new JSException('ModuleConstructor: can\'t find config in module '.$this->moduleName);
         }
+    }
+
+	public static function factory($modulePath)
+	{
+        $node = new ModuleConstructor($modulePath);
         return $node;
 	}
 
@@ -73,12 +87,14 @@ class ModuleConstructor
             }
             $tpl = &Locator::get('tpl');
             $tpl->set('wrapped', $result);
-            return $tpl->parse($this->config['template']);
+            return $tpl->parse($this->config['template'] ? $this->config['template'] : 'tree_form.html');
         }
     }
 
     public function getTitle() {
-        return 'mock title';
+        $sql = "SELECT title FROM ??toolbar WHERE href=".Locator::get('db')->quote( $this->modulePath ) ;
+		$current = Locator::get('db')->queryOne($sql);
+		return $current['title'];
     }
 }
 ?>

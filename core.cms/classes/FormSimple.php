@@ -225,7 +225,7 @@ class FormSimple
 		if (!$this->config['table'])
 		{
 			Finder::useClass('Inflector');
-			$pathParts = explode('/', $this->config['componentPath']);
+			$pathParts = explode('/', $this->config['module_path']);
 			array_pop($pathParts);
 			$pathParts = array_map(array(Inflector, 'underscore'), $pathParts);
 			$this->config['table'] = strtolower(implode('_', $pathParts));
