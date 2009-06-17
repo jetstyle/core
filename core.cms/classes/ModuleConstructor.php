@@ -75,6 +75,7 @@ class ModuleConstructor
     {
         if ($this->config['class'])
         {
+            Finder::useClass($this->config['class']);
             $cls = new $this->config['class']($this->config);
             $cls->handle();
             return $cls->getHtml();

@@ -280,27 +280,18 @@ class FormSimple
 
 		if( is_array($this->config['render']) )
 		{
-			$N = count($this->config['render']);
-			for($i=0;$i<$N;$i++)
+            foreach ($this->config['render']['checkbox'] as $checkbox)
 			{
-				$row =& $this->config['render'][$i];
-				switch( $row[1] )
+                $tpl->set( 'checkbox_'.$checkbox, $this->item[$checkbox] ? "checked=\"checked\"" : '' );
+            }
+            foreach ($this->config['render']['select'] as $name => $params)
+			{
+                foreach($params['values'] as $id => $val)
 				{
-					case 'checkbox':
-						$tpl->set( 'checkbox_'.$row[0], $this->item[$row[0]] ? "checked=\"checked\"" : '' );
-					break;
-
-					case 'select':
-						$_str = '';
-						$A =& $row[2];
-						foreach($row[2] as $_id=>$_val)
-						{
-							$_str .= "<option value='".$_id."' ".(($this->item["id"] && $this->item[$row[0]]==$_id) || (!$this->item["id"] && $_id==$row[3]) ? "selected=\"selected\"" : '' ).">".$_val;
-						}
-						$tpl->set( 'options_'.$row[0], $_str );
-					break;
+					$str .= "<option value='".$id."' ".(($this->item["id"] && $this->item[$name]==$id) || (!$this->item["id"] && $id==$params['default']) ? "selected=\"selected\"" : '' ).">".$val;
 				}
-			}
+				$tpl->set( 'options_'.$name, $str );
+            }
 		}
 	}
 
