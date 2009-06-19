@@ -40,18 +40,18 @@ class FormCalendar extends FormIframe
 	{
 		parent::__construct($config);
 
-		if($this->config->USE_TIME === false)
+		if($this->config['use_time'] === false)
 		{
-			$this->USE_TIME = false;
+			$this['use_time'] = false;
 		}
 	}
 
 	function handle()
 	{
-		$this->YEAR = $this->config->YEAR;
-		$this->MONTH = $this->config->MONTH;
-		$this->DAY = $this->config->DAY;
-		$this->CALENDAR_FIELDS = $this->config->CALENDAR_FIELDS ? $this->config->CALENDAR_FIELDS : array();
+		$this->YEAR = $this->config['year'];
+		$this->MONTH = $this->config['month'];
+		$this->DAY = $this->config['day'];
+		$this->CALENDAR_FIELDS = $this->config['calendar_fields'] ? $this->config['calendar_fields'] : array();
 
 		$this->load();
 		if( !$this->id )

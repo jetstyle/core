@@ -11,7 +11,7 @@ class ModuleConstructor
     private $config;
     private $children;
 
-    public function __construct($modulePath) {
+    public function __construct($modulePath, $config = null) {
         if( !Locator::get('principal')->security('cmsModules', $modulePath) )
 		{
 			return Controller::deny();
@@ -23,51 +23,48 @@ class ModuleConstructor
 
         Finder::prependDir(Config::get('app_dir').$this->handlersType.'/'.$this->moduleName.'/', 'app');
 
-        $ymlFile  = Finder::findScript($this->handlersType, $this->moduleName.'/config', 0, 1, 'yml') ;
-		if ( $ymlFile )
-		{
-			$this->config = YamlWrapper::load($ymlFile);
-            $this->config['module_name'] = $this->moduleName;
-            $this->config['module_path'] = $this->modulePath;
-
-            $pathParts = $this->modulePathParts;
-            array_shift($pathParts);
-            foreach ($pathParts as $part)
+        if (!$config) {
+            $ymlFile  = Finder::findScript($this->handlersType, $this->moduleName.'/config', 0, 1, 'yml') ;
+            if ( $ymlFile )
             {
-                foreach ($this->config as $key => $value)
-                {
-                    if (!(is_array($value) && $value['class']) && !$this->config[$part][$key])
-                    {
-                        $this->config[$part][$key] = $this->config[$key];
-                    }
-                }
-                $this->config = $this->config[$part];
+                $this->config = YamlWrapper::load($ymlFile);
             }
-            if (is_array($this->config))
+            else
             {
-                foreach ($this->config as $key => $child)
-                {
-                    if ($this->config['class'])
-                    {
-
-                    }
-                    elseif (is_array($child) && $child['class'])
-                    {
-                        $this->children[$key] = ModuleConstructor::factory($this->modulePath.'/'.$key);
-                        unset($this->config[$key]);
-                    }
-                }
+                throw new JSException('ModuleConstructor: can\'t find config in module '.$this->moduleName);
             }
         }
         else
         {
-            throw new JSException('ModuleConstructor: can\'t find config in module '.$this->moduleName);
+            $this->config = $config;
         }
+
+        if (is_array($this->config))
+        {
+            foreach ($this->config as $key => $child)
+            {
+                if (is_array($child) && $child['class'])
+                {
+                    foreach ($this->config as $key => $value)
+                    {
+                        if (!(is_array($value) && $value['class']) && !$child[$key])
+                        {
+                            $child[$key] = $this->config[$key];
+                        }
+                    }
+                    $this->children[$key] = ModuleConstructor::factory($this->modulePath.'/'.$key, $child);
+                    unset($this->config[$key]);
+                }
+            }
+        }
+        
+        $this->config['module_name'] = $this->moduleName;
+        $this->config['module_path'] = $this->modulePath;
     }
 
-	public static function factory($modulePath)
+	public static function factory($modulePath, $config = null)
 	{
-        $node = new ModuleConstructor($modulePath);
+        $node = new ModuleConstructor($modulePath, $config);
         return $node;
 	}
 

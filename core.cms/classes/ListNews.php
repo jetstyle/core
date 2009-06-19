@@ -25,15 +25,15 @@ class ListNews extends ListSimple
 	public function __construct( &$config )
 	{
 		//упорядочиваем список
-		if(!$config->order_by)
+		if(!$config['order_by'])
 		{
-			$config->order_by = 'inserted DESC';
+			$config['order_by'] = 'inserted DESC';
 		}
 
 		//по этапу
 		parent::__construct( $config );
 
-		$this->prefix = $config->getModuleName().'_tree_';
+		$this->prefix = $config['module_name'].'_tree_';
 		$this->defineDate();
 	}
 
@@ -50,8 +50,8 @@ class ListNews extends ListSimple
 		$M = array();
 		$rs = $db->execute("
 	    	SELECT DISTINCT month
-	    	FROM ??".$this->config->get('table_name')."
-	    	WHERE year='".$this->year."' AND _state <= 1 ".($this->config->get('where') ? " AND ".$this->config->get('where') : "" )
+	    	FROM ??".$this->config['table']."
+	    	WHERE year='".$this->year."' AND _state <= 1 ".($this->config['where'] ? " AND ".$this->config['where'] : "" )
 		);
 		while($row = $db->getRow())
 		{
@@ -70,8 +70,8 @@ class ListNews extends ListSimple
 		//годы
 		$rs = $db->execute("
 	    	SELECT DISTINCT year
-	    	FROM ??".$this->config->get('table_name')."
-	    	WHERE _state <= 1 ".($this->config->get('where') ? " AND ".$this->config->get('where') : "" ) . "
+	    	FROM ??".$this->config['table_name']."
+	    	WHERE _state <= 1 ".($this->config['where'] ? " AND ".$this->config['where'] : "" ) . "
 	    	ORDER BY year ASC
 	    ");
 
@@ -105,7 +105,7 @@ class ListNews extends ListSimple
 
 		if (!$this->year || !$this->month)
 		{
-			$rs = $db->queryOne("SELECT id, year, month FROM ??".$this->config->get('table_name')." WHERE _state<=1 ".($this->config->where ? " AND ".$this->config->where : "" )." ORDER BY inserted DESC");
+			$rs = $db->queryOne("SELECT id, year, month FROM ??".$this->config['table_name']." WHERE _state<=1 ".($this->config['where'] ? " AND ".$this->config['where'] : "" )." ORDER BY inserted DESC");
 			if($rs['id'])
 			{
 				$this->year = $rs['year'];
