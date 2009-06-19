@@ -2,14 +2,14 @@ Inplace = function( editorType, cmsUrl, inplaceObject, field )
 {
     this.editorType = editorType;
     this.cmsUrl = cmsUrl;
-    
+
     //инплейсный объект - редактор+кнопки
-    this.inplaceObject = $(inplaceObject); 
+    this.inplaceObject = $(inplaceObject);
     this.inplaceObjectID = inplaceObject;
     this.field  = field ? field : 'text';
 }
 
-Inplace.prototype = 
+Inplace.prototype =
 {
     editorType: 'input',
 
@@ -30,12 +30,12 @@ Inplace.prototype =
 
     edit: function()
     {
-	
-    	//загрузим в редактор содержимое редактируемого контейнера 
+
+    	//загрузим в редактор содержимое редактируемого контейнера
 	this.loadDataToInplaceEditor();
 
 	//unbind events from container
-    	this.unbindAll();	
+    	this.unbindAll();
     },
 
     loadDataToInplaceEditor: function()
@@ -44,11 +44,11 @@ Inplace.prototype =
 
         if (this.cacheData )
 	{
-            this.onLoad( this.cacheData );            
+            this.onLoad( this.cacheData );
 	}
         else
 	{
-		$(document).ajaxError( 
+		$(document).ajaxError(
     			    function(event, request, settings)
     			    {
 			       onTBRemove = this.__get.prototypeBind(this);
@@ -56,17 +56,17 @@ Inplace.prototype =
     			    }.prototypeBind(this)
 		);
 	        this.__get();
-		
+
 	}
     },
-    
+
     __get: function ()
     {
-	    $.get(  this.cmsUrl, 
-		            { 'ret': this.field }, 
+	    $.get(  this.cmsUrl,
+		            { 'ret': this.field },
                     this.onLoad.prototypeBind(this), 'html'
 	        );
-		
+
     },
 
     onLoad: function (data)
@@ -74,25 +74,25 @@ Inplace.prototype =
         if ( ! this.inplaceContainer )
         {
             this.inplaceContainer = this.container.clone().empty().append( $( this.inplaceObject ) ).css("padding", "0").removeClass("inplace-over");
-        
+
             //–€дом с контейнером создаем его пустой клон, с инплейсным редактором
             //this.container.parent().append( this.inplaceContainer );
 	    this.container.after( this.inplaceContainer );
         }
-        
+
         //show inplaceObject and its container
         $( this.inplaceObject ).add( this.inplaceContainer ).removeClass("invisible");
-	
+
 	//width fix
 	if (this.editorType!='wysiwyg')
 	    $( this.inplaceObject ).css("width", $( this.inplaceObject ).children(":first").children(":first").width()+16 );
-	
+
         //контейнер спр€чем
         this.container.addClass("invisible");
 
 	// важно, что после манипул€ций с домом
         this.setEditorData(data);
-	
+
         this.hideIndicator();
     },
 
@@ -100,25 +100,25 @@ Inplace.prototype =
     {
 	    if ( this.editorType=='' || this.editorType=='textarea' )
 	    {
-	        $( this.inplaceObject ).children(":first").children(":first").attr("value", data);    
+	        $( this.inplaceObject ).children(":first").children(":first").attr("value", data);
 	    }
 	    else
 	    {
-	        $( this.inplaceObject ).children(":first").attr("value", data); 
+	        $( this.inplaceObject ).children(":first").attr("value", data);
 
 	        if (!this.inited)
 	        {	/*
 			for(id in tinyMCE.editors)
 			{
 			    console.log('Remove: ' + id );
-			    tinyMCE.execCommand('mceFocus', false, id );     
+			    tinyMCE.execCommand('mceFocus', false, id );
 			    tinyMCE.execCommand('mceRemoveControl', false, id);
-			}			
+			}
 			console.log(tinyMCE.editors);
 			*/
 			var textarea_id = $( this.inplaceObject ).children(":first").attr("id");
 //			console.log('mceAddControl '+ textarea_id );
-			
+
 		        tinyMCE.execCommand("mceAddControl", true, textarea_id );
 		        this.inited = true;
 	        }
@@ -126,7 +126,7 @@ Inplace.prototype =
 		        tinyMCE.activeEditor.setContent( data );
 	    }
     },
-    
+
     getEditorData: function( data )
     {
 	    if ( this.editorType=='' || this.editorType=='textarea' )
@@ -151,7 +151,7 @@ Inplace.prototype =
         this.saveButton.addClass("invisible");
         this.cancelButton.addClass("invisible");
     },
-    
+
     hideIndicator: function()
     {
 	//console.log( $("#cms_panel_loading") );
@@ -167,19 +167,19 @@ Inplace.prototype =
 	    var params =  {'ajax_update': this.field+'_pre'};
 	    params[ this.field ] = this.getEditorData();
 
-	    $.post( this.cmsUrl, 
+	    $.post( this.cmsUrl,
 	        params, this.onSave.prototypeBind( this )
 	    );
     },
-    
+
     onSave: function(data)
     {
-	    
+
 	    this.container.html( data );
 	    this.cancel();
-    }, 
-	    
-    
+    },
+
+
     cancel: function()
     {
 	    this.cacheData = this.getEditorData();
@@ -196,10 +196,10 @@ Inplace.prototype =
 
 	    //оригинальный контейнер покажем
 	    this.container.removeClass("invisible inplace-over");
-	    
+
 	    this.bindAll();
-	    
-	    this.hideIndicator(); 
+
+	    this.hideIndicator();
     },
 
     bindAll: function()
@@ -222,7 +222,7 @@ Inplace.prototype =
 	//контейнер инплейсного объекта
 	if ( parent )
 	    this.container = $( this.inplaceObject ).parent();
-	else 
+	else
 	    this.container = $( this.inplaceObject ).prev();
 
 	this.inplaceObject.css("z-index", 1000).css("position", "relative");
@@ -235,7 +235,7 @@ Inplace.prototype =
 	    preInitMce(textarea_id);
 	}
     },
-    
+
     initButtons: function()
     {
 	//bind buttons
@@ -248,10 +248,10 @@ Inplace.prototype =
 	    $(this.buttons).css("padding-left", "8px");
 	else
 	    $(this.buttons).css("float", "right");
-	    
+
         this.saveButton.click(   this.save.prototypeBind(this)   );
         this.cancelButton.click( this.cancel.prototypeBind(this) );
-	
+
 	//append buttons
 	this.inplaceObject.append( this.buttons );
     },
@@ -263,7 +263,7 @@ var mce_timer = false
     function preInitMce(textarea_id)
     {
 	mce_ids.push(textarea_id);
-	
+
 	if (!mce_timer)
 	{
 	    setTimeout( initMCE, 1000 );
@@ -293,8 +293,8 @@ var mce_timer = false
     		valid_elements : "+a[name|href|target|title|onclick|mode|fileparams],-strong/-b/,-em/-i,-strike,-u,#p[id|style],-ol,-ul,-li,br,img[src|alt|title|bigwidth|bigheight|bigsrc|mode|width|height|title|style],-sub,-sup,-blockquote,-table[class],-tr[rowspan],tbody,thead,tfoot,#td[colspan|rowspan],-th[colspan|rowspan],caption,-pre,address,-h1,-h2,-h3,-h4,-h5,-h6,hr,dd,dl,dt,cite,abbr,acronym,del,ins,big",
     		theme_advanced_toolbar_location : "top",
     		theme_advanced_resizing : true,
-    		theme_advanced_statusbar_location : "false",
-    		theme_advanced_resize_horizontal : "false",
+    		theme_advanced_statusbar_location : false,
+    		theme_advanced_resize_horizontal : false,
     		theme_advanced_toolbar_align : "left",
     		theme_advanced_buttons1 : "link,unlink,anchor,separator,justifyleft,justifycenter,justifyright,justifyfull,formatselect,bold,italic,underline,strikethrough,sub,sup,separator,bullist,numlist,separator,jetimages,jetfiles,code",
     		theme_advanced_buttons2 : "",
@@ -302,15 +302,15 @@ var mce_timer = false
 		theme_advanced_blockformats : "p,h3,address",
     		width: "100%",
     		///height: "600px",
-		
-		
+
+
 		init_instance_callback: this.onMCEInit.prototypeBind(self)
 		});
-	
+
 	tinyMCE.jetimages= base_url + "cms/do/Pictures/jetimages";
 	tinyMCE.jetfiles = base_url + "cms/do/PicFiles/jetfiles";
 	tinyMCE.jetcontent = base_url + "cms/jetcontent";
-	
+
     	tinyMCE.base_url = base_url + "cms/";
 
 //	this.mceInstance = tinyMCE;
@@ -321,10 +321,10 @@ var mce_timer = false
     	});
 	*/
     };
-    
-    function onMCEInit(inst)  
+
+    function onMCEInit(inst)
     {
-	    inst.resizeToContent(); 
+	    inst.resizeToContent();
 //    	    console.log('mce inited!!! '+inst.id);
     	    //append buttons
     	    //console.log( $(inst.getContainer()).width() );
