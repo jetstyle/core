@@ -33,6 +33,8 @@ class ListNews extends ListSimple
 		//по этапу
 		parent::__construct( $config );
 
+        //var_dump($this->config['table']);die;
+
 		$this->prefix = $config['module_name'].'_tree_';
 		$this->defineDate();
 	}
@@ -70,7 +72,7 @@ class ListNews extends ListSimple
 		//годы
 		$rs = $db->execute("
 	    	SELECT DISTINCT year
-	    	FROM ??".$this->config['table_name']."
+	    	FROM ??".$this->config['table']."
 	    	WHERE _state <= 1 ".($this->config['where'] ? " AND ".$this->config['where'] : "" ) . "
 	    	ORDER BY year ASC
 	    ");
@@ -105,7 +107,7 @@ class ListNews extends ListSimple
 
 		if (!$this->year || !$this->month)
 		{
-			$rs = $db->queryOne("SELECT id, year, month FROM ??".$this->config['table_name']." WHERE _state<=1 ".($this->config['where'] ? " AND ".$this->config['where'] : "" )." ORDER BY inserted DESC");
+			$rs = $db->queryOne("SELECT id, year, month FROM ??".$this->config['table']." WHERE _state<=1 ".($this->config['where'] ? " AND ".$this->config['where'] : "" )." ORDER BY inserted DESC");
 			if($rs['id'])
 			{
 				$this->year = $rs['year'];

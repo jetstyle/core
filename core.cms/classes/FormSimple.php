@@ -337,7 +337,7 @@ class FormSimple
 				{
 					$data[$r[$value['fk']]] = $r['title'];
 				}
-
+                
 				$this->config['render'][] = array($value['pk'], "select", $data, $value['default']);
 			}
 			// думаем, что $value['name'] это имя таблицы

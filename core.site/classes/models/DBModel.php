@@ -24,7 +24,7 @@ class DBModel extends Model implements IteratorAggregate, ArrayAccess, Countable
 	 * @var bool
 	 */
 	protected $autoPrefix = true;
-	
+
 	/**
 	 * Имя таблицы
 	 *
@@ -188,7 +188,7 @@ class DBModel extends Model implements IteratorAggregate, ArrayAccess, Countable
 	 * @var string
 	 */
 	protected $keyField = null;
-	
+
 	protected $data = NULL;
 
 	/**
@@ -216,12 +216,12 @@ class DBModel extends Model implements IteratorAggregate, ArrayAccess, Countable
 	protected $children = array();
 	protected $treeMinLevel = 0;
 	protected $treeRootId = 0;
-	
+
 	private $loadedConfigFileName = '';
-	
+
 	private $preCollectIds = false;
 	private $ids = array();
-	
+
 	public static function factory($className = '')
 	{
 		$obj = null;
@@ -231,7 +231,7 @@ class DBModel extends Model implements IteratorAggregate, ArrayAccess, Countable
 		{
 			$className= $parts[0];
 			$fieldSet = $parts[1];
-			
+
 		}
 
 		if ($className)
@@ -256,7 +256,7 @@ class DBModel extends Model implements IteratorAggregate, ArrayAccess, Countable
 		else
 		{
 			$model = new DBModel();
-			
+
 			if (!$model->loadConfig( $className, $fieldSet ))
 			{
 				throw new JSException('DBModel: can\'t find model "'.$className.'"'. ($fieldSet ? " with field set \"".$fieldSet."\"" : ""));
@@ -285,7 +285,7 @@ class DBModel extends Model implements IteratorAggregate, ArrayAccess, Countable
 		$this->treeMinLevel = 0;
 		$this->treeRootId = 0;
 		$this->ids = array();
-		
+
 		if (is_array($this->foreignModels) && !empty($this->foreignModels))
 		{
 			foreach ($this->foreignModels AS &$model)
@@ -294,7 +294,7 @@ class DBModel extends Model implements IteratorAggregate, ArrayAccess, Countable
 			}
 		}
 	}
-	
+
 	/**
 	 * loadConfig
 	 *
@@ -330,13 +330,13 @@ class DBModel extends Model implements IteratorAggregate, ArrayAccess, Countable
 			{
 				$fieldSet = 'default';
 				$ymlConfig = $ymlConfig[ $fieldSet ];
-				
+
 			}
 
 			$storeTo = $fileName.($fieldSet ? "_".$fieldSet : "");
-			
+
 			$this->loadedConfigFileName = $fileName;
-			
+
 			$this->setConfig($ymlConfig, $fileName, $storeTo);
 			return true;
 		}
@@ -359,7 +359,7 @@ class DBModel extends Model implements IteratorAggregate, ArrayAccess, Countable
 		$this->setGroupBy($ymlConfig['group']);
 		$this->setHaving($ymlConfig['having']);
 		$this->setLimit($ymlConfig['limit']);
-		
+
 		$this->storeTo = $storeTo;
 
 		if ( !empty( $ymlConfig['table'] ) )
@@ -370,12 +370,12 @@ class DBModel extends Model implements IteratorAggregate, ArrayAccess, Countable
 		{
 			$this->autoDefineTable($className);
 		}
-		
+
 		if (isset($ymlConfig['autoPrefix']))
 		{
 			$this->setAutoPrefix($ymlConfig['autoPrefix']);
 		}
-		
+
 		if ($ymlConfig['files'])
 		{
 			$this->addFilesConfig($ymlConfig['files']);
@@ -416,7 +416,7 @@ class DBModel extends Model implements IteratorAggregate, ArrayAccess, Countable
 	{
 		return $this->tableFields;
 	}
-	
+
 	/**
 	 * Return table name with alias
 	 *
@@ -469,7 +469,7 @@ class DBModel extends Model implements IteratorAggregate, ArrayAccess, Countable
 		}
 		return $this->foreignModels[$fieldName];
 	}
-	
+
 	/**
 	 * Return data
 	 *
@@ -509,10 +509,10 @@ class DBModel extends Model implements IteratorAggregate, ArrayAccess, Countable
 		}
 		return $result;
 	}
-	
+
 //	public function getTree()
 //	{
-//		
+//
 //	}
 
 	public function getCount($where = NULL)
@@ -568,10 +568,10 @@ class DBModel extends Model implements IteratorAggregate, ArrayAccess, Countable
 	{
 		$this->autoPrefix = $v;
 	}
-	
+
 	/**
 	 * Set key field
-	 * 
+	 *
 	 * @param string $keyField
 	 */
 	public function setKeyField($keyField)
@@ -579,7 +579,7 @@ class DBModel extends Model implements IteratorAggregate, ArrayAccess, Countable
 		$this->keyField = $keyField;
 		return $this;
 	}
-	
+
 	/**
 	 * Set table alias
 	 *
@@ -647,7 +647,7 @@ class DBModel extends Model implements IteratorAggregate, ArrayAccess, Countable
 	{
 		if (is_numeric($v))
 			$this->limit = $v;
-			
+
 		return $this;
 	}
 
@@ -844,7 +844,7 @@ class DBModel extends Model implements IteratorAggregate, ArrayAccess, Countable
 		}
 
 		$config = FileManager::getConfig($configKey);
-		
+
 		if (is_array($config))
 		{
 			foreach ($config AS $key => $conf)
@@ -852,7 +852,7 @@ class DBModel extends Model implements IteratorAggregate, ArrayAccess, Countable
 				$fieldConfig = $params;
 				$fieldConfig['type'] = 'file';
 				$fieldConfig['conf'] = $configKey.':'.$key;
-				
+
 				$this->addField($key, $fieldConfig);
 
 				// subconfigs
@@ -956,7 +956,7 @@ class DBModel extends Model implements IteratorAggregate, ArrayAccess, Countable
 					}
 				}
 			}
-			
+
 			if (is_array($config) && array_key_exists('lazy_load', $config) && $config['lazy_load'] === false)
 			{
 				$this->preCollectIds = true;
@@ -969,7 +969,7 @@ class DBModel extends Model implements IteratorAggregate, ArrayAccess, Countable
 	{
 		$this->foreignModels[$fieldName] = &$model;
         $this->foreignModels[$fieldName]->setBannedTableAliases(&$this->bannedTableAliases);
-        
+
 		return $this;
 	}
 
@@ -978,7 +978,7 @@ class DBModel extends Model implements IteratorAggregate, ArrayAccess, Countable
 	    if ($storeTo=="")
 	    {
 	        $storeTo = $this->storeTo;
-	    }   
+	    }
 		Locator::get('tpl')->setRef($storeTo, $this);
 		return $this;
 	}
@@ -1122,12 +1122,12 @@ class DBModel extends Model implements IteratorAggregate, ArrayAccess, Countable
 		}
 		$this->registerObserver('row', array($this, 'treePrepareRow'));
 		$this->registerObserver('did_load', array($this, 'treeConstruct'));
-				
+
 		$this->load($where);
-		
+
 		$this->removeObserver('row', array($this, 'treePrepareRow'));
 		$this->removeObserver('did_load', array($this, 'treeConstruct'));
-				
+
 		return $this;
 	}
 
@@ -1137,7 +1137,7 @@ class DBModel extends Model implements IteratorAggregate, ArrayAccess, Countable
 		if (is_null($this->table))
 		{
 			$this->autoDefineTable();
-		}		
+		}
 
 		//для всех классов с пустым fields
 		$className = get_class($this);
@@ -1155,14 +1155,14 @@ class DBModel extends Model implements IteratorAggregate, ArrayAccess, Countable
 		{
 			$this->addFields($this->fields);
 		}
-		
+
 		if ($this->files)
 		{
 			$this->addFilesConfig($this->files);
 			$this->files = null;
 		}
 	}
-	
+
 	public function &getPager()
 	{
 		if (null === $this->pager)
@@ -1210,7 +1210,7 @@ class DBModel extends Model implements IteratorAggregate, ArrayAccess, Countable
 		$config["type"] = $type;
 		$config['className'] = $className;
 		$config['initialized'] = false;
-		
+
 		$this->foreignFields[$fieldName] = $config;
 	}
 
@@ -1239,7 +1239,7 @@ class DBModel extends Model implements IteratorAggregate, ArrayAccess, Countable
 		$this->notify('will_load', array(&$this));
 
 		$this->setData($this->selectSql($sql, true));
-		
+
 		$this->notify('did_load', array(&$this));
 	}
 
@@ -1256,9 +1256,9 @@ class DBModel extends Model implements IteratorAggregate, ArrayAccess, Countable
 		if (!isset($model)) return;
 
 		// we need clean model for each row
-		
+
 		$fmodel = clone $model;
-		
+
 		$where = $fmodel->quoteField($fieldinfo['fk']) .'='. DBModel::quote($data[$fieldinfo['pk']]);
 		$fmodel->load($where);
 
@@ -1278,7 +1278,7 @@ class DBModel extends Model implements IteratorAggregate, ArrayAccess, Countable
 
 		// we need clean model for each row
 		$fmodel = clone $model;
-		
+
 		$qt = $this->quoteName(DBAL::$prefix.$fieldinfo['through']['table']);
 
 		$sqlParts = $fmodel->getSqlParts();
@@ -1341,19 +1341,19 @@ class DBModel extends Model implements IteratorAggregate, ArrayAccess, Countable
 		}
 		$data[$fieldName] = $file;
 	}
-	
+
 	protected function mapFile($fieldName, &$data)
 	{
 		Finder::useClass('FileManager');
 		$fieldinfo = &$this->foreignFields[$fieldName];
-		
+
 		$isId = false;
-				
+
 		if ($this->loadedConfigFileName == 'FilesModel' || get_class($this) == 'FilesModel')
 		{
 			$isId = true;
 		}
-		
+
 		if ($fieldinfo['parent'])
 		{
 			$parent = &$this->foreignFields[$fieldinfo['parent']];
@@ -1362,7 +1362,7 @@ class DBModel extends Model implements IteratorAggregate, ArrayAccess, Countable
 		{
 			$parent = &$fieldinfo;
 		}
-		
+
 		if (!$parent['cached'])
 		{
 			if (is_array($this->ids) && !empty($this->ids))
@@ -1371,10 +1371,10 @@ class DBModel extends Model implements IteratorAggregate, ArrayAccess, Countable
 			}
 			$parent['cached'] = true;
 		}
-		
+
 		$data[$fieldName] = FileManager::getFile($fieldinfo['conf'], $data['id'], $isId);
 	}
-	
+
 	/**
 	 * Строит join для has_one
 	 *
@@ -1492,21 +1492,21 @@ class DBModel extends Model implements IteratorAggregate, ArrayAccess, Countable
 	public function selectSql($sql, $isLoad=false)
 	{
 		$this->notify('will_select_sql', array(&$this, &$sql));
-		
+
 		$db = &Locator::get('db');
 		$result = $db->execute($sql);
 		$data = array();
-		
+
 		if ($this->preCollectIds)
 		{
 			$tmpData = array();
-			
+
 			while ($r = $db->getRow($result))
 			{
 				$this->ids[] = $r[$this->getPk()];
 				$tmpData[] = $r;
 			}
-			
+
 			foreach ($tmpData AS $r)
 			{
 				$this->onRow($this, &$r);
@@ -1527,7 +1527,7 @@ class DBModel extends Model implements IteratorAggregate, ArrayAccess, Countable
 					$data[$r[$this->keyField]] = $r;
 				else
 					$data[] = $r;
-				
+
 				$this->ids[] = $r[$this->getPk()];
 			}
 		}
@@ -1536,12 +1536,12 @@ class DBModel extends Model implements IteratorAggregate, ArrayAccess, Countable
 		{
 			$data = null;
 		}
-		
+
 		$this->notify('did_select_sql', array(&$this, &$data));
 
 		return $data;
 	}
-	
+
 	protected function onRow(&$model, &$row)
 	{
 		$this->applyDataToForeignModels($this->divideForeignDataFrom($row), $row);
@@ -1571,7 +1571,7 @@ class DBModel extends Model implements IteratorAggregate, ArrayAccess, Countable
 		{
 			return $foreignData;
 		}
-		
+
 		foreach($data AS $fieldName => $fieldValue)
 		{
 			if (!isset($this->tableFields[$fieldName]))
@@ -1585,7 +1585,7 @@ class DBModel extends Model implements IteratorAggregate, ArrayAccess, Countable
 				unset($data[$fieldName]);
 			}
 		}
-		
+
 		return $foreignData;
 	}
 
@@ -1617,7 +1617,7 @@ class DBModel extends Model implements IteratorAggregate, ArrayAccess, Countable
 				$row[$fieldName] = $clonedModel;
 			}
 		}
-		
+
 	}
 
 	public function loadForeignField($fieldName, &$data)
@@ -1980,7 +1980,7 @@ class DBModel extends Model implements IteratorAggregate, ArrayAccess, Countable
 		{
 			$model->setOrder($field['order']);
 		}
-		
+
 		if (isset($field['limit']))
 		{
 			$model->setLimit($field['limit']);
@@ -2018,7 +2018,7 @@ class DBModel extends Model implements IteratorAggregate, ArrayAccess, Countable
                 if ($conf['type'] == 'has_one')
                 {
                     $model->setBannedTableAliases(&$this->bannedTableAliases);
-                }   
+                }
 			}
 		}
     }
@@ -2040,12 +2040,12 @@ class DBModel extends Model implements IteratorAggregate, ArrayAccess, Countable
 			$this->treeRootId = $row['_parent'];
 		}
 	}
-	
+
 	protected function treeConstruct(&$model, &$data)
 	{
 		$data = $this->makeTree($this->treeRootId, $this->children, $data);
 	}
-	
+
 	protected function makeTree($parent, $children, $items)
 	{
 		$result = array();
@@ -2065,9 +2065,9 @@ class DBModel extends Model implements IteratorAggregate, ArrayAccess, Countable
 		}
 		return $result;
 	}
-	
+
 	/**
-	 * 
+	 *
 	 */
 	public function isForeignField($field)
 	{

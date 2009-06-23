@@ -345,8 +345,8 @@ abstract class Controller implements ArrayAccess
 
         Finder::useClass('FileManager');
 
-        $view['logo'] = FileManager::getFile('Config:logo/small', 1);
-        $view['header_bg'] = FileManager::getFile('Config:bg', 1);
+        $view['logo'] = FileManager::getFile('Config/config:logo/small', 1);
+        $view['header_bg'] = FileManager::getFile('Config/config:bg', 1);
 
 		$view["config_title"] = $config['project_title'];
 

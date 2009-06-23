@@ -133,14 +133,16 @@ class FileManager
 	private function loadConfig($conf)
 	{
 		$path = $this->getPathsForKey($conf);
-		try
-		{
-			$this->configs[$conf] = YamlWrapper::load($path);
-		}
-		catch (FileNotFoundException $e)
-		{
-			$this->configs[$conf] = array();
-		}
+        Finder::useClass('ModuleConstructor');
+        //$moduleConf = ModuleConstructor::factory($conf)->getConfig();
+        if ($moduleConf['files'])
+        {
+            //$this->configs[$conf] = $moduleConf['files'];
+        }
+        else
+        {
+            $this->configs[$conf] = array();
+        }
 
 		if (!empty($this->configs[$conf]))
 		{
