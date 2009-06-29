@@ -2,11 +2,11 @@
 
 class FileUpload
 {
-	protected static $allow = null; // белый список расширений
+	protected $allow = null; // белый список расширений
 //	protected $deny = null; // чёрный список расширений
 //	public $GRAPHICS = array('jpg', 'jpeg', 'gif', 'png', 'bmp');
 
-	protected static $baseDir = null;
+	protected $baseDir = null;
 	
 	protected $dir = '';
 	
@@ -18,9 +18,9 @@ class FileUpload
 
 	public function __construct()
 	{
-		if (null === self::$allow)
+		if (null === $this->allow)
 		{
-			self::$allow = array();
+			$this->allow = array();
 			if (Config::get('upload_ext'))
 			{
 				$exts = explode(",", Config::get('upload_ext'));
@@ -29,15 +29,15 @@ class FileUpload
 					foreach ($exts as $ext)
 					{
 						$ext = strtolower(trim($ext));
-						self::$allow[$ext] = $ext;
+						$this->allow[$ext] = $ext;
 					}
 				}
 			}
 		}
 		
-		if (null === self::$baseDir)
+		if (null === $this->baseDir)
 		{
-			self::$baseDir = Config::get('files_dir');
+			$this->baseDir = Config::get('files_dir');
 		}
 	}
 
@@ -46,10 +46,33 @@ class FileUpload
 		$this->dir = trim($dir, '/');
 	}
 
+    public function setBaseDir($dir)
+    {
+        $this->baseDir = $dir;
+    }
+
+    public function setAllowedExts($exts)
+    {
+        if (is_array($exts))
+        {
+            $this->allow = $exts;
+        }
+    }
+
 	public function getDir()
 	{
 		return $this->dir;
 	}
+
+    public function getBaseDir()
+    {
+        return $this->baseDir;
+    }
+
+    public function getAllowedExts()
+    {
+        return $this->allow;
+    }
 
 	public function uploadFile($fileData, $params = NULL )
 	{
@@ -85,8 +108,16 @@ class FileUpload
 		}
 		
 		$this->isImage = File::isImageExt($ext);
+
+        if ($params['filename'])
+        {
+            $fileName = $params['filename'];
+        }
+        else
+        {
+            $fileName = pathinfo($fileData['name'], PATHINFO_FILENAME);
+        }
 		
-		$fileName = pathinfo($fileData['name'], PATHINFO_FILENAME);
 		
 		Finder::useClass('Translit');
 		$translit = new Translit();
@@ -96,7 +127,7 @@ class FileUpload
 		$this->createDir();
 		
 		// construct full filename
-		$dirname = self::$baseDir.$this->dir.($this->dir ? '/' : '');
+		$dirname = $this->baseDir.$this->dir.($this->dir ? '/' : '');
 		$add = '';
 		while (file_exists($dirname.$fileName.$add.'.'.$ext))
 		{
@@ -168,7 +199,7 @@ class FileUpload
 
 	protected function isAllowed($ext)
 	{
-		if( (!empty(self::$allow) && !in_array($ext, self::$allow)) )
+		if( (!empty($this->allow) && !in_array($ext, $this->allow)) )
 		{
 			return false;
 		}
@@ -189,7 +220,7 @@ class FileUpload
 
 	protected function createDir()
 	{
-		$dirname = self::$baseDir.$this->dir;
+		$dirname = $this->baseDir.$this->dir;
 		
 		if (!is_dir($dirname))
 		{
@@ -287,30 +318,6 @@ class FileUpload
 
 		imagecopyresampled ($thumbnail, $img, 0,0,0,0, $newWidth, $newHeight, $size[0], $size[1]);
 
-		// создаем плашку с размерами миниатюры. потом в нее вписываем полученное изображение
-//		if($pl)
-//		{
-//			$x = 0;
-//			$y = 0;
-//
-//			if(imagesx($thumbnail) < $size['x'])
-//			{
-//				$x = round(($size['x'] - imagesx($thumbnail)) / 2);
-//			}
-//
-//			if (imagesy($thumbnail) < $size['y'])
-//			{
-//				$y = round(($size['y'] - imagesy($thumbnail)) / 2);
-//			}
-//
-//			$t = $thumbnail;
-//			$thumbnail = imagecreatetruecolor ($size['x'], $size['y']);
-//			$fg = ImageColorAllocate($thumbnail, 255, 255, 255);
-//			imagefill($thumbnail, 0, 0, $fg);
-//
-//			imagecopy($thumbnail, $t, $x, $y, 0, 0, imagesx($t), imagesy($t));
-//			imagedestroy($t);
-//		}
 		imagedestroy($img);
 		$img = $thumbnail;
 	}
@@ -366,23 +373,12 @@ class FileUpload
 			for ($y = 0; $y < $maskSize['y']; $y++)
 			{ // each pixel
 				$maskRGBColor = imagecolorsforindex($mask, imagecolorat($mask, $x, $y));
-//				var_dump($maskRGBColor);
-//				die();
 				if ($maskRGBColor['red'] > 250 && $maskRGBColor['blue'] > 250 && $maskRGBColor['blue'] > 250)
 				{
 					$rgbColor = imagecolorsforindex($img, imagecolorat($img, $x, $y));
 					$newColor = imagecolorallocatealpha ($img, $rgbColor['red'], $rgbColor['green'], $rgbColor['blue'], 126);
 					imagesetpixel ($img, $x, $y, $newColor);
 				}
-
-				/*
-				$rgbColor = imagecolorsforindex($img, imagecolorat($img, $x, $y));
-				if ($rgbColor['alpha'] < 100)
-				{
-					$newColor = imagecolorallocatealpha ($img, $rgbColor['red'], $rgbColor['green'], $rgbColor['blue'], $opacity);
-					imagesetpixel ($img, $x, $y, $newColor);
-				}
-				*/
 			}
 		}
 	}
@@ -536,31 +532,4 @@ class FileUpload
 		return true;
 	}
 }
-			/*
-			if( $params['filesize'] )
-			{
-				$fileSize = filesize($uploaded_file);
-				
-				$kill = false;
-				$size = $this->parseSizeParam($params['filesize']);
-
-				if($size[0] == '')
-				{
-					if($B != $size[1])
-					{
-						$kill = true;
-					}
-				}
-				else
-				{
-					eval('$kill = ('.$size[1].$size[0].$B.');');
-				}
-
-				if($kill)
-				{
-					@unlink($uploaded_file);
-					return false;
-				}
-			}
-			*/
 ?>
