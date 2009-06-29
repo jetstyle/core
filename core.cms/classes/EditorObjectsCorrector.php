@@ -11,7 +11,7 @@ class EditorObjectsCorrector
 {
 	protected $tpl = null;
 	protected $validTableClasses = array('w100_simple', 'w100_decorated', 'w100_decorated2');
-	
+
 	public function __construct()
 	{
 		$this->tpl = &Locator::get('tpl');
@@ -28,12 +28,12 @@ class EditorObjectsCorrector
 		$data = preg_replace_callback("/<blockquote>(.*?)?<\/blockquote>/si", array($this, "correctQuotes"), $data);
 		$data = preg_replace_callback("/<ins>(.*?)?<\/ins>/si", array($this, "correctMarks"), $data);
 		$data = preg_replace_callback("/<big>(.*?)?<\/big>/si", array($this, "correctNotes"), $data);
-		
+
 		$data = preg_replace_callback("/<img([^>]*?)class=\"flash\"([^>]*?)[\/]{0,1}>/si", array($this, "correctFlash"), $data);
-		
+
 		// rewrite regexp. look at flash regexp
-		$data = preg_replace_callback("/<img(.*?)?[\/]{0,1}>/si", array($this, "correctImages"), $data);
-		$data = preg_replace_callback("/<a(.*?)?>(.*?)?<\/a?>/si", array($this, "correctFiles"), $data);
+		$data = preg_replace_callback("/<img([^>]*?)?[\/]{0,1}>/si", array($this, "correctImages"), $data);
+		$data = preg_replace_callback("/<a([^>]*?)?>(.*?)?<\/a>/si", array($this, "correctFiles"), $data);
 
 		$data = preg_replace_callback("/<table[^>]*?class=\"([\w\s]+)\"[^>]*?>(.*?)?<\/table>/si", array($this, "correctTables"), $data);
 
@@ -44,7 +44,7 @@ class EditorObjectsCorrector
 	{
 		$r= array('text' => $matches[1]);
 		$this->tpl->setRef('*', $r);
-		
+
 		// @TODO remove HACK
 		try
 		{
@@ -52,7 +52,7 @@ class EditorObjectsCorrector
 		}
 		catch(FileNotFoundException $e)
 		{
-			return $this->tpl->parse('editor/quote.html');		
+			return $this->tpl->parse('editor/quote.html');
 		}
 	}
 
@@ -67,7 +67,7 @@ class EditorObjectsCorrector
 		}
 		catch(FileNotFoundException $e)
 		{
-			return $this->tpl->parse('editor/mark.html');		
+			return $this->tpl->parse('editor/mark.html');
 		}
 	}
 
@@ -83,16 +83,16 @@ class EditorObjectsCorrector
 		}
 		catch(FileNotFoundException $e)
 		{
-			return $this->tpl->parse('editor/note.html');		
+			return $this->tpl->parse('editor/note.html');
 		}
 	}
-	
+
 	protected function correctFlash($matches)
 	{
 		$result = $matches[0];
-		
+
 		preg_match_all('/(.*?)=(")(|.*?[^\\\])\\2/si', $matches[1]." ".$matches[2], $paramsMatches);
-		
+
 		if (is_array($paramsMatches[3]) && !empty($paramsMatches[3]))
 		{
 			$params = array();
@@ -108,11 +108,11 @@ class EditorObjectsCorrector
 				$flashParams = array();
 				$previousLetter = '';
 				$letter = '';
-				
+
 				for ($i = 0; $i < $length; $i++)
 				{
 					$letter = $params['id']{$i};
-					
+
 					if ($letter == ';')
 					{
 						if ($previousLetter == '\\')
@@ -130,15 +130,15 @@ class EditorObjectsCorrector
 					$flashParams[$part] .= $letter;
 					$previousLetter = $letter;
 				}
-								
+
 				if (count($flashParams) == 3)
 				{
 					$params['src'] = $flashParams[0];
 					$params['width'] = intval($flashParams[1]);
 					$params['height'] = intval($flashParams[2]);
-					
+
 					$this->tpl->setRef('*', $params);
-					
+
 					// @TODO remove HACK
 					try
 					{
@@ -146,19 +146,19 @@ class EditorObjectsCorrector
 					}
 					catch(FileNotFoundException $e)
 					{
-						// 
+						//
 					}
 				}
 			}
 		}
-		
+
 		return $result;
 	}
-	
+
 	protected function correctFiles($matches)
 	{
 		preg_match_all('/(.*?)=(")(|.*?[^\\\])\\2/si', $matches[1], $paramsMatches);
-		
+
 		if(is_array($paramsMatches[3]) && !empty($paramsMatches[3]))
 		{
 			$res = array();
@@ -174,7 +174,7 @@ class EditorObjectsCorrector
 				$res['ext'] = $res['fileparams'][1];
 				$res['title'] = $matches[2];
 				$this->tpl->setRef('*', $res);
-				
+
 				// @TODO remove HACK
 				try
 				{
@@ -182,7 +182,7 @@ class EditorObjectsCorrector
 				}
 				catch(FileNotFoundException $e)
 				{
-					return $this->tpl->parse('editor/file.html');		
+					return $this->tpl->parse('editor/file.html');
 				}
 			}
 			// link in new window
@@ -220,7 +220,7 @@ class EditorObjectsCorrector
 					}
 					catch(FileNotFoundException $e)
 					{
-						return $this->tpl->parse('editor/images.html:image_preview');		
+						return $this->tpl->parse('editor/images.html:image_preview');
 					}
 					break;
 
@@ -232,7 +232,7 @@ class EditorObjectsCorrector
 					}
 					catch(FileNotFoundException $e)
 					{
-						return $this->tpl->parse('editor/images.html:image_small');		
+						return $this->tpl->parse('editor/images.html:image_small');
 					}
 					break;
 
@@ -244,7 +244,7 @@ class EditorObjectsCorrector
 					}
 					catch(FileNotFoundException $e)
 					{
-						return $this->tpl->parse('editor/images.html:image_big');		
+						return $this->tpl->parse('editor/images.html:image_big');
 					}
 
 					break;
@@ -275,12 +275,12 @@ class EditorObjectsCorrector
 		$template = preg_replace('#\s#', '_', $template);
 		$template = preg_replace('#[^\w_]#', '', $template);
 		$template = trim($template);
-		
+
 		if ( !in_array($template, $this->validTableClasses))
 		{
 		    $template = $this->validTableClasses[0];
 		}
-		
+
 		$this->tpl->set('table', $this->table);
 		// @TODO remove HACK
 		try
@@ -289,7 +289,7 @@ class EditorObjectsCorrector
 		}
 		catch(FileNotFoundException $e)
 		{
-			return $this->tpl->parse('editor/tables/'.$template);		
+			return $this->tpl->parse('editor/tables/'.$template);
 		}
 	}
 
