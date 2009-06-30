@@ -1,6 +1,6 @@
 <?php
 
-class FormSimple
+class FormSimpleModel
 {
 	protected $tpl = null;
 	protected $db = null;
@@ -34,13 +34,6 @@ class FormSimple
 		$this->tpl = &Locator::get('tpl');
 		$this->db = &Locator::get('db');
 
-		if (is_array($this->config['has_one']))
-		{
-			foreach($this->config['has_one'] AS $value)
-			{
-				$config['fields'][] = $value['pk'];
-			}
-		}
 		$config['fields'][] = '_state';
 
 		if (!$this->config['fields_update'])
@@ -201,7 +194,6 @@ class FormSimple
 			}
 		}
 
-
 		if ( $this->item['id']>0 )
 		    $tpl->set( 'ajax_url', RequestInfo::href() );
 	}
@@ -214,34 +206,8 @@ class FormSimple
 
 	protected function initModel()
 	{
-        if (!$this->config['model'])
-        {
-            Finder::useModel('DBModel');
-        	$this->model = new DBModel();
-        	$this->model->setTable($this->getTableName());
-            $this->model->setFields($this->config['fields']);
-        }
-        else
-        {
-            Finder::useModel('DBModel');
-        	$this->model = DBModel::factory($this->config['model']);
-            $this->config['table'] = $this->model->getTableName();
-            $this->config['fields'] = $this->model->getTableFields();
-        }
-	}
-
-	public function getTableName()
-	{
-		if (!$this->config['table'])
-		{
-			Finder::useClass('Inflector');
-			$pathParts = explode('/', $this->config['module_path']);
-			array_pop($pathParts);
-			$pathParts = array_map(array(Inflector, 'underscore'), $pathParts);
-			$this->config['table'] = strtolower(implode('_', $pathParts));
-		}
-
-		return $this->config['table'];
+        Finder::useModel('DBModel');
+        $this->model = DBModel::factory($this->config['model']);
 	}
 
 	public function load()
@@ -250,9 +216,10 @@ class FormSimple
 		{
 			if($this->id)
 			{
-                //echo '<pre>';
-                //print_r($this->model);
-                //echo '</pre>';die;
+                foreach($this->model->getForeignFields() as $field => $conf)
+                {
+                    $this->model->addField($conf['pk']);
+                }
 				$this->model->loadOne($this->model->quoteField($this->idField).'='.$this->id);
 				$this->item = $this->model->getData();
 				if (!$this->item[$this->idField])
@@ -316,82 +283,21 @@ class FormSimple
 
 	protected function handleForeignFields()
 	{
-		if (!isset($this->config['has_one']) || !is_array($this->config['has_one']))
-		{
-            if ($this->model && $fields = $this->model->getForeignFields())
-            {
-                foreach($fields as $field => $conf)
-                {
-                    $conf['name'] = $conf['className'];
-                    $this->config['has_one'][] = $conf;
-                }
-            }
-            else
-            {
-                return;
-            }
-		}
-
-		foreach($this->config['has_one'] AS $key => $value)
-		{
-			$value['fk']  = $value['fk'] ? $value['fk'] : "id";
-
-			// пытаемся найти модель
-			try
+		foreach($this->model->getForeignFields() as $field => $conf)
+        {
+            $this->model->addField($conf['pk']);
+            $foreignModel = DBModel::factory($conf['className'])->load();
+            $data = array();
+			foreach($foreignModel AS $r)
 			{
-				$model = DBModel::factory($value['name']);
-			}
-			catch(Exception $e)
-			{
-				//
+				$data[$r[$conf['fk']]] = $r['title'];
 			}
 
-			if ($model)
-			{
-				$model->setFields(array($value['fk'], 'title'));
-				$model->setOrder(array("title" => "ASC"));
-				if ($value['where'])
-				{
-					$model->where = ($model->where ? $model->where." AND " : "").$value['where'];
-				}
-				$model->load();
-
-				$data = array();
-				foreach($model AS $r)
-				{
-					$data[$r[$value['fk']]] = $r['title'];
-				}
-
-				$this->config['render']['select'][$value['pk']] = array(
-                    'values' => $data,
-                    'default' => $value['default'],
-                );
-			}
-			// думаем, что $value['name'] это имя таблицы
-			else
-			{
-				$result = $this->db->execute("
-					SELECT ".$value['fk'].", title
-					FROM ??".$value['name']."
-					WHERE _state = 0
-					ORDER BY ".($value['order'] ? $value['order'] : "title ASC")."
-				");
-
-				if ($result)
-				{
-					$data = array();
-					while ($r = $this->db->getRow($result))
-					{
-						$data[$r[$value['fk']]] = $r['title'];
-					}
-
-					$this->config['render']['select'][$value['pk']] = array(
-                        'values' => $data,
-                        'default' => $value['default'],
-                    );
-				}
-			}
-		}
+			$this->config['render']['select'][$conf['pk']] = array(
+                'values' => $data,
+                'default' => $conf['default'],
+            );
+        }
 	}
 
 	public function delete()
@@ -420,7 +326,7 @@ class FormSimple
 	{
 		if (empty($this->postData))
 		{
-			foreach ($this->config['fields_update'] AS $fieldName)
+			foreach ($this->model->getAllFields() as $fieldName)
 			{
 				if ($fieldName !== $this->idField)
 				{

@@ -174,12 +174,24 @@ class ListSimple
 	{
 		if (!$this->model)
 		{
-			Finder::useModel('DBModel');
-			$this->model = new DBModel();
-			$this->model->setTable($this->getTableName());
-			$this->model->setFields($this->config['fields']);
-			$this->model->where = ( $_GET['_show_trash'] ? '{_state}>=0' : "{_state} <>2 " ) . ($this->config['where'] ? ' AND ' . $this->config['where'] : '') ;
-			$this->model->setOrder($this->config['order_by']);
+            Finder::useModel('DBModel');
+            if ($this->config['model'])
+			{
+                $this->model = new DBModel();
+                $this->model->setTable($this->getTableName());
+                $this->model->setFields($this->config['fields']);
+                $this->model->where = ( $_GET['_show_trash'] ? '{_state}>=0' : "{_state} <>2 " ) . ($this->config['where'] ? ' AND ' . $this->config['where'] : '') ;
+                $this->model->setOrder($this->config['order_by']);
+            }
+            else
+            {
+                $this->model = DBModel::factory($this->config['model']);
+                $this->config['table'] = $this->model->getTableName();
+                $this->config['fields'] = $this->model->getTableFields();
+                $this->model->where .= $_GET['_show_trash'] ? '{_state}>=0' : "{_state} <>2 ";
+                $this->config['where'] = $this->model->where;
+                $this->config['order_by'] = $this->model->getOrderSql();
+            }
 		}
 
 		return $this->model;

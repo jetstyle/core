@@ -33,32 +33,32 @@ class ListDrugs extends ListSimple
 
  	    $db = &Locator::get('db');
  		$destItem = $db->query(
- 			"SELECT _order FROM ??".$this->config->table_name." ORDER BY _order LIMIT 1 OFFSET ".$destIndex
+ 			"SELECT _order FROM ??".$this->config['table']." ORDER BY _order LIMIT 1 OFFSET ".$destIndex
  		);
  		if (!$destItem[0]['_order']) {
         	$destItem = $db->query(
-	 			"SELECT _order FROM ??".$this->config->table_name." ORDER BY _order DESC LIMIT 1"
+	 			"SELECT _order FROM ??".$this->config['table']." ORDER BY _order DESC LIMIT 1"
 	 		);
  		}
  		$destOrder = $destItem[0]['_order'];
  		$sourceItem = $db->queryOne(
- 			"SELECT _order FROM ??".$this->config->table_name." WHERE id = ".$itemId
+ 			"SELECT _order FROM ??".$this->config['table']." WHERE id = ".$itemId
  		);
  		$sourceOrder = $sourceItem['_order'];
  		if ($sourceOrder > $destOrder)
         	$db->execute("
-        		UPDATE ??".$this->config->table_name."
+        		UPDATE ??".$this->config['table']."
         		SET _order = _order + 1
         		WHERE _order < ".$sourceOrder." AND _order >= ".$destOrder
         	);
  		else
  			$db->execute("
-        		UPDATE ??".$this->config->table_name."
+        		UPDATE ??".$this->config['table']."
         		SET _order = _order - 1
         		WHERE _order > ".$sourceOrder." AND _order <= ".$destOrder
         	);
         $db->execute("
-        	UPDATE ??".$this->config->table_name."
+        	UPDATE ??".$this->config['table']."
         	SET _order = ".$destOrder."
         	WHERE id = ".$itemId
         );
@@ -139,7 +139,7 @@ class ListDrugs extends ListSimple
 		$items = implode(',',$items);
     	$items = $db->query("
     		SELECT id, _state
-    		FROM ??".$this->config->table_name."
+    		FROM ??".$this->config['table']."
     		WHERE id IN (".$items.")"
     	);
     	return $items;

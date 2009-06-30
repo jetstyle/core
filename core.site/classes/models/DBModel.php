@@ -412,10 +412,32 @@ class DBModel extends Model implements IteratorAggregate, ArrayAccess, Countable
 		}
 	}
 
+    public function getOrderSql()
+	{
+        return $this->buildOrderBy($this->order);
+	}
+
 	public function getTableFields()
 	{
 		return $this->tableFields;
 	}
+
+    public function getForeignFields()
+	{
+		return $this->foreignFields;
+	}
+
+    public function getAllFields()
+    {
+        $fields = $this->getTableFields();
+        $foreignFields = $this->getForeignFields();
+
+        foreach ($foreignFields as $name => $conf)
+        {
+            $fields[] = $conf['pk'];
+        }
+        return $fields;
+    }
 
 	/**
 	 * Return table name with alias
