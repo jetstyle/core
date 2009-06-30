@@ -289,7 +289,7 @@ function tree_component () {
 						str += 'hidden="hidden"';
 				}
 				else if (data.hide_buttons && data.hide_buttons.addChild) str += 'hidden="hidden"';
-					
+
 				str += '/>';
 
 				str += '<img title="Добавить рядом" class="tree-brother-add" src="'+ this.images_path +'add.png" width="15" height="13" ';
@@ -476,14 +476,14 @@ function tree_component () {
 					}
 				})
 
-				$('#treeBox li').livequery('mouseover',	function(){
+				$('#treeBox li').live('mouseover',	function(){
 					$(this).find('>img[hidden!=hidden]').show();
 		           	$(this).parent().siblings('img[hidden!=hidden]').hide();
 		           	return false;
-				}).livequery('mouseout', function(){
+				}).live('mouseout', function(){
 		           	$(this).find('>img[hidden!=hidden]').hide();
 				});
-				$('#treeBox li > a').livequery('mouseover', function(){
+				$('#treeBox li > a').live('mouseover', function(){
 					$(this).siblings('img[hidden!=hidden]').show();
 				});
 
