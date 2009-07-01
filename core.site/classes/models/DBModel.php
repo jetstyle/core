@@ -429,9 +429,13 @@ class DBModel extends Model implements IteratorAggregate, ArrayAccess, Countable
 
     public function getAllFields()
     {
-        $fields = $this->getTableFields();
-        $foreignFields = $this->getForeignFields();
+        $fields = array();
+        foreach ($this->getTableFields() as $name => $config)
+        {
+            $fields[] = $name;
+        }
 
+        $foreignFields = $this->getForeignFields();
         foreach ($foreignFields as $name => $conf)
         {
             $fields[] = $conf['pk'];
@@ -1733,6 +1737,30 @@ class DBModel extends Model implements IteratorAggregate, ArrayAccess, Countable
 		$this->usePrefixedTableAsAlias = false;
 
 		return $this->db->query($sql);
+	}
+
+    public function deleteToTrash($id)
+	{
+        $where = '{id} = '.$id;
+		$this->loadOne($where);
+        if ($this['_state'] <= 1 )
+		{
+            $row = array('_state' => 2);
+			$this->update($row, $where);
+            return 1;
+		}
+		else
+		{
+			$this->delete($where);
+            return 2;
+		}
+	}
+
+    public function restoreFromTrash($id)
+	{
+        $row = array('_state' => 0);
+		$where = '{id} = '.$id;
+        $this->update($row, $where);
 	}
 
 	public function clean($truncate=True)

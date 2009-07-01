@@ -83,11 +83,11 @@ class ListDrugs extends ListSimple
       		$db->execute("UPDATE ??".$this->config->table_name." SET _state = _state + 1  WHERE id IN (".implode(',',$updateItems).")");
       	Controller::redirect(RequestInfo::hrefChange('',array('delete_list'=>'', 'items_list'=>'')));*/
         Finder::useClass($this->config->formConfig->class_name);
-        $config = $this->config->formConfig;
+        $config = $this->config['formConfig'];
         $items = explode(',', $_POST['delete_list']);
         foreach ($items as $id)
         {
-            $form = new $config->class_name($config);
+            $form = new $config['class_name']($config);
             $form->setId($id);
             $form->load();
             $form->delete();
@@ -96,12 +96,12 @@ class ListDrugs extends ListSimple
  	}
  	if ($_POST['restore_list'])
  	{
- 		Finder::useClass($this->config->formConfig->class_name);
-        $config = $this->config->formConfig;
+ 		Finder::useClass($this->config['formConfig']['class_name']);
+        $config = $this->config['formConfig'];
         $items = explode(',', $_POST['restore_list']);
         foreach ($items as $id)
         {
-            $form = new $config->class_name($config);
+            $form = new $config['class_name']($config);
             $form->setId($id);
             $form->load();
             $form->restore();
@@ -126,8 +126,8 @@ class ListDrugs extends ListSimple
   	$tpl->set('per_page', $this->perPage);
     $tpl->set('group_delete_url', RequestInfo::hrefChange('',array('delete_list'=>'1')));
     $tpl->set('group_restore_url', RequestInfo::hrefChange('',array('restore_list'=>'1')));
-    $tpl->set('group_operations', $this->config->group_operations);
-    parent::Handle();
+    $tpl->set('group_operations', $this->config['group_operations']);
+    parent::handle();
  }
 
 	function loadItems($items) {

@@ -302,23 +302,12 @@ class FormSimpleModel
 
 	public function delete()
 	{
-		if ($this->item['_state'] <= 1 )
-		{
-			$this->updateData(array('_state' => 2));
-			return 1;
-		}
-		// удаляем насовсем
-		else
-		{
-			$this->model->delete('{'.$this->idField.'}='.$this->id);
-			RequestInfo::free($this->idGetVar);
-			return 2;
-		}
+		return $this->model->deleteToTrash($this->id);
 	}
 
 	public function restore()
 	{
-		$this->updateData(array('_state' => 0));
+		$this->model->restoreFromTrash($this->id);
 		return true;
 	}
 

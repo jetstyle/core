@@ -175,7 +175,7 @@ class ListSimple
 		if (!$this->model)
 		{
             Finder::useModel('DBModel');
-            if ($this->config['model'])
+            if (!$this->config['model'])
 			{
                 $this->model = new DBModel();
                 $this->model->setTable($this->getTableName());
