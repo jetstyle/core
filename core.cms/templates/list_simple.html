@@ -56,7 +56,11 @@
 
 	</div>
 	{{__select}}
-	{{__filter}}
+    {{?__filter}}
+        <form action="" method="get" class="select-topic-">
+            {{__filter}}
+        </form>
+    {{/?}}
 	{{__form}}
 	{{__arrows}}
 	<img class="block" src="{{images}}z.gif" width="1" height="10" align="top" alt="" />

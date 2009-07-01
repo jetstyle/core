@@ -8,7 +8,9 @@ class ListSimple
 	protected $items;
 	protected $pager;
 
-	private $model;
+    private $filtersObjects = null;
+
+	private $model = null;
 
 	protected $loaded = false; //ãğóçèëè èëè íåò äàííûå?
 
@@ -51,8 +53,8 @@ class ListSimple
 			$this->frameSize = $this->config['frameSize'];
 		}
 
-		$this->config['fields'][] = '_order';
-		$this->config['fields'][] = '_state';
+		//$this->config['fields'][] = '_order';
+		//$this->config['fields'][] = '_state';
 
 		$this->storeTo = "list_".$config['module_name'];
 		$this->id = intval(RequestInfo::get($this->idGetVar));
@@ -86,6 +88,8 @@ class ListSimple
         Locator::get('tpl')->set('module_name', $this->config['module_name']);
 
 		$this->renderPager();
+
+        $this->renderFilters();
 	}
 
 	public function setStoreTo($value)
@@ -148,6 +152,11 @@ class ListSimple
 		return $this->tpl->parse( $this->template);
 	}
 
+    public function getPrefix()
+    {
+        return $this->prefix;
+    }
+
 	protected function renderTrash()
 	{
 		//render trash switcher
@@ -170,33 +179,94 @@ class ListSimple
 		}
 	}
 
+    protected function renderFilters()
+    {
+        $html = '';
+        $filters = $this->getFiltersObjects();
+        foreach ($filters AS $filter)
+        {
+            $html .= $filter->getHtml();
+        }
+
+        $this->tpl->set('__filter', $html);
+    }
+
+    protected function renderPager()
+	{
+		if ($this->pager)
+		{
+			$this->tpl->set('pager', $this->pager->getPages());
+			$this->tpl->parse('blocks/pager.html', '__arrows');
+		}
+	}
+
 	protected function &getModel()
 	{
-		if (!$this->model)
+		if (null === $this->model)
 		{
-            Finder::useModel('DBModel');
-            if (!$this->config['model'])
-			{
-                $this->model = new DBModel();
-                $this->model->setTable($this->getTableName());
-                $this->model->setFields($this->config['fields']);
-                $this->model->where = ( $_GET['_show_trash'] ? '{_state}>=0' : "{_state} <>2 " ) . ($this->config['where'] ? ' AND ' . $this->config['where'] : '') ;
-                $this->model->setOrder($this->config['order_by']);
-            }
-            else
-            {
-                $this->model = DBModel::factory($this->config['model']);
-                $this->config['table'] = $this->model->getTableName();
-                $this->config['fields'] = $this->model->getTableFields();
-                $this->model->where .= $_GET['_show_trash'] ? '{_state}>=0' : "{_state} <>2 ";
-                $this->config['where'] = $this->model->where;
-                $this->config['order_by'] = $this->model->getOrderSql();
-            }
+            $this->model = $this->constructModel();
 		}
 
 		return $this->model;
 	}
 
+    protected function constructModel()
+    {
+        Finder::useModel('DBModel');
+        $model = DBModel::factory($this->config['model']);
+        $model->addFields(array('_order', '_state'));
+
+        $model->where .= $_GET['_show_trash'] ? '{_state}>=0' : "{_state} <>2 ";
+
+        $this->applyFilters($model);
+
+        return $model;
+    }
+
+    protected function applyFilters(&$model)
+    {
+        $filters = $this->getFiltersObjects();
+        foreach ($filters AS $filter)
+        {
+            $filter->apply($model);
+        }
+    }
+
+    protected function getFiltersObjects()
+    {
+        if (null === $this->filtersObjects)
+		{
+            $this->filtersObjects = $this->constructFiltersObjects();
+		}
+
+		return $this->filtersObjects;
+    }
+
+    protected function constructFiltersObjects()
+    {
+        $filters = array();
+
+        if (is_array($this->config['filters']))
+        {
+            foreach ($this->config['filters'] AS $filter)
+            {
+                $className = 'List'.ucfirst($filter['type']).'Filter';
+                Finder::useClass($className);
+                $filterObj = new $className($filter, $this);
+
+                if (!in_array('ListFilter', class_parents($filterObj)))
+                {
+                    throw new JSException("Class \"".get_class($filterObj)."\" must extends from ListFilter");
+                }
+
+                $filters[] = $filterObj;
+            }
+        }
+
+        return $filters;
+    }
+
+    /*
 	protected function getTableName()
 	{
 		if (!$this->config['table'])
@@ -210,6 +280,8 @@ class ListSimple
 
 		return $this->config['table'];
 	}
+     *
+     */
 
 	/**
 	 * Ìåíÿåì ıëåìåíòû ìåñòàìè
@@ -251,15 +323,6 @@ class ListSimple
 		$this->pager->setup(intval(RequestInfo::get($this->pageVar)), $total, $this->perPage, $this->frameSize);
 	}
 
-	protected function renderPager()
-	{
-		if ($this->pager)
-		{
-			$this->tpl->set('pager', $this->pager->getPages());
-			$this->tpl->parse('blocks/pager.html', '__arrows');
-		}
-	}
-
 	public function getAllItems($where = '')
 	{
     	$model = &$this->getModel();
@@ -268,5 +331,4 @@ class ListSimple
 		return $model->getArray();
 	}
 }
-
 ?>
