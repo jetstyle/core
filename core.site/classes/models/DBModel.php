@@ -1746,7 +1746,7 @@ class DBModel extends Model implements IteratorAggregate, ArrayAccess, Countable
     public function deleteToTrash($id)
 	{
         $where = '{id} = '.$id;
-		$this->loadOne($where);
+		$this->setWhere($where)->loadOne();
         if ($this['_state'] <= 1 )
 		{
             $row = array('_state' => 2);

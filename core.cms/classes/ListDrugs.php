@@ -69,42 +69,19 @@ class ListDrugs extends ListSimple
  	}
  	if ($_POST['delete_list'])
  	{
- 		/*$db = &Locator::get('db');
-        $items = $this->loadItems($_GET['items_list']);
-        $deleteItems = $updateItems = array();
-	    foreach ($items as $i=>$item)
-	    	if ($item['_state'] == 2)
-            	$deleteItems[] = $item['id'];
-	    	else
-                $updateItems[] = $item['id'];
-      	if (!empty($deleteItems))
-      		$db->execute("DELETE FROM ??".$this->config->table_name." WHERE id IN (".implode(',',$deleteItems).")");
-      	if (!empty($updateItems))
-      		$db->execute("UPDATE ??".$this->config->table_name." SET _state = _state + 1  WHERE id IN (".implode(',',$updateItems).")");
-      	Controller::redirect(RequestInfo::hrefChange('',array('delete_list'=>'', 'items_list'=>'')));*/
-        Finder::useClass($this->config->formConfig->class_name);
-        $config = $this->config['formConfig'];
         $items = explode(',', $_POST['delete_list']);
         foreach ($items as $id)
         {
-            $form = new $config['class_name']($config);
-            $form->setId($id);
-            $form->load();
-            $form->delete();
+            $this->getModel()->deleteToTrash(intval($id));
         }
         die('1');
  	}
  	if ($_POST['restore_list'])
  	{
- 		Finder::useClass($this->config['formConfig']['class_name']);
-        $config = $this->config['formConfig'];
         $items = explode(',', $_POST['restore_list']);
         foreach ($items as $id)
         {
-            $form = new $config['class_name']($config);
-            $form->setId($id);
-            $form->load();
-            $form->restore();
+            $this->getModel()->restoreFromTrash(intval($id));
         }
         die('1');
  	}
