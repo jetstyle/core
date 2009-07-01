@@ -96,7 +96,7 @@ class FileManager
 			$keyParts = explode('/', $key);
 			if (count($keyParts) == 2)
 			{
-				return $this->configs[$conf][$keyParts[0]]['previews'][$keyParts[1]];
+				return $this->configs[$conf][$keyParts[0]]['variants'][$keyParts[1]];
 			}
 			else
 			{
@@ -109,50 +109,31 @@ class FileManager
 		}
 	}
 
-	private function getPathsForKey($key)
-	{
-		if (!$this->keys2paths[$key])
-		{
-			$keyParts = explode('/', $key);
-			$moduleName = array_shift($keyParts);
-
-			$path = Config::get('project_dir').'cms/modules/'.$moduleName.'/';
-
-			if (count($keyParts))
-			{
-				$path .= 'conf/'.implode('/', $keyParts).'/';
-			}
-
-			$path .= 'files.yml';
-			$this->keys2paths[$key] = $path;
-		}
-
-		return $this->keys2paths[$key];
-	}
-
 	private function loadConfig($conf)
 	{
-		$path = $this->getPathsForKey($conf);
         Finder::useClass('ModuleConstructor');
-        //$moduleConf = ModuleConstructor::factory($conf)->getConfig();
-        if ($moduleConf['files'])
-        {
-            //$this->configs[$conf] = $moduleConf['files'];
-        }
-        else
-        {
-            $this->configs[$conf] = array();
-        }
+        $moduleConf = ModuleConstructor::factory($conf)->getConfig();
 
-		if (!empty($this->configs[$conf]))
-		{
-			foreach ($this->configs[$conf] AS $key => &$v)
+        $filesConf = array();
+
+        if (is_array($moduleConf['files']))
+        {
+            $filesConf = $moduleConf['files'];
+            foreach ($moduleConf['files'] AS $key => $v)
 			{
-				if (is_array($v['previews']))
+                if (is_numeric($key))
+                {
+                    $key = $v;
+                    $v = array();
+                }
+
+                $filesConf[$key] = $v;
+
+                if (is_array($v) && is_array($v['variants']))
 				{
-					foreach ($v['previews'] AS $subKey => $subConf)
+					foreach ($v['variants'] AS $subKey => $subConf)
 					{
-						$v['previews'][$subKey] = array(
+						$filesConf[$key]['variants'][$subKey] = array(
 							'actions' => $subConf,
 							'key' => $key,
 							'subkey' => $subKey,
@@ -161,19 +142,20 @@ class FileManager
 
 						if (is_array($subConf))
 						{
-							$v['previews'][$subKey]['actions_hash'] = md5(serialize($subConf));
+							$filesConf[$key]['variants'][$subKey]['actions_hash'] = md5(serialize($subConf));
 						}
 					}
 				}
 
-				$v['key'] = $key;
-				$v['conf'] = $conf;
+				$filesConf[$key]['key'] = $key;
+				$filesConf[$key]['conf'] = $conf;
 				if (is_array($v['actions']))
 				{
-					$v['actions_hash'] = md5(serialize($v['actions']));
+					$filesConf[$key]['actions_hash'] = md5(serialize($v['actions']));
 				}
 			}
-		}
+        }
+        $this->configs[$conf] = $filesConf;
 	}
 }
 ?>

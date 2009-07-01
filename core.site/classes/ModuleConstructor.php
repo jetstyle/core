@@ -12,11 +12,6 @@ class ModuleConstructor
     private $children;
 
     public function __construct($modulePath, $config = null) {
-        /*if( !Locator::get('principal')->security('cmsModules', $modulePath) )
-		{
-			return Controller::deny();
-		}*/
-
         $this->modulePath = $modulePath;
         $this->modulePathParts = explode('/', $modulePath);
         $this->moduleName = $this->modulePathParts[0];

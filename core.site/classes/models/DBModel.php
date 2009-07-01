@@ -430,15 +430,18 @@ class DBModel extends Model implements IteratorAggregate, ArrayAccess, Countable
     public function getAllFields()
     {
         $fields = array();
-        foreach ($this->getTableFields() as $name => $config)
+        foreach ($this->getTableFields() AS $name => $config)
         {
-            $fields[] = $name;
+            $fields[$name] = $name;
         }
 
         $foreignFields = $this->getForeignFields();
-        foreach ($foreignFields as $name => $conf)
+        foreach ($foreignFields AS $name => $conf)
         {
-            $fields[] = $conf['pk'];
+            if ($conf['pk'])
+            {
+                $fields[$conf['pk']] = $conf['pk'];
+            }
         }
         return $fields;
     }
@@ -878,13 +881,13 @@ class DBModel extends Model implements IteratorAggregate, ArrayAccess, Countable
 				$fieldConfig = $params;
 				$fieldConfig['type'] = 'file';
 				$fieldConfig['conf'] = $configKey.':'.$key;
-
+                
 				$this->addField($key, $fieldConfig);
 
 				// subconfigs
-				if (is_array($conf['previews']))
+				if (is_array($conf['variants']))
 				{
-					foreach ($conf['previews'] AS $subKey => $subConf)
+					foreach ($conf['variants'] AS $subKey => $subConf)
 					{
 						$fieldConfig = $params;
 						$fieldConfig['type'] = 'file';
@@ -926,6 +929,10 @@ class DBModel extends Model implements IteratorAggregate, ArrayAccess, Countable
 
 	public function addField($fieldName, $config = NULL)
 	{
+        if (!$fieldName)
+        {
+            return;
+        }
 
 		if (NULL === $config)
 		{
@@ -1097,8 +1104,8 @@ class DBModel extends Model implements IteratorAggregate, ArrayAccess, Countable
 
 
 	public function &load($where=NULL, $limit=NULL, $offset=NULL)
-	{
-		if (!empty($this->sqlParts))
+	{        
+        if (!empty($this->sqlParts))
 		{
 			$this->cleanUp();
 		}
@@ -1505,10 +1512,7 @@ class DBModel extends Model implements IteratorAggregate, ArrayAccess, Countable
 		$this->sqlParts['group'] = $this->buildGroupBy($this->group);
 		$this->sqlParts['order'] = $this->buildOrderBy($this->order);
 		$this->sqlParts['limit'] = $this->buildLimit($limit, $offset);
-
 		$this->sqlParts['fields'] .= $joinFields;
-
-		//		var_dump($this->sqlParts);
 
 		return $this->sqlParts;
 	}
@@ -1820,7 +1824,12 @@ class DBModel extends Model implements IteratorAggregate, ArrayAccess, Countable
 	{
 		$set = array();
 		foreach ($data AS $k=>$v)
-			$set[] = $this->quoteField($k) . '='. $this->quoteValue($v);
+        {
+			if ($k)
+            {
+                $set[] = $this->quoteField($k) . '='. $this->quoteValue($v);
+            }
+        }
 		return implode(',', $set);
 	}
 

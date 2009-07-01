@@ -43,12 +43,14 @@ class DoController extends Controller
 
 		Finder::useClass("ModuleConstructor");
         $modulePath = $config['module'].( $params ? '/'.implode('/', $params) : '' );
-		$moduleConstructor = ModuleConstructor::factory($modulePath);
-        /*echo '<pre>';
-        print_r($moduleConstructor);
-        echo '</pre>';
-        die();*/
 
+        if ((!defined('COMMAND_LINE') || !COMMAND_LINE) && !Locator::get('principal')->security('cmsModules', $modulePath))
+		{
+			return Controller::deny();
+		}
+
+		$moduleConstructor = ModuleConstructor::factory($modulePath);
+        
         Locator::get('tpl')->set('module_title', $moduleConstructor->getTitle());
 		Locator::get('tpl')->set('module_body', $moduleConstructor->getHtml());
 

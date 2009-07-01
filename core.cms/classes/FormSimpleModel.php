@@ -216,10 +216,14 @@ class FormSimpleModel
 		{
 			if($this->id)
 			{
-                foreach($this->model->getForeignFields() as $field => $conf)
+                foreach($this->model->getForeignFields() AS $field => $conf)
                 {
-                    $this->model->addField($conf['pk']);
+                    if ($conf['type'] == 'has_one' && $conf['pk'])
+                    {
+                        $this->model->addField($conf['pk']);
+                    }
                 }
+                
 				$this->model->loadOne($this->model->quoteField($this->idField).'='.$this->id);
 				$this->item = $this->model->getData();
 				if (!$this->item[$this->idField])
@@ -285,18 +289,21 @@ class FormSimpleModel
 	{
 		foreach($this->model->getForeignFields() as $field => $conf)
         {
-            $this->model->addField($conf['pk']);
-            $foreignModel = DBModel::factory($conf['className'])->load();
-            $data = array();
-			foreach($foreignModel AS $r)
-			{
-				$data[$r[$conf['fk']]] = $r['title'];
-			}
+            if (is_array($conf) && $conf['type'] == 'has_one')
+            {
+                $this->model->addField($conf['pk']);
+                $foreignModel = DBModel::factory($conf['className'])->load();
+                $data = array();
+                foreach($foreignModel AS $r)
+                {
+                    $data[$r[$conf['fk']]] = $r['title'];
+                }
 
-			$this->config['render']['select'][$conf['pk']] = array(
-                'values' => $data,
-                'default' => $conf['default'],
-            );
+                $this->config['render']['select'][$conf['pk']] = array(
+                    'values' => $data,
+                    'default' => $conf['default'],
+                );
+            }
         }
 	}
 
