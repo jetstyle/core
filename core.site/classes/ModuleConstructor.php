@@ -12,6 +12,7 @@ class ModuleConstructor
     private $children;
 
     public function __construct($modulePath, $config = null) {
+        $modulePath = trim($modulePath, '/');
         $this->modulePath = $modulePath;
         $this->modulePathParts = explode('/', $modulePath);
         $this->moduleName = $this->modulePathParts[0];
@@ -156,12 +157,19 @@ class ModuleConstructor
         }
         else
         {
-            foreach ($this->children as $child)
-            {
-                $result[] = $child->getHtml();
-            }
             $tpl = &Locator::get('tpl');
-            $tpl->set('wrapped', $result);
+
+            if (is_array($this->children))
+            {
+                $result = array();
+                
+                foreach ($this->children as $child)
+                {
+                    $result[] = $child->getHtml();
+                }
+            
+                $tpl->set('wrapped', $result);
+            }
             return $tpl->parse($this->config['template'] ? $this->config['template'] : 'tree_form.html');
         }
     }
