@@ -223,7 +223,7 @@ class FormSimpleModel
                         $this->model->addField($conf['pk']);
                     }
                 }
-                
+
 				$this->model->loadOne($this->model->quoteField($this->idField).'='.$this->id);
 				$this->item = $this->model->getData();
 				if (!$this->item[$this->idField])
@@ -463,17 +463,15 @@ class FormSimpleModel
 
 			if ($this->config['supertag_check'] || $this->config['supertag_path_check'])
 			{
-				$sql = "SELECT id, _supertag
-				        FROM ??".$this->config['table']."
-						WHERE  _supertag=".$this->db->quote($this->postData['_supertag'])." AND id <> ".intval($this->id);
+				$where = "_supertag=".$this->db->quote($this->postData['_supertag'])." AND id <> ".intval($this->id);
 
 				if ($this->config['supertag_path_check'])
 				{
-					$item = $this->db->queryOne("SELECT _parent FROM ??".$this->config['table']." WHERE id = ".intval($this->id));
-					$sql .= ' AND _parent = '.intval($item['_parent']);
+                    $item = DBModel::factory($this->config['model'])->setFields(array('_parent'))->loadOne('{id} = '.intval($this->id));
+					$where .= ' AND _parent = '.intval($item['_parent']);
 				}
 
-				$rs = $this->db->queryOne($sql);
+				$rs = DBModel::factory($this->config['model'])->setFields(array('id', '_supertag'))->loadOne($where);
 				if ($rs['id'])
 				{
 					if (!$this->id)
