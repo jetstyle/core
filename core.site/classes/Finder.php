@@ -316,8 +316,19 @@ class Finder {
 		if (null !== $scope)
 		{
 			if (!is_array(self::$DIRS[$scope])) self::$DIRS[$scope] = array();
+
+            if (($pos = array_search($dir, self::$DIRS[$scope])) !== false)
+            {
+                unset(self::$DIRS[$scope][$pos]);
+            }
+
 			array_unshift(self::$DIRS[$scope], $dir);
 		}
+
+        if (($pos = array_search($dir, self::$DIRS['all'])) !== false)
+        {
+            unset(self::$DIRS['all'][$pos]);
+        }
 		array_unshift(self::$DIRS['all'], $dir);
 	}
 
@@ -326,8 +337,20 @@ class Finder {
 		if (null !== $scope)
 		{
 			if (!is_array(self::$DIRS[$scope])) self::$DIRS[$scope] = array();
+
+            if (($pos = array_search($dir, self::$DIRS[$scope])) !== false)
+            {
+                unset(self::$DIRS[$scope][$pos]);
+            }
+
 			array_push(self::$DIRS[$scope], $dir);
 		}
+
+        if (($pos = array_search($dir, self::$DIRS['all'])) !== false)
+        {
+            unset(self::$DIRS['all'][$pos]);
+        }
+
 		array_push(self::$DIRS['all'], $dir);
 	}
 }
