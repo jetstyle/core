@@ -71,7 +71,7 @@ class FormCalendar extends FormIframe
 			{
 				if($this->USE_TIME)
 				{
-					$this->item[$field.'_time'] = preg_replace($this->r_mysql, $this->r_time_out, $this->item[$field]);
+                    $this->item[$field.'_time'] = preg_replace($this->r_mysql, $this->r_time_out, $this->item[$field]);
 					$this->item[$field] = preg_replace($this->r_mysql, $this->r_date_out, $this->item[$field]);
 				}
 				else

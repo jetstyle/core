@@ -12,23 +12,22 @@ class ListSelectFilter extends ListFilter
     protected $neededConfigVars = array('model', 'field');
 
     protected $getVarValue = '';
+    protected $data = array();
 
     protected $template = 'list_select_filter.html';
 
     public function getHtml()
     {
-        $model = DBModel::factory($this->getConfig('model'));
-        $model->registerObserver('row', array($this, 'markSelected'));
-        $model->load();
+        $this->loadData();
 
         $tpl = Locator::get('tpl');
-        $tplData = array(
-            'get_var' => $this->getVar,
-            'data' => $model,
-            'title' => $this->getConfig('title')
-        );
-        $tpl->setRef('*', $tplData);
+        $tpl->setRef('*', $this->getTplData());
         return $tpl->parse($this->template);
+    }
+
+    public function getValue()
+    {
+        return $this->getVarValue;
     }
 
     public function apply($model)
@@ -41,10 +40,64 @@ class ListSelectFilter extends ListFilter
 
     public function markSelected(&$model, &$row)
     {
-        if ($row['id'] === $this->getVarValue)
+        if ($row['id'] == $this->getVarValue)
         {
             $row['selected'] = true;
         }
+    }
+
+    public function collectRows(&$model, &$row)
+    {
+        $this->data[] = $row;
+    }
+
+    protected function loadData()
+    {
+        $model = $this->getModel();
+        if ($model)
+        {
+            $model->load();
+        }
+    }
+
+    protected function getModel()
+    {
+        $model = DBModel::factory($this->getConfig('model'));
+        $model->registerObserver('row', array($this, 'markSelected'));
+        $model->registerObserver('row', array($this, 'collectRows'));
+
+        $this->applyDependencies($model);
+
+        return $model;
+    }
+
+    protected function applyDependencies(&$model)
+    {
+        $depends = $this->getConfig('depends');
+        if ($depends)
+        {
+            $filter = $this->getListObj()->getFilterObject($depends);
+
+            if (!$filter->getValue())
+            {
+                $model = null;
+            }
+            else
+            {
+                $filter->apply($model);
+            }
+        }
+    }
+
+    protected function getTplData()
+    {
+        $tplData = array(
+            'get_var' => $this->getVar,
+            'data' => $this->data,
+            'title' => $this->getConfig('title')
+        );
+        
+        return $tplData;
     }
 
     protected function init()

@@ -287,12 +287,16 @@ class FormSimpleModel
 
 	protected function handleForeignFields()
 	{
-		foreach($this->model->getForeignFields() as $field => $conf)
+		foreach($this->model->getForeignFields() AS $fieldName => $conf)
         {
             if (is_array($conf) && $conf['type'] == 'has_one')
             {
+                $foreignModel = clone $this->model->getForeignModel($fieldName);
+                
+                $conf = $this->model->getForeignFieldConf($fieldName);
                 $this->model->addField($conf['pk']);
-                $foreignModel = DBModel::factory($conf['className'])->load();
+
+                $foreignModel->load();
                 $data = array();
                 foreach($foreignModel AS $r)
                 {

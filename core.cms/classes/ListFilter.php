@@ -29,6 +29,7 @@ abstract class ListFilter
     }
 
     abstract public function getHtml();
+    abstract public function getValue();
     abstract public function apply($model);
 
     abstract protected function init();
