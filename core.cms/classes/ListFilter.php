@@ -4,19 +4,37 @@
  *
  * @author lunatic
  */
+Finder::useClass('Inflector');
+
 abstract class ListFilter
 {
-    static public $varCount = 0;
-
     protected $template;
 
     private $listObj = null;
     private $config;
+    private $model;
+    
+    static public function factory($config, $listObj = null)
+    {
+        $className = 'List'.Inflector::camelize($config['type']).'Filter';
+        Finder::useClass($className);
+        $filterObj = new $className($config, $listObj);
 
-    public function __construct($config, $listObj)
+        if (!in_array('ListFilter', class_parents($filterObj)))
+        {
+            throw new JSException("Class \"".get_class($filterObj)."\" must extends from ListFilter");
+        }
+
+        return $filterObj;
+    }
+
+    public function __construct($config, $listObj = null)
     {
         $this->config = $config;
-        $this->listObj = $listObj;
+        if ($listObj)
+        {
+            $this->listObj = $listObj;
+        }
         $this->checkConfig();
 
         $template = $this->getConfig('template');
@@ -28,11 +46,64 @@ abstract class ListFilter
         $this->init();
     }
 
-    abstract public function getHtml();
+    public function getHtml()
+    {
+        $this->loadData();
+
+        $tpl = Locator::get('tpl');
+        $tpl->setRef('*', $this->getTplData());
+        return $tpl->parse($this->template);
+    }
+
+    public function getByKey($key)
+    {
+
+    }
+
     abstract public function getValue();
     abstract public function apply($model);
 
     abstract protected function init();
+    abstract protected function getTplData();
+    abstract protected function constructModel();
+
+    protected function getModel()
+    {
+        if (null === $this->model)
+        {
+            $this->model = $this->constructModel();
+            $this->applyDependencies($this->model);
+        }
+
+        return $this->model;
+    }
+
+    protected function applyDependencies(&$model)
+    {
+        $depends = $this->getConfig('depends');
+        if ($depends)
+        {
+            $filter = $this->getListObj()->getFiltersObject($depends);
+
+            if (!$filter->getValue())
+            {
+                $model = null;
+            }
+            else
+            {
+                $filter->apply($model);
+            }
+        }
+    }
+
+    protected function loadData()
+    {
+        $model = $this->getModel();
+        if ($model)
+        {
+            $model->load();
+        }
+    }
 
     protected function getConfig($key = null)
     {
@@ -68,11 +139,6 @@ abstract class ListFilter
                 }
             }
         }
-    }
-
-    protected function getUniqueGetVar()
-    {
-        return $this->getListObj()->getPrefix().'_'.self::$varCount++;
     }
 }
 ?>

@@ -16,15 +16,6 @@ class ListSelectFilter extends ListFilter
 
     protected $template = 'list_select_filter.html';
 
-    public function getHtml()
-    {
-        $this->loadData();
-
-        $tpl = Locator::get('tpl');
-        $tpl->setRef('*', $this->getTplData());
-        return $tpl->parse($this->template);
-    }
-
     public function getValue()
     {
         return $this->getVarValue;
@@ -51,42 +42,13 @@ class ListSelectFilter extends ListFilter
         $this->data[] = $row;
     }
 
-    protected function loadData()
-    {
-        $model = $this->getModel();
-        if ($model)
-        {
-            $model->load();
-        }
-    }
-
-    protected function getModel()
+    protected function constructModel()
     {
         $model = DBModel::factory($this->getConfig('model'));
         $model->registerObserver('row', array($this, 'markSelected'));
         $model->registerObserver('row', array($this, 'collectRows'));
 
-        $this->applyDependencies($model);
-
         return $model;
-    }
-
-    protected function applyDependencies(&$model)
-    {
-        $depends = $this->getConfig('depends');
-        if ($depends)
-        {
-            $filter = $this->getListObj()->getFilterObject($depends);
-
-            if (!$filter->getValue())
-            {
-                $model = null;
-            }
-            else
-            {
-                $filter->apply($model);
-            }
-        }
     }
 
     protected function getTplData()

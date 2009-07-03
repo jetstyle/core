@@ -8,7 +8,7 @@ class ListSimple
 	protected $items;
 	protected $pager;
 
-    private $filtersObjects = array();
+    private $filtersObject = null;
 
 	private $model = null;
 
@@ -157,30 +157,22 @@ class ListSimple
         return $this->prefix;
     }
 
-
-    public function getFiltersObjects()
+    public function getFiltersObject($key = null)
     {
-        $filters = array();
-        if (is_array($this->config['filters']))
+        if (null === $this->filtersObject)
         {
-            foreach ($this->config['filters'] AS $key => $filter)
-            {
-                $filters[$key] = $this->getFilterObject($key);
-            }
-        }
-        return $filters;
-    }
-
-    public function getFilterObject($key)
-    {
-        if (!array_key_exists($key, $this->filtersObjects))
-        {
-            $this->filtersObjects[$key] = $this->constructFiltersObject($key);
+            $this->filtersObject = $this->constructFiltersObject();
         }
 
-        return $this->filtersObjects[$key];
+        if ($key)
+        {
+            return $this->filtersObject->getByKey($key);
+        }
+        else
+        {
+            return $this->filtersObject;
+        }
     }
-
 
 	protected function renderTrash()
 	{
@@ -206,13 +198,7 @@ class ListSimple
 
     protected function renderFilters()
     {
-        $html = '';
-        $filters = $this->getFiltersObjects();
-        foreach ($filters AS $filter)
-        {
-            $html .= $filter->getHtml();
-        }
-
+        $html = $this->getFiltersObject()->getHtml();
         $this->tpl->set('__filter', $html);
     }
 
@@ -250,37 +236,19 @@ class ListSimple
 
     protected function applyFilters(&$model)
     {
-        $filters = $this->getFiltersObjects();
-        foreach ($filters AS $filter)
-        {
-            $filter->apply($model);
-        }
+        $filter = $this->getFiltersObject();
+        $filter->apply($model);
     }
 
-    protected function constructFiltersObject($key)
+    protected function constructFiltersObject()
     {
-        Finder::useClass('Inflector');
-        
-        $config = $this->config['filters'][$key];
+        Finder::useClass('ListFilter');
+        $config = array(
+            'type' => 'wrapper',
+            'filters' => $this->config['filters'],
+        );
 
-        if (!is_array($config))
-        {
-            $config = array();
-        }
-
-        if (!$config['field'] && !is_numeric($key))
-        {
-            $config['field'] = $key;
-        }
-
-        $className = 'List'.Inflector::camelize($config['type']).'Filter';
-        Finder::useClass($className);
-        $filterObj = new $className($config, $this);
-
-        if (!in_array('ListFilter', class_parents($filterObj)))
-        {
-            throw new JSException("Class \"".get_class($filterObj)."\" must extends from ListFilter");
-        }
+        $filterObj = ListFilter::factory($config, $this);
 
         return $filterObj;
     }
