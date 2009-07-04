@@ -330,11 +330,12 @@ class FormSimpleModel
 			{
 				if ($fieldName !== $this->idField)
 				{
-					if (null === $_POST[$this->prefix.$fieldName])
+					if (null !== $_POST[$this->prefix.$fieldName])
 					{
-						$_POST[$this->prefix.$fieldName] = '';
+						//$_POST[$this->prefix.$fieldName] = '';
+                        $this->postData[$fieldName] = $_POST[$this->prefix.$fieldName];
 					}
-					$this->postData[$fieldName] = $_POST[$this->prefix.$fieldName];
+
 
 					if ($this->ajax_update)
 					    $this->postData[$fieldName] = iconv('UTF-8', 'CP1251', $this->postData[$fieldName]);

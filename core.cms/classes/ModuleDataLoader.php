@@ -5,7 +5,7 @@
  *
  */
 
-Finder::useClass('ModuleConfig');
+Finder::useClass('ModuleConstructor');
 class ModuleDataLoader {
 
 	protected $moduleName = null;
@@ -13,8 +13,8 @@ class ModuleDataLoader {
 
 	private $config = null;
 
-	protected $listPath = 'list.php';
-	protected $formPath = 'form.php';
+	protected $listPath = 'list';
+	protected $formPath = 'form`';
 
 	public function __construct($moduleName = null)
 	{
@@ -53,20 +53,20 @@ class ModuleDataLoader {
     	$itemForm->load();
     	$itemForm->delete();
 	}
-	
+
 	public function insert($parent)
-	{	
-			
+	{
+
 	}
-	
+
 	public function updateTitle($item, $title)
-	{	
+	{
 		$itemParts = explode('-', $item);
-		$typo = &Locator::get('typografica');		
+		$typo = &Locator::get('typografica');
 		$titlePre = $typo->correct($title, true);
-		
+
 		$itemForm = $this->getObject($this->formPath);
-		
+
 		$db = &Locator::get('db');
 		$db->execute("
 			UPDATE ??".$itemForm->getTableName()."
@@ -74,20 +74,15 @@ class ModuleDataLoader {
 			WHERE id = ".intval($itemParts[count($itemParts)-1])."
 		");
 	}
-	
+
 	public function getParentsForItem($itemId)
 	{
 		return array();
 	}
 
-	protected function getObject($configPath)
+	protected function getObject($path)
 	{
-    	$config = new ModuleConfig();
-		$listPath = Config::get('app_dir').$this->handlersType.'/'.$this->moduleName.'/'.$configPath;
-		$config->read($listPath);
-		$config->moduleName = $this->moduleName;
-		$className = $config->class_name;
-		return new $className($config);
+		return ModuleConstructor::factory($this->moduleName.'/'.$path)->getObj();
 	}
 
 }

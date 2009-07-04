@@ -432,7 +432,7 @@ class DBModel extends Model implements IteratorAggregate, ArrayAccess, Countable
         $fields = array();
         foreach ($this->getTableFields() AS $name => $config)
         {
-            $fields[$name] = $name;
+            $fields[] = $name;
         }
 
         $foreignFields = $this->getForeignFields();
@@ -440,7 +440,7 @@ class DBModel extends Model implements IteratorAggregate, ArrayAccess, Countable
         {
             if ($conf['pk'])
             {
-                $fields[$conf['pk']] = $conf['pk'];
+                $fields[] = $conf['pk'];
             }
         }
         return $fields;
@@ -881,7 +881,7 @@ class DBModel extends Model implements IteratorAggregate, ArrayAccess, Countable
 				$fieldConfig = $params;
 				$fieldConfig['type'] = 'file';
 				$fieldConfig['conf'] = $configKey.':'.$key;
-                
+
 				$this->addField($key, $fieldConfig);
 
 				// subconfigs
@@ -1104,7 +1104,7 @@ class DBModel extends Model implements IteratorAggregate, ArrayAccess, Countable
 
 
 	public function &load($where=NULL, $limit=NULL, $offset=NULL)
-	{        
+	{
         if (!empty($this->sqlParts))
 		{
 			$this->cleanUp();

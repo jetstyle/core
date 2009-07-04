@@ -162,12 +162,12 @@ class ModuleConstructor
             if (is_array($this->children))
             {
                 $result = array();
-                
+
                 foreach ($this->children as $child)
                 {
                     $result[] = $child->getHtml();
                 }
-            
+
                 $tpl->set('wrapped', $result);
             }
             return $tpl->parse($this->config['template'] ? $this->config['template'] : 'tree_form.html');
