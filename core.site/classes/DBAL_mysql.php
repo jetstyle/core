@@ -53,15 +53,15 @@ class DBAL_mysql
 		{
 			throw new DbException("Connect failed: Host=<b>" . Config::get('db_host') . "</b>, User=<b>" . Config::get('db_user') . "</b>");
 		}
-		
+
 		Config::free('db_password');
-		
+
 		if (!mysql_select_db(Config::get('db_name'), $this->dblink))
 		{
 			throw new DbException("Database \"" . Config::get('db_name') . "\" select error");
 		}
-		
-		if (Config::get('db_set_encoding')) 
+
+		if (Config::get('db_set_encoding'))
 		{
 			$this->query("SET NAMES " . Config::get('db_set_encoding'));
 		}
@@ -78,7 +78,7 @@ class DBAL_mysql
 			$ret = implode (",", $ret);
 			return $ret;
 		}
-		elseif (is_numeric($value))
+		elseif (is_numeric($value) && strlen($value) == strlen((int)$value))
 			return $value;
 		else
 			return "'".mysql_real_escape_string($value)."'";
@@ -91,15 +91,15 @@ class DBAL_mysql
 		if ($limit > 0)
 		{
 			if ($offset > 0)
-			{ 
+			{
 				$sql.= " LIMIT $offset, $limit";
 			}
 			else
-			{             
+			{
 				$sql.= " LIMIT $limit";
 			}
 		}
-		elseif ($offset > 0) 
+		elseif ($offset > 0)
 		{
 			$sql.= " LIMIT $offset, -1";
 		}
@@ -107,12 +107,12 @@ class DBAL_mysql
 		// 1. execute
 		if (!$result = mysql_query($sql, $this->dblink))
 			throw new DbException("Query failed: <div class=\"query\">" . $this->formatSql($sql) . "</div>");
-		
+
 		if (!is_resource($result))
 		{
 			$result = false;
 		}
-			
+
 		return $result;
 	}
 
@@ -133,7 +133,7 @@ class DBAL_mysql
 
 	public function getNumRows($handle)
 	{ return mysql_num_rows($handle); }
-	
+
 	protected function formatSql($sql)
 	{
 		return preg_replace('/((select|from|((left|right|inner)\s*?join)|where|order|group|having|limit))\s/i', '<br /><b>$1</b> ', $sql);
