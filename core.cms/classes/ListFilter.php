@@ -87,13 +87,18 @@ abstract class ListFilter
 
             if (!$filter->getValue())
             {
-                $model = null;
+                $this->disableFilter($model);
             }
             else
             {
                 $filter->apply($model);
             }
         }
+    }
+
+    protected function disableFilter(&$model)
+    {
+        $model = null;
     }
 
     protected function loadData()
