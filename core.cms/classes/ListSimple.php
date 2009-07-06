@@ -8,7 +8,7 @@ class ListSimple
 	protected $items;
 	protected $pager;
 
-    private $filtersObjects = null;
+    private $filtersObject = null;
 
 	private $model = null;
 
@@ -157,6 +157,23 @@ class ListSimple
         return $this->prefix;
     }
 
+    public function getFiltersObject($key = null)
+    {
+        if (null === $this->filtersObject)
+        {
+            $this->filtersObject = $this->constructFiltersObject();
+        }
+
+        if ($key)
+        {
+            return $this->filtersObject->getByKey($key);
+        }
+        else
+        {
+            return $this->filtersObject;
+        }
+    }
+
 	protected function renderTrash()
 	{
 		//render trash switcher
@@ -181,13 +198,7 @@ class ListSimple
 
     protected function renderFilters()
     {
-        $html = '';
-        $filters = $this->getFiltersObjects();
-        foreach ($filters AS $filter)
-        {
-            $html .= $filter->getHtml();
-        }
-
+        $html = $this->getFiltersObject()->getHtml();
         $this->tpl->set('__filter', $html);
     }
 
@@ -225,63 +236,22 @@ class ListSimple
 
     protected function applyFilters(&$model)
     {
-        $filters = $this->getFiltersObjects();
-        foreach ($filters AS $filter)
-        {
-            $filter->apply($model);
-        }
+        $filter = $this->getFiltersObject();
+        $filter->apply($model);
     }
 
-    protected function getFiltersObjects()
+    protected function constructFiltersObject()
     {
-        if (null === $this->filtersObjects)
-		{
-            $this->filtersObjects = $this->constructFiltersObjects();
-		}
+        Finder::useClass('ListFilter');
+        $config = array(
+            'type' => 'wrapper',
+            'filters' => $this->config['filters'],
+        );
 
-		return $this->filtersObjects;
+        $filterObj = ListFilter::factory($config, $this);
+
+        return $filterObj;
     }
-
-    protected function constructFiltersObjects()
-    {
-        $filters = array();
-
-        if (is_array($this->config['filters']))
-        {
-            foreach ($this->config['filters'] AS $filter)
-            {
-                $className = 'List'.ucfirst($filter['type']).'Filter';
-                Finder::useClass($className);
-                $filterObj = new $className($filter, $this);
-
-                if (!in_array('ListFilter', class_parents($filterObj)))
-                {
-                    throw new JSException("Class \"".get_class($filterObj)."\" must extends from ListFilter");
-                }
-
-                $filters[] = $filterObj;
-            }
-        }
-
-        return $filters;
-    }
-
-    /*
-	protected function getTableName()
-	{
-		if (!$this->config['table'])
-		{
-			Finder::useClass('Inflector');
-			$pathParts = explode('/', $this->config['module_path']);
-			array_pop($pathParts);
-			$pathParts = array_map(array(Inflector, 'underscore'), $pathParts);
-			$this->config['table'] = strtolower(implode('_', $pathParts));
-		}
-
-		return $this->config['table'];
-	}
-     *
-     */
 
 	/**
 	 * Меняем элементы местами
