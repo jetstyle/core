@@ -292,7 +292,7 @@ class FormSimpleModel
             if (is_array($conf) && $conf['type'] == 'has_one')
             {
                 $foreignModel = clone $this->model->getForeignModel($fieldName);
-                
+
                 $conf = $this->model->getForeignFieldConf($fieldName);
                 $this->model->addField($conf['pk']);
 
@@ -342,6 +342,10 @@ class FormSimpleModel
 					RequestInfo::free($this->prefix.$fieldName);
 				}
 			}
+            foreach ($this->config['render']['checkbox'] as $fieldName)
+            {
+                if (!$this->postData[$fieldName]) $this->postData[$fieldName] = 0;
+            }
 		}
 	}
 
