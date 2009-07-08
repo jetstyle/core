@@ -111,11 +111,10 @@ TreeControl.prototype = {
 	onclkCallback : function(NODE, TREE)
 	{
 		var id = NODE.getAttribute('id').split('-').reverse()[0];
-		var formConfig = $(NODE).metadata().form_config;
-		this.params.go_url = this.params.go_url.replace(/&?form_config=[^&]+/, '');
+        //delete full_id parameter from url
 		this.params.go_url = this.params.go_url.replace(/&?full_id=[^&]+/, '');
 		var url = this.params.go_url + 'id=' + id;
-		if (formConfig) url += '&form_config=' + formConfig + '&full_id=' + NODE.getAttribute('id');
+		if (NODE.getAttribute('id').split('-').length > 2) url += '&full_id=' + NODE.getAttribute('id');
 		window.location.assign( url );
 	},
 

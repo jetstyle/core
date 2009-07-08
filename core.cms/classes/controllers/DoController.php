@@ -49,12 +49,13 @@ class DoController extends Controller
 			return Controller::deny();
 		}
 
-		$moduleConstructor = ModuleConstructor::factory($modulePath);
-        
-        Locator::get('tpl')->set('module_title', $moduleConstructor->getTitle());
-		Locator::get('tpl')->set('module_body', $moduleConstructor->getHtml());
+		$this->moduleConstructor = ModuleConstructor::factory($modulePath);
 
-		$this->data['title_short'] = $moduleConstructor->getTitle();
+        Locator::get('tpl')->set('module_title', $this->moduleConstructor->getTitle());
+		Locator::get('tpl')->set('module_body', $this->moduleConstructor->getHtml());
+
+		$this->data['title_short'] = $this->moduleConstructor->getTitle();
+
 		$this->siteMap = 'module';
 	}
 

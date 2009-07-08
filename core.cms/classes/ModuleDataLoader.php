@@ -80,6 +80,11 @@ class ModuleDataLoader {
 		return array();
 	}
 
+    public function getFormConfig($nodeId)
+    {
+        return $this->moduleName.'/'.$this->formPath;
+    }
+
 	protected function getObject($path)
 	{
 		return ModuleConstructor::factory($this->moduleName.'/'.$path)->getObj();

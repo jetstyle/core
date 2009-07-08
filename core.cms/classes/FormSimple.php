@@ -46,6 +46,7 @@ class FormSimple
 		if (!$this->config['fields_update'])
 		{
 			$this->config['fields_update'] = $this->config['fields'];
+            var_dump($this->config['fields_update']);die;
 		}
 
 		if (!isset($this->config['supertag_check']) && !isset($this->config['supertag_path_check']))

@@ -11,6 +11,9 @@ class ModuleConstructor
     private $config;
     private $children;
 
+    private $childrenNumbered;
+    private $currentChild = 0;
+
     public function __construct($modulePath, $config = null) {
         $modulePath = trim($modulePath, '/');
         $this->modulePath = $modulePath;
@@ -163,9 +166,14 @@ class ModuleConstructor
             {
                 $result = array();
 
-                foreach ($this->children as $child)
+                while ($nextChild = $this->getNextChild())
                 {
-                    $result[] = $child->getHtml();
+                    /*$i++;
+                    echo '<pre>';
+                    var_dump($nextChild);
+                    echo '</pre>';
+                    if ($i==2) die;*/
+                    $result[] = $nextChild->getHtml();
                 }
 
                 $tpl->set('wrapped', $result);
@@ -174,10 +182,28 @@ class ModuleConstructor
         }
     }
 
-    public function getTitle() {
+    public function getTitle()
+    {
         $sql = "SELECT title FROM ??toolbar WHERE href=".Locator::get('db')->quote( $this->modulePath ) ;
 		$current = Locator::get('db')->queryOne($sql);
 		return $current['title'];
     }
+
+    public function replaceForm($formPath)
+    {
+        $this->children['form'] = ModuleConstructor::factory($formPath);
+    }
+
+    private function getNextChild()
+    {
+        if (!$this->childrenNumbered)
+        {
+            $this->childrenNumbered = array_keys($this->children);
+        }
+        $currentChild = $this->currentChild;
+        $this->currentChild++;
+        return $this->children[$this->childrenNumbered[$currentChild]];
+    }
+
 }
 ?>
