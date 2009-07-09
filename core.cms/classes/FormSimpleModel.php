@@ -79,7 +79,6 @@ class FormSimpleModel
 		//form in iframe thickbox
 		if ( $_GET["popup"] )
 		{
-
 			$iframe = array("css_buttons_class"=>"iframe-buttons-",
 					"height"=>( $_GET["height"]>0 ? ($_GET["height"]-80)."px" : "360px") );//thickbox default height(440) - buttons heoght
 			Locator::get("tpl")->set( "iframe", $iframe );
@@ -194,8 +193,10 @@ class FormSimpleModel
 			}
 		}
 
-		if ( $this->item['id']>0 )
+		if ( $this->item['id']>0 || RequestInfo::get('_new') )
+        {
 		    $tpl->set( 'ajax_url', RequestInfo::href() );
+        }
 	}
 
 	public function getHtml()

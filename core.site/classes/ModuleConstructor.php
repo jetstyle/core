@@ -20,7 +20,11 @@ class ModuleConstructor
         $this->modulePathParts = explode('/', $modulePath);
         $this->moduleName = $this->modulePathParts[0];
 
-        Finder::prependDir(Config::get('app_dir').$this->handlersType.'/'.$this->moduleName.'/', 'app');
+        if (Config::get('app_name') == 'app')
+            Finder::prependDir(Config::get('project_dir').'cms/', 'app');
+        else
+            Finder::prependDir(Config::get('app_dir').$this->handlersType.'/'.$this->moduleName.'/', 'app');
+
 
         if (!$config) {
             $ymlFile  = Finder::findScript($this->handlersType, $this->moduleName.'/config', 0, 1, 'yml') ;
@@ -168,11 +172,6 @@ class ModuleConstructor
 
                 while ($nextChild = $this->getNextChild())
                 {
-                    /*$i++;
-                    echo '<pre>';
-                    var_dump($nextChild);
-                    echo '</pre>';
-                    if ($i==2) die;*/
                     $result[] = $nextChild->getHtml();
                 }
 
