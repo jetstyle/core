@@ -16,35 +16,59 @@ if(Locator::get('principalCms')->security('cmsModules', $module))
 	$oce = Config::get('oce');
 	$id = (integer)$params['id'];
 
-	if( !isset($oce[$module]) )
-	{
-		Debug::trace("<span style='color: red; font-weight: bold;'>OCE: module not found, module=$module, id=$id, var=$var</span>");
-		return '';
-	}
+	//if( !isset($oce[$module]) )
+	//{
+	//	Debug::trace("<span style='color: red; font-weight: bold;'>OCE: module not found, module=$module, id=$id, var=$var</span>");
+	//	return '';
+	//}
 
 	if( !$id && !$params['add'] )
 	{
 		Debug::trace("<span style='color: red; font-weight: bold;'>OCE: id not found, module=$module, id=$id, var=$var</span>");
 	}
 
-	$tpl->set('_module', $module);
-	$tpl->set('_id', $id);
-    if ($params['add'])
+    //set link
+    $oceLink = $params['module'].'/form?';
+    if ($id)
     {
-        $oceLink = str_replace('id=::id::', '', $oce[$module]).'_new=1&';
+        $oceLink .= 'id='.$id;
+    }
+    else if($params['add'])
+    {
+        $oceLink .= '_new=1';
+    }
+
+    //set title
+    if (!$params['title'])
+    {
+        if ($params['add'])
+        {
+            $title = 'добавить';
+        }
+        else
+        {
+            $title = 'редактировать';
+        }
     }
     else
     {
-        $oceLink = str_replace('::id::', $id, $oce[$module]);
+        $title = $params['title'];
     }
-	$tpl->set('_href', (Config::exists('cms_url') ? Config::get('cms_url') : RequestInfo::$baseUrl."cms/").$oceLink.'hide_toolbar=1&popup=1' );
+
+	$tpl->set('_module', $module);
+	$tpl->set('_id', $id);
+	$tpl->set('_href', (Config::exists('cms_url') ? Config::get('cms_url') : RequestInfo::$baseUrl."cms/do/").$oceLink.'&hide_toolbar=1&popup=1');
 	$tpl->set('_width', $params['width'] ? $params['width'] : 800 );
 	$tpl->set('_height', $params['height'] ? $params['height'] : 600 );
-	$tpl->set('_title', $params['title'] ? $params['title'] : 'редактировать' );
+	$tpl->set('_title',  $title );
 	$tpl->set('_field', $params['field'] );
 	$tpl->set('_popup', isset($params['popup']) ? 1 : null );
 
 	return $tpl->parse( 'oce.html' );
 }
-return '';
+else
+{
+    return '';
+}
+
 ?>

@@ -19,13 +19,13 @@
     {
       position: relative; padding: 0;
     }
-    
+
     .p-shadow .shaddow-r
     {
       width: 100%; padding: 0 6px 0 0;
       background: url( {{images}}shaddow-r.png ) 100% 0 repeat-y;
     }
-    
+
     .p-shadow .shaddow-b
     {
       position: relative; width: 100%; height: 6px;
@@ -37,7 +37,7 @@
       position: absolute; right: -6px; top: 0; width: 6px; height: 6px;
       background: url( {{images}}shaddow-br.png ) 0 0 no-repeat;
     }
-    
+
     .p-shadow textarea, .p-shadow input
     {
       padding: 6px;
@@ -46,12 +46,12 @@
     {
       width: 97%;
     }
-    
+
     {{@_/platonica_widgets_css.html}}
 </style>
 
 
-{{/?}} 
+{{/?}}
 
 
 <table style="border-top: 4px #F0F2ED solid; top: 0; z-index: 1000;" cellspacing="0" cellpadding="0" class="cms-toolbar w100">
@@ -69,12 +69,12 @@
 		</td>
 
 		<td style="text-align: right;">
-			{{!oce module="config" title="Настройки"}} |
+			{{!oce module="Config/config" title="Настройки"}} |
 			{{!textOce type="content" module="content" title="редактировать в CMS" id=PAGE.id show="1"}}
 			|
-			
-		    	<a href="{{/}}cms">перейти CMS</a> |  &nbsp; 
-		    	<a rel="notrack" href="{{/}}cms/login?logout=1&retpath={{cur_url}}" onclick="return confirm('Вы действительно желаете выйти?');">выход</a>	
+
+		    	<a href="{{/}}cms">перейти CMS</a> |  &nbsp;
+		    	<a rel="notrack" href="{{/}}cms/login?logout=1&retpath={{cur_url}}" onclick="return confirm('Вы действительно желаете выйти?');">выход</a>
 		</td>
 	</tr>
 </table>

@@ -84,7 +84,6 @@ class FormSimpleModel
 			Locator::get("tpl")->set( "iframe", $iframe );
 		}
 
-
 		if ($_GET['ret'] && in_array($_GET['ret'], $valid) )
 		{
 		    header('Content-Type: text/html; charset=windows-1251');
@@ -93,24 +92,7 @@ class FormSimpleModel
 		else if ($this->needAjaxUpdate())
 		{
 			$this->ajax_update = true;
-
 			$this->prefix = "";
-
-			//var_dump( $this->config->UPDATE_FIELDS, $_POST, array_intersect_key($_POST, array_flip($this->config->UPDATE_FIELDS)) );
-			//die();
-			//$this->ajaxValidFields;
-
-			$this->config['fields_update'] = array_flip( array_intersect_key($_POST, array_flip( $this->config['fields_update'] ) ));
-
-			$this->readPost();
-			//var_dump( $this->prefix, $this->postData ) ;
-
-			$redirect = $this->update();
-			$this->loaded=false;
-			//$this->load();
-
-			header('Content-Type: text/html; charset=windows-1251');
-			die($this->postData[ $_POST['ajax_update'] ]);
 		}
 		//update data
 		if ($this->needDelete())
@@ -126,6 +108,12 @@ class FormSimpleModel
 			$this->readPost();
 			$redirect = $this->update();
 		}
+
+        if ($this->ajax_update)
+        {
+            header('Content-Type: text/html; charset=windows-1251');
+			die($this->postData[ $_POST['ajax_update'] ]);
+        }
 
 		//редирект или выставление флага, что он нужен
 		if ($redirect)
@@ -384,7 +372,7 @@ class FormSimpleModel
 
 	protected function needDelete()
 	{
-		return $_POST[$this->prefix."delete"] ? true : false;
+        return $_POST[($this->ajax_update ? '' : $this->prefix)."delete"] ? true : false;
 	}
 
 	protected function needRestore()

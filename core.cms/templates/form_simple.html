@@ -73,7 +73,7 @@ $(document).ready( function()
             if (typeof(tinymce) != 'undefined') tinymce.EditorManager.triggerSave();
             data = {};
             $(":input", "#{{__form_name}}").each(function (a,b,c) {
-                if (b.type!="submit" || b.name=="update_2")
+                if (b.type!="submit" || b.name=="update_2" || b.name=="{{prefix}}delete")
                     data[b.name.replace(/{{prefix}}/, "")  ] = getVal(b);
             });
             data['ajax_update'] = "1";
