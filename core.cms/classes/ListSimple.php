@@ -18,10 +18,10 @@ class ListSimple
 	protected $idField = "id";		// первичный ключ таблицы
 
 	protected $template = "list_simple.html"; 				//шаблон результата
-	protected $template_list = "list_simple.html:List"; 	//откуда брать шаблоны элементов списка
+	protected $template_list = "list_simple.html:list"; 	//откуда брать шаблоны элементов списка
 
-	protected $template_trash_show = "list_simple.html:TrashShow";
-	protected $template_trash_hide = "list_simple.html:TrashHide";
+	protected $template_trash_show = "list_simple.html:trash_show";
+	protected $template_trash_hide = "list_simple.html:trash_hide";
 
 	protected $template_new = 'list_simple.html:add_new';
 	protected $template_arrows = 'blocks/pager.html';
@@ -53,9 +53,6 @@ class ListSimple
 			$this->frameSize = $this->config['frameSize'];
 		}
 
-		//$this->config['fields'][] = '_order';
-		//$this->config['fields'][] = '_state';
-
 		$this->storeTo = "list_".$config['module_name'];
 		$this->id = intval(RequestInfo::get($this->idGetVar));
 
@@ -64,12 +61,72 @@ class ListSimple
 
 	public function handle()
 	{
-		if( $this->updateListStruct() )
-		{
-			Controller::redirect( RequestInfo::hrefChange('', array()));
-		}
+        if ($_POST['order_list'])
+        {
+            $itemId = intval($_POST['item_id']);
+            $page = intval($_POST[$this->pageVar]);
+            if (!$page) $page = 1;
+            $destIndex = intval($_POST['index']) + ($page - 1) * $this->perPage;
+
+            $destItem = DBModel::factory($this->config['model'])->setOrder('_order ASC')->load(null, 1, $destIndex);
+            if (!$destItem[0]['_order']) {
+                $destItem = DBModel::factory($this->config['model'])->setOrder('_order DESC')->loadOne();
+            }
+            else
+            {
+                $destItem = $destItem[0];
+            }
+            $destOrder = $destItem['_order'];
+            $sourceItem = DBModel::factory($this->config['model'])->loadOne('{id} = '.$itemId);
+            $sourceOrder = $sourceItem['_order'];
+            $db = Locator::get('db');
+            if ($sourceOrder > $destOrder)
+                $db->execute("
+                    UPDATE ??".$this->getModel()->getTableName()."
+                    SET _order = _order + 1
+                    WHERE _order < ".$sourceOrder." AND _order >= ".$destOrder
+                );
+            else
+                $db->execute("
+                    UPDATE ??".$this->getModel()->getTableName()."
+                    SET _order = _order - 1
+                    WHERE _order > ".$sourceOrder." AND _order <= ".$destOrder
+                );
+            $data = array('_order'=>$destOrder);
+            DBModel::factory($this->config['model'])->update($data, '{id} = '.$itemId);
+            die('1');
+        }
+        if ($_POST['delete_list'])
+        {
+            $items = explode(',', $_POST['delete_list']);
+            foreach ($items as $id)
+            {
+                $this->getModel()->deleteToTrash(intval($id));
+            }
+            die('1');
+        }
+        if ($_POST['restore_list'])
+        {
+            $items = explode(',', $_POST['restore_list']);
+            foreach ($items as $id)
+            {
+                $this->getModel()->restoreFromTrash(intval($id));
+            }
+            die('1');
+        }
 
 		$this->load();
+
+        $tpl = &Locator::get('tpl');
+        $tpl->set('page_url', RequestInfo::$baseUrl.RequestInfo::$pageUrl);
+        $tpl->set('page_num', intval($_GET[$this->pageVar]));
+        $tpl->set('page_var', $this->pageVar);
+        $tpl->set('per_page', $this->perPage);
+        $tpl->set('group_delete_url', RequestInfo::hrefChange('',array('delete_list'=>'1')));
+        $tpl->set('group_restore_url', RequestInfo::hrefChange('',array('restore_list'=>'1')));
+        $tpl->set('group_operations', $this->config['group_operations']);
+        $tpl->set('drags', $this->config['drags']);
+        $tpl->set('module_name', $this->config['module_name']);
 
 		$this->renderTrash();
 		$this->renderAddNew();
@@ -81,15 +138,13 @@ class ListSimple
 		$list->EVOLUTORS = $this->EVOLUTORS; //потомки могут добавить своего
 		$list->EVOLUTORS["href"] = array( &$this, "_href" );
 		$list->EVOLUTORS["title"] = array( &$this, "_title" );
-		$list->EVOLUTORS['controls'] = array( &$this, '_controls' );
 		$list->issel_function = array( &$this, '_current' );
 		$list->parse( $this->template_list, '__list' );
-
-        Locator::get('tpl')->set('module_name', $this->config['module_name']);
 
 		$this->renderPager();
 
         $this->renderFilters();
+
 	}
 
 	public function setStoreTo($value)
@@ -136,15 +191,6 @@ class ListSimple
 	{
 		$r = &$list->ITEMS[ $list->loop_index ];
 		return ($this->id == $r[$this->idGetVar] ? '_sel' : '').($r['_state']==1 ? '_hidden' : '').($r['_state']==2 ? '_del' : '');
-	}
-
-	public function _controls(&$list)
-	{
-		if( !$this->config['hide_controls']['exchange'] )
-		{
-			return $this->tpl->parse( $list->tpl_item.'_Exchange' );
-		}
-		return '';
 	}
 
 	public function getHtml()
@@ -252,39 +298,6 @@ class ListSimple
 
         return $filterObj;
     }
-
-	/**
-	 * Меняем элементы местами
-	 *
-	 * @return boolean
-	 */
-	protected function updateListStruct()
-	{
-		//params
-		$id1 = intval($_POST['id1']);
-		$id2 = intval($_POST['id2']);
-		$action = $_POST['action'];
-
-		$return = false;
-		switch($action)
-		{
-			case 'exchange':
-
-				$model = &$this->getModel();
-				$model->load($model->quoteField($this->idField).'IN('.$id1.','.$id2.')');
-
-				$data = array('_order' => $model[1]['_order']);
-				$model->update($data, $model->quoteFieldShort($this->idField).'='.$model[0][$this->idField]);
-
-				$data = array('_order' => $model[0]['_order']);
-				$model->update($data, $model->quoteFieldShort($this->idField).'='.$model[1][$this->idField]);
-
-				//возвращаем
-				$return = true;
-			break;
-		}
-		return $return;
-	}
 
 	protected function pager($total)
 	{
