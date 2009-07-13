@@ -87,16 +87,16 @@ Gallery.prototype = {
         	function(event) {
         		self.lastOveredImageId = this.id;
                 $(this).find('img.gallery-delete')
-                	   .css('left',$(this).offset().left+$(this).width()-24-5-$('#gallery').offset().left)
-                	   .css('top',$(this).offset().top+5-$('#gallery').offset().top)
+                	   .css('left',$(this).offset().left+$(this).width()-24-5)
+                	   .css('top',$(this).offset().top+5)
                 	   .show();
                 $(this).find('img.gallery-edit').add('#replaceFileButton')
-                	   .css('left',$(this).offset().left+$(this).width()-(24+5)*2-$('#gallery').offset().left)
-                	   .css('top',$(this).offset().top+5-$('#gallery').offset().top)
+                	   .css('left',$(this).offset().left+$(this).width()-(24+5)*2)
+                	   .css('top',$(this).offset().top+5)
                 	   .show();
                 $(this).find('img.gallery-zoom')
-                	   .css('left',$(this).offset().left+$(this).width()-(24+5)*3-$('#gallery').offset().left)
-                	   .css('top',$(this).offset().top+5-$('#gallery').offset().top)
+                	   .css('left',$(this).offset().left+$(this).width()-(24+5)*3)
+                	   .css('top',$(this).offset().top+5)
                 	   .show();
         	},
         	function (event) {
@@ -276,7 +276,7 @@ var imagesUploadSettings = {
 		);
 	},
 	upload_error_handler: function(file, errorCode, message) {
-		alert('Ошибка!');
+		alert(message);
 		location.reload(true);
 	},
 	upload_success_handler: function(file, data) {
