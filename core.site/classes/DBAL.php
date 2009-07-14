@@ -76,6 +76,16 @@ class DBAL
 	{
 		DBAL::$prefix = Config::get('db_prefix');
 
+        if (Config::get('db_disable'))
+        {
+            Config::set('db_al', 'dummy');
+        }
+
+        if ( !Config::exists('db_al') || !Config::get('db_al') )
+        {
+            throw new JSException("You need to set 'db_al' param in 'conig.yml' file or set 'db_disable' to 'true'");
+        }
+
 		$lowlevelClass = "DBAL_" . Config::get('db_al');
 		Finder::useClass($lowlevelClass);
 
