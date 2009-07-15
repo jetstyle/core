@@ -5,8 +5,8 @@ class TreeControlJsTree extends TreeControl
 {
 	//templates
 	protected $template = "tree_control_js_tree.html";
-	protected $template_trash_show = "list_simple.html:TrashShow";
-	protected $template_trash_hide = "list_simple.html:TrashHide";
+	protected $template_trash_show = "list_simple.html:trash_show";
+	protected $template_trash_hide = "list_simple.html:trash_hide";
 
 	public function handle()
 	{

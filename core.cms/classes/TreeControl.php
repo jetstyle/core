@@ -6,8 +6,8 @@ class TreeControl
 
 	//templates
 	protected $template = "tree_control.html";
-	protected $template_trash_show = "list_simple.html:TrashShow";
-	protected $template_trash_hide = "list_simple.html:TrashHide";
+	protected $template_trash_show = "list_simple.html:trash_show";
+	protected $template_trash_hide = "list_simple.html:trash_hide";
 
 	protected $xmlEncoding = "windows-1251";
 

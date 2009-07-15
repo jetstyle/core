@@ -18,7 +18,7 @@ else
 if ( !isset($params['module']) )
 {
 
-    if ( in_array($controller['controller'], array('home', 'content', 'catalogue_simple', 'feedback' ) ) )
+    if ( in_array($controller['controller'], array('', 'home', 'content', 'catalogue_simple', 'feedback' ) ) )
     {
 	 $params['module']='content';
 	 $params['id']= $controller['id'];

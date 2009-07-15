@@ -37,6 +37,12 @@ if(Locator::get('principalCms')->security('cmsModules', $module))
     {
         $oceLink .= '_new=1';
     }
+    //add params
+    if ($params['insert_fields'])
+    {
+        Finder::useClass('Json');
+        $oceLink .= '&insert_fields='.urlencode(Json::encode($params['insert_fields']));
+    }
 
     //set title
     if (!$params['title'])

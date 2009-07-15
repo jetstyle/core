@@ -66,6 +66,12 @@ class FormSimpleModel
 			$this->idField = $this->config['idField'];
 		}
 
+        if ($_GET['insert_fields'])
+        {
+            Finder::useClass('Json');
+            $this->insert_fields = Json::decode($_GET['insert_fields'], true);
+        }
+
 		$this->id = intval(RequestInfo::get( $this->idGetVar));
 	}
 
@@ -89,7 +95,7 @@ class FormSimpleModel
 		    header('Content-Type: text/html; charset=windows-1251');
 		    die( $this->item[ $_GET['ret'] ] );
 		}
-		else if ($this->needAjaxUpdate())
+		elseif ($this->needAjaxUpdate())
 		{
 			$this->ajax_update = true;
 			$this->prefix = "";
@@ -103,7 +109,7 @@ class FormSimpleModel
 		{
 			$redirect = $this->restore();
 		}
-		elseif ($this->needUpdate())
+		elseif ($this->needUpdate() || $this->ajax_update)
 		{
 			$this->readPost();
 			$redirect = $this->update();
@@ -180,6 +186,11 @@ class FormSimpleModel
 				$tpl->parse( $this->template.':send_button', '_send_button' );
 			}
 		}
+
+        if ($this->insert_fields)
+        {
+            $tpl->set('hidden_fields', $this->insert_fields);
+        }
 
 		if ( $this->item['id']>0 || RequestInfo::get('_new') )
         {
@@ -321,19 +332,21 @@ class FormSimpleModel
 				{
 					if (null !== $_POST[$this->prefix.$fieldName])
 					{
-						//$_POST[$this->prefix.$fieldName] = '';
                         $this->postData[$fieldName] = $_POST[$this->prefix.$fieldName];
+                        if ($this->ajax_update)
+                        {
+                            $this->postData[$fieldName] = iconv('UTF-8', 'CP1251', $this->postData[$fieldName]);
+                        }
+                        RequestInfo::free($this->prefix.$fieldName);
 					}
-
-
-					if ($this->ajax_update)
-					    $this->postData[$fieldName] = iconv('UTF-8', 'CP1251', $this->postData[$fieldName]);
-					RequestInfo::free($this->prefix.$fieldName);
 				}
 			}
-            foreach ($this->config['render']['checkbox'] as $fieldName)
+            if (!$this->ajax_update)
             {
-                if (!$this->postData[$fieldName]) $this->postData[$fieldName] = 0;
+                foreach ($this->config['render']['checkbox'] as $fieldName)
+                {
+                    if (!$this->postData[$fieldName]) $this->postData[$fieldName] = 0;
+                }
             }
 		}
 	}
@@ -435,8 +448,6 @@ class FormSimpleModel
 				}
 			}
 		}
-		if ( $this->ajax_update )
-		    return;
 
 		//supertag
 		if ( $this->config['supertag'])
@@ -452,7 +463,7 @@ class FormSimpleModel
 				$limit = $this->supertagLimit;
 			}
 
-			if ($_POST[$this->prefix . '_supertag'] == '')
+			if ($_POST[$this->prefix . '_supertag'] === '')
 			{
 				Finder::useClass('Translit');
 				$translit =& new Translit();
@@ -492,14 +503,6 @@ class FormSimpleModel
 
 	protected function insert()
 	{
-		if (is_array($this->config['fields_insert']) && !empty($this->config['fields_insert']))
-		{
-			foreach ($this->config['fields_insert'] as $fieldName => $value)
-			{
-				$this->postData[$fieldName] = $value;
-			}
-		}
-
 		$this->postData['_created'] = date('Y-m-d H:i:s');
 		$this->new_id = $this->id = $this->model->insert($this->postData);
 
@@ -511,6 +514,23 @@ class FormSimpleModel
 			$data['_supertag'] = $this->postData['_supertag'].'_'.$this->id;
 		}
 		$this->updateData($data);
+	}
+	
+	protected function getList()
+	{
+		$module = Locator::get('controller')->moduleConstructor;
+		$children = $module->getChildren();
+		$config = $module->getConfig();
+		if ($children && $children['list'])
+		{
+			return $module->getList()->getObj();
+		}
+		else
+		{
+			$path = $config['module_name'].'/list';
+			$list = ModuleConstructor::factory($path);
+			return $list->getObj();
+		}
 	}
 
 	public function setId($id)
