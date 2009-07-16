@@ -40,7 +40,7 @@
 
 class MessageSet
 {
-	private static $instance = null;
+	//private static $instance = null;
 	
 	private $MSGS      = array(); // стек мессаджсетов
 	private $MSG_NAMES = array(); // стек имён для переключения языка
@@ -57,6 +57,7 @@ class MessageSet
 		}
 	}
 
+    /*
 	public function &getInstance()
 	{
 		if (null === self::$instance)
@@ -65,6 +66,7 @@ class MessageSet
 		}
 		return self::$instance; 
 	}
+     */
 	
 	public function switchTo( $lang = "ru" )
 	{

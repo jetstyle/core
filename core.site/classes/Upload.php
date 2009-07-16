@@ -56,7 +56,7 @@
 class Upload
 {
 
-	private static $instance = null;
+	//private static $instance = null;
 
 	public $TYPES = array(); // ext => [type,word]
 	public $ALLOW = array(); // белый список расширений
@@ -70,7 +70,7 @@ class Upload
 
 	protected $DIRS_SWAPPED = array(); //для DirSwap(),  DirUnSwap();
 
-	private function __construct()
+	public function __construct()
 	{
 		if (Config::get('upload_ext'))
 		{
@@ -86,8 +86,11 @@ class Upload
 				}
 			}
 		}
+    
+        $this->setDir(Config::get('files_dir'));
 	}
 
+    /*
 	public static function &getInstance()
 	{
 		 if (null === self::$instance)
@@ -98,6 +101,7 @@ class Upload
 
 		 return self::$instance;
 	}
+    */
 
 	public function setDir($dir)
 	{

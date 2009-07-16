@@ -126,7 +126,6 @@ class Finder {
 			if( !( is_array($dir) && !in_array($type,$dir) ) )
 			{
 				$fname = (is_array($dir) ? $dir[0] : $dir).$type."/".$name.'.'.$ext;
-
 				self::$searchHistory[] = $fname;
 				
 				if(@file_exists($fname))
@@ -160,7 +159,7 @@ class Finder {
 
 	public static function getPluralizeDir($classname) 
 	{
-		Finder::useClass("Inflector");
+		include_once('Inflector.php');
 		$words = preg_split('/[A-Z]/', $classname);
 		$last_word = substr($classname, -strlen($words[count($words) - 1]) - 1);
 		$last_word = strtolower($last_word);
@@ -208,7 +207,8 @@ class Finder {
 	{
 		if (!$fname = self::findScript($type,$name,$level,$dr,$ext,$withSubDirs, $scope))
 		{
-			$e = new FileNotFoundException("File not found: <b>".$name.".".$ext."</b>", self::buildSearchHistory());
+			$searchHistory = self::buildSearchHistory();
+			$e = new FileNotFoundException("File not found: <b>".$name.".".$ext."</b>", $searchHistory);
 			$e->setFilename($name.".".$ext);
 			throw $e;
 		}
@@ -222,11 +222,9 @@ class Finder {
 	{
 		//определяем начальный уровень поиска
 		$n = count(self::$DIRS['all']);
-//		$level = $n - 1;
-//		$i = $level>=0 ? $level : $n - $level;
-
+		
 		//ищем
-		for( ; $i>=0 && $i<$n; $i-=1 )
+		for($i = 0; $i < $n; $i++ )
 		{
 			//разбор каждого уровня тут
 			$dir = self::$DIRS['all'][$i];
