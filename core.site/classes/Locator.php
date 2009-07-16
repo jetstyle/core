@@ -10,6 +10,12 @@
  */
 class Locator
 {
+	
+	/**
+	 * 
+	 */
+	private static $stacks = array();
+	
 	/**
 	 * Objects cache
 	 *
@@ -42,9 +48,8 @@ class Locator
 	 * @param string $path path to class OR object
 	 * @param boolean $singleton
 	 */
-	public static function bind($key, $path, $singleton = true, $params = NULL)
+	public static function bind($key, $path, $singleton = false, $params = NULL)
 	{
-
 		Debug::trace('Bind "'.$key.'"', 'locator');
 		if (is_object($path) || is_array($path))
 			self::$objs[$key] = $path;
@@ -91,7 +96,7 @@ class Locator
 			    {
 				    if (!isset($s['singleton']))
 				    {
-					    $s['singleton'] = true;
+					    $s['singleton'] = false;
 				    }
 				    Locator::bind($k, $s['path'], $s['singleton'], $s['params']);
 			    }
@@ -115,8 +120,6 @@ class Locator
 		{
 			if (isset(self::$relations[$key]))
 			{
-
-
 				Finder::useClass( self::$relations[$key]['path'] );
 				$class = self::$relations[$key]['class'];
 
@@ -229,5 +232,43 @@ class Locator
 	{
 		return isset(self::$objs[$key]);
 	}
+	
+	public static function pushStack()
+	{
+		$length = count(self::$stacks);
+		
+		self::$stacks[$length] = array(
+			'objs' => array(),
+			'relations' => array(),
+		);
+		
+		self::$objs = &self::$stacks[$length]['objs'];
+		self::$relations = &self::$stacks[$length]['relations'];
+	}
+	
+	public static function popStack()
+	{
+		$length = count(self::$stacks);
+		
+		if ($length)
+		{
+			array_pop(self::$stacks);
+			
+			$length--;
+			if ($length)
+			{
+				$length--;
+				self::$objs = &self::$stacks[$length]['objs'];
+				self::$relations = &self::$stacks[$length]['relations'];
+			}
+			else
+			{
+				self::pushStack();
+			}
+		}
+	}
 }
+
+Locator::pushStack();
+
 ?>

@@ -66,7 +66,7 @@
 
 class DBAL
 {
-	private static $instance = null;
+	//private static $instance = null;
 	public static $prefix = '';
 
 	protected $lowlevel;
@@ -101,10 +101,10 @@ class DBAL
 	/**
 	 * singletone
 	 *
-	 * @param RequestHandler $rh
 	 * @param string $connect
 	 * @return DBAL
 	 */
+	/*
 	public static function &getInstance($connect = true)
 	{
 		if (null === self::$instance)
@@ -113,6 +113,7 @@ class DBAL
 		}
 		return self::$instance;
 	}
+	*/
 	
 	public function connect()
 	{

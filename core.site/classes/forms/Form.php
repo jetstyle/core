@@ -392,7 +392,7 @@ class Form
    // парсинг кнопок
    function _ParseButtons($index=null)
    {
-     $tpl = &TemplateEngine::getInstance();
+     $tpl = &Locator::get('tpl');
      $result = array();
      foreach( $this->buttons as $button )
      {

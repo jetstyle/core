@@ -99,16 +99,20 @@ class Router
 		$page = NULL;
 		$cls = strtolower($criteria['class']);
 		$url = $criteria['url'];
-		
+				
 		if (isset($cls) && array_key_exists($cls, $this->cls2controller))
 		{
 			if (null === $this->cls2controller[$cls])
 			{
 				return null;
 			}
-			else
+			elseif (Locator::exists($this->cls2controller[$cls]))
 			{
 				return Locator::get($this->cls2controller[$cls]);
+			}
+			else
+			{
+				unset($this->cls2controller[$cls]);
 			}
 		}
 		elseif (isset($url) && array_key_exists($url, $this->url2controller))
@@ -117,9 +121,13 @@ class Router
 			{
 				return null;
 			}
+			elseif (Locator::exists($this->url2controller[$cls]))
+			{
+				return Locator::get($this->url2controller[$cls]);
+			}
 			else
 			{
-				return Locator::get($this->url2controller[$url]);
+				unset($this->url2controller[$cls]);
 			}
 		}
 		
@@ -145,6 +153,7 @@ class Router
 			}
 			else
 			{
+				$cls = strtolower(substr(get_class($page), 0, -strlen('Controller')));
 				$id = 'controller';
 			}
 			

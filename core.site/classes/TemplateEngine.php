@@ -11,7 +11,7 @@ class TemplateEngine
 	const COMPILE_SMART = 1;
 	const COMPILE_ALWAYS = 2;
 
-	private static $instance = null;
+	//private static $instance = null;
 
 	public $domain = array();
 
@@ -60,7 +60,7 @@ class TemplateEngine
 	 *
 	 * @access private
 	 */
-	private function __construct()
+	public function __construct()
 	{
 		if (!($this->rootHref = Config::get('rootHref')))
 		{
@@ -85,6 +85,7 @@ class TemplateEngine
 		$this->set("tpl_skin", Config::get('tpl_skin') );
 	}
 
+	/*
 	public static function &getInstance()
 	{
 		if (null === self::$instance)
@@ -100,6 +101,7 @@ class TemplateEngine
 	{
 	    self::$instance = null;
 	}
+	*/
 
 
 	public function setCompileMode($mode)

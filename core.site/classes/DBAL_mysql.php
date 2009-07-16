@@ -58,7 +58,7 @@ class DBAL_mysql
             throw new DbException("Connect failed: Host=<b>" . Config::get('db_host') . "</b>, User=<b>" . Config::get('db_user') . "</b>", '', $humanMessage);
 		}
 		
-		Config::free('db_password');
+		//Config::free('db_password');
 		
 		if (!mysql_select_db(Config::get('db_name'), $this->dblink))
 		{
