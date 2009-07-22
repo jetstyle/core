@@ -4,6 +4,7 @@ Gallery.prototype = {
 	baseUrl: '',
 	selectedItems: [],
 	lastSelected: null,
+	formPrefix: '',
 
 	initialize: function(){},
 
@@ -20,12 +21,13 @@ Gallery.prototype = {
         			order += self.getId(this)+',';
        			});
        			order = order.substr(0, order.length-1);
-       			$.post(self.baseUrl, {'action': 'reorder','order': order},function(data) {
-					if (data != '1') alert('Ошибка!');
-       			},'text');
+       			$.post(self.baseUrl + '?id='+self.rubricId, {'action': 'reorder','order': order},function(data) {
+					if (!data.ok) alert('Ошибка!');
+       			},'json');
         	},
         	items: '> div.gallery-image'
 		});
+
 		//control for upload images
 		imagesUploadSettings.upload_url = this.baseUrl+'?id='+this.rubricId+'&session_hash='+this.sessionHash;
 		imagesUploadSettings.flash_url = this.imagesUrl+"swfupload.swf";
@@ -40,6 +42,7 @@ Gallery.prototype = {
 		imageOneUploadSettings.file_types = this.fileExtensions;
 		this.swfUploadOne = new SWFUpload(imageOneUploadSettings);
 		this.swfUploadOne.customSettings.gallery = this;
+
 		//control buttons
 		$('#gallery div.gallery-image').each(function() {
         	self.initImage(this);
@@ -83,7 +86,10 @@ Gallery.prototype = {
     		this,
     		$(image).find('div.image-title')
     	));
-    	tb_init($(image).find('a.popup').get(0));
+		if ($(image).find('a.popup').get(0))
+		{
+			tb_init($(image).find('a.popup').get(0));
+		}
     	var self = this;
     	$(image).hover(
         	function(event) {
@@ -161,9 +167,9 @@ Gallery.prototype = {
     		items = this.getId(deleteBtn.parentNode.parentNode);
     	}
     	var self = this;
-    	$.post(this.baseUrl, {'action': 'delete','items': items}, function(data)
+    	$.post(this.baseUrl + '?id=' + this.rubricId, {'action': 'delete','items': items}, function(data)
 		{
-       		if (data == '1')
+       		if (data.ok)
 			{
 				if (self.selectedItems.length > 0) {
                 	for (var i=0; i<self.selectedItems.length; i++)
@@ -174,7 +180,7 @@ Gallery.prototype = {
 					$('#image'+items).remove();
 				}
 			}
-		},'text');
+		},'json');
    		return false;
 	},
 
@@ -186,8 +192,8 @@ Gallery.prototype = {
     	};
        	$.post(this.baseUrl, values, function(data) {
 			$('#image'+values.id+' div.image-title').text(values.title);
-			if (data != '1') alert("Ошибка!");
-    	},'text');
+			if (!data.ok) alert("Ошибка!");
+    	},'json');
     	$('#editImageForm').hide();
   	},
 
@@ -281,8 +287,18 @@ var imagesUploadSettings = {
 		location.reload(true);
 	},
 	upload_success_handler: function(file, data) {
-		if (data.indexOf('ok,')==0) {
-           	$('#addImageButton').before(data.substring(3));
+
+		try
+		{
+			eval('data = ' + data + ';');
+		}
+		catch (err)
+		{
+			data = {};
+		}
+
+		if (data.ok) {
+           	$('#addImageButton').before(data.html);
            	$('#gallery div.gallery-image:last .image-title').html('Заголовок');
 			this.customSettings.gallery.initImage($('#gallery div.gallery-image').get().reverse()[0]);
 		} else {
@@ -320,12 +336,15 @@ var imageOneUploadSettings = {
 	button_cursor: SWFUpload.CURSOR.HAND,
 	button_action: SWFUpload.BUTTON_ACTION.SELECT_FILE,
 
+	file_dialog_start_handler: function() {
+		this.customSettings.gallery.editedItemId = this.customSettings.gallery.lastOveredImageId;
+	},
 	file_dialog_complete_handler: function(numFilesSelected, numFilesQueued) {
 		if (numFilesSelected > 0) {
 			this.customSettings.gallery.swfUploadOne.removePostParam('item_id');
 			this.customSettings.gallery.swfUploadOne.addPostParam(
 				'item_id',
-				this.customSettings.gallery.getId($('#'+this.customSettings.gallery.lastOveredImageId).get(0))
+				this.customSettings.gallery.getId($('#'+this.customSettings.gallery.editedItemId).get(0))
 			);
 			this.startUpload();
 		}
@@ -347,10 +366,31 @@ var imageOneUploadSettings = {
 		location.reload(true);
 	},
 	upload_success_handler: function(file, data) {
-		if (data.indexOf('ok,')==0) {
-           	$('#'+this.customSettings.gallery.lastOveredImageId+' img').get(0).src += '?'+Math.random;
+
+        try
+		{
+			eval('data = ' + data + ';');
+		}
+		catch (err)
+		{
+			data = {};
+		}
+
+		if (data.ok)
+        {
+			if (data.picture.is_image)
+            {
+                $('#'+this.customSettings.gallery.editedItemId+' img').get(0).src = data.picture_thumb.link;
+            }
+            else
+            {
+                $('#'+this.customSettings.gallery.editedItemId+' img').get(0).src = base_url + 'skins/images/file_icons/'+data.picture.ext+'.gif';
+            }
+
 			this.customSettings.gallery.initImage($('#gallery div.gallery-image').get().reverse()[0]);
-		} else {
+		}
+        else
+        {
            	location.reload(true);
 		}
 	},
