@@ -31,11 +31,13 @@ Gallery.prototype = {
 		imagesUploadSettings.flash_url = this.imagesUrl+"swfupload.swf";
 		imagesUploadSettings.button_width = this.thumbWidth;
 		imagesUploadSettings.button_height = this.thumbHeight;
+		imagesUploadSettings.file_types = this.fileExtensions;
 		this.swfUpload = new SWFUpload(imagesUploadSettings);
 		this.swfUpload.customSettings.gallery = this;
 		//control for replace one image
 		imageOneUploadSettings.upload_url = this.baseUrl+'?id='+this.rubricId+'&session_hash='+this.sessionHash;
 		imageOneUploadSettings.flash_url = this.imagesUrl+"swfupload.swf";
+		imageOneUploadSettings.file_types = this.fileExtensions;
 		this.swfUploadOne = new SWFUpload(imageOneUploadSettings);
 		this.swfUploadOne.customSettings.gallery = this;
 		//control buttons
@@ -114,7 +116,7 @@ Gallery.prototype = {
 
 	itemClick: function(img, e) {
 		var id = this.getId($(img).parent()[0]);
-		if (e.ctrlKey) {
+		if (e.ctrlKey || e.metaKey) {
 			var index = this.isSelected(id);
 			if (index != -1)
 				this.deleteSelected(index);
@@ -130,7 +132,7 @@ Gallery.prototype = {
             	var fromIndex = Math.min(clickedIndex, lastClickedIndex);
             	var toIndex = Math.max(clickedIndex, lastClickedIndex);
             	var self = this;
-            	$('div.gallery-image:gt('+(fromIndex-1)+'):lt('+(toIndex-fromIndex+1)+')').each(function(){
+            	$('div.gallery-image:eq('+fromIndex+')').add('div.gallery-image:gt('+fromIndex+'):lt('+(toIndex-fromIndex)+')').each(function(){
 					items.push(self.getId(this));
             	});
             	this.addSelectedAr(items);
@@ -247,9 +249,8 @@ Gallery.prototype = {
 };
 
 var imagesUploadSettings = {
-	file_size_limit:  "2 MB",
-	file_types:       '*.jpg;*.jpeg;*.gif;*.png',
-	file_types_description: "Графические файлы",
+	file_size_limit:  "8 MB",
+	file_types_description: "Допустимые типы файлов",
 
 	post_params: {
 		'swfupload_user_agent': navigator.userAgent || navigator.vendor || window.opera
@@ -267,7 +268,7 @@ var imagesUploadSettings = {
 		this.customSettings.gallery.uploadUpdateFileCounter(this.getStats());
 		$('#progressCont').show();
 		$('#addImageButton').css('backgroundImage','url('+this.customSettings.gallery.imagesUrl+'gallery/ajax-loader-arrows.gif)');
-		return true
+		return true;
 	},
 	upload_progress_handler: function(file, bytesLoaded, bytesTotal) {
 		$('#progressBar').css(
@@ -304,9 +305,8 @@ var imagesUploadSettings = {
 };
 
 var imageOneUploadSettings = {
-	file_size_limit:  "2 MB",
-	file_types:       '*.jpg;*.jpeg;*.gif;*.png',
-	file_types_description: "Графические файлы",
+	file_size_limit:  "8 MB",
+	file_types_description: "Допустимые типы файлов",
 
 	post_params: {
 		'swfupload_user_agent': navigator.userAgent || navigator.vendor || window.opera,
