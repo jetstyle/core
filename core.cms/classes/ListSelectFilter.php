@@ -2,7 +2,7 @@
 /**
  * ListSelectFilter
  *
- * @author lunatic
+ * @author lunatic lunatic@jetstyle.ru
  */
 Finder::useClass('ListFilter');
 

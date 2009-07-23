@@ -1,6 +1,6 @@
 <?php
 
-class FormSimpleModel
+class FormSimple
 {
 	protected $tpl = null;
 	protected $db = null;
@@ -33,13 +33,6 @@ class FormSimpleModel
 		$this->config =& $config;
 		$this->tpl = &Locator::get('tpl');
 		$this->db = &Locator::get('db');
-
-		$config['fields'][] = '_state';
-
-		if (!$this->config['fields_update'])
-		{
-			$this->config['fields_update'] = $this->config['fields'];
-		}
 
 		if (!isset($this->config['supertag_check']) && !isset($this->config['supertag_path_check']))
 		{
@@ -206,6 +199,11 @@ class FormSimpleModel
 
 	protected function initModel()
 	{
+        if (!$this->config['model'])
+        {
+            throw new JSException("You should set `model` param in config");
+        }
+
         Finder::useModel('DBModel');
         $this->model = DBModel::factory($this->config['model']);
 	}
@@ -224,7 +222,7 @@ class FormSimpleModel
                     }
                 }
 
-				$this->model->loadOne($this->model->quoteField($this->idField).'='.$this->id);
+				$this->model->loadOne('{'.$this->idField.'} = '.$this->id);
 				$this->item = $this->model->getData();
 				if (!$this->item[$this->idField])
 				{
@@ -275,6 +273,7 @@ class FormSimpleModel
             {
                 foreach ($this->config['render']['select'] as $name => $params)
                 {
+                    $str = '';
                     foreach($params['values'] as $id => $val)
                     {
                         $str .= "<option value='".$id."' ".(($this->item["id"] && $this->item[$name]==$id) || (!$this->item["id"] && $id==$params['default']) ? "selected=\"selected\"" : '' ).">".$val;
@@ -326,7 +325,7 @@ class FormSimpleModel
 	{
 		if (empty($this->postData))
 		{
-			foreach ($this->model->getAllFields() as $fieldName)
+			foreach ($this->model->getAllFields() AS $fieldName)
 			{
 				if ($fieldName !== $this->idField)
 				{
@@ -343,9 +342,12 @@ class FormSimpleModel
 			}
             if (!$this->ajax_update)
             {
-                foreach ($this->config['render']['checkbox'] as $fieldName)
+                if (is_array($this->config['render']['checkbox']))
                 {
-                    if (!$this->postData[$fieldName]) $this->postData[$fieldName] = 0;
+                    foreach ($this->config['render']['checkbox'] AS $fieldName)
+                    {
+                        if (!$this->postData[$fieldName]) $this->postData[$fieldName] = 0;
+                    }
                 }
             }
 		}
@@ -370,7 +372,7 @@ class FormSimpleModel
 
 	protected function updateData($data)
 	{
-		$this->model->update( $data, $this->model->quoteFieldShort($this->idField).'='.DBModel::quote($this->id) );
+		$this->model->update( $data, '{'.$this->idField.'} = '.DBModel::quote($this->id) );
 	}
 
 	protected function needAjaxUpdate()

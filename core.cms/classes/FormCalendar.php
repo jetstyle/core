@@ -42,7 +42,7 @@ class FormCalendar extends FormIframe
 
 		if($this->config['use_time'] === false)
 		{
-			$this['use_time'] = false;
+			$this->USE_TIME = false;
 		}
 	}
 

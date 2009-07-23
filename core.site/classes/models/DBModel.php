@@ -881,7 +881,7 @@ class DBModel extends Model implements IteratorAggregate, ArrayAccess, Countable
 				$fieldConfig = $params;
 				$fieldConfig['type'] = 'file';
 				$fieldConfig['conf'] = $configKey.':'.$key;
-
+                
 				$this->addField($key, $fieldConfig);
 
 				// subconfigs

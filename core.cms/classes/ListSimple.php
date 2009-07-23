@@ -65,33 +65,44 @@ class ListSimple
         {
             $itemId = intval($_POST['item_id']);
             $page = intval($_POST[$this->pageVar]);
-            if (!$page) $page = 1;
+            if (!$page)
+            {
+                $page = 1;
+            }
             $destIndex = intval($_POST['index']) + ($page - 1) * $this->perPage;
 
-            $destItem = DBModel::factory($this->config['model'])->setOrder('_order ASC')->load(null, 1, $destIndex);
-            if (!$destItem[0]['_order']) {
-                $destItem = DBModel::factory($this->config['model'])->setOrder('_order DESC')->loadOne();
+            $destItem = DBModel::factory($this->config['model'])->setOrder('{_order} ASC')->load(null, 1, $destIndex);
+
+            if (!$destItem[0]['_order'])
+            {
+                $destItem = DBModel::factory($this->config['model'])->setOrder('{_order} DESC')->loadOne();
             }
             else
             {
                 $destItem = $destItem[0];
             }
-            $destOrder = $destItem['_order'];
+
+            $destOrder = intval($destItem['_order']);
             $sourceItem = DBModel::factory($this->config['model'])->loadOne('{id} = '.$itemId);
-            $sourceOrder = $sourceItem['_order'];
+            $sourceOrder = intval($sourceItem['_order']);
+
             $db = Locator::get('db');
             if ($sourceOrder > $destOrder)
+            {
                 $db->execute("
                     UPDATE ??".$this->getModel()->getTableName()."
                     SET _order = _order + 1
                     WHERE _order < ".$sourceOrder." AND _order >= ".$destOrder
                 );
+            }
             else
+            {
                 $db->execute("
                     UPDATE ??".$this->getModel()->getTableName()."
                     SET _order = _order - 1
                     WHERE _order > ".$sourceOrder." AND _order <= ".$destOrder
                 );
+            }
             $data = array('_order'=>$destOrder);
             DBModel::factory($this->config['model'])->update($data, '{id} = '.$itemId);
             die('1');
@@ -269,11 +280,16 @@ class ListSimple
 
     protected function constructModel()
     {
+        if (!$this->config['model'])
+        {
+            throw new JSException("You should set `model` param in config");
+        }
+
         Finder::useModel('DBModel');
         $model = DBModel::factory($this->config['model']);
         $model->addFields(array('_order', '_state'));
 
-        $model->where .= $_GET['_show_trash'] ? '{_state}>=0' : "{_state} <>2 ";
+        $model->where .= ($model->where ? " AND " : "" ).($_GET['_show_trash'] ? '{_state}>=0' : "{_state} <>2 ");
 
         $this->applyFilters($model);
 

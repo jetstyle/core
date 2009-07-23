@@ -51,6 +51,7 @@ class DoController extends Controller
 
 		$this->moduleConstructor = ModuleConstructor::factory($modulePath);
 
+        Locator::get('tpl')->set('module_name', $modulePath);
         Locator::get('tpl')->set('module_title', $this->moduleConstructor->getTitle());
 		Locator::get('tpl')->set('module_body', $this->moduleConstructor->getHtml());
 

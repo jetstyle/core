@@ -80,15 +80,8 @@ class TreeControlJsTree extends TreeControl
 				}
 				$treeParams['go_url'] = $url;
 
-				if (function_exists('json_encode'))
-				{
-					$treeParams['hide_buttons'] = json_encode($this->config['hide_buttons']);
-				}
-				else
-				{
-					Finder::useClass('Json');
-					$treeParams['hide_buttons'] = Json::encode($this->config['hide_buttons']);
-				}
+                Finder::useClass('Json');
+                $treeParams['hide_buttons'] = Json::encode($this->config['hide_buttons']);
 
 				if ($_COOKIE['tree_control_btns'] == 'true')
 				{

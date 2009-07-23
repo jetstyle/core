@@ -31,7 +31,3 @@ cms:
         - password
         - name
         - _state
-        >group: 
-            model: PrincipalStorageDbGroupsModel
-            pk: group_id
-            fk: id

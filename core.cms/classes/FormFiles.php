@@ -1,8 +1,7 @@
 <?php
+Finder::useClass('FormSimple');
 
-Finder::useClass('FormSimpleModel');
-
-class FormFiles extends FormSimpleModel
+class FormFiles extends FormSimple
 {
 	const FILES_RUBRIC_TYPE_ID = 0;
 	const PICTURES_RUBRIC_TYPE_ID = 1;
@@ -28,14 +27,6 @@ class FormFiles extends FormSimpleModel
 
 		$this->filesConfig = FileManager::getConfig($this->configKey);
 		parent::__construct($config);
-	}
-
-	protected function initModel()
-	{
-		parent::initModel();
-
-		// add files fields to model
-		//$this->model->addFilesConfig($this->configKey);
 	}
 
 	/**
@@ -110,6 +101,11 @@ class FormFiles extends FormSimpleModel
 		//загружаем и удаляем файлы
 		foreach ($this->filesConfig AS $inputName => $conf)
 		{
+            if ($conf['input'])
+            {
+                $inputName = $conf['input'];
+            }
+            
 			$file = FileManager::getFile($this->configKey.':'.$conf['key'], $objId, $isId);
 
 			if (is_uploaded_file($_FILES[$this->prefix.$inputName]['tmp_name']))
@@ -144,15 +140,15 @@ class FormFiles extends FormSimpleModel
 
 	public function delete()
 	{
-		$upload =& $this->upload;
+		$deleteRes = parent :: delete();
 
-		$res = parent :: delete();
-		// delete forever
-		if( 2 == $res )
+        // delete forever
+		if( 2 == $deleteRes )
 		{
 			$this->deleteFiles();
 		}
-		return $res;
+
+		return $deleteRes;
 	}
 
 	protected function deleteFiles($objId = 0, $isId = false)

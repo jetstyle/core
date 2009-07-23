@@ -1,0 +1,15 @@
+{{?*data && count(*data)}}
+    <div>
+        {{?*title}}
+            {{*title}}:&nbsp;
+        {{/?}}
+        <select name="{{*get_var}}" onchange="this.form.submit();" >
+            <option value="">-----------</option>
+            {{!for *data do=@:option}}
+
+            {{:option}}
+                <option value="{{*id}}" {{?*selected}}selected="selected"{{/?}} {{?*marked}}style="background-color:#eeeeee"{{/?}}>{{*indent}}{{*title}}</option>
+            {{/:option}}
+        </select>
+    </div>
+{{/?}}
