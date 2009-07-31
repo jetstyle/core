@@ -147,6 +147,7 @@ class TreeControlJsTree extends TreeControl
 
 	public function getHtml()
 	{
+        $this->renderFilters();
 		$this->renderTrash();
 		return $this->tpl->Parse( $this->template);
 	}

@@ -61,7 +61,7 @@ abstract class ListFilter
     }
 
     abstract public function getValue();
-    abstract public function apply($model);
+    abstract public function apply(&$model);
 
     abstract protected function init();
     abstract protected function getTplData();

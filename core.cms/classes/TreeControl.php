@@ -1,6 +1,8 @@
 <?php
 class TreeControl
 {
+    private $filtersObject = null;
+    
 	protected $tpl = null;
 	protected $config;
 
@@ -55,6 +57,8 @@ class TreeControl
 		$this->db = &Locator::get('db');
 
 		$this->id = intval(RequestInfo::get($this->idGetVar));
+
+        $this->applyFilters($this->config['where']);
 	}
 
 
@@ -211,9 +215,27 @@ class TreeControl
 
 	public function getHtml()
 	{
+        $this->renderFilters();
 		$this->renderTrash();
 		return $this->tpl->Parse( $this->template);
 	}
+
+    public function getFiltersObject($key = null)
+    {
+        if (null === $this->filtersObject)
+        {
+            $this->filtersObject = $this->constructFiltersObject();
+        }
+
+        if ($key)
+        {
+            return $this->filtersObject->getByKey($key);
+        }
+        else
+        {
+            return $this->filtersObject;
+        }
+    }
 
 	public function toXML($treeId = 0)
 	{
@@ -248,6 +270,31 @@ class TreeControl
 		$str .= "</tree>";
 		return $str;
 	}
+
+    protected function renderFilters()
+    {
+        $html = $this->getFiltersObject()->getHtml();
+        $this->tpl->set('__filter', $html);
+    }
+
+    protected function applyFilters(&$model)
+    {
+        $filter = $this->getFiltersObject();
+        $filter->apply($model);
+    }
+
+    protected function constructFiltersObject()
+    {
+        Finder::useClass('ListFilter');
+        $config = array(
+            'type' => 'wrapper',
+            'filters' => $this->config['filters'],
+        );
+
+        $filterObj = ListFilter::factory($config, $this);
+
+        return $filterObj;
+    }
 
 	protected function renderTrash()
 	{
@@ -541,9 +588,9 @@ class TreeControl
 			$order = intval($order['_max']);
 		}
 
-		if (isset($this->config['fields_insert']) && is_array($this->config['fields_insert']))
+		if (isset($this->config['insert']) && is_array($this->config['insert']))
 		{
-			foreach ($this->config['fields_insert'] as $fieldName => $fieldValue)
+			foreach ($this->config['insert'] AS $fieldName => $fieldValue)
 			{
 				$additionFields .= ','.$fieldName;
 				$additionValues .= ','.$db->quote($fieldValue);

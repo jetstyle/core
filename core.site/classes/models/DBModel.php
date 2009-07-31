@@ -666,6 +666,14 @@ class DBModel extends Model implements IteratorAggregate, ArrayAccess, Countable
 		return $this;
 	}
 
+    public function addWhere($where)
+	{
+		if (!empty($where))
+			$this->where .= ($this->where ? " AND " : "" ) . $where;
+
+		return $this;
+	}
+
 	/**
 	 * Set query limit
 	 *
@@ -1146,6 +1154,9 @@ class DBModel extends Model implements IteratorAggregate, ArrayAccess, Countable
 
 	public function &loadTree($where = NULL)
 	{
+        $this->treeMinLevel = null;
+        $this->treeRootId = null;
+
 		/**
 		 * we need to aggregate data by primary key
 		 */
@@ -1293,7 +1304,14 @@ class DBModel extends Model implements IteratorAggregate, ArrayAccess, Countable
 		$fmodel = clone $model;
 
 		$where = $fmodel->quoteField($fieldinfo['fk']) .'='. DBModel::quote($data[$fieldinfo['pk']]);
-		$fmodel->load($where);
+        if ($fieldinfo['tree'])
+        {
+            $fmodel->loadTree($where);
+        }
+        else
+        {
+            $fmodel->load($where);
+        }
 
 		$data[$fieldName] = &$fmodel;
 	}

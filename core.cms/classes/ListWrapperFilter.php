@@ -16,7 +16,7 @@ class ListWrapperFilter extends ListFilter
         
     }
 
-    public function apply($model)
+    public function apply(&$model)
     {
         foreach ($this->filters AS $filter)
         {

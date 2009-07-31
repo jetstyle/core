@@ -23,7 +23,7 @@ class ListSearchFilter extends ListFilter
         return $this->getVarValue;
     }
 
-    public function apply($model)
+    public function apply(&$model)
     {
         if ($this->preparedGetVarValue)
         {
