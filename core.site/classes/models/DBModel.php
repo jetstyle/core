@@ -375,7 +375,12 @@ class DBModel extends Model implements IteratorAggregate, ArrayAccess, Countable
 		{
 			$this->setAutoPrefix($ymlConfig['autoPrefix']);
 		}
-		
+
+        if ($ymlConfig['key_field'])
+        {
+            $this->setKeyField($ymlConfig['key_field']);
+        }
+
 		if ($ymlConfig['files'])
 		{
 			$this->addFilesConfig($ymlConfig['files']);
