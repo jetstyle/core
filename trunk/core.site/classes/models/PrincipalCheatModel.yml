@@ -1,9 +1,0 @@
-default:
-    table: users_cheats
-    fields: 
-        - hash
-        - user_id
-        - timeline
-        - usage_count
-        
-    where: '{usage_count} < 3' 

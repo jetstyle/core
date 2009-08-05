@@ -1,8 +1,0 @@
-table: files2rubrics
-fields:
-    - file_id
-    - rubric_id
-    >rubric:
-       model: FilesRubricsModel
-       pk: rubric_id
-       fk: id

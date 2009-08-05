@@ -1,7 +1,0 @@
-table: files_rubrics
-fields:
-    - id
-    - title
-where: {_state} = 0
-order: 
-    _order: ASC
