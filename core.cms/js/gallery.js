@@ -167,10 +167,8 @@ Gallery.prototype = {
     		items = this.getId(deleteBtn.parentNode.parentNode);
     	}
     	var self = this;
-    	$.post(this.baseUrl + '?id=' + this.rubricId, {'action': 'delete','items': items}, function(data)
-		{
-       		if (data.ok)
-			{
+    	$.post(this.baseUrl + '?id=' + this.rubricId, {'action': 'delete','items': items}, function(data) {
+       		if (data.ok) {
 				if (self.selectedItems.length > 0) {
                 	for (var i=0; i<self.selectedItems.length; i++)
                 		$('#image'+self.selectedItems[i]).remove();
@@ -287,7 +285,7 @@ var imagesUploadSettings = {
 		location.reload(true);
 	},
 	upload_success_handler: function(file, data) {
-
+	
 		try
 		{
 			eval('data = ' + data + ';');
