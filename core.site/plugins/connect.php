@@ -112,8 +112,8 @@ if ( $compile )
 				file_put_contents(Config::get('cache_dir').'/'.$compile.'/'.$compressedName.'.'.$compile.'.gz', gzencode($result, 9));
 			}
 			
-			$fname = array('path' => RequestInfo::$baseUrl.'cache/'.Config::get('app_name').'/'.$compile, 'file' => $compressedName);
-			$tpl->set("*",$fname);
+			//$fname = array('path' => RequestInfo::$baseUrl.'cache/'.Config::get('app_name').'/'.$compile, 'file' => $compressedName);
+			$tpl->set("_", RequestInfo::$baseUrl.'cache/'.Config::get('app_name').'/'.$compile.'/'.$compressedName.'.'.$compile);
 			$str = $tpl->parse($template."_path");
 		}
 		else
@@ -121,7 +121,7 @@ if ( $compile )
 			$projDir = Config::get('project_dir');
 			$projDir = rtrim($projDir, '/\\');
 			
-      foreach( $tpl->CONNECT[$compile] as $fname )
+            foreach( $tpl->CONNECT[$compile] as $fname )
 			{
 				$tplAdd = '';
 				
