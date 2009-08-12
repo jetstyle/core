@@ -1,6 +1,6 @@
 <?php
-Finder::useClass("TreeControl");
-class TreeSelect extends TreeControl
+Finder::useClass("TreeControlJsTree");
+class TreeSelect extends TreeControlJsTree
 {
 	protected $select_template = 'list_multi_select.html';
 	protected $storeTo = '__filters';
@@ -15,10 +15,12 @@ class TreeSelect extends TreeControl
 				{
 					$sql = "
 						SELECT ".$config['id']." AS id, CONCAT(SUBSTRING(".$config['title'].",1,40),'..') AS title
+						".($config['format_tree'] ? ",_level" : "")."
 						FROM ".$config['table']." 
 						".($config['where'] ? "WHERE ".$config['where'] : "")."
 						".($config['order'] ? "ORDER BY ".$config['order'] : "")."
 					";
+
 					$config['opts'] = $this->db->query($sql);
 				}
 				if (is_array($config['opts']))
@@ -31,7 +33,8 @@ class TreeSelect extends TreeControl
 					
 					foreach ($config['opts'] AS $k)
 					{
-						$options .= "<option value='".$k['id']."'".($_GET[$config['get_var']] == $k['id'] ? " selected='selected'" : '').">".$k['title']."</option>";
+						$title = ( $config['format_tree'] ? str_repeat("&nbsp;&nbsp;", $k['_level']) : "" ).$k['title'];
+						$options .= "<option value='".$k['id']."'".($_GET[$config['get_var']] == $k['id'] ? " selected='selected'" : '').">".$title."</option>";
 					}
 										
 					$this->tpl->set('__options', $options);

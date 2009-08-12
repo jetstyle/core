@@ -1,0 +1,29 @@
+	<tr>
+	  <td colspan="2">
+	{{!!wrap title="ƒополнительные опции" closed="1"}}
+	    <table cellspacing="0" class="w100 quick-simple-form-compact">
+	      <tr>
+	        <td class="right"><label for="{{prefix}}meta_description"> раткое описание страницы:</label></td>
+	        <td class="desc">
+	          <input type="text" id="{{prefix}}meta_description" name="{{prefix}}meta_description" class="w100" value="{{*meta_description|escape}}" validate="string" validate_params=":200" />
+	          ќписание содержани€ страницы (тег <dfn>description</dfn>), до 200 символов, используетс€ дл€ повышени€ релевантности страницы по поисковым запросам св€занным с содержанием страницы.
+	        </td>
+	      </tr>
+	      <tr>
+	        <td class="right"><label for="{{prefix}}meta_keywords"> лючевые слова:</label></td>
+	        <td class="desc">
+	          <input type="text" id="{{prefix}}meta_keywords" name="{{prefix}}meta_keywords" class="w100" value="{{*meta_keywords|escape}}" validate="string" validate_params=":200" />
+	          ѕеречисление ключевых слов описывающих содержание страницы (тег <dfn>keywords</dfn>), до 200 символов, используетс€ дл€ повышени€ релевантности страницы по поисковым запросам св€занным с содержанием страницы.
+	        </td>
+	      </tr>
+	      <tr>
+	        <td class="right"><label for="{{prefix}}meta_title">«аголовок страницы:</label></td>
+	        <td class="desc">
+	          <input type="text" id="{{prefix}}meta_title" name="{{prefix}}meta_title" class="w100" value="{{*meta_title|escape}}" validate="string" validate_params=":200" />
+	          —одержимое тега <dfn>title</dfn>. ƒанный текст будет использоватьс€ поисковыми системами при выдаче дл€ указани€ ссылки на данный документ.
+	        </td>
+	      </tr>
+	    </table>
+	  {{/!!}}
+	  </td>
+	</tr>
