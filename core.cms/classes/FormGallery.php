@@ -79,7 +79,7 @@ class FormGallery extends FormCalendar
 		foreach (explode(',', Config::get('upload_ext')) AS $ext)
 		{
 			$ext = trim($ext);
-			if ($this->config->allowNonImageFiles || File::isImageExt($ext))
+			if ($this->config['allowNonImageFiles'] || File::isImageExt($ext))
 				$exts .= '*.'.$ext.';';
 		}
 		
