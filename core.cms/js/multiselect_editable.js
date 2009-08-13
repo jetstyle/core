@@ -98,16 +98,19 @@ MultiselectEditable.prototype = {
 	
 	delItem: function(id, row)
 	{
-		this.showUpdateMsg();
-		var params = {'a' : 'del', 'item_id' : id};
-		$.post(this.url, params, this._delItem.prototypeBind(this, row), 'json');
-		
+        if (confirm('Удалить?'))
+        {
+            this.showUpdateMsg();
+            var params = {'a' : 'del', 'item_id' : id};
+            $.post(this.url, params, this._delItem.prototypeBind(this, row), 'json');
+        }
 	},
 	
 	_delItem: function(row)
 	{
 		this.hideUpdateMsg();
 		this.table.deleteRow(row.rowIndex);
+        this.currentRow--;
 	},
 	
 	showUpdateMsg: function()
