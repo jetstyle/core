@@ -44,31 +44,16 @@ class EditorObjectsCorrector
 	{
 		$r= array('text' => $matches[1]);
 		$this->tpl->setRef('*', $r);
-		
-		// @TODO remove HACK
-		try
-		{
-			return $this->tpl->parse('content/blocks/quote.html');
-		}
-		catch(FileNotFoundException $e)
-		{
-			return $this->tpl->parse('editor/quote.html');		
-		}
+
+        return $this->tpl->parse('content/blocks/quote.html');
 	}
 
 	protected function correctMarks($matches)
 	{
 		$r= array('text' => $matches[1]);
 		$this->tpl->setRef('*', $r);
-		// @TODO remove HACK
-		try
-		{
-			return $this->tpl->parse('content/blocks/mark.html');
-		}
-		catch(FileNotFoundException $e)
-		{
-			return $this->tpl->parse('editor/mark.html');		
-		}
+
+		return $this->tpl->parse('content/blocks/mark.html');
 	}
 
 	protected function correctNotes($matches)
@@ -76,15 +61,7 @@ class EditorObjectsCorrector
 		$r= array('text' => $matches[1]);
 		$this->tpl->setRef('*', $r);
 
-		// @TODO remove HACK
-		try
-		{
-			return $this->tpl->parse('content/blocks/note.html');
-		}
-		catch(FileNotFoundException $e)
-		{
-			return $this->tpl->parse('editor/note.html');		
-		}
+		return $this->tpl->parse('content/blocks/note.html');
 	}
 	
 	protected function correctFlash($matches)
@@ -138,16 +115,7 @@ class EditorObjectsCorrector
 					$params['height'] = intval($flashParams[2]);
 					
 					$this->tpl->setRef('*', $params);
-					
-					// @TODO remove HACK
-					try
-					{
-						$result = $this->tpl->parse('content/blocks/flash.html');
-					}
-					catch(FileNotFoundException $e)
-					{
-						// 
-					}
+					$result = $this->tpl->parse('content/blocks/flash.html');
 				}
 			}
 		}
@@ -175,15 +143,7 @@ class EditorObjectsCorrector
 				$res['title'] = $matches[2];
 				$this->tpl->setRef('*', $res);
 				
-				// @TODO remove HACK
-				try
-				{
-					return $this->tpl->parse('content/blocks/file.html');
-				}
-				catch(FileNotFoundException $e)
-				{
-					return $this->tpl->parse('editor/file.html');		
-				}
+				return $this->tpl->parse('content/blocks/file.html');
 			}
 			// link in new window
 			elseif($res['target'] == '_blank')
@@ -193,7 +153,6 @@ class EditorObjectsCorrector
 
 				//return $this->tpl->Parse('typografica/link.html');
 			}
-
 		}
 		return $matches[0];
 	}
@@ -213,40 +172,15 @@ class EditorObjectsCorrector
 			switch($res['mode'])
 			{
 				case 1:
-					// @TODO remove HACK
-					try
-					{
-						return $this->tpl->parse('content/blocks/images.html:image_preview');
-					}
-					catch(FileNotFoundException $e)
-					{
-						return $this->tpl->parse('editor/images.html:image_preview');		
-					}
+					return $this->tpl->parse('content/blocks/images.html:image_preview');
 					break;
 
 				case 2:
-					// @TODO remove HACK
-					try
-					{
-						return $this->tpl->parse('content/blocks/images.html:image_small');
-					}
-					catch(FileNotFoundException $e)
-					{
-						return $this->tpl->parse('editor/images.html:image_small');		
-					}
+					return $this->tpl->parse('content/blocks/images.html:image_small');
 					break;
 
 				case 3:
-					// @TODO remove HACK
-					try
-					{
-						return $this->tpl->parse('content/blocks/images.html:image_big');
-					}
-					catch(FileNotFoundException $e)
-					{
-						return $this->tpl->parse('editor/images.html:image_big');		
-					}
-
+					return $this->tpl->parse('content/blocks/images.html:image_big');
 					break;
 
 				default:
@@ -282,15 +216,7 @@ class EditorObjectsCorrector
 		}
 		
 		$this->tpl->set('table', $this->table);
-		// @TODO remove HACK
-		try
-		{
-			return $this->tpl->parse('content/blocks/tables/'.$template);
-		}
-		catch(FileNotFoundException $e)
-		{
-			return $this->tpl->parse('editor/tables/'.$template);		
-		}
+		return $this->tpl->parse('content/blocks/tables/'.$template);
 	}
 
 	protected function correctTableHead($matches)
