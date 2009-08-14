@@ -21,9 +21,7 @@ class FormFiles extends FormSimple
 	{
 		Finder::useClass('FileManager');
 
-		$key = explode('/', $config['module_path']);
-		array_pop($key);
-		$this->configKey = implode('/', $key);
+		$this->configKey = $config['module_path'];
 
 		$this->filesConfig = FileManager::getConfig($this->configKey);
 		parent::__construct($config);
