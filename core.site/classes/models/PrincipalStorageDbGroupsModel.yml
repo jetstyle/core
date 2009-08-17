@@ -1,6 +1,16 @@
-table: users_groups
-fields: 
-    - id
-    - title
-    - god
-    - custom
+default:
+    table: users_groups
+    fields:
+        - id
+        - title
+        - god
+        - custom
+
+cms:
+    table: users_groups
+    fields:
+        - id
+        - title
+        - god
+        - custom
+        - _state

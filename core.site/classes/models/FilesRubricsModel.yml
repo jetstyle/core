@@ -1,7 +1,29 @@
-table: files_rubrics
-fields:
-    - id
-    - title
-where: {_state} = 0
-order: 
-    _order: ASC
+default:
+    table: files_rubrics
+    fields:
+        - id
+        - title
+    where: {_state} = 0
+    order:
+        _order: ASC
+
+
+cms_files:
+    table: files_rubrics
+    fields:
+        - id
+        - title
+        - _state
+    where: {type_id} = 0
+    order:
+        _order: ASC
+
+cms_pictures:
+    table: files_rubrics
+    fields:
+        - id
+        - title
+        - _state
+    where: {type_id} = 1
+    order:
+        _order: ASC

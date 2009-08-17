@@ -15,7 +15,11 @@
     {{@blocks/help_link.html}}
 	{{__trash_switch}}
   </div>
-	{{__filters}}
+	{{?__filter}}
+        <form action="" method="get" class="select-topic-">
+            {{__filter}}
+        </form>
+    {{/?}}
 	<!--<a href="#" title="Показать/скрыть элементы управления" onclick="treeToggleControls(); return false;" style="float:right;"><img {{?tree_params.show_controls}}class="toggleEditTreeClass-Sel"{{/?}} src="{{images}}tree/npj_edit.gif" id="toggleEditImg"></a>-->
 	<img class="block" src="{{images}}z.gif" width="1" height="10" align="top" alt="" />
 

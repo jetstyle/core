@@ -1,29 +1,29 @@
 <?php
 /**
  * FileManager
- * 
+ *
  * @package config
  * @author lunatic <lunatic@jetstyle.ru>
- * @since version 0.4 
+ * @since version 0.4
  */
 Finder::useClass('File');
 class FileManager
 {
 	private static $instance = null;
-	
+
 	private $configs = array();
 	private $keys2paths = array();
-	
+
 	private function __construct(){}
-	
+
 	protected static function &getInstance()
 	{
 		if (null === self::$instance)
 			self::$instance = new self();
-		
+
 		return self::$instance;
 	}
-	
+
 	/**
 	 * Get file by key AND id, if exists
 	 *
@@ -44,9 +44,9 @@ class FileManager
 			$isFileId = true;
 			$config = array();
 		}
-		
+
 		$file = new File($config);
-		
+
 		if ($id)
 		{
 			if ($isFileId)
@@ -58,7 +58,7 @@ class FileManager
 				$file->setObjId($id);
 			}
 		}
-		
+
 		return $file;
 	}
 
@@ -78,14 +78,14 @@ class FileManager
 	{
 		return self::getInstance()->getConfigInternal($conf, $key);
 	}
-	
+
 	private function getConfigInternal($conf, $key = null)
 	{
 		if (!is_string($conf) && !is_numeric($conf))
 		{
 			return;
 		}
-		
+
 		if (!array_key_exists($conf, $this->configs))
 		{
 			$this->loadConfig($conf);
@@ -96,7 +96,7 @@ class FileManager
 			$keyParts = explode('/', $key);
 			if (count($keyParts) == 2)
 			{
-				return $this->configs[$conf][$keyParts[0]]['previews'][$keyParts[1]];
+				return $this->configs[$conf][$keyParts[0]]['variants'][$keyParts[1]];
 			}
 			else
 			{
@@ -108,70 +108,54 @@ class FileManager
 			return $this->configs[$conf];
 		}
 	}
-	
-	private function getPathsForKey($key)
-	{
-		if (!$this->keys2paths[$key])
-		{
-			$keyParts = explode('/', $key);
-			$moduleName = array_shift($keyParts);
-			
-			$path = Config::get('project_dir').'cms/modules/'.$moduleName.'/';
-			
-			if (count($keyParts))
-			{
-				$path .= 'conf/'.implode('/', $keyParts).'/';
-			}
-			
-			$path .= 'files.yml';
-			$this->keys2paths[$key] = $path;
-		}
 
-		return $this->keys2paths[$key];
-	}
-	
 	private function loadConfig($conf)
 	{
-		$path = $this->getPathsForKey($conf);
-		try
-		{
-			$this->configs[$conf] = YamlWrapper::load($path);
-		}
-		catch (FileNotFoundException $e)
-		{
-			$this->configs[$conf] = array();
-		}
-		
-		if (!empty($this->configs[$conf]))
-		{
-			foreach ($this->configs[$conf] AS $key => &$v)
+        Finder::useClass('ModuleConstructor');
+        $moduleConf = ModuleConstructor::factory($conf)->getConfig();
+
+        $filesConf = array();
+
+        if (is_array($moduleConf['files']))
+        {
+            $filesConf = $moduleConf['files'];
+            foreach ($moduleConf['files'] AS $key => $v)
 			{
-				if (is_array($v['previews']))
+                if (is_numeric($key))
+                {
+                    $key = $v;
+                    $v = array();
+                }
+
+                $filesConf[$key] = $v;
+
+                if (is_array($v) && is_array($v['variants']))
 				{
-					foreach ($v['previews'] AS $subKey => $subConf)
+					foreach ($v['variants'] AS $subKey => $subConf)
 					{
-						$v['previews'][$subKey] = array(
+						$filesConf[$key]['variants'][$subKey] = array(
 							'actions' => $subConf,
 							'key' => $key,
 							'subkey' => $subKey,
 							'conf' => $conf
 						);
-						
+
 						if (is_array($subConf))
 						{
-							$v['previews'][$subKey]['actions_hash'] = md5(serialize($subConf));
+							$filesConf[$key]['variants'][$subKey]['actions_hash'] = md5(serialize($subConf));
 						}
 					}
 				}
-				
-				$v['key'] = $key;
-				$v['conf'] = $conf;
+
+				$filesConf[$key]['key'] = $key;
+				$filesConf[$key]['conf'] = $conf;
 				if (is_array($v['actions']))
 				{
-					$v['actions_hash'] = md5(serialize($v['actions']));
+					$filesConf[$key]['actions_hash'] = md5(serialize($v['actions']));
 				}
 			}
-		}
+        }
+        $this->configs[$conf] = $filesConf;
 	}
 }
 ?>

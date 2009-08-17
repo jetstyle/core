@@ -8,7 +8,9 @@ class ListSimple
 	protected $items;
 	protected $pager;
 
-	private $model;
+    private $filtersObject = null;
+
+	private $model = null;
 
 	protected $loaded = false; //грузили или нет данные?
 
@@ -16,10 +18,10 @@ class ListSimple
 	protected $idField = "id";		// первичный ключ таблицы
 
 	protected $template = "list_simple.html"; 				//шаблон результата
-	protected $template_list = "list_simple.html:List"; 	//откуда брать шаблоны элементов списка
+	protected $template_list = "list_simple.html:list"; 	//откуда брать шаблоны элементов списка
 
-	protected $template_trash_show = "list_simple.html:TrashShow";
-	protected $template_trash_hide = "list_simple.html:TrashHide";
+	protected $template_trash_show = "list_simple.html:trash_show";
+	protected $template_trash_hide = "list_simple.html:trash_hide";
 
 	protected $template_new = 'list_simple.html:add_new';
 	protected $template_arrows = 'blocks/pager.html';
@@ -41,33 +43,101 @@ class ListSimple
 		$this->db = &Locator::get('db');
 		$this->tpl = &Locator::get('tpl');
 
-		if ($this->config->perPage)
+		if ($this->config['perPage'])
 		{
-			$this->perPage = $this->config->perPage;
+			$this->perPage = $this->config['perPage'];
 		}
 
-		if ($this->config->frameSize)
+		if ($this->config['frameSize'])
 		{
-			$this->frameSize = $frameSize;
+			$this->frameSize = $this->config['frameSize'];
 		}
 
-		$this->config->SELECT_FIELDS[] = '_order';
-		$this->config->SELECT_FIELDS[] = '_state';
-
-		$this->storeTo = "list_".$config->getModuleName();
+		$this->storeTo = "list_".$config['module_name'];
 		$this->id = intval(RequestInfo::get($this->idGetVar));
 
-		$this->prefix = $config->moduleName.'_list_';
+		$this->prefix = $this->config['module_name'].'_list_';
 	}
 
 	public function handle()
 	{
-		if( $this->updateListStruct() )
-		{
-			Controller::redirect( RequestInfo::hrefChange('', array()));
-		}
+        if ($_POST['order_list'])
+        {
+            $itemId = intval($_POST['item_id']);
+            $page = intval($_POST[$this->pageVar]);
+            if (!$page)
+            {
+                $page = 1;
+            }
+            $destIndex = intval($_POST['index']) + ($page - 1) * $this->perPage;
+
+            $destItem = DBModel::factory($this->config['model'])->setOrder('{_order} ASC')->load(null, 1, $destIndex);
+
+            if (!$destItem[0]['_order'])
+            {
+                $destItem = DBModel::factory($this->config['model'])->setOrder('{_order} DESC')->loadOne();
+            }
+            else
+            {
+                $destItem = $destItem[0];
+            }
+
+            $destOrder = intval($destItem['_order']);
+            $sourceItem = DBModel::factory($this->config['model'])->loadOne('{id} = '.$itemId);
+            $sourceOrder = intval($sourceItem['_order']);
+
+            $db = Locator::get('db');
+            if ($sourceOrder > $destOrder)
+            {
+                $db->execute("
+                    UPDATE ??".$this->getModel()->getTableName()."
+                    SET _order = _order + 1
+                    WHERE _order < ".$sourceOrder." AND _order >= ".$destOrder
+                );
+            }
+            else
+            {
+                $db->execute("
+                    UPDATE ??".$this->getModel()->getTableName()."
+                    SET _order = _order - 1
+                    WHERE _order > ".$sourceOrder." AND _order <= ".$destOrder
+                );
+            }
+            $data = array('_order'=>$destOrder);
+            DBModel::factory($this->config['model'])->update($data, '{id} = '.$itemId);
+            die('1');
+        }
+        if ($_POST['delete_list'])
+        {
+            $items = explode(',', $_POST['delete_list']);
+            foreach ($items as $id)
+            {
+                $this->getModel()->deleteToTrash(intval($id));
+            }
+            die('1');
+        }
+        if ($_POST['restore_list'])
+        {
+            $items = explode(',', $_POST['restore_list']);
+            foreach ($items as $id)
+            {
+                $this->getModel()->restoreFromTrash(intval($id));
+            }
+            die('1');
+        }
 
 		$this->load();
+
+        $tpl = &Locator::get('tpl');
+        $tpl->set('page_url', RequestInfo::$baseUrl.RequestInfo::$pageUrl);
+        $tpl->set('page_num', intval($_GET[$this->pageVar]));
+        $tpl->set('page_var', $this->pageVar);
+        $tpl->set('per_page', $this->perPage);
+        $tpl->set('group_delete_url', RequestInfo::hrefChange('',array('delete_list'=>'1')));
+        $tpl->set('group_restore_url', RequestInfo::hrefChange('',array('restore_list'=>'1')));
+        $tpl->set('group_operations', $this->config['group_operations']);
+        $tpl->set('drags', $this->config['drags']);
+        $tpl->set('module_name', $this->config['module_name']);
 
 		$this->renderTrash();
 		$this->renderAddNew();
@@ -79,13 +149,13 @@ class ListSimple
 		$list->EVOLUTORS = $this->EVOLUTORS; //потомки могут добавить своего
 		$list->EVOLUTORS["href"] = array( &$this, "_href" );
 		$list->EVOLUTORS["title"] = array( &$this, "_title" );
-		$list->EVOLUTORS['controls'] = array( &$this, '_controls' );
 		$list->issel_function = array( &$this, '_current' );
 		$list->parse( $this->template_list, '__list' );
 
-        Locator::get('tpl')->set('module_name', $this->config->getModuleName());
-
 		$this->renderPager();
+
+        $this->renderFilters();
+
 	}
 
 	public function setStoreTo($value)
@@ -134,24 +204,37 @@ class ListSimple
 		return ($this->id == $r[$this->idGetVar] ? '_sel' : '').($r['_state']==1 ? '_hidden' : '').($r['_state']==2 ? '_del' : '');
 	}
 
-	public function _controls(&$list)
-	{
-		if( !$this->config->HIDE_CONTROLS['exchange'] )
-		{
-			return $this->tpl->parse( $list->tpl_item.'_Exchange' );
-		}
-		return '';
-	}
-
 	public function getHtml()
 	{
 		return $this->tpl->parse( $this->template);
 	}
 
+    public function getPrefix()
+    {
+        return $this->prefix;
+    }
+
+    public function getFiltersObject($key = null)
+    {
+        if (null === $this->filtersObject)
+        {
+            $this->filtersObject = $this->constructFiltersObject();
+        }
+
+        if ($key)
+        {
+            return $this->filtersObject->getByKey($key);
+        }
+        else
+        {
+            return $this->filtersObject;
+        }
+    }
+
 	protected function renderTrash()
 	{
 		//render trash switcher
-		if (!$this->config->HIDE_CONTROLS['show_trash'])
+		if (!$this->config['hide_controls']['show_trash'])
 		{
 			$show_trash = $_GET['_show_trash'];
 			$this->tpl->set( '_show_trash_href', RequestInfo::hrefChange('', array('_show_trash' => !$show_trash)));
@@ -161,91 +244,82 @@ class ListSimple
 
 	protected function renderAddNew()
 	{
-		if (!$this->config->HIDE_CONTROLS['add_new'])
+		if (!$this->config['hide_controls']['add_new'])
 		{
 			//ссылка на новое
 			$this->tpl->set( '_add_new_href', RequestInfo::hrefChange('', array($this->idGetVar => '', '_new' => 1)));
-			$this->tpl->set( '_add_new_title', $this->config->get('add_new_title') );
+			$this->tpl->set( '_add_new_title', $this->config['add_new_title'] );
 			$this->tpl->Parse( $this->template_new, '__add_new' );
 		}
 	}
 
-	protected function &getModel()
-	{
-		if (!$this->model)
-		{
-			Finder::useModel('DBModel');
-			$this->model = new DBModel();
-			$this->model->setTable($this->getTableName());
-			$this->model->setFields($this->config->SELECT_FIELDS);
-			$this->model->where = ( $_GET['_show_trash'] ? '{_state}>=0' : "{_state} <>2 " ) . ($this->config->where ? ' AND ' . $this->config->where : '') ;
-			$this->model->setOrder($this->config->order_by);
-		}
+    protected function renderFilters()
+    {
+        $html = $this->getFiltersObject()->getHtml();
+        $this->tpl->set('__filter', $html);
+    }
 
-		return $this->model;
-	}
-
-	protected function getTableName()
-	{
-		if (!$this->config->table_name)
-		{
-			Finder::useClass('Inflector');
-			$pathParts = explode('/', $this->config->componentPath);
-			array_pop($pathParts);
-			$pathParts = array_map(array(Inflector, 'underscore'), $pathParts);
-			$this->config->table_name = strtolower(implode('_', $pathParts));
-		}
-
-		return $this->config->table_name;
-	}
-
-	/**
-	 * Меняем элементы местами
-	 *
-	 * @return boolean
-	 */
-	protected function updateListStruct()
-	{
-		//params
-		$id1 = intval($_POST['id1']);
-		$id2 = intval($_POST['id2']);
-		$action = $_POST['action'];
-
-		$return = false;
-		switch($action)
-		{
-			case 'exchange':
-
-				$model = &$this->getModel();
-				$model->load($model->quoteField($this->idField).'IN('.$id1.','.$id2.')');
-
-				$data = array('_order' => $model[1]['_order']);
-				$model->update($data, $model->quoteFieldShort($this->idField).'='.$model[0][$this->idField]);
-
-				$data = array('_order' => $model[0]['_order']);
-				$model->update($data, $model->quoteFieldShort($this->idField).'='.$model[1][$this->idField]);
-
-				//возвращаем
-				$return = true;
-			break;
-		}
-		return $return;
-	}
-
-	protected function pager($total)
-	{
-		Finder::useClass('Pager');
-		$this->pager = new Pager();
-		$this->pager->setup(intval(RequestInfo::get($this->pageVar)), $total, $this->perPage, $this->frameSize);
-	}
-
-	protected function renderPager()
+    protected function renderPager()
 	{
 		if ($this->pager)
 		{
 			$this->tpl->set('pager', $this->pager->getPages());
 			$this->tpl->parse('blocks/pager.html', '__arrows');
 		}
+	}
+
+	protected function &getModel()
+	{
+		if (null === $this->model)
+		{
+            $this->model = $this->constructModel();
+		}
+
+		return $this->model;
+	}
+
+    protected function constructModel()
+    {
+        if (!$this->config['model'])
+        {
+            throw new JSException("You should set `model` param in config");
+        }
+
+        Finder::useModel('DBModel');
+        $model = DBModel::factory($this->config['model']);
+        $model->addFields(array('_order', '_state'));
+
+        $model->where .= ($model->where ? " AND " : "" ).($_GET['_show_trash'] ? '{_state}>=0' : "{_state} <>2 ");
+
+        $this->applyFilters($model);
+
+        return $model;
+    }
+
+    protected function applyFilters(&$model)
+    {
+        $filter = $this->getFiltersObject();
+        $filter->apply($model);
+    }
+
+    protected function constructFiltersObject()
+    {
+        Finder::useClass('ListFilter');
+        $config = array(
+            'type' => 'wrapper',
+            'filters' => $this->config['filters'],
+        );
+
+        $filterObj = ListFilter::factory($config, $this);
+
+        return $filterObj;
+    }
+
+	protected function pager($total)
+	{
+		Finder::useClass('Pager');
+		$this->pager = new Pager();
+		$this->pager->setup(intval(RequestInfo::get($this->pageVar)), $total, $this->perPage, $this->frameSize);
 	}
 
 	public function getAllItems($where = '')
@@ -256,5 +330,4 @@ class ListSimple
 		return $model->getArray();
 	}
 }
-
 ?>

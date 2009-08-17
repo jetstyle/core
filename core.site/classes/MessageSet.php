@@ -46,7 +46,7 @@ class MessageSet
 	private $MSG_NAMES = array(); // стек имён для переключения языка
 	private $lang = "default";
 
-	private function __construct()
+	public function __construct()
 	{
 		// always load default messageset
 		$this->load();

@@ -27,7 +27,7 @@ class DoController extends Controller
 		{
 			Controller::deny();
 		}
-		
+
 		parent::handle();
 	}
 
@@ -40,21 +40,26 @@ class DoController extends Controller
 	{
 		$params = $this->params;
 		unset($params[0]);
-		
-		$sql = "SELECT title FROM ??toolbar WHERE href=".Locator::get('db')->quote( implode("/",$config) ) ;
-		$current = Locator::get('db')->queryOne($sql);
-		Locator::get('tpl')->set('module_title', $current['title']);
-		
+
 		Finder::useClass("ModuleConstructor");
-		$moduleConstructor =& new ModuleConstructor();
-		$moduleConstructor->initialize($config['module'], $params);
+        $modulePath = $config['module'].( $params ? '/'.implode('/', $params) : '' );
 
-		Locator::get('tpl')->set('module_body', $moduleConstructor->proceed());
+        if ((!defined('COMMAND_LINE') || !COMMAND_LINE) && !Locator::get('principal')->security('cmsModules', $modulePath))
+		{
+			return Controller::deny();
+		}
 
-		$this->data['title_short'] = $moduleConstructor->getTitle();
+		$this->moduleConstructor = ModuleConstructor::factory($modulePath);
+
+        Locator::get('tpl')->set('module_name', $modulePath);
+        Locator::get('tpl')->set('module_title', $this->moduleConstructor->getTitle());
+		Locator::get('tpl')->set('module_body', $this->moduleConstructor->getHtml());
+
+		$this->data['title_short'] = $this->moduleConstructor->getTitle();
+
 		$this->siteMap = 'module';
 	}
-	
+
 	function handle_pack_modules($config)
 	{
 		// force UTF8

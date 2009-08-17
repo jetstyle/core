@@ -33,9 +33,9 @@ class Json
         return $result;
 	}
 
-	public static function decode($input)
+	public static function decode($input, $assoc = false)
 	{
-		return json_decode($input);
+		return json_decode($input, $assoc);
 	}
 
     private static function encodeAsObject($input)
@@ -87,7 +87,7 @@ class Json
 		if (is_numeric($value))
 			return $value;
 		else
-			return "'".addslashes($value)."'";
+			return '"'.addslashes($value).'"';
 	}
 }
 
