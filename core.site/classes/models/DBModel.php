@@ -1681,6 +1681,20 @@ class DBModel extends Model implements IteratorAggregate, ArrayAccess, Countable
 		return $row['id'];
 	}
 
+    public function replace(&$row)
+	{
+		$this->onBeforeInsert($row);
+
+		$fields = implode(',', array_map(array(&$this, 'quoteName'), array_keys($row)));
+		$values = implode(',', array_map(array(&$this, 'quoteValue'), $row));
+
+		$sql = ' REPLACE INTO '.$this->quoteName(($this->autoPrefix ? DBAL::$prefix : "").$this->getTableName())
+		.'('.$fields.')'
+		.' VALUES ('.$values.')';
+
+		$row['id'] = $this->db->insert($sql);
+		return $row['id'];
+	}
 
 	public function update(&$row, $where=NULL)
 	{
