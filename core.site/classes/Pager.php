@@ -52,6 +52,11 @@
  		return (($this->p-1) * $this->perPage);
  	}
 
+    public function getTotal()
+    {
+        return $this->total;
+    }
+
  	protected function construct()
  	{
  		if ($this->total <= $this->perPage)

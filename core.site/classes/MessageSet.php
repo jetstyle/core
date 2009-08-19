@@ -108,7 +108,7 @@ class MessageSet
 		return $key;
 	}
 
-	private function load( $ms_name="", $level=false, $dir=-1 ) // -- догрузить messageset, расширив стек
+	private function load( $ms_name="", $level=0, $dir=1 ) // -- догрузить messageset, расширив стек
 	{
 		$this->MSG_NAMES[] = array($ms_name, $level, $dir);
 		if ($ms_name) $ms_name = "_".$ms_name;
