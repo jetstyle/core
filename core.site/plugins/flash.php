@@ -31,10 +31,16 @@ unset ($params[0]);
 if (!$src)
 	return;
 
+if ( !isset($params['fullpath']) )
+{
+	Locator::get( 'tpl' )->set("prepath", Locator::get('tpl')->get('images')."flash/" );
+}
+
 //отрезать параметры от имени
 list ($filename, $query) = explode("?", $src);
 
 $id = basename($filename, ".swf");
+
 if (!$container = $params['container'])
 {
 	$container = $id . '_container';
