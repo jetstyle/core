@@ -44,15 +44,15 @@ class FormComponent_file extends FormComponent_model_plain
    // MODEL ==============================================================================
    function Model_DbInsert( &$fields, &$values )
    {
-     if ($this->file_uploaded)
-     {
-       $fields[] = $this->field->name;
-       $values[] = $this->model_data;
-     }
+     //if ($this->file_uploaded)
+     //{
+     //  $fields[] = $this->field->name;
+     //  $values[] = $this->model_data;
+     //}
    }
    function Model_DbUpdate( $data_id, &$fields, &$values )
    {
-     return $this->Model_DbInsert( $fields, $values );
+     //return $this->Model_DbInsert( $fields, $values );
    }
 
    // VALIDATOR ==============================================================================
@@ -95,27 +95,29 @@ class FormComponent_file extends FormComponent_model_plain
      return true;
    }
 
-   // INTERFACE ==============================================================================
-   // парсинг полей интерфейса
-   function Interface_Parse()
-   {
-     parent::Interface_Parse();
+    // INTERFACE ==============================================================================
+    // парсинг полей интерфейса
+    function Interface_Parse()
+    {
+        $tpl = Locator::get('tpl');
+        parent::Interface_Parse();
 
-     $name = $this->field->model->Model_GetDataValue();
-     $file_size = $this->_GetSize( $name );
-     if ($file_size === false)
-     {
-       $this->field->tpl->Set("interface_file", false);
-     }
-     else
-     {
-       $this->field->tpl->Set("interface_file", $name );
-       $this->field->tpl->Set("interface_size_Kb", floor(($file_size+512)/1024));
-     }
+        $name = $this->field->model->Model_GetDataValue();
+        $file_size = $this->_GetSize( $name );
+        if ($file_size === false)
+        {
+            $tpl->Set("interface_file", false);
+        }
+        else
+        {
+            $tpl->Set("interface_file", $name );
+            $tpl->Set("interface_size_Kb", floor(($file_size+512)/1024));
+        }
 
-     return $this->field->tpl->Parse( $this->field->form->config["template_prefix_interface"].
-                                      $this->field->config["interface_tpl"] );
-   }
+        return $tpl->Parse( $this->field->form->config["template_prefix_interface"].
+                $this->field->config["interface_tpl"] );
+    }
+    
    // преобразование из поста в массив для загрузки моделью
    function Interface_PostToArray( $post_data )
    {
@@ -140,58 +142,62 @@ class FormComponent_file extends FormComponent_model_plain
        return filesize($full_name);
      else return false;
    }
-   function _UploadFile( $post_data )
-   {
-    $uploaded_file = @$_FILES[ '_'.$this->field->name ]["tmp_name"];
-    if(is_uploaded_file($uploaded_file))
+   
+    function _UploadFile( $post_data )
     {
-      //клиентские данные
-      $type = $_FILES[ '_'.$this->field->name ]['type'];
-      $size = $_FILES[ '_'.$this->field->name ]['size'];
-      $ext = explode(".",$_FILES[ '_'.$this->field->name ]['name']);
-      $ext = strtolower(end($ext));
-
-      $this->file_size = $size;
-      $this->file_ext  = $ext;
-      $this->file_type = $type;
-      $this->file_uploaded = true;
-
-      if ($this->_CheckExtSize($ext, $size))
-      {
-        Finder::useLib( "Translit", "php/translit" );
-
-        if (isset($this->field->config["file_random_name"]) && $this->field->config["file_random_name"])
+        $upload = Locator::get('upload');
+        $result = $upload->uploadFile('_'.$this->field->name, $this->field->config['file_dir'].'/'.$this->field->config['file_name'], false, $this->field->config['params']);
+        return $result;
+        /*$uploaded_file = @$_FILES[ '_'.$this->field->name ]["tmp_name"];
+        if(is_uploaded_file($uploaded_file))
         {
-          $name = substr( md5(time()), 0, 6 );
+          //клиентские данные
+          $type = $_FILES[ '_'.$this->field->name ]['type'];
+          $size = $_FILES[ '_'.$this->field->name ]['size'];
+          $ext = explode(".",$_FILES[ '_'.$this->field->name ]['name']);
+          $ext = strtolower(end($ext));
+    
+          $this->file_size = $size;
+          $this->file_ext  = $ext;
+          $this->file_type = $type;
+          $this->file_uploaded = true;
+    
+          if ($this->_CheckExtSize($ext, $size))
+          {
+            Finder::useLib( "Translit", "php/translit" );
+    
+            if (isset($this->field->config["file_random_name"]) && $this->field->config["file_random_name"])
+            {
+              $name = substr( md5(time()), 0, 6 );
+            }
+            else
+            {
+              $name = basename( $_FILES[ '_'.$this->field->name ]['name'] );
+              $name = substr($name, 0, strlen($name)-strlen($ext)-1 );
+              $name = Translit::Supertag( $name, TR_NO_SLASHES);
+            }
+    
+            $count=1; $_name = $name;
+            while (file_exists($this->field->config["file_dir"].$name.".".$ext))
+            {
+              if ($name === $_name) $name = $_name.$count;
+              else $name = $_name.(++$count);
+            }
+            $file_name = $name.".".$ext;
+            $full_name = $this->field->config["file_dir"].$file_name;
+            move_uploaded_file($uploaded_file,$full_name);
+            chmod($full_name,$this->field->config["file_chmod"]);
+            $this->file_name = $file_name;
+            return $file_name;
+          }
+          else return "[error]";
         }
         else
         {
-          $name = basename( $_FILES[ '_'.$this->field->name ]['name'] );
-          $name = substr($name, 0, strlen($name)-strlen($ext)-1 );
-          $name = Translit::Supertag( $name, TR_NO_SLASHES);
-        }
-
-        $count=1; $_name = $name;
-        while (file_exists($this->field->config["file_dir"].$name.".".$ext))
-        {
-          if ($name === $_name) $name = $_name.$count;
-          else $name = $_name.(++$count);
-        }
-        $file_name = $name.".".$ext;
-        $full_name = $this->field->config["file_dir"].$file_name;
-        move_uploaded_file($uploaded_file,$full_name);
-        chmod($full_name,$this->field->config["file_chmod"]);
-        $this->file_name = $file_name;
-        return $file_name;
-      }
-      else return "[error]";
+          $this->file_uploaded = false;
+          return false;
+        }*/
     }
-    else
-    {
-      $this->file_uploaded = false;
-      return false;
-    }
-   }
 
 
 }
