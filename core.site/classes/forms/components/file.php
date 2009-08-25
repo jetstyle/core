@@ -41,20 +41,32 @@ Finder::UseClass( "forms/components/model_plain" );
 
 class FormComponent_file extends FormComponent_model_plain
 {
-   // MODEL ==============================================================================
-   function Model_DbInsert( &$fields, &$values )
-   {
-     //if ($this->file_uploaded)
-     //{
-     //  $fields[] = $this->field->name;
-     //  $values[] = $this->model_data;
-     //}
-   }
-   function Model_DbUpdate( $data_id, &$fields, &$values )
-   {
-     //return $this->Model_DbInsert( $fields, $values );
-   }
+    // MODEL ==============================================================================
+    function Model_DbInsert( &$fields, &$values )
+    {
+        //if ($this->file_uploaded)
+        //{
+        //  $fields[] = $this->field->name;
+        //  $values[] = $this->model_data;
+        //}
+    }
 
+    function Model_DbUpdate( $data_id, &$fields, &$values )
+    {
+        //return $this->Model_DbInsert( $fields, $values );
+    }
+    
+    function Model_DbAfterInsert($data_id)
+    {
+        $this->field->config['file_name'] = str_replace('*', $data_id, $this->field->config['file_name']);
+        $this->_UploadFile();
+    }
+    
+    function Model_DbAfterUpdate($data_id)
+    {
+        $this->Model_DbAfterInsert($data_id);
+    }
+    
    // VALIDATOR ==============================================================================
    function Validate()
    {
@@ -118,20 +130,15 @@ class FormComponent_file extends FormComponent_model_plain
                 $this->field->config["interface_tpl"] );
     }
     
-   // преобразование из поста в массив для загрузки моделью
-   function Interface_PostToArray( $post_data )
-   {
-     // @todo: загрузить файл, положить его свойства в себя, а имя в массив
-     $value = $this->_UploadFile($post_data);
-
-     if ($value === false) return array(); // no data here
-
-     $a = array(
-          $this->field->name           => $value,
-               );
-
-     return $a;
-   }
+    // преобразование из поста в массив для загрузки моделью
+    function Interface_PostToArray( $post_data )
+    {
+        if ($value === false) return array(); // no data here
+        $a = array(
+            $this->field->name => $value,
+        );
+        return $a;
+    }
 
    // ---------------------------------------------------------------------------
    // UPLOAD specific handlers
@@ -143,7 +150,7 @@ class FormComponent_file extends FormComponent_model_plain
      else return false;
    }
    
-    function _UploadFile( $post_data )
+    function _UploadFile()
     {
         $upload = Locator::get('upload');
         $result = $upload->uploadFile('_'.$this->field->name, $this->field->config['file_dir'].'/'.$this->field->config['file_name'], false, $this->field->config['params']);
