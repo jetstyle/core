@@ -58,7 +58,10 @@ class FormComponent_file extends FormComponent_model_plain
     
     function Model_DbAfterInsert($data_id)
     {
-        $this->field->config['file_name'] = str_replace('*', $data_id, $this->field->config['file_name']);
+        foreach ($this->field->config['variants'] as $key => $variant)
+        {
+            $this->field->config['variants'][$key]['file_name'] = str_replace('*', $data_id, $this->field->config['variants'][$key]['file_name']);
+        }
         $this->_UploadFile();
     }
     
@@ -153,7 +156,10 @@ class FormComponent_file extends FormComponent_model_plain
     function _UploadFile()
     {
         $upload = Locator::get('upload');
-        $result = $upload->uploadFile('_'.$this->field->name, $this->field->config['file_dir'].'/'.$this->field->config['file_name'], false, $this->field->config['params']);
+        foreach ($this->field->config['variants'] as $variant)
+        {
+            $result = $upload->uploadFile('_'.$this->field->name, $this->field->config['file_dir'].'/'.$variant['file_name'], false, $variant['params']);
+        }
         return $result;
         /*$uploaded_file = @$_FILES[ '_'.$this->field->name ]["tmp_name"];
         if(is_uploaded_file($uploaded_file))

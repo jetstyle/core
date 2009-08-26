@@ -577,7 +577,7 @@ class Form
         }
         
         foreach($this->fields as $k=>$v)
-            $this->fields[$k]->DbAfterUpdate( $data_id );
+            $this->fields[$k]->DbAfterUpdate( $dataId );
     }
     
     function _dbUpdate ( &$fields, &$values )
