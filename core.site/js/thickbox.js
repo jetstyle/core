@@ -7,6 +7,7 @@
 
 var tb_pathToImage = "/app/skins/default/images/loadingAnimation.gif";
 var onTBRemove = null;
+var TB_NEED_REMOVE;
 /*!!!!!!!!!!!!!!!!! edit below this line at your own risk !!!!!!!!!!!!!!!!!!!!!!!*/
 
 //on page load call tb_init
