@@ -69,7 +69,7 @@ class FileUpload
 				$fileData['name'] = pathinfo($fileData['tmp_name'], PATHINFO_BASENAME);
 			}
 		}
-
+                
 		$uploadedFile = $fileData['tmp_name'];
 		
 		if (!is_uploaded_file($uploadedFile) && !( file_exists($uploadedFile) && is_file($uploadedFile) ) )
@@ -88,9 +88,12 @@ class FileUpload
 		
 		$fileName = pathinfo($fileData['name'], PATHINFO_FILENAME);
 		
-		Finder::useClass('Translit');
-		$translit = new Translit();
-		$fileName = $translit->supertag($fileName);
+		if (!$params || !$params['dont_supertag'])
+		{
+		    Finder::useClass('Translit');
+    		$translit = new Translit();
+    		$fileName = $translit->supertag($fileName);
+		}
 			
 		// create directory, if needed
 		$this->createDir();
@@ -105,7 +108,7 @@ class FileUpload
 		$fileName = $fileName.$add;
 		$fileNameExt = $fileName.'.'.$ext;
 		$fileNameFull = $dirname.$fileNameExt;
-		
+				
 		if($this->isImage)
 		{
 			$image = $this->createResourceFromImage($uploadedFile);

@@ -686,9 +686,16 @@ class File implements ArrayAccess
 	
 	private function buildParams()
 	{
-		return array(
+	    $params = array(
 			'actions' => $this->config['actions'],
 		);
+		
+		if (array_key_exists("subkey", $this->config)) 
+		{
+		    $params['dont_supertag'] = true;
+		}
+		
+		return $params;
 	}
 }
 ?>
