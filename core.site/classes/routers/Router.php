@@ -103,9 +103,10 @@ class Router
 
 		if (null !== $page)
 		{
+			$cls = strtolower(substr(get_class($page), 0, -strlen('Controller')));
+
 			if (Locator::exists('controller'))
 			{
-				$cls = strtolower(substr(get_class($page), 0, -strlen('Controller')));
 				$id = 'controller_'.$cls;
 			}
 			else
