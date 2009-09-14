@@ -117,22 +117,40 @@ class FormComponent_file extends FormComponent_model_plain
         $tpl = Locator::get('tpl');
         parent::Interface_Parse();
 
-        $name = $this->field->model->Model_GetDataValue();
-        $file_size = $this->_GetSize( $name );
-        if ($file_size === false)
+        $file = $this->field->model->Model_GetDataValue();
+        
+        if (!$file || !$file['name_full'])
         {
             $tpl->Set("interface_file", false);
         }
         else
         {
-            $tpl->Set("interface_file", $name );
-            $tpl->Set("interface_size_Kb", floor(($file_size+512)/1024));
+            $tpl->Set("interface_file", $file );
         }
 
         return $tpl->Parse( $this->field->form->config["template_prefix_interface"].
                 $this->field->config["interface_tpl"] );
     }
-    
+
+    function Model_GetDataValue()
+    {
+        $result = null;
+        $id = $this->field->form->data_id;
+
+        $upload = Locator::get('upload');
+        foreach ($this->field->config['variants'] AS $variant)
+        {
+            if ($variant['show'])
+            {
+                $variant['file_name'] = str_replace('*', $id, $variant['file_name']);
+                $result = $upload->getFile($this->field->config['file_dir'].'/'.$variant['file_name']);
+                break;
+            }
+        }
+
+        return $result;
+    }
+
     // преобразование из поста в массив для загрузки моделью
     function Interface_PostToArray( $post_data )
     {
@@ -158,6 +176,14 @@ class FormComponent_file extends FormComponent_model_plain
         $upload = Locator::get('upload');
         foreach ($this->field->config['variants'] as $variant)
         {
+            if ($_POST['_'.$this->field->name.'_del'])
+            {
+                $file = $upload->getFile($this->field->config['file_dir'].'/'.$variant['file_name']);
+                if ($file && $file['name_full'])
+                {
+                    @unlink($file['name_full']);
+                }
+            }
             $result = $upload->uploadFile('_'.$this->field->name, $this->field->config['file_dir'].'/'.$variant['file_name'], false, $variant['params']);
         }
         return $result;

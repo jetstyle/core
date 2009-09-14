@@ -48,6 +48,14 @@
 
 {{TPL:Image}}
 <input type="file" name="{{field}}" />
+{{?interface_file}}
+<div>
+    <input type="checkbox" name="{{field}}_del" id="{{field}}_del" value="1" > <label for="{{field}}_del">Удалить</label>
+</div>
+<div>
+    <img src="{{interface_file.link}}" />
+</div>
+{{/?}}
 {{/TPL:Image}}
 
 {{TPL:multiply}}
