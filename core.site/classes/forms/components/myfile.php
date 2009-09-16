@@ -6,7 +6,7 @@ class FormComponent_file extends FormComponent_abstract
   {
     $this->field->rh->UseClass('Upload');
 //    $file =& new Upload($this->field->rh, 'files/');
-    $file =& new Upload($this->field->rh, $this->field->config['model_data_dir'] ? $this->field->config['model_data_dir'] : 'files/');
+    $file = new Upload($this->field->rh, $this->field->config['model_data_dir'] ? $this->field->config['model_data_dir'] : 'files/');
 
     // валидация
     if (isset($this->field->config['validator_params']['allow']))

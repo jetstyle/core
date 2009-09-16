@@ -1,25 +1,23 @@
 <?php
 Finder::useClass('FormSimple');
 
-class FormFiles extends FormSimple
-{
-	const FILES_RUBRIC_TYPE_ID = 0;
-	const PICTURES_RUBRIC_TYPE_ID = 1;
+class FormFiles extends FormSimple {
+    const FILES_RUBRIC_TYPE_ID = 0;
+    const PICTURES_RUBRIC_TYPE_ID = 1;
 
-	protected $upload;
-	protected $max_file_size = 55242880; //максимальный размер файла для загрузки
-	protected $template_files = 'formfiles.html';
+    protected $upload;
+    protected $max_file_size = 55242880; //максимальный размер файла для загрузки
+    protected $template_files = 'formfiles.html';
 
-	protected $filesConfig = array();
-	protected $configKey = '';
+    protected $filesConfig = array();
+    protected $configKey = '';
 
-	protected $filesRubrics = array();
+    protected $filesRubrics = array();
 
-	private $uploadedFiles = array();
+    private $uploadedFiles = array();
 
-	public function __construct( &$config )
-	{
-		Finder::useClass('FileManager');
+    public function __construct( &$config ) {
+        Finder::useClass('FileManager');
 
         $fullConfigKey = $config['module_path'];
         $shortConfigKeyParts = explode('/', $config['module_path']);
@@ -27,168 +25,146 @@ class FormFiles extends FormSimple
         $shortConfigKey = implode('/', $shortConfigKeyParts);
 
         $filesConfig = FileManager::getConfig($shortConfigKey);
-        if (is_array($filesConfig) && !empty($filesConfig))
-        {
+        if (is_array($filesConfig) && !empty($filesConfig)) {
             $this->configKey = $shortConfigKey;
             $this->filesConfig = $filesConfig;
         }
-        else
-        {
+        else {
             $this->configKey = $fullConfigKey;
             $this->filesConfig = FileManager::getConfig($fullConfigKey);
         }
 
-		parent::__construct($config);
-	}
+        parent::__construct($config);
 
-	/**
-	 * Rubric for files
-	 *
-	 */
-	protected function getFilesRubric($file = null)
-	{
-		if ($file && $file->isImage())
-		{
-			$rubricTypeId = self::PICTURES_RUBRIC_TYPE_ID;
-		}
-		else
-		{
-			$rubricTypeId = self::FILES_RUBRIC_TYPE_ID;
-		}
+        if ($_POST['from_flash'])
+        {
+            foreach ($_FILES AS $key => $fileData) {
+                $_FILES[$key]['name'] = iconv('utf-8', 'cp1251', $_FILES[$key]['name']);
+            }
+        }
+    }
 
-		if ( !array_key_exists($rubricTypeId, $this->filesRubrics) )
-		{
-			$parts = explode('/', $this->config['module_path']);
-			$moduleName = array_shift($parts);
+    /**
+     * Rubric for files
+     *
+     */
+    protected function getFilesRubric($file = null) {
+        if ($file && $file->isImage()) {
+            $rubricTypeId = self::PICTURES_RUBRIC_TYPE_ID;
+        }
+        else {
+            $rubricTypeId = self::FILES_RUBRIC_TYPE_ID;
+        }
 
-			$rubric = DBModel::factory('FilesRubrics');
-			$rubric->loadOne('{type_id} = '.DBModel::quote($rubricTypeId).' AND {module} = '.DBModel::quote($moduleName));
+        if ( !array_key_exists($rubricTypeId, $this->filesRubrics) ) {
+            $parts = explode('/', $this->config['module_path']);
+            $moduleName = array_shift($parts);
 
-			if (!$rubric['id'])
-			{
-				$data = array(
-					'module' => $moduleName,
-					'title' => $moduleName,
-					'type_id' => $rubricTypeId,
-					'_state' => 0,
-					'_created' => date('Y-m-d H:i:s'),
-				);
-				$id = $rubric->insert($data);
+            $rubric = DBModel::factory('FilesRubrics');
+            $rubric->loadOne('{type_id} = '.DBModel::quote($rubricTypeId).' AND {module} = '.DBModel::quote($moduleName));
 
-				$data = array(
-					'_order' => $id,
-				);
-				$rubric->update($data, '{id} = '.DBModel::quote($id));
-				$rubric->loadOne('{id} = '.DBModel::quote($id));
-			}
-			$this->filesRubrics[$rubricTypeId] = $rubric;
-		}
+            if (!$rubric['id']) {
+                $data = array(
+                    'module' => $moduleName,
+                    'title' => $moduleName,
+                    'type_id' => $rubricTypeId,
+                    '_state' => 0,
+                    '_created' => date('Y-m-d H:i:s'),
+                );
+                $id = $rubric->insert($data);
 
-		return $this->filesRubrics[$rubricTypeId];
-	}
+                $data = array(
+                    '_order' => $id,
+                );
+                $rubric->update($data, '{id} = '.DBModel::quote($id));
+                $rubric->loadOne('{id} = '.DBModel::quote($id));
+            }
+            $this->filesRubrics[$rubricTypeId] = $rubric;
+        }
 
-	protected function getUploadedFiles()
-	{
-		return $this->uploadedFiles;
-	}
+        return $this->filesRubrics[$rubricTypeId];
+    }
 
-	protected function update()
-	{
-		$updateResult = parent :: update();
-		if( $updateResult )
-		{
-			$this->uploadFiles();
-		}
+    protected function getUploadedFiles() {
+        return $this->uploadedFiles;
+    }
 
-		return $updateResult;
-	}
+    protected function update() {
+        $updateResult = parent :: update();
+        if( $updateResult ) {
+            $this->uploadFiles();
+        }
 
-	protected function uploadFiles($objId = null, $isId = false)
-	{
-		if ($objId === null)
-		{
-			$objId = $this->id;
-		}
+        return $updateResult;
+    }
 
-		//загружаем и удаляем файлы
-		foreach ($this->filesConfig AS $inputName => $conf)
-		{
-            if ($conf['input'])
-            {
+    protected function uploadFiles($objId = null, $isId = false) {
+        if ($objId === null) {
+            $objId = $this->id;
+        }
+
+        //загружаем и удаляем файлы
+        foreach ($this->filesConfig AS $inputName => $conf) {
+            if ($conf['input']) {
                 $inputName = $conf['input'];
             }
-            
-			$file = FileManager::getFile($this->configKey.':'.$conf['key'], $objId, $isId);
 
-			if (is_uploaded_file($_FILES[$this->prefix.$inputName]['tmp_name']))
-			{
-				try
-				{
-					$file->upload($_FILES[$this->prefix.$inputName]);
-					$filesRubric = $this->getFilesRubric($file);
-					$file->addToRubric($filesRubric['id']);
-				}
-				catch( UploadException $e )
-				{
-					$this->tpl->set($inputName.'_err', $e->getMessage());
-				}
+            $file = FileManager::getFile($this->configKey.':'.$conf['key'], $objId, $isId);
 
-				$this->uploadedFiles[$inputName] = $file;
-			}
-			elseif ($_POST[$this->prefix.$inputName.'_del'])
-			{
-				if ($isId)
-				{
-					$filesRubric = $this->getFilesRubric($file);
-					$file->removeFromRubric($filesRubric['id']);
-				}
-				else
-				{
-					$file->deleteLink();
-				}
-			}
-		}
-	}
+            if (is_uploaded_file($_FILES[$this->prefix.$inputName]['tmp_name'])) {
+                try {
+                    $file->upload($_FILES[$this->prefix.$inputName]);
+                    $filesRubric = $this->getFilesRubric($file);
+                    $file->addToRubric($filesRubric['id']);
+                } catch( UploadException $e ) {
+                    $this->tpl->set($inputName.'_err', $e->getMessage());
+                }
 
-	public function delete()
-	{
-		$deleteRes = parent :: delete();
+                $this->uploadedFiles[$inputName] = $file;
+            }
+            elseif ($_POST[$this->prefix.$inputName.'_del']) {
+                if ($isId) {
+                    $filesRubric = $this->getFilesRubric($file);
+                    $file->removeFromRubric($filesRubric['id']);
+                }
+                else {
+                    $file->deleteLink();
+                }
+            }
+        }
+    }
+
+    public function delete() {
+        $deleteRes = parent :: delete();
 
         // delete forever
-		if( 2 == $deleteRes )
-		{
-			$this->deleteFiles();
-		}
+        if( 2 == $deleteRes ) {
+            $this->deleteFiles();
+        }
 
-		return $deleteRes;
-	}
+        return $deleteRes;
+    }
 
-	protected function deleteFiles($objId = 0, $isId = false)
-	{
-		if (!empty($this->filesConfig))
-		{
-			$objId = intval($objId);
-			if (!$objId)
-			{
-				$objId = $this->id;
-			}
+    protected function deleteFiles($objId = 0, $isId = false) {
+        if (!empty($this->filesConfig)) {
+            $objId = intval($objId);
+            if (!$objId) {
+                $objId = $this->id;
+            }
 
-			if (!$objId) return;
+            if (!$objId) return;
 
-			foreach ($this->filesConfig AS $conf)
-			{
+            foreach ($this->filesConfig AS $conf) {
                 $file = FileManager::getFile($this->configKey.':'.$conf['key'], $objId, $isId);
-				if ($isId)
-				{
-					$filesRubric = $this->getFilesRubric($file);
-					$file->removeFromRubric($filesRubric['id']);
-				}
-				else
-				{
-					$file->deleteLink();
-				}
-			}
-		}
-	}
+                if ($isId) {
+                    $filesRubric = $this->getFilesRubric($file);
+                    $file->removeFromRubric($filesRubric['id']);
+                }
+                else {
+                    $file->deleteLink();
+                }
+            }
+        }
+    }
 }
 ?>

@@ -35,7 +35,7 @@ class RegisterController extends Controller
 			$config['on_after_event'] = array(array(&$this, 'registerAfterEvent'));	
 		}
 		
-		$form =& new EasyForm('register', $config);
+		$form = new EasyForm('register', $config);
 		Locator::get('tpl')->set('Form', $form->handle());
 		
 		$this->siteMap = "register";

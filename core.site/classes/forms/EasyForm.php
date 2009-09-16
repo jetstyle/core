@@ -98,8 +98,7 @@ class EasyForm {
 		//инициализируем форму
 		$class_name = isset($config["class"]) ? $config["class"] : "Form";
 		Finder::useClass( 'forms/'.$class_name );
-		$form =& new $class_name($config);
-		$this->form =& $form;
+		$this->form = new $class_name($config);
 
 		//привязываем строку к БД
 		if( $id = isset($config["id"]) ? $config["id"] : false )
@@ -109,10 +108,10 @@ class EasyForm {
 				$form->AssignId( $id );
 
 		//добавляем поля
-		$this->AddFields( $form, $config["fields"] );
+		$this->AddFields( $this->form, $config["fields"] );
 
 		//добавляем кнопки
-		$this->AddButtons( $form, $config["buttons"] );
+		$this->AddButtons( $this->form, $config["buttons"] );
 	}
 
 	//добавляем поля к форме или группе

@@ -41,7 +41,7 @@ class LoginController extends Controller
 			Finder::useClass("forms/EasyForm");
 
 			$config['on_after_event'] = &$this;
-			$form =& new EasyForm('login', $config);
+			$form = new EasyForm('login', $config);
 			Locator::get('tpl')->set('Form', $form->handle());
 
 			$this->siteMap = 'login';

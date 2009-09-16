@@ -26,7 +26,7 @@ class PasswordRestoreController extends Controller
 		$config = array();
 		$config['success_url'] = RequestInfo::$baseUrl.$this->path.'/thank';
 		$config['on_after_event'] = array(array(&$this, 'restoreAfterEvent'));
-		$form = & new EasyForm('password_restore', $config);
+		$form =  new EasyForm('password_restore', $config);
 		Locator::get('tpl')->set('Form', $form->handle());
 	
 		$this->siteMap = 'password_restore';
@@ -57,7 +57,7 @@ class PasswordRestoreController extends Controller
 				'db_model' => Locator::get('principal')->getStorageModel(),
 				'on_after_event' => array(array(&$this, 'changeAfterEvent')),
 			);
-			$form = & new EasyForm('password_change', $config);
+			$form = new EasyForm('password_change', $config);
 			Locator::get('tpl')->set('Form', $form->handle());
 		}
 		else $error = true;

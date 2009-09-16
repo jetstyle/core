@@ -89,7 +89,7 @@ class DBAL
 		$lowlevelClass = "DBAL_" . Config::get('db_al');
 		Finder::useClass($lowlevelClass);
 
-		$this->lowlevel = & new $lowlevelClass();
+		$this->lowlevel = new $lowlevelClass();
 
 		// connection, if any
 		if ($connect)

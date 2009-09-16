@@ -37,6 +37,7 @@ Gallery.prototype = {
 		imagesUploadSettings.file_post_name = this.formPrefix + "Filedata";
 		this.swfUpload = new SWFUpload(imagesUploadSettings);
 		this.swfUpload.customSettings.gallery = this;
+
 		//control for replace one image
 		imageOneUploadSettings.upload_url = this.baseUrl+'?id='+this.rubricId+'&session_hash='+this.sessionHash;
 		imageOneUploadSettings.flash_url = this.imagesUrl+"swfupload.swf";
@@ -261,7 +262,8 @@ var imagesUploadSettings = {
 	file_types_description: "Допустимые типы файлов",
 
 	post_params: {
-		'swfupload_user_agent': navigator.userAgent || navigator.vendor || window.opera
+		'swfupload_user_agent': navigator.userAgent || navigator.vendor || window.opera,
+                'from_flash' : '1'
 	},
 
 	button_placeholder_id : "spanButtonPlaceholder",
@@ -289,7 +291,6 @@ var imagesUploadSettings = {
 		location.reload(true);
 	},
 	upload_success_handler: function(file, data) {
-
 		try
 		{
 			eval('data = ' + data + ';');
@@ -328,7 +329,8 @@ var imageOneUploadSettings = {
 
 	post_params: {
 		'swfupload_user_agent': navigator.userAgent || navigator.vendor || window.opera,
-		'replace_image': true
+		'replace_image': true,
+                'from_flash' : '1'
 	},
 
 	button_placeholder_id : "spanReplaceButtonPlaceholder",
@@ -368,7 +370,7 @@ var imageOneUploadSettings = {
 		location.reload(true);
 	},
 	upload_success_handler: function(file, data) {
-
+            window.console.log(data);
         try
 		{
 			eval('data = ' + data + ';');

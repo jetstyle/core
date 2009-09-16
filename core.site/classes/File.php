@@ -75,6 +75,14 @@ class File implements ArrayAccess
 			self::$filesInfoCache[$key][$result['obj_id']] = $result['id'];
 			self::$filesInfoByIdCache[$result['id']] = $result;
 		}
+
+                foreach ($ids AS $id)
+                {
+                    if (!array_key_exists($id, self::$filesInfoCache[$key]))
+                    {
+                        self::$filesInfoCache[$key][$id] = null;
+                    }
+                }
 	}
 	
 	public static function precacheByIds($ids)

@@ -31,7 +31,7 @@ class ResponseController extends Controller
 
         $formConfig = array();
         $formConfig['action'] = RequestInfo::$baseUrl.Router::linkTo('Login').'?retpath='.$retPath;
-		$form =& new EasyForm('login', $formConfig);
+		$form = new EasyForm('login', $formConfig);
 		
         Locator::get('tpl')->set('Form', $form->handle());
 	}

@@ -66,7 +66,7 @@ class DoController extends Controller
 		Locator::get('db')->query("SET NAMES utf8");
 
 		Finder::useClass("ModulePacker");
-		$modulePacker =& new ModulePacker();
+		$modulePacker = new ModulePacker();
 		$modulePacker->pack();
 	}
 

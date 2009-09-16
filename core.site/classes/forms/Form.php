@@ -176,7 +176,7 @@ class Form
    // Добавить поле
    function &AddField( $field_name = NULL, $config )
    {
-     $f = &new FormField( $this, $field_name, $config );
+     $f = new FormField( $this, $field_name, $config );
      return $this->_AddField($f);
    }
    function &_AddField( &$field_object )

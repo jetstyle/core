@@ -133,13 +133,13 @@ class CyrDate
 	 */
 	function &newFromStr($fmt, $str)
 	{
-		$o = &new CyrDate();
+		$o = new CyrDate();
 		return $o->fromStr($fmt, $str);
 	}
 
 	function &newFromTimestamp($timestamp)
 	{
-		$o = &new CyrDate();
+		$o = new CyrDate();
 		return $o->fromTimestamp($timestamp);
 	}
 
@@ -223,7 +223,7 @@ class CyrDate
 	 */
 	function &newNow()
 	{
-		$o = &new CyrDate();
+		$o = new CyrDate();
 		return $o->now();
 	}
 	// compability, don't use
@@ -245,7 +245,7 @@ class CyrDate
 
 	function &date($fmt, $date)
 	{
-		$o = &new CyrDate($date);
+		$o = new CyrDate($date);
 		return $o->format($fmt);
 	}
 

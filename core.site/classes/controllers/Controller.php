@@ -384,7 +384,7 @@ abstract class Controller implements ArrayAccess
 		unset($o);
 
 		Finder::useClass('plugins/'.$name.'/'.$name);
-		$o =& new $name();
+		$o = new $name();
 		$config['factory'] =& $this;
 		$o->initialize($config);
 		$this->o_plugins[] =& $o;

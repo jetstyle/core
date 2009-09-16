@@ -65,7 +65,7 @@ class FormComponent_group extends FormComponent_abstract
     // добавление полей
     function &Model_AddField( $field_name, $config )
     {
-        $f = &new FormField( $this->field->form, $field_name, $config );
+        $f = new FormField( $this->field->form, $field_name, $config );
         return $this->_AddField($f);
     }
 

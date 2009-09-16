@@ -144,7 +144,7 @@ class ListSimple
 
 		//render list
 		Finder::useClass("ListObject");
-		$list =& new ListObject( $this->items );
+		$list = new ListObject( $this->items );
 		$list->ASSIGN_FIELDS = $this->SELECT_FIELDS;
 		$list->EVOLUTORS = $this->EVOLUTORS; //потомки могут добавить своего
 		$list->EVOLUTORS["href"] = array( &$this, "_href" );

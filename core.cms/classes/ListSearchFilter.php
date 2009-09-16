@@ -74,7 +74,7 @@ class ListSearchFilter extends ListFilter
     protected function prepareQuery($q)
     {
         $q = preg_replace("/[^.\w\x7F-\xFF\s]/", " ", $q);
-        $q = trim(preg_replace("/\s(\S{1,".$this->minWordLength."})\s/", " ", ereg_replace(" +", "  ", " " . $q . " ")));
+        $q = trim(preg_replace("/\s(\S{1,".$this->minWordLength."})\s/", " ", preg_replace("/ +/", " ", " " . $q . " ")));
         return $q;
     }
 }
