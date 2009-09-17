@@ -157,8 +157,9 @@ class FormFiles extends FormSimple {
             foreach ($this->filesConfig AS $conf) {
                 $file = FileManager::getFile($this->configKey.':'.$conf['key'], $objId, $isId);
                 if ($isId) {
-                    $filesRubric = $this->getFilesRubric($file);
-                    $file->removeFromRubric($filesRubric['id']);
+                    //$filesRubric = $this->getFilesRubric($file);
+                    //$file->removeFromRubric($filesRubric['id']);
+                    $file->delete();
                 }
                 else {
                     $file->deleteLink();
