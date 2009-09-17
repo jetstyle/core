@@ -42,6 +42,13 @@ class FormFiles extends FormSimple
 		}
 		
 		parent::__construct($config);
+		
+		if ($_POST['from_flash'])
+		{
+		    foreach ($_FILES AS $key => $fileData) {
+			$_FILES[$key]['name'] = iconv('utf-8', 'cp1251', $_FILES[$key]['name']);
+		    }
+		}
 	}
 	
 	protected function initModel()

@@ -261,7 +261,8 @@ var imagesUploadSettings = {
 	file_types_description: "Допустимые типы файлов",
 
 	post_params: {
-		'swfupload_user_agent': navigator.userAgent || navigator.vendor || window.opera
+		'swfupload_user_agent': navigator.userAgent || navigator.vendor || window.opera,
+		'from_flash' : 1
 	},
 
 	button_placeholder_id : "spanButtonPlaceholder",
@@ -328,7 +329,8 @@ var imageOneUploadSettings = {
 
 	post_params: {
 		'swfupload_user_agent': navigator.userAgent || navigator.vendor || window.opera,
-		'replace_image': true
+		'replace_image': true,
+		'from_flash' : 1
 	},
 
 	button_placeholder_id : "spanReplaceButtonPlaceholder",
