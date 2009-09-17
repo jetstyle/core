@@ -378,6 +378,22 @@ class File implements ArrayAccess {
 
         return $result;
     }
+    
+    public function getLinkedObjectsIds() {
+        $result = array();
+
+        if ($this->id) {
+            $db = &Locator::get('db');
+            $sqlResult = $db->execute("
+				SELECT `obj_id`, `key` FROM ??files2objects WHERE `file_id` = ".$db->quote($this->id)."
+			");
+            while ($r = $db->getRow($sqlResult)) {
+                $result[$r['key']][] = $r['obj_id'];
+            }
+        }
+
+        return $result;
+    }
 
     public function addToRubric($rubricId) {
         $rubricId = intval($rubricId);

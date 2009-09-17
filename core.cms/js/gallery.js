@@ -168,23 +168,32 @@ Gallery.prototype = {
            	items = this.selectedItems.join(',');
 		} else {
     		items = this.getId(deleteBtn.parentNode.parentNode);
-    	}
-    	var self = this;
-    	$.post(this.baseUrl + '?id=' + this.rubricId, {'action': 'delete','items': items}, function(data)
-		{
-       		if (data.ok)
-			{
-				if (self.selectedItems.length > 0) {
-                	for (var i=0; i<self.selectedItems.length; i++)
-                		$('#image'+self.selectedItems[i]).remove();
-                	self.selectedItems[i] = [];
-                 	self.lastSelected = null;
-				} else {
-					$('#image'+items).remove();
-				}
-			}
-		},'json');
+                }
+
+                $.post(this.baseUrl + '?id=' + this.rubricId, {'action': 'delete','items': items}, this.deleteItemsCallback.prototypeBind(this, items),'json');
    		return false;
+	},
+	
+	deleteItemsCallback : function(items, data) {
+            
+	    if (data.need_approvement !== undefined && data.need_approvement)
+	    {
+                var message = this.selectedItems.length > 0 ? 'Выбранные объекты связаны с другими объектами. Удалить?' : 'Выбранный объект связан с другими объектами. Удалить?';
+        	if (!confirm(message)) return false;
+    		$.post(this.baseUrl + '?id=' + this.rubricId, {'action': 'delete','approved':'1','items': items}, this.deleteItemsCallback.prototypeBind(this, items),'json');
+	    }
+            else if (data.ok)
+            {
+		if (this.selectedItems.length > 0) {
+                    for (var i=0; i<this.selectedItems.length; i++)
+                        $('#image'+this.selectedItems[i]).remove();
+                    this.selectedItems[i] = [];
+                    this.lastSelected = null;
+                } else {
+                    $('#image'+items).remove();
+    		}
+            }
+		
 	},
 
 	editImageTitle: function() {
