@@ -370,7 +370,6 @@ var imageOneUploadSettings = {
 		location.reload(true);
 	},
 	upload_success_handler: function(file, data) {
-            window.console.log(data);
         try
 		{
 			eval('data = ' + data + ';');
