@@ -71,11 +71,14 @@ class FormComponent_file extends FormComponent_model_plain
     }
     
    // VALIDATOR ==============================================================================
-   function Validate()
-   {
-     parent::Validate();
+    function Validate()
+    {
+        parent::Validate();
 
-     if (!$this->valid) return $this->valid; // ==== strip one
+        if (!$this->valid) return $this->valid; // ==== strip one
+     
+        if ($this->field->config['validator_params']['not_empty'] && !$_FILES['_'.$this->field->name]['name'])
+            $this->_Invalidate( "file_empty", "Файл не выбран" );
 
      if ($this->file_size)
        if (isset( $this->field->config["file_size"]))
