@@ -83,14 +83,14 @@ abstract class ListFilter
         $depends = $this->getConfig('depends');
         if ($depends)
         {
-            $filter = $this->getListObj()->getFiltersObject($depends);
-
-            if (!$filter->getValue())
+            if (!is_array($depends))
             {
-                $this->disableFilter($model);
+                $depends = array($depends);
             }
-            else
+
+            foreach ($depends AS $filterKey)
             {
+                $filter = $this->getListObj()->getFiltersObject($filterKey);
                 $filter->apply($model);
             }
         }

@@ -1,12 +1,12 @@
 <?php
 /**
- * ListSelectFilter
+ * ListLettersFilter
  *
  * @author lunatic lunatic@jetstyle.ru
  */
 Finder::useClass('ListFilter');
 
-class ListSelectFilter extends ListFilter
+class ListLettersFilter extends ListFilter
 {
     protected $getVar = '';
     protected $neededConfigVars = array('model', 'field');
@@ -14,7 +14,7 @@ class ListSelectFilter extends ListFilter
     protected $getVarValue = '';
     protected $data = array();
 
-    protected $template = 'list_select_filter.html';
+    protected $template = 'list_letters_filter.html';
 
     public function getValue()
     {
@@ -25,31 +25,20 @@ class ListSelectFilter extends ListFilter
     {
         if ($this->getVarValue || $this->getConfig('always_apply'))
         {
-            $depends = $this->getConfig('depends');
-            if ($depends)
-            {
-                $filter = $this->getListObj()->getFiltersObject($depends);
-
-                if (!$filter->getValue())
-                {
-                    return;
-                }
-            }
-
             if ($model instanceof DBModel)
             {
-                $model->where .= ($model->where ? " AND " : "")." {".$this->getConfig('field')."} = ".DBModel::quote($this->getVarValue);
+                $model->where .= ($model->where ? " AND " : "")." {".$this->getConfig('field')."} LIKE ".DBModel::quote($this->getVarValue.'%');
             }
             else
             {
-                $model .= ($where ? " AND " : "")." ".$this->getConfig('field')." = ".DBModel::quote($this->getVarValue);
+                $model .= ($where ? " AND " : "")." ".$this->getConfig('field')." LIKE ".DBModel::quote($this->getVarValue.'%');
             }
         }
     }
 
     public function markSelected(&$model, &$row)
     {
-        if ($row['id'] == $this->getVarValue)
+        if ($row['letter'] == $this->getVarValue)
         {
             $row['selected'] = true;
         }
@@ -57,34 +46,8 @@ class ListSelectFilter extends ListFilter
 
     public function collectRows(&$model, &$row)
     {
+        $row['href'] = RequestInfo::hrefChange('', array($this->getVar => $row['selected'] ? '' : $row['letter']));
         $this->data[] = $row;
-    }
-
-    protected function applyDependencies(&$model)
-    {
-        $depends = $this->getConfig('depends');
-        if ($depends)
-        {
-            if (!is_array($depends))
-            {
-                $depends = array($depends);
-            }
-
-            foreach ($depends AS $filterKey)
-            {
-                $filter = $this->getListObj()->getFiltersObject($filterKey);
-
-                if (!$filter->getValue())
-                {
-                    $this->disableFilter($model);
-                    break;
-                }
-                else
-                {
-                    $filter->apply($model);
-                }
-            }
-        }
     }
 
     protected function constructModel()

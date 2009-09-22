@@ -39,6 +39,8 @@ class DBModel extends Model implements IteratorAggregate, ArrayAccess, Countable
 	 **/
 	protected $tableAlias = NULL;
 
+        protected $distinct = false;
+
 	/**
 	 * јлиасы таблиц, которые нельз€ использовать
 	 *
@@ -381,6 +383,11 @@ class DBModel extends Model implements IteratorAggregate, ArrayAccess, Countable
 			$this->addFilesConfig($ymlConfig['files']);
 			$this->files = null;
 		}
+
+                if (array_key_exists('distinct', $ymlConfig))
+                {
+                    $this->setDistinct($ymlConfig['distinct']);
+                }
 	}
 
 	// ######## GETTERS ############## //
@@ -632,6 +639,12 @@ class DBModel extends Model implements IteratorAggregate, ArrayAccess, Countable
 		$this->table = $v;
 		return $this;
 	}
+
+        public function setDistinct($v)
+        {
+            $this->distinct = $v;
+            return $this;
+        }
 
 	/**
 	 * Set banned table alises
@@ -1509,7 +1522,7 @@ class DBModel extends Model implements IteratorAggregate, ArrayAccess, Countable
 
 		$this->sqlParts = array();
 
-		$this->sqlParts['fields'] = 'SELECT '.$this->getFields();
+		$this->sqlParts['fields'] = 'SELECT '.($this->distinct ? 'DISTINCT ' : '').$this->getFields();
 		$this->sqlParts['from'] = 'FROM '.$this->getTableNameWithAlias();
 
 		list($joinSql, $joinFields, $joinWhere) = $this->buildJoin();
