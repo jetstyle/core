@@ -522,7 +522,13 @@ class DBModel extends Model implements IteratorAggregate, ArrayAccess, Countable
 
 	public function getCount($where = NULL)
 	{
+		if (!empty($this->sqlParts))
+		{
+			$this->cleanUp();
+		}
+
 		$sqlParts = $this->getSqlParts($where);
+		
 		$sql = '
 			SELECT COUNT(*) AS total
 			'.$sqlParts['from'].'
