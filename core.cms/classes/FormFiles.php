@@ -57,16 +57,17 @@ class FormFiles extends FormSimple {
         }
 
         if ( !array_key_exists($rubricTypeId, $this->filesRubrics) ) {
-            $parts = explode('/', $this->config['module_path']);
-            $moduleName = array_shift($parts);
+            //$parts = explode('/', $this->config['module_path']);
+            //$moduleName = array_shift($parts);
 
             $rubric = DBModel::factory('FilesRubrics');
-            $rubric->loadOne('{type_id} = '.DBModel::quote($rubricTypeId).' AND {module} = '.DBModel::quote($moduleName));
+            $rubric->loadOne('{type_id} = '.DBModel::quote($rubricTypeId).' AND {module} = '.DBModel::quote($this->configKey));
 
             if (!$rubric['id']) {
+
                 $data = array(
-                    'module' => $moduleName,
-                    'title' => $moduleName,
+                    'module' => $this->configKey,
+                    'title' => ModuleConstructor::factory($this->configKey)->getTitle(),
                     'type_id' => $rubricTypeId,
                     '_state' => 0,
                     '_created' => date('Y-m-d H:i:s'),
