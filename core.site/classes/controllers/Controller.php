@@ -6,11 +6,6 @@
 
 abstract class Controller implements ArrayAccess
 {
-	protected $plugins = array();
-
-	private $o_plugins = array();
-	private $o_aspects = array();
-
 	private $breadItems = array();
 
 	protected $params;
@@ -158,11 +153,6 @@ abstract class Controller implements ArrayAccess
 	{
 		$status = True;
 
-		if (!Config::get('db_disable'))
-		{
-			$this->loadPlugins();
-		}
-
 		$matches = array();
 
 		if (is_array($this->params_map))
@@ -306,12 +296,6 @@ abstract class Controller implements ArrayAccess
 		return $ret;
 	}
 
-	public function &getAspect($name)
-	{
-		$o =& $this->o_aspects[$name];
-		return $o;
-	}
-
 	protected function preHandle($config)
 	{
 
@@ -353,59 +337,13 @@ abstract class Controller implements ArrayAccess
 		Locator::get('tpl')->set('View', $view);
 	}
 
-	private function loadPlugins()
-	{
-		if (is_array($this->plugins))
-		{
-			foreach ($this->plugins as $info)
-			{
-				if (is_array($info))
-				{
-					list($name, $config) = $info;
-				}
-				else
-				{
-					$name = $info;
-					$config = array();
-				}
-				$this->loadPlugin($name, $config);
-			}
-		}
-	}
-
-	protected function &loadPlugin($name, $config)
-	{
-		$aspect = NULL;
-		if (array_key_exists('__aspect', $config))
-		{
-			$aspect = $config['__aspect'];
-		}
-
-		unset($o);
-
-		Finder::useClass('plugins/'.$name.'/'.$name);
-		$o = new $name();
-		$config['factory'] =& $this;
-		$o->initialize($config);
-		$this->o_plugins[] =& $o;
-		if ($aspect) $this->o_aspects[$aspect] =& $o;
-		return $o;
-	}
-
+	
 	/**
 	 * TODO:
 	 *  - extract to view
 	 */
 	protected function rend()
 	{
-		if (is_array($this->o_plugins))
-		{
-			foreach ($this->o_plugins AS &$plugin)
-			{
-				$plugin->rend();
-			}
-		}
-
 		if (!empty($this->data))
 		{
 			$this->data['params'] = $this->params_mapped;
