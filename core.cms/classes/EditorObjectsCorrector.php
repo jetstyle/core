@@ -30,9 +30,11 @@ class EditorObjectsCorrector
 		$data = preg_replace_callback("/<big>(.*?)?<\/big>/si", array($this, "correctNotes"), $data);
 		
 		$data = preg_replace_callback("/<img([^>]*?)class=\"flash\"([^>]*?)[\/]{0,1}>/si", array($this, "correctFlash"), $data);
-		
-		// rewrite regexp. look at flash regexp
-		$data = preg_replace_callback("/<img(.*?)?[\/]{0,1}>/si", array($this, "correctImages"), $data);
+
+                $data = preg_replace("/<p>(<img([^>]*?)mode=\"\d+\"([^>]*?)[\/]{0,1}>)<\/p>/si", '$1', $data);
+		$data = preg_replace_callback("/<img(([^>]*?)mode=\"\d+\"([^>]*?))[\/]{0,1}>/si", array($this, "correctImages"), $data);
+
+                // rewrite regexp. look at flash regexp
 		$data = preg_replace_callback("/<a(.*?)?>(.*?)?<\/a?>/si", array($this, "correctFiles"), $data);
 
 		$data = preg_replace_callback("/<table[^>]*?class=\"([\w\s]+)\"[^>]*?>(.*?)?<\/table>/si", array($this, "correctTables"), $data);
