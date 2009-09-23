@@ -137,12 +137,15 @@ class TreeControlJsTree extends TreeControl
 
 	protected function loadByParents($parents)
 	{
-		foreach($parents as &$parent)
-		{
-        	$parent = str_replace('node-', '', $parent);
-		}
-		$where = empty($parents) ? '' : "_parent IN (".implode(',',$parents).")";
-    	$this->load($where);
+            $parentsIds = array();
+            foreach($parents AS $parent)
+            {
+                $parentsIds[] = str_replace('node-', '', $parent);
+            }
+
+            $where = empty($parentsIds) ? '' : "_parent IN (".DBModel::quote($parentsIds).")";
+                
+            $this->load($where);
 	}
 
 	public function getHtml()
