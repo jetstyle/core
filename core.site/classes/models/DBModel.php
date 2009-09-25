@@ -1316,7 +1316,23 @@ class DBModel extends Model implements IteratorAggregate, ArrayAccess, Countable
 
 		$fmodel = clone $model;
 
-		$where = $fmodel->quoteField($fieldinfo['fk']) .'='. DBModel::quote($data[$fieldinfo['pk']]);
+                $pkParts = explode('.', $fieldinfo['pk']);
+                $_data = $data;
+                for ($i = 0; $i < count($pkParts); $i++)
+                {
+                    if((is_array($_data) || ($_data instanceof ArrayAccess)))
+                    {
+                        $_data = $_data[$pkParts[$i]];
+                    }
+                    else
+                    {
+                        break;
+                    }
+                }
+
+                $pkValue = $_data;
+                
+		$where = $fmodel->quoteField($fieldinfo['fk']) .'='. DBModel::quote($pkValue);
         if ($fieldinfo['tree'])
         {
             $fmodel->loadTree($where);
@@ -1345,6 +1361,22 @@ class DBModel extends Model implements IteratorAggregate, ArrayAccess, Countable
 
 		$qt = $this->quoteName(DBAL::$prefix.$fieldinfo['through']['table']);
 
+                $pkParts = explode('.', $fieldinfo['pk']);
+                $_data = $data;
+                for ($i = 0; $i < count($pkParts); $i++)
+                {
+                    if((is_array($_data) || ($_data instanceof ArrayAccess)))
+                    {
+                        $_data = $_data[$pkParts[$i]];
+                    }
+                    else
+                    {
+                        break;
+                    }
+                }
+
+                $pkValue = $_data;
+
 		$sqlParts = $fmodel->getSqlParts();
 		$sqlParts['join'] .= '
 			INNER JOIN '.$qt.' AS '.$qt.'
@@ -1352,7 +1384,7 @@ class DBModel extends Model implements IteratorAggregate, ArrayAccess, Countable
 			(
 				('.$fmodel->quoteField($fieldinfo['fk']).'='.$qt.'.'.$this->quoteName($fieldinfo['through']['fk']).')
 				 AND
-				('.$qt.'.'.$this->quoteName($fieldinfo['through']['pk']) .'='. DBModel::quote($data[$fieldinfo['pk']]).')
+				('.$qt.'.'.$this->quoteName($fieldinfo['through']['pk']) .'='. DBModel::quote($pkValue).')
 			) ';
 
 		if ($fieldinfo['through']['order'] && is_array($fieldinfo['through']['order']))
