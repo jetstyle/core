@@ -1,15 +1,15 @@
 {{?*data && count(*data)}}
-    <div>
-        {{?*title}}
-            {{*title}}:&nbsp;
-        {{/?}}
-        <select name="{{*get_var}}" onchange="this.form.submit();" >
-            <option value="">-----------</option>
-            {{!for *data do=@:option}}
+  <fieldset>
+    {{?*title}}
+        <label for="{{*get_var}}">{{*title}}:</label>
+    {{/?}}
+    <select name="{{*get_var}}" id="{{*get_var}}" onchange="this.form.submit();" >
+        <option value="">-----------</option>
+        {{!for *data do=@:option}}
 
-            {{:option}}
-                <option value="{{*id}}" {{?*selected}}selected="selected"{{/?}} {{?*marked}}style="background-color:#eeeeee"{{/?}}>{{*title}}</option>
-            {{/:option}}
-        </select>
-    </div>
+        {{:option}}
+            <option value="{{*id}}" {{?*selected}}selected="selected"{{/?}} {{?*marked}}style="background-color:#eeeeee"{{/?}}>{{*title}}</option>
+        {{/:option}}
+    </select>
+  </fieldset>
 {{/?}}
