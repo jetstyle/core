@@ -71,11 +71,11 @@ class ListSimple
             }
             $destIndex = intval($_POST['index']) + ($page - 1) * $this->perPage;
 
-            $destItem = DBModel::factory($this->config['model'])->setOrder('{_order} ASC')->load(null, 1, $destIndex);
+            $destItem = DBModel::factory($this->config['model'])->addField('_order')->setOrder('{_order} ASC')->load(null, 1, $destIndex);
 
             if (!$destItem[0]['_order'])
             {
-                $destItem = DBModel::factory($this->config['model'])->setOrder('{_order} DESC')->loadOne();
+                $destItem = DBModel::factory($this->config['model'])->addField('_order')->setOrder('{_order} DESC')->loadOne();
             }
             else
             {

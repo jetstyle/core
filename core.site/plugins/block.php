@@ -40,8 +40,8 @@ if (!$storeTo)
 }
 
 $controller = Locator::get('controller', true);
-$blockName = get_class($block);
-$blockName = strtolower(substr($blockName,0,1)).substr($blockName, 1, -5);
+//$blockName = get_class($block);
+$blockName = strtolower(substr($blockName,0,1)).substr($blockName, 1);
 
 if ($controller)
 {
