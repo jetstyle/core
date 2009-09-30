@@ -10,6 +10,7 @@ class File implements ArrayAccess {
     private static $filesInfoCache = array();
     private static $filesInfoByIdCache = array();
     private static $imageExts = array('jpg', 'jpeg', 'gif', 'png', 'bmp');
+    private static $flashExts = array('swf');
     private static $webFilesDir = null;
 
     const FILE_NEW = 1;
@@ -137,6 +138,10 @@ class File implements ArrayAccess {
         return in_array($ext, self::$imageExts);
     }
 
+    public static function isFlashExt($ext) {
+        return in_array($ext, self::$flashExts);
+    }
+
     public function __construct($config = array()) {
         if (null === self::$webFilesDir) {
             self::$webFilesDir = (Config::get('front_end_path') ? Config::get('front_end_path') : RequestInfo::$baseUrl).str_replace(Config::get('project_dir'), '', Config::get('files_dir'));
@@ -204,6 +209,19 @@ class File implements ArrayAccess {
         }
 
         return $this->data['is_image'];
+    }
+
+    public function isFlash() {
+        if (!array_key_exists('is_flash', $this->data)) {
+            if ($this->isLoaded()) {
+                $this->data['is_flash'] = self::isFlashExt($this->data['ext']);
+            }
+            else {
+                $this->data['is_flash'] = false;
+            }
+        }
+
+        return $this->data['is_flash'];
     }
 
     /**
@@ -549,6 +567,9 @@ class File implements ArrayAccess {
         }
         elseif ($key == 'is_loaded') {
             return $this->isLoaded();
+        }
+        elseif ($key == 'is_flash') {
+            return $this->isFlash();
         }
         elseif ($key == 'is_image') {
             return $this->isImage();
