@@ -33,10 +33,8 @@ class EditorObjectsCorrector
 
                 $data = preg_replace("/<p>(<img([^>]*?)mode=\"\d+\"([^>]*?)[\/]{0,1}>)<\/p>/si", '$1', $data);
 		$data = preg_replace_callback("/<img(([^>]*?)mode=\"\d+\"([^>]*?))[\/]{0,1}>/si", array($this, "correctImages"), $data);
-
-                // rewrite regexp. look at flash regexp
-		$data = preg_replace_callback("/<a(.*?)?>(.*?)?<\/a?>/si", array($this, "correctFiles"), $data);
-
+                
+                $data = preg_replace_callback("/<a(([^>]*?)mode=\"file\"([^>]*?))>(.*?)?<\/a>/si", array($this, "correctFiles"), $data);
 		$data = preg_replace_callback("/<table[^>]*?class=\"([\w\s]+)\"[^>]*?>(.*?)?<\/table>/si", array($this, "correctTables"), $data);
 
 		return $data;
@@ -128,7 +126,7 @@ class EditorObjectsCorrector
 	protected function correctFiles($matches)
 	{
 		preg_match_all('/(.*?)=(")(|.*?[^\\\])\\2/si', $matches[1], $paramsMatches);
-		
+
 		if(is_array($paramsMatches[3]) && !empty($paramsMatches[3]))
 		{
 			$res = array();
@@ -137,24 +135,13 @@ class EditorObjectsCorrector
 				$res[trim($r)] = trim(str_replace('\"', '"', $paramsMatches[3][$i]));
 			}
 
-			if($res['mode'] == 'file')
-			{
-				$res['fileparams'] = explode('|', $res['fileparams']);
-				$res['size'] = $res['fileparams'][0];
-				$res['ext'] = $res['fileparams'][1];
-				$res['title'] = $matches[2];
-				$this->tpl->setRef('*', $res);
-				
-				return $this->tpl->parse('content/blocks/file.html');
-			}
-			// link in new window
-			elseif($res['target'] == '_blank')
-			{
-				//$res['_title'] = $match[2];
-				//$this->tpl->setRef('*', $res);
+                        $res['fileparams'] = explode('|', $res['fileparams']);
+                        $res['size'] = $res['fileparams'][0];
+                        $res['ext'] = $res['fileparams'][1];
+                        $res['title'] = $matches[4];
+                        $this->tpl->setRef('*', $res);
 
-				//return $this->tpl->Parse('typografica/link.html');
-			}
+                        return $this->tpl->parse('content/blocks/file.html');
 		}
 		return $matches[0];
 	}
