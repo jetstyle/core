@@ -315,8 +315,9 @@ class FormSimple
 
 			if ($model)
 			{
-				$model->setFields(array($value['fk'], 'title'));
-				$model->setOrder(array("title" => "ASC"));
+				$titleField = $value['title_field'] ? $value['title_field'] : 'title';
+				$model->setFields(array($value['fk'], $titleField));
+				$model->setOrder(array($titleField => "ASC"));
 				if ($value['where'])
 				{
 					$model->where = ($model->where ? $model->where." AND " : "").$value['where'];
@@ -326,7 +327,7 @@ class FormSimple
 				$data = array();
 				foreach($model AS $r)
 				{
-					$data[$r[$value['fk']]] = $r['title'];
+					$data[$r[$value['fk']]] = $r[$titleField];
 				}
 
 				$this->config->RENDER[] = array($value['pk'], "select", $data, $value['default']);
