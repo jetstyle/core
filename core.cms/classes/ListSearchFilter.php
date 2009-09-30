@@ -8,6 +8,11 @@ Finder::useClass('ListFilter');
 
 class ListSearchFilter extends ListFilter
 {
+    const TYPE_LIKE = 'like';
+    const TYPE_LT = 'lt';
+    const TYPE_GT = 'gt';
+    const TYPE_EQUAL = 'eq';
+
     protected $getVar = '';
     protected $neededConfigVars = array('field');
 
@@ -17,23 +22,62 @@ class ListSearchFilter extends ListFilter
     protected $template = 'list_search_filter.html';
 
     protected $minWordLength = 2;
+    protected $searchType;
 
     public function getValue()
     {
-        return $this->getVarValue;
+        switch ($this->searchType)
+        {
+            case self::TYPE_LIKE:
+                return $this->preparedGetVarValue;
+                break;
+
+            case self::TYPE_EQUAL:
+            case self::TYPE_GT:
+            case self::TYPE_LT:
+            default:
+                return $this->getVarValue;
+                break;
+        }
     }
 
     public function apply(&$model)
     {
-        if ($this->preparedGetVarValue)
+        $value = $this->getValue();
+
+        if ($value)
         {
-            $data = explode(' ', $this->preparedGetVarValue);
-            $newData = array();
-            foreach ($data AS $d)
+            $where = '';
+            switch ($this->searchType)
             {
-                $newData[] = '{'.$this->getConfig('field').'} LIKE '.DBModel::quote('%'.$d.'%');
+                case self::TYPE_LIKE:
+                    $data = explode(' ', $value);
+                    $newData = array();
+                    foreach ($data AS $d)
+                    {
+                        $newData[] = '{'.$this->getConfig('field').'} LIKE '.DBModel::quote('%'.$d.'%');
+                    }
+                    $where = implode(' AND ', $newData);
+
+                    break;
+
+                case self::TYPE_EQUAL:
+                    $where= '{'.$this->getConfig('field').'} = '.DBModel::quote($value);
+                    break;
+
+                case self::TYPE_GT:
+                    $where= '{'.$this->getConfig('field').'} > '.DBModel::quote($value);
+                    break;
+
+                case self::TYPE_LT:
+                    $where= '{'.$this->getConfig('field').'} < '.DBModel::quote($value);
+                    break;
             }
-            $model->where .= ($model->where ? " AND " : "")." ".implode(' AND ', $newData);
+
+            if ($where)
+            {
+                $model->where .= ($model->where ? " AND " : "")." ".$where;
+            }
         }
     }
     
@@ -60,15 +104,14 @@ class ListSearchFilter extends ListFilter
 
     protected function init()
     {
-        $this->getVar = $this->getConfig('get_var');
-
-        if (!$this->getVar)
-        {
-            $this->getVar = $this->getConfig('field');
-        }
-
+        $this->getVar = $this->getConfig('get_var', $this->getConfig('field'));
         $this->getVarValue = RequestInfo::get($this->getVar);
-        $this->preparedGetVarValue = $this->prepareQuery($this->getVarValue);
+        $this->searchType = $this->getConfig('search_type', self::TYPE_LIKE);
+
+        if ($this->searchType == self::TYPE_LIKE)
+        {
+            $this->preparedGetVarValue = $this->prepareQuery($this->getVarValue);
+        }
     }
 
     protected function prepareQuery($q)

@@ -110,11 +110,18 @@ abstract class ListFilter
         }
     }
 
-    protected function getConfig($key = null)
+    protected function getConfig($key = null, $defaultValue = null)
     {
         if (null !== $key )
         {
-            return $this->config[$key];
+            if (array_key_exists($key, $this->config))
+            {
+                return $this->config[$key];
+            }
+            else
+            {
+                return $defaultValue;
+            }
         }
         else
         {
