@@ -20,7 +20,7 @@ class ModuleConstructor
         $this->modulePathParts = explode('/', $modulePath);
         $this->moduleName = $this->modulePathParts[0];
 
-        if (Config::get('app_name') == 'app')
+        if (Config::get('app_name') != 'cms')
             Finder::prependDir(Config::get('project_dir').'cms/', 'app');
         else
             Finder::prependDir(Config::get('app_dir').$this->handlersType.'/'.$this->moduleName.'/', 'app');
