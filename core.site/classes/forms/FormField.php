@@ -109,6 +109,17 @@ class FormField {
         $this->event->Event_Register();
     }
 
+    public function &getFieldByName($name) {
+        $resultField = null;
+        
+        if ($this->model && method_exists($this->model, 'getFieldByName'))
+        {
+            $resultField = $this->model->getFieldByName($name);
+        }
+
+        return $resultField;
+    }
+
     // парсинг поля формы
     function Parse( $is_readonly=false ) {
         Debug::trace("FormField: <b>Parsing field: { ".$this->name." } </b>");

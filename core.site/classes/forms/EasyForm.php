@@ -102,10 +102,10 @@ class EasyForm {
 
 		//привязываем строку к БД
 		if( $id = isset($config["id"]) ? $config["id"] : false )
-			$form->AssignId( $id );
+			$this->form->AssignId( $id );
 		else
 			if( $id = isset($_REQUEST[ $this->id_var_name ]) ? $_REQUEST[ $this->id_var_name ] : false )
-				$form->AssignId( $id );
+				$this->form->AssignId( $id );
 
 		//добавляем поля
 		$this->AddFields( $this->form, $config["fields"] );

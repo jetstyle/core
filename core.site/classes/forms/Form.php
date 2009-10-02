@@ -711,10 +711,20 @@ class Form
 
     public function &getFieldByName($name)
     {
-        foreach ($this->fields as $k => $field)
+        $resultField = null;
+        foreach ($this->fields AS $k => $field)
         {
-            if ($field->name == $name) return $this->fields[$k];
+            if ($field->name == $name)
+            {
+                $resultField = $this->fields[$k];
+                break;
+            }
+            elseif ($resultField = &$field->getFieldByName($name))
+            {
+                break;
+            }
         }
+        return $resultField;
     }
 
 

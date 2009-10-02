@@ -8,6 +8,7 @@ default:
         - password
         - name
         - salt
+        - key
         >group:
             join_where: {group._state} = 0
             model: PrincipalStorageDbGroupsModel

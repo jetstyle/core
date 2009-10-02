@@ -8,6 +8,8 @@ interface PrincipalStorageInterface
 	
 	public function loadById($id);
 	public function loadByLogin($login);
+        public function loadByEmail($email);
+        
 	public function setRealm($realm);
 	
 	public function guest();

@@ -5,11 +5,10 @@ class RegisterController extends Controller
 	protected $params_map = array(
 		array('thank', array('thank'=>'thank')),
 		array('activate',
-			array(
-				'activate' => 'activate',
-				'id' => '\d+',
-				'key' => '\w+',
-			),
+                    array(
+                        'activate' => 'activate',
+                        'key' => '\w+',
+                    ),
 		),
 		array('default', array(NULL)),
 	);
@@ -19,7 +18,6 @@ class RegisterController extends Controller
 		Finder::useClass("forms/EasyForm");
 		$config['success_url'] = RequestInfo::$baseUrl.$this->path.'/thank';
 		$config['db_model'] = &Locator::get('principal')->getStorageModel();
-		$config['fields']['realm']['model_default'] = 'site';
 		
 		$prp = &Locator::get('principal');
 		if ($prp->security('noguests'))
@@ -55,25 +53,24 @@ class RegisterController extends Controller
 		$db = &Locator::get('db');
 		$error = false;
 
-    	$model = Locator::get('principal')->getStorageModel();
-		$where = '{id} = '.intval($config['id']).' AND {key} = '.$db->quote($config['key']);
-		$user = $model->loadOne($where)->getData();
+                $user = clone Locator::get('principal')->getStorageModel();
+		$user->loadOne('{key} = '.$db->quote($config['key']));
 		if ($user['id'])
 		{
-			$data = array('email_active' => 1);
-			$model->update($data, '{id} = '.intval($config['id']));
+			$data = array(
+                            'email_active' => 1,
+                            'key' => $this->generateKey(),
+                        );
+
+			$user->update($data, '{id} = '.DBModel::quote($user['id']));
 			if ($db->affectedRows() != 1) $error = true;
 		}
-		else $error = true;
+		else 
+                {
+                    $error = true;
+                }
 
-		if ($error)
-		{
-        	$this->siteMap = 'activate-error';
-		}
-		else
-		{
-       		$this->siteMap = 'activate-ok';
-		}
+		Locator::get('tpl')->set('activate_error', $error);
 	}
 	
 	public function registerAfterEvent($event, $form)
@@ -81,11 +78,7 @@ class RegisterController extends Controller
 		$key = $this->generateKey();
 		$data['key'] = $key;
 		$form->config['db_model']->update($data, '{id} = '.DBModel::quote($form->data_id));
-		$this->sendActivationMail($form->data_id, $form->getFieldByName('email')->model->model_data, $key);
-		
-		$login = $form->getFieldByName('login')->model->model_data;
-		$password = $form->getFieldByName('password')->model->model_data;
-		Locator::get('principal')->login($login, $password);
+		$this->sendActivationMail($form->getFieldByName('email')->model->model_data, $key);
 	}
 	
 	public function profileBeforeEvent($event, $form)
@@ -97,16 +90,16 @@ class RegisterController extends Controller
 			$data['key'] = $key;
 			$data['email_active'] = 0;
 			$form->config['db_model']->update($data, '{id} = '.DBModel::quote($form->data_id));
-			$this->sendActivationMail($form->data_id, $form->getFieldByName('email')->model->model_data, $key);	
+			$this->sendActivationMail($form->getFieldByName('email')->model->model_data, $key);	
 		}
 	}
 	
-	private function sendActivationMail($id, $to, $key)
+	private function sendActivationMail($to, $key)
 	{
 		$tpl = &Locator::get('tpl');
 		
 		$tpl->set('site_name', Config::get('project_title'));
-		$actLink = $this->url_to('activate', array('activate' => 'activate', 'id' => $id, 'key' => $key));
+		$actLink = $this->url_to('activate', array('activate' => 'activate', 'key' => $key));
 		$tpl->set('act_link',RequestInfo::$baseUrl.$actLink);
 		$emailText = $tpl->parse('users/email_confirmation.html');
 		
@@ -122,7 +115,7 @@ class RegisterController extends Controller
 	
 	private function generateKey()
 	{
-    	return md5($_SERVER['HTTP_USER_AGENT'].$_SERVER['REMOTE_ADDR'].time().rand());
+            return md5($_SERVER['HTTP_USER_AGENT'].$_SERVER['REMOTE_ADDR'].time().rand());
 	}
 }
 ?>

@@ -76,6 +76,24 @@ class FormComponent_group extends FormComponent_abstract
         return $field_object;
     }
 
+    public function &getFieldByName($name)
+    {
+        $resultField = null;
+        foreach ($this->childs AS $k => $field)
+        {
+            if ($field->name == $name)
+            {
+                $resultField = $this->childs[$k];
+                break;
+            }
+            elseif ($resultField = &$field->getFieldByName($name))
+            {
+                break;
+            }
+        }
+        return $resultField;
+    }
+
     // регистрация в форме
     function Event_Register()
     {
