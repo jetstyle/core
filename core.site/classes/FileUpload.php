@@ -108,14 +108,15 @@ class FileUpload
 		$fileName = $fileName.$add;
 		$fileNameExt = $fileName.'.'.$ext;
 		$fileNameFull = $dirname.$fileNameExt;
-				
-		if($this->isImage)
-		{
-			$image = $this->createResourceFromImage($uploadedFile);
-		}
-		
+
+                $image = null;
+
 		if ( is_array($params['actions']) )
 		{
+                    if($this->isImage)
+                    {
+                        $image = $this->createResourceFromImage($uploadedFile);
+                    }
 			foreach ($params['actions'] AS $key => $value)
 			{
 				switch ($key)
@@ -149,7 +150,7 @@ class FileUpload
 			}
 		}
 		
-		if ($this->isImage)
+		if ($image)
 		{
 			$this->saveImageFromResource($image, $ext, $fileNameFull);
 		}
