@@ -50,16 +50,18 @@ class FormComponent_model_filters extends FormComponent_model_plain
    {                   
      $data = $this->model_data;
      $filtered = array();
-     $params = array();
      foreach( $this->field->config["model_filters"] as $k=>$v )
      {
        // разветвление. Можно брать не из предыдущего, а из любого фильтра
        if (isset($this->field->config["model_filters_from"]) &&
            isset($this->field->config["model_filters_from"][$k]))
-         $params["_"] = $filtered[ $this->field->config["model_filters_from"][$k] ];
+       {
+         $params = array("_" => $filtered[ $this->field->config["model_filters_from"][$k] ]);
+       }
        else
-       $params["_"] = $data;
-
+       {
+         $params = array("_" => $data);  
+       }
        $filtered[$k] = $data = Locator::get('tpl')->action( $v, $params );
      }
 
@@ -70,7 +72,6 @@ class FormComponent_model_filters extends FormComponent_model_plain
        $v = str_replace("*", $this->field->name, $v);
        $result[$v] = $filtered[$k];
      }
-
      return $result;
    }
 
