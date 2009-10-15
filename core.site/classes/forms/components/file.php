@@ -79,27 +79,36 @@ class FormComponent_file extends FormComponent_model_plain
      
         if ($this->field->config['validator_params']['not_empty'] && !$_FILES['_'.$this->field->name]['name'])
             $this->_Invalidate( "file_empty", "Файл не выбран" );
+            
+        $this->file_size = $_FILES[ '_'.$this->field->name ]['size'];
+        $this->file_ext = substr($_FILES[ '_'.$this->field->name ]['name'], strrpos($_FILES[ '_'.$this->field->name ]['name'], '.')+1);
 
-     if ($this->file_size)
-       if (isset( $this->field->config["file_size"]))
-         if ($this->file_size > $this->field->config["file_size"]*1024)
-           $this->_Invalidate( "file_size", "Слишком большой файл" );
+        if ($this->file_size)
+            if (isset( $this->field->config["file_size"]))
+                if ($this->file_size > $this->field->config["file_size"]*1024)
+                    $this->_Invalidate( "file_size", "Слишком большой файл" );
 
-     if ($this->file_ext)
-       if (isset( $this->field->config["file_ext"]))
-         if (!in_array($this->file_ext,$this->field->config["file_ext"]))
-           $this->_Invalidate( "file_ext", "Недопустимый тип файла" );
+        if ($this->file_ext)
+            if (isset( $this->field->config["file_ext"]))
+                if (!in_array($this->file_ext,$this->field->config["file_ext"]))
+                    $this->_Invalidate( "file_ext", "Недопустимый тип файла" );
 
-     if ($this->file_size)
-       if (@$this->field->config["validator_func"]) {
-         if ($result = call_user_func( $this->field->config["validator_func"],
-                                       $this->field->model->Model_GetDataValue(),
-                                       $this->field->config ))
-           $this->_Invalidate( "func", $result );
-
+        if ($this->file_size)
+            if (@$this->field->config["validator_func"]) {
+                if ($result = call_user_func( $this->field->config["validator_func"],
+                                              $this->field->model->Model_GetDataValue(),
+                                              $this->field->config ))
+            $this->_Invalidate( "func", $result );
+        }
+        
+        if (isset( $this->field->config["min_width"]) || isset( $this->field->config["min_height"]))
+        {
+            $imageSize = getimagesize($_FILES['_'.$this->field->name]['tmp_name']);
+            if ($imageSize[0] < $this->field->config["min_width"] || $imageSize[1] < $this->field->config["min_height"])
+                $this->_Invalidate( "file_size", "Слишком маленькая картинка" );
         }
 
-     return $this->valid;
+        return $this->valid;
    }
    // quick pre-validation
    function _CheckExtSize( $ext, $size )
