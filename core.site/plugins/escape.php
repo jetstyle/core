@@ -1,8 +1,13 @@
 <?php
 
-$string = isset($params[0]) ? $params[0] : $params['_'];
-$esc_type = $params['type'] ? $params['type'] : 'html';
-	
+if (!is_array($params)) {
+    $string = $params;
+    $esc_type = 'html';
+} else {
+    $string = isset($params[0]) ? $params[0] : $params['_'];
+    $esc_type = $params['type'] ? $params['type'] : 'html';
+}
+
   switch ($esc_type) {
       case 'html':
           $res = htmlspecialchars($string, ENT_QUOTES);
