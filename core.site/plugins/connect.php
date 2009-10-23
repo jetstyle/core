@@ -53,10 +53,11 @@ if ( $compile )
 			$compressedName = '';
 			foreach ($tpl->CONNECT[$compile] AS $fileName)
 			{
-				if (file_exists($tpl->getSkinDir().'/'.$compile.'/'.$fileName.'.'.$compile))
-				{
-					$compressedName .= '|'.filemtime($tpl->getSkinDir().'/'.$compile.'/'.$fileName.'.'.$compile).'|'.$fileName.'|';
-				}
+                            $_fileName = Finder::findScript($compile, $fileName, 0, 1, $compile);
+                            if ($_fileName)
+                            {
+                                $compressedName .= '|'.filemtime($_fileName).'/'.$compile.'/'.$_fileName.'|';
+                            }
 			}
 			$compressedName = md5($compressedName);
 			
@@ -66,21 +67,30 @@ if ( $compile )
 				$skinDir = $tpl->getSkinDir();
 				foreach ($tpl->CONNECT[$compile] AS $filename)
 				{
-					if (file_exists($skinDir.'/'.$compile.'/'.$filename.'.'.$compile))
-					{
-						$result .= file_get_contents($skinDir.'/'.$compile.'/'.$filename.'.'.$compile);
-					}
+                                    $_fileName = Finder::findScript($compile, $fileName, 0, 1, $compile);
+                                    if ($_fileName)
+                                    {
+                                        $result .= file_get_contents($_fileName);
+                                    }
 				}
 				
 				if ('js' == $compile)
 				{
+                                    if (Config::get('minify_js'))
+                                    {
 					Finder::useClass('JSMin');
 					$result = JSMin::minify($result);
+                                    }
 				}
 				elseif ('css' == $compile)
 				{
-					Finder::useClass('CSSMin');
+                                    $result = str_replace('../images/', $tpl->get('images'), $result);
+
+                                    if (Config::get('minify_css'))
+                                    {
+                                        Finder::useClass('CSSMin');
 					$result = CSSMin::minify($result);
+                                    }
 				}
 								
 				if (!is_dir(Config::get('cache_dir').'/'.$compile))
