@@ -53,10 +53,11 @@ if ( $compile )
 			$compressedName = '';
 			foreach ($tpl->CONNECT[$compile] AS $fileName)
 			{
-				if (file_exists($tpl->getSkinDir().'/'.$compile.'/'.$fileName.'.'.$compile))
-				{
-					$compressedName .= '|'.filemtime($tpl->getSkinDir().'/'.$compile.'/'.$fileName.'.'.$compile).'|'.$fileName.'|';
-				}
+                            $_fileName = Finder::findScript($compile, $fileName, 0, 1, $compile);
+                            if ($_fileName)
+                            {
+                                $compressedName .= '|'.filemtime($_fileName).'/'.$compile.'/'.$_fileName.'|';
+                            }
 			}
 			$compressedName = md5($compressedName);
 			
@@ -64,23 +65,32 @@ if ( $compile )
 			{
 				$result = '';
 				$skinDir = $tpl->getSkinDir();
-				foreach ($tpl->CONNECT[$compile] AS $filename)
+				foreach ($tpl->CONNECT[$compile] AS $fileName)
 				{
-					if (file_exists($skinDir.'/'.$compile.'/'.$filename.'.'.$compile))
-					{
-						$result .= file_get_contents($skinDir.'/'.$compile.'/'.$filename.'.'.$compile);
-					}
+                                    $_fileName = Finder::findScript($compile, $fileName, 0, 1, $compile);
+                                    if ($_fileName)
+                                    {
+                                        $result .= file_get_contents($_fileName);
+                                    }
 				}
 				
 				if ('js' == $compile)
 				{
+                                    if (Config::get('minify_js'))
+                                    {
 					Finder::useClass('JSMin');
 					$result = JSMin::minify($result);
+                                    }
 				}
 				elseif ('css' == $compile)
 				{
-					Finder::useClass('CSSMin');
+                                    $result = str_replace('../images/', $tpl->get('images'), $result);
+
+                                    if (Config::get('minify_css'))
+                                    {
+                                        Finder::useClass('CSSMin');
 					$result = CSSMin::minify($result);
+                                    }
 				}
 								
 				if (!is_dir(Config::get('cache_dir').'/'.$compile))
@@ -112,8 +122,9 @@ if ( $compile )
 				file_put_contents(Config::get('cache_dir').'/'.$compile.'/'.$compressedName.'.'.$compile.'.gz', gzencode($result, 9));
 			}
 			
-			$fname = array('path' => RequestInfo::$baseUrl.'cache/'.Config::get('app_name').'/'.$compile, 'file' => $compressedName);
-			$tpl->set("*",$fname);
+			//$fname = array('path' => RequestInfo::$baseUrl.'cache/'.Config::get('app_name').'/'.$compile, 'file' => $compressedName);
+                        $fname = RequestInfo::$baseUrl.'cache/'.Config::get('app_name').'/'.$compile.'/'.$compressedName.'.'.$compile;
+			$tpl->set("_",$fname);
 			$str = $tpl->parse($template."_path");
 		}
 		else
