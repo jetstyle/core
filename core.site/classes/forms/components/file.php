@@ -101,7 +101,7 @@ class FormComponent_file extends FormComponent_model_plain
             $this->_Invalidate( "func", $result );
         }
         
-        if (isset( $this->field->config["min_width"]) || isset( $this->field->config["min_height"]))
+        if ((isset( $this->field->config["min_width"]) || isset( $this->field->config["min_height"])) && $_FILES['_'.$this->field->name]['tmp_name'])
         {
             $imageSize = getimagesize($_FILES['_'.$this->field->name]['tmp_name']);
             if ($imageSize[0] < $this->field->config["min_width"] || $imageSize[1] < $this->field->config["min_height"])
