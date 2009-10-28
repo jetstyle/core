@@ -210,6 +210,11 @@ class Upload
 							case 'opacity':
 								$this->makeImageOpacity($image, $value);
 							break;
+						
+							case 'back':
+								$this->createThumb($image, array('x' => $value[0], 'y' => $value[1]), false);
+								$this->drawOnBack($image, array('x' => $value[0], 'y' => $value[1]));
+							break;
 						}
 					}
 
@@ -504,32 +509,32 @@ class Upload
 
 		imagecopyresampled ($thumbnail, $img, 0,0,0,0, $newWidth, $newHeight, $size[0], $size[1]);
 
-		// создаем плашку с размерами миниатюры. потом в нее вписываем полученное изображение
-//		if($pl)
-//		{
-//			$x = 0;
-//			$y = 0;
-//
-//			if(imagesx($thumbnail) < $size['x'])
-//			{
-//				$x = round(($size['x'] - imagesx($thumbnail)) / 2);
-//			}
-//
-//			if (imagesy($thumbnail) < $size['y'])
-//			{
-//				$y = round(($size['y'] - imagesy($thumbnail)) / 2);
-//			}
-//
-//			$t = $thumbnail;
-//			$thumbnail = imagecreatetruecolor ($size['x'], $size['y']);
-//			$fg = ImageColorAllocate($thumbnail, 255, 255, 255);
-//			imagefill($thumbnail, 0, 0, $fg);
-//
-//			imagecopy($thumbnail, $t, $x, $y, 0, 0, imagesx($t), imagesy($t));
-//			imagedestroy($t);
-//		}
 		imagedestroy($img);
 		$img = $thumbnail;
+	}
+	
+	protected function drawOnBack(&$img, $size)
+	{
+		$x = 0;
+		$y = 0;
+		
+		if(imagesx($img) < $size['x'])
+		{
+			$x = round(($size['x'] - imagesx($img)) / 2);
+		}
+
+		if (imagesy($img) < $size['y'])
+		{
+			$y = round(($size['y'] - imagesy($img)) / 2);
+		}
+
+		$t = $img;
+		$img = imagecreatetruecolor ($size['x'], $size['y']);
+		$fg = ImageColorAllocate($img, 255, 255, 255);
+		imagefill($img, 0, 0, $fg);
+
+		imagecopy($img, $t, $x, $y, 0, 0, imagesx($t), imagesy($t));
+		imagedestroy($t);
 	}
 
 	protected function cropImage(&$img, $size, $cropType)
