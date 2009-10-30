@@ -325,7 +325,7 @@ class TreeControlJsTree extends TreeControl
 
 			if ($supertag)
 			{
-				$this->updateTreePathes($this->config->table_name, $node['id'], $this->config->allow_empty_supertag, $this->config->where);
+				$this->updateTreePathes($this->config->table_name, $node['id'], $this->config->allow_empty_supertag, $this->config->where, $this->config->noRoot);
 			}
 		}
 	}
