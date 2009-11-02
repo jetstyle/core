@@ -10,9 +10,12 @@
 
  class Pager implements PagerInterface
  {
+	const DEFAULT_PAGE = 1;
+	
+	protected $pageVar = 'p';	// http request parameter name
  	protected $total = 0;		// total items
  	protected $perPage = 10;	// items per page
- 	protected $p = 1;			// current page
+ 	protected $p = NULL;		// current page
  	protected $frameSize = 7;	//
  	protected $data = array();
 
@@ -24,10 +27,13 @@
 
  	public function setup($currentPage = 1, $total = 0, $perPage = 0, $frameSize = 0)
  	{
- 		$this->p = $currentPage;
- 		if ($this->p < 1)
+		if (isset($currentPage))
 		{
-			$this->p = 1;
+			if ($currentPage < 1)
+			{
+				$currentPage = 1;
+			}
+			$this->setCurrentPage($currentPage);
 		}
 
  		$this->total = $total;
@@ -49,7 +55,7 @@
 
  	public function getOffset()
  	{
- 		return (($this->p-1) * $this->perPage);
+ 		return (($this->getCurrentPage()-1) * $this->perPage);
  	}
 
  	protected function construct()
@@ -61,19 +67,16 @@
 
 		$allPages = ceil($this->total / $this->perPage);
 
-		if ($this->p < 1)
+		$p = $this->getCurrentPage();
+		
+		if ($p < 1)
 		{
 			$p = 1;
 		}
-		elseif ($this->p >= $allPages)
+		elseif ($p >= $allPages)
 		{
 			$p = $allPages;
 		}
-		else
-		{
-			$p = $this->p;
-		}
-
 		if ($this->frameSize > $allPages)
 		{
 			$this->frameSize = $allPages;
@@ -94,8 +97,8 @@
 			if ($allPages > $this->frameSize)
 			{
 				$this->data['pages'][$i-1]['has_more'] = $i;
-				$this->data['pages'][$i-1]['has_more_url'] = $this->fixUrl( RequestInfo::hrefChange('',array ('p' => $i,'submit' => '')) );
-				$this->data['pages'][$i-1]['last_url'] = $this->fixUrl( RequestInfo::hrefChange('',array ('p' => $allPages)) );
+				$this->data['pages'][$i-1]['has_more_url'] = $this->fixUrl( RequestInfo::hrefChange('',array ($this->getPageVar() => $i,'submit' => '')) );
+				$this->data['pages'][$i-1]['last_url'] = $this->fixUrl( RequestInfo::hrefChange('',array ($this->getPageVar() => $allPages)) );
 				$this->data['pages'][$i-1]['last_num'] = $allPages;
 			}
 		}
@@ -126,8 +129,8 @@
 			if ( $allPages > $i )
 			{
 				$this->data['pages'][$i-1]['has_more'] = $i;
-				$this->data['pages'][$i-1]['has_more_url'] = $this->fixUrl( RequestInfo::hrefChange('',array ('p' => $i,'submit' => '')) );
-				$this->data['pages'][$i-1]['last_url'] = $this->fixUrl( RequestInfo::hrefChange('',array ('p' => $allPages)) );
+				$this->data['pages'][$i-1]['has_more_url'] = $this->fixUrl( RequestInfo::hrefChange('',array ($this->getPageVar() => $i,'submit' => '')) );
+				$this->data['pages'][$i-1]['last_url'] = $this->fixUrl( RequestInfo::hrefChange('',array ($this->getPageVar() => $allPages)) );
 				$this->data['pages'][$i-1]['last_num'] = $allPages;
 
 			}
@@ -136,7 +139,7 @@
 		if ($p > 1)
 		{
 			$this->data['prev_page'] = $this->fixUrl( RequestInfo::hrefChange('', array (
-				'p' => ($p -1
+				$this->getPageVar() => ($p -1
 			), 'submit' => ''))
 			)
 			;
@@ -144,7 +147,7 @@
 		if ($p <= ($allPages -1))
 		{
 			$this->data['next_page'] = $this->fixUrl( RequestInfo::hrefChange('', array (
-																			  'p' => ($p +1
+																			  $this->getPageVar() => ($p +1
 																			), 'submit' => ''))
 			);
 		}
@@ -169,7 +172,7 @@
 					'num' => $i,
 					'url' => $this->fixUrl( RequestInfo::hrefChange('',
 					array (
-						'p' => $i,
+						$this->getPageVar() => $i,
 						'submit' => ''
 					)
 				)) );
@@ -183,11 +186,42 @@
 		//для первой страницы текущего фрейма проверим, можно ли отмотать фрейм назад
 		if ( $i == $start_from && $start_from > 1 )
 		{
-			$page['has_less_url'] = $this->fixUrl( RequestInfo::hrefChange('',array ('p' => $i-1)) );
-			$page['first_url'] = $this->fixUrl( RequestInfo::hrefChange('',array ('p' => 1)) );
+			$page['has_less_url'] = $this->fixUrl( RequestInfo::hrefChange('',array ($this->getPageVar() => $i-1)) );
+			$page['first_url'] = $this->fixUrl( RequestInfo::hrefChange('',array ($this->getPageVar() => 1)) );
 		}
 
 		return $page;
  	}
+
+	public function getPageVar()
+	{
+		return $this->pageVar;
+	}
+	public function setPageVar($name)
+	{
+		$this->pageVar = $name;
+		return $this;
+	}
+	
+	public function getCurrentPage()
+	{
+		if (!isset($this->p))
+		{
+			if ($this->getPageVar())
+			{
+				$this->p = intval(RequestInfo::get($this->getPageVar()));
+			}
+			else
+			{
+				$this->p = self::DEFAULT_PAGE;
+			}
+		}
+		return $this->p;
+	}
+	public function setCurrentPage($pageNo)
+	{
+		$this->p = $pageNo;
+		return $this;
+	}
  }
 ?>
