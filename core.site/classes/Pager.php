@@ -25,7 +25,7 @@
  		return $this->data;
  	}
 
- 	public function setup($currentPage = 1, $total = 0, $perPage = 0, $frameSize = 0)
+ 	public function setup($currentPage = self::DEFAULT_PAGE, $total = 0, $perPage = 0, $frameSize = 0)
  	{
 		if (isset($currentPage))
 		{
@@ -211,11 +211,8 @@
 			{
 				$this->p = intval(RequestInfo::get($this->getPageVar()));
 			}
-			else
-			{
-				$this->p = self::DEFAULT_PAGE;
-			}
 		}
+		if (!$this->p) $this->p = self::DEFAULT_PAGE;
 		return $this->p;
 	}
 	public function setCurrentPage($pageNo)
