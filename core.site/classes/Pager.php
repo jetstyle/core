@@ -10,12 +10,9 @@
 
  class Pager implements PagerInterface
  {
-	const DEFAULT_PAGE = 1;
-	
-	protected $pageVar = 'p';	// http request parameter name
  	protected $total = 0;		// total items
  	protected $perPage = 10;	// items per page
- 	protected $p = NULL;		// current page
+ 	protected $p = 1;			// current page
  	protected $frameSize = 7;	//
  	protected $data = array();
 
@@ -27,13 +24,10 @@
 
  	public function setup($currentPage = self::DEFAULT_PAGE, $total = 0, $perPage = 0, $frameSize = 0)
  	{
-		if (isset($currentPage))
+ 		$this->p = $currentPage;
+ 		if ($this->p < 1)
 		{
-			if ($currentPage < 1)
-			{
-				$currentPage = 1;
-			}
-			$this->setCurrentPage($currentPage);
+			$this->p = 1;
 		}
 
  		$this->total = $total;
@@ -55,7 +49,7 @@
 
  	public function getOffset()
  	{
- 		return (($this->getCurrentPage()-1) * $this->perPage);
+ 		return (($this->p-1) * $this->perPage);
  	}
 
  	protected function construct()
@@ -67,16 +61,19 @@
 
 		$allPages = ceil($this->total / $this->perPage);
 
-		$p = $this->getCurrentPage();
-		
-		if ($p < 1)
+		if ($this->p < 1)
 		{
 			$p = 1;
 		}
-		elseif ($p >= $allPages)
+		elseif ($this->p >= $allPages)
 		{
 			$p = $allPages;
 		}
+		else
+		{
+			$p = $this->p;
+		}
+
 		if ($this->frameSize > $allPages)
 		{
 			$this->frameSize = $allPages;
@@ -97,8 +94,8 @@
 			if ($allPages > $this->frameSize)
 			{
 				$this->data['pages'][$i-1]['has_more'] = $i;
-				$this->data['pages'][$i-1]['has_more_url'] = $this->fixUrl( RequestInfo::hrefChange('',array ($this->getPageVar() => $i,'submit' => '')) );
-				$this->data['pages'][$i-1]['last_url'] = $this->fixUrl( RequestInfo::hrefChange('',array ($this->getPageVar() => $allPages)) );
+				$this->data['pages'][$i-1]['has_more_url'] = $this->fixUrl( RequestInfo::hrefChange('',array ('p' => $i,'submit' => '')) );
+				$this->data['pages'][$i-1]['last_url'] = $this->fixUrl( RequestInfo::hrefChange('',array ('p' => $allPages)) );
 				$this->data['pages'][$i-1]['last_num'] = $allPages;
 			}
 		}
@@ -129,8 +126,8 @@
 			if ( $allPages > $i )
 			{
 				$this->data['pages'][$i-1]['has_more'] = $i;
-				$this->data['pages'][$i-1]['has_more_url'] = $this->fixUrl( RequestInfo::hrefChange('',array ($this->getPageVar() => $i,'submit' => '')) );
-				$this->data['pages'][$i-1]['last_url'] = $this->fixUrl( RequestInfo::hrefChange('',array ($this->getPageVar() => $allPages)) );
+				$this->data['pages'][$i-1]['has_more_url'] = $this->fixUrl( RequestInfo::hrefChange('',array ('p' => $i,'submit' => '')) );
+				$this->data['pages'][$i-1]['last_url'] = $this->fixUrl( RequestInfo::hrefChange('',array ('p' => $allPages)) );
 				$this->data['pages'][$i-1]['last_num'] = $allPages;
 
 			}
@@ -139,7 +136,7 @@
 		if ($p > 1)
 		{
 			$this->data['prev_page'] = $this->fixUrl( RequestInfo::hrefChange('', array (
-				$this->getPageVar() => ($p -1
+				'p' => ($p -1
 			), 'submit' => ''))
 			)
 			;
@@ -147,7 +144,7 @@
 		if ($p <= ($allPages -1))
 		{
 			$this->data['next_page'] = $this->fixUrl( RequestInfo::hrefChange('', array (
-																			  $this->getPageVar() => ($p +1
+																			  'p' => ($p +1
 																			), 'submit' => ''))
 			);
 		}
@@ -172,7 +169,7 @@
 					'num' => $i,
 					'url' => $this->fixUrl( RequestInfo::hrefChange('',
 					array (
-						$this->getPageVar() => $i,
+						'p' => $i,
 						'submit' => ''
 					)
 				)) );

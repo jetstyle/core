@@ -1097,8 +1097,7 @@ class DBModel extends Model implements IteratorAggregate, ArrayAccess, Countable
 			}
 
 			$pager = &$this->getPager();
-			$pager->setup(NULL, $total, $this->pagerPerPage, $this->pagerFrameSize);
-			$pager->setPageVar($this->pagerVar);
+			$pager->setup(RequestInfo::get($this->pagerVar), $total, $this->pagerPerPage, $this->pagerFrameSize);
 			$limit = $pager->getLimit();
 			$offset = $pager->getOffset();
 		}
