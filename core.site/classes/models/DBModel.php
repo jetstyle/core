@@ -522,13 +522,7 @@ class DBModel extends Model implements IteratorAggregate, ArrayAccess, Countable
 
 	public function getCount($where = NULL)
 	{
-		if (!empty($this->sqlParts))
-		{
-			$this->cleanUp();
-		}
-
 		$sqlParts = $this->getSqlParts($where);
-		
 		$sql = '
 			SELECT COUNT(*) AS total
 			'.$sqlParts['from'].'
@@ -1102,8 +1096,9 @@ class DBModel extends Model implements IteratorAggregate, ArrayAccess, Countable
 				return $this;
 			}
 
-			$pager = &$this->getPager();
+			$pager = $this->getPager();
 			$pager->setup(RequestInfo::get($this->pagerVar), $total, $this->pagerPerPage, $this->pagerFrameSize);
+			$pager->setPageVar($this->pagerVar);
 			$limit = $pager->getLimit();
 			$offset = $pager->getOffset();
 		}
@@ -1173,7 +1168,10 @@ class DBModel extends Model implements IteratorAggregate, ArrayAccess, Countable
 			$this->files = null;
 		}
 	}
-	
+
+	/**
+	 * @return Pager
+	 */
 	public function &getPager()
 	{
 		if (null === $this->pager)
