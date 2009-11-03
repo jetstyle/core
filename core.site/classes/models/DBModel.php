@@ -1096,8 +1096,9 @@ class DBModel extends Model implements IteratorAggregate, ArrayAccess, Countable
 				return $this;
 			}
 
-			$pager = &$this->getPager();
+			$pager = $this->getPager();
 			$pager->setup(RequestInfo::get($this->pagerVar), $total, $this->pagerPerPage, $this->pagerFrameSize);
+			$pager->setPageVar($this->pagerVar);
 			$limit = $pager->getLimit();
 			$offset = $pager->getOffset();
 		}
@@ -1167,7 +1168,10 @@ class DBModel extends Model implements IteratorAggregate, ArrayAccess, Countable
 			$this->files = null;
 		}
 	}
-	
+
+	/**
+	 * @return Pager
+	 */
 	public function &getPager()
 	{
 		if (null === $this->pager)
