@@ -14,6 +14,7 @@
 	float: left;
 	margin-right: 10px;
 	margin-bottom: 10px;
+	position: relative;
 }
 
 #gallery div.gallery-image div.image-title {
@@ -42,6 +43,19 @@ div#addImageButton {
 	position: absolute;
 	display: none;
 	border: 0;
+	top: 5px;
+}
+
+#gallery img.gallery-edit {
+	right: 30px;
+}
+
+#gallery img.gallery-delete {
+	right: 5px;
+}
+
+#gallery img.gallery-zoom {
+	right: 55px;
 }
 
 #editImageForm {
@@ -60,7 +74,7 @@ div#addImageButton {
 
 #replaceFileButton {
 	position: absolute;
-	display: none;
+	display: block;
 }
 
 #fileCounter {

@@ -13,8 +13,9 @@ Gallery.prototype = {
 
         $('#gallery').sortable({
             start: function(e,ui) {
-                $(ui.helper[0]).find('img.control').hide();
-                $(ui.item[0]).find('img.control').hide();
+                //$(ui.helper[0]).find('img.control').hide();
+                //$(ui.item[0]).find('img.control').hide();
+				Gallery.dragged = true;
             },
             stop: function() {
                 var order = '';
@@ -102,18 +103,13 @@ Gallery.prototype = {
         $(image).hover(
             function(event) {
                 self.lastOveredImageId = this.id;
-                $(this).find('img.gallery-delete')
-                .css('left',$(this).offset().left+$(this).width()-24-5)
-                .css('top',$(this).offset().top+5)
-                .show();
-                $(this).find('img.gallery-edit').add('#replaceFileButton')
-                .css('left',$(this).offset().left+$(this).width()-(24+5)*2)
-                .css('top',$(this).offset().top+5)
-                .show();
-                $(this).find('img.gallery-zoom')
-                .css('left',$(this).offset().left+$(this).width()-(24+5)*3)
-                .css('top',$(this).offset().top+5)
-                .show();
+                $(this).find('img.gallery-delete').show();
+				$('#replaceFileButton').appendTo($(this).find('img.gallery-edit').parent()).css({
+					left: $(this).find('img.gallery-edit').offset().left,
+					top: $(this).find('img.gallery-edit').offset().top
+				});
+                $(this).find('img.gallery-edit').show();
+                $(this).find('img.gallery-zoom').show();
             },
             function (event) {
                 if (
@@ -129,6 +125,10 @@ Gallery.prototype = {
     },
 
     itemClick: function(img, e) {
+		if (Gallery.dragged) {
+			Gallery.dragged = false;
+			return false;
+		}
         var id = this.getId($(img).parent()[0]);
         if (e.ctrlKey || e.metaKey) {
             var index = this.isSelected(id);
