@@ -1,4 +1,8 @@
 <?php
+/**
+ * looks like deprecated due to ListTreeControlSelectFilter
+ */
+
 Finder::useClass("TreeControl");
 class TreeSelect extends TreeControl
 {
@@ -15,7 +19,8 @@ class TreeSelect extends TreeControl
 				{
 					$sql = "
 						SELECT ".$config['id']." AS id, CONCAT(SUBSTRING(".$config['title'].",1,40),'..') AS title
-						FROM ".$config['table']."
+						".($config['format_tree'] ? ",_level" : "")."
+						FROM ".$config['table']." 
 						".($config['where'] ? "WHERE ".$config['where'] : "")."
 						".($config['order'] ? "ORDER BY ".$config['order'] : "")."
 					";
@@ -31,7 +36,8 @@ class TreeSelect extends TreeControl
 
 					foreach ($config['opts'] AS $k)
 					{
-						$options .= "<option value='".$k['id']."'".($_GET[$config['get_var']] == $k['id'] ? " selected='selected'" : '').">".$k['title']."</option>";
+						$title = ( $config['format_tree'] ? str_repeat("&nbsp;&nbsp;", $k['_level']) : "" ).$k['title'];
+						$options .= "<option value='".$k['id']."'".($_GET[$config['get_var']] == $k['id'] ? " selected='selected'" : '').">".$title."</option>";
 					}
 
 					$this->tpl->set('__options', $options);

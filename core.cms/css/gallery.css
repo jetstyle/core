@@ -19,7 +19,7 @@
 
 #gallery div.gallery-image div.image-title {
 	cursor: pointer;
-	white-space: nowrap;
+	/*white-space: nowrap;*/
 	overflow: hidden;
 }
 

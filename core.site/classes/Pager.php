@@ -44,6 +44,11 @@
  		}
  	}
 
+	public function getTotal()
+	{
+		return $this->total;
+	}
+
  	public function getLimit()
  	{
  		return $this->perPage;

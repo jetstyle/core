@@ -378,6 +378,11 @@ class DBModel extends Model implements IteratorAggregate, ArrayAccess, Countable
 			$this->setAutoPrefix($ymlConfig['autoPrefix']);
 		}
 
+        if ($ymlConfig['key_field'])
+        {
+            $this->setKeyField($ymlConfig['key_field']);
+        }
+
 		if ($ymlConfig['files'])
 		{
 			$this->addFilesConfig($ymlConfig['files']);
@@ -1770,6 +1775,20 @@ class DBModel extends Model implements IteratorAggregate, ArrayAccess, Countable
 		return $row['id'];
 	}
 
+    public function replace(&$row)
+	{
+		$this->onBeforeInsert($row);
+
+		$fields = implode(',', array_map(array(&$this, 'quoteName'), array_keys($row)));
+		$values = implode(',', array_map(array(&$this, 'quoteValue'), $row));
+
+		$sql = ' REPLACE INTO '.$this->quoteName(($this->autoPrefix ? DBAL::$prefix : "").$this->getTableName())
+		.'('.$fields.')'
+		.' VALUES ('.$values.')';
+
+		$row['id'] = $this->db->insert($sql);
+		return $row['id'];
+	}
 
 	public function update(&$row, $where=NULL)
 	{

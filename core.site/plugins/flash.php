@@ -33,7 +33,7 @@ if (!$src)
 
 if (!$params['fullpath'])
 {
-    $src = $tpl->get('images').'flash/'.$src;
+	Locator::get( 'tpl' )->set("prepath", Locator::get('tpl')->get('images')."flash/" );
 }
 
 //отрезать параметры от имени

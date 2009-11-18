@@ -65,7 +65,7 @@ if ( $compile )
 			{
 				$result = '';
 				$skinDir = $tpl->getSkinDir();
-				foreach ($tpl->CONNECT[$compile] AS $filename)
+				foreach ($tpl->CONNECT[$compile] AS $fileName)
 				{
                                     $_fileName = Finder::findScript($compile, $fileName, 0, 1, $compile);
                                     if ($_fileName)
@@ -123,8 +123,8 @@ if ( $compile )
 			}
 			
 			//$fname = array('path' => RequestInfo::$baseUrl.'cache/'.Config::get('app_name').'/'.$compile, 'file' => $compressedName);
-            $tpl->set("_", RequestInfo::$baseUrl.'cache/'.Config::get('app_name').'/'.$compile.'/'.$compressedName.'.'.$compile);
-			//$tpl->set("*",$fname);
+                        $fname = RequestInfo::$baseUrl.'cache/'.Config::get('app_name').'/'.$compile.'/'.$compressedName.'.'.$compile;
+			$tpl->set("_",$fname);
 			$str = $tpl->parse($template."_path");
 		}
 		else
