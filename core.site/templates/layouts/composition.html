@@ -1,0 +1,11 @@
+<!--
+  Тут определяется общая композиция страницы.
+  Обёртка "header-and-content-wrapper" нужна для того, чтобы прибить футер к низу страницы (эти стили лежат в "composition.css", и там только(!) эти стили).
+  -->
+
+{{!connect "composition.css"}}
+<div class="header-and-content-wrapper">
+  {{!include header_tpl}}
+  {{!include content_tpl}}
+</div>
+{{!include footer_tpl}}

@@ -11,16 +11,16 @@
     <title>{{!pageTitle}}</title>
     {{!connect "all.css"}}
     {{!connect "custom.css"}}
-	{{!connect "screen-footer.css"}}
-
-	{{!connect "screen-forms.css"}}
-	{{!connect "screen-tables.css"}}
-	{{!connect "screen-layouts.css"}}
-	{{!connect "screen-blocks.css"}}
-	{{!connect "screen-contact.css"}}
-	{{!connect "screen-news.css"}}
-	{{!connect "thickbox.css"}}
-    {{!connect compile="css"}}
+  	{{!connect "screen-footer.css"}}
+  
+  	{{!connect "screen-layouts.css"}}
+  	{{!connect "screen-blocks.css"}}
+  	{{!connect "screen-tables.css"}}
+  	{{!connect "screen-forms.css"}}
+  	{{!connect "screen-contact.css"}}
+  	{{!connect "screen-news.css"}}
+  	{{!connect "thickbox.css"}}
+      {{!connect compile="css"}}
     <link rel="stylesheet" href="{{css}}print.css"
           media="{{?html_print}}all{{?:}}print{{/?}}" type="text/css" />
 
@@ -63,7 +63,7 @@
 	</script>
 {{?/}}
 
-<img src="{{!href_to 'HTCron'}}" alt="" />
+<!--img src="{{!href_to 'HTCron'}}" alt="" /-->
 {{@blocks/google_analytics.html}}
 
 {{!debug}}
