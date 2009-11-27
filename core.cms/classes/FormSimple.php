@@ -207,12 +207,14 @@ class FormSimple
 				$this->item = $model->getData();
 				if (!$this->item[$this->idField])
 				{
-					Controller::redirect(RequestInfo::hrefChange('', array($this->idGetVar => '')));
-				}
-
-				if ($this->item['_state']>0)
-				{
-					$this->tpl->set("body_class", "class='state1'");
+					if ($this->config['deny_redirects'])
+					{
+						$this->id = 0;
+					}
+					else
+					{
+						Controller::redirect(RequestInfo::hrefChange('', array($this->idGetVar => '')));
+					}
 				}
 			}
 			$this->loaded = true;
@@ -386,6 +388,11 @@ class FormSimple
 
 		$tpl =& $this->tpl;
 		$item = &$this->getItem();
+
+		if ($item['_state']>0)
+		{
+			$this->tpl->set("body_class", "class='state1'");
+		}
 
 		/*
 			 $this->config->RENDER - каждая запись в нём:
