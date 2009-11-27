@@ -44,63 +44,64 @@ class FormCalendar extends FormIframe
 		{
 			$this->USE_TIME = false;
 		}
-	}
 
-	function handle()
-	{
 		$this->YEAR = $this->config['year'];
 		$this->MONTH = $this->config['month'];
 		$this->DAY = $this->config['day'];
 		$this->CALENDAR_FIELDS = $this->config['calendar_fields'] ? $this->config['calendar_fields'] : array();
-
-		$this->load();
-		if( !$this->id )
-		{
-			foreach($this->CALENDAR_FIELDS AS $field)
-			{
-				$this->tpl->set('_'.$field, date($this->date_format));
-				if($this->USE_TIME)
-				{
-					$this->tpl->set('_'.$field.'_time', date('H:i'));
-				}
-			}
-		}
-		else
-		{
-			foreach($this->CALENDAR_FIELDS AS $field)
-			{
-				if($this->USE_TIME)
-				{
-                    $this->item[$field.'_time'] = preg_replace($this->r_mysql, $this->r_time_out, $this->item[$field]);
-					$this->item[$field] = preg_replace($this->r_mysql, $this->r_date_out, $this->item[$field]);
-				}
-				else
-				{
-					$this->item[$field] = preg_replace($this->r_mysql_without_time, $this->r_date_out, $this->item[$field]);
-				}
-			}
-		}
-
-		//по этапу
-		parent::handle();
 	}
 
-	function update()
+	protected function renderFields()
 	{
+		$renderResult = parent::renderFields();
+
+		if ($renderResult)
+		{
+			$item = &$this->getItem();
+			if( !$item  || !$item['id'])
+			{
+				foreach($this->CALENDAR_FIELDS AS $field)
+				{
+					$this->tpl->set('_'.$field, date($this->date_format));
+					if($this->USE_TIME)
+					{
+						$this->tpl->set('_'.$field.'_time', date('H:i'));
+					}
+				}
+			}
+			else
+			{
+				foreach($this->CALENDAR_FIELDS AS $field)
+				{
+					if($this->USE_TIME)
+					{
+						$item[$field.'_time'] = preg_replace($this->r_mysql, $this->r_time_out, $item[$field]);
+						$item[$field] = preg_replace($this->r_mysql, $this->r_date_out, $item[$field]);
+					}
+					else
+					{
+						$item[$field] = preg_replace($this->r_mysql_without_time, $this->r_date_out, $item[$field]);
+					}
+				}
+			}
+		}
+	}
+
+	protected function constructPostData()
+	{
+		$postData = parent::constructPostData();
+
 		if($this->YEAR)
 		{
-			$this->postData['year'] = preg_replace($this->r_date_in, $this->r_year, $_POST[$this->prefix.$this->YEAR]);
-			$this->UPDATE_FIELDS[] = 'year';
+			$postData['year'] = preg_replace($this->r_date_in, $this->r_year, $_POST[$this->prefix.$this->YEAR]);
 		}
 		if($this->MONTH)
 		{
-			$this->postData['month'] = preg_replace($this->r_date_in, $this->r_month, $_POST[$this->prefix.$this->MONTH]);
-			$this->UPDATE_FIELDS[] = 'month';
+			$postData['month'] = preg_replace($this->r_date_in, $this->r_month, $_POST[$this->prefix.$this->MONTH]);
 		}
 		if($this->DAY)
 		{
-			$this->postData['day'] = preg_replace($this->r_date_in, $this->r_day, $_POST[$this->prefix.$this->DAY]);
-			$this->UPDATE_FIELDS[] = 'day';
+			$postData['day'] = preg_replace($this->r_date_in, $this->r_day, $_POST[$this->prefix.$this->DAY]);
 		}
 
 		foreach($this->CALENDAR_FIELDS AS $field)
@@ -122,10 +123,10 @@ class FormCalendar extends FormIframe
 				$date = preg_replace($this->r_date_in, $this->r_date_out_mysql, $_POST[$this->prefix.$field]);
 			}
 
-			$this->postData[$field] = $date;
+			$postData[$field] = $date;
 		}
 
-		return parent::update();
+		return $postData;
 	}
 
 }

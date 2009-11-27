@@ -273,6 +273,7 @@ class ListSimple
 		if (null === $this->model)
 		{
             $this->model = $this->constructModel();
+			$this->applyFilters($this->model);
 		}
 
 		return $this->model;
@@ -290,8 +291,6 @@ class ListSimple
         $model->addFields(array('_order', '_state'));
 
         $model->where .= ($model->where ? " AND " : "" ).($_GET['_show_trash'] ? '{_state}>=0' : "{_state} <>2 ");
-
-        $this->applyFilters($model);
 
         return $model;
     }

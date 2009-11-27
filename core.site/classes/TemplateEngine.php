@@ -17,6 +17,7 @@ class TemplateEngine
 
 	protected $compiler = null;
 	protected $stack = array();
+	protected $currentStackId = null;
 
 	protected $parseCache = array();
 	protected $parseFunctionsCache = array();
@@ -113,17 +114,72 @@ class TemplateEngine
 	{ return isset($this->domain[$key]) ? $this->domain[$key] : "" ; }
 
 	public function set( $key, $value=1 )  // -- установить значение ключу
-	{ $this->domain[$key] = $value; }
+	{
+		if ($this->currentStackId !== null)
+		{
+			if (!isset($this->stack[$this->currentStackId][$key]))
+				$this->stack[$this->currentStackId][$key] = $this->domain[$key];
+		}
+		$this->domain[$key] = $value;
+	}
 
 	public function setRef( $key, &$ref )  // -- установить значение ссылкой
-	{ $this->domain[$key] = &$ref; }
+	{
+		if ($this->currentStackId !== null)
+		{
+			if (!isset($this->stack[$this->currentStackId][$key]))
+				$this->stack[$this->currentStackId][$key] = &$this->domain[$key];
+		}
+		$this->domain[$key] = &$ref;
+	}
 
 	public function append( $key, $value ) // -- дописать в конец
-	{ $this->domain[$key] .= $value; }
+	{
+		if ($this->currentStackId !== null)
+		{
+			if (!isset($this->stack[$this->currentStackId][$key]))
+				$this->stack[$this->currentStackId][$key] = $this->domain[$key];
+		}
+		$this->domain[$key] .= $value;
+	}
 
 	public function is( $key ) // -- true, если этот ключ хоть что-то значит
 	{ return isset( $this->domain[$key] ); }
 
+	public function pushContext()
+	{
+		if ($this->currentStackId === null)
+		{
+			$this->currentStackId = 0;
+		}
+		else
+		{
+			$this->currentStackId++;
+		}
+	
+		$this->stack[$this->currentStackId] = array();
+	}
+
+	public function popContext()
+	{
+		if ($this->currentStackId >= 0)
+		{
+			foreach ($this->stack[$this->currentStackId] AS $k => $v)
+			{
+				$this->domain[$k] = &$this->stack[$this->currentStackId][$k];
+			}
+
+			unset($this->stack[$this->currentStackId]);
+			$this->currentStackId--;
+
+			if ($this->currentStackId < 0)
+			{
+				$this->currentStackId = null;
+			}
+		}
+	}
+
+	/*
 	public function addToStack(&$data)
 	{
 		if (is_array($data))
@@ -163,6 +219,8 @@ class TemplateEngine
 			unset($this->stack[$stackId]);
 		}
 	}
+	 *
+	 */
 
 	/**
 	 * Очистка домена
@@ -199,6 +257,10 @@ class TemplateEngine
 		{
 			foreach($domain AS $k => $v)
 			{
+				if ($v{0} === '@')
+				{
+					$v = $this->parse(substr($v, 1));
+				}
 				$this->set( $k, $v );
 			}
 		}

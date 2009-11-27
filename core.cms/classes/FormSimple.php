@@ -7,9 +7,8 @@ class FormSimple
 
 	protected $config; //ссылка на объект класса ModuleConfig
 	protected $loaded = false; //грузили или нет данные?
-	protected $model = null;
 	protected $item = null;
-	protected $postData = array();		// данные из формы
+	protected $fieldsRendered = false;
 
 	//templates
 	protected $template = "form_simple.html";
@@ -27,6 +26,10 @@ class FormSimple
 
 	protected $html;
 
+	private $model = null;
+	private $postData = null;		// данные из формы
+	private $postFields = null;
+
 	public function __construct( &$config )
 	{
 		//base modules binds
@@ -38,8 +41,6 @@ class FormSimple
 		{
 			$this->config['supertag_check'] = true;
 		}
-
-		$this->initModel();
 
 		$this->prefix = $config['module_name'].'_form_';
 
@@ -68,11 +69,14 @@ class FormSimple
 		$this->id = intval(RequestInfo::get( $this->idGetVar));
 	}
 
+	public function setId($id)
+	{
+		$this->cleanUp();
+     	$this->id = $id;
+	}
+
 	public function handle()
 	{
-		//load data
-		$this->load();
-
 		$valid = array('text', 'title', 'lead');
 
 		//form in iframe thickbox
@@ -85,8 +89,9 @@ class FormSimple
 
 		if ($_GET['ret'] && in_array($_GET['ret'], $valid) )
 		{
+			$item = &$this->getItem();
 		    header('Content-Type: text/html; charset=windows-1251');
-		    die( $this->item[ $_GET['ret'] ] );
+		    die( $item[ $_GET['ret'] ] );
 		}
 		elseif ($this->needAjaxUpdate())
 		{
@@ -104,14 +109,14 @@ class FormSimple
 		}
 		elseif ($this->needUpdate() || $this->ajax_update)
 		{
-			$this->readPost();
 			$redirect = $this->update();
 		}
 
         if ($this->ajax_update)
         {
+			$postData = $this->getPostData();
             header('Content-Type: text/html; charset=windows-1251');
-			die($this->postData[ $_POST['ajax_update'] ]);
+			die($postData[ $_POST['ajax_update'] ]);
         }
 
 		//редирект или выставление флага, что он нужен
@@ -128,102 +133,78 @@ class FormSimple
 				Controller::redirect( $this->_redirect );
 			}
 		}
-
-		$tpl =& $this->tpl;
-
-		//подготовка нетекстовых полей
-		$this->renderFields();
-
-		//render form
-		$tpl->setRef( '*', $this->item );
-
-		$tpl->set( 'prefix', $this->prefix );
-		$tpl->set( '__form_name', $this->prefix.'_simple_form' );
-		if($this->delete_title)
-		{
-			$tpl->set('__delete_title', $this->delete_title);
-		}
-		else
-		{
-			$tpl->set( '__delete_title', $this->item['_state'] !=2 ? 'удалить в корзину' : 'удалить окончательно'  );
-		}
-
-		if($this->id && !$this->config['hide_delete_button'] )
-		{
-			$tpl->parse( $this->template.':delete_button', '_delete_button' );
-		}
-
-		if(!$this->config['hide_save_button'] )
-		{
-			if ($_GET['popup']==1)
-			    $tpl->set('popup', 1);
-
-			if($this->item['_state'] == 2)
-			{
-				$tpl->parse( $this->template.':restore_button', '_save_button' );
-			}
-			else
-			{
-				$tpl->parse( $this->template.':save_button'.( $this->config['ajax_save'] ? '_norefresh' : ''), '_save_button' );
-			}
-		}
-
-		if($this->config['send_button'] && $this->id  && $this->item['_state'] == 0)
-		{
-			if($this->item['sended'])
-			{
-				$tpl->parse( $this->template.':send_button_disabled', '_send_button' );
-			}
-			else
-			{
-				$tpl->parse( $this->template.':send_button', '_send_button' );
-			}
-		}
-
-        if ($this->insert_fields)
-        {
-            $tpl->set('hidden_fields', $this->insert_fields);
-        }
-
-		if ( $this->item['id']>0 || RequestInfo::get('_new') )
-        {
-		    $tpl->set( 'ajax_url', RequestInfo::href() );
-        }
 	}
 
 	public function getHtml()
 	{
-		$this->tpl->parse( $this->template_item, '___form');
-		return $this->tpl->parse($this->template);
-	}
+		Finder::pushContext();
+		Finder::prependDir(Config::get('cms_dir').'modules/'.$this->config['module_name'].'/');
 
-	protected function initModel()
-	{
-        if (!$this->config['model'])
+		$tpl = &Locator::get('tpl');
+		$tpl->pushContext();
+
+		$tpl->set( 'prefix', $this->prefix );
+		$tpl->set( '__form_name', $this->prefix.'_simple_form' );
+
+		if ($this->insert_fields)
         {
-            throw new JSException("You should set `model` param in config");
+            $tpl->set('hidden_fields', $this->insert_fields);
         }
 
-        Finder::useModel('DBModel');
-        $this->model = DBModel::factory($this->config['model']);
+		$item = &$this->getItem();
+
+		if ( $item['id']>0 || RequestInfo::get('_new') )
+        {
+		    $tpl->set( 'ajax_url', RequestInfo::href() );
+        }
+
+		$tpl->set('___form', $this->getFieldsHtml());
+		$this->renderButtons();
+		$result = $tpl->parse($this->template);
+
+		$tpl->popContext();
+		Finder::popContext();
+
+		return $result;
 	}
 
-	public function load()
+	public function getFieldsHtml()
+	{
+		Finder::pushContext();
+		Finder::prependDir(Config::get('cms_dir').'modules/'.$this->config['module_name'].'/');
+
+		$tpl = &Locator::get('tpl');
+		$tpl->pushContext();
+
+		$item = &$this->getItem();
+
+		$tpl->set( 'prefix', $this->prefix );
+		$tpl->set( '__form_name', $this->prefix.'_simple_form' );
+		$tpl->setRef('*', $item );
+
+		//подготовка нетекстовых полей
+		if( !$this->fieldsRendered )
+		{
+			$this->renderFields();
+		}
+		
+		$result = $tpl->parse( $this->template_item);
+		$tpl->popContext();
+		Finder::popContext();
+
+		return $result;
+	}
+
+	protected function load()
 	{
 		if( !$this->loaded )
 		{
 			if($this->id)
 			{
-                foreach($this->model->getForeignFields() AS $field => $conf)
-                {
-                    if ($conf['type'] == 'has_one' && $conf['pk'])
-                    {
-                        $this->model->addField($conf['pk']);
-                    }
-                }
+				$model = &$this->getModel();
+				$model->loadOne('{'.$this->idField.'} = '.$this->id);
 
-				$this->model->loadOne('{'.$this->idField.'} = '.$this->id);
-				$this->item = $this->model->getData();
+				$this->item = $model->getData();
 				if (!$this->item[$this->idField])
 				{
 					Controller::redirect(RequestInfo::hrefChange('', array($this->idGetVar => '')));
@@ -239,19 +220,172 @@ class FormSimple
 		}
 		return false;
 	}
+	
+	public function &getItem()
+	{
+		$this->load();
+		return $this->item;
+	}
+
+	public function update($updateData = null)
+	{
+		$postData = $this->getPostData();
+
+		if (is_array($updateData))
+		{
+			$postData = array_merge($postData, $updateData);
+		}
+
+		$this->filters($postData);
+
+		if ($this->id)
+		{
+			$this->updateData($postData);
+			return true;
+		}
+		elseif (!$this->config['dont_insert'])
+		{
+			$this->insert($postData);
+			return true;
+		}
+
+
+		return false;
+	}
+
+	public function delete()
+	{
+		$model = &$this->getModel();
+		return $model->deleteToTrash($this->id);
+	}
+
+	public function restore()
+	{
+		$model = &$this->getModel();
+		$model->restoreFromTrash($this->id);
+		return true;
+	}
+
+	protected function insert($postData)
+	{
+		$postData['_created'] = date('Y-m-d H:i:s');
+
+		$this->filters($postData);
+
+		$model = &$this->getModel();
+		$this->new_id = $this->id = $model->insert($postData);
+
+		// update order
+		$data = array('_order' => $this->id);
+
+		if ($this->updateSupertagAfterInsert)
+		{
+			$data['_supertag'] = $insertData['_supertag'].'_'.$this->id;
+		}
+		$this->updateData($data);
+
+		$this->setId($this->id);
+		RequestInfo::set($this->idGetVar, $this->id);
+	}
+
+	protected function cleanUp()
+	{
+		$this->loaded = false;
+		$this->model = null;
+		$this->item = null;
+		$this->postData = null;
+		$this->postFields = null;
+		$this->updateSupertagAfterInsert = false;
+		$this->html = '';
+		$this->fieldsRendered = false;
+	}
+
+	protected function renderButtons()
+	{
+		$tpl = &Locator::get('tpl');
+		$item = &$this->getItem();
+
+		if($this->delete_title)
+		{
+			$tpl->set('__delete_title', $this->delete_title);
+		}
+		else
+		{
+			$tpl->set( '__delete_title', $item['_state'] !=2 ? 'удалить в корзину' : 'удалить окончательно'  );
+		}
+
+		if($this->id && !$this->config['hide_delete_button'] )
+		{
+			$tpl->parse( $this->template.':delete_button', '_delete_button' );
+		}
+
+		if(!$this->config['hide_save_button'] )
+		{
+			if ($_GET['popup']==1)
+			    $tpl->set('popup', 1);
+
+			if($item['_state'] == 2)
+			{
+				$tpl->parse( $this->template.':restore_button', '_save_button' );
+			}
+			else
+			{
+				$tpl->parse( $this->template.':save_button'.( $this->config['ajax_save'] ? '_norefresh' : ''), '_save_button' );
+			}
+		}
+
+		if($this->config['send_button'] && $this->id  && $item['_state'] == 0)
+		{
+			if($item['sended'])
+			{
+				$tpl->parse( $this->template.':send_button_disabled', '_send_button' );
+			}
+			else
+			{
+				$tpl->parse( $this->template.':send_button', '_send_button' );
+			}
+		}
+	}
+
+	protected function &getModel()
+	{
+		if (null === $this->model)
+		{
+            $this->model = $this->constructModel();
+		}
+
+		return $this->model;
+	}
+
+    protected function constructModel()
+    {
+		if (!$this->config['model'])
+        {
+            throw new JSException("You should set `model` param in config");
+        }
+
+        Finder::useModel('DBModel');
+        $model = DBModel::factory($this->config['model']);
+
+		foreach($model->getForeignFields() AS $field => $conf)
+		{
+			if ($conf['type'] == 'has_one' && $conf['pk'])
+			{
+				$model->addField($conf['pk']);
+			}
+		}
+
+        return $model;
+    }
 
 	protected function renderFields()
 	{
-		if( $this->fieldsRendered )
-		{
-			return;
-		}
-
 		$this->fieldsRendered = true;
 
 		$this->handleForeignFields();
 
 		$tpl =& $this->tpl;
+		$item = &$this->getItem();
 
 		/*
 			 $this->config->RENDER - каждая запись в нём:
@@ -266,7 +400,7 @@ class FormSimple
             {
                 foreach ($this->config['render']['checkbox'] as $checkbox)
                 {
-                    $tpl->set( 'checkbox_'.$checkbox, $this->item[$checkbox] ? "checked=\"checked\"" : '' );
+                    $tpl->set( 'checkbox_'.$checkbox, $item[$checkbox] ? "checked=\"checked\"" : '' );
                 }
             }
             if (!empty($this->config['render']['select']))
@@ -276,24 +410,28 @@ class FormSimple
                     $str = '';
                     foreach($params['values'] as $id => $val)
                     {
-                        $str .= "<option value='".$id."' ".(($this->item["id"] && $this->item[$name]==$id) || (!$this->item["id"] && $id==$params['default']) ? "selected=\"selected\"" : '' ).">".$val;
+                        $str .= "<option value='".$id."' ".(($item["id"] && $item[$name]==$id) || (!$item["id"] && $id==$params['default']) ? "selected=\"selected\"" : '' ).">".$val;
                     }
                     $tpl->set( 'options_'.$name, $str );
                 }
             }
 		}
+
+		return true;
 	}
 
 	protected function handleForeignFields()
 	{
-		foreach($this->model->getForeignFields() AS $fieldName => $conf)
+		$model = &$this->getModel();
+
+		foreach($model->getForeignFields() AS $fieldName => $conf)
         {
             if (is_array($conf) && $conf['type'] == 'has_one')
             {
-                $foreignModel = clone $this->model->getForeignModel($fieldName);
+                $foreignModel = clone $model->getForeignModel($fieldName);
 
-                $conf = $this->model->getForeignFieldConf($fieldName);
-                $this->model->addField($conf['pk']);
+                $conf = $model->getForeignFieldConf($fieldName);
+                $model->addField($conf['pk']);
 
                 $foreignModel->load();
                 $data = array();
@@ -310,69 +448,72 @@ class FormSimple
         }
 	}
 
-	public function delete()
+	protected function getPostFields()
 	{
-		return $this->model->deleteToTrash($this->id);
-	}
-
-	public function restore()
-	{
-		$this->model->restoreFromTrash($this->id);
-		return true;
-	}
-
-	protected function readPost()
-	{
-		if (empty($this->postData))
+		if ($this->postFields === null)
 		{
-			foreach ($this->model->getAllFields() AS $fieldName)
+			$this->postFields = $this->constructPostFields();
+		}
+
+		return $this->postFields;
+	}
+
+	protected function constructPostFields()
+	{
+		$model = &$this->getModel();
+		$result = $model->getAllFields();
+		return $result;
+	}
+
+	protected function &getPostData()
+	{
+		if ($this->postData === null)
+		{
+			$this->postData = $this->constructPostData();
+		}
+
+		return $this->postData;
+	}
+
+	protected function constructPostData()
+	{
+		$postData = array();
+
+		$fields = $this->getPostFields();
+		foreach ($fields AS $fieldName)
+		{
+			if ($fieldName !== $this->idField)
 			{
-				if ($fieldName !== $this->idField)
+				if (null !== $_POST[$this->prefix.$fieldName])
 				{
-					if (null !== $_POST[$this->prefix.$fieldName])
+					$postData[$fieldName] = $_POST[$this->prefix.$fieldName];
+					if ($this->ajax_update)
 					{
-                        $this->postData[$fieldName] = $_POST[$this->prefix.$fieldName];
-                        if ($this->ajax_update)
-                        {
-                            $this->postData[$fieldName] = iconv('UTF-8', 'CP1251', $this->postData[$fieldName]);
-                        }
-                        RequestInfo::free($this->prefix.$fieldName);
+						$postData[$fieldName] = iconv('UTF-8', 'CP1251', $this->postData[$fieldName]);
 					}
+					RequestInfo::free($this->prefix.$fieldName);
 				}
 			}
-            if (!$this->ajax_update)
-            {
-                if (is_array($this->config['render']['checkbox']))
-                {
-                    foreach ($this->config['render']['checkbox'] AS $fieldName)
-                    {
-                        if (!$this->postData[$fieldName]) $this->postData[$fieldName] = 0;
-                    }
-                }
-            }
 		}
-	}
 
-	protected function update()
-	{
-		$this->filters();
-
-		if ( $this->id )
+		if (!$this->ajax_update)
 		{
-			$this->updateData($this->postData);
-		}
-		elseif (!$this->config['dont_insert'])
-		{
-			$this->insert();
-			RequestInfo::set($this->idGetVar, $this->id);
+			if (is_array($this->config['render']['checkbox']))
+			{
+				foreach ($this->config['render']['checkbox'] AS $fieldName)
+				{
+					if (!$postData[$fieldName]) $postData[$fieldName] = 0;
+				}
+			}
 		}
 
-		return true;
+		return $postData;
 	}
 
 	protected function updateData($data)
 	{
-		$this->model->update( $data, '{'.$this->idField.'} = '.DBModel::quote($this->id) );
+		$model = &$this->getModel();
+		$model->update( $data, '{'.$this->idField.'} = '.DBModel::quote($this->id) );
 	}
 
 	protected function needAjaxUpdate()
@@ -395,9 +536,9 @@ class FormSimple
 		return $_POST[$this->prefix."restore"] ? true : false;
 	}
 
-	protected function filters()
+	protected function filters(&$postData)
 	{
-		$tpl =& $this->tpl;
+		$tpl = &$this->tpl;
 
 		//filter data
 		if( is_array($this->config['update_filters']) )
@@ -407,22 +548,9 @@ class FormSimple
 				if( is_string($field) )
 				{
 					//some field specified
-					if (isset($this->postData[ $field ]))
+					if (isset($postData[ $field ]))
 					{
-						$this->postData[ $field ] = $tpl->action( $filter, $this->postData[ $fieldName ] );
-					}
-				}
-				else
-				{
-					//filter all fields
-					$m = count($this->UPDATE_FIELDS);
-					for ($j=0; $j < $m; $j++)
-					{
-						$fieldName = $this->UPDATE_FIELDS[$j];
-						if (isset($this->postData[ $fieldName ]))
-						{
-							$this->postData[ $fieldName ] = $tpl->action( $filter, $this->postData[ $fieldName ] );
-						}
+						$postData[ $field ] = $tpl->action( $filter, $postData[ $fieldName ] );
 					}
 				}
 			}
@@ -435,17 +563,15 @@ class FormSimple
 			{
 				foreach ($fields AS $field)
 				{
-					if ( isset($this->postData[ $field ]) )
+					if ( isset($postData[ $field ]) )
 					{
 					    $field_pre = $field.'_pre';
-					    if (!isset($this->postData[ $field_pre ]))
+					    if (!isset($postData[ $field_pre ]))
 					    {
-						    $this->postData[ $field_pre ] = $this->postData[ $field ];
+						    $postData[ $field_pre ] = $postData[ $field ];
 					    }
 
-					    $this->postData[ $field_pre ] = $tpl->action( $filter, $this->postData[ $field_pre ]);
-					    //добавляем поле в список для сохранения
-					    $this->UPDATE_FIELDS[] = $field_pre;
+					    $postData[ $field_pre ] = $tpl->action( $filter, $postData[ $field_pre ]);
 					}
 				}
 			}
@@ -469,12 +595,12 @@ class FormSimple
 			{
 				Finder::useClass('Translit');
 				$translit = new Translit();
-				$this->postData['_supertag'] = $translit->supertag( $this->postData[$field], TR_NO_SLASHES, $limit );
+				$postData['_supertag'] = $translit->supertag( $postData[$field], TR_NO_SLASHES, $limit );
 			}
 
 			if ($this->config['supertag_check'] || $this->config['supertag_path_check'])
 			{
-				$where = "_supertag=".$this->db->quote($this->postData['_supertag'])." AND id <> ".intval($this->id);
+				$where = "_supertag=".$this->db->quote($postData['_supertag'])." AND id <> ".intval($this->id);
 
 				if ($this->config['supertag_path_check'])
 				{
@@ -491,33 +617,15 @@ class FormSimple
 					}
 					else
 					{
-						$this->postData['_supertag'] .= '_'.$this->id;
+						$postData['_supertag'] .= '_'.$this->id;
 					}
 				}
 			}
-			$this->UPDATE_FIELDS[] = '_supertag';
-		}
-		elseif ($this->config['allow_empty_supertag'])
-		{
-			$this->UPDATE_FIELDS[] = '_supertag';
 		}
 	}
 
-	protected function insert()
-	{
-		$this->postData['_created'] = date('Y-m-d H:i:s');
-		$this->new_id = $this->id = $this->model->insert($this->postData);
 
-		// update order
-		$data = array('_order' => $this->id);
-
-		if ($this->updateSupertagAfterInsert)
-		{
-			$data['_supertag'] = $this->postData['_supertag'].'_'.$this->id;
-		}
-		$this->updateData($data);
-	}
-	
+	// @TODO: it's a bad way to do this
 	protected function getList()
 	{
 		$module = Locator::get('controller')->moduleConstructor;
@@ -533,12 +641,6 @@ class FormSimple
 			$list = ModuleConstructor::factory($path);
 			return $list->getObj();
 		}
-	}
-
-	public function setId($id)
-	{
-     	$this->id = $id;
-	}
+	}	
 }
-
 ?>

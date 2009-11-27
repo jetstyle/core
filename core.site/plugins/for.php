@@ -19,7 +19,8 @@
 	 	
 	 	unset($params[0], $params['as'], $params['do'], $params['sep'], $params['_name']);
  	
-		$stackId = $tpl->addToStack($params);
+		$tpl->pushContext();
+		$tpl->load($params);
 	 	$i=0;
 	 	$total = count($data);
 		foreach($data AS $key => $r)
@@ -46,7 +47,7 @@
 			$content .= ($content ? $sep : '').$tpl->parse($templateName);
 		}
 	
-		$tpl->freeStack($stackId);
+		$tpl->popContext();
 		
 		echo $content;	
 	}

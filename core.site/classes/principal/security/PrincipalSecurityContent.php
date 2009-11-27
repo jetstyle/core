@@ -67,7 +67,7 @@ class PrincipalSecurityContent implements PrincipalSecurityInterface
 	public function updateGroupACL($groupId, $acl)
 	{
 		$this->deleteGroupACL($groupId);
-		
+
 		if (is_array($acl) && !empty($acl))
 		{
 			$groupId = intval($groupId);

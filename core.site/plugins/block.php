@@ -25,9 +25,10 @@ try
 }
 catch(FileNotFoundException $e)
 {
-	$stackId = $tpl->addToStack($params);
+	$tpl->pushContext();
+	$tpl->load($params);
 	echo $tpl->parse($tplName);
-	$tpl->freeStack($stackId);
+	$tpl->popContext();
 	return;
 }
 
@@ -54,9 +55,10 @@ if ($controller)
 
 $params[$storeTo] = $block->getData();
 
-$stackId = $tpl->addToStack($params);
+$tpl->pushContext();
+$tpl->load($params);
 $res = $tpl->parse($tplName);
-$tpl->freeStack($stackId);
+$tpl->popContext();
 
 if ($block->getParam('ret'))
     return $res;

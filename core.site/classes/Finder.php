@@ -84,6 +84,8 @@ class Finder {
 
 	private static $DIRS = array('all' => array()); 				//информация о корневых директориях для каждого уровня
 
+	private static $stack = array();
+
 	private static $searchHistory = array();	//информация о том, где мы пытались найти файл. Используется в случае неудачного поиска.
 	private static $searchCache = array();
 	private static $lib_dir;
@@ -313,27 +315,38 @@ class Finder {
 
 	public static function prependDir($dir, $scope = null)
 	{
-		if (null !== $scope)
-		{
-			if (!is_array(self::$DIRS[$scope])) self::$DIRS[$scope] = array();
-
-            if (($pos = array_search($dir, self::$DIRS[$scope])) !== false)
-            {
-                unset(self::$DIRS[$scope][$pos]);
-            }
-
-			array_unshift(self::$DIRS[$scope], $dir);
-		}
-
-        if (($pos = array_search($dir, self::$DIRS['all'])) !== false)
-        {
-            unset(self::$DIRS['all'][$pos]);
-        }
-		array_unshift(self::$DIRS['all'], $dir);
+		self::addDir($dir, $scope, 'prepend');
 	}
 
 	public static function appendDir($dir, $scope = null)
 	{
+		self::addDir($dir, $scope);
+	}
+
+	public static function pushContext()
+	{
+		self::$stack[] = self::$DIRS;
+	}
+
+	public static function popContext()
+	{
+		if (count(self::$stack))
+		{
+			self::$DIRS = array_pop(self::$stack);
+		}
+	}
+
+	private static function addDir($dir, $scope, $type = 'append')
+	{
+		if ($type == 'prepend')
+		{
+			$func = 'array_unshift';
+		}
+		else
+		{
+			$func = 'array_push';
+		}
+
 		if (null !== $scope)
 		{
 			if (!is_array(self::$DIRS[$scope])) self::$DIRS[$scope] = array();
@@ -343,7 +356,7 @@ class Finder {
                 unset(self::$DIRS[$scope][$pos]);
             }
 
-			array_push(self::$DIRS[$scope], $dir);
+			$func(self::$DIRS[$scope], $dir);
 		}
 
         if (($pos = array_search($dir, self::$DIRS['all'])) !== false)
@@ -351,7 +364,7 @@ class Finder {
             unset(self::$DIRS['all'][$pos]);
         }
 
-		array_push(self::$DIRS['all'], $dir);
+		$func(self::$DIRS['all'], $dir);
 	}
 }
 ?>

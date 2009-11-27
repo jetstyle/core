@@ -8,270 +8,326 @@
 
 Finder::useClass('FormCalendar');
 
-class FormGallery extends FormCalendar {
-    const DELETE_OK = 1;
-    const DELETE_NEED_APPROVEMENT = 2;
-        
-    protected $galleryFilesModel = null;
+class FormGallery extends FormCalendar
+{
+	const DELETE_OK = 1;
+	const DELETE_NEED_APPROVEMENT = 2;
 
-    public function handle() {
-        $this->load();
+	protected $galleryFilesModel = null;
 
-        $this->handleGalleryUpload();
+	public function handle()
+	{
+		$this->handleGalleryUpload();
+		$this->handleAjax();
 
-        if ($_POST['action'] == 'delete') {
-            $deleteResult = $this->deleteGalleryFiles(explode(',',$_POST['items']));
-            $jsonResult = array();
-            
-            switch ($deleteResult)
-            {
-                case self::DELETE_NEED_APPROVEMENT:
-                    $jsonResult['need_approvement'] = true;
-                break;
-                
-                case self::DELETE_OK:
-                default:
-                    $jsonResult['ok'] = true;
-                break;
-            }
-            
-            Finder::useClass('Json');
-            echo Json::encode($jsonResult);
-            die();
-        }
+		parent::handle();
+	}
 
-        if ($_POST['action'] == 'reorder') {
-            $this->reorderGallery(explode(',',$_POST['order']));
+	public function delete()
+	{
+		$deleteRes = parent::delete();
+		if ($deleteRes == 2)
+		{
+			$item = &$this->getItem();
+			foreach ($item['gallery_items'] AS $item)
+			{
+				$this->deleteGalleryFile($item['id']);
+			}
+		}
 
-            Finder::useClass('Json');
-            echo Json::encode(array('ok' => true));
-            die();
-        }
+		return $deleteRes;
+	}
 
-        if ($_POST['action'] == 'edit') {
-            $title = iconv('utf-8', 'cp1251', $_POST['title']);
-            $data = array(
-                'title' => $title,
-                'title_pre' => Locator::get('typografica')->correct($title, '')
-            );
+	protected function renderFields()
+	{
+		$tpl = &$this->tpl;
 
-            $itemId = $_POST['id'];
-            $this->editGalleryFileData($itemId, $data);
+		$tpl->set('file_extensions', $this->getAllowedExtsForGallery());
 
-            Finder::useClass('Json');
-            echo Json::encode(array('ok' => true));
-            die();
-        }
+		$thumbSize = $this->getThumbSize();
+		if ($thumbSize)
+		{
+			$tpl->set('thumb_width', $thumbSize[0]);
+			$tpl->set('thumb_height', $thumbSize[1]);
+		}
 
+		$tpl->set('session_hash', Locator::get('principal')->getSessionModel()->getSessionHash());
+		$tpl->set('base_url', RequestInfo::$baseUrl.RequestInfo::$pageUrl);
+		$tpl->set('rubric_id', $this->id);
 
-        $tpl = Locator::get('tpl');
+		parent::renderFields();
+	}
 
-        $tpl->set('file_extensions', $this->getAllowedExtsForGallery());
+	protected function getAllowedExtsForGallery()
+	{
+		$exts = '';
+		Finder::useClass('File');
 
-        $thumbSize = $this->getThumbSize();
-        if ($thumbSize) {
-            $tpl->set('thumb_width', $thumbSize[0]);
-            $tpl->set('thumb_height', $thumbSize[1]);
-        }
+		foreach (explode(',', Config::get('upload_ext')) AS $ext)
+		{
+			$ext = trim($ext);
+			if ($this->config['allowNonImageFiles'] || File::isImageExt($ext))
+				$exts .= '*.'.$ext.';';
+		}
 
-        $tpl->set('session_hash', Locator::get('principal')->getSessionModel()->getSessionHash());
-        $tpl->set('base_url', RequestInfo::$baseUrl.RequestInfo::$pageUrl);
-        $tpl->set('rubric_id', $this->id);
+		return $exts;
+	}
 
-        parent::handle();
-    }
+	protected function reorderGallery($newOrder)
+	{
+		if (is_array($newOrder))
+		{
+			$filesModel = $this->getGalleryFilesModel();
+			if ($filesModel)
+			{
+				foreach($newOrder AS $pos => $itemId)
+				{
+					$itemId = intval($itemId);
+					$pos = intval($pos);
 
-    protected function getAllowedExtsForGallery() {
-        $exts = '';
-        Finder::useClass('File');
+					if ($itemId && $pos >= 0)
+					{
+						$data = array('_order' => $pos);
+						$filesModel->update($data, '{'.$filesModel->getPk().'} = '.DBModel::quote($itemId));
+					}
+				}
+			}
+		}
+	}
 
-        foreach (explode(',', Config::get('upload_ext')) AS $ext) {
-            $ext = trim($ext);
-            if ($this->config['allowNonImageFiles'] || File::isImageExt($ext))
-                $exts .= '*.'.$ext.';';
-        }
+	protected function editGalleryFileData($itemId, $data)
+	{
+		$filesModel = $this->getGalleryFilesModel();
+		if ($filesModel)
+		{
+			$filesModel->update($data, '{'.$filesModel->getPk().'} = '.DBModel::quote($itemId));
+		}
+	}
 
-        return $exts;
-    }
+	protected function getGalleryFilesModel()
+	{
+		if ($this->galleryFilesModel === null)
+		{
+			if (!$this->config['files_model'])
+			{
+				throw new JSException("You should set `files_model` param in config");
+			}
+			$this->galleryFilesModel = DBModel::factory($this->config['files_model']);
+		}
 
-    protected function reorderGallery($newOrder) {
-        if (is_array($newOrder)) {
-            $filesModel = $this->getGalleryFilesModel();
-            if ($filesModel) {
-                foreach($newOrder AS $pos => $itemId) {
-                    $itemId = intval($itemId);
-                    $pos = intval($pos);
+		return $this->galleryFilesModel;
+	}
 
-                    if ($itemId && $pos >= 0) {
-                        $data = array('_order' => $pos);
-                        $filesModel->update($data, '{'.$filesModel->getPk().'} = '.DBModel::quote($itemId));
-                    }
-                }
-            }
-        }
-    }
+	protected function getGalleryFile($itemId)
+	{
+		$filesModel = $this->getGalleryFilesModel();
+		if ($filesModel)
+		{
+			$result = $filesModel->loadOne('{'.$filesModel->getPk().'} = '.DBModel::quote($itemId).'')->getArray();
+		}
+		else
+		{
+			$result = array();
+		}
 
-    protected function editGalleryFileData($itemId, $data) {
-        $filesModel = $this->getGalleryFilesModel();
-        if ($filesModel) {
-            $filesModel->update($data, '{'.$filesModel->getPk().'} = '.DBModel::quote($itemId));
-        }
-    }
+		return $result;
+	}
 
-    protected function getGalleryFilesModel() {
-        if ($this->galleryFilesModel === null) {
-            if (!$this->config['files_model']) {
-                throw new JSException("You should set `files_model` param in config");
-            }
-            $this->galleryFilesModel = DBModel::factory($this->config['files_model']);
-        }
+	protected function handleAjax()
+	{
+		if ($_POST['action'] == 'delete')
+		{
+			$deleteResult = $this->deleteGalleryFiles(explode(',',$_POST['items']));
+			$jsonResult = array();
 
-        return $this->galleryFilesModel;
-    }
+			switch ($deleteResult)
+			{
+				case self::DELETE_NEED_APPROVEMENT:
+					$jsonResult['need_approvement'] = true;
+					break;
 
-    protected function getGalleryFile($itemId) {
-        $filesModel = $this->getGalleryFilesModel();
-        if ($filesModel) {
-            $result = $filesModel->loadOne('{'.$filesModel->getPk().'} = '.DBModel::quote($itemId).'')->getArray();
-        }
-        else {
-            $result = array();
-        }
+				case self::DELETE_OK:
+				default:
+					$jsonResult['ok'] = true;
+					break;
+			}
 
-        return $result;
-    }
+			Finder::useClass('Json');
+			echo Json::encode($jsonResult);
+			die();
+		}
 
-    protected function handleGalleryUpload() {
-        if (!empty($_FILES[$this->prefix.'Filedata']) && !empty($_FILES[$this->prefix.'Filedata']['name'])) {
-            if ($_POST['item_id']) {
-                $this->replaceUploadedGalleryFile($_POST['item_id']);
-                $item = $this->getGalleryFile($_POST['item_id']);
-                $item['ok'] = true;
+		if ($_POST['action'] == 'reorder')
+		{
+			$this->reorderGallery(explode(',',$_POST['order']));
 
-                Finder::useClass('Json');
-                echo Json::encode($item);
-                die();
-            }
-            else {
-                $itemId = $this->uploadGalleryFile();
+			Finder::useClass('Json');
+			echo Json::encode(array('ok' => true));
+			die();
+		}
 
-                if ($itemId) {
-                    $item = $this->getGalleryFile($itemId);
-                }
-                else {
-                    $item = array();
-                }
+		if ($_POST['action'] == 'edit')
+		{
+			$title = iconv('utf-8', 'cp1251', $_POST['title']);
+			$data = array(
+				'title' => $title,
+				'title_pre' => Locator::get('typografica')->correct($title, '')
+			);
 
-                $tpl = Locator::get('tpl');
-                $tpl->set('*', $item);
+			$itemId = $_POST['id'];
+			$this->editGalleryFileData($itemId, $data);
 
-                $thumbSizes = $this->getThumbSize();
-                if ($thumbSizes) {
-                    $tpl->set('thumb_width', $thumbSizes[0]);
-                    $tpl->set('thumb_height', $thumbSizes[1]);
-                }
+			Finder::useClass('Json');
+			echo Json::encode(array('ok' => true));
+			die();
+		}
+	}
 
-                $result = array(
-                    'ok' => true,
-                    'html' => $tpl->parse('gallery.html:gallery_item')
-                );
+	protected function handleGalleryUpload()
+	{
+		if (!empty($_FILES[$this->prefix.'Filedata']) && !empty($_FILES[$this->prefix.'Filedata']['name']))
+		{
+			if ($_POST['item_id'])
+			{
+				$this->replaceUploadedGalleryFile($_POST['item_id']);
+				$item = $this->getGalleryFile($_POST['item_id']);
+				$item['ok'] = true;
 
-                Finder::useClass('Json');
-                echo Json::encode($result);
-                die();
-            }
-        }
-    }
+				Finder::useClass('Json');
+				echo Json::encode($item);
+				die();
+			}
+			else
+			{
+				$itemId = $this->uploadGalleryFile();
 
-    protected function uploadGalleryFile() {
-        $itemId = 0;
-        $filesModel = $this->getGalleryFilesModel();
-        if ($filesModel) {
-            $data = array(
-                'rubric_id' => $this->id,
-                'title' => 'Заголовок',
-                'title_pre' => 'Заголовок'
-            );
+				if ($itemId)
+				{
+					$item = $this->getGalleryFile($itemId);
+				}
+				else
+				{
+					$item = array();
+				}
 
-            $itemId = $filesModel->insert($data);
+				$tpl = Locator::get('tpl');
+				$tpl->set('*', $item);
 
-            $data = array('_order' => $itemId);
-            $filesModel->update($data, '{'.$filesModel->getPk().'} = '.DBModel::quote($itemId));
-        }
+				$thumbSizes = $this->getThumbSize();
+				if ($thumbSizes)
+				{
+					$tpl->set('thumb_width', $thumbSizes[0]);
+					$tpl->set('thumb_height', $thumbSizes[1]);
+				}
 
-        $this->uploadFiles($itemId);
+				$result = array(
+					'ok' => true,
+					'html' => $tpl->parse('gallery.html:gallery_item')
+				);
 
-        return $itemId;
-    }
+				Finder::useClass('Json');
+				echo Json::encode($result);
+				die();
+			}
+		}
+	}
 
-    protected function replaceUploadedGalleryFile($itemId) {
-        $this->uploadFiles($itemId);
-    }
+	protected function uploadGalleryFile()
+	{
+		$itemId = 0;
+		$filesModel = $this->getGalleryFilesModel();
+		if ($filesModel)
+		{
+			$data = array(
+				'rubric_id' => $this->id,
+				'title' => 'Заголовок',
+				'title_pre' => 'Заголовок'
+			);
 
-    protected function initModel() {
-        parent::initModel();
+			$itemId = $filesModel->insert($data);
 
-        $this->model->addField('>>gallery_items', array(
-            'pk' => 'id',
-            'fk' => 'rubric_id'
-        ));
-        $this->model->addForeignModel('gallery_items', $this->getGalleryFilesModel());
-    }
+			$data = array('_order' => $itemId);
+			$filesModel->update($data, '{'.$filesModel->getPk().'} = '.DBModel::quote($itemId));
+		}
 
-    public function delete() {
-        $deleteRes = parent::delete();
-        if ($deleteRes == 2) {
-            foreach ($this->item['gallery_items'] AS $item) {
-                $this->deleteGalleryFile($item['id']);
-            }
-        }
+		$this->uploadFiles($itemId);
 
-        return $deleteRes;
-    }
+		return $itemId;
+	}
 
-    protected function deleteGalleryFiles($items) {
-        if (is_array($items)) {
-            foreach($items AS $itemId) {
-                $this->deleteGalleryFile($itemId);
-            }
-        }
-    }
+	protected function replaceUploadedGalleryFile($itemId)
+	{
+		$this->uploadFiles($itemId);
+	}
 
-    protected function deleteGalleryFile($itemId) {
-        $itemId = intval($itemId);
+	protected function constructModel()
+	{
+		$model = parent::constructModel();
 
-        if ($itemId) {
-            $filesModel = $this->getGalleryFilesModel();
-            if ($filesModel) {
-                $filesModel->delete('{'.$filesModel->getPk().'} = '.DBModel::quote($itemId));
-            }
+		$model->addField('>>gallery_items', array(
+			'pk' => 'id',
+			'fk' => 'rubric_id'
+		));
+		$model->addForeignModel('gallery_items', $this->getGalleryFilesModel());
 
-            // form files method
-            $this->deleteFiles($itemId);
-        }
-    }
+		return $model;
+	}
 
-    protected function getThumbConfig() {
-        if ($this->filesConfig['picture']['variants']['thumb']) {
-            $result = $this->filesConfig['picture']['variants']['thumb'];
-        }
-        else {
-            $result = false;
-        }
+	protected function deleteGalleryFiles($items)
+	{
+		if (is_array($items))
+		{
+			foreach($items AS $itemId)
+			{
+				$this->deleteGalleryFile($itemId);
+			}
+		}
+	}
 
-        return $result;
-    }
+	protected function deleteGalleryFile($itemId)
+	{
+		$itemId = intval($itemId);
 
-    protected function getThumbSize() {
-        if ($config = $this->getThumbConfig()) {
-            $result = $config['actions']['crop'];
-        }
-        else {
-        //$result = false;
-            $result = array(100, 100);
-        }
+		if ($itemId)
+		{
+			$filesModel = $this->getGalleryFilesModel();
+			if ($filesModel)
+			{
+				$filesModel->delete('{'.$filesModel->getPk().'} = '.DBModel::quote($itemId));
+			}
 
-        return $result;
-    }
+			// form files method
+			$this->deleteFiles($itemId);
+		}
+	}
+
+	protected function getThumbConfig()
+	{
+		if ($this->filesConfig['picture']['variants']['thumb'])
+		{
+			$result = $this->filesConfig['picture']['variants']['thumb'];
+		}
+		else
+		{
+			$result = false;
+		}
+
+		return $result;
+	}
+
+	protected function getThumbSize()
+	{
+		if ($config = $this->getThumbConfig())
+		{
+			$result = $config['actions']['crop'];
+		}
+		else
+		{
+		//$result = false;
+			$result = array(100, 100);
+		}
+
+		return $result;
+	}
 }
 ?>

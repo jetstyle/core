@@ -90,7 +90,7 @@ class FormFiles extends FormSimple {
         return $this->uploadedFiles;
     }
 
-    protected function update() {
+    public function update() {
         $updateResult = parent :: update();
         if( $updateResult ) {
             $this->uploadFiles();
