@@ -15,7 +15,7 @@ class FormSimple
 	protected $template_item = ''; //возьмём из конфига
 	protected $_template_item = 'form'; //basename шаблона формы, если брать его из конфига
 
-	protected $prefix;
+	protected $prefix="";
 
 	protected $idGetVar = 'id';
 	protected $idField = "id";
@@ -43,6 +43,7 @@ class FormSimple
 		}
 
 		$this->prefix = $config['module_name'].'_form_';
+		
 
 		//настройки шаблонов
 		$this->store_to = "form_".$config['module_name'];
@@ -92,12 +93,13 @@ class FormSimple
 			$item = &$this->getItem();
 		    header('Content-Type: text/html; charset=windows-1251');
 		    die( $item[ $_GET['ret'] ] );
-		}
+		}/*
 		elseif ($this->needAjaxUpdate())
 		{
 			$this->ajax_update = true;
 			$this->prefix = "";
 		}
+		*/
 		//update data
 		if ($this->needDelete())
 		{
@@ -107,17 +109,17 @@ class FormSimple
 		{
 			$redirect = $this->restore();
 		}
-		elseif ($this->needUpdate() || $this->ajax_update)
+		elseif ($this->needUpdate() || $this->needAjaxUpdate())
 		{
 			$redirect = $this->update();
 		}
 
-        if ($this->ajax_update)
-        {
-			$postData = $this->getPostData();
-            header('Content-Type: text/html; charset=windows-1251');
-			die($postData[ $_POST['ajax_update'] ]);
-        }
+		if ($this->needAjaxUpdate())
+		{
+				$postData = $this->getPostData();
+		    header('Content-Type: text/html; charset=windows-1251');
+				die($postData[ $_POST['ajax_update'] ]);
+		}
 
 		//редирект или выставление флага, что он нужен
 		if ($redirect)
@@ -232,6 +234,7 @@ class FormSimple
 	public function update($updateData = null)
 	{
 		$postData = $this->getPostData();
+		
 
 		if (is_array($updateData))
 		{
@@ -487,6 +490,7 @@ class FormSimple
 		$postData = array();
 
 		$fields = $this->getPostFields();
+		
 		foreach ($fields AS $fieldName)
 		{
 			if ($fieldName !== $this->idField)
@@ -494,16 +498,16 @@ class FormSimple
 				if (null !== $_POST[$this->prefix.$fieldName])
 				{
 					$postData[$fieldName] = $_POST[$this->prefix.$fieldName];
-					if ($this->ajax_update)
+					if ($this->needAjaxUpdate())
 					{
-						$postData[$fieldName] = iconv('UTF-8', 'CP1251', $this->postData[$fieldName]);
+						$postData[$fieldName] = iconv('UTF-8', 'CP1251', $postData[$fieldName]);
 					}
 					RequestInfo::free($this->prefix.$fieldName);
 				}
 			}
 		}
 
-		if (!$this->ajax_update)
+		if (!$this->needAjaxUpdate())
 		{
 			if (is_array($this->config['render']['checkbox']))
 			{
@@ -513,7 +517,7 @@ class FormSimple
 				}
 			}
 		}
-
+		
 		return $postData;
 	}
 
@@ -535,7 +539,7 @@ class FormSimple
 
 	protected function needDelete()
 	{
-        return $_POST[($this->ajax_update ? '' : $this->prefix)."delete"] ? true : false;
+        return $_POST[($this->needAjaxUpdate() ? '' : $this->prefix)."delete"] ? true : false;
 	}
 
 	protected function needRestore()

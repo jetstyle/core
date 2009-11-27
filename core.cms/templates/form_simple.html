@@ -81,13 +81,15 @@ $(document).ready( function()
         $("#{{__form_name}}").submit( function() {
             if (typeof(tinymce) != 'undefined') tinymce.EditorManager.triggerSave();
             data = {};
-            $(":input", "#{{__form_name}}").each(function (a,b,c) {
+            
+	    $(":input", "#{{__form_name}}").each(function (a,b,c) {
                 if (b.type!="submit" || b.name==clickedButton.name)
-                    data[b.name.replace(/{{prefix}}/, "")  ] = getVal(b);
+                    //data[b.name.replace(/{{prefix}}/, "")  ] = getVal(b);
+		    data[b.name ] = getVal(b);
             });
             data['ajax_update'] = "1";
             data['prefix'] = "{{prefix}}";
-
+		
             $.post("{{ajax_url}}", data, function(returned) {
                 if ( top.onTBRemove) top.onTBRemove(); else top.tb_remove();
             });

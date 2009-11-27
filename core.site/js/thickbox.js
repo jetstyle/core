@@ -294,8 +294,8 @@ var tb_remove = function (close) {
 		$("html").css("overflow","");
 	}
 
-	if (TB_NEED_REMOVE && onTBRemove && !close)
-	    onTBRemove();
+	//if (TB_NEED_REMOVE && onTBRemove && !close)
+	//    onTBRemove();
 
 	document.onkeydown = "";
 	document.onkeyup = "";

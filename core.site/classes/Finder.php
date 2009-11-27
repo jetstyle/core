@@ -137,7 +137,7 @@ class Finder {
 
 			if(@file_exists($fname))
 			{
-				self::$searchCache[$type][$name.'.'.$ext] = $fname;
+				//self::$searchCache[$type][$name.'.'.$ext] = $fname;
 				return $fname;
 			}
 
@@ -145,7 +145,7 @@ class Finder {
 			{
 				if ($file = self::recursiveFind($fname))
 				{
-					self::$searchCache[$type][$name.'.'.$ext] = $file;
+					//self::$searchCache[$type][$name.'.'.$ext] = $file;
 					return $file;
 				}
 			}
