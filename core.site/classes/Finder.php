@@ -94,11 +94,15 @@ class Finder {
 	public static function findScript( $type, $name, $level=0, $dr=1, $ext = 'php', $withSubDirs = false, $scope = 'all' )
 	{
 		//проверяем входные данные
+		/*
 		if (strlen($type) == 0)
 		{
 			throw new Exception("FindScript: <b>*type* пусто</b>, type=<b>$type</b>, name=<b>$name</b>, level=<b>$level</b>, dr=<b>$dr</b>, ext=<b>$ext</b>");
 		}
-		elseif (strlen($name) == 0)
+		else
+		*/
+
+		if (strlen($name) == 0)
 		{
 			throw new Exception("FindScript: <b>*name* пусто</b>, type=<b>$type</b>, name=<b>$name</b>, level=<b>$level</b>, dr=<b>$dr</b>, ext=<b>$ext</b>");
 		}
@@ -125,27 +129,27 @@ class Finder {
 		{
 			//разбор каждого уровня тут
 			$dir =& self::$DIRS[$scope][$i];
-			if( !( is_array($dir) && !in_array($type,$dir) ) )
+			//if( !( is_array($dir) && !in_array($type,$dir) ) )
+			//{
+			$fname = $dir.($type ? $type."/" : "").$name.'.'.$ext;
+
+			self::$searchHistory[] = $fname;
+
+			if(@file_exists($fname))
 			{
-				$fname = (is_array($dir) ? $dir[0] : $dir).$type."/".$name.'.'.$ext;
+				self::$searchCache[$type][$name.'.'.$ext] = $fname;
+				return $fname;
+			}
 
-				self::$searchHistory[] = $fname;
-
-				if(@file_exists($fname))
+			if ($withSubDirs)
+			{
+				if ($file = self::recursiveFind($fname))
 				{
-					self::$searchCache[$type][$name.'.'.$ext] = $fname;
-					return $fname;
-				}
-
-				if ($withSubDirs)
-				{
-					if ($file = self::recursiveFind((is_array($dir) ? $dir[0] : $dir).$type."/", $name . "." . $ext))
-					{
-						self::$searchCache[$type][$name.'.'.$ext] = $file;
-						return $file;
-					}
+					self::$searchCache[$type][$name.'.'.$ext] = $file;
+					return $file;
 				}
 			}
+			//}
 			//если искать только на одном уровне - сразу выходим
 			if($dr==0)
 			break;

@@ -29,7 +29,7 @@ class ModuleConstructor
 
 		Finder::pushContext();
 		Finder::prependDir(Config::get('cms_dir').$this->handlersType.'/'.$this->moduleName.'/');
-		$ymlFile  = Finder::findScript_($this->handlersType, $this->moduleName.'/config', 0, 1, 'yml') ;
+		$ymlFile  = Finder::findScript_("", 'config', 0, 1, 'yml') ;
 		Finder::popContext();
 
 		$this->config = YamlWrapper::load($ymlFile);
