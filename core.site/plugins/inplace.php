@@ -85,8 +85,11 @@ else
 //	echo 'tags';
 	if(!$supertag)
 		$supertag = $tpl->get( $params["var"] );
-	if(!$supertag)
+	
+	if(!$supertag && !$params["id"])
 		echo "<font color='red'><strong>[\$supertag пуст]</strong></font>";
+	else if ($params['id'])
+		$id = $params['id'];
 
 	$custom = array('table'=>'??texts', 'module'=>'texts', 'field'=>'text_pre', 'add_fields'=>',type'.( isset($params['field']) ? ",".$params['field'] : "" ));
 
@@ -98,20 +101,27 @@ else
 	else
 	{
 		$db = &Locator::get('db');
+		
+		if ($supertag)
+			$where = "_supertag=".DBModel::quote($supertag);
+		else if ($id)
+			$where = "id=".DBModel::quote($id);
+
 		if ( $params['referer'] )
 		{
 		    $ref = $_SERVER['HTTP_REFERER'];
 		    
 		    $sql = "SELECT t.id, t.".$custom['field']. " ".$custom['add_fields']." FROM ".$custom['table']." as t 
-			    INNER JOIN ??texts_referers as r WHERE t._supertag='$supertag' AND t._state=0 
+			    INNER JOIN ??texts_referers as r WHERE t.".$where." AND t._state=0 
 			    AND (".$db->quote($ref)." LIKE r.title OR r.title='')  AND t.channel_id=r.channel_id ORDER by r.title DESC";
 		    
 		    $custom['module'] = 'textsref';
 		}
 		else
 		{
-		    $sql = "SELECT id,".$custom['field'].$custom['add_fields']." FROM ".$custom['table']." WHERE _supertag='$supertag' AND _state=0 ";
+		    $sql = "SELECT id,".$custom['field'].$custom['add_fields']." FROM ".$custom['table']." WHERE ".$where." AND _state=0 ";
 		}
+		
 		$r = $db->queryOne($sql);
 
 		//если записи с реферером нет - ищем без него
