@@ -5,7 +5,7 @@
  * Licensed under the MIT License: http://www.opensource.org/licenses/mit-license.php
 */
 
-var tb_pathToImage = "/app/skins/default/images/loadingAnimation.gif";
+var tb_pathToImage = "/app/skins/images/loadingAnimation.gif";
 var onTBRemove = null;
 var TB_NEED_REMOVE = null;
 /*!!!!!!!!!!!!!!!!! edit below this line at your own risk !!!!!!!!!!!!!!!!!!!!!!!*/
@@ -189,8 +189,8 @@ function tb_show(caption, url, imageGroup) {//function called when the user clic
 			//console.log(params);
 			//saved = params['saved'];
 
-			TB_WIDTH = (params['width']*1) + 30 || 630; //defaults to 630 if no paramaters were added to URL
-			TB_HEIGHT = (params['height']*1) + 40 || 440; //defaults to 440 if no paramaters were added to URL
+			TB_WIDTH = (params['width']*1) + 30 || getDefaultWidth(); //defaults to 630 if no paramaters were added to URL
+			TB_HEIGHT = (params['height']*1) + 40 || getDefaultHeight(); //defaults to 440 if no paramaters were added to URL
 			ajaxContentW = TB_WIDTH - 30;
 			ajaxContentH = TB_HEIGHT - 45;
 			TB_NEED_REMOVE = (params['onremove'] ? true : null);
@@ -269,6 +269,21 @@ function tb_show(caption, url, imageGroup) {//function called when the user clic
 	}
 }
 
+function getDefaultWidth()
+{
+	var pagesize = tb_getPageSize();
+	var w = Math.floor(0.8 * pagesize[0]);
+	return w;
+}
+
+function getDefaultHeight()
+{
+	var pagesize = tb_getPageSize();
+	var h = Math.floor(0.8 * pagesize[1]);
+	return h;
+}
+
+
 //helper functions below
 function tb_showIframe()
 {
@@ -294,8 +309,8 @@ var tb_remove = function (close) {
 		$("html").css("overflow","");
 	}
 
-	//if (TB_NEED_REMOVE && onTBRemove && !close)
-	//    onTBRemove();
+	if (TB_NEED_REMOVE && onTBRemove && !close)
+	    onTBRemove();
 
 	document.onkeydown = "";
 	document.onkeyup = "";

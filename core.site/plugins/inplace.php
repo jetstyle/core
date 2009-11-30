@@ -204,7 +204,7 @@ if(Locator::get('principalCms')->security('cmsModules', $module))
 	    $tpl->set('_cols', "cols='".$params['cols']."'" );
 	*/
 	$params['href'] = (Config::exists('cms_url') ? Config::get('cms_url') : RequestInfo::$baseUrl."cms/").str_replace('::id::',$id,$oce[$module]).'hide_toolbar=1&popup=1';
-	//var_dump($params);
+	$params["prefix"] = ucFirst($module."_form_"); //prefix for FormSimple fields
 	$tpl->set("*", $params);	
 
 	return  $params["_"] .  $tpl->parse( 'inplace.html' );

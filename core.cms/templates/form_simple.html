@@ -16,7 +16,7 @@
 	    <td class="cms-form-block">
 
 	    {{?iframe}}
-		<div style="overflow-x: hidden; overflow-y: auto; height: {{iframe.height}}">
+		<div style="overflow-x: hidden; overflow-y: auto; " id="iframe_div"><!--height: {{iframe.height}}-->
 	    {{/?}}
 
 	    {{!!form_simple}}
@@ -96,6 +96,14 @@ $(document).ready( function()
         	return false;
         });
     }
+    
+    
+    {{?iframe}}
+	var h = top.getDefaultHeight()+100;
+	//$("iframe-buttons-").css({"left": "-100%", "margin-left:100%"});
+	//$("#iframe_div").height( h );
+	//alert(h);
+    {{/?}}
 });
 
 function getVal(el)

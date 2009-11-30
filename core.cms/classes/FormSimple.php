@@ -83,8 +83,8 @@ class FormSimple
 		//form in iframe thickbox
 		if ( $_GET["popup"] )
 		{
-			$iframe = array("css_buttons_class"=>"iframe-buttons-",
-					"height"=>( $_GET["height"]>0 ? ($_GET["height"]-80)."px" : "360px") );//thickbox default height(440) - buttons heoght
+			$iframe = array("css_buttons_class"=>"iframe-buttons-"
+					/*"height"=>( $_GET["height"]>0 ? ($_GET["height"]-80)."px" : "360px")*/ );//thickbox default height(440) - buttons heoght
 			Locator::get("tpl")->set( "iframe", $iframe );
 		}
 
@@ -113,11 +113,12 @@ class FormSimple
 		{
 			$redirect = $this->update();
 		}
-
+		
 		if ($this->needAjaxUpdate())
 		{
 				$postData = $this->getPostData();
-		    header('Content-Type: text/html; charset=windows-1251');
+				header('Content-Type: text/html; charset=windows-1251');
+				//var_dump($postData, $_POST['ajax_update']);
 				die($postData[ $_POST['ajax_update'] ]);
 		}
 
@@ -490,6 +491,7 @@ class FormSimple
 		$postData = array();
 
 		$fields = $this->getPostFields();
+		
 		
 		foreach ($fields AS $fieldName)
 		{

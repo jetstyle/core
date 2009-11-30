@@ -1,4 +1,4 @@
-Inplace = function( editorType, cmsUrl, inplaceObject, field )
+Inplace = function( editorType, cmsUrl, inplaceObject, field, prefix )
 {
     this.editorType = editorType;
     this.cmsUrl = cmsUrl;
@@ -7,6 +7,8 @@ Inplace = function( editorType, cmsUrl, inplaceObject, field )
     this.inplaceObject = $(inplaceObject);
     this.inplaceObjectID = inplaceObject;
     this.field  = field ? field : 'text';
+    
+    this.prefix = prefix;
 }
 
 Inplace.prototype =
@@ -145,8 +147,8 @@ Inplace.prototype =
     {
 	    this.showIndicator( this.saveButton );
 
-	    var params =  {'ajax_update': this.field+'_pre'};
-	    params[ this.field ] = this.getEditorData();
+	    var params =  {'ajax_update': this.field };
+	    params[ this.prefix+this.field ] = this.getEditorData();
 
 	    $.post( this.cmsUrl,
 	        params, this.onSave.prototypeBind( this )
