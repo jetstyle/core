@@ -20,6 +20,7 @@ class FormSimple
 	protected $idGetVar = 'id';
 	protected $idField = "id";
 	protected $id = 0; //id редактируемой записи
+	protected $new_id = 0;
 
 	protected $supertagLimit = 20;
 	protected $updateSupertagAfterInsert = false;
@@ -261,15 +262,49 @@ class FormSimple
 
 	public function delete()
 	{
-		$model = &$this->getModel();
-		return $model->deleteToTrash($this->id);
+		if ($this->id)
+		{
+			$model = &$this->getModel();
+			return $model->deleteToTrash($this->id);
+		}
+		else
+		{
+			return false;
+		}
 	}
 
 	public function restore()
 	{
-		$model = &$this->getModel();
-		$model->restoreFromTrash($this->id);
-		return true;
+		if ($this->id)
+		{
+			$model = &$this->getModel();
+			$model->restoreFromTrash($this->id);
+			return true;
+		}
+		else
+		{
+			return false;
+		}
+	}
+
+	public function needAjaxUpdate()
+	{
+		return $_POST["ajax_update"] ? true : false;
+	}
+
+	public function needUpdate()
+	{
+		return $_POST[$this->prefix."update"] ? true : false;
+	}
+
+	public function needDelete()
+	{
+        return $_POST[($this->needAjaxUpdate() ? '' : $this->prefix)."delete"] ? true : false;
+	}
+
+	public function needRestore()
+	{
+		return $_POST[$this->prefix."restore"] ? true : false;
 	}
 
 	protected function insert($postData)
@@ -279,7 +314,8 @@ class FormSimple
 		$this->filters($postData);
 
 		$model = &$this->getModel();
-		$this->new_id = $this->id = $model->insert($postData);
+		$this->new_id = $model->insert($postData);
+		$this->setId($this->new_id);
 
 		// update order
 		$data = array('_order' => $this->id);
@@ -289,13 +325,12 @@ class FormSimple
 			$data['_supertag'] = $insertData['_supertag'].'_'.$this->id;
 		}
 		$this->updateData($data);
-
-		$this->setId($this->id);
 		RequestInfo::set($this->idGetVar, $this->id);
 	}
 
 	protected function cleanUp()
 	{
+		$this->new_id = 0;
 		$this->loaded = false;
 		$this->model = null;
 		$this->item = null;
@@ -529,26 +564,6 @@ class FormSimple
 		$model->update( $data, '{'.$this->idField.'} = '.DBModel::quote($this->id) );
 	}
 
-	protected function needAjaxUpdate()
-	{
-		return $_POST["ajax_update"] ? true : false;
-	}
-
-	protected function needUpdate()
-	{
-		return $_POST[$this->prefix."update"] ? true : false;
-	}
-
-	protected function needDelete()
-	{
-        return $_POST[($this->needAjaxUpdate() ? '' : $this->prefix)."delete"] ? true : false;
-	}
-
-	protected function needRestore()
-	{
-		return $_POST[$this->prefix."restore"] ? true : false;
-	}
-
 	protected function filters(&$postData)
 	{
 		$tpl = &$this->tpl;
@@ -556,14 +571,16 @@ class FormSimple
 		//filter data
 		if( is_array($this->config['update_filters']) )
 		{
-			foreach( $this->config['update_filters'] AS $field => $filter )
+			foreach( $this->config['update_filters'] AS $filter => $fields )
 			{
-				if( is_string($field) )
+				if (is_array($fields))
 				{
-					//some field specified
-					if (isset($postData[ $field ]))
+					foreach ($fields AS $field)
 					{
-						$postData[ $field ] = $tpl->action( $filter, $postData[ $fieldName ] );
+						if (isset($postData[ $field ]))
+						{
+							$postData[ $field ] = $tpl->action( $filter, $postData[ $field ] );
+						}
 					}
 				}
 			}
@@ -574,17 +591,20 @@ class FormSimple
 		{
 			foreach ( $this->config['pre_filters'] AS $filter => $fields )
 			{
-				foreach ($fields AS $field)
+				if (is_array($fields))
 				{
-					if ( isset($postData[ $field ]) )
+					foreach ($fields AS $field)
 					{
-					    $field_pre = $field.'_pre';
-					    if (!isset($postData[ $field_pre ]))
-					    {
-						    $postData[ $field_pre ] = $postData[ $field ];
-					    }
+						if ( isset($postData[ $field ]) )
+						{
+							$field_pre = $field.'_pre';
+							if (!isset($postData[ $field_pre ]))
+							{
+								$postData[ $field_pre ] = $postData[ $field ];
+							}
 
-					    $postData[ $field_pre ] = $tpl->action( $filter, $postData[ $field_pre ]);
+							$postData[ $field_pre ] = $tpl->action( $filter, $postData[ $field_pre ]);
+						}
 					}
 				}
 			}

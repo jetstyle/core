@@ -4,6 +4,10 @@ $text = $params["_"]?$params["_"]:$params[0];
 
 if ($text == "") return;
 
-$type = &Locator::get('typografica');
-echo $typo->correct($text);
+$typo = &Locator::get('typografica');
+
+$typo->settings["dashglue"] = false;
+$typo->settings["dashwbr"] = true;
+
+return $typo->correct( $text, false );
 ?>

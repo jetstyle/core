@@ -34,36 +34,19 @@ class FormCalendar extends FormIframe
 	protected $r_month = '$2';															// мес€ц
 	protected $r_day = '$1';																// день
 
-	protected $USE_TIME = true;
-
-	public function __construct( &$config )
-	{
-		parent::__construct($config);
-
-		if($this->config['use_time'] === false)
-		{
-			$this->USE_TIME = false;
-		}
-
-		$this->YEAR = $this->config['year'];
-		$this->MONTH = $this->config['month'];
-		$this->DAY = $this->config['day'];
-		$this->CALENDAR_FIELDS = $this->config['calendar_fields'] ? $this->config['calendar_fields'] : array();
-	}
-
 	protected function renderFields()
 	{
 		$renderResult = parent::renderFields();
 
-		if ($renderResult)
+		if ($renderResult && is_array($this->config['calendar']['fields']))
 		{
 			$item = &$this->getItem();
 			if( !$item  || !$item['id'])
 			{
-				foreach($this->CALENDAR_FIELDS AS $field)
+				foreach($this->config['calendar']['fields'] AS $field)
 				{
 					$this->tpl->set('_'.$field, date($this->date_format));
-					if($this->USE_TIME)
+					if($this->config['calendar']['use_time'] !== false)
 					{
 						$this->tpl->set('_'.$field.'_time', date('H:i'));
 					}
@@ -71,9 +54,9 @@ class FormCalendar extends FormIframe
 			}
 			else
 			{
-				foreach($this->CALENDAR_FIELDS AS $field)
+				foreach($this->config['calendar']['fields'] AS $field)
 				{
-					if($this->USE_TIME)
+					if($this->config['calendar']['use_time'] !== false)
 					{
 						$item[$field.'_time'] = preg_replace($this->r_mysql, $this->r_time_out, $item[$field]);
 						$item[$field] = preg_replace($this->r_mysql, $this->r_date_out, $item[$field]);
@@ -91,41 +74,44 @@ class FormCalendar extends FormIframe
 	{
 		$postData = parent::constructPostData();
 
-		if($this->YEAR)
+		if($this->config['calendar']['year'])
 		{
-			$postData['year'] = preg_replace($this->r_date_in, $this->r_year, $_POST[$this->prefix.$this->YEAR]);
+			$postData['year'] = preg_replace($this->r_date_in, $this->r_year, $postData[$this->config['calendar']['year']]);
 		}
-		if($this->MONTH)
+		if($this->config['calendar']['month'])
 		{
-			$postData['month'] = preg_replace($this->r_date_in, $this->r_month, $_POST[$this->prefix.$this->MONTH]);
+			$postData['month'] = preg_replace($this->r_date_in, $this->r_month, $postData[$this->config['calendar']['month']]);
 		}
-		if($this->DAY)
+		if($this->config['calendar']['day'])
 		{
-			$postData['day'] = preg_replace($this->r_date_in, $this->r_day, $_POST[$this->prefix.$this->DAY]);
+			$postData['day'] = preg_replace($this->r_date_in, $this->r_day, $postData[$this->config['calendar']['day']]);
 		}
 
-		foreach($this->CALENDAR_FIELDS AS $field)
+		if (is_array($this->config['calendar']['fields']))
 		{
-			if($this->USE_TIME)
+			foreach($this->config['calendar']['fields'] AS $field)
 			{
-				if($time = $_POST[$this->prefix.$field.'_time'])
+				if($this->config['calendar']['use_time'] !== false)
 				{
-					$time = $time.':00';
+					if($time = $_POST[$this->prefix.$field.'_time'])
+					{
+						$time = $time.':00';
+					}
+					else
+					{
+						$time = date('H:i:s', time());
+					}
+					$date = preg_replace($this->r_date_in, $this->r_date_out_mysql, $postData[$field]).' '.$time;
 				}
 				else
 				{
-					$time = date('H:i:s', time());
+					$date = preg_replace($this->r_date_in, $this->r_date_out_mysql, $postData[$field]);
 				}
-				$date = preg_replace($this->r_date_in, $this->r_date_out_mysql, $_POST[$this->prefix.$field]).' '.$time;
-			}
-			else
-			{
-				$date = preg_replace($this->r_date_in, $this->r_date_out_mysql, $_POST[$this->prefix.$field]);
-			}
 
-			$postData[$field] = $date;
+				$postData[$field] = $date;
+			}
 		}
-
+		
 		return $postData;
 	}
 
