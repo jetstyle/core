@@ -92,8 +92,8 @@ class FormSimple
 		if ($_GET['ret'] && in_array($_GET['ret'], $valid) )
 		{
 			$item = &$this->getItem();
-		    header('Content-Type: text/html; charset=windows-1251');
-		    die( $item[ $_GET['ret'] ] );
+			header('Content-Type: text/html; charset=windows-1251');
+			die( $item[ $_GET['ret'] ] );
 		}/*
 		elseif ($this->needAjaxUpdate())
 		{
@@ -124,9 +124,11 @@ class FormSimple
 		}
 
 		//редирект или выставление флага, что он нужен
+		
 		if ($redirect)
 		{
 			$this->_redirect = RequestInfo::hrefChange('', array('rnd' => mt_rand(1,255)));
+			
 			if ($this->stop_redirect)
 			{
 				$this->redirect = $this->_redirect;

@@ -273,6 +273,7 @@ function getDefaultWidth()
 {
 	var pagesize = tb_getPageSize();
 	var w = Math.floor(0.8 * pagesize[0]);
+	
 	return w;
 }
 
@@ -290,7 +291,7 @@ function tb_showIframe()
 	$("#TB_load").remove();
 	$("#TB_window").css({display:"block"});
 
-//	console.log(  $("#TB_iframeContent").attr('src') );
+	//console.log(   document.getElementById("TB_iframeContent").src );
 	//console.log( saved );
 	//if (saved == true)
 	//    tb_remove();
