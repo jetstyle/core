@@ -351,6 +351,21 @@ abstract class Controller implements ArrayAccess
 		}
 	}
 
+	protected function updateMeta($meta)
+	{
+		if (empty($this->data) || (!is_array($meta) && !($meta instanceof DBModel) ))
+		{
+			return;
+		}
+
+		foreach (array('meta_description', 'meta_keywords', 'meta_title') AS $key)
+		{
+			if ($key)
+			{
+				$this->data[$key] = $meta[$key];
+			}
+		}
+	}
 
 	private function getActionName($param)
 	{
