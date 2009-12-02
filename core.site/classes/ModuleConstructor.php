@@ -20,6 +20,26 @@ class ModuleConstructor
 		return $node;
 	}
 
+	public static function getModulesList()
+	{
+		$result = array();
+		$dir = Config::get('cms_dir').'modules';
+		if ($handle = opendir($dir))
+		{
+			/* This is the correct way to loop over the directory. */
+			while (false !== ($file = readdir($handle)))
+			{
+				if ($file{0} != ".")
+				{
+					$result[] = $file;
+				}
+			}
+			closedir($handle);
+		}
+		
+		return $result;
+	}
+
 	public function __construct($modulePath, $config = null)
 	{
 		$modulePath = trim($modulePath, '/');
