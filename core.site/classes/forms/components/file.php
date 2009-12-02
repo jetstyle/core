@@ -100,20 +100,22 @@ class FormComponent_file extends FormComponent_model_plain
    function Interface_Parse()
    {
      parent::Interface_Parse();
+     
+     $tpl = Locator::get('tpl');
 
      $name = $this->field->model->Model_GetDataValue();
      $file_size = $this->_GetSize( $name );
      if ($file_size === false)
      {
-       $this->field->tpl->Set("interface_file", false);
+       $tpl->Set("interface_file", false);
      }
      else
      {
-       $this->field->tpl->Set("interface_file", $name );
-       $this->field->tpl->Set("interface_size_Kb", floor(($file_size+512)/1024));
+       $tpl->Set("interface_file", $name );
+       $tpl->Set("interface_size_Kb", floor(($file_size+512)/1024));
      }
 
-     return $this->field->tpl->Parse( $this->field->form->config["template_prefix_interface"].
+     return $tpl->Parse( $this->field->form->config["template_prefix_interface"].
                                       $this->field->config["interface_tpl"] );
    }
    // преобразование из поста в массив для загрузки моделью
