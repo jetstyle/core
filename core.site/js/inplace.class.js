@@ -205,7 +205,10 @@ Inplace.prototype =
 			this.container = $( this.inplaceObject ).parent();
 		else
 			this.container = $( this.inplaceObject ).prev();
+		
+		
 
+	
 		this.inplaceObject.css("z-index", 1000).css("position", "relative");
 		var dif = this.container.width() - this.inplaceObject.width();
 		//if(dif){ this.inplaceObject.css("margin-left", dif); }
@@ -217,6 +220,14 @@ Inplace.prototype =
 			//setTimeout( this.initMCE.prototypeBind(this, textarea_id),  100 );
 			preInitMce(textarea_id);
 		}
+		else
+		{
+			//console.log($(this.container).height("100%"));
+			if ($("textarea,input", this.inplaceObject).val()=="" )
+			{
+				$(this.container).css( {"border": "1px red dashed", "height": "24px" });
+			}
+		}
     },
 
     initButtons: function()
@@ -226,6 +237,7 @@ Inplace.prototype =
 		this.cancelButton = $(document.createElement("input")).val("Отменить").attr("type", "button").addClass("cms-delete-but hand");
 
 		this.buttons = $(document.createElement("div")).append( this.saveButton, this.cancelButton ).css("padding-top", "8px");//;
+		//console.log(this.field, this.buttons);
 
 		if (this.editorType=="wysiwyg")
 			$(this.buttons).css("padding-left", "8px");
@@ -288,8 +300,8 @@ function initMCE()
 		init_instance_callback: this.onMCEInit.prototypeBind(self)
 	});
 
-	tinyMCE.jetimages= base_url + "cms/do/Pictures/jetimages";
-	tinyMCE.jetfiles = base_url + "cms/do/PicFiles/jetfiles";
+	tinyMCE.jetimages= base_url + "cms/do/Files/jetimages";
+	//tinyMCE.jetfiles = base_url + "cms/do/PicFiles/jetfiles";
 	tinyMCE.jetcontent = base_url + "cms/jetcontent";
 
     tinyMCE.base_url = base_url + "cms/";

@@ -62,11 +62,11 @@ class FormSimple
 			$this->idField = $this->config['idField'];
 		}
 
-        if ($_GET['insert_fields'])
-        {
-            Finder::useClass('Json');
-            $this->insert_fields = Json::decode($_GET['insert_fields'], true);
-        }
+		if ($_GET['insert_fields'])
+		{
+		    Finder::useClass('Json');
+		    $this->insert_fields = Json::decode($_GET['insert_fields'], true);
+		}
 
 		$this->id = intval(RequestInfo::get( $this->idGetVar));
 	}
@@ -88,10 +88,9 @@ class FormSimple
 					/*"height"=>( $_GET["height"]>0 ? ($_GET["height"]-80)."px" : "360px")*/ );//thickbox default height(440) - buttons heoght
 			Locator::get("tpl")->set( "iframe", $iframe );
 		}
-
+		$item = &$this->getItem();
 		if ($_GET['ret'] && in_array($_GET['ret'], $valid) )
 		{
-			$item = &$this->getItem();
 			header('Content-Type: text/html; charset=windows-1251');
 			die( $item[ $_GET['ret'] ] );
 		}/*
@@ -119,7 +118,7 @@ class FormSimple
 		{
 				$postData = $this->getPostData();
 				header('Content-Type: text/html; charset=windows-1251');
-				//var_dump($postData, $_POST['ajax_update']);
+				
 				die($postData[ $_POST['ajax_update'] ]);
 		}
 
@@ -556,7 +555,7 @@ class FormSimple
 				}
 			}
 		}
-		
+
 		return $postData;
 	}
 
@@ -611,6 +610,8 @@ class FormSimple
 				}
 			}
 		}
+		if ( $this->needAjaxUpdate() )
+		    return;
 
 		//supertag
 		if ( $this->config['supertag'])
