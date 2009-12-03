@@ -222,11 +222,13 @@ Inplace.prototype =
 		}
 		else
 		{
-			//console.log($(this.container).height("100%"));
-			if ($("textarea,input", this.inplaceObject).val()=="" )
+			var txt = $(this.container).text().replace(/\n|\r|\s/gi, "");
+			if ( txt=="" )
 			{
 				$(this.container).css( {"border": "1px red dashed", "height": "24px" });
 			}
+			
+			$("input,textarea", this.container).css("width", "99%");
 		}
     },
 

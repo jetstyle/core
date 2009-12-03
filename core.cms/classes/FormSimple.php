@@ -237,7 +237,6 @@ class FormSimple
 	public function update($updateData = null)
 	{
 		$postData = $this->getPostData();
-		
 
 		if (is_array($updateData))
 		{
@@ -527,8 +526,7 @@ class FormSimple
 		$postData = array();
 
 		$fields = $this->getPostFields();
-		
-		
+		var_dump($this->prefix);die();
 		foreach ($fields AS $fieldName)
 		{
 			if ($fieldName !== $this->idField)
