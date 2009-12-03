@@ -526,7 +526,7 @@ class FormSimple
 		$postData = array();
 
 		$fields = $this->getPostFields();
-		var_dump($this->prefix);die();
+		
 		foreach ($fields AS $fieldName)
 		{
 			if ($fieldName !== $this->idField)
