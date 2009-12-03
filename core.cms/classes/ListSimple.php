@@ -53,10 +53,10 @@ class ListSimple
 			$this->frameSize = $this->config['frameSize'];
 		}
 
-		$this->storeTo = "list_".$config['module_name'];
-		$this->id = intval(RequestInfo::get($this->idGetVar));
+		$this->prefix = implode('_', $config['module_path_parts']).'_';
+		$this->storeTo = $this->prefix.'tpl';
 
-		$this->prefix = $this->config['module_name'].'_list_';
+		$this->id = intval(RequestInfo::get($this->idGetVar));
 	}
 
 	public function handle()

@@ -43,11 +43,10 @@ class FormSimple
 			$this->config['supertag_check'] = true;
 		}
 
-		$this->prefix = $config['module_name'].'_form_';
-		
+		$this->prefix = implode('_', $config['module_path_parts']).'_';
 
 		//настройки шаблонов
-		$this->store_to = "form_".$config['module_name'];
+		$this->store_to = $this->prefix.'tpl';
 		if( $config['template_item'] )
 		{
 			$this->template_item = $config['template_item'];

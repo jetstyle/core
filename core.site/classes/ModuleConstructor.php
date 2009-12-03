@@ -26,7 +26,6 @@ class ModuleConstructor
 		$dir = Config::get('cms_dir').'modules';
 		if ($handle = opendir($dir))
 		{
-			/* This is the correct way to loop over the directory. */
 			while (false !== ($file = readdir($handle)))
 			{
 				if ($file{0} != ".")
@@ -90,6 +89,7 @@ class ModuleConstructor
 
 		$this->config['module_name'] = $this->moduleName;
 		$this->config['module_path'] = $this->modulePath;
+		$this->config['module_path_parts'] = $this->modulePathParts;
 	}
 
 	private function markRenderable(&$config)
