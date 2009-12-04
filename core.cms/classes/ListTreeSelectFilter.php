@@ -23,7 +23,8 @@ class ListTreeSelectFilter extends ListSelectFilter
 
     public function addIndent(&$model, &$row)
     {
-        $row['indent'] = str_pad('', ($row['_level'] - 1) * 2, '-');
+        //$row['indent'] = str_pad('', ($row['_level'] - 1) * 2, '-');
+	$row['indent'] = str_repeat('&nbsp;', ($row['_level'] - 1) * 2);
     }
 
 }
