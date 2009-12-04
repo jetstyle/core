@@ -82,21 +82,25 @@ if ($params['module'] != 'texts' && $params['module'] != 'textsref')
 else
 {
 	$supertag = $params['tag'] ? $params['tag'] : $params[0];
-//	echo 'tags';
+	
 	if(!$supertag)
 		$supertag = $tpl->get( $params["var"] );
-	
+
+	$cacheby = $supertag;
+
 	if(!$supertag && !$params["id"])
 		echo "<font color='red'><strong>[\$supertag пуст]</strong></font>";
 	else if ($params['id'])
+	{
 		$id = $params['id'];
-
+		$cacheby = $id;
+	}
 	$custom = array('table'=>'??texts', 'module'=>'texts', 'field'=>'text_pre', 'add_fields'=>',type'.( isset($params['field']) ? ",".$params['field'] : "" ));
 
 	//грузим текст по супертагу
-	if (Config::exists('__texts_'.$supertag))
+	if (Config::exists('__texts_'.$cacheby))
 	{
-		$r = Config::get('__texts_'.$supertag);
+		$r = Config::get('__texts_'.$cacheby);
 	}
 	else
 	{
@@ -121,7 +125,7 @@ else
 		{
 		    $sql = "SELECT id,".$custom['field'].$custom['add_fields']." FROM ".$custom['table']." WHERE ".$where." AND _state=0 ";
 		}
-		
+		//echo "<br>".$sql;
 		$r = $db->queryOne($sql);
 
 		//если записи с реферером нет - ищем без него
