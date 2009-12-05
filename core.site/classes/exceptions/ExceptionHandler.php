@@ -198,7 +198,7 @@ class ExceptionHandler
 			}
 			$result .= "\n\n";
 			
-			if ("Exception" != get_class($exceptionObj))
+			if (method_exists($exceptionObj, 'getText'))
 			{
 				$result .= $exceptionObj->getText();
 				$result .= "\n\n";
@@ -247,7 +247,7 @@ class ExceptionHandler
 				$result .= '<div class="url">http://'.$_SERVER["HTTP_HOST"] . $_SERVER["REQUEST_URI"].'</div>';
 				$result .= '<br />';
 			}
-
+                        $result .= '<pre>';
 			if ("Exception" == get_class($exceptionObj))
 			{
 				$result .= $exceptionObj->getMessage();
@@ -256,6 +256,7 @@ class ExceptionHandler
 			{
 				$result .= $exceptionObj;
 			}
+                        $result .= '</pre>';
 
 			$result .= "</div>";
 
@@ -264,7 +265,7 @@ class ExceptionHandler
 			$result .= $this->getTrace($exceptionObj->getTrace());
 			$result .= "</td><td class=\"detailed-info\">";
 
-			if ("Exception" != get_class($exceptionObj))
+			if (method_exists($exceptionObj, 'getText'))
 			{
 				$result .= $exceptionObj->getText();
 			}
