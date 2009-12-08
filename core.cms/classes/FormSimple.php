@@ -151,16 +151,17 @@ class FormSimple
 		$tpl->set( '__form_name', $this->prefix.'_simple_form' );
 
 		if ($this->insert_fields)
-        {
-            $tpl->set('hidden_fields', $this->insert_fields);
-        }
+		{
+				
+		    $tpl->set('hidden_fields', $this->insert_fields);
+		}
 
 		$item = &$this->getItem();
 
 		if ( $item['id']>0 || RequestInfo::get('_new') )
-        {
-		    $tpl->set( 'ajax_url', RequestInfo::href() );
-        }
+		{
+			    $tpl->set( 'ajax_url', RequestInfo::href() );
+		}
 
 		$tpl->set('___form', $this->getFieldsHtml());
 		$this->renderButtons();
@@ -318,6 +319,8 @@ class FormSimple
 
 		// update order
 		$data = array('_order' => $this->id);
+
+		
 
 		if ($this->updateSupertagAfterInsert)
 		{

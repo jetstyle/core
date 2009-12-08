@@ -9,8 +9,8 @@ class Json {
 	} // end of method serialize
 
 	public function unserialize ($string, $assoc=false, $depth=512) {
-		if (function_exists('json_dencode')) json_decode($data, $assoc, $depth);
-		else throw new Exception("Unsupported");
+		if (function_exists('json_dencode')) return json_decode($data, $assoc, $depth);
+		else throw new Exception("Unsupported Json::unserialize");
 	} // end of method unserialize
 
 	/**
@@ -52,6 +52,11 @@ class Json {
 			//return '"'.str_replace('"', '\\"', mb_convert_encoding($x, 'UTF-8')).'"';
 			return '"' . strtr($x, $jsonReplaces) . '"';
 		}
+	}
+	
+	static public function decode($x, $assoc) {
+		if (function_exists('json_decode')) return json_decode($x, $assoc);
+		else throw new Exception("Unsupported Json::decode");
 	}
 }
 
