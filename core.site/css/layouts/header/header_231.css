@@ -1,0 +1,19 @@
+.header {
+  width: 100%; overflow: hidden;
+  margin: 15px 0 40px; /* тут задаём только верхний и нижний отступы */
+  }
+  .header__logo {
+    width: 210px; height: 100px; padding: 0 10px 0 15px;
+    }
+    .header__logo img {
+      vertical-align: top; /* чтобы не появлялось отступа под картинкой */
+      }
+  .header__slogan {
+    padding: 0 10px;
+    }
+  .header__info {
+    width: 50%; padding: 0 15px 0 10px;
+    }
+  .header__navigation {
+    padding: 10px 15px 0 10px;
+    }
