@@ -1,0 +1,28 @@
+.footer-112 {
+  clear: both; width: 100%; overflow: hidden;
+  }
+  .footer-112_col-1, .footer-112_col-2, .footer-112_col-3 {
+    float: left;
+    }
+  .footer-112_col-1 {
+    width: 25%; //margin-right: -100%;
+    }
+    .footer-112_col-1_pad {
+      padding: 0 10px 0 15px;
+      }
+  .footer-112_col-2 {
+    width: 25%;
+    //margin-left: 25%; /* ширина колонок перед этой ( в данном случае перед ней одна колонка ширины 25% ) */
+    //margin-right: -100%; //display: inline;
+    }
+    .footer-112_col-2_pad {
+      padding: 0 10px;
+      }
+  .footer-112_col-3 {
+    width: 50%;
+    //margin-left: 50%; /* ширина колонок перед этой ( в данном случае перед ней две колонки, ширина которых в сумме 50% ) */
+    //display: inline;
+    }
+    .footer-112_col-3_pad {
+      padding: 0 15px 0 10px;
+      }

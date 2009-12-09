@@ -1,0 +1,18 @@
+.footer-11 {
+  clear: both; width: 100%; overflow: hidden;
+  }
+  .footer-11_col-1, .footer-11_col-2 {
+    float: left; width: 50%;
+    }
+  .footer-11_col-1 {
+    width: 50%; //margin-right: -100%;
+    }
+    .footer-11_col-1_pad {
+      padding: 0 10px 0 15px;
+      }
+  .footer-11_col-2 {
+    width: 50%; //margin-left: 50%; //display: inline;
+    }
+    .footer-11_col-2_pad {
+      padding: 0 15px 0 10px;
+      }
