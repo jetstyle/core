@@ -1,3 +1,5 @@
+/* Подкючать после основного стиля контента (например, в футере) */
+
 .content-11, .content-12, .content-13, .content-21, .content-31, .content-111, .content-112, .content-121, .content-211 {
   background: gray;
   }
