@@ -1,0 +1,9 @@
+.content-11, .content-12, .content-13, .content-21, .content-31, .content-111, .content-112, .content-121, .content-211 {
+  background: gray;
+  }
+  .content-11_col-1_pad, .content-12_col-1_pad, .content-13_col-1_pad, .content-21_col-1_pad, .content-31_col-1_pad, .content-111_col-1_pad, .content-112_col-1_pad, .content-121_col-1_pad, .content-211_col-1_pad {
+    background-color: rgb(215, 105, 206);
+    }
+  .content-11_col-2_pad, .content-12_col-2_pad, .content-13_col-2_pad, .content-21_col-2_pad, .content-31_col-2_pad, .content-111_col-2_pad, .content-112_col-2_pad, .content-121_col-2_pad, .content-211_col-2_pad {
+    background-color: rgb(123, 135, 202);
+    }

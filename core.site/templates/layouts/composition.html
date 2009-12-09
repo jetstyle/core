@@ -1,11 +1,10 @@
-<!--
-  Тут определяется общая композиция страницы.
-  Обёртка "header-and-content-wrapper" нужна для того, чтобы прибить футер к низу страницы (эти стили лежат в "composition.css", и там только(!) эти стили).
-  -->
+<!-- Тут определяется общая композиция страницы.
+     Обёртка "header-and-content-wrapper" нужна для того, чтобы прибить футер к низу страницы (эти стили лежат в "composition.css", и там только(!) эти стили). -->
 
 {{!connect "composition.css"}}
+{{!connect "header.css"}} <!-- Эти стили определяются дизайном и лежат в "..\app\skins\base1\css". Они не должны менять структуру шапки. Если нужны стилевые изменения в структуре шапки, то нужно скопировать css-файл, соответствующий выбранной шапке, из "..\core\core.site\css\layouts\header" в такую же папку в app и там менять. -->
 <div class="header-and-content-wrapper">
-  {{!include header_tpl}}
+  {{!include header_tpl logo=@header.html:logo slogan=@header.html:slogan info=@header.html:info navigation=@header.html:navigation navigation2=@header.html:navigation2}}
   {{!include content_tpl}}
 </div>
 {{!include footer_tpl}}
