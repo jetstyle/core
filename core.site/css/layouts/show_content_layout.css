@@ -9,3 +9,6 @@
   .content-11_col-2_pad, .content-12_col-2_pad, .content-13_col-2_pad, .content-21_col-2_pad, .content-31_col-2_pad, .content-111_col-2_pad, .content-112_col-2_pad, .content-121_col-2_pad, .content-211_col-2_pad {
     background-color: rgb(123, 135, 202);
     }
+  .content-11_col-3_pad, .content-12_col-3_pad, .content-13_col-3_pad, .content-21_col-3_pad, .content-31_col-3_pad, .content-111_col-3_pad, .content-112_col-3_pad, .content-121_col-3_pad, .content-211_col-3_pad {
+    background-color: #98eeac;
+    }

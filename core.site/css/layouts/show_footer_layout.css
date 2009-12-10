@@ -1,0 +1,14 @@
+/* Подкючать после основного стиля контента (например, в футере) */
+
+.footer-11, .footer-12, .footer-13, .footer-21, .footer-31, .footer-111, .footer-112, .footer-121, .footer-211 {
+  background: #8ab9f3;
+  }
+  .footer-11_col-1_pad, .footer-12_col-1_pad, .footer-13_col-1_pad, .footer-21_col-1_pad, .footer-31_col-1_pad, .footer-111_col-1_pad, .footer-112_col-1_pad, .footer-121_col-1_pad, .footer-211_col-1_pad {
+    background-color: #e591b0;
+    }
+  .footer-11_col-2_pad, .footer-12_col-2_pad, .footer-13_col-2_pad, .footer-21_col-2_pad, .footer-31_col-2_pad, .footer-111_col-2_pad, .footer-112_col-2_pad, .footer-121_col-2_pad, .footer-211_col-2_pad {
+    background-color: #c5bcee;
+    }
+  .footer-11_col-3_pad, .footer-12_col-3_pad, .footer-13_col-3_pad, .footer-21_col-3_pad, .footer-31_col-3_pad, .footer-111_col-3_pad, .footer-112_col-3_pad, .footer-121_col-3_pad, .footer-211_col-3_pad {
+    background-color: #f6c0b3;
+    }
