@@ -141,7 +141,7 @@ class Upload {
 		if(!is_array($_file))	{
 			$_file = $_FILES[ $_file ];
 		}
-
+		
 		$uploaded_file = $_file['tmp_name'];
 		if(is_uploaded_file($uploaded_file))
 		{
@@ -150,6 +150,7 @@ class Upload {
 			$type = $_file['type'];
 			$ext = explode(".",$_file['name']);
 			$ext = strtolower($ext[ count($ext)-1 ]);
+						
 			//проверка на допуск
 			if( !$this->IsAllowed($ext) ) return false;
 			//грузим
@@ -186,7 +187,7 @@ class Upload {
 				
 			}
 			
-			if(is_array($params['size']) && (strlen($params['size'][0]) > 0 && strlen($params['size'][1]) > 0))
+			if(in_array($ext, array('jpg', 'jpeg', 'png', 'bmp', 'gif')) && is_array($params['size']) && (strlen($params['size'][0]) > 0 && strlen($params['size'][1]) > 0))
 			{
 				$x = $this->parseSizeParam($params['size'][0]);
 				$y = $this->parseSizeParam($params['size'][1]);
