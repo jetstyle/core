@@ -5,9 +5,10 @@
   <div id="{{#f.container}}">
   </div>
 {{/?}}
+
 <script type="text/javascript">
 //<![CDATA[
-   var so = new SWFObject("{{images}}flash/{{#f.src}}", "{{#f.id}}","{{#f.width}}",
+   var so = new SWFObject("{{?#f.absolute_path}}{{#f.src}}{{?:}}{{images}}flash/{{#f.src}}{{/?}}", "{{#f.id}}","{{#f.width}}",
                        "{{#f.height}}","{{#f.version}}","{{#f.bgcolor}}",
                        '{{#f.quality}}',
                        '{{#f.xiRedirectUrl}}',
