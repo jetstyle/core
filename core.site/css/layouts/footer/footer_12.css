@@ -1,3 +1,5 @@
+/* Футер всегда фиксированной высоты. Высота задается в "composition.css" */
+
 .footer-12 {
   clear: both; width: 100%; overflow: hidden;
   }
