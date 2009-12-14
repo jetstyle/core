@@ -89,9 +89,13 @@ class FormComponent_file extends FormComponent_model_plain
                     $this->_Invalidate( "file_size", "Слишком большой файл" );
 
         if ($this->file_ext)
+        {
             if (isset( $this->field->config["file_ext"]))
-                if (!in_array($this->file_ext,$this->field->config["file_ext"]))
+            {
+                if (!in_array(strtolower($this->file_ext), $this->field->config["file_ext"]))
                     $this->_Invalidate( "file_ext", "Недопустимый тип файла" );
+            }
+        }
 
         if ($this->file_size)
             if (@$this->field->config["validator_func"]) {
