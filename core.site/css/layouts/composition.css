@@ -1,13 +1,13 @@
 html { height: 100%; }
 body { height: 100%; position: relative; }
-.header-and-content-wrapper {
+.l-header-and-content-wrapper {
   position: relative;
   min-height: 100%; height: auto !important; height: 100%;
   }
-.body {
+.l-content {
   padding-bottom: 160px; /* высота футера + его паддинг */
   }
-.footer {
+.l-footer {
   position: relative;
   height: 120px; padding-top: 40px;  
   margin-top: -160px; /* -(высота футера + его паддинг) */

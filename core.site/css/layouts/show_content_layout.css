@@ -1,14 +1,14 @@
 /* Подкючать после основного стиля контента (например, в футере) */
 
-.content-11, .content-12, .content-13, .content-21, .content-31, .content-111, .content-112, .content-121, .content-211, .content-1 {
+.l-content-11, .l-content-12, .l-content-13, .l-content-21, .l-content-31, .l-content-111, .l-content-112, .l-content-121, .l-content-211, .l-content-1 {
   background: gray;
   }
-  .content-11_col-1_pad, .content-12_col-1_pad, .content-13_col-1_pad, .content-21_col-1_pad, .content-31_col-1_pad, .content-111_col-1_pad, .content-112_col-1_pad, .content-121_col-1_pad, .content-211_col-1_pad, .content-1_pad {
+  .l-content-11__col-1__pad, .l-content-12__col-1__pad, .l-content-13__col-1__pad, .l-content-21__col-1__pad, .l-content-31__col-1__pad, .l-content-111__col-1__pad, .l-content-112__col-1__pad, .l-content-121__col-1__pad, .l-content-211__col-1__pad, .l-content-1__pad {
     background-color: rgb(215, 105, 206);
     }
-  .content-11_col-2_pad, .content-12_col-2_pad, .content-13_col-2_pad, .content-21_col-2_pad, .content-31_col-2_pad, .content-111_col-2_pad, .content-112_col-2_pad, .content-121_col-2_pad, .content-211_col-2_pad {
+  .l-content-11__col-2__pad, .l-content-12__col-2__pad, .l-content-13__col-2__pad, .l-content-21__col-2__pad, .l-content-31__col-2__pad, .l-content-111__col-2__pad, .l-content-112__col-2__pad, .l-content-121__col-2__pad, .l-content-211__col-2__pad {
     background-color: rgb(123, 135, 202);
     }
-  .content-11_col-3_pad, .content-12_col-3_pad, .content-13_col-3_pad, .content-21_col-3_pad, .content-31_col-3_pad, .content-111_col-3_pad, .content-112_col-3_pad, .content-121_col-3_pad, .content-211_col-3_pad {
+  .l-content-11__col-3__pad, .l-content-12__col-3__pad, .l-content-13__col-3__pad, .l-content-21__col-3__pad, .l-content-31__col-3__pad, .l-content-111__col-3__pad, .l-content-112__col-3__pad, .l-content-121__col-3__pad, .l-content-211__col-3__pad {
     background-color: #98eeac;
     }

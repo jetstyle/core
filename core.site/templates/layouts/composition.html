@@ -5,7 +5,7 @@
 {{!connect "header.css"}} <!-- Эти стили определяются дизайном и лежат в "..\app\skins\base1\css". Они не должны менять структуру шапки. Если нужны стилевые изменения в структуре шапки, то нужно скопировать css-файл, соответствующий выбранной шапке, из "..\core\core.site\css\layouts\header" в такую же папку в app и там менять. -->
 {{!connect "footer.css"}} <!-- Аналогично "header.css" -->
 
-<div class="header-and-content-wrapper">
+<div class="l-header-and-content-wrapper">
   {{!include header_tpl logo=@header.html:logo slogan=@header.html:slogan info=@header.html:info navigation=@header.html:navigation navigation2=@header.html:navigation2}}
   {{!include content_tpl}}
 </div>
