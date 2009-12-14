@@ -1,0 +1,18 @@
+.l-columns-21 {
+  clear: both; width: 100%; overflow: hidden;
+  }
+  .l-columns-21__col-1, .l-columns-21__col-2 {
+    float: left;
+    }
+  .l-columns-21__col-1 {
+    width: 66%; //margin-right: -100%;
+    }
+    .l-columns-21__col-1__pad {
+      padding: 0 10px 0 0;
+      }
+  .l-columns-21__col-2 {
+    width: 34%; //margin-left: 66%; //display: inline;
+    }
+    .l-columns-21__col-2__pad {
+      padding: 0 0 0 10px;
+      }
