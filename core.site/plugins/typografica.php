@@ -4,6 +4,6 @@ $text = $params["_"]?$params["_"]:$params[0];
 
 if ($text == "") return;
 
-$type = &Locator::get('typografica');
-echo $typo->correct($text);
+$typo = &Locator::get('typografica');
+echo $typo->correct($text, false);
 ?>
