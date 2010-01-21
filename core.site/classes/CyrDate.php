@@ -14,7 +14,17 @@ class CyrDate
 	var $minute=NULL;
 	var $second=NULL;
 
-	var $cyr_months = array(
+        static $cyr_week = array(
+            0 => 'понедельник',
+            'вторник',
+            'среда',
+            'четверг',
+            'пятница',
+            'суббота',
+            'воскресенье'
+        );
+
+	static $cyr_months = array(
 		1 => 'января',
 		2 => 'февраля',
 		3 => 'марта',
@@ -28,7 +38,8 @@ class CyrDate
 		11 => 'ноября',
 		12 => 'декабря',
 	);
-	var $en_months = array(
+        
+	static $en_months = array(
 		1 => 'january',
 		2 => 'february',
 		3 => 'march',
@@ -42,7 +53,8 @@ class CyrDate
 		11 => 'november',
 		12 => 'december',
 	);
-	var $cyr_month = array(
+
+	static $cyr_month = array(
 		1 => 'январь',
 		2 => 'февраль',
 		3 => 'март',
@@ -56,7 +68,8 @@ class CyrDate
 		11 => 'ноябрь',
 		12 => 'декабрь',
 	);
-	var $en_month = array(
+
+	static $en_month = array(
 		1 => 'January',
 		2 => 'February',
 		3 => 'March',
@@ -70,7 +83,8 @@ class CyrDate
 		11 => 'November',
 		12 => 'December',
 	);
-	var $en_week = array(
+
+	static $en_week = array(
 		0 => 'Monday',
 		1 => 'Tuesday',
 		2 => 'Wednesday',
@@ -79,15 +93,18 @@ class CyrDate
 		5 => 'Saturday',
 		6 => 'Sunday',
 	);
-	var $cyr_quarter = array(
+
+	static $cyr_quarter = array(
 		1 => 'I квартал', 
 		2 => 'II квартал', 
 		3 => 'III квартал', 
 		4 => 'IV квартал'
 	);
-	var $fmts = array(
+
+	static $fmts = array(
 		'Q'=>'quarter',
 		'Y'=>'year',
+                'y'=> 'year_short',
 		'm'=>'month',
 		'M'=>'months_str',
 		'N'=>'month_str',
@@ -102,7 +119,8 @@ class CyrDate
 		'a' => 'week_str3',
 		'z' => 'timezone',
 	);
-	var $prsrs = array(
+
+	static $prsrs = array(
 		'Y'=>array('\d{4}',   'setYear'),
 		'm'=>array('\d{1,2}', 'setMonth'),
 		'd'=>array('\d{1,2}', 'setDay'),
@@ -280,6 +298,7 @@ class CyrDate
 	// renders/getters:
 	function quarter() { return $this->cyr_quarter[$this->getQuarter()]; }
 	function year() { return sprintf('%04d', $this->year); }
+        function year_short() { return sprintf('%02d', $this->year % 100); }
 	function month() { return sprintf('%02d', $this->month); }
 	function day() { return sprintf('%02d', $this->day); }
 	function day_short() { return sprintf('%d', $this->day); }
@@ -337,17 +356,17 @@ class CyrDate
 	function _callback($matches)
 	{
 		$value = $matches[1];
-		return array_key_exists($value, $this->fmts) 
-			? call_user_func(array(&$this, $this->fmts[$value]))
+		return array_key_exists($value, self::$fmts)
+			? call_user_func(array(&$this, self::$fmts[$value]))
 			: $value;
 	}
 	function _fromstr($matches)
 	{
 		$value = $matches[1];
-		if( array_key_exists($value, $this->prsrs) )
+		if( array_key_exists($value, self::$prsrs) )
 		{
 			$this->parser[] = $value;
-			$value = '('.$this->prsrs[$value][0].')';
+			$value = '('.self::$prsrs[$value][0].')';
 		}
 		return $value;
 	}
@@ -357,7 +376,7 @@ class CyrDate
 
 		for($i=0, $c=count($this->parser); $i<$c; $i++)
 		{
-			call_user_func(array(&$this, $this->prsrs[$this->parser[$i]][1]), $matches[$i+1]);
+			call_user_func(array(&$this, self::$prsrs[$this->parser[$i]][1]), $matches[$i+1]);
 		}
 
 		return True;
@@ -367,8 +386,8 @@ class CyrDate
 		$lang = (isset($this->lang) 
 			? $this->lang 
 			: 'cyr');
-		$attr = $lang.'_'.$name; 
-		$src = $this->$attr;
+		$attr = "{$lang}_{$name}";
+		$src = self::$$attr;
 		return $src[$value];
 	}
 }
