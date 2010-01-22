@@ -176,7 +176,7 @@ class CyrDate
 	{
 		$this->hour = 0;
 		$this->minute = 0;
-		$this->second = 1;
+		$this->second = 0;
 	}
 	function dayEnd()
 	{
