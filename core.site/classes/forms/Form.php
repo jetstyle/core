@@ -229,7 +229,6 @@ class Form
      }
 
      $postData = null;
-
      if (isset($_POST[$this->form_present_var]) && ($_POST[$this->form_present_var] == 'form_'.$this->name))
      {
          $postData = &$_POST;
@@ -373,7 +372,7 @@ class Form
      		' enctype="multipart/form-data"> '/*. RequestInfo::pack(RequestInfo::METHOD_POST)*/
      );
 
-     $tpl->set( "form_name", 'form_'.$this->name );
+     $tpl->set( "form_name", $form_name );
      $tpl->set( "form_present", $this->form_present_var );
      $tpl->set( "form_data_id", $this->data_id_var );
      $tpl->set( "form_data_id_value", $this->data_id );

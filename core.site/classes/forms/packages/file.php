@@ -5,7 +5,6 @@ $config = array(
                 "view"            => "view_plain",
                 "interface"       => "file",
                 "interface_tpl"   => "file.html:File",
-                "db_ignore"       => true,
 
                 "file_size" => "100",
                 "file_ext"  => array( "zip", "rar", "ppt", "doc", "xls",
