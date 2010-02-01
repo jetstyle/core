@@ -158,7 +158,7 @@ else
 	*/
 	$params['module']= $custom['module']; 
 	$params['id'] = $r['id'];
-	$content = ( $params['field'] && isset( $r[$params['field']] ) ) ? $r[$params['field']] : $r[$custom['field']];
+	$content = ( $params['field'] && isset( $r[$params['field']] ) ) ? ( isset($r[$params['field']."_pre"]) ? $r[$params['field']."_pre"] : $r[$params['field']] ) : $r[$custom['field']];
 	if ($params['nl2br'])
 	    $content = nl2br( $content );
 	echo $content;
