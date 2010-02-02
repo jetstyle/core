@@ -35,7 +35,7 @@ class EditorObjectsCorrector
 		$data = preg_replace_callback("/<img(([^>]*?)mode=\"\d+\"([^>]*?))[\/]{0,1}>/si", array($this, "correctImages"), $data);
                 
                 $data = preg_replace_callback("/<a(([^>]*?)mode=\"file\"([^>]*?))>(.*?)?<\/a>/si", array($this, "correctFiles"), $data);
-		$data = preg_replace_callback("/<table[^>]*?class=\"([\w\s]+)\"[^>]*?>(.*?)?<\/table>/si", array($this, "correctTables"), $data);
+		$data = preg_replace_callback("/<table([^>]*?class=\"[\w\s]+\"[^>]*?)>(.*?)?<\/table>/si", array($this, "correctTables"), $data);
 
 		return $data;
 	}
@@ -185,7 +185,10 @@ class EditorObjectsCorrector
 
 	protected function correctTables($matches)
 	{
-		$this->table = array('class' => $matches[1]);
+		//$this->table = array('class' => $matches[1]);
+                $params = $this->splitParams($matches[1]);
+                $this->table = $params;
+
 		preg_replace_callback("/<thead>(.*?)?<\/thead>/si",array(&$this, "correctTableHead"), $matches[2], -1, $theads);
 		preg_replace_callback("/<tbody>(.*?)?<\/tbody>/si",array(&$this, "correctTableBody"), $matches[2], -1, $tbodies);
 
@@ -199,6 +202,8 @@ class EditorObjectsCorrector
 		$template = preg_replace('#[^\w_]#', '', $template);
 		$template = trim($template);
 		
+
+                        
 		if ( !in_array($template, $this->validTableClasses))
 		{
 		    $template = $this->validTableClasses[0];
@@ -238,25 +243,30 @@ class EditorObjectsCorrector
 		$this->rows[] = array('cells' => $this->cells);
 	}
 
+        
 	protected function correctTableCells($matches)
 	{
-		// parse attributes
-		$attributes = array();
-		//preg_match_all('/(.*?)="(.*?[^\\\])"/si', $matches[2], $paramsMatches);
-		preg_match_all('/(.*?)=(")(|.*?[^\\\])\\2/si', $matches[2], $paramsMatches);
-		if(is_array($paramsMatches[3]) && !empty($paramsMatches[3]))
-		{
-			foreach($paramsMatches[1] AS $i => $r)
-			{
-				$attributes[trim($r)] = trim(str_replace('\"', '"', $paramsMatches[3][$i]));
-			}
-		}
+                $attributes = $this->splitParams($matches[2]);
 
 		$this->cells[] = array(
 			'attributes' => $attributes,
 			'data' => $matches[3]
 		);
 	}
+        
+        protected function splitParams($allParams)
+        {
+            $attributes = array();
+            preg_match_all('/(.*?)=(")(|.*?[^\\\])\\2/si', $allParams, $paramsMatches);
+            if(is_array($paramsMatches[3]) && !empty($paramsMatches[3]))
+            {
+                    foreach($paramsMatches[1] AS $i => $r)
+                    {
+                            $attributes[trim($r)] = trim(str_replace('\"', '"', $paramsMatches[3][$i]));
+                    }
+            }
+            return $attributes;
+        }
 
 }
 ?>
