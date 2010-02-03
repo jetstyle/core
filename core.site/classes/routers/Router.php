@@ -84,14 +84,26 @@ class Router
 	public function addRouter($router)
 	{
 		if (!in_array($router, $this->routers))
+		{
 			$this->routers[] = $router;
+			$this->routerObjs = null;
+		}
+	}
+	
+	public function hasRouter($router)
+	{
+		$key = array_search($router, $this->routers);
+		return $key !== false;
 	}
 	
 	public function removeRouter($router)
 	{
 		$key = array_search($router, $this->routers);
 		if ($key !== false)
+		{
 			unset($this->routers[$key]);
+			$this->routerObjs = null;
+		}
 	}
 	
 	public function &find($criteria, $routers=NULL)
