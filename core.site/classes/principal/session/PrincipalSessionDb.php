@@ -7,7 +7,7 @@ class PrincipalSessionDb extends DBModel implements PrincipalSessionInterface
 	protected $one = true;
 
 	protected $realm = "";
-	protected $expireTime = 900;
+	protected $expireTime = 1800;
 	protected $sessionHash = '';
 	protected $idHash = '';
 	protected $ip = '';
