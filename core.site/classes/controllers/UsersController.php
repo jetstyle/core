@@ -400,7 +400,7 @@ class UsersController extends Controller
 		$tpl->set('site_name', Config::get('project_title'));
 		$actLink = $this->url_to('activate', array('activate' => 'activate', 'key' => $key));
 		$tpl->set('act_link',RequestInfo::$baseUrl.$actLink);
-		$emailText = $tpl->parse('users_site/emails/confirmation.html');
+		$emailText = $tpl->parse('users/emails/confirmation.html');
 
 		Finder::useClass('SimpleEmailer');
 		$emailer = new SimpleEmailer();
@@ -420,7 +420,7 @@ class UsersController extends Controller
         $changeLink = RequestInfo::$baseUrl.$this->url_to('restore').'/'.$user['key'];
         $tpl->set('change_link', $changeLink);
         $tpl->set('restore_user', $user);
-        $emailText = $tpl->parse('users_site/emails/password_restore.html');
+        $emailText = $tpl->parse('users/emails/password_restore.html');
 
         Finder::useClass('SimpleEmailer');
         $emailer = new SimpleEmailer();
