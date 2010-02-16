@@ -136,6 +136,10 @@ class EasyForm {
                     $pack_name = $rec;
                     $conf = array();
                 }
+
+                //генерируем конфиг для поля
+                $conf = $this->ConstructConfig( $pack_name, $conf, false, $name );
+
                 //определяем wrapper_tpl
                 if (!isset($conf["wrapper_tpl"]))
                     foreach ($this->wrapper_tpl as $k=>$v)
@@ -146,8 +150,7 @@ class EasyForm {
                             break;
                         }
                     }
-                //генерируем конфиг для поля
-                $conf = $this->ConstructConfig( $pack_name, $conf, false, $name );
+
                 //создаём поле
                 if ($is_field)
                     $field =& $form->model->Model_AddField( $name, $conf );

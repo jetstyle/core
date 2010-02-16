@@ -1,6 +1,6 @@
 <?php
   $config = array(
-//    "wrapper_tpl"   => "wrapper.html:RowSpan",
+    "wrapper_tpl"   => "wrapper.html:DefaultTextWrapper",
     "wrapper_title" => "[textarea title]",
     
     "interface_tpl" => "string.html:Textarea",
