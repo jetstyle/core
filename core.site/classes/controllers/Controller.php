@@ -111,7 +111,7 @@ abstract class Controller implements ArrayAccess
 			$className = Inflector::underscore(str_replace("Controller", "", get_class($this)));
 			$methodName = str_replace('handle_', '', $this->method);
 
-            if ( $methodName && !in_array($methodName, array('index', 'default')) )
+                        if ( $methodName && !in_array($methodName, array('index', 'default')) )
 			{
 				$this->siteMap = strtolower($className.'/'.$methodName);
 			}
@@ -213,6 +213,7 @@ abstract class Controller implements ArrayAccess
 
 		if ($this->method)
 		{
+                        
 			if ($controller)
 			{
 				$status = call_user_func_array(
@@ -228,6 +229,10 @@ abstract class Controller implements ArrayAccess
 				);
 			}
 		}
+                else if ( $this->params_map!==NULL && Config::get('enable_strict_404') )
+                {
+                         Controller::_404();
+                }
 
 		$this->postHandle( $matches );
 
@@ -325,12 +330,12 @@ abstract class Controller implements ArrayAccess
 
 		$view = array("colors"=> $colors,
 		              "grid"  => $grid,
-					  "header_bg_repeat" => Config::get('header_bg_repeat'));
+                              "header_bg_repeat" => Config::get('header_bg_repeat'));
 
-        Finder::useClass('FileManager');
+                Finder::useClass('FileManager');
 
-        $view['logo'] = FileManager::getFile('Config/config:logo/small', 1);
-        $view['header_bg'] = FileManager::getFile('Config/config:bg', 1);
+                $view['logo'] = FileManager::getFile('Config/config:logo/small', 1);
+                $view['header_bg'] = FileManager::getFile('Config/config:bg', 1);
 
 		$view["config_title"] = $config['project_title'];
 
@@ -367,7 +372,7 @@ abstract class Controller implements ArrayAccess
 		}
 	}
 
-	private function getActionName($param)
+	public function getActionName($param)
 	{
 	    $keys = array_keys($param);
 	    if (!is_numeric($keys[0]))
@@ -393,41 +398,48 @@ abstract class Controller implements ArrayAccess
 
 	public function url_to($cls=NULL, $item=NULL)
 	{
-		$result = '';
 
-		if (empty($cls))
+
+		$result = '';
+		if (empty($cls) || $cls=="default")
 		{
+                        //$cls = $this["controller"];
 			$result = rtrim($this->path, '/');
 		}
-		else if (null !== $cls && null !== $item)
+                else if (null !== $cls && null !== $item)
 		{
 			if (is_array($this->params_map) && !empty($this->params_map))
 			{
+
 				foreach ($this->params_map AS $v)
 				{
+                                        
 					if ($this->getActionName($v) == $cls)
 					{
 						$pathParts = array(rtrim($this->path, '/'));
 
-						foreach ($this->getActionParams($v) AS $fieldName => $regExp)
+                                                $actionParams = $this->getActionParams($v);
+                                               
+						foreach ($actionParams AS $fieldName => $regExp)
 						{
-							if (isset($item[$fieldName]))
+							if ( (is_array($item) || is_object($item))  && isset($item[$fieldName]))
 							{
 								$pathParts[] = $item[$fieldName];
-//								echo '<br>'.$fieldName.'='.$item[$fieldName];
+								//echo '<hr>'.$fieldName.'='.$item[$fieldName];
 							}
 							else
 							{
 								$fieldNameParts = explode('_', $fieldName);
-//								var_dump($fieldNameParts);
-								if (count($fieldNameParts) > 1)
+								if (count($fieldNameParts) > 1 )
 								{
 									$value = &$item;
 									foreach ($fieldNameParts AS $fieldNamePart)
 									{
+                                                                                
 										if (isset($value[$fieldNamePart]))
 										{
 											$value = &$value[$fieldNamePart];
+                                                                                        
 										}
 										// TODO: remove HACK
 										else if (isset($value[0]) && isset($value[0][$fieldNamePart]))
@@ -446,16 +458,47 @@ abstract class Controller implements ArrayAccess
 										$pathParts[] = $value;
 									}
 								}
+                                                                else if ( $item == $fieldNameParts[0] )
+                                                                {
+                                                                        $pathParts[] = $item;
+                                                                }
 							}
 						}
 						$result = implode('/', $pathParts);
 						break;
 					}
 				}
+                                //var_dump($result);
+                                //die();
 			}
 		}
+                else if ( $cls !==null  )
+                {
+                    $pathParts[] = $this->path;
+                    if (is_array($this->params_map) && !empty($this->params_map))
+                    {
+                        foreach ($this->params_map AS $v)
+                        {
+                             if ($this->getActionName($v) == $cls)
+                             {
+                                $pathParts[] = $cls;
+                             }
+                        }
+                        $result = implode('/', $pathParts);
+                    }
+                }
 
 		return $result;
 	}
+        
+        function getPath()
+        {
+            return $this->path;
+        }
+        
+        function getParamsMap()
+        {
+            return $this->params_map;
+        }
 }
 ?>

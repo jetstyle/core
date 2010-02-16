@@ -48,45 +48,48 @@ class Router
 		return self::getInstance()->find(array('class' => $class));
 	}
 
-    public static function linkTo($class, $params = null)
-    {
-		if (strpos($class, '/') !== false)
+        public static function linkTo($class, $params = null)
         {
-            $classParams = explode('/', $class, 2);
-        }
-        else
-        {
-            $classParams = explode('::', $class, 2);
-        }
+            if (strpos($class, '/') !== false)
+            {
+                $classParams = explode('/', $class, 2);
+            }
+            else
+            {
+                $classParams = explode('::', $class, 2);
+            }
 
-        if (count($classParams) == 2)
-        {
-            list($pageClass, $itemClass) = $classParams;
-        }
-        else
-        {
-            $pageClass = $class;
-            $itemClass = NULL;
-        }
+            if (count($classParams) == 2)
+            {
+                list($pageClass, $itemClass) = $classParams;
+            }
+            else
+            {
+                $pageClass = $class;
+                $itemClass = NULL;
+            }
+        
+            if ($p = self::findByClass($pageClass))
+            {
+                $url = $p->url_to($itemClass, $params);
+            }
+            else
+            {
+                $url = null;
+            }
 
-        if ($p = self::findByClass($pageClass))
-        {
-            $url = $p->url_to($itemClass, $params);
+            return $url;
         }
-        else
-        {
-            $url = null;
-        }
-
-        return $url;
-    }
 	
 	public function addRouter($router)
 	{
 		if (!in_array($router, $this->routers))
 		{
+                        
 			$this->routers[] = $router;
 			$this->routerObjs = null;
+                        $this->cls2controller = array();
+			$this->url2controller = array();
 		}
 	}
 	
@@ -191,7 +194,7 @@ class Router
 		return $page;
 	}
 
-	protected function &getRouters()
+	public function &getRouters()
 	{
 		if ( null === $this->routerObjs)
 		{
