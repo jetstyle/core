@@ -1,18 +1,18 @@
-.l-columns-11 {
+.l-inner-columns-11 {
   clear: both; width: 100%; overflow: hidden;
   }
-  .l-columns-11__col-1, .l-columns-11__col-2 {
+  .l-inner-columns-11__col-1, .l-inner-columns-11__col-2 {
     float: left; width: 50%;
     }
-  .l-columns-11__col-1 {
+  .l-inner-columns-11__col-1 {
     width: 50%; //margin-right: -100%;
     }
-    .l-columns-11__col-1__pad {
+    .l-inner-columns-11__col-1__pad {
       padding: 0 10px 0 0;
       }
-  .l-columns-11__col-2 {
+  .l-inner-columns-11__col-2 {
     width: 50%; //margin-left: 50%; //display: inline;
     }
-    .l-columns-11__col-2__pad {
+    .l-inner-columns-11__col-2__pad {
       padding: 0 0 0 10px;
       }

@@ -9,16 +9,23 @@
     <meta name="Description" content="{{!pageDescription}}" />
 
     <title>{{!pageTitle}}</title>
-    {{!connect "all.css"}}
+    <!--#[if IE 6]>
+      <link rel="stylesheet" href="{{css}}g-png24.ie.css" type="text/css" />      
+  	<![endif]-->
+  	{{!connect "all.css"}}
+      	
     {{!connect "custom.css"}}
-    	
+    
+    
+    
   	{{!connect "screen-blocks.css"}}
-  	{{!connect "screen-tables.css"}}
   	{{!connect "screen-forms.css"}}
   	{{!connect "screen-contact.css"}}
   	{{!connect "screen-news.css"}}
+  	
+  	
   	{{!connect "thickbox.css"}}
-      {{!connect compile="css"}}
+    {{!connect compile="css"}}
     <link rel="stylesheet" href="{{css}}print.css"
           media="{{?html_print}}all{{?:}}print{{/?}}" type="text/css" />
 
@@ -32,10 +39,9 @@
     {{!connect compile="js"}}
     {{!inline compile="head"}}
 
-	<script language="javascript" type="text/javascript">
-		var base_url = "{{/}}";
-	</script>
-
+  	<script language="javascript" type="text/javascript">
+  		var base_url = "{{/}}";
+  	</script>
   </head>
 
 <body id="idBody" class="debug" onload="preloadImages('{{images}}'); {{!inline compile="onload"}}">
