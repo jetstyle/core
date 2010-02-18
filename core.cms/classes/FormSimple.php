@@ -473,27 +473,26 @@ class FormSimple
 		$model = &$this->getModel();
 
 		foreach($model->getForeignFields() AS $fieldName => $conf)
-        {
-            if (is_array($conf) && $conf['type'] == 'has_one')
-            {
-                $foreignModel = clone $model->getForeignModel($fieldName);
-
-                $conf = $model->getForeignFieldConf($fieldName);
-                $model->addField($conf['pk']);
-
-                $foreignModel->load();
-                $data = array();
-                foreach($foreignModel AS $r)
                 {
-                    $data[$r[$conf['fk']]] = $r['title'];
-                }
+                    if (is_array($conf) && $conf['type'] == 'has_one')
+                    {
+                        $foreignModel = clone $model->getForeignModel($fieldName);
 
-                $this->config['render']['select'][$conf['pk']] = array(
-                    'values' => $data,
-                    'default' => $conf['default'],
-                );
-            }
-        }
+                        $conf = $model->getForeignFieldConf($fieldName);
+                        $model->addField($conf['pk']);
+                        $foreignModel->load("{_state}=0");
+                        $data = array();
+                        foreach($foreignModel AS $r)
+                        {
+                            $data[$r[$conf['fk']]] = ($r['_level'] ? str_repeat("&nbsp;&nbsp;", $r['_level']-1) : ""). $r['title'];
+                        }
+
+                        $this->config['render']['select'][$conf['pk']] = array(
+                            'values' => $data,
+                            'default' => $conf['default'],
+                        );
+                    }
+                }
 	}
 
 	protected function getPostFields()
