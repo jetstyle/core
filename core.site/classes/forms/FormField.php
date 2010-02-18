@@ -192,6 +192,11 @@ class FormField {
     function DbLoad( $data_id ) {
         if (@!$this->config["db_ignore"])
             return $this->model->Model_DbLoad( $data_id );
+        else
+        {
+            $this->model->Model_SetDefault();
+            return $this->model->Model_GetDataValue();
+        }
     }
     function DbDelete( $data_id ) {
         if (@!$this->config["db_ignore"])

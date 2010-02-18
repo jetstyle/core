@@ -295,6 +295,7 @@ class DBModel extends Model implements IteratorAggregate, ArrayAccess, Countable
 				$model->cleanUp();
 			}
 		}
+                $this->setOne(false);
 	}
 
 	/**
@@ -1131,7 +1132,8 @@ class DBModel extends Model implements IteratorAggregate, ArrayAccess, Countable
 
 	public function &load($where=NULL, $limit=NULL, $offset=NULL)
 	{
-        if (!empty($this->sqlParts))
+                
+                if (!empty($this->sqlParts))
 		{
 			$this->cleanUp();
 		}
@@ -1167,8 +1169,9 @@ class DBModel extends Model implements IteratorAggregate, ArrayAccess, Countable
 
 	public function &loadOne($where = NULL)
 	{
-		$this->setOne(true);
-		return $this->load($where, 1);
+		$ret = $this->load($where, 1);
+                $this->setOne(true);
+		return $ret;
 	}
 
 	public function &loadTree($where = NULL)
