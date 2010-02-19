@@ -444,25 +444,25 @@ class FormSimple
 
 		if( is_array($this->config['render']) )
 		{
-            if (!empty($this->config['render']['checkbox']))
-            {
-                foreach ($this->config['render']['checkbox'] as $checkbox)
-                {
-                    $tpl->set( 'checkbox_'.$checkbox, $item[$checkbox] ? "checked=\"checked\"" : '' );
-                }
-            }
-            if (!empty($this->config['render']['select']))
-            {
-                foreach ($this->config['render']['select'] as $name => $params)
-                {
-                    $str = '';
-                    foreach($params['values'] as $id => $val)
+                    if (!empty($this->config['render']['checkbox']))
                     {
-                        $str .= "<option value='".$id."' ".(($item["id"] && $item[$name]==$id) || (!$item["id"] && $id==$params['default']) ? "selected=\"selected\"" : '' ).">".$val;
+                        foreach ($this->config['render']['checkbox'] as $checkbox)
+                        {
+                            $tpl->set( 'checkbox_'.$checkbox, $item[$checkbox] ? "checked=\"checked\"" : '' );
+                        }
                     }
-                    $tpl->set( 'options_'.$name, $str );
-                }
-            }
+                    if (!empty($this->config['render']['select']))
+                    {
+                        foreach ($this->config['render']['select'] as $name => $params)
+                        {
+                            $str = '';
+                            foreach($params['values'] as $id => $val)
+                            {
+                                    $str .= "<option value='".$id."' ".(($item["id"] && $item[$name]==$id) || (!$item["id"] && $id==$params['default']) ? "selected=\"selected\"" : '' ).">".$val;
+                            }
+                            $tpl->set( 'options_'.$name, $str );
+                        }
+                    }
 		}
 
 		return true;
@@ -480,11 +480,12 @@ class FormSimple
 
                         $conf = $model->getForeignFieldConf($fieldName);
                         $model->addField($conf['pk']);
-                        $foreignModel->load("{_state}=0");
+                        $foreignModel->load();
                         $data = array();
                         foreach($foreignModel AS $r)
                         {
-                            $data[$r[$conf['fk']]] = ($r['_level'] ? str_repeat("&nbsp;&nbsp;", $r['_level']-1) : ""). $r['title'];
+                            if (!isset($r["_state"]) || $r["_state"]==0)
+                                $data[$r[$conf['fk']]] = ($r['_level'] ? str_repeat("&nbsp;&nbsp;", $r['_level']-1) : ""). $r['title'];
                         }
 
                         $this->config['render']['select'][$conf['pk']] = array(
