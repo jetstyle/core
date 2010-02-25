@@ -13,24 +13,16 @@
       <link rel="stylesheet" href="{{css}}g-png24.ie.css" type="text/css" />      
   	<![endif]-->
   	{{!connect "all.css"}}
-      	
-    {{!connect "custom.css"}} <!-- тут сейчас чё-то есть, пока не знаю куда это -->
-    
-        
-  	<!--{{!connect "screen-blocks.css"}}
-  	{{!connect "screen-forms.css"}}-->
-  	
-  	
-  	{{!connect "thickbox.css"}}
+    {{!connect "custom.css"}} <!-- тут сейчас чё-то есть, пока не знаю куда это -->  	
+  	{{!connect "colorbox.css"}}
     {{!connect compile="css"}}
     <link rel="stylesheet" href="{{css}}print.css"
           media="{{?html_print}}all{{?:}}print{{/?}}" type="text/css" />
 
     {{!connect "default.js"}}
     {{!connect "custom.js"}}
-
     {{!connect "jquery.js" unshift="true"}}
-    {{!connect "thickbox.js"}}
+    {{!connect "colorbox.js"}}
     <!-- {{!connect "counter.js"}} -->
 
     {{!connect compile="js"}}
@@ -38,6 +30,10 @@
 
   	<script language="javascript" type="text/javascript">
   		var base_url = "{{/}}";
+		$(function(){
+			$('a.colorbox').colorbox({height: '90%'});
+			$('a.colorbox-iframe').colorbox({width: '90%', height: '90%', iframe: true, rel: 'nofollow'});
+		});
   	</script>
   </head>
 

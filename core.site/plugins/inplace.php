@@ -163,14 +163,6 @@ else
 	    $content = nl2br( $content );
 	echo $content;
 }
-//$para['show'] = $params['show'] ? true : false;
-//$para['inplace'] = $params['inplace'];
-//$para['field'] = $params['field'];
-//$para['container'] = $params['container'];
-//$para['thickbox'] = $params['thickbox'];
-//$para['rows'] = $params['rows'];
-//$para['cols'] = $params['cols'];
-//----------------------------------------------------
 
 if (RequestInfo::get('oce') == 'off' && !$params['show'] ) return '';
 if (!RequestInfo::get('oce') && $_COOKIE['oce'] != 'on' && !$params['show']) return '';

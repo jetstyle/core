@@ -80,11 +80,10 @@ class FormSimple
 	{
 		$valid = array('text', 'title', 'lead');
 
-		//form in iframe thickbox
+		//form in iframe colorbox
 		if ( $_GET["popup"] )
 		{
-			$iframe = array("css_buttons_class"=>"iframe-buttons-"
-					/*"height"=>( $_GET["height"]>0 ? ($_GET["height"]-80)."px" : "360px")*/ );//thickbox default height(440) - buttons heoght
+			$iframe = array("css_buttons_class"=>"iframe-buttons-");
 			Locator::get("tpl")->set( "iframe", $iframe );
 		}
 		$item = &$this->getItem();
@@ -662,6 +661,7 @@ class FormSimple
 
 
 	// @TODO: it's a bad way to do this
+	// @TODO: bad way is better then no way
 	protected function getList()
 	{
 		$module = Locator::get('controller')->moduleConstructor;
@@ -673,7 +673,7 @@ class FormSimple
 		}
 		else
 		{
-			$path = $config['module_name'].'/list';
+			$path = $config['module_path_parts'][0].'/'.$config['module_path_parts'][1].'/list';
 			$list = ModuleConstructor::factory($path);
 			return $list->getObj();
 		}

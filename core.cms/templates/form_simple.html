@@ -74,38 +74,28 @@
 $(document).ready( function()
 {
     if(window.location.search.match("&popup=1") && window.location.search.match("&rnd=")) {
-	if ( top.onTBRemove) top.onTBRemove(); else top.tb_remove();
+		top.$.fn.colorbox.close();
     }
     else if ( window.location.search.match("&popup=1") )
     {
         var clickedButton = null;
 	
-	$("#{{__form_name}} input[type=submit]").click(function(){
+		$("#{{__form_name}} input[type=submit]").click(function(){
             clickedButton = this;
-	    $("#{{__form_name}}").submit();
+			$("#{{__form_name}}").submit();
         });
-	$("#TB_window", top.document).append( $(".iframe-buttons-") );
+		//$("#TB_window", top.document).append( $(".iframe-buttons-") );
 	
-
         $("#{{__form_name}}").submit( function() {
             if (typeof(tinymce) != 'undefined') tinymce.EditorManager.triggerSave();
             data = {};
             
-	    $(":input", "#{{__form_name}}").each(function (a,b,c) {
-                if (b.type!="submit" || b.name==clickedButton.name)
-                    //data[b.name.replace(/{{prefix}}/, "")  ] = getVal(b);
-		    data[b.name ] = getVal(b);
-            });
-            data['ajax_update'] = "1";
-            data['prefix'] = "{{prefix}}";
-	    
-	    /*
-            $.post("{{ajax_url}}", data, function(returned) {
-                if ( top.onTBRemove) top.onTBRemove(); else top.tb_remove();
-            });
-	    */
-
-	    return true;
+			$(":input", "#{{__form_name}}").each(function (a,b,c) {
+			    if (b.type!="submit" || b.name==clickedButton.name) data[b.name ] = getVal(b);
+			});
+			data['ajax_update'] = "1";
+			data['prefix'] = "{{prefix}}";
+			return true;
         });
     }
 
