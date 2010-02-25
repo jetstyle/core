@@ -104,11 +104,32 @@ Gallery.prototype = {
             function(event) {
                 self.lastOveredImageId = this.id;
                 $(this).find('img.gallery-delete').show();
-				$('#replaceFileButton').appendTo($(this).find('img.gallery-edit').parent()).css({
-					left: $(this).find('img.gallery-edit').offset().left,
-					top: $(this).find('img.gallery-edit').offset().top
-				});
                 $(this).find('img.gallery-edit').show();
+                
+                //var left = $(this).find('img.gallery-edit').offset().left;
+                //var top = $(this).find('img.gallery-edit').offset().top;
+                
+                var left = 48;
+                var top  = 0;
+                
+                try{
+                
+                    //$('img.gallery-edit', this).parent().append( $('#replaceFileButton') );
+                    //$( '#replaceFileButton' ).css({'left': left, 'top': top});
+                    
+                    /*
+                    $('#replaceFileButton').appendTo($(this).find('img.gallery-edit').parent()).css({
+                            left: left,
+                            top: top
+                    });*/
+                }
+                catch(e)
+                {
+                    alert('Caught!');
+                }
+                //console.log($(this).find('img.gallery-edit').css("left"), left, top);
+                
+                
                 $(this).find('img.gallery-zoom').show();
             },
             function (event) {
