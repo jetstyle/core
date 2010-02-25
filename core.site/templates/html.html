@@ -13,8 +13,16 @@
       <link rel="stylesheet" href="{{css}}g-png24.ie.css" type="text/css" />      
   	<![endif]-->
   	{{!connect "all.css"}}
-    {{!connect "custom.css"}} <!-- тут сейчас чё-то есть, пока не знаю куда это -->  	
-  	{{!connect "colorbox.css"}}
+    {{!connect "content.css"}}
+    {{!connect "forms.css"}}
+    
+    {{!connect "custom.css"}} <!-- тут сейчас чё-то есть, пока не знаю куда это -->
+    
+  	<!--{{!connect "screen-blocks.css"}}
+  	{{!connect "screen-forms.css"}}-->  	
+  	
+  	{{!connect "thickbox.css"}}
+    {{!connect "colorbox.css"}}
     {{!connect compile="css"}}
     <link rel="stylesheet" href="{{css}}print.css"
           media="{{?html_print}}all{{?:}}print{{/?}}" type="text/css" />
