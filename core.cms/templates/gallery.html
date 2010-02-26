@@ -35,7 +35,7 @@
 			<img src="{{*picture_thumb.link}}" {{?thumb_width}}width="{{thumb_width}}"{{/?}} {{?thumb_height}}height="{{thumb_height}}"{{/?}}/>
 			<a href="#" class="control gallery-edit"><img width="24" height="24" src="{{images}}gallery/edit.png"/></a>
 			<a href="#" class="control gallery-delete"><img width="24" height="24" src="{{images}}gallery/delete.png"/></a>
-			<a href="{{*picture_medium.link}}" title="{{*title}}" {{?*picture_medium.is_image}}rel="gallery"{{?/}} class="{{?*picture_medium.is_image}}colorbox {{?/}}control gallery-zoom"><img width="24" height="24" src="{{images}}gallery/zoom.png"/></a>
+			<a href="{{*picture.link}}" title="{{*title}}" {{?*picture.is_image}}rel="gallery"{{?/}} class="{{?*picture.is_image}}colorbox {{?/}}control gallery-zoom"><img width="24" height="24" src="{{images}}gallery/zoom.png"/></a>
 			<div class="image-title" style="width: {{thumb_width}}px">{{*title}}</div>
 		</div>
 	{{/:gallery_item}}
