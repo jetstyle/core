@@ -345,7 +345,13 @@ $(function(){
 			} else if ($('#cboxPhoto').attr('src')) {
 				$('#cboxLinkToOrigianl').attr('href', $('#cboxPhoto').attr('src'));
 			}
-		}	
+		},
+		onOpen: function() {
+			$('object').css('visibility', 'hidden');
+		},
+		onClosed: function() {
+			$('object').css('visibility', 'visible');
+		}
 	};
 })
 
