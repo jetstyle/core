@@ -39,22 +39,28 @@ div#addImageButton {
 	position: absolute;
 }
 
-#gallery img.control {
+#gallery a.control img {
+	border: 0;
+}
+
+#gallery a.control {
 	position: absolute;
 	display: none;
 	border: 0;
 	top: 5px;
 }
 
-#gallery img.gallery-edit {
+#gallery a.gallery-edit {
 	right: 30px;
+	display: block;
+	visibility: hidden;
 }
 
-#gallery img.gallery-delete {
+#gallery a.gallery-delete {
 	right: 5px;
 }
 
-#gallery img.gallery-zoom {
+#gallery a.gallery-zoom {
 	right: 55px;
 }
 

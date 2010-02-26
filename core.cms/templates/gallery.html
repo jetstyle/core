@@ -22,37 +22,20 @@
 		gallery.sessionHash = '{{session_hash}}';
 		gallery.fileExtensions = '{{file_extensions}}';
 		gallery.init();
-                
-                var myUpload = $('.gallery-edit').upload({
-                  name:  '{{base_url}}?id={{rubric_id}}&session_hash={{session_hash}}',
-                  method: 'post',
-                  enctype: 'multipart/form-data',
-                  action: '',
-                  onSubmit: function() {
-                      $('#progress1').text('Uploading file...');
-                  },
-                  onComplete: function(data) {	
-                      //data contains the response from the action url
-                      //$('#image_logo').attr("src", data + "?r="+Math.random(0,9999) );
-                      $('#progress1').text('Done');
-                  }
-              });
 	});
 </script>
 
 <div id="gallery">
 	<h4>{{?gallery_title}}{{gallery_title}}{{?:}}Управление изображениями{{/?}}</h4>
-        
-        <span id="progress1">Progress</span>
 	
-        {{!for *gallery_items do=@:gallery_item}}
+    {{!for *gallery_items do=@:gallery_item}}
 
 	{{:gallery_item *picture && *picture.is_image && *picture_thumb}}
 		<div class="gallery-image" id="image{{*id}}">
 			<img src="{{*picture_thumb.link}}" {{?thumb_width}}width="{{thumb_width}}"{{/?}} {{?thumb_height}}height="{{thumb_height}}"{{/?}}/>
-			<a href="#"><img width="24" height="24" src="{{images}}gallery/edit.png" class="control gallery-edit"/></a>
-			<a href="#"><img width="24" height="24" src="{{images}}gallery/delete.png" class="control gallery-delete"/></a>
-			<a href="{{*picture_medium.link}}" {{?*picture_medium.is_image}}rel="gallery" class="popup"{{?/}}><img width="24" height="24" src="{{images}}gallery/zoom.png" class="control gallery-zoom"/></a>
+			<a href="#" class="control gallery-edit"><img width="24" height="24" src="{{images}}gallery/edit.png"/></a>
+			<a href="#" class="control gallery-delete"><img width="24" height="24" src="{{images}}gallery/delete.png"/></a>
+			<a href="{{*picture_medium.link}}" {{?*picture_medium.is_image}}rel="gallery"{{?/}} class="{{?*picture_medium.is_image}}colorbox {{?/}}control gallery-zoom"><img width="24" height="24" src="{{images}}gallery/zoom.png"/></a>
 			<div class="image-title" style="width: {{thumb_width}}px">{{*title}}</div>
 		</div>
 	{{/:gallery_item}}
@@ -60,18 +43,18 @@
 	{{:gallery_item *picture && *picture.link}}
 		<div class="gallery-image" id="image{{*id}}">
 			<img src="{{images}}file_icons/{{*picture.ext}}.gif" {{?thumb_width}}width="{{thumb_width}}"{{/?}} {{?thumb_height}}height="{{thumb_height}}"{{/?}}/>
-			<a href="#"><img width="24" height="24" src="{{images}}gallery/edit.png" class="control gallery-edit"/></a>
-			<a href="#"><img width="24" height="24" src="{{images}}gallery/delete.png" class="control gallery-delete"/></a>
-			<a href="{{*picture.link}}"><img width="24" height="24" src="{{images}}gallery/zoom.png" class="control gallery-zoom"/></a>
+			<a href="#" class="control gallery-edit"><img width="24" height="24" src="{{images}}gallery/edit.png"/></a>
+			<a href="#" class="control gallery-delete"><img width="24" height="24" src="{{images}}gallery/delete.png"/></a>
+			<a href="{{*picture.link}}" class="control gallery-zoom"><img width="24" height="24" src="{{images}}gallery/zoom.png"/></a>
 			<div class="image-title" style="width: {{thumb_width}}px">{{*title}}</div>
 		</div>
 	{{/:gallery_item}}
         
-        {{:gallery_item *picture}}
+    {{:gallery_item *picture}}
 		<div class="gallery-image" id="image{{*id}}">
 			<img src="{{images}}file_icons/no-file.png" alt="Файл отсутсвует на диске" {{?thumb_width}}width="{{thumb_width}}"{{/?}} {{?thumb_height}}height="{{thumb_height}}"{{/?}} />
-			<a href="#"><img width="24" height="24" src="{{images}}gallery/edit.png" class="control gallery-edit"/></a>
-			<a href="#"><img width="24" height="24" src="{{images}}gallery/delete.png" class="control gallery-delete"/></a>
+			<a href="#" class="control gallery-edit"><img width="24" height="24" src="{{images}}gallery/edit.png"/></a>
+			<a href="#" class="control gallery-delete"><img width="24" height="24" src="{{images}}gallery/delete.png"/></a>
 			
 			<div class="image-title" style="width: {{thumb_width}}px">{{*title}}</div>
 		</div>

@@ -13,8 +13,6 @@ Gallery.prototype = {
 
         $('#gallery').sortable({
             start: function(e,ui) {
-                //$(ui.helper[0]).find('img.control').hide();
-                //$(ui.item[0]).find('img.control').hide();
 				Gallery.dragged = true;
             },
             stop: function() {
@@ -44,13 +42,13 @@ Gallery.prototype = {
         this.swfUpload.customSettings.gallery = this;
 
         //control for replace one image
-        imageOneUploadSettings.upload_url = this.baseUrl+'?id='+this.rubricId+'&session_hash='+this.sessionHash;
+        /*imageOneUploadSettings.upload_url = this.baseUrl+'?id='+this.rubricId+'&session_hash='+this.sessionHash;
         imageOneUploadSettings.flash_url = this.imagesUrl+"swfupload.swf";
         imageOneUploadSettings.file_types = this.fileExtensions;
         imageOneUploadSettings.file_post_name = this.formPrefix + "Filedata";
         this.swfUploadOne = new SWFUpload(imageOneUploadSettings);
-        this.swfUploadOne.customSettings.gallery = this;
-
+        this.swfUploadOne.customSettings.gallery = this;*/
+		
         //control buttons
         $('#gallery div.gallery-image').each(function() {
             self.initImage(this);
@@ -86,51 +84,27 @@ Gallery.prototype = {
         $(image).find('img:first').click(this.itemClick.prototypeBind(
             this,
             $(image).find('img:first')[0]
-            ));
-        $(image).find('img.gallery-delete').parent().click(this.deleteImage.prototypeBind(
+        ));
+        $(image).find('a.gallery-delete').click(this.deleteImage.prototypeBind(
             this,
-            $(image).find('img.gallery-delete')[0]
-            ));
+            $(image).find('a.gallery-delete')[0]
+        ));
         $(image).find('div.image-title').click(this.showEditImageForm.prototypeBind(
             this,
             $(image).find('div.image-title')
-            ));
-        if ($(image).find('a.popup').get(0))
-        {
-            tb_init($(image).find('a.popup').get(0));
-        }
+        ));
+    
         var self = this;
         $(image).hover(
             function(event) {
                 self.lastOveredImageId = this.id;
-                $(this).find('img.gallery-delete').show();
-                $(this).find('img.gallery-edit').show();
-                
-                //var left = $(this).find('img.gallery-edit').offset().left;
-                //var top = $(this).find('img.gallery-edit').offset().top;
-                
+                $(this).find('a.gallery-delete').show();
+                $(this).find('a.gallery-edit').show();
+				
                 var left = 48;
-                var top  = 0;
+                var top  = 0;                
                 
-                try{
-                
-                    //$('img.gallery-edit', this).parent().append( $('#replaceFileButton') );
-                    //$( '#replaceFileButton' ).css({'left': left, 'top': top});
-                    
-                    /*
-                    $('#replaceFileButton').appendTo($(this).find('img.gallery-edit').parent()).css({
-                            left: left,
-                            top: top
-                    });*/
-                }
-                catch(e)
-                {
-                    alert('Caught!');
-                }
-                //console.log($(this).find('img.gallery-edit').css("left"), left, top);
-                
-                
-                $(this).find('img.gallery-zoom').show();
+                $(this).find('a.gallery-zoom').show();
             },
             function (event) {
                 if (
@@ -138,11 +112,36 @@ Gallery.prototype = {
                     event.pageY <= $(this).offset().top ||
                     event.pageX >= $(this).offset().left + $(this).width() ||
                     event.pageY >= $(this).offset().top + $(this).height()
-                    ) {
-                    $(this).find('img.control').hide();
+                ) {
+                    $(this).find('a.control').hide();
                 }
             }
-            );
+        );
+		
+		$('.gallery-edit img', image).each(function(){
+			$(this).upload({
+				name:  self.formPrefix + "Filedata",
+				method: 'post',
+				enctype: 'multipart/form-data',
+				action: self.baseUrl+'?id='+self.rubricId+'&session_hash='+self.sessionHash,
+				params: {
+					replace_image: true,
+					from_flash: 1,
+					item_id: self.getId($(this).closest('div').get(0))
+				},
+				/*onSubmit: function() {
+					$('#progress1').text('Uploading file...');
+				},*/
+				onComplete: function(data) {
+					eval('data = '+data);
+					$('#image'+data.id+'>img').attr("src", data.picture_thumb.link );
+				}
+			});
+			$($(this).closest('a')).hide().css('visibility', 'visible');
+		});
+		
+		var sizes = getPageSize();
+		$('a.colorbox', image).colorbox({maxWidth: sizes[2]-50, maxHeight: sizes[3]-50});
     },
 
     itemClick: function(img, e) {
@@ -193,7 +192,7 @@ Gallery.prototype = {
         if (this.selectedItems.length > 0) {
             items = this.selectedItems.join(',');
         } else {
-            items = this.getId(deleteBtn.parentNode.parentNode);
+            items = this.getId(deleteBtn.parentNode);
         }
 
         $.post(this.baseUrl + '?id=' + this.rubricId, {
