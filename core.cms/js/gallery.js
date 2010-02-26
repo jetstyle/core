@@ -141,6 +141,7 @@ Gallery.prototype = {
 		});
 		
 		var sizes = getPageSize();
+		$('a.colorbox').colorbox(window.colorBoxParams);
 		$('a.colorbox', image).colorbox({maxWidth: sizes[2]-50, maxHeight: sizes[3]-50});
     },
 

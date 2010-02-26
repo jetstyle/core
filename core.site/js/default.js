@@ -331,6 +331,24 @@ function getPageSize() {
 	return arrayPageSize;
 }
 
+$(function(){
+	var sizes = getPageSize();
+	window.colorBoxParams = {
+		maxWidth:  sizes[2]-50,
+		maxHeight: sizes[3]-50,
+		current:   '{current} из {total}',
+		previous:  'предыдущая',
+		next:      'следующая',
+		onComplete: function() {
+			if ($('#cboxPhoto').attr('src') && !$('#cboxLinkToOrigianl').get(0)) {
+				$('#cboxCurrent').show().prepend('<a id="cboxLinkToOrigianl" target="_blank" href="'+$('#cboxPhoto').attr('src')+'">изображение</a>&nbsp;');
+			} else if ($('#cboxPhoto').attr('src')) {
+				$('#cboxLinkToOrigianl').attr('href', $('#cboxPhoto').attr('src'));
+			}
+		}	
+	};
+})
+
 /*
 function isFlash(){
     

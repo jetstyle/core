@@ -39,8 +39,7 @@
   	<script language="javascript" type="text/javascript">
   		var base_url = "{{/}}";
 		$(function(){
-			var sizes = getPageSize();
-			$('a.colorbox').colorbox({maxWidth: sizes[2]-50, maxHeight: sizes[3]-50});
+			$('a.colorbox').colorbox(window.colorBoxParams);
 			$('a.colorbox-iframe').colorbox({width: '90%', height: '90%', iframe: true, rel: 'nofollow'});
 		});
   	</script>
