@@ -81,6 +81,29 @@ abstract class Controller implements ArrayAccess
 
 	public function __construct()
 	{
+		$className = get_class($this);
+		$this->loadConfig($className);
+	}
+	
+	public function loadConfig( $fileName )
+	{
+		$ymlFile = Finder::findScript('classes/controllers', $fileName, 0, 1, 'yml');
+
+		if ( $ymlFile )
+		{
+			$ymlConfig = YamlWrapper::load($ymlFile);
+
+			if (!is_array($ymlConfig) || empty($ymlConfig))
+			{
+				return false;
+			}
+			
+			$this->params_map = $ymlConfig;
+
+			return true;
+		}
+
+		return false;
 	}
 
 	public function offsetExists($key)
