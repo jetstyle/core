@@ -353,6 +353,15 @@ $(function(){
 			$('object').css('visibility', 'visible');
 		}
 	};
+	window.colorBoxIframeParams = {
+		width: '90%',
+		height: '90%',
+		iframe: true,
+		rel: 'nofollow'
+	};
+	window.colorBoxInlineParams = {
+		inline: true
+	};
 })
 
 /*
