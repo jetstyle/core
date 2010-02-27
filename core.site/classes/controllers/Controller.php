@@ -318,7 +318,6 @@ abstract class Controller implements ArrayAccess
 		{
 			$matches = $params;
 			$ret = true;
-			break;
 		}
 
 		return $ret;
