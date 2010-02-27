@@ -11,25 +11,27 @@ Gallery.prototype = {
     init: function() {
         var self = this;
 
-        $('#gallery').sortable({
-            start: function(e,ui) {
-				Gallery.dragged = true;
-            },
-            stop: function() {
-                var order = '';
-                $('#gallery div.gallery-image').each(function() {
-                    order += self.getId(this)+',';
-                });
-                order = order.substr(0, order.length-1);
-                $.post(self.baseUrl + '?id='+self.rubricId, {
-                    'action': 'reorder',
-                    'order': order
-                },function(data) {
-                    if (!data.ok) alert('Îøèáêà!');
-                },'json');
-            },
-            items: '> div.gallery-image'
-        });
+		if (!this.noDrags) {
+			$('#gallery').sortable({
+				start: function(e,ui) {
+					Gallery.dragged = true;
+				},
+				stop: function() {
+					var order = '';
+					$('#gallery div.gallery-image').each(function() {
+						order += self.getId(this)+',';
+					});
+					order = order.substr(0, order.length-1);
+					$.post(self.baseUrl + '?id='+self.rubricId, {
+						'action': 'reorder',
+						'order': order
+					},function(data) {
+						if (!data.ok) alert('Îøèáêà!');
+					},'json');
+				},
+				items: '> div.gallery-image'
+			});	
+		}
 
         //control for upload images
         imagesUploadSettings.upload_url = this.baseUrl+'?id='+this.rubricId+'&session_hash='+this.sessionHash;

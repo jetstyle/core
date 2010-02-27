@@ -358,10 +358,24 @@ $(function(){
 		width: '90%',
 		height: '90%',
 		iframe: true,
-		rel: 'nofollow'
+		rel: 'nofollow',
+		onComplete: function() {
+			$('#cboxTitle').hide();
+			$('#cboxLoadedContent').css({
+				'margin-bottom': 0,
+				'height': $('#cboxLoadedContent').height() + 28 + 'px'
+			});
+		}
 	};
 	window.colorBoxInlineParams = {
-		inline: true
+		inline: true,
+		onComplete: function() {
+			$('#cboxTitle').hide();
+			$('#cboxLoadedContent').css({
+				'margin-bottom': 0,
+				'height': $('#cboxLoadedContent').height() + 28 + 'px'
+			});
+		}
 	};
 	//login window on 403 error
 	$(document).ajaxError(function(event, request, settings){

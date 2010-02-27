@@ -21,6 +21,7 @@
 		gallery.rubricId = '{{rubric_id}}';
 		gallery.sessionHash = '{{session_hash}}';
 		gallery.fileExtensions = '{{file_extensions}}';
+		{{?no_drags}}gallery.noDrags = true;{{?/}}
 		gallery.init();
 	});
 </script>
