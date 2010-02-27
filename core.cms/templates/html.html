@@ -19,15 +19,6 @@
 		var base_url = "{{/}}";
 	</script>
     <script language="javascript" type="text/javascript">
-		$(document).ajaxError(function(event, request, settings){
-			if (request.status == 403) {
-				//tb_remove();
-				tb_show("", base_url+"login/ajax?TB_iframe=true&width=264&height=90&onremove=true", "");
-                onTBRemove = function(){
-                    location.reload(true);
-                }
-			}
-		});
 		$(function(){
 			if ($.fn.colorbox) {
 			  $('a.colorbox-iframe').colorbox(window.colorBoxIframeParams);

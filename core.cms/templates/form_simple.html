@@ -75,6 +75,7 @@ $(document).ready( function()
 {
     if(window.location.search.match("&popup=1") && window.location.search.match("&rnd=")) {
 		top.$.fn.colorbox.close();
+		top.location.assign(top.location.href);
     }
     else if ( window.location.search.match("&popup=1") )
     {
@@ -84,7 +85,6 @@ $(document).ready( function()
             clickedButton = this;
 			$("#{{__form_name}}").submit();
         });
-		//$("#TB_window", top.document).append( $(".iframe-buttons-") );
 	
         $("#{{__form_name}}").submit( function() {
             if (typeof(tinymce) != 'undefined') tinymce.EditorManager.triggerSave();

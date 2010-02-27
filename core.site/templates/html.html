@@ -53,17 +53,6 @@
 	{{HTML_body}}
 {{/?}}
 
-{{?oce_on}}
-	<script language="javascript" type="text/javascript">
-		$(document).ajaxError(function(event, request, settings){
-			if (request.status == 403) {
-				//tb_remove();
-				tb_show("", base_url+"cms/login/ajax?TB_iframe=true&width=264&height=90&onremove=true", "");
-			}
-		});
-	</script>
-{{?/}}
-
 <!--img src="{{!href_to 'HTCron'}}" alt="" /-->
 {{@blocks/google_analytics.html}}
 

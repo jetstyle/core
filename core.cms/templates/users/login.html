@@ -8,15 +8,10 @@
                     data[ b.name  ] = b.value;
             });
 
-    	    $.post( base_url+"login/ajax", data, function( ret ){
+    	    $.post( base_url+"u/login/ajax", data, function( ret ){
                 if (ret=="200")
                 {
-                    //window.location.assign( window.location + "?saved=1" );
-                    top.tb_remove();
-                }
-                else
-                {
-                    $("#TB_ajaxWindowTitle", top.document).css("color", "red").html( ret );
+                    top.$.fn.colorbox.close()
                 }
     	    });
 

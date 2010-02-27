@@ -332,6 +332,7 @@ function getPageSize() {
 }
 
 $(function(){
+	//colorbox parameters
 	var sizes = getPageSize();
 	window.colorBoxParams = {
 		maxWidth:  sizes[2]-50,
@@ -362,6 +363,21 @@ $(function(){
 	window.colorBoxInlineParams = {
 		inline: true
 	};
+	//login window on 403 error
+	$(document).ajaxError(function(event, request, settings){
+		if (request.status == 403) {
+			var params = window.colorBoxIframeParams;
+			params.href = (base_url.match(/.*cms\/$/) ? base_url : (base_url+'cms/'))+"u/login/ajax&onremove=true";
+			params.width = false;
+			params.height = false;
+			params.innerWidth = 274;
+			params.innerHeight = 100;
+			params.onClosed = function() {
+			  window.location.assign( window.location );
+			}
+			$.fn.colorbox(params);
+		}
+	});
 })
 
 /*

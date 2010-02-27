@@ -20,6 +20,10 @@ class UsersController extends Controller
 		array('login',
 			array(
 				'login' => 'login',
+				'ajax' => 'ajax',
+			),
+			array(
+				'login' => 'login',
 			),
 		),
 		array('restore',
