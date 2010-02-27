@@ -60,7 +60,7 @@
  	}
 	public function getLastPage()
 	{
-		return ceil($this->total / $this->perPage);
+		return intval(ceil($this->total / $this->perPage));
 	}
  	protected function construct()
  	{
@@ -239,7 +239,7 @@
 	public function setCurrentPage($pageNo)
 	{
 		if (!is_int($pageNo))
-			throw new InvalidArgumentException("Invalid type of pageNo argument. Integer expected");
+			throw new JSException("Invalid type of pageNo argument. Integer expected");
 		$this->p = $pageNo;
 		return $this;
 	}

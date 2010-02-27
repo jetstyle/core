@@ -15,6 +15,8 @@ class PopupObjects
 	protected $model = null;
 
 	protected $configKey = '';
+        
+        protected $perPage = 10;
 
 	public function __construct()
 	{		
@@ -60,6 +62,12 @@ class PopupObjects
 		
 		return $model->getArray();
 	}
+        
+        public function setPerPage($perPage)
+        {
+            if ( $perPage > 0 )
+                $this->perPage = $perPage;
+        }
 
 	public function getPages()
 	{
@@ -76,7 +84,7 @@ class PopupObjects
 			$this->model->where = $this->model->where . ($this->where ? ($this->model->where ? ' AND ' : '') . $this->where : '') ;
 			
 			$this->model->enablePager();
-			$this->model->setPagerPerPage(8);
+			$this->model->setPagerPerPage($this->perPage);
 			
 			$this->model->addFilesConfig(array('config' => $this->configKey, 'lazy_load' => false));
 			
