@@ -23,7 +23,7 @@
     <link rel="stylesheet" href="{{css}}print.css"
           media="{{?html_print}}all{{?:}}print{{/?}}" type="text/css" />
 
-    {{!connect "default.js"}}
+    {{!connect "default.js" unshift="true"}}
     {{!connect "custom.js"}}
     {{!connect "jquery.js" unshift="true"}}
     {{!connect "colorbox.js"}}
