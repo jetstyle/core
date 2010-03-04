@@ -127,19 +127,44 @@ class Finder {
 		//ищем
 		for( ; $i>=0 && $i<$n; $i+=$dr )
 		{
+                        unset ($fname_block); 
 			//разбор каждого уровня тут
 			$dir =& self::$DIRS[$scope][$i];
 			//if( !( is_array($dir) && !in_array($type,$dir) ) )
 			//{
 			$fname = $dir.($type ? $type."/" : "").$name.'.'.$ext;
+                        self::$searchHistory[] = $fname;
 
-			self::$searchHistory[] = $fname;
+                        //looking for b-* files in [type]/blocks/name/name.[type]
+                        $word = substr($name, 0, 2);
+                        if ( strpos($name, "b_")!==false ) //$word=="b-" || $word=="b_" 
+                        {
+                            $_name = str_replace("blocks/", "", $name);
+                            $fname_block = $dir.($type ? "templates/blocks/".$_name."/" : "").$_name.'.'.$ext;
+                            //var_dump($fname_block);
+                          
+                            //var_dump($fname_block, file_exists($fname_block));
+                            
+                        }
+                        /*
+                        else if ( $i==0 && ( substr($name, 0, 9)=="blocks/b_" ) ) // || substr($name, 0, 9)=="blocks/b-" 
+                        {
+                            $_name = str_replace("blocks/", "", $name);
+                            $fname_block = $dir.($type ? "templates/".$name."/" : "").$_name.'.'.$ext;
+                            
+                            //var_dump($fname_block);
+                        }
+                        */
 
 			if(@file_exists($fname))
 			{
 				//self::$searchCache[$type][$name.'.'.$ext] = $fname;
 				return $fname;
 			}
+                        else if ($fname_block && @file_exists($fname_block) )
+                        {
+                                return $fname_block;
+                        }
 
 			if ($withSubDirs)
 			{

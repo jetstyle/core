@@ -2,6 +2,65 @@
 {{!connect 'colorbox.js'}}
 {{!connect 'colorbox.css'}}
 
+{{!connect 'jstree/jquery.cookie.js'}}
+{{!connect 'splitter.js'}}
+
+<style type="text/css" media="all">
+.splitter {
+	height: 100%;
+	
+	border: 0;//px solid #aaa;
+}
+.splitter div {
+	overflow: auto;
+}
+.vsplitbar {
+	width: 5px;
+	background: #f0f2ed url({{images}}splitter.gif) no-repeat center;;
+}
+.vsplitbar.active {
+	background: #BEEBFF url({{images}}splitter.gif) no-repeat center;
+	opacity: 0.7;
+}
+</style>
+
+<div class="splitter">
+	<div class="tree-" style="font-size: 80%">
+            {{wrapped.0}} 
+	</div>
+	<div>
+            <div class="carpet" style="position: absolute; display: none; background: transparent;"></div><!--background: red; -->
+            {{wrapped.1}}
+	</div>
+</div>
+
+<script type="text/javascript">
+	$(document).ready(function(){
+            var newH = parseInt($(".splitter").height())-$(".splitter").position().top;
+
+            $(".splitter").css("height", newH );
+            $(".splitter").splitter({sizeLeft: 300, onStartSplit: function(){
+
+                $(".carpet").each( function (){
+                        $(this).css({
+				width: $(this).parent().width(),
+				height: $(this).parent().height(),
+                                "z-index": 10000,
+			}).show();
+                })}, 
+                
+                onEndSplit: function(){
+                    $(".carpet").hide();
+                },
+                cookie: "splitter"
+            
+            });
+        });
+</script>
+
+
+
+{{:old}}
 <table cellspacing="0" cellpadding="0" class="w100 cms-body">
 <tr>
   <td><img class="block" src="{{images}}z.gif" width="2" height="1" align="top" alt="" /></td>
@@ -38,3 +97,4 @@
 		});
 	});
 </script>
+{{/:old}}

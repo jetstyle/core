@@ -11,7 +11,7 @@ if (count($blockParts) > 1)
 }
 else
 {
-    $blockName = str_replace(" ","",ucwords(str_replace("_"," ",$blockParts[0])));;
+    $blockName = str_replace(" ","",ucwords( str_replace("_"," ", str_replace("b_", "", $blockParts[0]))));;
     $tplName = 'blocks/'.$blockParts[0].'.html';
 }
 
@@ -42,6 +42,7 @@ if (!$storeTo)
 
 $controller = Locator::get('controller', true);
 //$blockName = get_class($block);
+
 $blockName = strtolower(substr($blockName,0,1)).substr($blockName, 1);
 
 if ($controller)
@@ -58,6 +59,7 @@ $params[$storeTo] = $block->getData();
 $tpl->pushContext();
 $tpl->load($params);
 $res = $tpl->parse($tplName);
+
 $tpl->popContext();
 
 if ($block->getParam('ret'))
