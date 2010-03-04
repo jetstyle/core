@@ -108,11 +108,20 @@ class PopupObjects
 		if (is_uploaded_file($_FILES['file']['tmp_name']))
 		{			
 			$rubricId = intval($_POST['rubric']);
-			if (!$rubricId)
+                        $new_rubric = $_POST['new_rubric'];
+                        var_dump($rubricId, $new_rubric);
+			if (!$rubricId && !$new_rubric)
 			{
 				Locator::get('tpl')->set('file_err', 'Поле "Рубрика" обязательно для заполнения');
 				return;
 			}
+                        else if ( $rubricId==0 && $new_rubric )
+                        {
+                                $data = array("title"=>$new_rubric, "type_id"=>1, "module"=>"Files");
+                                
+                                $rubricId = $this->getModel()->getForeignModel('rubric')->getForeignModel('rubric')->insert($data);
+                                var_dump($rubricId);
+                        }
 			
 			$file = FileManager::getFile($this->configKey.':picture');
 
