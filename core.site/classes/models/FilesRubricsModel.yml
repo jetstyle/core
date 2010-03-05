@@ -2,6 +2,7 @@ default:
     table: files_rubrics
     fields:
         - id
+        - _order
         - title
     where: {_state} = 0
     order:

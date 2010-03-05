@@ -25,7 +25,10 @@ class PopupObjects
 
 	public function setRubric($value)
 	{
-		$this->rubricId = $value;
+                if (isset($value))
+                    $this->rubricId = intval($value);
+                else
+                    $this->rubricId = -1;
 	}
 	
 	public function setRubricsTypeId($value)
@@ -92,36 +95,45 @@ class PopupObjects
 			$files2rubricsModel->where = $files2rubricsModel->where.( $files2rubricsModel->where ? " AND " : "" ). "{rubric.type_id} = ".DBModel::quote($this->rubricsTypeId);
 			
 			$this->model->setOrder('{_created} DESC'); // {rubric._order} ASC 
-			
-			if ($this->rubricId)
+
+			if ($this->rubricId>=0)
 			{
 				// condition on rubric
 				$files2rubricsModel->where = $files2rubricsModel->where.( $files2rubricsModel->where ? " AND " : "" ). "{rubric_id} = ".DBModel::quote($this->rubricId);
 			}
+                        /*else if ($this->rubricId==0)
+                        {
+                                $files2rubricsModel->where = "";
+                        }*/
+                        //var_dump($files2rubricsModel->where);
 		}
 
 		return $this->model;
 	}
 
 	public function handlePost()
-	{		
-		if (is_uploaded_file($_FILES['file']['tmp_name']))
+        {		
+                if ( $_POST['rubric_id']=="create" &&  $_POST['new_rubric'] )
+                {
+                        $o = $this->getModel()->getForeignModel('rubric')->getForeignModel('rubric')->setOrder("_order desc")->loadOne("_state=0");
+
+                        $data = array("title"=>iconv("utf-8", "cp1251", $_POST['new_rubric']), "type_id"=>1, "module"=>"Files", "_order"=>($o["_order"]+1) );
+
+                        $rubricId = $this->getModel()->getForeignModel('rubric')->getForeignModel('rubric')->insert($data);
+                        echo $rubricId;
+                        die();
+                }
+		elseif (is_uploaded_file($_FILES['file']['tmp_name']))
 		{			
-			$rubricId = intval($_POST['rubric']);
-                        $new_rubric = $_POST['new_rubric'];
-                        var_dump($rubricId, $new_rubric);
-			if (!$rubricId && !$new_rubric)
+			$rubricId = intval($_POST['rubric_id']);
+                        
+                        /*
+                        if (!$rubricId && !$new_rubric)
 			{
 				Locator::get('tpl')->set('file_err', 'Поле "Рубрика" обязательно для заполнения');
 				return;
 			}
-                        else if ( $rubricId==0 && $new_rubric )
-                        {
-                                $data = array("title"=>$new_rubric, "type_id"=>1, "module"=>"Files");
-                                
-                                $rubricId = $this->getModel()->getForeignModel('rubric')->getForeignModel('rubric')->insert($data);
-                                var_dump($rubricId);
-                        }
+                        */
 			
 			$file = FileManager::getFile($this->configKey.':picture');
 
@@ -133,7 +145,7 @@ class PopupObjects
 			{
 				Locator::get('tpl')->set('file_err', $e->getMessage());
 			}
-			
+
 			if ($file['id'])
 			{
 				$file->addToRubric($rubricId);
@@ -144,8 +156,19 @@ class PopupObjects
 				);
 				
 				$file->updateData($data);
+                                
+                                if ($_POST["ajax"])
+                                {
+                                    //echo $file["id"]."|".$file["link"];
+                                    $ret = $this->getModel()->loadOne("{id}=". $file["id"] )->getArray();
+                                    //$ret = $file->getArray();
+                                    echo Json::encode($ret);
+                                    die();
+                                }
 			}
 		}
+                else if ($_POST)
+                    die('badly');
 	}
 
 	protected function loadRubrics()
@@ -153,7 +176,7 @@ class PopupObjects
 		$this->rubrics = $this->db->query("
 			SELECT id, title
 			FROM ??".$this->rubricsTable."
-			WHERE type_id = ".$this->db->quote($this->rubricsTypeId)." AND _state = 0
+			WHERE type_id = ".$this->db->quote($this->rubricsTypeId)." AND _state = 0 ORDER by _order
 		", "id");
 
 		// mark current rubric

@@ -415,7 +415,8 @@ class File implements ArrayAccess {
 
     public function addToRubric($rubricId) {
         $rubricId = intval($rubricId);
-        if (!$this->id || !$rubricId) {
+        
+        if (!$this->id /*|| !$rubricId*/) {
             return;
         }
 
@@ -434,12 +435,14 @@ class File implements ArrayAccess {
 
         $maxOrder = $maxOrderResult['mo'] + 1;
 
-        $db->query("
+        $sql = "
                 REPLACE INTO ??files2rubrics
                 (`file_id`, `rubric_id`, `_order`)
                 VALUES
                 (".$db->quote($this->id).", ".$db->quote($rubricId).", ".$db->quote($maxOrder).")
-        ");
+        ";
+
+        $db->query($sql);
     }
 
     public function removeFromRubric($rubricId) {
