@@ -641,6 +641,18 @@ class DBModel extends Model implements IteratorAggregate, ArrayAccess, Countable
 
 		return $this;
 	}
+	
+	/**
+	 * getWhere
+	 *
+	 * get where condition
+	 *
+	 * @return string
+	 */
+	public function getWhere()
+	{
+		return $this->where;
+	}
 
 	/**
 	 * Set query limit
