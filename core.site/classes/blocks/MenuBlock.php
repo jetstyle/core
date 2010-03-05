@@ -44,24 +44,15 @@ class MenuBlock extends Block
 	protected function getParentNodeByLevel($level)
 	{
 		$result = array();
-		
-		if (Locator::exists('controller'))
+		$data = $this->getCurrent();
+		if ($data)
 		{
-			$data = &Locator::get('controller');
-			$sql = '
-				SELECT id, _path, _level, _left, _right, _parent, hide_from_menu
-				FROM ??content
-				WHERE
-					_level = ' . $level . '
-						AND
-					(_left <= ' . intval($data['_left']) . ' AND _right >= ' . intval($data['_right']) . ')
-						AND
-					_state = 0
-			';
-	
-			$result = Locator::get('db')->queryOne($sql);
+			$where = '_level = '.$level.' AND '.
+					 '_left <= '.intval($data['_left']).' AND '.
+					 '_right >= '.intval($data['_right']).' AND '.
+					 '_state = 0';
+			$result = DBModel::factory($this->config['model'])->loadOne($where)->getArray();
 		}
-		
 		return $result;
 	}
 
@@ -72,14 +63,7 @@ class MenuBlock extends Block
 			return $this->parents;
 		}
 
-		if (Locator::exists('controller'))
-		{
-			$data = &Locator::get('controller');
-		}
-		else
-		{
-			$data = array();
-		}
+		$data = $this->getCurrent();
 
 		if (!$data['id'])
 		{
@@ -87,13 +71,12 @@ class MenuBlock extends Block
 		}
 		else
 		{
-			$sql = '
-				SELECT id, hide_from_menu, _parent
-				FROM ??content
-				WHERE _left < ' . $data['_left'] . ' AND _right >= ' . $data['_right'] . ' AND _level < '.($this->config['level'] + $this->config['depth']).' AND _state = 0
-			';
+			$where = '_left < '.$data['_left'].' AND '.
+					 '_right >= '.$data['_right'].' AND '.
+					 '_level < '.($this->config['level'] + $this->config['depth']).' AND '.
+					 '_state = 0';
 	
-			$this->parents = Locator::get('db')->query($sql, "id");
+			$this->parents = $result = DBModel::factory($this->config['model'])->load($where)->getArray();
 	
 			if ($this->parents === null)
 			{
@@ -110,8 +93,10 @@ class MenuBlock extends Block
 		 * загрузим модель меню
 		 * с условием на where
 		 */
-		$menu = & DBModel::factory('Content')->removeField('text');
-		$menu->setOrder(array('_level' => 'ASC', '_order' => 'ASC'));
+		if (!$this->config['model']) $this->config['model'] = 'Content/menu';
+
+		$menu = & DBModel::factory($this->config['model']);
+		//$menu->setOrder(array('_level' => 'ASC', '_order' => 'ASC'));
 
 		$parents = $this->getParentNodes();
 
@@ -146,16 +131,15 @@ class MenuBlock extends Block
 			break;
 		}
 
-		if (Locator::exists('controller'))
+		$current = $this->getCurrent();
+		if ($current)
 		{
-			$current = &Locator::get('controller');
 			$this->currentNodeId = $current['id'];
 		}
 		
-		$where[] = $menu->quoteField('hide_from_menu').' = 0';
 		$menu->registerObserver('row', array(&$this, 'markItem'));
 		$menu->loadTree(implode(' AND ', $where));
-
+		
 		$this->setData($menu->getArray());
 	}
 
@@ -177,6 +161,19 @@ class MenuBlock extends Block
 			}
 		}
 		return false;
+	}
+	
+	protected function getCurrent()
+	{
+		if (Locator::exists('controller'))
+		{
+			$data = &Locator::get('controller');
+		}
+		else
+		{
+			$data = array();
+		}
+		return $data;
 	}
 }
 ?>

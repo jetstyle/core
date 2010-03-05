@@ -1,0 +1,22 @@
+{{?*}}
+	<a href="#" id="gotolink" class='underline-dashed'>перейти</span></a>
+	<ul class="gotomenu invis" id="gotomenu">
+		{{!for * do=@:goToLiItem}}
+		{{:goToLiItem}}
+		    <li><a target="_blank" title="Откроется в новом окне" href="{{fe_/}}{{*path}}">{{*title}}</a></li>
+		{{/:goToLiItem}}
+	</ul>	
+	<script language="javascript">
+		$(document).ready( function() {
+			$('body').click(function(){
+				if ($('#gotomenu').is(':visible')) $('#gotomenu').hide();
+			});
+			$('#gotolink').click(function(){
+				$('#gotomenu').css('right',$(document).width() - $('#gotolink').offset().left - $('#gotolink').width());
+				$('#gotomenu').css('top',$('#gotolink').offset().top + $('#gotolink').height() + 5);
+				$('#gotomenu').toggle();
+				return false;
+			});
+		});
+	</script>
+{{/?}}

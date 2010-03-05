@@ -1,0 +1,11 @@
+{{?*}}
+	{{!for * do=@:subitem}}
+	
+	{{:subitem *selected}}
+		{{*title}}
+	{{/:subitem}}
+	
+	{{:subitem}}
+		<a href="{{!href_to 'Do/module' *}}">{{*title}}</a>
+	{{/:subitem}}
+{{/?}}
