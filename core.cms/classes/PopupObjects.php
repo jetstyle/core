@@ -173,8 +173,7 @@ class PopupObjects
                                 }
 			}
 		}
-                else if ($_POST)
-                    die('badly');
+                
 	}
 
 	protected function loadRubrics()
