@@ -25,10 +25,10 @@ class PopupObjects
 
 	public function setRubric($value)
 	{
-                if (isset($value))
+                //if (isset($value))
                     $this->rubricId = intval($value);
-                else
-                    $this->rubricId = -1;
+              //  else
+               //     $this->rubricId = -1;
 	}
 	
 	public function setRubricsTypeId($value)
@@ -127,13 +127,19 @@ class PopupObjects
 		{			
 			$rubricId = intval($_POST['rubric_id']);
                         
-                        /*
-                        if (!$rubricId && !$new_rubric)
+                        if ($rubricId==-1)
+                        {
+                                $r = $this->getModel()->getForeignModel('rubric')->getForeignModel('rubric')->loadOne("is_default=1")->getArray();
+                                $rubricId = $r["id"];
+                        }
+                        
+                        
+                        if (!$rubricId)
 			{
 				Locator::get('tpl')->set('file_err', 'Поле "Рубрика" обязательно для заполнения');
 				return;
 			}
-                        */
+                        
 			
 			$file = FileManager::getFile($this->configKey.':picture');
 
