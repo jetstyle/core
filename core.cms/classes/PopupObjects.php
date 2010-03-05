@@ -96,7 +96,7 @@ class PopupObjects
 			
 			$this->model->setOrder('{_created} DESC'); // {rubric._order} ASC 
 
-			if ($this->rubricId>=0)
+			if ($this->rubricId>0)
 			{
 				// condition on rubric
 				$files2rubricsModel->where = $files2rubricsModel->where.( $files2rubricsModel->where ? " AND " : "" ). "{rubric_id} = ".DBModel::quote($this->rubricId);
