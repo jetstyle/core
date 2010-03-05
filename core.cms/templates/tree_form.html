@@ -39,7 +39,7 @@
             var newH = parseInt($(".splitter").height())-$(".splitter").position().top;
 
             $(".splitter").css("height", newH );
-            $(".splitter").splitter({sizeLeft: 300, onStartSplit: function(){
+            $(".splitter").splitter({minLeft: 300, minRight: 300, sizeLeft: 300, onStartSplit: function(){
 
                 $(".carpet").each( function (){
                         $(this).css({
