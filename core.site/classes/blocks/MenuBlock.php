@@ -47,10 +47,10 @@ class MenuBlock extends Block
 		$data = $this->getCurrent();
 		if ($data)
 		{
-			$where = '_level = '.$level.' AND '.
-					 '_left <= '.intval($data['_left']).' AND '.
-					 '_right >= '.intval($data['_right']).' AND '.
-					 '_state = 0';
+			$where = '{_level} = '.$level.' AND '.
+					 '{_left} <= '.intval($data['_left']).' AND '.
+					 '{_right} >= '.intval($data['_right']).' AND '.
+					 '{_state} = 0';
 			$result = DBModel::factory($this->config['model'])->loadOne($where)->getArray();
 		}
 		return $result;
@@ -71,10 +71,10 @@ class MenuBlock extends Block
 		}
 		else
 		{
-			$where = '_left < '.$data['_left'].' AND '.
-					 '_right >= '.$data['_right'].' AND '.
-					 '_level < '.($this->config['level'] + $this->config['depth']).' AND '.
-					 '_state = 0';
+			$where = '{_left} < '.$data['_left'].' AND '.
+					 '{_right} >= '.$data['_right'].' AND '.
+					 '{_level} < '.($this->config['level'] + $this->config['depth']).' AND '.
+					 '{_state} = 0';
 	
 			$this->parents = $result = DBModel::factory($this->config['model'])->load($where)->getArray();
 	
