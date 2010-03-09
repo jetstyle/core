@@ -17,6 +17,9 @@ class FormGallery extends FormCalendar
 
 	public function handle()
 	{
+                Finder::useLib("UTF8");
+                UTF8::autoconvert_request();
+        
 		$this->handleGalleryUpload();
 		$this->handleAjax();
 
@@ -120,6 +123,7 @@ class FormGallery extends FormCalendar
 
 	protected function getGalleryFile($itemId)
 	{
+                $this->galleryFilesModel = null;
 		$filesModel = $this->getGalleryFilesModel();
 		if ($filesModel)
 		{
@@ -211,6 +215,7 @@ class FormGallery extends FormCalendar
 				}
 
 				$tpl = Locator::get('tpl');
+                                $item["title"] = iconv("cp1251","utf8", $item["title"]);
 				$tpl->set('*', $item);
 
 				$thumbSizes = $this->getThumbSize();
@@ -220,11 +225,13 @@ class FormGallery extends FormCalendar
 					$tpl->set('thumb_height', $thumbSizes[1]);
 				}
 
+
 				$result = array(
 					'ok' => true,
 					'html' => $tpl->parse('gallery.html:gallery_item')
 				);
 
+                                //header("Content-Type: text/html; charset=utf-8");
 				Finder::useClass('Json');
 				echo Json::encode($result);
 				die();

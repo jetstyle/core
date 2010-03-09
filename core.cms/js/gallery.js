@@ -344,6 +344,7 @@ var imagesUploadSettings = {
         location.reload(true);
     },
     upload_success_handler: function(file, data) {
+
         try
         {
             eval('data = ' + data + ';');
@@ -354,9 +355,15 @@ var imagesUploadSettings = {
         }
 
         if (data.ok) {
-            $('#addImageButton').before(data.html);
-            $('#gallery div.gallery-image:last .image-title').html('Заголовок');
-            this.customSettings.gallery.initImage($('#gallery div.gallery-image').get().reverse()[0]);
+            
+           
+            var ret = $("#gallery div.gallery-image:first").before(data.html);
+            //console.log($('#gallery div.gallery-image').get(0));
+            this.customSettings.gallery.initImage($('#gallery div.gallery-image').get(0));
+            
+            //$('#addImageButton').before(data.html);
+            //$('#gallery div.gallery-image:last .image-title').html('Заголовок');
+            //this.customSettings.gallery.initImage($('#gallery div.gallery-image').get().reverse()[0]);
         } else {
             location.reload(true);
         }
