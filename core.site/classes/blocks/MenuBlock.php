@@ -21,9 +21,10 @@ class MenuBlock extends Block
 	public function markItem(&$model, &$row)
 	{
 		$parents = $this->getParentNodes();
-		
+
 		if ($parents[$row['id']])
 		{
+                        
 			$row['selected'] = 1;
 		}
 		elseif ($row['id'] == $this->currentNodeId)
@@ -76,12 +77,17 @@ class MenuBlock extends Block
 					 '{_level} < '.($this->config['level'] + $this->config['depth']).' AND '.
 					 '{_state} = 0';
 	
-			$this->parents = $result = DBModel::factory($this->config['model'])->load($where)->getArray();
+			$parents = $result = DBModel::factory($this->config['model'])->load($where)->getArray();
 	
 			if ($this->parents === null)
 			{
 				$this->parents = array();
 			}
+                        
+                        foreach ($parents as $parent)
+                        {
+                                $this->parents[ $parent["id"] ] = $parent;
+                        }
 		}
 
 		return $this->parents;
