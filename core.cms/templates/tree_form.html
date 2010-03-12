@@ -75,22 +75,24 @@
 
 <table cellspacing="0" cellpadding="0" class="w100 cms-body">
 <tr>
-  <td></td><td>
-            <div class="cms-list-advanced">
-                <div class="toolbar" >
-                    {{@blocks/help_link.html}}
-                    {{__trash_switch}}
-                    {{__add_new}}
-                </div>
-            </div>
-    </td><td  class="statusbarview"></td><td class="statusbarview"><strong>{{module_title}}</strong></td>
+  <td></td>
+  <td>
+    <div class="cms-list-advanced">
+      <div class="toolbar" >
+        Содержание
+        <!--{{@blocks/help_link.html}}
+        {{__trash_switch}}
+        {{__add_new}}-->
+      </div>
+    </div>
+  </td>
+  <td class="bar-sep"></td>
+  <td class="statusbarview"><strong>{{module_title}}</strong></td>
 </tr>
 <tr>
   <td><img class="block" src="{{images}}z.gif" width="2" height="1" align="top" alt="" /></td>
   <td class="tree-" style="font-size: 80%" id="table1">
     <div class="carpet" style="position: absolute; display: none; background: transparent;"></div>
-    
-    {{@blocks/submenu.html}}
     
     {{wrapped.0}}
 

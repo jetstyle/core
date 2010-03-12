@@ -6,7 +6,24 @@
     */
 </style>
 
-<div style="position:absolute; right: 0; top: 0;"> 
+
+
+{{:logo}}
+    {{@blocks/logo.html}}
+{{/:logo}}
+
+{{:navigation}}
+    {{@blocks/menu.html}} 
+{{/:navigation}}
+
+{{:navigation2}}
+    {{@blocks/submenu.html}}
+{{/:navigation2}}
+
+{{:slogan}}{{/:slogan}}
+
+{{:info}}
+<div style=""> 
     <small>
         <img src="{{images}}user.png" />&nbsp;<a href="{{!href_to 'Start'}}">{{user.login}}</a>
         &nbsp;|&nbsp;
@@ -17,18 +34,9 @@
         {{@blocks/user.html}}   
     </small>
 </div>
+{{/:info}}
 
-{{:logo}}
-    {{@blocks/logo.html}}
-{{/:logo}}
-
-{{:navigation}}
-    <br />
-    {{@blocks/menu.html}} 
-{{/:navigation}}
-
-
-{{@layouts/l_content/l_content_13.html column1=@:logo column2=@:navigation }}
+{{@layouts/l_header/l_header_114_doublemenu.html logo=@:logo slogan=@:slogan info=@:info navigation=@:navigation navigation2=@:navigation2}}
 
 {{module_body}}
 
