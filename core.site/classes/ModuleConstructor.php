@@ -217,10 +217,20 @@ class ModuleConstructor
 		return $result;
 	}
 
+        public function getPath()
+	{
+            return $this->modulePath;
+        }
+
 	public function getTitle()
 	{
+                if ($this->moduleTitle)
+                    return $this->moduleTitle;
+        
 		$sql = "SELECT title FROM ??toolbar WHERE href=".Locator::get('db')->quote( $this->modulePath ) ;
 		$current = Locator::get('db')->queryOne($sql);
+                
+                $this->moduleTitle = $current['title'];
 		return $current['title'];
 	}
 

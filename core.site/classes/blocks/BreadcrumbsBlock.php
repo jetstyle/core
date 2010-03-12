@@ -5,8 +5,9 @@ class BreadcrumbsBlock extends Block
 {
 	public function addItem($path, $title, $hide = 0)
 	{
-		$data = &$this->getData();
-		$data[] = array('href' => $path, 'title_short' => $title, 'hide' => $hide);
+		//$data = &$this->getData();
+		$this->data[] = array('href' => $path, 'title_short' => $title, 'hide' => $hide);
+               //var_dump($this->data);
 	}
 
 	protected function constructData()
@@ -16,16 +17,31 @@ class BreadcrumbsBlock extends Block
 		{
 			$current = &Locator::get('controller');
 		}
-
-		$model = DBModel::factory('Content')
-							->clearFields()
-							->addFields(array('id','_left', '_right', '_level', '_path', '_parent'))
-							->addField('title_short', 'IF(LENGTH(title_short) > 0, title_short, title_pre)')
-							->addField('href', '_path')
-							->setOrder(array('_left' => 'ASC'))
-							->load('_left <= '.DBModel::quote($current['_left']).' AND _right >= '.DBModel::quote($current['_right']));
-
-		$this->setData($model->getArray());
+                
+                if ($this->getParam("cms"))
+                {   
+                    //var_dump($this->data);
+                    $this->setData($this->data);
+                    // var_dump($this->data);
+                }
+                else
+                {
+                    
+                    $model = DBModel::factory('Content')
+                                                            ->clearFields()
+                                                            ->addFields(array('id','_left', '_right', '_level', '_path', '_parent'))
+                                                            ->addField('title_short', 'IF(LENGTH(title_short) > 0, title_short, title_pre)')
+                                                            ->addField('href', '_path')
+                                                            ->setOrder(array('_left' => 'ASC'))
+                                                            ->load('_left <= '.DBModel::quote($current['_left']).' AND _right >= '.DBModel::quote($current['_right']));
+                    $data = $model->getArray();
+                    
+                    var_dump( $this->breadItems );
+                    
+                    $this->data = @array_merge($data, $this->data);
+                    
+                    $this->setData($this->data);
+                }
 	}
 }
 ?>

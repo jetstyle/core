@@ -130,10 +130,13 @@ class Finder {
                         unset ($fname_block); 
 			//разбор каждого уровня тут
 			$dir =& self::$DIRS[$scope][$i];
+
+                        
 			//if( !( is_array($dir) && !in_array($type,$dir) ) )
 			//{
 			$fname = $dir.($type ? $type."/" : "").$name.'.'.$ext;
                         self::$searchHistory[] = $fname;
+
 
                         //looking for b-* files in [type]/blocks/name/name.[type]
                         $word = substr($name, 0, 2);

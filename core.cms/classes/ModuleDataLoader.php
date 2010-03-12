@@ -20,38 +20,39 @@ class ModuleDataLoader {
 	{
 		if ($moduleName)
 		{
-        	$this->moduleName = $moduleName;
+                    $this->moduleName = $moduleName;
 		}
 	}
 
 	public function getData($parent)
 	{
-        $list = $this->getObject($this->listPath);
-        $items = $chidlren = array();
-        Finder::useClass('Inflector');
-       	$inflector = new Inflector();
-       	$controller = $inflector->underscore($this->moduleName);
-		$parentRow = DBModel::factory('Content')->loadOne('{id} = '.intval($parent));
-        foreach ($list->getAllItems() as $item)
-        {
-        	$item['id'] = $controller.'-'.$item['id'];
-			$item['_level'] = $parentRow['_level']+1;
-			$item['custom_buttons'] = true;
-			$item['hide_buttons']['addChild'] = true;
-			$item['form_config'] = $this->moduleName.'/'.$this->formPath;
-         	$items[$item['id']] = $item;
-        	$children[$parent][] = $item['id'];
-        }
-        return array('items' => $items, 'children' => $children);
+            $list = $this->getObject($this->listPath);
+            $items = $chidlren = array();
+            Finder::useClass('Inflector');
+            $inflector = new Inflector();
+            $controller = $inflector->underscore($this->moduleName);
+            $parentRow = DBModel::factory('Content')->loadOne('{id} = '.intval($parent));
+            foreach ($list->getAllItems() as $item)
+            {
+                    $item['id'] = $controller.'-'.$item['id'];
+                    $item['_level'] = $parentRow['_level']+1;
+                    $item['custom_buttons'] = true;
+                    $item['hide_buttons']['addChild'] = true;
+                    $item['form_config'] = $this->moduleName.'/'.$this->formPath;
+                    $items[$item['id']] = $item;
+                    $children[$parent][] = $item['id'];
+            }
+
+            return array('items' => $items, 'children' => $children);
 	}
 
 	public function delete($item)
 	{
-    	$itemParts = explode('-', $item);
-    	$itemForm = $this->getObject($this->formPath);
-    	$itemForm->setId($itemParts[count($itemParts)-1]);
-    	$itemForm->load();
-    	$itemForm->delete();
+            $itemParts = explode('-', $item);
+            $itemForm = $this->getObject($this->formPath);
+            $itemForm->setId($itemParts[count($itemParts)-1]);
+            $itemForm->load();
+            $itemForm->delete();
 	}
 
 	public function insert($parent)

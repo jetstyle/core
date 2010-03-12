@@ -1,5 +1,48 @@
-{{@blocks/menu.html}}
-{{@blocks/submenu.html}}
-{{@blocks/goto_menu.html}}
+<style>
+/*
+    .l-content {
+       border-bottom: 1px solid black;
+    }
+    */
+</style>
+
+<div style="position:absolute; right: 0; top: 0;"> 
+    <small>
+        <img src="{{images}}user.png" />&nbsp;<a href="{{!href_to 'Start'}}">{{user.login}}</a>
+        &nbsp;|&nbsp;
+        <a href="{{/}}do/Config/config">Настройки</a>
+        &nbsp;|&nbsp;
+        {{@blocks/goto_menu.html}}   
+        &nbsp;|&nbsp;
+        {{@blocks/user.html}}   
+    </small>
+</div>
+
+{{:logo}}
+    {{@blocks/logo.html}}
+{{/:logo}}
+
+{{:navigation}}
+    <br />
+    {{@blocks/menu.html}} 
+{{/:navigation}}
+
+
+{{@layouts/l_content/l_content_13.html column1=@:logo column2=@:navigation }}
 
 {{module_body}}
+
+
+
+<!--
+<table class="w100" style="border-bottom: 1px solid black;">
+<tr><td width="20%">
+    {{@blocks/logo.html}}
+    </td>
+    <td width="100%">
+
+        {{@blocks/menu.html}} 
+    </td>
+</tr>
+</table>
+-->

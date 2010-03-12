@@ -42,23 +42,36 @@ class DoController extends Controller
 		unset($params[0]);
 
 		Finder::useClass("ModuleConstructor");
-        $modulePath = $config['module'].( $params ? '/'.implode('/', $params) : '' );
+                $modulePath = $config['module'].( $params ? '/'.implode('/', $params) : '' );
 
-        if ((!defined('COMMAND_LINE') || !COMMAND_LINE) && !Locator::get('principal')->security('cmsModules', $modulePath))
+                if ((!defined('COMMAND_LINE') || !COMMAND_LINE) && !Locator::get('principal')->security('cmsModules', $modulePath))
 		{
 			return Controller::deny();
 		}
 
 		$this->moduleConstructor = ModuleConstructor::factory($modulePath);
 
-        Locator::get('tpl')->set('module_name', $modulePath);
-        Locator::get('tpl')->set('module_title', $this->moduleConstructor->getTitle());
+                Locator::get('tpl')->set('module_name', $modulePath);
+                Locator::get('tpl')->set('module_title', $this->moduleConstructor->getTitle());
 		Locator::get('tpl')->set('module_body', $this->moduleConstructor->getHtml());
 
+               
 		$this->data['title_short'] = $this->moduleConstructor->getTitle();
 
 		$this->siteMap = 'module';
 	}
+
+        function breadcrumbsWillRender($block)
+        {
+                $elements = Locator::getBlock("menu")->getParentNodes();
+
+                foreach ( $elements as $el )
+                {
+                    Locator::getBlock("breadcrumbs")->addItem( $el["path"], $el["title"] );
+
+                }
+                Locator::getBlock("breadcrumbs")->addItem( $this->moduleConstructor->getPath(), $this->moduleConstructor->getTitle() );
+        }
 
 	function handle_pack_modules($config)
 	{

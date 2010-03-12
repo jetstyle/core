@@ -1,4 +1,10 @@
+<!--
 <strong><a href="{{!href_to 'Start'}}">{{user.login}}</a></strong>
+<a href='{{!href_to "Users::logout_confirmed"}}' onclick="return confirm('Действительно выйти?');" title="Выйти">
+<img src="{{images}}logout.png"  title="Выйти" alt="x" style="vertical-align:bottom;" />
+</a>
+-->
+
 <a href='{{!href_to "Users::logout_confirmed"}}' onclick="return confirm('Действительно выйти?');" title="Выйти">
 <img src="{{images}}logout.png"  title="Выйти" alt="x" style="vertical-align:bottom;" />
 </a>

@@ -1,11 +1,19 @@
 {{?*}}
-	{{!for * do=@:subitem}}
+        <ul class="submenu-">
+            {{!for * do=@:subitem}}
+        </ul>
 	
-	{{:subitem *selected}}
-		{{*title}}
+        {{:subitem *current}}
+                <li class="item- current-">{{*title}}</li>
+        {{/:subitem}}
+        
+        {{:subitem *selected}}
+		<li class="item-">{{*title}}</li>
 	{{/:subitem}}
 	
 	{{:subitem}}
-		<a href="{{!href_to 'Do/module' *}}">{{*title}}</a>
+                <li class="item-"> 
+                    <a href="{{!href_to 'Do/module' *}}">{{*title}}</a>
+                </li>
 	{{/:subitem}}
 {{/?}}

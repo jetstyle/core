@@ -1,8 +1,12 @@
 {{?*}}
-	<ul>
+	<ul class="menu-">
 		{{!for * do=@:item}}
 		
-		{{:item *selected}}
+                {{:item *current}}
+			<li class="current-" nowrap="nowrap">{{*title}}</li>
+		{{/:item}}
+                
+		{{:item *selected}}1
 			<li class="selected-" nowrap="nowrap"><a href="{{!href_to 'Do/module' *}}" id="menu_selected_{{*id}}" item_id="{{*id}}">{{*title}}</a></li>
 		{{/:item}}
 		

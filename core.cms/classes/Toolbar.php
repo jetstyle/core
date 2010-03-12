@@ -137,8 +137,8 @@
  			$children = $this->items['submenu'][$item['id']]['childs'];
  			if (!empty($children))
  			{
-            	$firstChild = array_shift($children);
-            	$this->items['main'][$k]['href'] = $firstChild['href'];
+                                $firstChild = array_shift($children);
+                                $this->items['main'][$k]['href'] = $firstChild['href'];
  			}
  			if(!$item['granted'])
  			{

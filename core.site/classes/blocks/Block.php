@@ -25,29 +25,29 @@ class Block
 		{
 		    try
 		    {
-                $this->constructData();
+                        $this->constructData();
 		    }
 		    catch( Exception $e )
 		    {
-                //Exceptions not to ignore
-                $processExceptions = array(EXCEPTION_MAIL, EXCEPTION_MAIL | EXCEPTION_SILENT);
+                        //Exceptions not to ignore
+                        $processExceptions = array(EXCEPTION_MAIL, EXCEPTION_MAIL | EXCEPTION_SILENT);
 
-                if ( in_array( ExceptionHandler::getInstance()->getMethod($e), $processExceptions  ) )
-                {
-                    ExceptionHandler::getInstance()->process($e);
-                }
-                else if ( $_GET['debug'] )
-                {
-                    ExceptionHandler::getInstance()->process($e);
-                }
+                        if ( in_array( ExceptionHandler::getInstance()->getMethod($e), $processExceptions  ) )
+                        {
+                            ExceptionHandler::getInstance()->process($e);
+                        }
+                        else if ( $_GET['debug'] )
+                        {
+                            ExceptionHandler::getInstance()->process($e);
+                        }
 
-                $this->data = null;
-		    }
-		}
-		return $this->data;
+                        $this->data = null;
+                    }
+                }
+                return $this->data;
 	}
 
-    /**
+        /**
 	 * Params, passed to tpl
 	 * @param $params array
 	 * @return void
@@ -62,25 +62,25 @@ class Block
 		return $this->tplParams[$key];
 	}
 
-    public function getParam($key)
-    {
-        if (isset($this->tplParams[$key]))
+        public function getParam($key)
         {
-            return $this->tplParams[$key];
-        }
-        elseif ($this->config[$key])
-        {
-            //если конфиг блока содиржит параметры для cms
-            if (is_array($this->config[$key]) && isset($this->config[$key]['value']))
-                return $this->config[$key]['value'];
+            if (isset($this->tplParams[$key]))
+            {
+                return $this->tplParams[$key];
+            }
+            elseif ($this->config[$key])
+            {
+                //если конфиг блока содиржит параметры для cms
+                if (is_array($this->config[$key]) && isset($this->config[$key]['value']))
+                    return $this->config[$key]['value'];
+                else
+                    return $this->config[$key];
+            }
             else
-                return $this->config[$key];
+            {
+                return null;
+            }
         }
-        else
-        {
-            return null;
-        }
-    }
 
 	protected function setData($data)
 	{

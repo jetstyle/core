@@ -280,6 +280,7 @@ abstract class Controller implements ArrayAccess
 		);
 	}
 
+        
 	private function _match_pattern($name, $pattern, $value)
 	{
 		if (preg_match('#^'.$pattern.'$#', $value)) return True;
@@ -356,8 +357,8 @@ abstract class Controller implements ArrayAccess
 
                 Finder::useClass('FileManager');
 
-                $view['logo'] = FileManager::getFile('Config/config:logo/small', 1);
-                $view['header_bg'] = FileManager::getFile('Config/config:bg', 1);
+                //$view['logo'] = FileManager::getFile('Config/config:logo/small', 1);
+                //$view['header_bg'] = FileManager::getFile('Config/config:bg', 1);
 
 		$view["config_title"] = $config['project_title'];
 

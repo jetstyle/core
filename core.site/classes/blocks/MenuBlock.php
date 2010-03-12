@@ -56,7 +56,7 @@ class MenuBlock extends Block
 		return $result;
 	}
 
-	protected function getParentNodes()
+	public function getParentNodes()
 	{
 		if (null !== $this->parents)
 		{

@@ -357,7 +357,8 @@ var imagesUploadSettings = {
         if (data.ok) {
             
            
-            var ret = $("#gallery div.gallery-image:first").before(data.html);
+            //$("#gallery div.gallery-image:first").before(data.html);
+            $("#gallery").children(":first").after(data.html);
             //console.log($('#gallery div.gallery-image').get(0));
             this.customSettings.gallery.initImage($('#gallery div.gallery-image').get(0));
             

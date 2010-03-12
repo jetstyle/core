@@ -25,10 +25,12 @@ try
 }
 catch(FileNotFoundException $e)
 {
+
 	$tpl->pushContext();
 	$tpl->load($params);
 	echo $tpl->parse($tplName);
 	$tpl->popContext();
+
 	return;
 }
 
