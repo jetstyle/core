@@ -10,8 +10,8 @@ class HomeController extends Controller
 	{
 		if (Locator::get('principal')->security('noguests'))
 		{
-
-			Controller::redirect(RequestInfo::$baseUrl.Router::linkTo('Start'));
+                        Controller::redirect(RequestInfo::$baseUrl.Router::linkTo('Do')."/Content/default");
+			//Controller::redirect(RequestInfo::$baseUrl.Router::linkTo('Start'));
 		}
 		else
 		{
