@@ -1,17 +1,17 @@
 {{?*}}
-	<ul class="menu-">
+	<ul class="b-cms-menu">
 		{{!for * do=@:item}}
 		
-                {{:item *current}}
-			<li class="current-" nowrap="nowrap">{{*title}}</li>
+    {{:item *current}}
+			<li class="b-cms-menu_current">{{*title}}</li>
 		{{/:item}}
                 
-		{{:item *selected}}1
-			<li class="selected-" nowrap="nowrap"><a href="{{!href_to 'Do/module' *}}" id="menu_selected_{{*id}}" item_id="{{*id}}">{{*title}}</a></li>
+		{{:item *selected}}
+			<li class="b-cms-menu_selected"><a href="{{!href_to 'Do/module' *}}">{{*title}}</a></li>
 		{{/:item}}
 		
 		{{:item}}
-			<li class="item-" nowrap="nowrap"><a href="{{!href_to 'Do/module' *}}" item_id="{{*id}}">{{*title}}</a></li>
+			<li><a href="{{!href_to 'Do/module' *}}">{{*title}}</a></li>
 		{{/:item}}
 	</ul>
 {{/?}}

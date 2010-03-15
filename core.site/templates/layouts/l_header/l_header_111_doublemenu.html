@@ -1,12 +1,12 @@
 {{!connect "layouts/l_header/l_header_111_doublemenu.css"}}<!-- такой же как l-header_111.css -->
-<table class="l-header b-header" cellspacing="0">
+<table class="l-header b-header"{{?cms_header}} id="b-cms-header"{{/?}} cellspacing="0">
   <tr>
     <td class="l-header__logo">{{logo}}</td>
     <td class="l-header__slogan">{{slogan}}</td>
     <td class="l-header__info">{{info}}</td>
   </tr>
   <tr>
-    <td class="l-header__navigation" colspan="3">{{navigation}}</td>
+    <td class="l-header__navigation{{?cms_header}} l-header__navigation__top{{/?}}" colspan="3">{{navigation}}</td>
   </tr>
   <tr>
     <td class="l-header__navigation" colspan="3">{{navigation2}}</td>

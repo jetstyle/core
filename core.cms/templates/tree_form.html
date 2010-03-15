@@ -7,30 +7,24 @@
 <!--
 {{!connect 'jstree/jquery.cookie.js'}}
 {{!connect 'splitter.js'}}
-
-
-
 <div class="splitter">
 	<div class="tree-" style="font-size: 80%">
-            
-            <div class="cms-list-advanced">
-                <div class="toolbar" >
-                    {{@blocks/help_link.html}}
-                    {{__trash_switch}}
-                    {{__add_new}}
-                </div>
-            </div>
-            {{@blocks/submenu.html}}
-            {{wrapped.0}} 
+    <div class="cms-list-advanced">
+        <div class="toolbar" >
+            {{@blocks/help_link.html}}
+            {{__trash_switch}}
+            {{__add_new}}
+        </div>
+    </div>
+    {{@blocks/submenu.html}}
+    {{wrapped.0}} 
 	</div>
-
 	<div>
-            <div class="carpet" style="position: absolute; display: none; background: transparent;"></div>
-            
-            <div class="statusbarview" style="position: fixed; width: 100%">
-                {{@blocks/b_breadcrumbs.html cms="true"}}
-            </div>
-            {{wrapped.1}}
+    <div class="carpet" style="position: absolute; display: none; background: transparent;"></div>
+    <div class="statusbarview" style="position: fixed; width: 100%">
+        {{@blocks/b_breadcrumbs.html cms="true"}}
+    </div>
+    {{wrapped.1}}
 	</div>
 </div>
 
@@ -73,112 +67,93 @@
 {{/:buggy}}
 
 
-<table cellspacing="0" cellpadding="0" class="w100 cms-body">
-<tr>
-  <td></td>
-  <td>
-    <div class="cms-list-advanced">
-      <div class="toolbar" >
-        Содержание
-        <!--{{@blocks/help_link.html}}
-        {{__trash_switch}}
-        {{__add_new}}-->
-      </div>
-    </div>
-  </td>
-  <td class="bar-sep"></td>
-  <td class="statusbarview"><strong>{{module_title}}</strong></td>
-</tr>
-<tr>
-  <td><img class="block" src="{{images}}z.gif" width="2" height="1" align="top" alt="" /></td>
-  <td class="tree-" style="font-size: 80%" id="table1">
-    <div class="carpet" style="position: absolute; display: none; background: transparent;"></div>
-    
-    {{wrapped.0}}
-
-  </td>
-  <td width="6" id="separator" class="vsplitbar">
-    <div class="arrow-"></div>
-  </td>
-  <td width="85%" style="padding-left: 20px; padding-top: 12px" id="table3">
-    <div class="carpet" style="position: absolute; display: none; background: transparent;"></div>
-
-    {{wrapped.1}}
-
-  </td>
-  <!--td><img class="block" src="{{images}}z.gif" width="5" height="1" align="top" alt="" /></td-->
-</tr>
+<table cellspacing="0" class="w100 cms-body">
+  <thead><tr>
+    <td></td>
+    <td class="cms-body_tools">
+      {{@blocks/help_link.html}}
+      {{__trash_switch}}
+      {{__add_new}}
+    </td>
+    <td class="cms-body_sep"></td>
+    <td>{{module_title}}</td>
+  </tr></thead>
+  <tbody><tr>
+    <td></td>
+    <td class="cms-body_tree" id="table1">
+      <div class="carpet" style="position: absolute; display: none; background: transparent;"></div>
+      {{wrapped.0}}
+    </td>
+    <td id="separator" class="cms-body_sep"></td>
+    <td width="85%" style="padding-left: 20px; padding-top: 12px" id="table3">
+      <div class="carpet" style="position: absolute; display: none; background: transparent;"></div>
+      {{wrapped.1}}
+    </td>
+  </tr></tbody>
 </table>
 
 <script type="text/javascript">
-        var startpos, diffpos=0;
-        var permitted = false;
-        
-        var startLeft  = parseInt( $("#table1").css("width") );
-        var startRight = parseInt( $("#table3").css("width") );
+  var startpos, diffpos=0;
+  var permitted = false;
+  
+  var startLeft  = parseInt( $("#table1").css("width") );
+  var startRight = parseInt( $("#table3").css("width") );
         
 	$(document).ready(function(){
-                $('#separator').mousedown(function(e){
-                    startpos = e.clientX + diffpos;
-                    permitted = true;
-                }).attr("unselectable", "on").hover(
-                        function(){
-                            $(this).css('background-color', '#E4E6E1');
-                            //$('.arrow-').css("border-color", "#F0F2ED #06498D #F0F2ED #06498D");
-                        }, 
-                        function(){
-                            $(this).css('background-color', '#F0F2ED');
-			//$('.arrow-').css("border-color", "#F0F2ED #000 #F0F2ED #000");
-                        }).dblclick(
-                        
-                            function(){
-                                if ( $(this).prev('td:hidden').length > 0 ){
-                                    $(this).prev('td').show();
-                                    $('.arrow-').css("margin", "0 1px 0 -4px");
-                                    $(this).next('td').attr('width', '85%');
-                                }
-                                else {
-                                    $(this).prev('td').hide();
-                                    $(this).next('td').attr('width', '99%');
-                                    $('.arrow-').css("margin", "0 -4px 0 1px");
-                                }
-                    });
-                
-                $("body").mousemove(function(e){
-                
-                          if (permitted){
-                              $("body").focus();
-                          
-                              new_position = e.clientX;
-                              diffpos = startpos-new_position;
-
-                              $("#table1").css({"-webkit-user-select": "none", "width": startLeft - diffpos} );
-                              $("#separator").css("width", 6);
-                              $("#table3").css("width", startRight + diffpos );
-                              
-                              $(".carpet").each( function (){
-                                        $(this).css({
-                                                width: $(this).parent().width(),
-                                                height: $(this).parent().height(),
-                                                "z-index": 10000,
-                                        }).show();
-                                }); 
-                          }
-                }).mouseup(function(e){
-                        permitted = false;
-                        $(".carpet").hide();
-                        
-                        e.preventDefault();
-                });
+    $('#separator').mousedown(function(e){
+        startpos = e.clientX + diffpos;
+        permitted = true;
+    }).attr("unselectable", "on").hover(
+      function(){
+        /*$('.cms-body_sep').css('background-color', '#E4E6E1');*/
+        $('.cms-body_sep').css('background-color', '#ccc');
+      }, 
+      function(){
+        /*$('.cms-body_sep').css('background-color', '#E3E9FF');*/
         
-                /*
-                if( $("#update_2").position().left > $(".quick-simple-form").position().left+$(".quick-simple-form").width() )
-                {
-                    $("#update_2").css({"float": "", "position": "absolute", "left": ($(".quick-simple-form").position().left+$(".quick-simple-form").width()) });
-                };
-                
-		*/
-                
+        $('.cms-body_sep').css('background-color', '#e4e6e1');
+        /*$('.cms-body_sep').css('background-color', '#F0F2ED');*/
+    }).dblclick(            
+      function(){
+        if ( $(this).prev('td:hidden').length > 0 ){
+          $(this).prev('td').show();
+          $(this).next('td').attr('width', '85%');
+        }
+        else {
+          $(this).prev('td').hide();
+          $(this).next('td').attr('width', '99%');
+        }
+    });
+    
+    $("body").mousemove(function(e){
+      if (permitted) {
+        $("body").focus();
+    
+        new_position = e.clientX;
+        diffpos = startpos-new_position;
 
+        $("#table1").css({"-webkit-user-select": "none", "width": startLeft - diffpos} );
+        /*$("#separator").css("width", 6);*/
+        $("#table3").css("width", startRight + diffpos );
+        
+        $(".carpet").each( function (){
+          $(this).css({
+            width: $(this).parent().width(),
+            height: $(this).parent().height(),
+            "z-index": 10000,
+          }).show();
+        });
+      }
+    }).mouseup(function(e){
+      permitted = false;
+      $(".carpet").hide();
+      
+      e.preventDefault();
+    });
+
+    /*if( $("#update_2").position().left > $(".quick-simple-form").position().left+$(".quick-simple-form").width() )
+    {
+        $("#update_2").css({"float": "", "position": "absolute", "left": ($(".quick-simple-form").position().left+$(".quick-simple-form").width()) });
+    };*/
 	});
 </script>

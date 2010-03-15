@@ -55,11 +55,7 @@
 {{/:list}}
 
 {{TPL:add_new}}
-    <div class="new-element-">
-        <a href="{{_add_new_href}}" title="{{_add_new_title}}">
-            <img src="{{images}}add_element.gif" width="16" height="12" align="bottom" alt="" title="" />
-        </a>
-    </div>
+  <a href="{{_add_new_href}}" title="{{_add_new_title}}"><img src="{{images}}add_element.gif" width="16" height="12" align="bottom" alt="" title="" /></a>
 {{/TPL:add_new}}
 
 {{TPL:add_new}}
@@ -76,13 +72,17 @@
     </div>
     
     <div class="new-element-menu- invisible" style="position: absolute; top: 24px; right: 70px; background-color: #FFFFFF; border-color: #CCCCCC #999999 #999999 #CCCCCC; " >
-        Новость<br/>
+        Новость<br />
         Рубрику
     </div>
 {{/TPL:add_new}}
 
-{{:trash_show}}<div class="trash-"><a href="{{_show_trash_href}}"><img src="{{images}}trash.png" width="16" height="16" alt="показать удалённые" /></a></div>{{/:trash_show}}
-{{:trash_hide}}<div class="trash-"><a href="{{_show_trash_href}}"><img src="{{images}}trash_hide.png" width="16" height="16" alt="спрятать удалённые" /></a></div>{{/:trash_hide}}
+{{:trash_show}}
+  <a href="{{_show_trash_href}}"><img src="{{images}}trash.png" width="16" height="16" alt="показать удалённые" /></a>
+{{/:trash_show}}
+{{:trash_hide}}
+  <a href="{{_show_trash_href}}"><img src="{{images}}trash_hide.png" width="16" height="16" alt="спрятать удалённые" /></a>
+{{/:trash_hide}}
 
 {{:item_checkbox}}<input style="display: none" type="checkbox" value="{{*id}}" name="selected_items[]"/>{{/:item_checkbox}}
 
