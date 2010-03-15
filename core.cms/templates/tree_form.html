@@ -68,15 +68,18 @@
 
 
 <table cellspacing="0" class="w100 cms-body">
-  <thead><tr>
-    <td class="cms-body_tools">
-      {{@blocks/help_link.html}}
-      {{__trash_switch}}
-      {{__add_new}}
-    </td>
-    <td class="cms-body_sep"></td>
-    <td>{{module_title}}</td>
-  </tr></thead>
+  <thead>
+    <tr class="cms-body_top-padding"><td colspan="3">&nbsp;</td></tr>
+    <tr>
+      <td class="cms-body_tools">
+        {{@blocks/help_link.html}}
+        {{__trash_switch}}
+        {{__add_new}}
+      </td>
+      <td class="cms-body_sep"></td>
+      <td>{{module_title}}</td>
+    </tr>
+  </thead>
   <tbody><tr>
     <td class="cms-body_tree" id="left">
       <div class="carpet" style="position: absolute; display: none; background: transparent;"></div>
