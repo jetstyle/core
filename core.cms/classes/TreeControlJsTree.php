@@ -5,8 +5,8 @@ class TreeControlJsTree extends TreeControl
 {
 	//templates
 	protected $template = "tree_control_js_tree.html";
-	protected $template_trash_show = "list_simple.html:TrashShow";
-	protected $template_trash_hide = "list_simple.html:TrashHide";
+	protected $template_trash_show = "list_simple.html:trash_show";
+	protected $template_trash_hide = "list_simple.html:trash_hide";
 
 	public function handle()
 	{
@@ -21,27 +21,27 @@ class TreeControlJsTree extends TreeControl
 
 			case 'json':
 				header("Content-type: text/x-json; charset=".$this->xmlEncoding);
-				
+
 				$nodeId = $_GET['id'];
 				$currentId = intval($_GET['cid']);
-				
+
 				if ($nodeId == '0')
 				{
 					$this->id = $currentId ? $currentId : $this->getRootId();
 					$parents = $this->getParentsForItem($this->id);
 					$parents[] = $this->id;
-					$this->load("_parent IN('".implode("','", $parents)."')");
+					$this->loadByParents($parents);
 					echo $this->toJSON();
 				}
 				else
 				{
-					$nodeParts = explode('-', $nodeId);
-					$nodeId = intval($nodeParts[1]);
-					$this->load("_parent = ".$nodeId);
-									
+					$this->loadByParents(array($nodeId));
+
+					$nodeId = str_replace('node-', '', $nodeId);
+
 					echo $this->toJSON($nodeId);
 				}
-				
+
 				die();
 			break;
 
@@ -58,13 +58,13 @@ class TreeControlJsTree extends TreeControl
 				$show_trash = $_GET['_show_trash'];
 
 				$treeParams = array(
-					'current_id' => $this->id,
-					'source_url' => RequestInfo::hrefChange(RequestInfo::$baseUrl."do/".$this->config->componentPath, array('action' => 'json', $this->idGetVar => '', 'cid' => $this->id)),
-					'update_url' => RequestInfo::hrefChange(RequestInfo::$baseUrl."do/".$this->config->componentPath, array('action' => 'update')),
-					'ajax_auto_loading' => $this->config->ajaxAutoLoading,
+					'current_id' => ($_GET['full_id'] ? $_GET['full_id'] : 'node-'.$this->id),
+					'source_url' => RequestInfo::hrefChange(RequestInfo::$baseUrl."do/".$this->config['module_path'], array('action' => 'json', $this->idGetVar => '', 'cid' => $this->id)),
+					'update_url' => RequestInfo::hrefChange(RequestInfo::$baseUrl."do/".$this->config['module_path'], array('action' => 'update')),
+					'ajax_auto_loading' => $this->config['ajaxAutoLoading'],
 				);
-				
-				
+
+
 				$url = RequestInfo::hrefChange('', array('id' => ''));
 				$pos = strpos($url, '?');
 				if ($pos !== false)
@@ -80,24 +80,17 @@ class TreeControlJsTree extends TreeControl
 				}
 				$treeParams['go_url'] = $url;
 
-				if (function_exists('json_encode'))
-				{
-					$treeParams['hide_buttons'] = json_encode($this->config->hide_buttons);
-				}
-				else
-				{
-					Finder::useClass('Json');
-					$treeParams['hide_buttons'] = Json::encode($this->config->hide_buttons);
-				}
+                                Finder::useClass('Json');
+                                $treeParams['hide_buttons'] = Json::encode($this->config['hide_buttons']);
 
 				if ($_COOKIE['tree_control_btns'] == 'true')
 				{
 				 	$treeParams['show_controls'] = true;
 				}
-				
+
 				$checkTree = false;
-				
-				if (!$this->config->ajaxAutoLoading)
+
+				if (!$this->config['ajaxAutoLoading'])
 				{
 					$this->load();
 					if (empty($this->children[$this->items[$this->getRootId()]['_parent']]))
@@ -109,15 +102,15 @@ class TreeControlJsTree extends TreeControl
 				{
 					$checkTree = true;
 				}
-	
+
 				if ($checkTree)
 				{
 					$result = $this->getNodesCountForRoot();
 					if (!$result['total'])
 					{
 						$this->createRootNode();
-							
-						if (!$this->config->ajaxAutoLoading)
+
+						if (!$this->config['ajaxAutoLoading'])
 						{
 							$this->loaded = false;
 							$this->items = array();
@@ -131,19 +124,33 @@ class TreeControlJsTree extends TreeControl
 						$treeParams['all_deleted'] = true;
 					}
 				}
-				
+
 				$treeParams['data'] = $this->toJSON();
 				$treeParams['level_limit'] = $this->level_limit;
-				
-				$treeParams['disable_drag'] = $this->config->disable_drag ? true : false;
-				
+
+				$treeParams['disable_drag'] = $this->config['disable_drag'] ? true : false;
+
 				$this->tpl->set('tree_params', $treeParams);
 			break;
 		}
 	}
 
+	protected function loadByParents($parents)
+	{
+            $parentsIds = array();
+            foreach($parents AS $parent)
+            {
+                $parentsIds[] = str_replace('node-', '', $parent);
+            }
+
+            $where = empty($parentsIds) ? '' : "_parent IN (".DBModel::quote($parentsIds).")";
+                
+            $this->load($where);
+	}
+
 	public function getHtml()
 	{
+        $this->renderFilters();
 		$this->renderTrash();
 		return $this->tpl->Parse( $this->template);
 	}
@@ -151,13 +158,15 @@ class TreeControlJsTree extends TreeControl
 	public function toJSON($fromNode = null)
 	{
 		$this->toRoot = array();
-		$c = $this->items[ intval($this->id) ];
+		$c = $this->items[ $this->id ];
 		do
 		{
 			$this->toRoot[$c['id']] = $c['id'];
 			$c = $this->items[$c['_parent']] ;
 		} while($c);
-	
+
+		//print_r($this->children);
+
 		if ($fromNode)
 		{
 			$data = $this->treeParse($this->children[$fromNode]);
@@ -182,24 +191,24 @@ class TreeControlJsTree extends TreeControl
 	{
 		$_REQUEST['newtitle'] = iconv('cp1251', 'UTF-8', 'Узел дерева');
 		$id = parent::addNode();
-		
-		if ($this->config->denyDropToRoot)
+
+		if ($this->config['denyDropToRoot'])
 		{
 			Locator::get('db')->execute('
-				UPDATE ??'.$this->config->table_name.' SET _supertag = "", _path = "" WHERE id = '.$id.'
+				UPDATE ??'.$this->config['table'].' SET _supertag = "", _path = "" WHERE id = '.$id.'
 			');
 		}
-		
+
 	}
-	
+
 	protected function getNodesCountForRoot()
 	{
 		$data = array('total' => 0, 'deleted' => 0);
-		
+
 		$result = $this->db->execute("
 			SELECT ".$this->idField.", _state
-			FROM ??".$this->config->table_name."
-			WHERE _parent = 0 AND _state>=0 " . ($this->config->where ? " AND ".$this->config->where : "") . "
+			FROM ??".$this->config['table']."
+			WHERE _parent = 0 AND _state>=0 " . ($this->config['where'] ? " AND ".$this->config['where'] : "") . "
 		");
 
 		while ($r = $this->db->getRow($result))
@@ -207,17 +216,17 @@ class TreeControlJsTree extends TreeControl
 			$data['total']++;
 			if ($r['_state'] == 2)
 			{
-				$data['deleted']++; 
+				$data['deleted']++;
 			}
 		}
-		
+
 		return $data;
 	}
-	
+
 	protected function renderTrash()
 	{
 		//render trash switcher
-		if (!$this->config->HIDE_CONTROLS['show_trash'])
+		if (!$this->config['hide_controls']['show_trash'])
 		{
 			$show_trash = $_GET['_show_trash'];
 			$this->tpl->set( '_show_trash_href', RequestInfo::hrefChange('', array('_show_trash' => !$show_trash)));
@@ -243,72 +252,85 @@ class TreeControlJsTree extends TreeControl
 						$state = 'open';
 					}
 				}
-				elseif ($this->config->ajaxAutoLoading && ($this->items[$id]['_right'] - $this->items[$id]['_left']) > 1)
+				elseif ($this->config['ajaxAutoLoading'] && $this->items[$id]['has_children'])
 				{
 					$state = 'closed';
 				}
-				
+
 				$result[] = array(
 					'data' => iconv('cp1251', 'utf-8', $this->_getTitle($this->items[$id])),
 					'attributes' => array(
-						'id' => 'node-'.$id, 
-						'data' => '{type: "'.( ($this->items[$id]['_level'] == 1 && $this->config->denyDropToRoot) ? 'root' : 'node').'",path: "'.$this->items[$id]['_path'].'" }',
+						'id' => 'node-'.$id,
+						'data' => '{type: "'.( ($this->items[$id]['_level'] == 1 && $this->config['denyDropToRoot']) ? 'root' : 'node').'",path: "'.$this->items[$id]['_path'].'",form_config: "'.$this->items[$id]['form_config'].'"}',
 						'class' => ($this->items[$id]['_state'] == 1 ? 'hidden' : ($this->items[$id]['_state'] == 2 ? 'deleted' : '')),
 					),
 					'level' => $this->items[$id]['_level'],
 					'state' => $state,
-					'children' => $this->treeParse($this->children[$id])
+					'children' => $this->treeParse($this->children[$id]),
+					'custom_buttons' => $this->items[$id]['custom_buttons'],
+					'hide_buttons' => $this->items[$id]['hide_buttons'],
 				);
+				if (
+					$this->config['customIconsField'] &&
+					$this->config['customIcons'][$this->items[$id]['controller']]
+				)
+					$result[count($result)-1]['icon'] = $this->config['customIcons'][$this->items[$id]['controller']];
 			}
 		}
 
 		return $result;
 	}
-	
+
 	protected function _getTitle(&$node)
 	{
 		$_title = $node['title_short'] ? $node['title_short'] : $node['title'];
 		$_title = $_title ? $_title : 'node_'.$node[$this->idField];
-		
+
 		return $_title;
 	}
-	
+
 	protected function addNode()
 	{
 		$id = parent::addNode();
 		Locator::get('db')->execute('
-			UPDATE ??'.$this->config->table_name.' SET _supertag = "" WHERE id = '.$id.'
+			UPDATE ??'.$this->config['table'].' SET _supertag = "" WHERE id = '.$id.'
 		');
 		return $id;
 	}
-	
+
 	protected function saveTitle($id, $title)
 	{
 		$db = &$this->db;
-		
+
 		$node = $this->getItem($id);
-		
+
 		if ($node['id'])
 		{
-			$sql = "UPDATE ??".$this->config->table_name." SET title=".$db->quote($title).", title_pre = ".$db->quote($this->tpl->action('typografica', $title));
-			
+			$sql = "UPDATE ??".$this->config['table']." SET title=".$db->quote($title).", title_pre = ".$db->quote($this->tpl->action('typografica', $title));
+
 			$supertag = '';
 			if (!$node['_supertag'])
 			{
 				Finder::useClass('Translit');
-				$translit =& new Translit();
+				$translit = new Translit();
 				$supertag = $translit->supertag($title, 20);
 				$sql .= ", _supertag = ".$db->quote($supertag);
 			}
-			
+
 			$sql .= " WHERE id=".$db->quote($id);
 			$db->execute($sql);
-			
+
 			if ($supertag)
 			{
-				$this->updateTreePathes($this->config->table_name, $node['id'], $this->config->allow_empty_supertag, $this->config->where);
+				$this->updateTreePathes($this->config['table'], $node['id'], $this->config['allow_empty_supertag'], $this->config['where']);
 			}
 		}
+	}
+
+	public function getItems($parent)
+	{
+                $this->loadByParents(array($parent));
+                return array('items'=>$this->items, 'children'=>$this->children);
 	}
 }
 ?>

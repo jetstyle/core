@@ -12,6 +12,9 @@ class DoController extends Controller
 			'module' => '\w+',
 			'mode' => '\w+',
 		)),
+		array('pack_modules', array(
+			'pack_modules' => 'pack_modules',
+		)),
 		array('default', array(
 			'module' => '\w+',
 		)),
@@ -20,7 +23,7 @@ class DoController extends Controller
 
 	function handle()
 	{
-		if (!Locator::get('principal')->security('noguests'))
+		if ((!defined('COMMAND_LINE') || !COMMAND_LINE) && !Locator::get('principal')->security('noguests'))
 		{
 			Controller::deny();
 		}
@@ -39,13 +42,45 @@ class DoController extends Controller
 		unset($params[0]);
 
 		Finder::useClass("ModuleConstructor");
-		$moduleConstructor =& new ModuleConstructor();
-		$moduleConstructor->initialize($config['module'], $params);
+                $modulePath = $config['module'].( $params ? '/'.implode('/', $params) : '' );
 
-		Locator::get('tpl')->set('module_body', $moduleConstructor->proceed());
+                if ((!defined('COMMAND_LINE') || !COMMAND_LINE) && !Locator::get('principal')->security('cmsModules', $modulePath))
+		{
+			return Controller::deny();
+		}
 
-		$this->data['title_short'] = $moduleConstructor->getTitle();
+		$this->moduleConstructor = ModuleConstructor::factory($modulePath);
+
+                Locator::get('tpl')->set('module_name', $modulePath);
+                Locator::get('tpl')->set('module_title', $this->moduleConstructor->getTitle());
+		Locator::get('tpl')->set('module_body', $this->moduleConstructor->getHtml());
+
+               
+		$this->data['title_short'] = $this->moduleConstructor->getTitle();
+
 		$this->siteMap = 'module';
+	}
+
+        function breadcrumbsWillRender($block)
+        {
+                $elements = Locator::getBlock("menu")->getParentNodes();
+
+                foreach ( $elements as $el )
+                {
+                    Locator::getBlock("breadcrumbs")->addItem( $el["path"], $el["title"] );
+
+                }
+                Locator::getBlock("breadcrumbs")->addItem( $this->moduleConstructor->getPath(), $this->moduleConstructor->getTitle() );
+        }
+
+	function handle_pack_modules($config)
+	{
+		// force UTF8
+		Locator::get('db')->query("SET NAMES utf8");
+
+		Finder::useClass("ModulePacker");
+		$modulePacker = new ModulePacker();
+		$modulePacker->pack();
 	}
 
 	public function url_to($cls=NULL, $item=NULL)

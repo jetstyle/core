@@ -1,0 +1,86 @@
+    .mceEditors { display: none; }
+    .wysiwyg_tbl { height: 400px; }
+    .inplace-over { background-color: #ffffcc;  }
+    .error { background-color: red }
+
+    .hand   { cursor:pointer; cursor:hand; }
+    .w98{
+        width: 98%;
+    }
+
+    .cms-save-but
+    {
+/*
+	-x-system-font:none;
+	background-color:#99FF99;
+*/
+	font-family:Arial,sans-serif;
+	font-size:12px;
+    }
+    .cms-delete-but
+    {
+	color:#880000;
+	font-family:Arial,sans-serif;
+	font-size:12px;
+    }
+.cms-delete-but, .cms-save-but {
+  padding: 6px;
+  margin: -6px 6px 6px -6px !important;
+  margin: 0; }
+
+/* customization params */
+.change-color-bg, .change-color-text {
+	cursor: pointer;
+	position: absolute;
+}
+
+#webPalette {
+	position: absolute;
+	width: 288px;
+	display: none;
+	z-index: 1100;
+	border: 1px solid;
+}
+#webPalette div {
+	width: 16px;
+	height: 16px;
+	float: left;
+	cursor: pointer;
+}
+.cms-edit{
+    color: #CC0000 !important;
+
+}
+
+a.ocelink:link, a.ocelink:visited {
+    color: #CC0000 !important;
+    border-bottom: 1px dashed #CC0000;
+    text-decoration:none !important;
+}
+
+/**
+ * from cms.css
+ */
+.iframe-buttons-
+{
+	background-color: #DCDCDC;
+	margin-top: 0px;
+	padding-top: 12px;
+	padding-bottom: 12px;
+
+	width: 100%;
+	height: 30px;
+}
+
+.cms-form-buttons { /*margin-top: 10px;*/ text-align: left; float: right; margin-right: 5px; border: 1px inner black; font: 12px Arial, sans-serif; padding: 5px; }
+.cms-add-form { padding-left:18px; }
+.cms-add-form input { font-size:12px; }
+.cms-add-form select { font-size:12px; }
+
+
+.cms-save-but { background-color: #99FF99;   }
+.cms-delete-but { background:#ffb8b1; color:#880000;   }
+
+.cms-save-small-but { height:20px; background:#d8fecd; color:#005314; }
+.cms-delete-small-but { height:20px; background:#ffb8b1; color:#880000; }
+

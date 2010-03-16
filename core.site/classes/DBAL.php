@@ -66,7 +66,7 @@
 
 class DBAL
 {
-	private static $instance = null;
+	//private static $instance = null;
 	public static $prefix = '';
 
 	protected $lowlevel;
@@ -76,10 +76,20 @@ class DBAL
 	{
 		DBAL::$prefix = Config::get('db_prefix');
 
+        if (Config::get('db_disable'))
+        {
+            Config::set('db_al', 'dummy');
+        }
+
+        if ( !Config::exists('db_al') || !Config::get('db_al') )
+        {
+            throw new JSException("You need to set 'db_al' param in 'conig.yml' file or set 'db_disable' to 'true'");
+        }
+
 		$lowlevelClass = "DBAL_" . Config::get('db_al');
 		Finder::useClass($lowlevelClass);
 
-		$this->lowlevel = & new $lowlevelClass();
+		$this->lowlevel = new $lowlevelClass();
 
 		// connection, if any
 		if ($connect)
@@ -91,10 +101,10 @@ class DBAL
 	/**
 	 * singletone
 	 *
-	 * @param RequestHandler $rh
 	 * @param string $connect
 	 * @return DBAL
 	 */
+	/*
 	public static function &getInstance($connect = true)
 	{
 		if (null === self::$instance)
@@ -103,6 +113,7 @@ class DBAL
 		}
 		return self::$instance;
 	}
+	*/
 	
 	public function connect()
 	{

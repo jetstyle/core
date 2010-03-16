@@ -52,7 +52,6 @@ class ContentRouter extends BasicRouter
 
 	private function getClassByMode($mode)
 	{
-		//TODO: remove in branch 5
 		return (($mode ? implode('', array_map(ucfirst, explode('_', $mode))) : "Content" ) .  "Controller");
 	}
 

@@ -12,5 +12,6 @@ $config = array(
                 "file_chmod" => "775",
 
                 // "file_dir"   => "[always supply this]",
+                // "file_name"   => "file_*",
 );
 ?>

@@ -84,7 +84,7 @@ else
 
 	//пририсовываем OCE
 	$para = array(
-          'module'=>$custom['module'], 
+          'module'=>ucFirst($custom['module']), 
           'id'=>$r['id'],
           'width'=>'800',
           'height'=> $r['type']==1 ? 500 : '600'
@@ -96,8 +96,6 @@ else
 $para['show'] = $params['show'] ? true : false;
 $para['inplace'] = $params['inplace'];
 $para['field'] = $params['field'];
-$para['container'] = $params['container'];
-$para['thickbox'] = $params['thickbox'];
 
 if ($good && !isset( $params["noedit"] ) )
     echo $tpl->action( 'oce', $para );

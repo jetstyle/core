@@ -112,9 +112,9 @@ class Translit
 
 		$string = $this->urlTranslit($string, $allow_slashes);
 		$string = preg_replace("/[^".$slash."0-9a-zA-Z\-\_]+/", "", $string);
-		$string = preg_replace("/[\-]+/", "_", $string);
+		$string = preg_replace("/[_\-]+/", "_", $string);
 		$string = preg_replace("/-+$/", "", $string);
-		
+        
 		// cut string
 		if (0 < $length && strlen($string) > $length)
 		{

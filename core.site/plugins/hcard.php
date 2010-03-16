@@ -9,8 +9,8 @@ Finder::useClass('Hcard');
 
 $template = 'microformats/hcard.html'; 
 
-$data = array('*' => Hcard::format($params['_']));
-$stackId = $tpl->addToStack($data);
+$tpl->pushContext();
+$tpl->set('*', Hcard::format($params['_']));
 echo $tpl->parse($template);
-$tpl->freeStack($stackId);
+$tpl->popContext();
 ?>

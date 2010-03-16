@@ -1,74 +1,244 @@
-{{TPL:List_Empty}}<div class="cms-nodata-">нет данных</div>{{/TPL:List_Empty}}
+{{!connect "list_drugs.css"}}
 
-{{TPL:List_Item}}
-<div class="element-">
-	<img src="{{images}}element.gif" width="16" height="12" align="bottom" alt="" title="" />&nbsp;<a href="{{*_href}}">{{*_title|strip_scape}}</a>
-{{*_controls}}
-</div>
-{{/TPL:List_Item}}
+{{:list_empty}}<p class="cms-body_tree_nodata">нет данных</p>{{/:list_empty}}
 
-{{TPL:List_Item_Exchange}} | <a href="" onclick="{{prefix}}picker.Pick({{*id}},2);return false;">&lt;&gt;</a>{{/TPL:List_Item_Exchange}}
+{{:list_item}}
+    <li class="element-" id="{{*id}}">
+        <img src="{{images}}element.gif" width="16" height="12" align="bottom" alt="" title=""/>
+        {{?group_operations}}{{@:item_checkbox}}{{?/}}
+        <a href="{{*_href}}">{{*_title|strip_scape}}</a>
+    </li>
+{{/:list_item}}
 
-{{TPL:List_Item_sel}}<div class="element-s-"><img src="{{images}}element_s.gif" width="16" height="12" align="bottom" alt="" title=""
-/>&nbsp;{{*_title|strip_scape}}
-{{*_controls}}</div>
-{{/TPL:List_Item_sel}}
+{{:list_item_sel}}
+    <li class="element-s-" id="{{*id}}">
+        <img src="{{images}}element_s.gif" width="16" height="12" align="bottom" alt="" title=""/>
+        {{?group_operations}}{{@:item_checkbox}}{{?/}}
+        {{*_title|strip_scape}}
+    </li>
+{{/:list_item_sel}}
 
-{{TPL:List_Item_del}}<div class="element-del-"><img src="{{images}}element_trash.gif" width="16" height="12" align="bottom" alt="" title="Удалённый элемент" />&nbsp;<a href="{{*_href}}">{{*_title}}</a>
-  {{*_controls}}</div>
-{{/TPL:List_Item_del}}
+{{:list_item_del}}
+    <li class="element-del-" id="{{*id}}">
+        <img src="{{images}}element_trash.gif" width="16" height="12" align="bottom" alt="" title="Удалённый элемент"/>
+        {{?group_operations}}{{@:item_checkbox}}{{?/}}
+        <a href="{{*_href}}">{{*_title}}</a>
+    </li>
+{{/:list_item_del}}
 
-{{TPL:List_Item_sel_del}}<div class="element-s-"><img src="{{images}}element_s.gif" width="16" height="12" align="bottom" alt="" title=""
-/>&nbsp;{{*_title}}
-{{*_controls}}</div>
-{{/TPL:List_Item_sel_del}}
+{{:list_item_sel_del}}
+    <li class="element-s-" id="{{*id}}">
+        <img src="{{images}}element_s.gif" width="16" height="12" align="bottom" alt="" title=""/>
+        {{?group_operations}}{{@:item_checkbox}}{{?/}}
+        {{*_title}}
+    </li>
+{{/:list_item_sel_del}}
 
-{{TPL:List_Item_hidden}}<div class="element-hiden-"><img src="{{images}}element_hiden.gif" width="16" height="12" align="bottom" alt="" title="Скрытый элемент" />&nbsp;<a href="{{*_href}}">{{*_title}}</a>
-  {{*_controls}}</div>
-{{/TPL:List_Item_hidden}}
+{{:list_item_hidden}}
+    <li class="element-hiden-" id="{{*id}}">
+        <img src="{{images}}element_hiden.gif" width="16" height="12" align="bottom" alt="" title="Скрытый элемент"/>
+        {{?group_operations}}{{@:item_checkbox}}{{?/}}
+        <a href="{{*_href}}">{{*_title}}</a>
+    </li>
+{{/:list_item_hidden}}
 
-{{TPL:List_Item_sel_hidden}}<div class="element-s-"><img src="{{images}}element_s.gif" width="16" height="12" align="bottom" alt="" title=""
-/>&nbsp;{{*_title}}
-{{_controls}}</div>
-{{/TPL:List_Item_sel_hidden}}
+{{:list_item_sel_hidden}}
+    <li class="element-s-" id="{{*id}}">
+        <img src="{{images}}element_s.gif" width="16" height="12" align="bottom" alt="" title=""/>
+        {{?group_operations}}{{@:item_checkbox}}{{?/}}
+        {{*_title}}
+    </li>
+{{/:list_item_sel_hidden}}
 
-{{TPL:List_Separator}}{{/TPL:List_Separator}}
-
-{{TPL:list}}
-{{_}}
-{{/TPL:list}}
+{{:list}}
+    {{_}}
+{{/:list}}
 
 {{TPL:add_new}}
-  <div class="new-element-"><img src="{{images}}add_element.gif" width="16" height="12" align="bottom" alt="" title="" />
-  <a href="{{_add_new_href}}">{{_add_new_title}}</a>
-  </div>
+  <a href="{{_add_new_href}}" title="{{_add_new_title}}"><img src="{{images}}add_element.gif" width="16" height="12" align="bottom" alt="" title="" /></a>
 {{/TPL:add_new}}
 
-{{TPL:TrashShow}}<div class="trash-"><a href="{{_show_trash_href}}">показать удалённые</a></div>{{/TPL:TrashShow}}
-{{TPL:TrashHide}}<div class="trash-"><a href="{{_show_trash_href}}">спрятать удалённые</a></div>{{/TPL:TrashHide}}
+{{TPL:add_new}}
+    <div class="new-element-" style="background:none repeat scroll 0 0 #E3E3E3; position: relative;">
+        <div style="background: none repeat scroll 0 0  #EFEFEF; height: 8px; border-bottom: 2px solid #EEEEEE; position: absolute; top: 0px; left: 0px; right: 0px;">
+        
+        </div>
+    
+        <div rel="{{_add_new_href}}" style="background: 2px solid #F9F9F9; position: relative">
+            {{?_add_new_title}}{{_add_new_title}}{{?:}}Создать{{/?}}
+            <img src="{{images}}down.gif" height="10" align="bottom" alt="" title="" />
+        </div>
+
+    </div>
+    
+    <div class="new-element-menu- invisible" style="position: absolute; top: 24px; right: 70px; background-color: #FFFFFF; border-color: #CCCCCC #999999 #999999 #CCCCCC; ">Новость<br />Рубрику</div>
+{{/TPL:add_new}}
+
+{{:trash_show}}
+  <a href="{{_show_trash_href}}" title="Показать удалённые"><img src="{{images}}trash.png" width="16" height="16" alt="показать удалённые" /></a>
+{{/:trash_show}}
+
+{{:trash_hide}}
+  <a href="{{_show_trash_href}}" title="Cпрятать удалённые"><img src="{{images}}trash_hide.png" width="16" height="16" alt="спрятать удалённые" /></a>
+{{/:trash_hide}}
+
+{{:item_checkbox}}
+  <input style="display: none" type="checkbox" value="{{*id}}" name="selected_items[]" />
+{{/:item_checkbox}}
 
 <div class="cms-list-advanced">
-{{__select}}
-{{__arrows}}
-<img class="block" src="{{images}}z.gif" width="1" height="10" align="top" alt="" />
-{{__form}}
-{{__trash_switch}}
-{{__add_new}}
-{{__filter}}
-<img class="block" src="{{images}}z.gif" width="1" height="10" align="top" alt="" />
-{{__list}}
-{{__bottom}}
-<img class="block" src="{{images}}z.gif" width="1" height="10" align="top" alt="" />
-{{__arrows}}
+<!--
+  <div class="toolbar" >        
+		{{@blocks/help_link.html}}
+		{{__trash_switch}}
+		{{__add_new}}
+      
+    {{?group_operations}}
+		<a id="toggleGroupSelect" href=""><img src="{{images}}group_operations_on.gif" alt="выбрать несколько" title="выбрать несколько"/></a>
+		<span id="groupSelectActions" style="display: none">
+			<a rel="all" id="groupSelectAll" href=""><img src="{{images}}group_operations_all.gif" alt="выбрать всё/ничего" title="выбрать всё/ничего"/></a>
+			<a id="groupDelete" href="{{group_delete_url}}"><img src="{{images}}group_operations_delete.gif" alt="удалить выбранные" title="удалить выбранные"/></a>
+			<a id="groupRestore" href="{{group_restore_url}}"><img src="{{images}}group_operations_restore.gif" alt="восстановить выбранные" title="восстановить выбранные"/></a>
+		</span>
+	  {{?/}}
+ </div>
+-->
+  
+	{{__select}}
+  {{?__filter}}
+    <form action="" method="get" class="cms-body_tree_filters">
+      {{__filter}}
+    </form>
+  {{/?}}
+	{{__form}}
+	{{__arrows}}
+  <ul id="left_col" {{?drags}}class="sortable boxy"{{?/}}>
+    {{__list}}
+  </ul>
+	{{__bottom}}
+	{{__arrows}}
 </div>
 
-{{!connect "nodepicker.js"}}
-<script language="javascript" type="text/javascript">
-	var {{prefix}}picker = new NodePicker("{{prefix}}form");
+<script>
+  function getItems(action) {
+    var items = '';
+  	$('#left_col li input:checked').each(function() {
+     	items += this.value+',';
+    });
+    return items.substr(0, items.length-1);
+	}
 </script>
 
-<form id="{{prefix}}form" action="" method="post">
-	<input type="hidden" name="action" value="">
-	<input type="hidden" name="id1" value="">
-	<input type="hidden" name="id2" value="">
-</form>
+{{?group_operations}}
+  {{!connect "jquery.js"}}
+  {{!connect "jquery.ui.js"}}
+  {{!connect "list_drugs.css"}}
+
+  <script language="JavaScript" type="text/javascript">
+      $(document).ready(function(){
+          $('#toggleGroupSelect').click(function(){
+			if ($('#left_col li input:checkbox:visible')[0]) {
+               	$('#left_col li input:checkbox').hide();
+               	$('#groupSelectActions').hide();
+			} else {
+				$('#left_col li input:checkbox').show();
+				$('#groupSelectActions').show();
+			}
+          	return false;
+		});
+		$('#groupSelectAll').click(function(){
+              if ($(this).attr('rel') == 'all') {
+                  $(this).find('img').attr('src', $(this).find('img').attr('src').replace('group_operations_all', 'group_operations_nothing'));
+                  $('#left_col li input:checkbox').attr('checked', 'checked');
+                  $(this).attr('rel', 'nothing');
+              } else {
+                  $(this).find('img').attr('src', $(this).find('img').attr('src').replace('group_operations_nothing', 'group_operations_all'))
+                  $('#left_col li input:checkbox').attr('checked', false);
+                  $(this).attr('rel', 'all');
+              }
+          	return false;
+		});
+		$('#groupDelete').click(function(){
+              if (confirm('Вы уверены что хотите удалить выбранное?')) {
+                  $.post('{{page_url}}', {
+                          'delete_list': getItems()
+                      }, function(data) {
+                          if (data != '1') alert(data); else window.location.reload(true);
+                      },'text'
+                  );
+              }
+              return false;
+		});
+		$('#groupRestore').click(function(){
+              $.post('{{page_url}}', {
+                  	'restore_list': getItems()
+                  }, function(data) {
+					if (data != '1') alert(data); else window.location.reload(true);
+	       		},'text'
+	       	);
+              return false;
+		});
+      });
+  </script>
+{{/?}}
+
+{{?drags}}
+    {{!connect "jquery.js"}}
+    {{!connect "jquery.ui.js"}}
+    {{!connect "list_drugs.css"}}
+
+    <script language="JavaScript" type="text/javascript">
+		$(document).ready(function(){
+			var lastOvered = null;
+			$('#left_col').sortable({
+	        	stop: function(e, ui) {
+                    var data = {
+		       			'item_id': ui.item.attr('id'),
+		       			'ajax_load': 1,
+                        'order_list': true
+		       		}
+	        		if (lastOvered) {
+                        var match = $(lastOvered).attr('href').match(/(?:\?|&){{page_var}}=(\d+)/);
+                        data['{{page_var}}'] = match[1];
+	        			data['index'] = {{per_page}}-1;
+                 	} else {
+                        data['index'] = $('#left_col li').index(ui.item);
+                        data['{{page_var}}'] = '{{page_num}}';
+	       			}
+                    $.post('{{page_url}}', data, function(data) {
+                        ui.item.css({'opacity': '1', 'cursor': 'default'});
+						if (data != '1') {
+                            alert(data);
+						} else if (lastOvered) {
+                            window.location.href = lastOvered.href;
+                        }
+		       		},'text');
+	        	},
+	        	start: function(e, ui) {
+	      			ui.helper.css({'opacity': '0.3', 'cursor': 'pointer'});
+	        	},
+	        	sort: function(e, ui) {
+                	if ($('.cms-arrow')[0]) {
+                    	$('.cms-arrow a').each(function(){
+                    		if (
+                    			e.pageX > $(this).offset().left &&
+                    			e.pageX < $(this).offset().left + $(this).width() &&
+                    			e.pageY > $(this).offset().top &&
+                    			e.pageY < $(this).offset().top + $(this).height()
+                    		) {
+                            	$(this).addClass('overed');
+                            	lastOvered = this;
+                            	return false;
+                    		} else {
+                            	if (lastOvered == this) {
+                            		$(this).removeClass('overed');
+                            		lastOvered = null;
+                            	}
+                    		}
+                    	});
+                	}
+	        	}
+			});
+		});
+    </script>
+{{?/}}

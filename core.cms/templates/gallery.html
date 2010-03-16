@@ -1,0 +1,79 @@
+
+{{!connect "gallery.css"}}
+{{!connect "swfupload.js"}}
+{{!connect "gallery.js"}}
+{{!connect "colorbox.js"}}
+{{!connect "colorbox.css"}}
+
+{{!connect "jquery.ui.js"}}
+
+{{!connect "jquery.ocupload-1.1.2.packed.js"}}
+
+
+<script language="javascript" type="text/javascript">
+	jQuery(document).ready(function() {
+		gallery = new Gallery();
+		gallery.formPrefix = "{{prefix}}";
+		gallery.baseUrl = '{{base_url}}';
+		gallery.imagesUrl = '{{images}}';
+		gallery.thumbWidth = '{{thumb_width}}';
+		gallery.thumbHeight = '{{thumb_height}}';
+		gallery.rubricId = '{{rubric_id}}';
+		gallery.sessionHash = '{{session_hash}}';
+		gallery.fileExtensions = '{{file_extensions}}';
+		{{?no_drags}}gallery.noDrags = true;{{?/}}
+		gallery.init();
+	});
+</script>
+
+<div id="gallery">
+	<h4>{{?gallery_title}}{{gallery_title}}{{?:}}”правление изображени€ми{{/?}}</h4>
+	
+    {{!for *gallery_items do=@:gallery_item}}
+
+	{{:gallery_item *picture && *picture.is_image && *picture_thumb}}
+		<div class="gallery-image" id="image{{*id}}">
+			<img src="{{*picture_thumb.link}}" {{?thumb_width}}width="{{thumb_width}}"{{/?}} {{?thumb_height}}height="{{thumb_height}}"{{/?}}/>
+			<a href="#" class="control gallery-edit"><img width="24" height="24" src="{{images}}gallery/edit.png"/></a>
+			<a href="#" class="control gallery-delete"><img width="24" height="24" src="{{images}}gallery/delete.png"/></a>
+			<a href="{{*picture.link}}" title="{{*title}}" {{?*picture.is_image}}rel="gallery"{{?/}} class="{{?*picture.is_image}}colorbox {{?/}}control gallery-zoom"><img width="24" height="24" src="{{images}}gallery/zoom.png"/></a>
+			<div class="image-title" style="width: {{thumb_width}}px">{{*title}}</div>
+		</div>
+	{{/:gallery_item}}
+	
+	{{:gallery_item *picture && *picture.link}}
+		<div class="gallery-image" id="image{{*id}}">
+			<img src="{{images}}file_icons/{{*picture.ext}}.gif" {{?thumb_width}}width="{{thumb_width}}"{{/?}} {{?thumb_height}}height="{{thumb_height}}"{{/?}}/>
+			<a href="#" class="control gallery-edit"><img width="24" height="24" src="{{images}}gallery/edit.png"/></a>
+			<a href="#" class="control gallery-delete"><img width="24" height="24" src="{{images}}gallery/delete.png"/></a>
+			<a href="{{*picture.link}}" class="control gallery-zoom"><img width="24" height="24" src="{{images}}gallery/zoom.png"/></a>
+			<div class="image-title" style="width: {{thumb_width}}px">{{*title}}</div>
+		</div>
+	{{/:gallery_item}}
+        
+    {{:gallery_item *picture}}
+		<div class="gallery-image" id="image{{*id}}">
+			<img src="{{images}}file_icons/no-file.png" alt="‘айл отсутсвует на диске" {{?thumb_width}}width="{{thumb_width}}"{{/?}} {{?thumb_height}}height="{{thumb_height}}"{{/?}} />
+			<a href="#" class="control gallery-edit"><img width="24" height="24" src="{{images}}gallery/edit.png"/></a>
+			<a href="#" class="control gallery-delete"><img width="24" height="24" src="{{images}}gallery/delete.png"/></a>
+			
+			<div class="image-title" style="width: {{thumb_width}}px">{{*title}}</div>
+		</div>
+	{{/:gallery_item}}
+
+  	<div id="addImageButton" style="background: url({{images}}gallery/add.png) center  no-repeat; width: {{thumb_width}}px; height: {{thumb_height}}px;">
+  		<div id="progressCont" style="display: none; width: 90px; height: 8px; background: white; border: 1px solid blue;">
+  			<div id="progressBar" style="width: 0px; height: 6px; background: blue; margin: 1px;"></div>
+  		</div>
+  		<div id="fileCounter"></div>
+    	<span id="spanButtonPlaceholder"></span>
+  	</div>
+  	<div id="replaceFileButton"><span id="spanReplaceButtonPlaceholder"></span></div>
+</div>
+
+<div id="editImageForm">
+	<p>¬ведите название:</p>
+	<input type="text" value="" id="editImageTitle"/>
+	<input type="hidden" value="" id="editImageId"/>
+	<input type="button" value="OK" id="editImageOK"/>
+</div>

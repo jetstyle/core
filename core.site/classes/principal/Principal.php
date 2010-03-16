@@ -91,7 +91,12 @@ class Principal implements PrincipalInterface
 		
 	public function security( $model, $params="" )
 	{
-		$sm = &$this->getSecurityModel($model);
+		if (defined('COMMAND_LINE') && COMMAND_LINE)        
+        {
+            return true;
+        }
+
+        $sm = &$this->getSecurityModel($model);
 		return $sm->check( $this->storageModel, $params );
 	}
 	

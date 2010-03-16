@@ -1,3 +1,20 @@
-{{@blocks/menu.html}}
+
+{{@layouts/l_header/l_cms_header.html logo=@:logo info=@:info navigation=@blocks/menu.html navigation2=@blocks/submenu.html}}
 
 {{module_body}}
+
+{{:logo}}
+  <div>{{@blocks/logo.html}}</div>  
+{{/:logo}}
+
+{{:slogan}}{{/:slogan}}
+
+{{:info}}
+  <img src="{{images}}user.png" />&nbsp;<a href="{{!href_to 'Start'}}">{{user.login}}</a>
+  &nbsp;|&nbsp;
+  <a href="{{/}}do/Config/config">Настройки</a>
+  &nbsp;|&nbsp;
+  {{@blocks/goto_menu.html}}   
+  &nbsp;|&nbsp;
+  {{@blocks/user.html}}
+{{/:info}}

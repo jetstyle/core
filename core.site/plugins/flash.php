@@ -31,6 +31,11 @@ unset ($params[0]);
 if (!$src)
 	return;
 
+if (!$params['fullpath'])
+{
+	Locator::get( 'tpl' )->set("prepath", Locator::get('tpl')->get('images')."flash/" );
+}
+
 //отрезать параметры от имени
 list ($filename, $query) = explode("?", $src);
 
@@ -44,7 +49,7 @@ if (!$container = $params['container'])
 $defaults = array (
 	'src' => '',
 	'width' => "100%",
-	'height' => "100",
+	'height' => "100%",
 	'id' => $id,
 	'container' => $id . '_container',
 	'generate_container' => $generate_container,
@@ -92,6 +97,6 @@ foreach ($flashvar_keys as $k)
 	$defaults['flashvars'] .= $tpl->parse("_/swfobject.html:Variable_Item");
 }
 
-$tpl->setRef('f', $defaults);
+$tpl->set('f', $defaults);
 echo $tpl->Parse("_/swfobject.html:body");
 ?>

@@ -1,0 +1,7 @@
+{{?*data && count(*data)}}
+  {{?*title}}<h3>{{*title}}:&nbsp;</h3>{{/?}}
+  <ul class="cms-body_tree_filters_letters">
+    {{!for *data do=@:option}}
+    {{:option}}<li><a href="{{*href}}">{{?*selected}}<b>{{/?}}{{*letter}}{{?*selected}}</b>{{/?}}</a></li>{{/:option}}
+  </ul>
+{{/?}}

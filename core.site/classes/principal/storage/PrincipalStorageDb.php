@@ -25,6 +25,11 @@ class PrincipalStorageDb extends DBModel implements PrincipalStorageInterface
 	{
 		$this->loadOne('{login} = '.self::quote($login)." AND {realm} = ".self::quote($this->realm) );
 	}
+
+        public function loadByEmail($email)
+	{
+		$this->loadOne('{email} = '.self::quote($email)." AND {realm} = ".self::quote($this->realm) );
+	}
 	
 	public function checkPassword($password, $fromCookie = false)
 	{
@@ -99,7 +104,7 @@ class PrincipalStorageDb extends DBModel implements PrincipalStorageInterface
 		$row['password'] = md5(md5($row['password']).$salt);
 
 		Finder::useClass('Translit');
-		$translit =& new Translit();
+		$translit = new Translit();
 		$supertag = $translit->supertag( $row['login'], TR_NO_SLASHES, 100);
 
 		// check supertag
@@ -119,6 +124,8 @@ class PrincipalStorageDb extends DBModel implements PrincipalStorageInterface
 	
 	protected function onBeforeUpdate(&$row)
 	{
+		if ($row['password'] == '') unset($row['password']);
+		
 		if (array_key_exists('password', $row))
 		{
 			$salt = $this->generateSalt();

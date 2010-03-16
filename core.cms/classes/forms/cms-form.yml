@@ -1,0 +1,7 @@
+buttons:
+    - auto
+db_table:        feedback
+auto_datetime:   true
+success_url:     ''
+cancel_url:      ''
+form_class:      'general-form'

@@ -22,6 +22,20 @@ class FormComponent_login extends FormComponent_validator_base
 				$this->valid = false;
 			}
 		}
+		
+		if($this->field->config['validator_params']['already_exists'])
+		{
+        	$value = $this->field->model->Model_GetDataValue();
+
+			$model = clone Locator::get('principal')->getStorageModel();
+			$model->loadByLogin($value);
+
+			if (!$model->getId())
+			{
+				$this->_Invalidate( "login_does_not_exists", "Пользователь с введённым логином не найден" );
+				$this->valid = false;
+			}
+		}
 
 		return $this->valid;
 	}

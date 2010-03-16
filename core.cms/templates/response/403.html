@@ -1,0 +1,12 @@
+{{@layouts/inner.html html_body=@:body}}
+
+{{:body login_form}}
+    {{@users/login.html message="Пожалуйста, авторизируйтесь."}}
+{{/:body}}
+
+{{:body}}
+    <br /><br /><br /><br />
+    <center>
+            <h1>У Вас нет прав доступа к этой странице.</h1>
+    </center>
+{{/:body}}

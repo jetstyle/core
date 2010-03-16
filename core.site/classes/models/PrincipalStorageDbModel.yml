@@ -8,8 +8,9 @@ default:
         - password
         - name
         - salt
+        - key
         >group:
-            join_where: {_state} = 0
+            join_where: {group._state} = 0
             model: PrincipalStorageDbGroupsModel
             pk: group_id
             fk: id
@@ -31,7 +32,3 @@ cms:
         - password
         - name
         - _state
-        >group: 
-            model: PrincipalStorageDbGroupsModel
-            pk: group_id
-            fk: id

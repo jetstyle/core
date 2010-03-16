@@ -282,7 +282,8 @@ class Spyc {
 			if (preg_match('/^\s*\t/', $line))
 			{
 				$input = str_replace(Config::get('project_dir'), '', $input);
-				throw new JSException('YAML file <b>'.$input.'</b> has tabs. Kill them all!');
+                $humanMessage = 'Файл <span class="example">'.$input.'</span> не должен содержать табы в начале строк.';
+				throw new JSException('YAML file <b>'.$input.'</b> has tabs. Kill them all!', '', $humanMessage);
 			}
 			 
 			$this->lineIndent = $lineIndent = $this->_getIndent($line);

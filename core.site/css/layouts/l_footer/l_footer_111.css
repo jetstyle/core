@@ -1,0 +1,28 @@
+/* Футер всегда фиксированной высоты. Высота задается в "composition.css" */
+
+.l-footer-111 {
+  clear: both; width: 100%; overflow: hidden;
+  }
+  .l-footer-111__col-1, .l-footer-111__col-2, .l-footer-111__col-3 {
+    float: left; width: 33.3333%;
+    }
+  .l-footer-111__col-1 {
+    //margin-right: -100%;
+    }
+    .l-footer-111__col-1__pad {
+      padding: 0 10px 0 15px;
+      }
+  .l-footer-111__col-2 {
+    //margin-left: 33.3333%; /* ширина колонок перед этой ( в данном случае перед ней одна колонка ширины 33.3333% ) */
+    //margin-right: -100%; //display: inline;
+    }
+    .l-footer-111__col-2__pad {
+      padding: 0 10px;
+      }
+  .l-footer-111__col-3 {
+    //margin-left: 66.6666%; /* ширина колонок перед этой ( в данном случае перед ней две колонки, ширина которых в сумме 66.6666% ) */
+    //display: inline;
+    }
+    .l-footer-111__col-3__pad {
+      padding: 0 15px 0 10px;
+      }

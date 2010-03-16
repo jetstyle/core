@@ -1,0 +1,14 @@
+/* Подкючать после основного стиля контента (например, в футере) */
+
+.l-content-11, .l-content-12, .l-content-13, .l-content-21, .l-content-31, .l-content-111, .l-content-112, .l-content-121, .l-content-211, .l-content-1 {
+  background: gray;
+  }
+  .l-content-11__col-1__pad, .l-content-12__col-1__pad, .l-content-13__col-1__pad, .l-content-21__col-1__pad, .l-content-31__col-1__pad, .l-content-111__col-1__pad, .l-content-112__col-1__pad, .l-content-121__col-1__pad, .l-content-211__col-1__pad, .l-content-1__pad {
+    background-color: rgb(215, 105, 206);
+    }
+  .l-content-11__col-2__pad, .l-content-12__col-2__pad, .l-content-13__col-2__pad, .l-content-21__col-2__pad, .l-content-31__col-2__pad, .l-content-111__col-2__pad, .l-content-112__col-2__pad, .l-content-121__col-2__pad, .l-content-211__col-2__pad {
+    background-color: rgb(123, 135, 202);
+    }
+  .l-content-11__col-3__pad, .l-content-12__col-3__pad, .l-content-13__col-3__pad, .l-content-21__col-3__pad, .l-content-31__col-3__pad, .l-content-111__col-3__pad, .l-content-112__col-3__pad, .l-content-121__col-3__pad, .l-content-211__col-3__pad {
+    background-color: #98eeac;
+    }

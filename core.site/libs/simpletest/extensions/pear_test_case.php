@@ -3,7 +3,7 @@
      *	adapter for SimpleTest to use PEAR PHPUnit test cases
      *	@package	SimpleTest
      *	@subpackage Extensions
-     *	@version	$Id: pear_test_case.php,v 1.9 2006/11/10 20:59:58 lastcraft Exp $
+     *	@version	$Id: pear_test_case.php 1388 2006-11-10 20:59:59Z lastcraft $
      */
     
     /**#@+
@@ -44,9 +44,9 @@
          */
         function assertEquals($first, $second, $message = "%s", $delta = 0) {
             if ($this->_loosely_typed) {
-                $expectation = &new EqualExpectation($first);
+                $expectation = new EqualExpectation($first);
             } else {
-                $expectation = &new IdenticalExpectation($first);
+                $expectation = new IdenticalExpectation($first);
             }
             $this->assert($expectation, $second, $message);
         }
@@ -80,7 +80,7 @@
          *    @public
          */
         function assertSame(&$first, &$second, $message = "%s") {
-            $dumper = &new SimpleDumper();
+            $dumper = new SimpleDumper();
             $message = sprintf(
                     $message,
                     "[" . $dumper->describeValue($first) .
@@ -101,7 +101,7 @@
          *    @public
          */
         function assertNotSame(&$first, &$second, $message = "%s") {
-            $dumper = &new SimpleDumper();
+            $dumper = new SimpleDumper();
             $message = sprintf(
                     $message,
                     "[" . $dumper->describeValue($first) .

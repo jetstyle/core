@@ -58,6 +58,11 @@ class PrincipalStorageProfiles implements PrincipalStorageInterface
 		return $included_profile;
 	}
 
+        public function loadByEmail($email)
+        {
+            
+        }
+
 	// EOC{ PrincipalStorage_profiles }
 }
 

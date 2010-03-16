@@ -288,6 +288,112 @@ function getWindowSize(width,height)
 	return {'left' : left, 'top' : top, 'width' : width, 'height' : height, 'scroll' : scroll};
 }
 
+function getPageSize() {
+	var xScroll, yScroll;
+	if (window.innerHeight && window.scrollMaxY) {
+		xScroll = window.innerWidth + window.scrollMaxX;
+		yScroll = window.innerHeight + window.scrollMaxY;
+	} else if (document.body.scrollHeight > document.body.offsetHeight){ // all but Explorer Mac
+		xScroll = document.body.scrollWidth;
+		yScroll = document.body.scrollHeight;
+	} else { // Explorer Mac...would also work in Explorer 6 Strict, Mozilla and Safari
+		xScroll = document.body.offsetWidth;
+		yScroll = document.body.offsetHeight;
+	}
+	var windowWidth, windowHeight;
+	if (self.innerHeight) {	// all except Explorer
+		if(document.documentElement.clientWidth){
+			windowWidth = document.documentElement.clientWidth;
+		} else {
+			windowWidth = self.innerWidth;
+		}
+		windowHeight = self.innerHeight;
+	} else if (document.documentElement && document.documentElement.clientHeight) { // Explorer 6 Strict Mode
+		windowWidth = document.documentElement.clientWidth;
+		windowHeight = document.documentElement.clientHeight;
+	} else if (document.body) { // other Explorers
+		windowWidth = document.body.clientWidth;
+		windowHeight = document.body.clientHeight;
+	}
+	// for small pages with total height less then height of the viewport
+	if(yScroll < windowHeight){
+		pageHeight = windowHeight;
+	} else {
+		pageHeight = yScroll;
+	}
+	// for small pages with total width less then width of the viewport
+	if(xScroll < windowWidth){
+		pageWidth = xScroll;
+	} else {
+		pageWidth = windowWidth;
+	}
+	arrayPageSize = new Array(pageWidth,pageHeight,windowWidth,windowHeight);
+	return arrayPageSize;
+}
+
+$(function(){
+	//colorbox parameters
+	var sizes = getPageSize();
+	window.colorBoxParams = {
+		maxWidth:  sizes[2]-50,
+		maxHeight: sizes[3]-50,
+		current:   '{current} из {total}',
+		previous:  'предыдущая',
+		next:      'следующая',
+		onComplete: function() {
+			if ($('#cboxPhoto').attr('src') && !$('#cboxLinkToOrigianl').get(0)) {
+				$('#cboxCurrent').show().prepend('<a id="cboxLinkToOrigianl" target="_blank" href="'+$('#cboxPhoto').attr('src')+'">изображение</a>&nbsp;');
+			} else if ($('#cboxPhoto').attr('src')) {
+				$('#cboxLinkToOrigianl').attr('href', $('#cboxPhoto').attr('src'));
+			}
+		},
+		onOpen: function() {
+			$('object').css('visibility', 'hidden');
+		},
+		onClosed: function() {
+			$('object').css('visibility', 'visible');
+		}
+	};
+	window.colorBoxIframeParams = {
+		width: '90%',
+		height: '90%',
+		iframe: true,
+		rel: 'nofollow',
+		onComplete: function() {
+			$('#cboxTitle').hide();
+			$('#cboxLoadedContent').css({
+				'margin-bottom': 0,
+				'height': $('#cboxLoadedContent').height() + 28 + 'px'
+			});
+		}
+	};
+	window.colorBoxInlineParams = {
+		inline: true,
+		onComplete: function() {
+			$('#cboxTitle').hide();
+			$('#cboxLoadedContent').css({
+				'margin-bottom': 0,
+				'height': $('#cboxLoadedContent').height() + 28 + 'px'
+			});
+		}
+	};
+	//login window on 403 error
+	$(document).ajaxError(function(event, request, settings){
+		if (request.status == 403) {
+			var params = window.colorBoxIframeParams;
+			params.href = (base_url.match(/.*cms\/$/) ? base_url : (base_url+'cms/'))+"u/login/ajax&onremove=true";
+			params.width = false;
+			params.height = false;
+			params.innerWidth = 274;
+			params.innerHeight = 100;
+			params.onClosed = function() {
+			  window.location.assign( window.location );
+			}
+			$.fn.colorbox(params);
+		}
+	});
+})
+
 /*
 function isFlash(){
     

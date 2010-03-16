@@ -28,7 +28,7 @@ Validator.prototype = {
 		collectItems : function()
 		{
 			this.objs = new Array();
-			var els = $('[@validate]', this.f).get();
+			var els = $('[validate]', this.f).get();
 			for(i in els)
 			{
 				this.objs[this.objs.length] = new ValidatorItem(els[i], this.instant);
@@ -140,6 +140,27 @@ ValidatorItem.prototype = {
 				{
 					s = false;
 				}
+											
+			break; 
+                        
+        		case 'emails' : 
+				
+				var vs = $.trim(this.obj.val()).split(",");
+                                for (i in vs)
+                                {
+                                    v = $.trim(vs[i]);
+                                    var filter  = /^([a-zA-Z0-9_\.\-])+\@(([a-zA-Z0-9\-])+\.)+([a-zA-Z0-9]{2,4})+$/;
+                                    if (filter.test(v)) 
+                                    {
+                                            s = true;
+                                    }
+                                    else
+                                    {
+                                            s = false;
+                                            break;
+                                    }
+                                }
+                                
 											
 			break; 
 			

@@ -51,14 +51,22 @@ class DBAL_mysql
 	{
 		if (!$this->dblink = @mysql_connect(Config::get('db_host'), Config::get('db_user'), Config::get('db_password')))
 		{
-			throw new DbException("Connect failed: Host=<b>" . Config::get('db_host') . "</b>, User=<b>" . Config::get('db_user') . "</b>");
+			$humanMessage = 'Ошибка при соединении с сервером базы данных.';
+            $humanMessage .= '<br />';
+            $humanMessage .= 'Проверьте правильность указания имени пользователя и пароля для сервера базы данных в файле настроек <span class="example">config/config.yml</span>';
+            
+            throw new DbException("Connect failed: Host=<b>" . Config::get('db_host') . "</b>, User=<b>" . Config::get('db_user') . "</b>", '', $humanMessage);
 		}
 		
-		Config::free('db_password');
+		//Config::free('db_password');
 		
 		if (!mysql_select_db(Config::get('db_name'), $this->dblink))
 		{
-			throw new DbException("Database \"" . Config::get('db_name') . "\" select error");
+			$humanMessage = 'Ошибка при выборе базы данных.';
+            $humanMessage .= '<br />';
+            $humanMessage .= 'Проверьте, существует ли база данных <span class="example">'.Config::get('db_name').'</span> и достаточно ли прав для ее использования.';
+
+            throw new DbException("Database \"" . Config::get('db_name') . "\" select error", '', $humanMessage);
 		}
 		
 		if (Config::get('db_set_encoding')) 

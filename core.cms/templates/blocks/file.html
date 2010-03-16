@@ -1,0 +1,18 @@
+<tr>
+ <td class="left">{{title}}:</td>
+  <td class="desc">
+    <input type="file" name="{{prefix}}{{input}}" />
+    <br />
+    Нажмите кнопку <dfn>Обзор</dfn> и выберите файл со своего компьютера.
+    {{?file.is_loaded}}
+	    <br />
+	    <input type="checkbox" id="{{prefix}}{{input}}_del" name="{{prefix}}{{input}}_del" value='1'>&nbsp;<label for="{{prefix}}{{input}}_del" class="warning">удалить иллюстрацию</label>
+    	<br />
+            {{?file.is_flash}}
+                {{!flash file.link transparent=1 fullpath="1" width=file.width height=file.height}}
+            {{?:}}
+                {{file}}
+            {{/?}}
+    {{/?}}
+  </td>
+</tr>

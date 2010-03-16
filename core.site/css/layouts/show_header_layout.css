@@ -1,0 +1,14 @@
+/* Подкючать после основного стиля шапки (например, в футере) */
+
+.l-header__logo {
+  background-color: rgb(100, 190, 236);
+  }
+.l-header__slogan {
+  background-color: rgb(215, 105, 206);
+  }
+.l-header__info {
+  background-color: rgb(123, 135, 202);
+  }
+.l-header__navigation {
+  background-color: #CCFFCC;
+  }

@@ -84,6 +84,8 @@ class Finder {
 
 	private static $DIRS = array('all' => array()); 				//информаци€ о корневых директори€х дл€ каждого уровн€
 
+	private static $stack = array();
+
 	private static $searchHistory = array();	//информаци€ о том, где мы пытались найти файл. »спользуетс€ в случае неудачного поиска.
 	private static $searchCache = array();
 	private static $lib_dir;
@@ -92,11 +94,15 @@ class Finder {
 	public static function findScript( $type, $name, $level=0, $dr=1, $ext = 'php', $withSubDirs = false, $scope = 'all' )
 	{
 		//провер€ем входные данные
+		/*
 		if (strlen($type) == 0)
 		{
 			throw new Exception("FindScript: <b>*type* пусто</b>, type=<b>$type</b>, name=<b>$name</b>, level=<b>$level</b>, dr=<b>$dr</b>, ext=<b>$ext</b>");
 		}
-		elseif (strlen($name) == 0)
+		else
+		*/
+
+		if (strlen($name) == 0)
 		{
 			throw new Exception("FindScript: <b>*name* пусто</b>, type=<b>$type</b>, name=<b>$name</b>, level=<b>$level</b>, dr=<b>$dr</b>, ext=<b>$ext</b>");
 		}
@@ -106,44 +112,72 @@ class Finder {
 			//echo '<hr>'.self::$searchCache[$type][$name.'.'.$ext];
 			return self::$searchCache[$type][$name.'.'.$ext];
 		}
-		
+
 		if (!is_array(self::$DIRS[$scope]))
 		{
 			return false;
 		}
-		
+
 		//определ€ем начальный уровень поиска
 		$n = count(self::$DIRS[$scope]);
 		if($level===false) $level = $n - 1;
 		$i = $level>=0 ? $level : $n - $level;
-		
+
 		self::$searchHistory = array();
 		//ищем
 		for( ; $i>=0 && $i<$n; $i+=$dr )
 		{
+                        unset ($fname_block); 
 			//разбор каждого уровн€ тут
 			$dir =& self::$DIRS[$scope][$i];
-			if( !( is_array($dir) && !in_array($type,$dir) ) )
+
+                        
+			//if( !( is_array($dir) && !in_array($type,$dir) ) )
+			//{
+			$fname = $dir.($type ? $type."/" : "").$name.'.'.$ext;
+                        self::$searchHistory[] = $fname;
+
+
+                        //looking for b-* files in [type]/blocks/name/name.[type]
+                        $word = substr($name, 0, 2);
+                        if ( strpos($name, "b_")!==false ) //$word=="b-" || $word=="b_" 
+                        {
+                            $_name = str_replace("blocks/", "", $name);
+                            $fname_block = $dir.($type ? "templates/blocks/".$_name."/" : "").$_name.'.'.$ext;
+                            //var_dump($fname_block);
+                          
+                            //var_dump($fname_block, file_exists($fname_block));
+                            
+                        }
+                        /*
+                        else if ( $i==0 && ( substr($name, 0, 9)=="blocks/b_" ) ) // || substr($name, 0, 9)=="blocks/b-" 
+                        {
+                            $_name = str_replace("blocks/", "", $name);
+                            $fname_block = $dir.($type ? "templates/".$name."/" : "").$_name.'.'.$ext;
+                            
+                            //var_dump($fname_block);
+                        }
+                        */
+
+			if(@file_exists($fname))
 			{
-				$fname = (is_array($dir) ? $dir[0] : $dir).$type."/".$name.'.'.$ext;
+				//self::$searchCache[$type][$name.'.'.$ext] = $fname;
+				return $fname;
+			}
+                        else if ($fname_block && @file_exists($fname_block) )
+                        {
+                                return $fname_block;
+                        }
 
-				self::$searchHistory[] = $fname;
-				
-				if(@file_exists($fname))
+			if ($withSubDirs)
+			{
+				if ($file = self::recursiveFind($fname))
 				{
-					self::$searchCache[$type][$name.'.'.$ext] = $fname;
-					return $fname;
-				}
-
-				if ($withSubDirs)
-				{
-					if ($file = self::recursiveFind((is_array($dir) ? $dir[0] : $dir).$type."/", $name . "." . $ext))
-					{
-						self::$searchCache[$type][$name.'.'.$ext] = $file;
-						return $file;
-					}
+					//self::$searchCache[$type][$name.'.'.$ext] = $file;
+					return $file;
 				}
 			}
+			//}
 			//если искать только на одном уровне - сразу выходим
 			if($dr==0)
 			break;
@@ -158,7 +192,7 @@ class Finder {
 		return self::$DIRS;
 	}
 
-	public static function getPluralizeDir($classname) 
+	public static function getPluralizeDir($classname)
 	{
 		Finder::useClass("Inflector");
 		$words = preg_split('/[A-Z]/', $classname);
@@ -166,7 +200,7 @@ class Finder {
 		$last_word = strtolower($last_word);
 		return Inflector :: pluralize($last_word);
 	}
-	
+
 	private static function recursiveFind($dir, $name)
 	{
 		if ($handle = @opendir($dir))
@@ -271,7 +305,7 @@ class Finder {
 		return $out;
 	}
 
-	public static function setDirs($DIRS) 
+	public static function setDirs($DIRS)
 	{
 		foreach ($DIRS AS $key => $value)
 		{
@@ -282,22 +316,26 @@ class Finder {
 			}
 			self::$DIRS['all'][] = $value;
 		}
-		//var_dump(self::$DIRS);
 	}
 
-	public static function useClass($name, $scope = 'all') 
+	public static function replaceDirs($DIRS)
+	{
+		self::$DIRS = $DIRS;
+	}
+
+	public static function useClass($name, $scope = 'all')
 	{
 		if (class_exists($name, false)) return;
 		Finder::useScript("classes", $name, 0, 1, 'php', false, false, $scope);
 	}
 
-	public static function useModel($name, $scope = 'all') 
+	public static function useModel($name, $scope = 'all')
 	{
 		if (class_exists($name, false)) return;
 		self::useScript("classes/models", $name, 0, 1, 'php', false, false, $scope);
 	}
 
-	public static function useLib($libraryName, $fileName = "") 
+	public static function useLib($libraryName, $fileName = "")
 	{
 		if ($fileName == "")
 		{
@@ -307,24 +345,58 @@ class Finder {
 		Finder::useScript('libs', $libraryName . "/" . $fileName, 0, 1, 'php');
 	}
 
-	public static function prependDir($dir, $scope = null) 
+	public static function prependDir($dir, $scope = null)
 	{
-		if (null !== $scope)
-		{
-			if (!is_array(self::$DIRS[$scope])) self::$DIRS[$scope] = array();
-			array_unshift(self::$DIRS[$scope], $dir);
-		}
-		array_unshift(self::$DIRS['all'], $dir);
+		self::addDir($dir, $scope, 'prepend');
 	}
 
 	public static function appendDir($dir, $scope = null)
 	{
+		self::addDir($dir, $scope);
+	}
+
+	public static function pushContext()
+	{
+		self::$stack[] = self::$DIRS;
+	}
+
+	public static function popContext()
+	{
+		if (count(self::$stack))
+		{
+			self::$DIRS = array_pop(self::$stack);
+		}
+	}
+
+	private static function addDir($dir, $scope, $type = 'append')
+	{
+		if ($type == 'prepend')
+		{
+			$func = 'array_unshift';
+		}
+		else
+		{
+			$func = 'array_push';
+		}
+
 		if (null !== $scope)
 		{
 			if (!is_array(self::$DIRS[$scope])) self::$DIRS[$scope] = array();
-			array_push(self::$DIRS[$scope], $dir);
+
+            if (($pos = array_search($dir, self::$DIRS[$scope])) !== false)
+            {
+                unset(self::$DIRS[$scope][$pos]);
+            }
+
+			$func(self::$DIRS[$scope], $dir);
 		}
-		array_push(self::$DIRS['all'], $dir);
+
+        if (($pos = array_search($dir, self::$DIRS['all'])) !== false)
+        {
+            unset(self::$DIRS['all'][$pos]);
+        }
+
+		$func(self::$DIRS['all'], $dir);
 	}
 }
 ?>

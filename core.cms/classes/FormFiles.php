@@ -1,308 +1,172 @@
 <?php
-
 Finder::useClass('FormSimple');
 
-class FormFiles extends FormSimple
-{
-	protected $upload;
-	protected $max_file_size = 55242880; //максимальный размер файла для загрузки
-	protected $template_files = 'formfiles.html';
+class FormFiles extends FormSimple {
+    const FILES_RUBRIC_TYPE_ID = 0;
+    const PICTURES_RUBRIC_TYPE_ID = 1;
 
-	//До каких размеров картинки показывать просто, а больше - через превью и попап?
-	var $view_width_max = 300;
-	var $view_height_max = 300;
-	var $field_file = "file";
+    protected $upload;
+    protected $max_file_size = 55242880; //максимальный размер файла для загрузки
+    protected $template_files = 'formfiles.html';
 
-	function __construct( &$config )
-	{
-		parent::__construct($config);
+    protected $filesConfig = array();
+    protected $configKey = '';
 
-		//upload
-		$this->upload = &Locator::get('upload');
-		$this->upload->setDir($config->upload_dir ? Config::get('files_dir').$config->upload_dir."/" : Config::get('files_dir'));
-	}
+    protected $filesRubrics = array();
 
-	public function handle()
-	{
-		//грузим форму
-		$this->load();
+    private $uploadedFiles = array();
 
-		$this->renderFiles();
+    public function __construct( &$config ) {
+        Finder::useClass('FileManager');
 
-		//по этапу
-		parent::handle();
-	}
+        $fullConfigKey = $config['module_path'];
+        $shortConfigKeyParts = explode('/', $config['module_path']);
+        array_pop($shortConfigKeyParts);
+        $shortConfigKey = implode('/', $shortConfigKeyParts);
 
-	function renderFiles()
-	{
-		if( $this->filesRendred ) return;
+        $filesConfig = FileManager::getConfig($shortConfigKey);
+        if (is_array($filesConfig) && !empty($filesConfig)) {
+            $this->configKey = $shortConfigKey;
+            $this->filesConfig = $filesConfig;
+        }
+        else {
+            $this->configKey = $fullConfigKey;
+            $this->filesConfig = FileManager::getConfig($fullConfigKey);
+        }
 
-		$tpl =& $this->tpl;
-		$config =& $this->config;
+        parent::__construct($config);
 
-		//рендерим файлы
-		if(is_array($config->_FILES))
-		{
-			$this->_renderFiles();
-		}
+        if ($_POST['from_flash'])
+        {
+            foreach ($_FILES AS $key => $fileData) {
+                $_FILES[$key]['name'] = iconv('utf-8', 'cp1251', $_FILES[$key]['name']);
+            }
+        }
+    }
 
-		$tpl->set( '__max_file_size', $config->max_file_size ? $config->max_file_size : $this->max_file_size );
-		$this->files_rendered = true;
-	}
+    /**
+     * Rubric for files
+     *
+     */
+    protected function getFilesRubric($file = null) {
+        if ($file && $file->isImage()) {
+            $rubricTypeId = self::PICTURES_RUBRIC_TYPE_ID;
+        }
+        else {
+            $rubricTypeId = self::FILES_RUBRIC_TYPE_ID;
+        }
 
-	function _renderFiles()
-	{
-		$tpl =& $this->tpl;
-		$upload =& $this->upload;
-		$config =& $this->config;
+        if ( !array_key_exists($rubricTypeId, $this->filesRubrics) ) {
+            //$parts = explode('/', $this->config['module_path']);
+            //$moduleName = array_shift($parts);
 
-		foreach($this->config->_FILES AS $field_file => $v)
-		{
-			if(is_array($v))
-			{
-				unset($exts);
-				foreach($v AS $vv)
-				{
-					if($vv['show'])
-					{
-						if ($vv['exts'])
-						{
-							$upload->ALLOW = $vv['exts'];
-						}
-						elseif ($vv['graphics'])
-						{
-							$upload->ALLOW = array_intersect($upload->ALLOW, $upload->GRAPHICS);
-						}
+            $rubric = DBModel::factory('FilesRubrics');
+            $rubric->loadOne('{type_id} = '.DBModel::quote($rubricTypeId).' AND {module} = '.DBModel::quote($this->configKey));
 
-						$file = $upload->getFile(str_replace('*', $this->id, $vv['filename']));
+            if (!$rubric['id']) {
 
-						if($file['name_full'] && in_array($file['ext'], $upload->GRAPHICS ) )
-						{
-							$r = array(
-								'src' => $file['link'],
-							);
+                $data = array(
+                    'module' => $this->configKey,
+                    'title' => ModuleConstructor::factory($this->configKey)->getTitle(),
+                    'type_id' => $rubricTypeId,
+                    '_state' => 0,
+                    '_created' => date('Y-m-d H:i:s'),
+                );
+                $id = $rubric->insert($data);
 
-							if($vv['link_to'])
-							{
-								foreach($this->config->_FILES[$vv['link_to']] AS $_vv)
-								{
-									if($_vv['show'])
-									{
-										$file = $upload->GetFile(str_replace('*', $this->id, $_vv['filename']));
+                $data = array(
+                    '_order' => $id,
+                );
+                $rubric->update($data, '{id} = '.DBModel::quote($id));
+                $rubric->loadOne('{id} = '.DBModel::quote($id));
+            }
+            $this->filesRubrics[$rubricTypeId] = $rubric;
+        }
 
-										if($file['name_full'] && in_array($file['ext'], $upload->GRAPHICS ) )
-										{
-											$A = getimagesize($file['name_full']);
-											$r['width'] = $A[0];
-											$r['height'] = $A[1];
-											$r['src_original'] = $file['link'].'?popup=1';
-											$this->tpl->setRef('file', $r);
-											$this->item[$field_file] = $this->tpl->parse($this->template_files.':image_with_link');
-										}
-									}
-								}
-							}
+        return $this->filesRubrics[$rubricTypeId];
+    }
 
-							if(!$this->item[$field_file])
-							{
-								$this->tpl->setRef('file', $r);
-								$this->item[$field_file] = $this->tpl->parse($this->template_files.':image');
-							}
-						}
-						else if ($file['name_full'])
-						{
-							$r = array(
-								'filesize' => $file['size'],
-								'format'   => $file['format'],
-								'src'      => $file['link'],
-								'name_short' =>  $file['name_short'],
-							);
+    protected function getUploadedFiles() {
+        return $this->uploadedFiles;
+    }
 
-							$this->tpl->setRef('file', $r);
+    public function update() {
+        $updateResult = parent :: update();
+        if( $updateResult ) {
+            $this->uploadFiles();
+        }
 
-							/*
-							if($file['ext'] == 'flv')
-							{
-								$this->item[$field_file] = $this->tpl->parse($this->template_files.':file_video');
-							}
-							elseif($file['ext'] == 'mp3')
-							{
-								$this->item[$field_file] = $this->tpl->parse($this->template_files.':file_mp3');
-							}
-							elseif($file['ext'] == 'swf')
-							{
-								$this->item[$field_file] = $this->tpl->parse($this->template_files.':file_flash');
-							}
-							else
-							{
-								*/
-								$this->item[$field_file] = $this->tpl->parse($this->template_files.':file');
-							//}
+        return $updateResult;
+    }
 
-                            $this->item[$field_file."_down"] = $this->item[$field_file];
-						}
-                        $this->file = $file;
-					}
-				}
-				if (isset($vv['exts']))
-				{
-					$exts = $vv['exts'];
-				}
+    protected function uploadFiles($objId = null, $isId = false) {
+        if ($objId === null) {
+            $objId = $this->id;
+        }
 
-				$ar = $this->_getExts($exts);
-				$this->item[$field_file."_exts"] = $ar['all'];
-				$this->item[$field_file."_exts_graphics"] = $ar['graphics'];
-			}
-		}
-	}
+        //загружаем и удаляем файлы
+        foreach ($this->filesConfig AS $inputName => $conf) {
+            if ($conf['input']) {
+                $inputName = $conf['input'];
+            }
 
-	function _getExts($exts)
-	{
-		if (is_array($exts))
-		{
-			$exts = array_unique($exts);
-		}
+            $file = FileManager::getFile($this->configKey.':'.$conf['key'], $objId, $isId);
 
-		if (empty($exts))
-		{
-			$exts = array_keys($this->upload->TYPES);
-		}
+            if (is_uploaded_file($_FILES[$this->prefix.$inputName]['tmp_name'])) {
+                try {
+                    $file->upload($_FILES[$this->prefix.$inputName]);
+                    $filesRubric = $this->getFilesRubric($file);
+                    $file->addToRubric($filesRubric['id']);
+                } catch( UploadException $e ) {
+                    $this->tpl->set($inputName.'_err', $e->getMessage());
+                }
 
-		return array("all" => "(".implode(", ",$exts).")", "graphics" => "(".implode(", ", array_intersect($exts, $this->upload->GRAPHICS)).")");
-	}
+                $this->uploadedFiles[$inputName] = $file;
+            }
+            elseif ($_POST[$this->prefix.$inputName.'_del']) {
+                if ($isId) {
+                    $filesRubric = $this->getFilesRubric($file);
+                    $file->removeFromRubric($filesRubric['id']);
+                }
+                else {
+                    $file->deleteLink();
+                }
+            }
+        }
+    }
 
-	function update()
-	{
-		if( parent :: update() )
-		{
-			//загружаем и удаляем файлы
-			$upload =& $this->upload;
-			if(is_array($this->config->_FILES))
-			{
-				foreach($this->config->_FILES AS $field_file => $result_arrays)
-				{
-					/**
-             		* файл заусунули в инпут
-             		*/
-					if(is_uploaded_file($_FILES[$this->prefix.$field_file]['tmp_name']))
-					{
-						$this->_handleUpload($field_file, $result_arrays, true);
-					}
-					/**
-             		* не засунули в инпут ничего, да еще и галочку удалить включили
-             		*/
-					elseif($_POST[$this->prefix.$field_file.'_del'])
-					{
-						$this->_handleUpload($field_file, $result_arrays);
-					}
-				}
-			}
+    public function delete() {
+        $deleteRes = parent :: delete();
 
-			return true;
-		}
-		else
-		{
-			return false;
-		}
-	}
+        // delete forever
+        if( 2 == $deleteRes ) {
+            $this->deleteFiles();
+        }
 
-	function _shouldTakeFromIfEmpty($from_field_file)
-	{
-		foreach($this->config->_FILES AS $field_file => $result_arrays)
-		{
-			foreach($result_arrays AS $vv)
-			{
-				if ($vv['take_from_if_empty'][0]==$from_field_file && !is_uploaded_file($_FILES[$this->prefix.$field_file]['tmp_name']))
-				{
-					$this->take_to = $vv;
-					return $field_file;
-				}
-			}
-		}
-		return false;
-		//die();
-	}
+        return $deleteRes;
+    }
 
-	function _handleUpload($field_file, &$result_arrays, $do_upload=false)
-	{
-		$upload =& $this->upload;
+    protected function deleteFiles($objId = 0, $isId = false) {
+        if (!empty($this->filesConfig)) {
+            $objId = intval($objId);
+            if (!$objId) {
+                $objId = $this->id;
+            }
 
-		if(is_array($result_arrays))
-		{
-			foreach($result_arrays AS $vv)
-			{
-				$file = $upload->GetFile( str_replace('*', $this->id, $vv['filename']));
-				if($file['name_full'])
-				{
-					@unlink( $file['name_full'] );
-				}
+            if (!$objId) return;
 
-				if ($do_upload)
-				{
-					if ($vv['exts'])
-					{
-						$upload->ALLOW = $vv['exts'];
-					}
-					elseif ($vv['graphics'])
-					{
-						$upload->ALLOW = array_intersect($upload->ALLOW, $upload->GRAPHICS);
-					}
-
-					//нужно сохранить превью?
-					if ($me_too = $this->_shouldTakeFromIfEmpty($field_file))
-					{
-						$vvv = $this->take_to;
-						$upload->UploadFile($this->prefix.$field_file, str_replace('*', $this->id, $vvv['filename']), false, $this->buildParams($vvv));
-					}
-
-					$this->current_file = $upload->UploadFile($this->prefix.$field_file, str_replace('*', $this->id, $vv['filename']), false, $this->buildParams($vv));
-				}
-			}
-		}
-	}
-
-	function buildParams($d)
-	{
-		return array(
-				'size' => $d['size'],
-				'filesize' => $d['filesize'],
-				'crop' => $d['crop'],
-				'base' => $d['base'],
-				'to_flv' => $d['convert_to_flv'],
-				'opacity' => $d['opacity'],
-				'mask' => $d['mask'],
-				'blur' => $d['blur'],
-		
-				'actions' => $d['actions'],
-			);
-	}
-
-	function delete()
-	{
-		$upload =& $this->upload;
-
-		$res = parent :: delete();
-		if( 2 == $res )
-		{
-			if (!empty($this->config->_FILES))
-			foreach($this->config->_FILES AS $field_file => $v)
-			{
-				if(is_array($v))
-				{
-					foreach($v AS $vv)
-					{
-						$file = $upload->GetFile(str_replace('*', $this->id, $vv['filename']));
-						if($file['name_full'])
-						{
-							unlink($file['name_full']);
-						}
-					}
-				}
-			}
-		}
-		return $res;
-	}
-
+            foreach ($this->filesConfig AS $conf) {
+                $file = FileManager::getFile($this->configKey.':'.$conf['key'], $objId, $isId);
+                if ($isId) {
+                    //$filesRubric = $this->getFilesRubric($file);
+                    //$file->removeFromRubric($filesRubric['id']);
+                    $file->delete();
+                }
+                else {
+                    $file->deleteLink();
+                }
+            }
+        }
+    }
 }
-
 ?>

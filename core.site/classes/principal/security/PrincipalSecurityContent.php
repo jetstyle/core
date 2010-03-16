@@ -11,12 +11,13 @@ class PrincipalSecurityContent implements PrincipalSecurityInterface
 	protected $tableUsersAccess = "??users_content_access";
 	protected $tableGroupsAccess = "??users_groups_content_access";
 	
-	public function check( &$storageModel, $params="" )
+	public function check( &$storageModel, $nodeId=0 )
 	{
 		$status = self::DENIED;
 
-		if ($storageModel->getId() > 0 && strlen($location) > 0) 
+		if ($storageModel->getId() > 0 && $nodeId > 0) 
 		{
+
 			$userData = $storageModel->getData();
 			if ($userData['group']['god'])
 			{
@@ -24,24 +25,23 @@ class PrincipalSecurityContent implements PrincipalSecurityInterface
 			}
 			else
 			{
-				if (array_key_exists($location, $this->aclCache))
+				if (array_key_exists($nodeId, $this->aclCache))
 				{
-					$status = $this->aclCache[$location];
+					$status = $this->aclCache[$nodeId];
 				}
 				else
 				{
 					$ACL = $this->getACL($storageModel);
-					if (is_array($ACL) && $ACL[$params])
+					if (is_array($ACL) && $ACL[$nodeId])
 					{				
 						$status = self::GRANTED;
-						break;
 					}
-					$this->aclCache[$params] = $status;
+					$this->aclCache[$nodeId] = $status;
 				}
 			}
 		}
 		
-		$debugText = 'Access to content node '.$params.': '.($status ? "<span style=\"color: green;\">GRANTED</span>" : "<span style=\"color: red;\">DENIED</span>");
+		$debugText = 'Access to content node '.$nodeId.': '.($status ? "<span style=\"color: green;\">GRANTED</span>" : "<span style=\"color: red;\">DENIED</span>");
 		Debug::trace($debugText, 'principal');
 		return $status;
 	}

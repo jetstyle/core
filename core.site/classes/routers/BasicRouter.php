@@ -42,7 +42,7 @@ abstract class BasicRouter
 
 		if (class_exists($config['class']))
 		{
-			$page =& new $config['class']();
+			$page = new $config['class']();
 			$page->setUrl($config['url']);
 			$page->setPath($config['path']);
 			$page->setParams($this->getParams($config['url'], $config['path']));

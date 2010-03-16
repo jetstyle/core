@@ -14,11 +14,12 @@
 	float: left;
 	margin-right: 10px;
 	margin-bottom: 10px;
+	position: relative;
 }
 
 #gallery div.gallery-image div.image-title {
 	cursor: pointer;
-	white-space: nowrap;
+	/*white-space: nowrap;*/
 	overflow: hidden;
 }
 
@@ -38,10 +39,29 @@ div#addImageButton {
 	position: absolute;
 }
 
-#gallery img.control {
+#gallery a.control img {
+	border: 0;
+}
+
+#gallery a.control {
 	position: absolute;
 	display: none;
 	border: 0;
+	top: 5px;
+}
+
+#gallery a.gallery-edit {
+	right: 30px;
+	display: block;
+	visibility: hidden;
+}
+
+#gallery a.gallery-delete {
+	right: 5px;
+}
+
+#gallery a.gallery-zoom {
+	right: 55px;
 }
 
 #editImageForm {
@@ -60,5 +80,15 @@ div#addImageButton {
 
 #replaceFileButton {
 	position: absolute;
-	display: none;
+	display: block;
+}
+
+#fileCounter {
+	font-size: 12px;
+	text-align: center;
+}
+
+#progressCont {
+	margin-left: auto;
+	margin-right: auto;
 }

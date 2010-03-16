@@ -21,9 +21,10 @@ class MenuBlock extends Block
 	public function markItem(&$model, &$row)
 	{
 		$parents = $this->getParentNodes();
-		
+
 		if ($parents[$row['id']])
 		{
+                        
 			$row['selected'] = 1;
 		}
 		elseif ($row['id'] == $this->currentNodeId)
@@ -37,51 +38,56 @@ class MenuBlock extends Block
 		}
 		$row['href'] = $row['_path'];
 		
+		if ($this->config['force_nbsp'])
+		    $row['title_short'] = str_replace( " ", "&nbsp;", $row['title_short'] );
 	}
 	
 	protected function getParentNodeByLevel($level)
 	{
-		$data = &Locator::get('controller');
-		$sql = '
-			SELECT id, _path, _level, _left, _right, _parent, hide_from_menu
-			FROM ??content
-			WHERE
-				_level = ' . $level . '
-					AND
-				(_left <= ' . $data['_left'] . ' AND _right >= ' . $data['_right'] . ')
-					AND
-				_state = 0
-		';
-
-		return Locator::get('db')->queryOne($sql);
+		$result = array();
+		$data = $this->getCurrent();
+		if ($data)
+		{
+			$where = '{_level} = '.$level.' AND '.
+					 '{_left} <= '.intval($data['_left']).' AND '.
+					 '{_right} >= '.intval($data['_right']).' AND '.
+					 '{_state} = 0';
+			$result = DBModel::factory($this->config['model'])->loadOne($where)->getArray();
+		}
+		return $result;
 	}
 
-	protected function getParentNodes()
+	public function getParentNodes()
 	{
 		if (null !== $this->parents)
 		{
 			return $this->parents;
 		}
 
-		$data = &Locator::get('controller');
+		$data = $this->getCurrent();
 
 		if (!$data['id'])
 		{
 			$this->parents = array();
-			return $this->parents;
 		}
-
-		$sql = '
-			SELECT id, hide_from_menu, _parent
-			FROM ??content
-			WHERE _left < ' . $data['_left'] . ' AND _right >= ' . $data['_right'] . ' AND _level < '.($this->config['level'] + $this->config['depth']).' AND _state = 0
-		';
-
-		$this->parents = Locator::get('db')->query($sql, "id");
-
-		if ($this->parents === null)
+		else
 		{
-			$this->parents = array();
+			$where = '{_left} < '.$data['_left'].' AND '.
+					 '{_right} >= '.$data['_right'].' AND '.
+					 '{_level} < '.($this->config['level'] + $this->config['depth']).' AND '.
+					 '{_state} = 0';
+	
+			$parents = $result = DBModel::factory($this->config['model'])->load($where)->getArray();
+	
+			if ($this->parents === null)
+			{
+				$this->parents = array();
+			}
+                        
+                        foreach ($parents as $parent)
+                        {
+                                $this->parents[ $parent["id"] ] = $parent;
+                        }
 		}
 
 		return $this->parents;
@@ -93,8 +99,10 @@ class MenuBlock extends Block
 		 * загрузим модель меню
 		 * с условием на where
 		 */
-		$menu = & DBModel::factory('Content')->removeField('text');
-		$menu->setOrder(array('_level' => 'ASC', '_order' => 'ASC'));
+		if (!$this->config['model']) $this->config['model'] = 'Content/menu';
+
+		$menu = & DBModel::factory($this->config['model']);
+		//$menu->setOrder(array('_level' => 'ASC', '_order' => 'ASC'));
 
 		$parents = $this->getParentNodes();
 
@@ -129,13 +137,15 @@ class MenuBlock extends Block
 			break;
 		}
 
-		$current = &Locator::get('controller');
-		$this->currentNodeId = $current['id'];
+		$current = $this->getCurrent();
+		if ($current)
+		{
+			$this->currentNodeId = $current['id'];
+		}
 		
-		$where[] = $menu->quoteField('hide_from_menu').' = 0';
 		$menu->registerObserver('row', array(&$this, 'markItem'));
 		$menu->loadTree(implode(' AND ', $where));
-
+		
 		$this->setData($menu->getArray());
 	}
 
@@ -157,6 +167,19 @@ class MenuBlock extends Block
 			}
 		}
 		return false;
+	}
+	
+	protected function getCurrent()
+	{
+		if (Locator::exists('controller'))
+		{
+			$data = &Locator::get('controller');
+		}
+		else
+		{
+			$data = array();
+		}
+		return $data;
 	}
 }
 ?>

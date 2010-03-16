@@ -1,14 +1,161 @@
-<img class="block" src="{{images}}z.gif" width="1" height="5" align="top" alt="" />
-<table cellspacing="0" cellpadding="0" class="w100">
-<tr>
-  <td><img class="block" src="{{images}}z.gif" width="2" height="1" align="top" alt="" /></td>
-  <td width="34%">
-  {{!!wrap template="wrapper_list.html"}}
-    {{wrapped.0}}
-  {{/!!}}</td>
-  <td><img class="block" src="{{images}}z.gif" width="1" height="1" align="top" alt="" /></td>
-  <td width="65%">{{wrapped.1}}</td>
-  <!--td><img class="block" src="{{images}}z.gif" width="5" height="1" align="top" alt="" /></td-->
-</tr>
+<!--<h1 class="cms-content-title-">Разделы сайта</h1>-->
+{{!connect 'colorbox.js'}}
+{{!connect 'colorbox.css'}}
+
+{{:buggy}}
+<!--
+{{!connect 'jstree/jquery.cookie.js'}}
+{{!connect 'splitter.js'}}
+<div class="splitter">
+	<div class="tree-" style="font-size: 80%">
+    <div class="cms-list-advanced">
+        <div class="toolbar" >
+            {{@blocks/help_link.html}}
+            {{__trash_switch}}
+            {{__add_new}}
+        </div>
+    </div>
+    {{@blocks/submenu.html}}
+    {{wrapped.0}} 
+	</div>
+	<div>
+    <div class="carpet" style="position: absolute; display: none; background: transparent;"></div>
+    <div class="statusbarview" style="position: fixed; width: 100%">
+        {{@blocks/b_breadcrumbs.html cms="true"}}
+    </div>
+    {{wrapped.1}}
+	</div>
+</div>
+
+<script type="text/javascript">
+	$(document).ready(function(){
+            var newH = parseInt($(".splitter").height())-$(".splitter").position().top;
+
+            $(".splitter").css("height", newH );
+            $(".splitter").splitter({minLeft: 300, minRight: 300, sizeLeft: 300, onStartSplit: function(){
+
+                $(".carpet").each( function (){
+                        $(this).css({
+				width: $(this).parent().width(),
+				height: $(this).parent().height(),
+                                "z-index": 10000,
+			}).show();
+                })}, 
+                
+                onEndSplit: function(){
+                    $(".carpet").hide();
+                },
+                cookie: "splitter"
+            
+            });
+            
+
+                $(".submenu- li:not(.current-)").hover(function(){
+                    $(this).css("background-color", "#E3E9FF");
+                }, function(){
+                    $(this).css("background-color", "#FFFFFF");
+                });
+                
+                
+                $(".new-element-").click( function(){
+                    $(".new-element-menu-").toggleClass("invisible");
+                });
+        });
+</script>
+-->
+{{/:buggy}}
+
+
+<table cellspacing="0" class="w100 cms-body">
+  <thead>
+    <tr class="cms-body_top-padding"><td colspan="3">&nbsp;</td></tr>
+    <tr>
+      <td class="cms-body_tools">
+        {{@blocks/help_link.html}}
+        {{__trash_switch}}
+        {{__add_new}}
+      </td>
+      <td class="cms-body_sep"></td>
+      <td>{{module_title}}</td>
+    </tr>
+  </thead>
+  <tbody><tr>
+    <td class="cms-body_tree" id="left">
+      <div class="carpet" style="position: absolute; display: none; background: transparent;"></div>
+      
+      <!-- список/дерево модуля слева -->
+      {{wrapped.0}}
+      
+    </td>
+    <td id="separator" class="cms-body_sep"></td>
+    <td class="cms-body_content" id="right">
+      <div class="carpet" style="position: absolute; display: none; background: transparent;"></div>
+      
+      <!-- форма модуля справа -->
+      {{wrapped.1}}
+      
+    </td>
+  </tr></tbody>
 </table>
 
+<script type="text/javascript">
+  var startpos, diffpos=0;
+  var permitted = false;
+  
+  var startLeft  = parseInt( $("#left").css("width") );
+  var startRight = parseInt( $("#right").css("width") );
+        
+	$(document).ready(function(){
+    $('#separator').mousedown(function(e){
+        startpos = e.clientX + diffpos;
+        permitted = true;
+    }).attr("unselectable", "on").hover(
+      function(){
+        /*$('.cms-body_sep').css('background-color', '#BBCCFF');*/
+      }, 
+      function(){
+        /*$('.cms-body_sep').css('background-color', '#BBCCFF');*/
+    }).dblclick(            
+      function(){
+        if ( $(this).prev('td:hidden').length > 0 ){
+          $(this).prev('td').show();
+          $(this).next('td').attr('width', '85%');
+        }
+        else {
+          $(this).prev('td').hide();
+          $(this).next('td').attr('width', '99%');
+        }
+    });
+    
+    $("body").mousemove(function(e){
+      if (permitted) {
+        $("body").focus();
+    
+        new_position = e.clientX;
+        diffpos = startpos-new_position;
+
+        $("#left").css({"-webkit-user-select": "none", "width": startLeft - diffpos} );
+        /*$("#separator").css("width", 6);*/
+        $("#right").css("width", startRight + diffpos );
+        
+        $(".carpet").each( function (){
+          $(this).css({
+            width: $(this).parent().width(),
+            height: $(this).parent().height(),
+            "z-index": 10000,
+          }).show();
+        });
+      }
+    }).mouseup(function(e){
+      permitted = false;
+      $(".carpet").hide();
+      
+      e.preventDefault();
+    });
+
+    /*if( $("#update_2").position().left > $(".quick-simple-form").position().left+$(".quick-simple-form").width() )
+    {
+        $("#update_2").css({"float": "", "position": "absolute", "left": ($(".quick-simple-form").position().left+$(".quick-simple-form").width()) });
+    };*/
+	});
+</script>

@@ -56,7 +56,7 @@
 class Upload
 {
 
-	private static $instance = null;
+	//private static $instance = null;
 
 	public $TYPES = array(); // ext => [type,word]
 	public $ALLOW = array(); // белый список расширений
@@ -70,7 +70,7 @@ class Upload
 
 	protected $DIRS_SWAPPED = array(); //для DirSwap(),  DirUnSwap();
 
-	private function __construct()
+	public function __construct()
 	{
 		if (Config::get('upload_ext'))
 		{
@@ -86,8 +86,11 @@ class Upload
 				}
 			}
 		}
+    
+        $this->setDir(Config::get('files_dir'));
 	}
 
+    /*
 	public static function &getInstance()
 	{
 		 if (null === self::$instance)
@@ -98,6 +101,7 @@ class Upload
 
 		 return self::$instance;
 	}
+    */
 
 	public function setDir($dir)
 	{
@@ -169,15 +173,22 @@ class Upload
 			{
 				if (!$this->createDir($dirname))
 				{
-					throw new Exception("Upload: can't create directory ".str_replace(Config::get('project_dir'), '', $dirname));
+					$dirname = str_replace(Config::get('project_dir'), '', $dirname);
+                    $humanMessage = 'Нет прав для создания директории <span class="example">'.$dirname.'</span>';
+                    throw new JSException("Upload: can't create directory ".$dirname, '', $humanMessage);
 				}
 			}
 			elseif (!is_writable($dirname))
 			{
-				throw new Exception("Upload: directory ".str_replace(Config::get('project_dir'), '', $dirname)." is not writable");
+				$dirname = str_replace(Config::get('project_dir'), '', $dirname);
+                $humanMessage = 'Нет прав для записи файлов в директорию <span class="example">'.$dirname.'</span>';
+                throw new JSException("Upload: directory ".$dirname." is not writable", '', $humanMessage);
 			}
 
-
+			/**
+			 * TODO: document this part 
+			 *
+			 */
 			if ($params['actions'] && is_array($params['actions']))
 			{
 				if(in_array($ext, $this->GRAPHICS))
@@ -415,6 +426,12 @@ class Upload
 
 	protected function createResourceFromImage($filename)
 	{
+		if (!function_exists("getimagesize") || !function_exists("imagecreatefromjpeg"))
+		{
+            $humanMessage = 'Не установлено расширения GD для PHP для работы с графикой.';
+            throw new JSException("Upload: no GD extension installed", '', $humanMessage);
+		}
+		
 		$size = getimagesize($filename);
 
 		$img = null;

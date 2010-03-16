@@ -55,7 +55,32 @@ final class YamlWrapper
 		
 		return $result;
 	}
+	
+	/**
+	 * Save Php array as YAML config.
+	 * 
+	 * @static
+	 * @access public
+	 * @param string $filePath
+	 * @param array  $array - php array
+	 */
+	public static function save($filePath, $array)
+	{		
+		if (!file_exists($filePath) && is_writeable($filePath) )
+		{
+			$e = new FileNotFoundException("File not found or not writeable: <b>".$filePath."</b>", '');
+			$e->setFilename($filePath);
+			throw $e;
+		}
+		$result = array();
 
+		Finder::useLib('spyc');
+		$result = Spyc :: YAMLDump($array);
+
+		file_put_contents($filePath, $result);
+
+		return $result;
+	}
 	/**
 	 * Get cacher object.
 	 * 

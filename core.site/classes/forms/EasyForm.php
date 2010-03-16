@@ -41,7 +41,7 @@
 
 */
 
-class EasyForm{
+class EasyForm {
 
 	var $form; //объект класса Form
 	var $id_var_name = "_id"; //из какой переменной запроса брать ID  к записи в БД
@@ -60,7 +60,8 @@ class EasyForm{
 	);
 
 	public function __construct()
-	{		$this->config = array();
+	{
+		$this->config = array();
 		if ($args = func_get_args())
 		{
 			foreach ($args as $arg)
@@ -72,8 +73,12 @@ class EasyForm{
 					{
 						$arg = YamlWrapper::load($ymlFile);
 					}
+					else
+					{
+						throw new FileNotFoundException('classes/forms/'.$arg.'.yml');
+					}
 	   			}
-	   			$this->config = $this->_mergeConfig($this->config,$arg);
+	   			$this->config = $this->_mergeConfig($this->config, $arg);
 			}
 		}
 
@@ -93,78 +98,89 @@ class EasyForm{
 		//инициализируем форму
 		$class_name = isset($config["class"]) ? $config["class"] : "Form";
 		Finder::useClass( 'forms/'.$class_name );
-		$form =& new $class_name($config);
-		$this->form =& $form;
+		$this->form = new $class_name($config);
 
 		//привязываем строку к БД
 		if( $id = isset($config["id"]) ? $config["id"] : false )
-			$form->AssignId( $id );
+			$this->form->AssignId( $id );
 		else
 			if( $id = isset($_REQUEST[ $this->id_var_name ]) ? $_REQUEST[ $this->id_var_name ] : false )
-				$form->AssignId( $id );
+				$this->form->AssignId( $id );
 
 		//добавляем поля
-		$this->AddFields( $form, $config["fields"] );
+		$this->AddFields( $this->form, $config["fields"] );
 
 		//добавляем кнопки
-		$this->AddButtons( $form, $config["buttons"] );
+		$this->AddButtons( $this->form, $config["buttons"] );
 	}
 
 	//добавляем поля к форме или группе
 	protected function addFields(&$form, $config, $is_field=false) {
 		//тут добавляем поля
-    	foreach($config as $name=>$rec)
-    	{
-      		//формируем конфиг для поля
-			if( is_array($rec) )
-			{
-				$pack_name = $rec['extends_from'];
-				$conf = $rec;
-				/*if (isset($rec[1]))
-					if (is_array($rec[1])) $conf = $rec[1];
-						else $conf = array( "model_default" => $rec[1] );
-				else $conf = array();*/
-			}
-			else
-			{
-				$pack_name = $rec;
-				$conf = array();
-			}
-			//определяем wrapper_tpl
-			if(!isset($conf["wrapper_tpl"]))
-				foreach($this->wrapper_tpl as $k=>$v)
-				{
-					if(in_array($pack_name, explode(",",$k)))
-					{
-						$conf["wrapper_tpl"] = $v[ $is_field ? 1 : 0 ];
-						break;
-					}
-				}
-			//генерируем конфиг для поля
-			$conf = $this->ConstructConfig( $pack_name, $conf, false, $name );
-			//создаём поле
-			if($is_field)
-				$field =& $form->model->Model_AddField( $name, $conf );
-			else
-				$field =& $form->AddField( $name, $conf );
-			//если указан пакет группы, обрабатываем вложение
-			if(in_array($rec[0],$this->groups))
-				$this->AddFields($field, $rec[2], true);
-		}
+        if ($config)
+        {
+            foreach ($config AS $name => $rec)
+            {
+                //формируем конфиг для поля
+                if ( is_array($rec) )
+                {
+                    $pack_name = $rec['extends_from'];
+                    $conf = $rec;
+                    /*if (isset($rec[1]))
+                        if (is_array($rec[1])) $conf = $rec[1];
+                            else $conf = array( "model_default" => $rec[1] );
+                    else $conf = array();*/
+                }
+                else
+                {
+                    $pack_name = $rec;
+                    $conf = array();
+                }
+
+                //генерируем конфиг для поля
+                $conf = $this->ConstructConfig( $pack_name, $conf, false, $name );
+
+                //определяем wrapper_tpl
+                if (!isset($conf["wrapper_tpl"]))
+                    foreach ($this->wrapper_tpl as $k=>$v)
+                    {
+                        if (in_array($pack_name, explode(",",$k)))
+                        {
+                            $conf["wrapper_tpl"] = $v[ $is_field ? 1 : 0 ];
+                            break;
+                        }
+                    }
+
+                //создаём поле
+                if ($is_field)
+                    $field =& $form->model->Model_AddField( $name, $conf );
+                else
+                    $field =& $form->AddField( $name, $conf );
+                //если указан пакет группы, обрабатываем вложение
+                if (in_array($pack_name, $this->groups))
+                {
+                    $this->AddFields($field, $conf['fields'], true);
+                }
+            }
+        }
 	}
 
   //добавляем кнопки к форме
   function AddButtons( &$form, $config ){
-
     //тут добавляем кнопки
-    foreach($config as $rec)
+    foreach($config as $btn => $rec)
     {
       //формируем конфиг для кнопки
       $rec_cfg = false;
-      if( is_array($rec) )
+      if( is_array($rec) && isset($rec[1]) && isset($rec[0]) )
       {
         $rec_cfg = $rec[1];
         $rec = $rec[0];
+      }
+      else if ( is_array($rec) )
+      {
+        $rec_cfg = $rec;
+	$rec = $btn; 
       }
 
       $conf = $this->ConstructConfig( "button_".$rec, $rec_cfg, $rec );

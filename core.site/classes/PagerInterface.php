@@ -6,6 +6,7 @@ interface PagerInterface
 	public function setup($currentPage = 1, $total = 0, $perPage = 0, $frameSize = 0);
 	public function getLimit();
 	public function getOffset();	
+	public function getTotal();	
 }
 
 ?>

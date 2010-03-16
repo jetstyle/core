@@ -1,103 +1,103 @@
 <?php
 /*
 
-  Ð¤Ð¾Ñ€Ð¼-Ð¿Ñ€Ð¾Ñ†ÐµÑÑÐ¾Ñ€:
-  * Ð³ÐµÐ½ÐµÑ€Ð°Ñ†Ð¸Ñ, Ð¾Ð±Ñ€Ð°Ð±Ð¾Ñ‚ÐºÐ° Ð¸ Ð²Ð°Ð»Ð¸Ð´Ð°Ñ†Ð¸Ñ Ð¿Ñ€Ð¾ÑÑ‚Ñ‹Ñ… Ð¸ ÑÐ»Ð¾Ð¶Ð½Ñ‹Ñ… Ñ„Ð¾Ñ€Ð¼
-  * ÑÐ¾Ñ…Ñ€Ð°Ð½ÐµÐ½Ð¸Ðµ Ð² Ð‘Ð” Ð¸ Ñ‡Ñ‚ÐµÐ½Ð¸Ðµ Ð¾Ñ‚Ñ‚ÑƒÐ´Ð°
+  Ôîðì-ïðîöåññîð:
+  * ãåíåðàöèÿ, îáðàáîòêà è âàëèäàöèÿ ïðîñòûõ è ñëîæíûõ ôîðì
+  * ñîõðàíåíèå â ÁÄ è ÷òåíèå îòòóäà
   * see http://in.jetstyle.ru/rocket/rocketforms
 
-  Ð£Ð¿Ñ€Ð°Ð²Ð»ÑÑŽÑ‰Ð¸Ð¹ ÐºÐ»Ð°ÑÑ.
+  Óïðàâëÿþùèé êëàññ.
 
   Form( $config )
 
   -------------------
 
-  // ÐšÐ¾Ð½ÑÑ‚Ñ€ÑƒÐ¸Ñ€Ð¾Ð²Ð°Ð½Ð¸Ðµ Ñ„Ð¾Ñ€Ð¼Ñ‹
+  // Êîíñòðóèðîâàíèå ôîðìû
 
-  * &AddField( $field_name, $config ) - ÐŸÑ€Ð¸Ð²ÑÐ·Ð°Ñ‚ÑŒ Ð¿Ð¾Ð»Ðµ Ð² Ñ„Ð¾Ñ€Ð¼Ñƒ. Ð”ÐµÐ»Ð°ÐµÑ‚ Ð²ÐµÑÑŒ handshaking Ñ ÑÐ¾Ð·Ð´Ð°Ð½Ð¸ÐµÐ¼ Ð¿Ð¾Ð»Ñ
-      - $field_name -- Ñ‡Ñ‚Ð¾ Ð·Ð° Ð¿Ð¾Ð»Ðµ
-      - $config     -- ÐºÐ¾Ð½Ñ„Ð¸Ð³ÑƒÑ€Ð°Ñ†Ð¸Ñ, Ð°Ð³Ð°.
-  * &_AddField( &$field_object ) - ÐŸÑ€Ð¸Ð²ÑÐ·Ð°Ñ‚ÑŒ Ð¿Ð¾Ð»Ðµ, ÑÑƒÑ‰ÐµÑÑ‚Ð²ÑƒÑŽÑ‰ÐµÐµ ÐºÐ°Ðº Ð¾Ð±ÑŠÐµÐºÑ‚
+  * &AddField( $field_name, $config ) - Ïðèâÿçàòü ïîëå â ôîðìó. Äåëàåò âåñü handshaking ñ ñîçäàíèåì ïîëÿ
+      - $field_name -- ÷òî çà ïîëå
+      - $config     -- êîíôèãóðàöèÿ, àãà.
+  * &_AddField( &$field_object ) - Ïðèâÿçàòü ïîëå, ñóùåñòâóþùåå êàê îáúåêò
 
-  * &AddButton( $button_config ) - Ð·Ð°Ñ€ÐµÐ³Ð¸ÑÑ‚Ñ€Ð¸Ñ€Ð¾Ð²Ð°Ñ‚ÑŒ ÐºÐ½Ð¾Ð¿ÐºÑƒ
-      - $button_config -- Ð¼Ð°ÑÑÐ¸Ð²-ÐºÐ¾Ð½Ñ„Ð¸Ð³ ÐºÐ½Ð¾Ð¿ÐºÐ¸
+  * &AddButton( $button_config ) - çàðåãèñòðèðîâàòü êíîïêó
+      - $button_config -- ìàññèâ-êîíôèã êíîïêè
 
-  * _RegisterField( &$field ) - Ð·Ð°Ð¿Ð¸ÑÑ‹Ð²Ð°ÐµÑ‚ Ð² $form->hash[$field->name] ÑÑÑ‹Ð»ÐºÑƒ Ð½Ð° ÑÑ‚Ð¾ Ð¿Ð¾Ð»Ðµ.
-                                ÐÐ• Ð”Ð›Ð¯ Ð’ÐÐ•Ð¨ÐÐ•Ð“Ðž Ð˜Ð¡ÐŸÐžÐ›Ð¬Ð—ÐžÐ’ÐÐÐ˜Ð¯
+  * _RegisterField( &$field ) - çàïèñûâàåò â $form->hash[$field->name] ññûëêó íà ýòî ïîëå.
+                                ÍÅ ÄËß ÂÍÅØÍÅÃÎ ?ÑÏÎËÜÇÎÂÀÍ?ß
 
-  // ÐŸÑ€Ð¾Ñ†ÐµÑÑÐ¸Ð½Ð³ Ñ„Ð¾Ñ€Ð¼Ñ‹ !! Ð¡Ð°Ð¼Ð¾Ðµ Ð³Ð»Ð°Ð²Ð½Ð¾Ðµ
+  // Ïðîöåññèíã ôîðìû !! Ñàìîå ãëàâíîå
 
   * Handle( $ignore_post=false, $ignore_load=false, $ignore_validator=false, $ignore_session=false )
-      - $ignore_* -- Ð¸Ð³Ð½Ð¾Ñ€Ð¸Ñ€Ð¾Ð²Ð°Ñ‚ÑŒ Ñ‚Ðµ Ð¸Ð»Ð¸ Ð¸Ð½Ñ‹Ðµ ÑÑ‚Ð°Ð¿Ñ‹ ÑÑ†ÐµÐ½Ð°Ñ€Ð¸Ñ Ð¿Ñ€Ð¾Ñ†ÐµÑÑÐ¸Ð½Ð³Ð°
-      - false, ÐµÑÐ»Ð¸ Ñ€ÐµÐ·ÑƒÐ»ÑŒÑ‚Ð°Ñ‚ -- Ð½Ðµ Ð¾Ñ‚Ð¿Ð°Ñ€ÑÐµÐ½Ð½Ð°Ñ Ñ„Ð¾Ñ€Ð¼Ð° (Ð¸Ð½Ñ‹Ð¼Ð¸ ÑÐ»Ð¾Ð²Ð°Ð¼Ð¸, ÐµÑÐ»Ð¸ Ð½ÐµÑ‚ Ñ€ÐµÐ´Ð¸Ñ€ÐµÐºÑ‚Ð°, Ð½Ð¾ ÑÐ¾Ð±Ñ‹Ñ‚Ð¸Ðµ Ð¿Ñ€Ð¾Ð¸Ð·Ð¾ÑˆÐ»Ð¾
+      - $ignore_* -- èãíîðèðîâàòü òå èëè èíûå ýòàïû ñöåíàðèÿ ïðîöåññèíãà
+      - false, åñëè ðåçóëüòàò -- íå îòïàðñåííàÿ ôîðìà (èíûìè ñëîâàìè, åñëè íåò ðåäèðåêòà, íî ñîáûòèå ïðîèçîøëî
 
   * ProcessEvent( $event_code ) -- proceed event as we hit one of the buttons
                                    useful for programmatical control
 
-  * _ExecEventHandler($event,$event_handler) - Ð²Ñ‹Ð¿Ð¾Ð»Ð½ÑÐµÑ‚ Ñ…ÑÐ½Ð´Ð»ÐµÑ€ Ð² Ð¾Ñ‚Ð´ÐµÐ»ÑŒÐ½Ð¾ Ð·Ð¾Ð½Ðµ Ð²Ð¸Ð´Ð¸Ð¼Ð¾ÑÑ‚Ð¸
-      - $event -- Ñ‚ÐµÐºÑƒÑ‰ÐµÐµ ÑÐ¾Ð±Ñ‹Ñ‚Ð¸Ðµ
-      - $event_handler -- Ð¿Ð¾Ð»Ð½Ñ‹Ð¹ Ð¿ÑƒÑ‚ÑŒ Ð´Ð¾ Ñ„Ð°Ð¹Ð»Ð° Ñ…ÑÐ½Ð´Ð»ÐµÑ€Ð°
+  * _ExecEventHandler($event,$event_handler) - âûïîëíÿåò õýíäëåð â îòäåëüíî çîíå âèäèìîñòè
+      - $event -- òåêóùåå ñîáûòèå
+      - $event_handler -- ïîëíûé ïóòü äî ôàéëà õýíäëåðà
 
-  // ÐÐ°ÑÑ‚Ñ€Ð¾Ð¹ÐºÐ° Ñ„Ð¾Ñ€Ð¼Ñ‹
+  // Íàñòðîéêà ôîðìû
 
-  - AssignId( $data_id ) - ÑÑ‚Ð°Ð²Ð¸Ñ‚ Ñ„Ð¾Ñ€Ð¼Ðµ Ð² ÑÐ¾Ð¾Ñ‚Ð²ÐµÑ‚ÑÑ‚Ð²Ð¸Ðµ ÑÑ‚Ñ€Ð¾ÐºÑƒ Ð² Ð‘Ð”
+  - AssignId( $data_id ) - ñòàâèò ôîðìå â ñîîòâåòñòâèå ñòðîêó â ÁÄ
 
-  * Load( $data_id=NULL ) - Ð·Ð°Ð³Ñ€ÑƒÐ¶Ð°ÐµÑ‚ Ñ„Ð¾Ñ€Ð¼Ñƒ Ð¸Ð· Ð‘Ð”
-      - $data_id -- ÐµÑÐ»Ð¸ NULL, Ñ‚Ð¾ Ð±ÐµÑ€Ñ‘Ñ‚ this->data_id
+  * Load( $data_id=NULL ) - çàãðóæàåò ôîðìó èç ÁÄ
+      - $data_id -- åñëè NULL, òî áåð¸ò this->data_id
 
-  * LoadFromArray( $a ) - Ð·Ð°Ð³Ñ€ÑƒÐ¶Ð°ÐµÑ‚ Ñ„Ð¾Ñ€Ð¼Ñƒ Ð¸Ð· Ð¼Ð°ÑÑÐ¸Ð²Ð°
-      - $a -- Ð¼Ð°ÑÑÐ¸Ð², Ð¸Ð· ÐºÐ¾Ñ‚Ð¾Ñ€Ð¾Ð³Ð¾ Ð·Ð°Ð³Ñ€ÑƒÐ¶Ð°Ñ‚ÑŒ
+  * LoadFromArray( $a ) - çàãðóæàåò ôîðìó èç ìàññèâà
+      - $a -- ìàññèâ, èç êîòîðîãî çàãðóæàòü
 
-  * Reset() - Ð¡Ð±Ñ€Ð°ÑÑ‹Ð²Ð°ÐµÑ‚ Ñ„Ð¾Ñ€Ð¼Ñƒ Ð² "Ð½ÐµÐ·Ð°Ð¿Ð¾Ð»Ð½ÐµÐ½Ð½Ð¾Ðµ" ÑÐ¾ÑÑ‚Ð¾ÑÐ½Ð¸Ðµ
+  * Reset() - Ñáðàñûâàåò ôîðìó â "íåçàïîëíåííîå" ñîñòîÿíèå
 
-  // Ð˜Ð·Ð¼ÐµÐ½ÐµÐ½Ð¸Ðµ Ð² Ð‘Ð”
+  // ?çìåíåíèå â ÁÄ
 
-  - DbDelete( $data_id=NULL ) -- ÑƒÐ´Ð°Ð»ÑÐµÑ‚ ÑÐ¾Ð¾Ñ‚Ð². ÑÑ‚Ñ€Ð¾ÐºÑƒ Ð¸Ð· Ð‘Ð”,
+  - DbDelete( $data_id=NULL ) -- óäàëÿåò ñîîòâ. ñòðîêó èç ÁÄ,
       - true, if success
-      - Ð¿Ñ€ÐµÐ¶Ð´Ðµ ÑƒÐ´Ð°Ð»ÐµÐ½Ð¸Ñ ÑÑ‚Ñ€Ð¾ÐºÐ¸ Ð´Ð¾Ð»Ð¶Ð½Ð¾ Ð²Ñ‹Ð·Ð²Ð°Ñ‚ÑŒ DbDelete Ð²ÑÐµÑ… Ð¿Ð¾Ð»ÐµÐ¹
-  - DbInsert()                -- Ð²ÑÑ‚Ð°Ð²Ð»ÑÐµÑ‚ Ñ‚ÐµÐºÑƒÑ‰ÐµÐµ ÑÐ¾ÑÑ‚Ð¾ÑÐ½Ð¸Ðµ Ñ„Ð¾Ñ€Ð¼Ñ‹ Ð² Ð‘Ð”, Ð²Ð¾Ð·Ð²Ñ€Ð°Ñ‰Ð°ÐµÑ‚ $data_id
-  - DbUpdate( $data_id=NULL ) -- Ð¸ÑÐ¿Ñ€Ð°Ð²Ð»ÑÐµÑ‚ ÑÑ‚Ñ€Ð¾ÐºÑƒ Ð² Ð‘Ð”, Ð²Ð¾Ð·Ð²Ñ€Ð°Ñ‰Ð°ÐµÑ‚ $data_id
-  - _DbUpdate( &$fields, &$values ) -- Ñ„Ð¾Ñ€Ð¼Ð¸Ñ€ÑƒÐµÑ‚ sql-Ð·Ð°Ð¿Ñ€Ð¾Ñ Ð¸ Ð¾Ñ‚Ð¿Ñ€Ð°Ð²Ð»ÑÐµÑ‚ ÐµÐ³Ð¾ Ð² Ð‘Ð”
-  - _DbAuto( &$fields, &$values ) -- Ð´Ð¾Ð±Ð°Ð²Ð»ÑÐµÑ‚ Ð² $fields, $values Ð°Ð²Ñ‚Ð¾Ð¼Ð°Ñ‚Ð¸Ñ‡ÐµÑÐºÐ¸ ÑÐ³ÐµÐ½ÐµÑ€Ð¸Ñ€Ð¾Ð²Ð°Ð½Ð½Ñ‹Ðµ Ð¿Ð¾Ð»Ñ
+      - ïðåæäå óäàëåíèÿ ñòðîêè äîëæíî âûçâàòü DbDelete âñåõ ïîëåé
+  - DbInsert()                -- âñòàâëÿåò òåêóùåå ñîñòîÿíèå ôîðìû â ÁÄ, âîçâðàùàåò $data_id
+  - DbUpdate( $data_id=NULL ) -- èñïðàâëÿåò ñòðîêó â ÁÄ, âîçâðàùàåò $data_id
+  - _DbUpdate( &$fields, &$values ) -- ôîðìèðóåò sql-çàïðîñ è îòïðàâëÿåò åãî â ÁÄ
+  - _DbAuto( &$fields, &$values ) -- äîáàâëÿåò â $fields, $values àâòîìàòè÷åñêè ñãåíåðèðîâàííûå ïîëÿ
 
-  // ÐŸÐ°Ñ€ÑÐ¸Ð½Ð³, Ð¸Ð½Ð¾Ð³Ð´Ð° Ð¼Ð¾Ð¶Ð½Ð¾ Ð¾Ñ‚Ð´ÐµÐ»ÑŒÐ½Ð¾ Ð¿Ð¾Ð»ÑŒÐ·Ð¾Ð²Ð°Ñ‚ÑŒ
+  // Ïàðñèíã, èíîãäà ìîæíî îòäåëüíî ïîëüçîâàòü
 
   * Parse()
   * ParsePreview()
 
-  // Ð’ÑÐ¿Ð¾Ð¼Ð¾Ð³Ð°Ñ‚ÐµÐ»ÑŒÐ½Ñ‹Ðµ Ð¼ÐµÑ‚Ð¾Ð´Ñ‹
+  // Âñïîìîãàòåëüíûå ìåòîäû
 
-  * StaticDefaults( $default_config, &$supplied_config ) - ÑÑ‚Ð°Ñ‚Ð¸Ñ‡Ð½Ñ‹Ð¹ Ð¼ÐµÑ‚Ð¾Ð´, Ð¼Ð¾Ð´Ð¸Ñ„Ð¸Ñ†Ð¸Ñ€ÑƒÐµÑ‚
-                                                            supplied_config Ð¿Ð¾ Ð´ÐµÑ„Ð¾Ð»Ñ‚Ð½Ð¾Ð¼Ñƒ
-                                                            (Ð²Ñ‹ÑÑ‚Ð°Ð²Ð»ÑÑ Ð²ÑÐµ Ð¿Ð¾Ð»Ñ, ÐºÐ¾Ñ‚Ð¾Ñ€Ñ‹Ðµ
-                                                            Ð¾Ñ‚ÑÑƒÑ‚ÑÑ‚Ð²ÑƒÑŽÑ‚ Ð² ÑÑƒÐ¿Ð¿Ð»Ð¸ÐµÐ´Ðµ
+  * StaticDefaults( $default_config, &$supplied_config ) - ñòàòè÷íûé ìåòîä, ìîäèôèöèðóåò
+                                                            supplied_config ïî äåôîëòíîìó
+                                                            (âûñòàâëÿÿ âñå ïîëÿ, êîòîðûå
+                                                            îòñóòñòâóþò â ñóïïëèåäå
   * _ParseWrapper( $content )
   * _ParseButtons()
 
 
 ================================================================== v.0 (kuso@npj)
 */
-define( "FORM_EVENT_OK",     "ok");     // Ð½Ð¸Ñ‡ÐµÐ³Ð¾ Ð½Ðµ Ð´ÐµÐ»Ð°ÐµÐ¼, Ð¿ÐµÑ€ÐµÑ…Ð¾Ð´ Ð¿Ð¾ "success_url", if redirect
-define( "FORM_EVENT_CANCEL", "cancel"); // Ð¾Ñ‚Ð¼ÐµÐ½Ð°, Ð¿ÐµÑ€ÐµÑ…Ð¾Ð´ Ð¿Ð¾ "cancel_url", if redirect
-define( "FORM_EVENT_RESET",  "reset");  // ÑÐ±Ñ€Ð¾Ñ ÑÐ¾ÑÑ‚Ð¾ÑÐ½Ð¸Ñ Ñ„Ð¾Ñ€Ð¼Ñ‹ Ðº ÑÑ‚Ð°Ñ€Ñ‚Ð¾Ð²Ð¾Ð¼Ñƒ
-define( "FORM_EVENT_INSERT", "insert"); // Ð²ÑÑ‚Ð°Ð²ÐºÐ° Ð² Ð‘Ð”, Ð¿ÐµÑ€ÐµÑ…Ð¾Ð´ Ð¿Ð¾ "success_url", if redirect
-define( "FORM_EVENT_UPDATE", "update"); // Ð¿Ñ€Ð°Ð²ÐºÐ° Ð² Ð‘Ð”, Ð¿ÐµÑ€ÐµÑ…Ð¾Ð´ Ð¿Ð¾ "success_url", if redirect
-define( "FORM_EVENT_UPDATE_CLIENT", "update_client"); // Ð¿Ñ€Ð°Ð²ÐºÐ° Ð² Ð‘Ð”, Ð¿ÐµÑ€ÐµÑ…Ð¾Ð´ Ð¿Ð¾ "success_url", if redirect
-define( "FORM_EVENT_DELETE", "delete"); // ÑƒÐ´Ð°Ð»Ð¸Ñ‚ÑŒ Ð²ÑÑ‘ Ð¸Ð· Ð‘Ð”, Ð¿ÐµÑ€ÐµÑ…Ð¾Ð´ Ð¿Ð¾ "success_url", if redirect
+define( "FORM_EVENT_OK",     "ok");     // íè÷åãî íå äåëàåì, ïåðåõîä ïî "success_url", if redirect
+define( "FORM_EVENT_CANCEL", "cancel"); // îòìåíà, ïåðåõîä ïî "cancel_url", if redirect
+define( "FORM_EVENT_RESET",  "reset");  // ñáðîñ ñîñòîÿíèÿ ôîðìû ê ñòàðòîâîìó
+define( "FORM_EVENT_INSERT", "insert"); // âñòàâêà â ÁÄ, ïåðåõîä ïî "success_url", if redirect
+define( "FORM_EVENT_UPDATE", "update"); // ïðàâêà â ÁÄ, ïåðåõîä ïî "success_url", if redirect
+define( "FORM_EVENT_UPDATE_CLIENT", "update_client"); // ïðàâêà â ÁÄ, ïåðåõîä ïî "success_url", if redirect
+define( "FORM_EVENT_DELETE", "delete"); // óäàëèòü âñ¸ èç ÁÄ, ïåðåõîä ïî "success_url", if redirect
 define( "FORM_EVENT_AUTO",   "auto");   // insert/update based on $data_id
 
 class Form
 {
-   var $name; // Ð¸Ð¼Ñ Ñ„Ð¾Ñ€Ð¼Ñ‹
+   var $name; // èìÿ ôîðìû
    var $form_present_var = "__form_present";
    var $data_id_var = "__form_data_id";
-   var $data_id=0;      // ÑÑ‚Ñ€Ð¾ÐºÐ°, Ð°ÑÑÐ¾Ñ†Ð¸Ð¸Ñ€Ð¾Ð²Ð°Ð½Ð½Ð°Ñ Ñ Ñ„Ð¾Ñ€Ð¼Ð¾Ð¹. 0 -- Ð·Ð½Ð°Ñ‡Ð¸Ñ‚ Ð½ÐµÑ‚ Ñ‚Ð°ÐºÐ¾Ð¹
-   var $hash=array();   // Ð¾Ñ‡ÐµÐ½ÑŒ ÑƒÐ´Ð¾Ð±Ð½Ñ‹Ð¹ ÑÐ¿Ð¾ÑÐ¾Ð± Ð´Ð¾ÑÑ‚ÑƒÐ¿Ð° Ðº Ð¿Ð¾Ð»ÑÐ¼
-   var $fields=array(); // Ð¾Ñ‡ÐµÐ½ÑŒ Ð½ÐµÑƒÐ´Ð¾Ð±Ð½Ñ‹Ð¹ ÑÐ¿Ð¾ÑÐ¾Ð± Ð´Ð¾ÑÑ‚ÑƒÐ¿Ð° Ðº Ð¿Ð¾Ð»ÑÐ¼
-   var $buttons=array();// Ñ…Ñ€Ð°Ð½Ð¸Ð»Ð¸Ñ‰Ðµ "ÐºÐ½Ð¾Ð¿Ð¾Ðº"
-   var $action; // ÐºÑƒÐ´Ð° ÑƒÑ…Ð¾Ð´Ð¸Ñ‚ÑŒ Ð¿Ð¾ Ð¿Ð¾ÑÑ‚Ñƒ Ñ„Ð¾Ñ€Ð¼Ñ‹
+   var $data_id=0;      // ñòðîêà, àññîöèèðîâàííàÿ ñ ôîðìîé. 0 -- çíà÷èò íåò òàêîé
+   var $hash=array();   // î÷åíü óäîáíûé ñïîñîá äîñòóïà ê ïîëÿì
+   var $fields=array(); // î÷åíü íåóäîáíûé ñïîñîá äîñòóïà ê ïîëÿì
+   var $buttons=array();// õðàíèëèùå "êíîïîê"
+   var $action; // êóäà óõîäèòü ïî ïîñòó ôîðìû
 
-   var $valid = true; // Ñ„Ð»Ð°Ð³ Ð²Ð°Ð»Ð¸Ð´Ð½Ð¾ÑÑ‚Ð¸ Ñ„Ð¾Ñ€Ð¼Ñ‹
+   var $valid = true; // ôëàã âàëèäíîñòè ôîðìû
 
    var $default_config = array(
            "template_prefix"           =>"forms/",
@@ -129,7 +129,7 @@ class Form
    public function Form($form_config = NULL)
    {
 
-     Finder::UseClass("forms/FormField"); // Ð¾Ð½ Ð½Ð°Ð¼ ÑÑ‚Ð¾Ð¿ÑƒÐ´Ð¾Ð²Ð¾ Ð¿Ð¾Ð½Ð°Ð´Ð¾Ð±Ð¸Ñ‚ÑÑ
+     Finder::UseClass("forms/FormField"); // îí íàì ñòîïóäîâî ïîíàäîáèòñÿ
 
      if ($form_config['action'])
      {
@@ -166,17 +166,17 @@ class Form
 
 
 
-   // Ð°Ð²Ñ‚Ð¾Ð¼Ð°Ñ‚Ð¸Ð·Ð°Ñ‚Ð¾Ñ€ "ÐºÐ¾Ð½Ñ„Ð¸Ð³Ð¾Ð² Ð¿Ð¾-ÑƒÐ¼Ð¾Ð»Ñ‡Ð°Ð½Ð¸ÑŽ"
+   // àâòîìàòèçàòîð "êîíôèãîâ ïî-óìîë÷àíèþ"
    function StaticDefaults( $default_config, &$supplied_config )
    {
      foreach( $default_config as $k=>$v )
        if (!isset($supplied_config[$k])) $supplied_config[$k] = $v;
    }
 
-   // Ð”Ð¾Ð±Ð°Ð²Ð¸Ñ‚ÑŒ Ð¿Ð¾Ð»Ðµ
+   // Äîáàâèòü ïîëå
    function &AddField( $field_name = NULL, $config )
    {
-     $f = &new FormField( $this, $field_name, $config );
+     $f = new FormField( $this, $field_name, $config );
      return $this->_AddField($f);
    }
    function &_AddField( &$field_object )
@@ -186,26 +186,26 @@ class Form
      return $field_object;
    }
 
-   // Ð”Ð¾Ð±Ð°Ð²Ð¸Ñ‚ÑŒ ÐºÐ½Ð¾Ð¿ÐºÑƒ
+   // Äîáàâèòü êíîïêó
    function &AddButton( $button_config )
    {
      $this->buttons[$button_config["title"]] = $button_config;
      return $this->buttons[$button_config["title"]];
    }
 
-   // Ð¡ÐÐœÐÐ¯ Ð¡Ð¢Ð ÐÐ¨ÐÐÐ¯ ÐŸÐ ÐžÐ¦Ð•Ð”Ð£Ð Ð --------------------------------------------------------
-   //zharik: Ð½Ñƒ, Ñ‚ÐµÐ¿ÐµÑ€ÑŒ Ð¾Ð½Ð° Ð½Ðµ Ñ‚Ð°ÐºÐ°Ñ ÑƒÐ¶ Ð¸ ÑÑ‚Ñ€Ð°ÑˆÐ½Ð°Ñ 8))
+   // ÑÀÌÀß ÑÒÐÀØÍÀß ÏÐÎÖÅÄÓÐÀ --------------------------------------------------------
+   //zharik: íó, òåïåðü îíà íå òàêàÿ óæ è ñòðàøíàÿ 8))
    function Handle( $ignore_post     =false,  $ignore_load   =false,
                     $ignore_validator=false,  $ignore_session=false )
    {
      $processed = false;
 
-     //Ð¸Ð½Ð¸Ñ†Ð¸Ð°Ð»Ð¸Ð·Ð°Ñ†Ð¸Ñ Ð·Ð½Ð°Ñ‡ÐµÐ½Ð¸Ð¹ Ð¿Ð¾Ð»ÐµÐ¹
-     if ($this->data_id && !$ignore_load) $this->Load();  // Ð¿Ñ€Ð¾Ð±ÑƒÐµÐ¼ Ð·Ð°Ð³Ñ€ÑƒÐ·Ð¸Ñ‚ÑŒ
-     if (!$this->data_id || $ignore_load) $this->Reset(); // ÑƒÑÑ‚Ð°Ð½Ð°Ð²Ð»Ð¸Ð²Ð°ÐµÐ¼ default-Ð·Ð½Ð°Ñ‡ÐµÐ½Ð¸Ñ
+     //èíèöèàëèçàöèÿ çíà÷åíèé ïîëåé
+     if ($this->data_id && !$ignore_load) $this->Load();  // ïðîáóåì çàãðóçèòü
+     if (!$this->data_id || $ignore_load) $this->Reset(); // óñòàíàâëèâàåì default-çíà÷åíèÿ
      if (!$ignore_session) $this->FromSession();
 
-     // Ð¿Ñ€Ð¸ÑÐ²Ð°Ð¸Ð²Ð°ÐµÐ¼ Ð¸Ð´ÐµÑ‚Ð¸Ñ„Ð¸ÐºÐ°Ñ‚Ð¾Ñ€ Ñ„Ð¾Ñ€Ð¼Ðµ
+     // ïðèñâàèâàåì èäåòèôèêàòîð ôîðìå
      /*$uid = 0;
      do
      {
@@ -217,17 +217,37 @@ class Form
      }
      while (isset($this->rh->forms) && in_array($this->name, $this->rh->forms));
      $this->rh->forms[] = $this->name;*/
-     $this->name = $this->config['db_table']? $this->config['db_table'] : 'form';
-
-     //Ð¿Ñ€Ð¾Ð±ÑƒÐµÐ¼ Ð¾Ð±Ñ€Ð°Ð±Ð¾Ñ‚Ð°Ñ‚ÑŒ Ð¿Ð¾ÑÑ‚
-     if (isset($_POST[$this->form_present_var]) && ($_POST[$this->form_present_var] == 'form_'.$this->name) && !$ignore_post)
+     if ($this->config['db_table'])
      {
-       $this->LoadFromPost( $_POST );
+         $this->name = $this->config['db_table'];
+     }
+     else
+     {
+         if (!Config::get('last_form_id')) Config::set('last_form_id', 1);
+         $this->name = 'form'.Config::get('last_form_id');
+         Config::set('last_form_id', Config::get('last_form_id')+1);
+     }
+
+     $postData = null;
+     if (isset($_POST[$this->form_present_var]) && ($_POST[$this->form_present_var] == 'form_'.$this->name))
+     {
+         $postData = &$_POST;
+     }
+     elseif (isset($_GET[$this->form_present_var]) && ($_GET[$this->form_present_var] == 'form_'.$this->name))
+     {
+         $postData = &$_GET;
+     }
+
+     //ïðîáóåì îáðàáîòàòü ïîñò
+     if (is_array($postData) && !$ignore_post)
+     {
+       $this->LoadFromPost( $postData );
 
        // get event
-       $event_name = $_POST["_event"];
+       $event_name = $postData["_event"];
+       /*
        if ($_POST["_event2"])
-         $event_name = $_POST["_event2"];
+         $event_name = $_POST["_event2"];*/
        $event = $this->buttons[$event_name];
 
        if (!$event) $event = $this->config["default_event"];
@@ -292,18 +312,18 @@ class Form
      $this->_ChooseEventHandler( $event, "on_after_event", "OnAfterEventForm" );
    }
 
-   //Ð²Ñ‹Ð±Ð¸Ñ€Ð°ÐµÐ¼, ÐºÐ°ÐºÐ¾Ð¹ Ð¾Ð±Ñ€Ð°Ð±Ð¾Ñ‚Ñ‡Ð¸Ðº ÑÐ¾Ð±Ñ‹Ñ‚Ð¸Ñ Ð·Ð°Ð¿ÑƒÑÐºÐ°Ñ‚ÑŒ
+   //âûáèðàåì, êàêîé îáðàáîò÷èê ñîáûòèÿ çàïóñêàòü
    function _ChooseEventHandler( $event, $handler, $default_method )
    {
       if (isset($this->config[$handler])){
         foreach($this->config[$handler] as $k=>$v){
-          //ÑÑ‚Ð¾ Ð¼Ð¾Ð¶ÐµÑ‚ Ð±Ñ‹Ñ‚ÑŒ Ð¾Ñ‚Ð´ÐµÐ»ÑŒÐ½Ð°Ñ Ñ„ÑƒÐ½ÐºÐ¸Ñ†Ñ
-          //Ð¸Ð»Ð¸ ÑÑ‚Ð¾ Ð¼Ð¾Ð¶ÐµÑ‚ Ð±Ñ‹Ñ‚ÑŒ Ð¾Ð±ÑŠÐµÐºÑ‚ Ñ ÑÐ²Ð½Ð¾ Ð·Ð°Ð´Ð°Ð½Ð½Ñ‹Ð¼ Ð¼ÐµÑ‚Ð¾Ð´Ð¾Ð¼
+          //ýòî ìîæåò áûòü îòäåëüíàÿ ôóíêèöÿ
+          //èëè ýòî ìîæåò áûòü îáúåêò ñ ÿâíî çàäàííûì ìåòîäîì
 
           if (is_callable($this->config[$handler][$k])){
             call_user_func($this->config[$handler][$k], $event, $this);
           }else
-          //ÑÑ‚Ð¾ Ð¼Ð¾Ð¶ÐµÑ‚ Ð±Ñ‹Ñ‚ÑŒ Ð¾Ð±ÑŠÐµÐºÑ‚ Ñ Ð¼ÐµÑ‚Ð¾Ð´Ð¾Ð¼ Ð¿Ð¾ ÑƒÐ¼Ð¾Ð»Ñ‡Ð°Ð½Ð¸ÑŽ
+          //ýòî ìîæåò áûòü îáúåêò ñ ìåòîäîì ïî óìîë÷àíèþ
           if ( is_callable( array($this->config[$handler][$k],$default_method) ) ){
             $this->config[$handler][$k]->$default_method( $event, $this );
           }
@@ -311,14 +331,14 @@ class Form
       }
    }
 
-   // ÑÐ±Ñ€Ð¾ÑÐ¸Ñ‚ÑŒ Ð²ÑÐµ Ð¿Ð¾Ð»Ñ Ñ„Ð¾Ñ€Ð¼Ñ‹ Ð² Ð½Ð°Ñ‡Ð°Ð»ÑŒÐ½Ð¾Ðµ ÑÐ¾ÑÑ‚Ð¾ÑÐ½Ð¸Ðµ
+   // ñáðîñèòü âñå ïîëÿ ôîðìû â íà÷àëüíîå ñîñòîÿíèå
    function Reset()
    {
      foreach($this->fields as $field)
        $field->model->Model_SetDefault();
    }
 
-   // Ð¿Ð°Ñ€ÑÐ¸Ð½Ð³ Ñ„Ð¾Ñ€Ð¼Ñ‹ Ð² ÑÐ²Ð¾Ñ‘Ð¼ Ð¾Ð±Ñ‹Ñ‡Ð½Ð¾Ð¼ ÑÐ¾ÑÑ‚Ð¾ÑÐ½Ð¸Ð¸
+   // ïàðñèíã ôîðìû â ñâî¸ì îáû÷íîì ñîñòîÿíèè
    function Parse()
    {
      $result = "";
@@ -327,7 +347,7 @@ class Form
      return $this->_ParseWrapper( $result );
    }
 
-   // Ð¿Ð°Ñ€ÑÐ¸Ð½Ð³ Ñ„Ð¾Ñ€Ð¼Ñ‹ "Ñ‚Ð¾Ð»ÑŒÐºÐ¾ Ð´Ð»Ñ Ñ‡Ñ‚ÐµÐ½Ð¸Ñ", Ð±ÐµÐ· ÐºÐ½Ð¾Ð¿Ð¾Ðº
+   // ïàðñèíã ôîðìû "òîëüêî äëÿ ÷òåíèÿ", áåç êíîïîê
    function ParsePreview()
    {
      $result = "";
@@ -336,7 +356,7 @@ class Form
      return $result;
    }
 
-   // Ð¿Ð°Ñ€ÑÐ¸Ñ‚ÑŒ Ð²ÑÑÐºÐ¾Ðµ Ð¾ÐºÑ€ÑƒÐ¶ÐµÐ½Ð¸Ðµ: ÐºÐ½Ð¾Ð¿ÐºÐ¸ Ñ‚Ð°Ð¼, Ð¿Ñ€Ð¾Ñ‡ÐµÐµ
+   // ïàðñèòü âñÿêîå îêðóæåíèå: êíîïêè òàì, ïðî÷åå
    function _ParseWrapper( $content )
    {
 	 $tpl = &Locator::get('tpl');
@@ -349,10 +369,10 @@ class Form
      		"name=\"".$form_name.'" '.
      		($this->config["form_class"] ? 'class="'.$this->config["form_class"].'"' : '' ).
      		($this->config["form_onsubmit"] ? "onsubmit='".$this->config["form_onsubmit"]."'" : '' ).
-     		' enctype="multipart/form-data"> '. RequestInfo::pack(METHOD_POST)
+     		' enctype="multipart/form-data"> '/*. RequestInfo::pack(RequestInfo::METHOD_POST)*/
      );
 
-     $tpl->set( "form_name", 'form_'.$this->name );
+     $tpl->set( "form_name", $form_name );
      $tpl->set( "form_present", $this->form_present_var );
      $tpl->set( "form_data_id", $this->data_id_var );
      $tpl->set( "form_data_id_value", $this->data_id );
@@ -360,7 +380,7 @@ class Form
      $tpl->set( "data_id", $this->data_id );
      $tpl->set( "buttons", $this->_ParseButtons() );
 
-     //Ð¾Ñ‚Ð¿Ð°Ñ€ÑÐ¸Ñ‚ÑŒ ÐºÐ½Ð¾Ð¿ÐºÐ¸ Ð¿Ð¾ Ð¾Ñ‚Ð´ÐµÐ»ÑŒÐ½Ð¾ÑÑ‚Ð¸
+     //îòïàðñèòü êíîïêè ïî îòäåëüíîñòè
      $tpl->set( "buttons_left",  $this->_ParseButtons(0) );
      $tpl->set( "buttons_right", $this->_ParseButtons(1) );
 
@@ -368,16 +388,16 @@ class Form
 
    }
 
-   // Ð¿Ð°Ñ€ÑÐ¸Ð½Ð³ ÐºÐ½Ð¾Ð¿Ð¾Ðº
+   // ïàðñèíã êíîïîê
    function _ParseButtons($index=null)
    {
-     $tpl = &TemplateEngine::getInstance();
+     $tpl = &Locator::get('tpl');
      $result = array();
      foreach( $this->buttons as $button )
      {
        $tpl->SetRef( "*", $button );
 
-       //Ð¾Ñ‚Ð¿Ð°Ñ€ÑÐ¸Ñ‚ÑŒ ÑÐ¿ÐµÑ†Ð¸Ð°Ð»ÑŒÐ½ÑƒÑŽ ÐºÐ½Ð¾Ð¿ÐºÑƒ Ð² Ð½ÑƒÐ¶Ð½Ð¾Ðµ Ð¼ÐµÑÑ‚Ð¾
+       //îòïàðñèòü ñïåöèàëüíóþ êíîïêó â íóæíîå ìåñòî
        if (!empty($button['store_to']))
        {
          $tpl->Parse( $this->config["template_prefix_button"].$button["template"], $button['store_to'] );
@@ -386,7 +406,7 @@ class Form
            $result[]["BUTTON"] = $tpl->Parse( $this->config["template_prefix_button"].$button["template"] );
      }
 
-     //Ð¾Ñ‚Ð¿Ð°Ñ€ÑÐ¸Ñ‚ÑŒ Ñ‚Ð¾Ð»ÑŒÐºÐ¾ Ð¾Ð´Ð½Ñƒ ÐºÐ½Ð¾Ð¿ÐºÑƒ
+     //îòïàðñèòü òîëüêî îäíó êíîïêó
      if ($index!==null)
      {
        $tpl->setRef('*', $result[$index]);
@@ -398,25 +418,27 @@ class Form
        return $tpl->set('buttons', $result, $this->config["template_prefix"].$this->config["template_buttonlist"] );
    }
 
-   // Ð·Ð°Ð³Ñ€ÑƒÐ·ÐºÐ° Ð¸Ð· Ñ„Ð¾Ñ€Ð¼Ñ‹
+   // çàãðóçêà èç ôîðìû
    function LoadFromPost( $post_data )
    {
      $this->AssignId( @$post_data[ $this->data_id_var ] ); //IVAN
 
      foreach($this->fields as $k=>$field)
+     {
        $this->fields[$k]->LoadFromPost( $post_data );
+     }
    }
 
-   // Ð²Ð°Ð»Ð¸Ð´Ð°Ñ†Ð¸Ñ Ð²ÑÐµÑ… Ð¿Ð¾Ð»ÐµÐ¹ Ñ„Ð¾Ñ€Ð¼Ñ‹
+   // âàëèäàöèÿ âñåõ ïîëåé ôîðìû
    function Validate()
    {
      $this->valid = true;
      foreach($this->fields as $k=>$field)
-       $this->valid = $this->fields[$k]->Validate() && $this->valid; // Ð²Ð°Ð¶Ð½Ð¾, Ñ‡Ñ‚Ð¾ Ð¸Ð¼ÐµÐ½Ð½Ð¾ Ð² Ñ‚Ð°ÐºÐ¾Ð¼ Ð¿Ð¾Ñ€ÑÐ´ÐºÐµ
+       $this->valid = $this->fields[$k]->Validate() && $this->valid; // âàæíî, ÷òî èìåííî â òàêîì ïîðÿäêå
      return $this->valid;
    }
 
-   // Ð”ÐÐœÐŸ Ð¤ÐžÐ ÐœÐ«
+   // ÄÀÌÏ ÔÎÐÌÛ
    function _Dump( $is_error=1 )
    {
      $dump_hash = array();
@@ -424,7 +446,7 @@ class Form
       $dump_hash[ $field->name ] = $field->_Dump();
    }
 
-   // Ñ€Ð°Ð±Ð¾Ñ‚Ð° Ð² ÑÐµÑÑÐ¸Ð¸
+   // ðàáîòà â ñåññèè
    function FromSession()
    {
      $key = "form_".$this->config["db_table"];
@@ -445,7 +467,7 @@ class Form
      $_SESSION[ "form_".$this->config["db_table"] ] = "";
    }
 
-   // Ð¾Ð±Ñ€Ð°Ð±Ð¾Ñ‚ÐºÐ° ÑÐ¾Ð±Ñ‹Ñ‚Ð¸Ñ, Ð°Ð³Ð° (Ð²ÑÑ‚Ð°Ð²ÐºÐ°/Ñ€ÐµÐ´Ð°ÐºÑ‚Ð¸Ñ€Ð¾Ð²Ð°Ð½Ð¸Ðµ)
+   // îáðàáîòêà ñîáûòèÿ, àãà (âñòàâêà/ðåäàêòèðîâàíèå)
    function HandleEvent( $event = FORM_EVENT_AUTO )
    {
      if (is_array($event)) $_event = $event["event"];
@@ -505,120 +527,159 @@ class Form
      if (!$this->processed)
 		Controller::redirect();
      else
-		$this->ResetSession(); // ÐµÑÐ»Ð¸ ÑƒÑÐ¿ÐµÑˆÐ½Ð¾ Ð¾Ð±Ñ€Ð°Ð±Ð¾Ñ‚Ð°Ð½Ð°, Ñ‚Ð¾ ÑÐµÑÑÐ¸ÑŽ Ð²Ñ‹ÐºÐ¸Ð´Ñ‹Ð²Ð°ÐµÐ¼
+		$this->ResetSession(); // åñëè óñïåøíî îáðàáîòàíà, òî ñåññèþ âûêèäûâàåì
    }
 
-   // Ð²ÑÑ‚Ð°Ð²ÐºÐ° Ð² Ð‘Ð”
-   function DbInsert()
-   {
-      $db = DBAL::getInstance();
+    // âñòàâêà â ÁÄ
+    function dbInsert()
+    {
+        if (!$this->config["db_table"] && !$this->config["db_model"])
+            if ($this->config["db_ignore"])
+                return;
+            else
+                throw new JSException("[Form]: *db_table* form config option is not set.");
 
-      if (!$this->config["db_table"])
-      	if ($this->config["db_ignore"]) return;
-      	  else throw new JSException("[Form]: *db_table* form config option is not set.");
+        $fields = array();
+        $values = array();
+        foreach($this->fields as $k=>$v)
+            $this->fields[$k]->dbInsert( $fields, $values );
 
-      $fields = array();
-      $values = array();
-      foreach($this->fields as $k=>$v)
-        $this->fields[$k]->DbInsert( $fields, $values );
+        $this->_dbAuto( $fields, $values, true );
 
-      $this->_DbAuto( $fields, $values, true );
-
-      foreach($values as $k=>$v)
-        $values[$k] = $db->Quote($values[$k]);
-
-      $sql = "insert into ".Config::get('db_prefix').$this->config["db_table"];
-      if (sizeof($fields) > 0)
-        $sql.=" (".implode(",",$fields).") VALUES (".implode(",",$values).")";
-
-      $this->data_id = $db->Insert($sql);
-
-//      if (!$this->data_id)
-//        die($sql);
-
-      foreach($this->fields as $k=>$v)
-        $this->fields[$k]->DbAfterInsert( $this->data_id );
-   }
-   function DbUpdate( $data_id = NULL )
-   {
-      if (!$this->config["db_table"])
-      	if ($this->config["db_ignore"]) return;
-      	  else throw new JSException("[Form]: *db_table* form config option is not set.");
-
-      if ($data_id == NULL) $data_id = $this->data_id;
-
-      $fields = array();
-      $values = array();
-      foreach($this->fields as $k=>$v)
-        $this->fields[$k]->DbUpdate( $data_id, $fields, $values );
-
-      $this->_DbAuto( $fields, $values );
-
-      $this->_DbUpdate( $fields, $values );
-
-      foreach($this->fields as $k=>$v)
-        $this->fields[$k]->DbAfterUpdate( $data_id );
-   }
-   function _DbUpdate ( &$fields, &$values )
-   {
-      $fields_values = array();
-      foreach($fields as $k=>$v)
-        $fields_values[] = $v." = ".Locator::get('db')->quote($values[$k]);
-
-      $sql = "update ".$this->config["db_table"].
-             " set ".implode(",",$fields_values)." where ".
-             $this->config["id_field"]."=".Locator::get('db')->quote($this->data_id);
-      if (sizeof($fields) == 0) return false;
-      Locator::get('db')->execute($sql);
-
-   }
-   function _DbAuto( &$fields, &$values, $is_insert=false )
-   {
-      $user = Locator::get('principal')->getId();
-      $dt = date("Y-m-d H:i:s");
-      if ($this->config["auto_user_id"])
-      {
-        if ($is_insert)
+        if ($this->config["db_table"])
         {
-          $fields[] = $this->config["fieldname_created_user_id"];//"_created_user_id";
-          $values[] = $user;
+            $db = &Locator::get('db');
+            foreach($values as $k=>$v)
+                $values[$k] = $db->quote($values[$k]);
+            $sql = "insert into ".Config::get('db_prefix').$this->config["db_table"];
+            if (sizeof($fields) > 0)
+                $sql.=" (".implode(",",$fields).") VALUES (".implode(",",$values).")";
+            $this->data_id = $db->insert($sql);
         }
-        $fields[] = $this->config["fieldname_edited_user_id"];//"_edited_user_id";
-        $values[] = $user;
-      }
-      if ($this->config["auto_datetime"])
-      {
-        if ($is_insert)
+        else
         {
-          $fields[] = $this->config["fieldname_created_datetime"];//"_created_datetime";
-          $values[] = $dt;
+            if (is_string($this->config["db_model"]))
+                $model = DBModel::factory($this->config["db_model"]);
+            else
+                $model = $this->config["db_model"];
+            $data = array_combine($fields, $values);
+            $this->data_id = $model->insert($data);
         }
-        $fields[] = $this->config["fieldname_edited_datetime"];//"_edited_datetime";
-        $values[] = $dt;
-      }
+
+        foreach($this->fields as $k=>$v)
+            $this->fields[$k]->dbAfterInsert( $this->data_id );
+    }
+
+    function dbUpdate( $dataId = NULL )
+    {
+        if (!$this->config["db_table"] && !$this->config["db_model"])
+            if ($this->config["db_ignore"])
+                return;
+            else
+                throw new JSException("[Form]: *db_table* form config option is not set.");
+
+        if ($dataId == NULL) $dataId = $this->data_id;
+
+        $fields = array();
+        $values = array();
+        foreach($this->fields as $k=>$v)
+            $this->fields[$k]->dbUpdate( $dataId, $fields, $values );
+
+        $this->_dbAuto( $fields, $values );
+
+        if ($this->config["db_table"])
+        {
+            $this->_DbUpdate( $fields, $values );
+        }
+        else
+        {
+            if (is_string($this->config["db_model"]))
+                $model = DBModel::factory($this->config["db_model"]);
+            else
+                $model = $this->config["db_model"];
+            $data = array_combine($fields, $values);
+            $model->update($data, '{'.$this->config["id_field"].'} = '.Locator::get('db')->quote($dataId));
+        }
+
+        foreach($this->fields as $k=>$v)
+            $this->fields[$k]->DbAfterUpdate( $dataId );
+    }
+
+    function _dbUpdate ( &$fields, &$values )
+    {
+        $fields_values = array();
+        foreach($fields as $k=>$v)
+            $fields_values[] = $v." = ".Locator::get('db')->quote($values[$k]);
+
+        $sql = "update ".$this->config["db_table"].
+               " set ".implode(",",$fields_values)." where ".
+               $this->config["id_field"]."=".Locator::get('db')->quote($this->data_id);
+        if (sizeof($fields) == 0) return false;
+        Locator::get('db')->execute($sql);
    }
 
-   // Ð·Ð°Ð³Ñ€ÑƒÐ·ÐºÐ° Ð¸Ð· Ð‘Ð”
-   function Load( $data_id = NULL )
-   {
-     if (!$this->config["db_table"])
-      	if ($this->config["db_ignore"]) return;
-      	  else throw new JSException("[Form]: *db_table* form config option is not set.");
+    function _dbAuto( &$fields, &$values, $is_insert=false )
+    {
+        $user = Locator::get('principal')->getId();
+        $dt = date("Y-m-d H:i:s");
+        if ($this->config["auto_user_id"])
+        {
+            if ($is_insert)
+            {
+                $fields[] = $this->config["fieldname_created_user_id"];//"_created_user_id";
+                $values[] = $user;
+            }
+            $fields[] = $this->config["fieldname_edited_user_id"];//"_edited_user_id";
+            $values[] = $user;
+        }
+        if ($this->config["auto_datetime"])
+        {
+            if ($is_insert)
+            {
+                $fields[] = $this->config["fieldname_created_datetime"];//"_created_datetime";
+                $values[] = $dt;
+            }
+            $fields[] = $this->config["fieldname_edited_datetime"];//"_edited_datetime";
+            $values[] = $dt;
+        }
+    }
 
-     if ($data_id == NULL) $data_id = $this->data_id;
-     $sql = "select * from ".$this->config["db_table"]." where ".
-             $this->config["id_field"]."=".Locator::get('db')->quote($data_id);
-     $data = Locator::get('db')->queryOne( $sql );
-     if ($data == false)
-     {
-       $this->data_id = 0;
-       return;
-     }
-     foreach($this->fields as $k=>$v)
-       $this->fields[$k]->DbLoad( $data );
-   }
+    // çàãðóçêà èç ÁÄ
+    function load( $dataId = NULL )
+    {
+        if (!$this->config["db_table"] && !$this->config["db_model"])
+            if ($this->config["db_ignore"])
+                return;
+            else
+                throw new JSException("[Form]: *db_table* form config option is not set.");
 
-   // ÑƒÐ´Ð°Ð»ÐµÐ½Ð¸Ðµ Ð¸Ð· Ð‘Ð”
+        if ($dataId == NULL) $dataId = $this->data_id;
+
+        if ($this->config["db_table"])
+        {
+            $sql = "select * from ".$this->config["db_table"]." where ".
+                    $this->config["id_field"]."=".Locator::get('db')->quote($dataId);
+            $data = Locator::get('db')->queryOne( $sql );
+        }
+        else
+        {
+            if (is_string($this->config["db_model"]))
+                $model = DBModel::factory($this->config["db_model"]);
+            else
+                $model = $this->config["db_model"];
+            $data = $model->loadOne('{'.$this->config["id_field"].'} = '.Locator::get('db')->quote($dataId))->getArray();
+        }
+
+        if ($data == false)
+        {
+            $this->data_id = 0;
+            return;
+        }
+        foreach($this->fields as $k=>$v)
+            $this->fields[$k]->DbLoad( $data );
+    }
+
+   // óäàëåíèå èç ÁÄ
    function DbDelete( $data_id = NULL )
    {
      if (!$this->config["db_table"])
@@ -634,18 +695,36 @@ class Form
      Locator::get('db')->query( $sql );
    }
 
-   // Ð·Ð°Ð³Ñ€ÑƒÐ·ÐºÐ° Ð¸Ð· Ð¼Ð°ÑÑÐ¸Ð²Ð°
+   // çàãðóçêà èç ìàññèâà
    function LoadFromArray( $data )
    {
      foreach($this->fields as $k=>$v)
        $this->fields[$k]->LoadFromArray( $data );
    }
 
-   // ÑÑ‚Ð°Ð²Ð¸Ð¼ Ñ„Ð¾Ñ€Ð¼Ðµ Ð² ÑÐ¾Ð¾Ñ‚Ð²ÐµÑ‚ÑÑ‚Ð²Ð¸Ðµ ÑÑ‚Ñ€Ð¾ÐºÑƒ Ð² Ð‘Ð”
+   // ñòàâèì ôîðìå â ñîîòâåòñòâèå ñòðîêó â ÁÄ
    function AssignId( $data_id )
    {
      $this->data_id = $data_id;
    }
+
+    public function &getFieldByName($name)
+    {
+        $resultField = null;
+        foreach ($this->fields AS $k => $field)
+        {
+            if ($field->name == $name)
+            {
+                $resultField = $this->fields[$k];
+                break;
+            }
+            elseif ($resultField = &$field->getFieldByName($name))
+            {
+                break;
+            }
+        }
+        return $resultField;
+    }
 
 
    var $_inner_name_counter = 0;

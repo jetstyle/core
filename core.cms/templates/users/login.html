@@ -1,0 +1,44 @@
+{{?ajax}}
+    <script language="javascript">
+    	function onSubmit()
+    	{
+    	    var data = {};
+    	    $("input", "#form_form1").each(function (a,b,c){
+                if (b.type!="submit")
+                    data[ b.name  ] = b.value;
+            });
+
+    	    $.post( base_url+"u/login/ajax", data, function( ret ){
+                if (ret=="200")
+                {
+                    top.$.fn.colorbox.close()
+                }
+    	    });
+
+    	}
+    </script>
+
+    <div class="cms-login cms-login-popup">
+	    {{Form}}
+    </div>
+{{?:}}
+<br /><br /><br /><br />
+<center>
+    {{?message}}
+	<h1>{{message}}</h1>
+	<br /><br />
+    {{/?}}
+
+
+    <div class="cms-login">
+	    {{Form}}
+    </div>
+</center>
+
+{{/?}}
+<script language="javascript" type="text/javascript">
+if (loginElement = document.getElementById('_login'))
+{
+	loginElement.focus();
+}
+</script>

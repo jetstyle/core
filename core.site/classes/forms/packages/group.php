@@ -11,8 +11,8 @@
             "interface_tpl_params" => array( "class" => "w100" ),
             
             "wrapper"   => "wrapper_group",
-            "wrapper_tpl"     => "wrapper.html:Collapsable",
-            "wrapper_title" => "[group title]",
-        //  "wrapper_desc"  => "[group desc]",
+            "wrapper_tpl"     => "wrapper.html:DefaultGroupWrapper",
+            "wrapper_title" => "",
+            "wrapper_desc"  => "",
   );
 ?>

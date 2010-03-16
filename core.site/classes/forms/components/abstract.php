@@ -180,7 +180,7 @@ class FormComponent_abstract
    // парсинг полей интерфейса
    function Interface_Parse()
    {
-     $tpl = TemplateEngine::getInstance();
+     $tpl = Locator::get('tpl');
      $tpl->set( "field", "_".$this->field->name );
      $tpl->set( "field_id", "id_".$this->form->name."_".$this->field->name );
      if (isset($this->field->config["interface_tpl_params"]) && is_array($this->field->config["interface_tpl_params"]))

@@ -10,11 +10,14 @@
 
  class Pager implements PagerInterface
  {
+	const FIRST_PAGE = 1;		// first page number
+	
  	protected $total = 0;		// total items
  	protected $perPage = 10;	// items per page
- 	protected $p = 1;			// current page
+ 	protected $p = NULL;		// current page
  	protected $frameSize = 7;	//
  	protected $data = array();
+	protected $pageVar = 'p';
 
  	public function getPages()
  	{
@@ -22,12 +25,11 @@
  		return $this->data;
  	}
 
- 	public function setup($currentPage = 1, $total = 0, $perPage = 0, $frameSize = 0)
+ 	public function setup($currentPage = 0, $total = 0, $perPage = 0, $frameSize = 0)
  	{
- 		$this->p = $currentPage;
- 		if ($this->p < 1)
+ 		if ($currentPage > 0)
 		{
-			$this->p = 1;
+			$this->setCurrentPage(intval($currentPage));
 		}
 
  		$this->total = $total;
@@ -42,6 +44,11 @@
  		}
  	}
 
+	public function getTotal()
+	{
+		return $this->total;
+	}
+
  	public function getLimit()
  	{
  		return $this->perPage;
@@ -49,9 +56,12 @@
 
  	public function getOffset()
  	{
- 		return (($this->p-1) * $this->perPage);
+ 		return (($this->getCurrentPage() - 1) * $this->perPage);
  	}
-
+	public function getLastPage()
+	{
+		return intval(ceil($this->total / $this->perPage));
+	}
  	protected function construct()
  	{
  		if ($this->total <= $this->perPage)
@@ -59,60 +69,57 @@
 			return;
 		}
 
-		$allPages = ceil($this->total / $this->perPage);
+		$lastPage = $this->getLastPage();
+		$currentPage = $this->getCurrentPage();
 
-		if ($this->p < 1)
+		if ($this->frameSize > $lastPage)
 		{
-			$p = 1;
-		}
-		elseif ($this->p >= $allPages)
-		{
-			$p = $allPages;
-		}
-		else
-		{
-			$p = $this->p;
-		}
-
-		if ($this->frameSize > $allPages)
-		{
-			$this->frameSize = $allPages;
+			$this->frameSize = $lastPage;
 		}
 
 		$htis->data = array (
 			'pages' => array ()
 		);
 
-		if ($p <= ceil($this->frameSize / 2))
+		if ($currentPage <= ceil($this->frameSize / 2))
 		{
 			//echo 'left';
 			for ($i = 1; $i <= $this->frameSize; $i++)
 			{
-				$this->data['pages'][$i] = $this->buildPage($i, $p, 0);
+				$this->data['pages'][$i] = $this->buildPage($i, $currentPage, 0);
 			}
 			//если в левой части фрейма и страниц больше чем влазит во фрейм
-			if ($allPages > $this->frameSize)
+			if ($lastPage > $this->frameSize)
 			{
 				$this->data['pages'][$i-1]['has_more'] = $i;
-				$this->data['pages'][$i-1]['has_more_url'] = $this->fixUrl( RequestInfo::hrefChange('',array ('p' => $i,'submit' => '')) );
-				$this->data['pages'][$i-1]['last_url'] = $this->fixUrl( RequestInfo::hrefChange('',array ('p' => $allPages)) );
-				$this->data['pages'][$i-1]['last_num'] = $allPages;
+				$this->data['pages'][$i-1]['has_more_url'] = $this->fixUrl( RequestInfo::hrefChange('',
+					array (
+						$this->getPageVar() => $i,
+						'submit' => '',
+					)
+				));
+				$this->data['pages'][$i-1]['last_url'] = $this->fixUrl( RequestInfo::hrefChange('',
+					array (
+						$this->getPageVar() => $lastPage,
+					)
+				));
+				$this->data['pages'][$i-1]['last_num'] = $lastPage;
 			}
 		}
-		elseif ($p > ($allPages - (ceil($this->frameSize / 2))))
+		elseif ($currentPage > ($lastPage - (ceil($this->frameSize / 2))))
 		{
 			//echo 'right';
-			$start_from = ($allPages + 1 - $this->frameSize);
-			for ($i = $start_from; $i <= $allPages; $i++)
+			$start_from = ($lastPage + 1 - $this->frameSize);
+			for ($i = $start_from; $i <= $lastPage; $i++)
 			{
-				$this->data['pages'][$i] = $this->buildPage($i, $p, $start_from);
+				$this->data['pages'][$i] = $this->buildPage($i, $currentPage, $start_from);
 			}
 
 		}
 		else
 		{
 
-			$start_from = ($p - (floor($this->frameSize / 2)));
+			$start_from = ($currentPage - (floor($this->frameSize / 2)));
 			$end_to =  (p + (floor($this->frameSize / 2)));
 
 			$end_to = $start_from + $this->frameSize ;
@@ -120,33 +127,45 @@
 
 			for ($i = $start_from; $i < $end_to ; $i++)
 			{
-				$this->data['pages'][$i] = $this->buildPage($i, $p, $start_from);
+				$this->data['pages'][$i] = $this->buildPage($i, $currentPage, $start_from);
 			}
 			//если до конца больше фрейма и в нем нет последней страницы
-			if ( $allPages > $i )
+			if ( $lastPage > $i )
 			{
 				$this->data['pages'][$i-1]['has_more'] = $i;
-				$this->data['pages'][$i-1]['has_more_url'] = $this->fixUrl( RequestInfo::hrefChange('',array ('p' => $i,'submit' => '')) );
-				$this->data['pages'][$i-1]['last_url'] = $this->fixUrl( RequestInfo::hrefChange('',array ('p' => $allPages)) );
-				$this->data['pages'][$i-1]['last_num'] = $allPages;
+				$this->data['pages'][$i-1]['has_more_url'] = $this->fixUrl( RequestInfo::hrefChange('',
+					array (
+						$this->getPageVar() => $i,
+						'submit' => '',
+					)
+				));
+				$this->data['pages'][$i-1]['last_url'] = $this->fixUrl( RequestInfo::hrefChange('',
+					array (
+						$this->getPageVar() => $lastPage,
+					)
+				));
+				$this->data['pages'][$i-1]['last_num'] = $lastPage;
 
 			}
 		}
 
-		if ($p > 1)
+		if ($currentPage > 1)
 		{
-			$this->data['prev_page'] = $this->fixUrl( RequestInfo::hrefChange('', array (
-				'p' => ($p -1
-			), 'submit' => ''))
-			)
-			;
+			$this->data['prev_page'] = $this->fixUrl( RequestInfo::hrefChange('',
+				array (
+					$this->getPageVar() => ($currentPage - 1),
+					'submit' => '',
+				)
+			));
 		}
-		if ($p <= ($allPages -1))
+		if ($currentPage <= ($lastPage -1))
 		{
-			$this->data['next_page'] = $this->fixUrl( RequestInfo::hrefChange('', array (
-																			  'p' => ($p +1
-																			), 'submit' => ''))
-			);
+			$this->data['next_page'] = $this->fixUrl( RequestInfo::hrefChange('',
+				array (
+					$this->getPageVar() => ($currentPage +1),
+					'submit' => '',
+				)
+			));
 		}
  	}
 
@@ -169,7 +188,7 @@
 					'num' => $i,
 					'url' => $this->fixUrl( RequestInfo::hrefChange('',
 					array (
-						'p' => $i,
+						$this->getPageVar() => $i,
 						'submit' => ''
 					)
 				)) );
@@ -183,11 +202,59 @@
 		//для первой страницы текущего фрейма проверим, можно ли отмотать фрейм назад
 		if ( $i == $start_from && $start_from > 1 )
 		{
-			$page['has_less_url'] = $this->fixUrl( RequestInfo::hrefChange('',array ('p' => $i-1)) );
-			$page['first_url'] = $this->fixUrl( RequestInfo::hrefChange('',array ('p' => 1)) );
+			$page['has_less_url'] = $this->fixUrl( RequestInfo::hrefChange('',
+				array ($this->getPageVar() => $i-1)
+			));
+			$page['first_url'] = $this->fixUrl( RequestInfo::hrefChange('',
+				array ($this->getPageVar() => 1)
+			));
 		}
 
 		return $page;
  	}
+
+	public function getPageVar()
+	{
+		return $this->pageVar;
+	}
+	public function setPageVar($name)
+	{
+		$this->pageVar = $name;
+		return $this;
+	}
+	
+	public function getCurrentPage()
+	{
+		if (!isset($this->p))
+		{
+			$page = NULL;
+			if ($this->getPageVar())
+			{
+				 $page = RequestInfo::get($this->getPageVar());
+			}
+			$this->setCurrentPage($this->recognizePage($page));
+		}
+		return $this->p;
+	}
+	public function setCurrentPage($pageNo)
+	{
+		if (!is_int($pageNo))
+			throw new JSException("Invalid type of pageNo argument. Integer expected");
+		$this->p = $pageNo;
+		return $this;
+	}
+	protected function recognizePage($page)
+	{
+		$page = intval($page);
+		if ($page < self::FIRST_PAGE)
+		{
+			$page = self::FIRST_PAGE;
+		}
+		elseif (NULL !== ($lastPage = $this->getLastPage()) && $page >= $lastPage)
+		{
+			$page = $lastPage;
+		}
+		return $page;
+	}
  }
 ?>
