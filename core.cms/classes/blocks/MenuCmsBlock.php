@@ -2,7 +2,7 @@
 Finder::useClass('blocks/MenuBlock');
 class MenuCmsBlock extends MenuBlock
 {	
-	protected function getCurrent()
+	public function getCurrent()
 	{
 		$params = array();
  		if (Locator::exists('controller'))
