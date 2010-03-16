@@ -4,10 +4,10 @@
   /*margin: 5px 0 0;  тут задаём только верхний и нижний отступы */
   }
   .l-cms-header__logo {
-    width: 60px; padding: 0 10px 5px 15px;
+    width: 60px; padding: 0px 1px;
     }
     .l-cms-header__logo img {
-      height: 25px;
+      height: 40px; /* 25px */
       vertical-align: top; /* чтобы не появлялось отступа под картинкой */
       }
   .l-cms-header__slogan {

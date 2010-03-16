@@ -7,7 +7,7 @@ class LogoBlock extends Block
 	{
                 Finder::useClass('FileManager');
 
-                $file = FileManager::getFile('Config/config:logo/small', 1);
+                $file = FileManager::getFile('Config/config/form:logo/small', 1);
 
 		$this->setData($file);
 	}
