@@ -14,8 +14,11 @@ class Block
 	/**
 	 * Вернуть конфиг
 	 */
-	public function getConfig()
+	public function getConfig($key="")
 	{
+                if ($key!=="" && isset($this->config[$key]))
+                    return $this->config[$key];
+        
 		return $this->config;
 	}
 

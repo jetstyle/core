@@ -15,7 +15,7 @@ else
     $tplName = 'blocks/'.$blockParts[0].'.html';
 }
 
-Debug::trace('Blocks: parse block '.$tplName, 'blocks');
+Debug::trace('Blocks: parse template ['.$tplName.'] for block ['.$blockName.']', 'blocks');
 
 unset($params[0]);
 
