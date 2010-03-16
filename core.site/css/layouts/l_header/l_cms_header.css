@@ -4,17 +4,19 @@
   /*margin: 5px 0 0;  тут задаём только верхний и нижний отступы */
   }
   .l-cms-header__logo {
-    width: 60px; padding: 0px 1px;
+    width: 60px; padding: 0 0 0 1px;
     }
-    .l-cms-header__logo img {
-      height: 40px; /* 25px */
-      vertical-align: top; /* чтобы не появлялось отступа под картинкой */
+    .l-cms-header__logo div {
+      height: 42px; overflow: hidden;
       }
+      .l-cms-header__logo img {
+        vertical-align: top; /* чтобы не появлялось отступа под картинкой */
+        }
   .l-cms-header__slogan {
     padding: 0 10px;
     }
   .l-cms-header__info {
-    width: 230px; padding: 0 15px 0 10px;
+    width: 230px; padding: 4px 15px 0 10px;
     text-align: right;
     font-size: 80%;
     }
@@ -23,7 +25,7 @@
       }
   .l-cms-header__navigation__menu {
     vertical-align: bottom;
-    padding: 10px 10px 0 10px;
+    padding: 11px 10px 0 10px;
     }
   .l-cms-header__navigation__submenu {
     padding: 0;
