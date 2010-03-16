@@ -56,6 +56,20 @@ class CyrDate
 		11 => 'но€брь',
 		12 => 'декабрь',
 	);
+	var $cyr_month_short = array(
+		1 => '€нв',
+		2 => 'фев',
+		3 => 'мар',
+		4 => 'апр',
+		5 => 'май',
+		6 => 'июн',
+		7 => 'июл',
+		8 => 'авг',
+		9 => 'сен',
+		10 => 'окт',
+		11 => 'но€',
+		12 => 'дек',
+	);
 	var $en_month = array(
 		1 => 'January',
 		2 => 'February',
@@ -90,6 +104,7 @@ class CyrDate
 		'Y'=>'year',
 		'm'=>'month',
 		'M'=>'months_str',
+                'U'=>'month_short_str',
 		'N'=>'month_str',
 		'd'=>'day',
 		'j'=>'day_short',
@@ -289,6 +304,7 @@ class CyrDate
 
 	function months_str() { return $this->_toStr('months', $this->month); }
 	function month_str() { return $this->_toStr('month', $this->month); }
+        function month_short_str() { return $this->_toStr('month_short', $this->month); }
 	function month_str3() { return substr($this->month_str(), 0, 3); }
 	function week_str() { return $this->_toStr('week', $this->getDayOfWeek()); }
 	function week_str3() { return substr($this->week_str(), 0, 3); }
