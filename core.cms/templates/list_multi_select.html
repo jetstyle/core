@@ -5,12 +5,11 @@
 {{/:main}}
 
 {{:select}}
-<div>
-	{{?__title}}
-		{{__title}}:&nbsp;
-	{{/?}}
-	<select name="{{__topic_field}}" onchange="this.form.submit();" >
+<fieldset>
+	{{?__title}}<label for="{{__topic_field}}">{{__title}}:&nbsp;<label>{{/?}}
+	
+	<select id="{{__topic_field}}" name="{{__topic_field}}" onchange="this.form.submit();" >
    		{{__options}}
 	</select>
-</div>
+</fieldset>
 {{/:select}}

@@ -1,16 +1,14 @@
 {{TPL:Form}}
-<br />
 <div class="cms-add-form">
-<form action='' method='post' name='{{__form_name}}'>
-<input type="hidden" name="{{prefix}}update" value="1" />
-<input type="hidden" name="_new" value="1" />
-
-<input type='text' name='{{prefix}}title' value='{{_title}}' /><br />
-<input type="submit" class="cms-save-small-but hand" value="{{_save_string}}" />&nbsp;
-{{__delete}}
-</form>
+  <form action='' method='post' name='{{__form_name}}'>
+    <input type="hidden" name="{{prefix}}update" value="1" />
+    <input type="hidden" name="_new" value="1" />
+    
+    <input type='text' name='{{prefix}}title' value='{{_title}}' /><br />
+    <input type="submit" class="cms-save-small-but hand" value="{{_save_string}}" />&nbsp;
+    {{__delete}}
+  </form>
 </div>
-<img class="block" src="{{images}}z.gif" width="1" height="10" align="top" alt="" />
 {{/TPL:Form}}
 
 {{TPL:delete}}<input type="submit" class="cms-delete-small-but hand" name="{{prefix}}delete" value="удалить" onclick="return confirm('Действительно удалить?');" />{{/TPL:delete}}

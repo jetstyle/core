@@ -1,5 +1,5 @@
 <fieldset class="cms-body_tree_search">
-  {{?*title}}<label>{{*title}}:</label>{{/?}}
-  <input type="text" name="{{*get_var}}" value="{{*data}}" />
+  {{?*title}}<label for="{{*get_var}}">{{*title}}:</label>{{/?}}
+  <input id="{{*get_var}}" class="text-input" type="text" name="{{*get_var}}" value="{{*data}}" />
   <input type="submit" name="{{*get_var}}_button" value="Найти" />
 </fieldset>

@@ -1,12 +1,8 @@
 {{!connect "calendar.css"}}
 {{!connect "calendar.js"}}
-<div>
-    {{?*title}}
-        {{*title}}:&nbsp;
-    {{/?}}
-    <input type="text" id="_list_filter_{{*get_var}}" name="{{*get_var}}" value="{{*data}}" />
-	<a href="#" onclick="return showCalendar('_list_filter_{{*get_var}}', '%d.%m.%Y');" >
-    	<img src="{{images}}calendar/icon.gif" title="календарь" alt="календарь" style="vertical-align:bottom" />
-	</a>
-    <input type="submit" name="{{*get_var}}_button" value="Найти" />
-</div>
+<fieldset class="cms-body_tree_calendar">
+  {{?*title}}<label for="_list_filter_{{*get_var}}">{{*title}}:&nbsp;</label>{{/?}}
+  <input class="text-input" type="text" id="_list_filter_{{*get_var}}" name="{{*get_var}}" value="{{*data}}" />
+	<a href="#" onclick="return showCalendar('_list_filter_{{*get_var}}', '%d.%m.%Y');" title="Календарь"><img src="{{images}}calendar/icon.gif" alt="календарь" /></a>
+  <input type="submit" name="{{*get_var}}_button" value="Найти" />
+</fieldset>

@@ -1,6 +1,6 @@
 {{!connect "list_drugs.css"}}
 
-{{:list_empty}}<div class="cms-nodata-">нет данных</div>{{/:list_empty}}
+{{:list_empty}}<p class="cms-body_tree_nodata">нет данных</p>{{/:list_empty}}
 
 {{:list_item}}
     <li class="element-" id="{{*id}}">
@@ -75,11 +75,11 @@
 {{/TPL:add_new}}
 
 {{:trash_show}}
-  <a href="{{_show_trash_href}}"><img src="{{images}}trash.png" width="16" height="16" alt="показать удалённые" /></a>
+  <a href="{{_show_trash_href}}" title="Показать удалённые"><img src="{{images}}trash.png" width="16" height="16" alt="показать удалённые" /></a>
 {{/:trash_show}}
 
 {{:trash_hide}}
-  <a href="{{_show_trash_href}}"><img src="{{images}}trash_hide.png" width="16" height="16" alt="спрятать удалённые" /></a>
+  <a href="{{_show_trash_href}}" title="Cпрятать удалённые"><img src="{{images}}trash_hide.png" width="16" height="16" alt="спрятать удалённые" /></a>
 {{/:trash_hide}}
 
 {{:item_checkbox}}
