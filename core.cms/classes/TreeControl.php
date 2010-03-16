@@ -720,6 +720,7 @@ class TreeControl
 
 		$sql = "UPDATE ??".$this->config['table']." SET title=".$db->quote($title).", title_pre = ".$db->quote($this->tpl->action('typografica', $title))." WHERE id=".$db->quote($id);
 		$db->execute($sql);
+
 		return $sql;
 	}
 

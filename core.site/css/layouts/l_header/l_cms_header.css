@@ -1,7 +1,7 @@
 .l-cms-header {
   table-layout: fixed; /* чтобы у таблицы не разъезжались колонки, если у них стоит фиксированная ширина */
   width: 100%; overflow: hidden;
-  margin: 5px 0 0; /* тут задаём только верхний и нижний отступы */
+  /*margin: 5px 0 0;  тут задаём только верхний и нижний отступы */
   }
   .l-cms-header__logo {
     width: 60px; padding: 0 10px 5px 15px;

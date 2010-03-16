@@ -80,8 +80,8 @@ class TreeControlJsTree extends TreeControl
 				}
 				$treeParams['go_url'] = $url;
 
-                Finder::useClass('Json');
-                $treeParams['hide_buttons'] = Json::encode($this->config['hide_buttons']);
+                                Finder::useClass('Json');
+                                $treeParams['hide_buttons'] = Json::encode($this->config['hide_buttons']);
 
 				if ($_COOKIE['tree_control_btns'] == 'true')
 				{
@@ -329,8 +329,8 @@ class TreeControlJsTree extends TreeControl
 
 	public function getItems($parent)
 	{
-     	$this->loadByParents(array($parent));
-     	return array('items'=>$this->items, 'children'=>$this->children);
+                $this->loadByParents(array($parent));
+                return array('items'=>$this->items, 'children'=>$this->children);
 	}
 }
 ?>

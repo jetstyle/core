@@ -314,12 +314,11 @@ class FormSimple
 
 		$model = &$this->getModel();
 		$this->new_id = $model->insert($postData);
+
 		$this->setId($this->new_id);
 
 		// update order
 		$data = array('_order' => $this->id);
-
-		
 
 		if ($this->updateSupertagAfterInsert)
 		{
@@ -327,6 +326,8 @@ class FormSimple
 		}
 		$this->updateData($data);
 		RequestInfo::set($this->idGetVar, $this->id);
+
+                return $this->id;
 	}
 
 	protected function cleanUp()
