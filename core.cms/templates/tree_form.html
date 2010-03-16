@@ -1,7 +1,6 @@
 <!--<h1 class="cms-content-title-">Разделы сайта</h1>-->
 {{!connect 'colorbox.js'}}
 {{!connect 'colorbox.css'}}
-{{!connect 'mysplitter.js'}}
 
 {{:buggy}}
 <!--
@@ -83,12 +82,18 @@
   <tbody><tr>
     <td class="cms-body_tree" id="left">
       <div class="carpet" style="position: absolute; display: none; background: transparent;"></div>
+      
+      <!-- список/дерево модуля слева -->
       {{wrapped.0}}
+      
     </td>
     <td id="separator" class="cms-body_sep"></td>
     <td class="cms-body_content" id="right">
       <div class="carpet" style="position: absolute; display: none; background: transparent;"></div>
+      
+      <!-- форма модуля справа -->
       {{wrapped.1}}
+      
     </td>
   </tr></tbody>
 </table>
