@@ -3,7 +3,7 @@
 //интерфейс получения даных от объекта. используется в Controller::add_config, ну и вообще везде где надо определить косит ли объект под массив. (с) dz
 interface DataContainer
 {
-	public function &getData();
+	public function &getData(); 
 }
 
 /**
@@ -292,7 +292,8 @@ class DBModel extends Model implements IteratorAggregate, ArrayAccess, Countable
 		{
 			foreach ($this->foreignModels AS &$model)
 			{
-				$model->cleanUp();
+                                if (is_object($model))
+                                    $model->cleanUp();
 			}
 		}
                 $this->setOne(false);
