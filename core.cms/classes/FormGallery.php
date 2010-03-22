@@ -17,16 +17,16 @@ class FormGallery extends FormCalendar
 
 	public function handle()
 	{
-                $post = $_POST;
-                $files= $_FILES;
+                //$post = $_POST;
+               // $files= $_FILES;
                 Finder::useLib("UTF8");
                 UTF8::autoconvert_request();
         
 		$this->handleGalleryUpload();
 		$this->handleAjax();
 
-                $_POST = $post;
-                $_FILES= $files;
+                //$_POST = $post;
+                //$_FILES= $files;
 		parent::handle();
 	}
 
@@ -328,9 +328,10 @@ class FormGallery extends FormCalendar
 
 	protected function getThumbSize()
 	{
-		if ($config = $this->getThumbConfig())
+                $config = $this->getThumbConfig();
+                if ( $config['actions']['view'] )
 		{
-			$result = $config['actions']['crop'];
+			$result = $config['actions']['view'];
 		}
 		else
 		{
