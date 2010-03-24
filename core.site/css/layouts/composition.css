@@ -15,5 +15,5 @@ body { height: 100%; position: relative; }
 
 .l-fixed-width .l-header-and-content-wrapper,
 .l-fixed-width .l-footer {
-  width: 950px; margin: 0 auto;
+  width: 950px; margin-left: auto; margin-right: auto;
   }
