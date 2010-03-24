@@ -12,3 +12,8 @@ body { height: 100%; position: relative; }
   height: 120px; padding-top: 40px;  
   margin-top: -160px; /* -(высота футера + его паддинг) */
   }
+
+.l-fixed-width .l-header-and-content-wrapper,
+.l-fixed-width .l-footer {
+  width: 950px; margin: 0 auto;
+  }
