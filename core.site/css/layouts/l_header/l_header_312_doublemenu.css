@@ -4,7 +4,9 @@
   margin: 15px 0 40px; /* тут задаём только верхний и нижний отступы */
   }
   .l-header__logo {
-    width: 290px; padding: 0 10px 0 15px;
+    width: 290px; /* нужно задать ширину логотипа */
+    height: 60px; /* в этой сетке высота логотипа должна быть близка к 60px */
+    padding: 0 10px 0 15px;
     }
     .l-header__logo img {
       vertical-align: top; /* чтобы не появлялось отступа под картинкой */
