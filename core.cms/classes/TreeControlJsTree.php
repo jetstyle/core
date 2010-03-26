@@ -49,10 +49,10 @@ class TreeControlJsTree extends TreeControl
 
 				if (!$this->id && $this->redirectIfEmptyId)
 				{
-					$rootId = $this->getRootId();
-					if ($rootId && !defined('UNIT_TEST'))
+					$defaultId = $this->getDefaultId();
+					if ($defaultId && !defined('UNIT_TEST'))
 					{
-						Controller::redirect(RequestInfo::hrefChange('', array($this->idGetVar => $rootId)));
+						Controller::redirect(RequestInfo::hrefChange('', array($this->idGetVar => $defaultId)));
 					}
 				}
 				$show_trash = $_GET['_show_trash'];
@@ -134,6 +134,11 @@ class TreeControlJsTree extends TreeControl
 			break;
 		}
 	}
+        
+        protected function getDefaultId(){
+            $ret = $this->redirectIfEmptyId > 0 ? $this->redirectIfEmptyId : $this->getRootId();
+            return $ret;
+        }
 
 	protected function loadByParents($parents)
 	{
