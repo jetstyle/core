@@ -289,9 +289,9 @@ class TreeControlJsTree extends TreeControl
 		return $_title;
 	}
 
-	protected function addNode()
+	public function addNode($node)
 	{
-		$id = parent::addNode();
+		$id = parent::addNode($node);
 		Locator::get('db')->execute('
 			UPDATE ??'.$this->config['table'].' SET _supertag = "" WHERE id = '.$id.'
 		');

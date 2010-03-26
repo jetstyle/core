@@ -329,6 +329,12 @@ class FormSimple
 
                 return $this->id;
 	}
+	
+	public function addNew($data)
+    {
+        $id = $this->insert($data);
+        return $id;
+    }
 
 	protected function cleanUp()
 	{

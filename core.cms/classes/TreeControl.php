@@ -527,24 +527,22 @@ class TreeControl
 
 
 
-	protected function addNode()
+	public function addNode($node = array())
 	{
 		$db =& $this->db;
 
 		Finder::useClass('Translit');
 		$translit = new Translit();
 
-		$node = array();
-
-		$node['title'] = iconv("UTF-8", "CP1251", $_REQUEST['newtitle']);
+		if (!$node['title']) $node['title'] = iconv("UTF-8", "CP1251", $_REQUEST['newtitle']);
 		if(strlen($node['title']) == 0)
 		{
 			$node['title'] = 'Новый узел';
 		}
 
 		$node['title_pre'] = $this->tpl->action('typografica', $node['title']);
-		$node['parent'] = intval($_REQUEST['parent']);
-		$node['before'] = intval($_REQUEST['before']);
+		if (!$node['parent']) $node['parent'] = intval($_REQUEST['parent']);
+		if (!$node['before']) $node['before'] = intval($_REQUEST['before']);
 		$node['supertag'] = $translit->supertag($node['title'], 20);
 
 		$parentNode = $db->queryOne("

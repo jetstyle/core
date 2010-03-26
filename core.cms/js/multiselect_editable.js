@@ -18,7 +18,7 @@ MultiselectEditable.prototype = {
 		this.cont.append(this.table);
 		this.url = params.url;
 		this.images = params.images;
-		
+
 		this.loadData();
 	},
 	
