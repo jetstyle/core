@@ -17,6 +17,7 @@
     }
   .l-cms-header__info {
     width: 230px; padding: 4px 15px 0 10px;
+    _width: 250px;
     text-align: right;
     font-size: 80%;
     }
