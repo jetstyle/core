@@ -55,7 +55,7 @@
  	}
 	public function getLastPage()
 	{
-		return ceil($this->total / $this->perPage);
+		return intval( ceil($this->total / $this->perPage));
 	}
  	protected function construct()
  	{
