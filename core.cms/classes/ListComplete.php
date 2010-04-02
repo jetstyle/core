@@ -93,7 +93,7 @@ class ListComplete extends ListSimple
 		}
 	}
 
-	protected function insert()
+	public function insert($node=array())
 	{
 		$model = &$this->getModel();
 

@@ -1,6 +1,6 @@
 <?php
 
-class FormSimple
+class FormSimple  implements ModuleInterface
 {
 	protected $tpl = null;
 	protected $db = null;
@@ -199,7 +199,7 @@ class FormSimple
 		return $result;
 	}
 
-	protected function load()
+	public function load()
 	{
 		if( !$this->loaded )
 		{
@@ -306,7 +306,7 @@ class FormSimple
 		return $_POST[$this->prefix."restore"] ? true : false;
 	}
 
-	protected function insert($postData)
+	public function insert($postData=array())
 	{
 		$postData['_created'] = date('Y-m-d H:i:s');
 

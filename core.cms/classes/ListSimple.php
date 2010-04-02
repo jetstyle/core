@@ -1,6 +1,6 @@
 <?php
 
-class ListSimple
+class ListSimple implements ModuleInterface
 {
 	protected $tpl;
 
@@ -8,7 +8,7 @@ class ListSimple
 	protected $items;
 	protected $pager;
 
-    private $filtersObject = null;
+        private $filtersObject = null;
 
 	private $model = null;
 
@@ -53,11 +53,16 @@ class ListSimple
 			$this->frameSize = $this->config['frameSize'];
 		}
 
-		$this->prefix = implode('_', $config['module_path_parts']).'_';
+		$this->prefix = @implode('_', $config['module_path_parts']).'_';
 		$this->storeTo = $this->prefix.'tpl';
 
 		$this->id = intval(RequestInfo::get($this->idGetVar));
 	}
+        
+        public function insert($postData=array()){
+        }
+        public function update(){
+        }
 
 	public function handle()
 	{
@@ -126,7 +131,7 @@ class ListSimple
             die('1');
         }
 
-		$this->load();
+        $this->load();
 
         $tpl = &Locator::get('tpl');
         $tpl->set('page_url', RequestInfo::$baseUrl.RequestInfo::$pageUrl);
@@ -139,20 +144,20 @@ class ListSimple
         $tpl->set('drags', $this->config['drags']);
         $tpl->set('module_name', $this->config['module_name']);
 
-		$this->renderTrash();
-		$this->renderAddNew();
+    	$this->renderTrash();
+    	$this->renderAddNew();
 
-		//render list
-		Finder::useClass("ListObject");
-		$list = new ListObject( $this->items );
-		$list->ASSIGN_FIELDS = $this->SELECT_FIELDS;
-		$list->EVOLUTORS = $this->EVOLUTORS; //ïîòîìêè ìîãóò äîáàâèòü ñâîåãî
-		$list->EVOLUTORS["href"] = array( &$this, "_href" );
-		$list->EVOLUTORS["title"] = array( &$this, "_title" );
-		$list->issel_function = array( &$this, '_current' );
-		$list->parse( $this->template_list, '__list' );
+    	//render list
+    	Finder::useClass("ListObject");
+    	$list = new ListObject( $this->items );
+    	$list->ASSIGN_FIELDS = $this->SELECT_FIELDS;
+    	$list->EVOLUTORS = $this->EVOLUTORS; //ïîòîìêè ìîãóò äîáàâèòü ñâîåãî
+    	$list->EVOLUTORS["href"] = array( &$this, "_href" );
+    	$list->EVOLUTORS["title"] = array( &$this, "_title" );
+    	$list->issel_function = array( &$this, '_current' );
+    	$list->parse( $this->template_list, '__list' );
 
-		$this->renderPager();
+    	$this->renderPager();
 
         $this->renderFilters();
 
@@ -209,27 +214,27 @@ class ListSimple
 		return $this->tpl->parse( $this->template);
 	}
 
-    public function getPrefix()
-    {
-        return $this->prefix;
-    }
-
-    public function getFiltersObject($key = null)
-    {
-        if (null === $this->filtersObject)
+        public function getPrefix()
         {
-            $this->filtersObject = $this->constructFiltersObject();
+            return $this->prefix;
         }
 
-        if ($key)
+        public function getFiltersObject($key = null)
         {
-            return $this->filtersObject->getByKey($key);
+            if (null === $this->filtersObject)
+            {
+                $this->filtersObject = $this->constructFiltersObject();
+            }
+
+            if ($key)
+            {
+                return $this->filtersObject->getByKey($key);
+            }
+            else
+            {
+                return $this->filtersObject;
+            }
         }
-        else
-        {
-            return $this->filtersObject;
-        }
-    }
 
 	protected function renderTrash()
 	{
@@ -253,13 +258,13 @@ class ListSimple
 		}
 	}
 
-    protected function renderFilters()
-    {
-        $html = $this->getFiltersObject()->getHtml();
-        $this->tpl->set('__filter', $html);
-    }
+        protected function renderFilters()
+        {
+            $html = $this->getFiltersObject()->getHtml();
+            $this->tpl->set('__filter', $html);
+        }
 
-    protected function renderPager()
+        protected function renderPager()
 	{
 		if ($this->pager)
 		{
@@ -272,47 +277,47 @@ class ListSimple
 	{
 		if (null === $this->model)
 		{
-            $this->model = $this->constructModel();
+                        $this->model = $this->constructModel();
 			$this->applyFilters($this->model);
 		}
 
 		return $this->model;
 	}
 
-    protected function constructModel()
-    {
-        if (!$this->config['model'])
+        protected function constructModel()
         {
-            throw new JSException("You should set `model` param in config");
+            if (!$this->config['model'])
+            {
+                throw new JSException("You should set `model` param in config");
+            }
+
+            Finder::useModel('DBModel');
+            $model = DBModel::factory($this->config['model']);
+            $model->addFields(array('_order', '_state'));
+
+            $model->where .= ($model->where ? " AND " : "" ).($_GET['_show_trash'] ? '{_state}>=0' : "{_state} <>2 ");
+
+            return $model;
         }
 
-        Finder::useModel('DBModel');
-        $model = DBModel::factory($this->config['model']);
-        $model->addFields(array('_order', '_state'));
+        protected function applyFilters(&$model)
+        {
+            $filter = $this->getFiltersObject();
+            $filter->apply($model);
+        }
 
-        $model->where .= ($model->where ? " AND " : "" ).($_GET['_show_trash'] ? '{_state}>=0' : "{_state} <>2 ");
+        protected function constructFiltersObject()
+        {
+            Finder::useClass('ListFilter');
+            $config = array(
+                'type' => 'wrapper',
+                'filters' => $this->config['filters'],
+            );
 
-        return $model;
-    }
+            $filterObj = ListFilter::factory($config, $this);
 
-    protected function applyFilters(&$model)
-    {
-        $filter = $this->getFiltersObject();
-        $filter->apply($model);
-    }
-
-    protected function constructFiltersObject()
-    {
-        Finder::useClass('ListFilter');
-        $config = array(
-            'type' => 'wrapper',
-            'filters' => $this->config['filters'],
-        );
-
-        $filterObj = ListFilter::factory($config, $this);
-
-        return $filterObj;
-    }
+            return $filterObj;
+        }
 
 	protected function pager($total)
 	{
@@ -323,10 +328,14 @@ class ListSimple
 
 	public function getAllItems($where = '')
 	{
-    	$model = &$this->getModel();
-    	$model->where = $where;
+                $model = &$this->getModel();
+                $model->where = $where;
 		$model->load();
 		return $model->getArray();
 	}
+        
+        public function getItems(){
+                return $this->items;
+        }
 }
 ?>

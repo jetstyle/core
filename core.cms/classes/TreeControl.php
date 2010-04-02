@@ -58,13 +58,13 @@ class TreeControl
 
 		$this->id = intval(RequestInfo::get($this->idGetVar));
 
-        $this->applyFilters($this->config['where']);
+                $this->applyFilters($this->config['where']);
 	}
 
 
 	public static function updateTreePathes($tableName, $id, $allow_empty_supertag = false, $where = '', $noRoot=null)
 	{
-    	$db = &Locator::get('db');
+                $db = &Locator::get('db');
 		$root = $db->queryOne("SELECT id,_left,_right,_path,_parent FROM ??".$tableName." WHERE id='".$id."' ".($where ? " AND " . $where : "")." ");
 		if ($root) {
 			//грузим поддерево

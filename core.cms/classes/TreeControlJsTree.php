@@ -1,7 +1,7 @@
 <?php
 Finder::useClass('TreeControl');
 
-class TreeControlJsTree extends TreeControl
+class TreeControlJsTree extends TreeControl implements ModuleInterface
 {
 	//templates
 	protected $template = "tree_control_js_tree.html";
@@ -326,6 +326,13 @@ class TreeControlJsTree extends TreeControl
 			}
 		}
 	}
+        
+        public function update(){
+        
+        }
+        public function insert($node=array()){
+        
+        }
 
 	public function getItems($parent)
 	{

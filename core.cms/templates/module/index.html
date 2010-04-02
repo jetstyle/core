@@ -1,6 +1,6 @@
-
-{{@layouts/l_header/l_cms_header.html logo=@:logo info=@:info navigation=@blocks/menu.html navigation2=@blocks/submenu.html}}
-
+{{?!hide_toolbar}}
+    {{@layouts/l_header/l_cms_header.html logo=@:logo info=@:info navigation=@blocks/menu.html navigation2=@blocks/submenu.html}}
+{{/?}}
 {{module_body}}
 
 {{:logo}}

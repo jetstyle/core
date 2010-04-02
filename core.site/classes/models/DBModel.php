@@ -257,12 +257,19 @@ class DBModel extends Model implements IteratorAggregate, ArrayAccess, Countable
 		}
 		else
 		{
-			$model = new DBModel();
+                        $modelName = (strpos($className, "Tree")!==false ) ? "DBModelTree" : "DBModel";
+
+                        //$classFile = Finder::findScript('classes/models', $modelName);
+
+			$model = new $modelName();
+
 
 			if (!$model->loadConfig( $className, $fieldSet ))
 			{
+
 				throw new JSException('DBModel: can\'t find model "'.$className.'"'. ($fieldSet ? " with field set \"".$fieldSet."\"" : ""));
 			}
+
 		}
 
 		return $model;
@@ -1132,14 +1139,13 @@ class DBModel extends Model implements IteratorAggregate, ArrayAccess, Countable
 
 	public function &load($where=NULL, $limit=NULL, $offset=NULL)
 	{
-                
                 if (!empty($this->sqlParts))
 		{
 			$this->cleanUp();
 		}
 
-        $this->bannedTableAliases = array($this->getTableAlias());
-        $this->updateForeignModelAliases();
+                $this->bannedTableAliases = array($this->getTableAlias());
+                $this->updateForeignModelAliases();
 
 		$this->notify('will_load', array(&$this));
 
@@ -1159,7 +1165,7 @@ class DBModel extends Model implements IteratorAggregate, ArrayAccess, Countable
 			$offset = $pager->getOffset();
 		}
 
-        $data = $this->select($where, $limit, $offset);
+                $data = $this->select($where, $limit, $offset);
 		$this->setData( $data );
 
 		$this->notify('did_load', array(&$this, &$this->data));
@@ -1176,8 +1182,8 @@ class DBModel extends Model implements IteratorAggregate, ArrayAccess, Countable
 
 	public function &loadTree($where = NULL)
 	{
-        $this->treeMinLevel = null;
-        $this->treeRootId = null;
+                $this->treeMinLevel = null;
+                $this->treeRootId = null;
 
 		/**
 		 * we need to aggregate data by primary key
@@ -1778,7 +1784,7 @@ class DBModel extends Model implements IteratorAggregate, ArrayAccess, Countable
 		return $row['id'];
 	}
 
-    public function replace(&$row)
+        public function replace(&$row)
 	{
 		$this->onBeforeInsert($row);
 
@@ -1829,33 +1835,33 @@ class DBModel extends Model implements IteratorAggregate, ArrayAccess, Countable
 		return $this->db->query($sql);
 	}
 
-    public function deleteToTrash($id)
+        public function deleteToTrash($id)
 	{
 		if (!$id)
 		{
 			return 0;
 		}
 
-        $where = '{id} = '.self::quote($id);
+                $where = '{id} = '.self::quote($id);
 		$this->setWhere($where)->loadOne();
-        if ($this['_state'] <= 1 )
+                if ($this['_state'] <= 1 )
 		{
-            $row = array('_state' => 2);
+                        $row = array('_state' => 2);
 			$this->update($row, $where);
-            return 1;
+                        return 1;
 		}
 		else
 		{
 			$this->delete($where);
-            return 2;
+                        return 2;
 		}
 	}
 
-    public function restoreFromTrash($id)
+        public function restoreFromTrash($id)
 	{
-        $row = array('_state' => 0);
+                $row = array('_state' => 0);
 		$where = '{id} = '.$id;
-        $this->update($row, $where);
+                $this->update($row, $where);
 	}
 
 	public function clean($truncate=True)
@@ -2179,6 +2185,7 @@ class DBModel extends Model implements IteratorAggregate, ArrayAccess, Countable
 	 */
 	protected function treePrepareRow(&$model, &$row)
 	{
+                $this->items[ $row['id'] ]  = $row;
 		$this->children[$row['_parent']][] = $row['id'];
 		if (!$this->treeMinLevel)
 		{
@@ -2211,8 +2218,13 @@ class DBModel extends Model implements IteratorAggregate, ArrayAccess, Countable
 					$item['children']->init($this, $childItems);
 				}
 				$result[] = $item;
+                                
+                                
 			}
 		}
+                
+                //$this->items = $items;
+                
 		return $result;
 	}
 

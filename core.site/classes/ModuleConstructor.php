@@ -172,7 +172,11 @@ class ModuleConstructor
 			Finder::prependDir(Config::get('cms_dir').$this->handlersType.'/'.$this->moduleName.'/');
 
 			Finder::useClass($this->config['class']);
+                        
 			$cls = new $this->config['class']($this->config);
+                        //var_dump(  in_array("ModuleInterface", class_implements($cls)));die();
+                        if ( ! in_array("ModuleInterface", class_implements($cls)) )
+                            throw new JSException(get_class($cls). " from ".$this->moduleName." doesn`t implemenet ModuleInterface");
 			Finder::popContext();
 			return $cls;
 		}
