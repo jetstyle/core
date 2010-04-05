@@ -1,0 +1,18 @@
+.l-header {
+  table-layout: fixed; /* чтобы у таблицы не разъезжались колонки, если у них стоит фиксированна€ ширина */
+  width: 100%; overflow: hidden;
+  margin: 15px 0 40px; /* тут задаЄм только верхний и нижний отступы */
+  }
+  .l-header__logo {
+    width: 100px; /* нужно задать ширину логотипа */
+    padding: 0 10px 0 15px;
+    }
+    .l-header__logo img {
+      vertical-align: top; /* чтобы не по€вл€лось отступа под картинкой */
+      }
+  .l-header__slogan {
+    padding: 0 10px;
+    }
+  .l-header__info {
+    width: 66.6666%; padding: 0 15px 0 10px;
+    }
