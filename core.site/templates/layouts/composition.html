@@ -2,8 +2,8 @@
      Обёртка "header-and-content-wrapper" нужна для того, чтобы прибить футер к низу страницы (эти стили лежат в "composition.css", и там только(!) эти стили). -->
 
 {{!connect "layouts/composition.css"}}
-{{!connect "b-header.css"}} <!-- Эти стили определяются дизайном и лежат в "..\app\skins\base1\css". Они не должны менять структуру шапки. Если нужны стилевые изменения в структуре шапки, то нужно скопировать css-файл, соответствующий выбранной шапке, из "..\core\core.site\css\layouts\header" в такую же папку в app и там менять. -->
-{{!connect "b-footer.css"}} <!-- Аналогично "b_header.css" -->
+{{!connect "b_header.css"}} <!-- Эти стили определяются дизайном и лежат в "..\app\skins\base1\css". Они не должны менять структуру шапки. Если нужны стилевые изменения в структуре шапки, то нужно скопировать css-файл, соответствующий выбранной шапке, из "..\core\core.site\css\layouts\header" в такую же папку в app и там менять. -->
+{{!connect "b_footer.css"}} <!-- Аналогично "b_header.css" -->
 
 <div class="l-header-and-content-wrapper {{layout_style}}">
   {{!include header_tpl logo=@header.html:logo slogan=@header.html:slogan info=@header.html:info navigation=@header.html:navigation navigation2=@header.html:navigation2}}
