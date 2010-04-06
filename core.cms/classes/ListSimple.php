@@ -70,10 +70,10 @@ class ListSimple
                 $page = 1;
             }
             $destIndex = intval($_POST['index']) + ($page - 1) * $this->perPage;
-
+            //die($this->config['model']);
             $destItem = DBModel::factory($this->config['model'])->addField('_order')->setOrder('{_order} ASC')->load(null, 1, $destIndex);
-
-            if (!$destItem[0]['_order'])
+            //var_dump( $destItem[0]['_order']." ".$destItem[0]['title']);
+            if (!$destItem[0]['id'])
             {
                 $destItem = DBModel::factory($this->config['model'])->addField('_order')->setOrder('{_order} DESC')->loadOne();
             }
@@ -82,6 +82,8 @@ class ListSimple
                 $destItem = $destItem[0];
             }
 
+//var_dump( $destItem['_order']." ".$destItem['title']);die();
+
             $destOrder = intval($destItem['_order']);
             $sourceItem = DBModel::factory($this->config['model'])->loadOne('{id} = '.$itemId);
             $sourceOrder = intval($sourceItem['_order']);
@@ -89,19 +91,19 @@ class ListSimple
             $db = Locator::get('db');
             if ($sourceOrder > $destOrder)
             {
-                $db->execute("
+                $sql = "
                     UPDATE ??".$this->getModel()->getTableName()."
                     SET _order = _order + 1
-                    WHERE _order < ".$sourceOrder." AND _order >= ".$destOrder
-                );
+                    WHERE _order < ".$sourceOrder." AND _order >= ".$destOrder;
+                $db->execute($sql);
             }
             else
             {
-                $db->execute("
+                $sql = "
                     UPDATE ??".$this->getModel()->getTableName()."
                     SET _order = _order - 1
-                    WHERE _order > ".$sourceOrder." AND _order <= ".$destOrder
-                );
+                    WHERE _order > ".$sourceOrder." AND _order <= ".$destOrder;
+               $db->execute($sql);
             }
             $data = array('_order'=>$destOrder);
             DBModel::factory($this->config['model'])->update($data, '{id} = '.$itemId);
