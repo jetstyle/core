@@ -1749,12 +1749,22 @@ class DBModel extends Model implements IteratorAggregate, ArrayAccess, Countable
 		}
 	}
 
+	protected function onAfterInsert(&$row)
+	{
+		//
+	}
+
 	protected function onBeforeUpdate(&$row)
 	{
 		if (isset($this->tableFields['_modified']) && !isset($row['_modified']))
 		{
 			$row['_modified'] = date('Y-m-d H:i:s');
 		}
+	}
+
+	protected function onAfterUpdate(&$row)
+	{
+		//
 	}
 
 	/**
@@ -1780,8 +1790,10 @@ class DBModel extends Model implements IteratorAggregate, ArrayAccess, Countable
 		.'('.$fields.')'
 		.' VALUES ('.$values.')';
 
-		$row['id'] = $this->db->insert($sql);
-		return $row['id'];
+		$row[$this->getPk()] = $this->db->insert($sql);
+
+		$this->onAfterInsert($row);
+		return $row[$this->getPk()];
 	}
 
         public function replace(&$row)
@@ -1796,6 +1808,7 @@ class DBModel extends Model implements IteratorAggregate, ArrayAccess, Countable
 		.' VALUES ('.$values.')';
 
 		$row['id'] = $this->db->insert($sql);
+		$this->onAfterInsert($row);
 		return $row['id'];
 	}
 
@@ -1816,7 +1829,11 @@ class DBModel extends Model implements IteratorAggregate, ArrayAccess, Countable
 
 		$this->usePrefixedTableAsAlias = false;
 
-		return $this->db->query($sql);
+		$queryResult = $this->db->query($sql);
+
+		$this->onAfterUpdate($row);
+
+		return $queryResult;
 	}
 
 	public function delete($where)

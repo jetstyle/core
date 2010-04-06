@@ -3,6 +3,8 @@ Finder::useClass('TreeControl');
 
 class TreeSimple extends ListSimple  implements ModuleInterface
 {
+	protected $children;
+
 	//templates
 	protected $template = "tree_control_js_tree.html";
 	protected $template_trash_show = "list_simple.html:trash_show";
@@ -11,13 +13,13 @@ class TreeSimple extends ListSimple  implements ModuleInterface
 	public function handle()
 	{
 		$action = $_REQUEST['action'];
-
+		
 		switch($action)
 		{
 			case 'update':
 				echo $this->updateTreeStruct();
 				die();
-			break;
+				break;
 
 			case 'json':
 				header("Content-type: text/x-json; charset=".$this->xmlEncoding);
@@ -43,7 +45,7 @@ class TreeSimple extends ListSimple  implements ModuleInterface
 				}
 
 				die();
-			break;
+				break;
 
 			default:
 
@@ -80,12 +82,12 @@ class TreeSimple extends ListSimple  implements ModuleInterface
 				}
 				$treeParams['go_url'] = $url;
 
-                                Finder::useClass('Json');
-                                $treeParams['hide_buttons'] = Json::encode($this->config['hide_buttons']);
+				Finder::useClass('Json');
+				$treeParams['hide_buttons'] = Json::encode($this->config['hide_buttons']);
 
 				if ($_COOKIE['tree_control_btns'] == 'true')
 				{
-				 	$treeParams['show_controls'] = true;
+					$treeParams['show_controls'] = true;
 				}
 
 				$checkTree = false;
@@ -131,46 +133,46 @@ class TreeSimple extends ListSimple  implements ModuleInterface
 				$treeParams['disable_drag'] = $this->config['disable_drag'] ? true : false;
 
 				$this->tpl->set('tree_params', $treeParams);
-			break;
+				break;
 		}
 	}
 
 	protected function loadByParents($parents)
 	{
-            $parentsIds = array();
-            foreach($parents AS $parent)
-            {
-                $parentsIds[] = str_replace('node-', '', $parent);
-            }
+		$parentsIds = array();
+		foreach($parents AS $parent)
+		{
+			$parentsIds[] = str_replace('node-', '', $parent);
+		}
 
-            $where = empty($parentsIds) ? '' : "_parent IN (".DBModel::quote($parentsIds).")";
-                
-            $this->load($where);
+		$where = empty($parentsIds) ? '' : "_parent IN (".DBModel::quote($parentsIds).")";
+
+		$this->load($where);
 	}
 
 	public function getHtml()
 	{
-                $this->renderFilters();
+		$this->renderFilters();
 		$this->renderTrash();
 		return $this->tpl->Parse( $this->template);
 	}
 
 
-        public function load($where="")
+	public function load($where="")
 	{
-                if (! $this->loaded)
-                {                    
+		if (! $this->loaded)
+		{
 
-                    $model = $this->getModel();
-                    
-                    $model->load($where);
+			$model = $this->getModel();
 
-                    $data  = $model->getData();
-//var_dump($data);
-                    if ( !empty($data) )
-                    {
-                            $this->items = $model->getItems();
-                            $this->children = $model->getChildren();
+			$model->load($where);
+
+			$data  = $model->getData();
+			//var_dump($data);
+			if ( !empty($data) )
+			{
+				$this->items = $model->getItems();
+				$this->children = $model->getChildren();
 
                             /*
                             foreach ($data as $r)
@@ -181,35 +183,35 @@ class TreeSimple extends ListSimple  implements ModuleInterface
                             }
                             */
 
-                            $this->loaded = true;
-                    }
-                    
-                }
+				$this->loaded = true;
+			}
+
+		}
 	}
 
-        protected function constructModel()
-        {
+	protected function constructModel()
+	{
 
-            if (!$this->config['model'])
-            {
-                throw new JSException("You should set `model` param in config");
-            }
+		if (!$this->config['model'])
+		{
+			throw new JSException("You should set `model` param in config");
+		}
 
-            Finder::useModel('DBModelTree');
-            $model = DBModelTree::factory($this->config['model']);
-            $model->addFields(array('_order', '_state'));
+		Finder::useModel('DBModelTree');
+		$model = DBModelTree::factory($this->config['model']);
+		$model->addFields(array('_order', '_state'));
 
-            $model->where .= ($model->where ? " AND " : "" ).($_GET['_show_trash'] ? '{_state}>=0' : "{_state} <>2 ");
+		$model->where .= ($model->where ? " AND " : "" ).($_GET['_show_trash'] ? '{_state}>=0' : "{_state} <>2 ");
 
-            return $model;
-        }
+		return $model;
+	}
 
 	protected function &getModel()
 	{
 		if (null === $this->model)
 		{
-                                               
-                        $this->model = $this->constructModel();
+
+			$this->model = $this->constructModel();
 			$this->applyFilters($this->model);
 
 		}
@@ -219,12 +221,17 @@ class TreeSimple extends ListSimple  implements ModuleInterface
 
 	public function insert($node=array())
 	{
-		
+
 	}
-        
-        public function update()
+
+	public function update()
 	{
-		
+
+	}
+
+	public function getChildren()
+	{
+		return $this->children;
 	}
 
 }

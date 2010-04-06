@@ -4,154 +4,222 @@
 class DBModelTree extends DBModel
 {
 
-    public function &load($where=NULL, $limit=NULL, $offset=NULL)
-    {
-        $this->treeMinLevel = null;
-        $this->treeRootId = null;
-
-    	/**
-    	 * we need to aggregate data by primary key
-    	 */
-    	if (!$this->keyField)
-    	{
-    		$this->setKeyField($this->getPk());
-    	}
-    	$this->registerObserver('row', array($this, 'treePrepareRow'));
-    	$this->registerObserver('did_load', array($this, 'treeConstruct'));
-
-    	parent::load($where);
-
-    	$this->removeObserver('row', array($this, 'treePrepareRow'));
-    	$this->removeObserver('did_load', array($this, 'treeConstruct'));
-
-    	return $this;
-    }
-
-    public function insert(&$node)
-    {
-        $db = Locator::get('db');
-
-        Finder::useClass('Translit');
-        $translit = new Translit();
-
-        if (!$node['title']) 
-            $node['title'] = iconv("UTF-8", "CP1251", $_REQUEST['newtitle']);
-            
-        if(strlen($node['title']) == 0)
-        {
-                $node['title'] = 'Новый узел';
-        }
-
-        $node['title_pre'] = $this->tpl->action('typografica', $node['title']);
-        
-        if (!$node['parent']) $node['parent'] = intval($_REQUEST['parent']);
-        if (!$node['before']) $node['before'] = intval($_REQUEST['before']);
-
-        $node['supertag'] = $translit->supertag($node['title'], 20);
-
-        $parentNode = $db->queryOne("
-                SELECT _path
-                FROM ??". $this->config['table'] ."
-                WHERE id = '".$node['parent']."'
-        ");
-
-        $node['_path'] = $parentNode['_path'] ? $parentNode['_path'].'/'.$node['supertag'] : $node['supertag'];
-
-        $order = null;
-
-        if($node['before'])
-        {
-                $beforeNode = $db->queryOne("
-                        SELECT _parent, _order
-                        FROM ??". $this->config['table'] ."
-                        WHERE ".$this->idField." = '".$node['before']."'
-                ");
-
-                if (is_array($beforeNode) && is_numeric($beforeNode['_order']))
-                {
-                        $db->query("
-                                UPDATE ??". $this->config['table'] ."
-                                SET _order = _order + 1
-                                WHERE _order >= " . $db->quote($beforeNode['_order']) . " AND _parent = '" . $beforeNode['_parent'] . "'
-                        ");
-
-                        $order = $beforeNode['_order'];
-                }
-        }
-
-        if (!is_numeric($order))
-        {
-                $order = $db->queryOne("
-                        SELECT (MAX(_order) + 1) AS _max
-                        FROM ??". $this->config['table'] ."
-                        WHERE _parent = '".$node['parent']."'
-                ");
-
-                $order = intval($order['_max']);
-        }
-
-        if (isset($this->config['insert']) && is_array($this->config['insert']))
-        {
-                foreach ($this->config['insert'] AS $fieldName => $fieldValue)
-                {
-                        $additionFields .= ','.$fieldName;
-                        $additionValues .= ','.$db->quote($fieldValue);
-                }
-        }
-
-        $id = $db->insert("
-                INSERT INTO ". DBAL::$prefix.$this->config['table'] ."
-                (title, title_pre, _parent, _supertag, _path, _order, _state " . $additionFields . ")
-                VALUES
-                (".$this->db->quote($node['title']).", ".$db->quote($node['title_pre']).", ".$db->quote($node['parent']).", ".$db->quote($node['supertag']).", ".$db->quote($node['_path']).", ".$db->quote($order).", 1 ".$additionValues.")
-        ");
-
-        return $id;
-    }
-
-
-	function delete($where)//$nodeId
+	public function &load($where=NULL, $limit=NULL, $offset=NULL)
 	{
-		$db = &$this->db;
+		$this->treeMinLevel = null;
+		$this->treeRootId = null;
 
-		$node = $db->queryOne("
-			SELECT id, _left, _right, _state
-			FROM ??". $this->config['table'] ."
-			WHERE ".$where );
-
-		if (is_array($node) && !empty($node))
+		/**
+		 * we need to aggregate data by primary key
+		 */
+		if (!$this->keyField)
 		{
-			// удаляем совсем
-			if ($node['_state'] == 2)
+			$this->setKeyField($this->getPk());
+		}
+		$this->registerObserver('row', array($this, 'treePrepareRow'));
+		$this->registerObserver('did_load', array($this, 'treeConstruct'));
+
+		parent::load($where);
+
+		$this->removeObserver('row', array($this, 'treePrepareRow'));
+		$this->removeObserver('did_load', array($this, 'treeConstruct'));
+
+		return $this;
+	}
+
+	protected function onBeforeInsert(&$row)
+	{
+		if (!isset($row['_parent']))
+		{
+			$row['_parent'] = 0;
+		}
+
+		if ($row['_parent'])
+		{
+			$db = Locator::get('db');
+			$queryResult = $db->queryOne("
+				SELECT ".$this->getPk()."
+				FROM ".$this->quoteName(($this->autoPrefix ? DBAL::$prefix : "").$this->getTableName())."
+				WHERE ".$this->quoteName('_parent')." = ".$this->quoteValue($row['_parent'])."
+			");
+
+			if (!$queryResult[$this->getPk()])
 			{
-				$db->query("
-					DELETE FROM ??". $this->config['table'] ."
-					WHERE _left >= ".$node['_left']." AND _right <= ".$node['_right']." ".($this->config['where'] ? " AND ".$this->config['where'] : "")."
-				");
-			}
-			// метим
-			else
-			{
-				$db->query("
-					UPDATE ??". $this->config['table'] ."
-					SET _state = 2
-					WHERE _left >= ".$node['_left']." AND _right <= ".$node['_right']." ".($this->config['where'] ? " AND ".$this->config['where'] : "")."
-				");
+				$row['_parent'] = 0;
 			}
 		}
 
-		return $node;
+		if (!isset($row['_order']))
+		{
+			$db = Locator::get('db');
+
+			$orderResult = $db->queryOne("
+				SELECT (MAX(".$this->quoteName('_order').") + 1) AS _max
+				FROM ".$this->quoteName(($this->autoPrefix ? DBAL::$prefix : "").$this->getTableName())."
+				WHERE ".$this->quoteName('_parent')." = ".$this->quoteValue($row['_parent'])."
+			");
+
+			$row['_order'] = intval($orderResult['_max']);
+		}
+
+		if (!isset($row['_level']))
+		{
+			if ($row['_parent'])
+			{
+				$db = Locator::get('db');
+				$queryResult = $db->queryOne("
+					SELECT _level
+					FROM ".$this->quoteName(($this->autoPrefix ? DBAL::$prefix : "").$this->getTableName())."
+					WHERE ".$this->quoteName('_parent')." = ".$this->quoteValue($row['_parent'])."
+				");
+				$row['_level'] = intval($row['_level']) + 1;
+			}
+			else
+			{
+				$row['_level'] = 1;
+			}
+		}
+
+		if (!$row['_supertag'] && $row['title'])
+		{
+			Finder::useClass('Translit');
+			$translit = new Translit();
+			$row['_supertag'] = $translit->supertag($row['title'], 20);
+		}
 	}
 
-        public function getItems()
-        {
-            return $this->items;
-        }
-        
-        public function getChildren()
-        {
-            return $this->children;
-        }
+	protected function onAfterInsert(&$row)
+	{
+		$this->rebuild();
+	}
+
+	public function delete($where)
+	{
+		$affectedRows = 0;
+
+		$db = Locator::get('db');
+
+		$this->usePrefixedTableAsAlias = true;
+
+		if ($where)
+		{
+			$where = 'WHERE '.$this->parse($where);
+		}
+
+		$sqlResult = $db->execute("
+			SELECT id, _left, _right
+			FROM ".$this->quoteName(($this->autoPrefix ? DBAL::$prefix : "").$this->getTableName())."
+			".$where );
+
+		while ($node = $db->getRow($sqlResult))
+		{
+			$db->query("
+				DELETE FROM ".$this->quoteName(($this->autoPrefix ? DBAL::$prefix : "").$this->getTableName())."
+				WHERE _left >= ".self::quote($node['_left'])." AND _right <= ".self::quote($node['_right'])."
+			");
+
+			$affectedRows += $db->affectedRows();
+		}
+
+		$this->usePrefixedTableAsAlias = false;
+
+		$this->rebuild();
+
+		return $affectedRows;
+	}
+
+	public function deleteNode($nodeId)
+	{
+		if (!$nodeId)
+		{
+			return 0;
+		}
+
+		return $this->delete('{'.$this->getPk().'} = '.self::quote($nodeId));
+	}
+
+	public function getItems()
+	{
+		return $this->items;
+	}
+
+	public function getChildren()
+	{
+		return $this->children;
+	}
+
+	public function rebuild()
+	{
+		$db = Locator::get('db');
+		$sqlResult = $db->execute("
+			SELECT ".$this->getPk().", _parent, _level, _supertag, _path
+			FROM ".$this->quoteName(($this->autoPrefix ? DBAL::$prefix : "").$this->getTableName())."
+			ORDER BY _level ASC, _order ASC
+		");
+
+		$items = array();
+		$children = array();
+
+		while ($r = $db->getRow($sqlResult))
+		{
+			$items[$r[$this->getPk()]] = $r;
+			$children[$r['_parent']][] = $r[$this->getPk()];
+		}
+
+		return $this->rebuildTree($items, $children);
+	}
+
+	protected function rebuildTree(&$items, &$children, $parentId = 0, $left = 0, $order = 0)
+	{
+		//shortcuts
+		$node = &$items[ $parentId ];
+		$db = Locator::get('db');
+
+		if ($node[$this->getPk()])
+		{
+			if (is_array($items[ $node['_parent'] ]))
+			{
+				$node['_path'] = ($items[$node['_parent']]['_path'] ? $items[$node['_parent']]['_path'].'/' : '').$node['_supertag'];
+
+				if (array_key_exists('_level', $items[ $node['_parent'] ]))
+				{
+					$node['_level'] = $items[ $node['_parent'] ]['_level'] + 1;
+				}
+			}
+			else
+			{
+				$node['_path'] = $node['_supertag'];
+			}
+		}
+
+		/* Taken from http://www.sitepoint.com/article/1105/3 */
+
+		// the right value of this node is the left value + 1
+		$right = $left + 1;
+
+		$n = count($children[$parentId]);
+		for ($i = 0; $i < $n; $i++)
+		{
+			// recursive execution of this function for each
+			// child of this node
+			// $right is the current right value, which is
+			// incremented by the rebuild_tree function
+			$right = $this->rebuildTree( $items, $children, $children[$parentId][$i], $right, $i);
+		}
+
+		if ($node[$this->getPk()])
+		{
+			// we've got the left value, and now that we've processed
+			// the children of this node we also know the right value
+			$node['_left'] = $left;
+			$node['_right'] = $right;
+
+			$this->update($node, '{'.$this->getPk().'} = '.self::quote($node[$this->getPk()]));
+		}
+
+		// return the right value of this node + 1
+		return $right + 1;
+	}
 }
 
 ?>

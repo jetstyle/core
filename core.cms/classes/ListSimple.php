@@ -8,7 +8,7 @@ class ListSimple implements ModuleInterface
 	protected $items;
 	protected $pager;
 
-        private $filtersObject = null;
+	private $filtersObject = null;
 
 	private $model = null;
 
@@ -58,108 +58,110 @@ class ListSimple implements ModuleInterface
 
 		$this->id = intval(RequestInfo::get($this->idGetVar));
 	}
-        
-        public function insert($postData=array()){
-        }
-        public function update(){
-        }
+
+	public function insert($postData=array())
+	{
+	}
+	public function update()
+	{
+	}
 
 	public function handle()
 	{
-        if ($_POST['order_list'])
-        {
-            $itemId = intval($_POST['item_id']);
-            $page = intval($_POST[$this->pageVar]);
-            if (!$page)
-            {
-                $page = 1;
-            }
-            $destIndex = intval($_POST['index']) + ($page - 1) * $this->perPage;
+		if ($_POST['order_list'])
+		{
+			$itemId = intval($_POST['item_id']);
+			$page = intval($_POST[$this->pageVar]);
+			if (!$page)
+			{
+				$page = 1;
+			}
+			$destIndex = intval($_POST['index']) + ($page - 1) * $this->perPage;
 
-            $destItem = DBModel::factory($this->config['model'])->addField('_order')->setOrder('{_order} ASC')->load(null, 1, $destIndex);
+			$destItem = DBModel::factory($this->config['model'])->addField('_order')->setOrder('{_order} ASC')->load(null, 1, $destIndex);
 
-            if (!$destItem[0]['_order'])
-            {
-                $destItem = DBModel::factory($this->config['model'])->addField('_order')->setOrder('{_order} DESC')->loadOne();
-            }
-            else
-            {
-                $destItem = $destItem[0];
-            }
+			if (!$destItem[0]['_order'])
+			{
+				$destItem = DBModel::factory($this->config['model'])->addField('_order')->setOrder('{_order} DESC')->loadOne();
+			}
+			else
+			{
+				$destItem = $destItem[0];
+			}
 
-            $destOrder = intval($destItem['_order']);
-            $sourceItem = DBModel::factory($this->config['model'])->loadOne('{id} = '.$itemId);
-            $sourceOrder = intval($sourceItem['_order']);
+			$destOrder = intval($destItem['_order']);
+			$sourceItem = DBModel::factory($this->config['model'])->loadOne('{id} = '.$itemId);
+			$sourceOrder = intval($sourceItem['_order']);
 
-            $db = Locator::get('db');
-            if ($sourceOrder > $destOrder)
-            {
-                $db->execute("
+			$db = Locator::get('db');
+			if ($sourceOrder > $destOrder)
+			{
+				$db->execute("
                     UPDATE ??".$this->getModel()->getTableName()."
                     SET _order = _order + 1
                     WHERE _order < ".$sourceOrder." AND _order >= ".$destOrder
-                );
-            }
-            else
-            {
-                $db->execute("
+				);
+			}
+			else
+			{
+				$db->execute("
                     UPDATE ??".$this->getModel()->getTableName()."
                     SET _order = _order - 1
                     WHERE _order > ".$sourceOrder." AND _order <= ".$destOrder
-                );
-            }
-            $data = array('_order'=>$destOrder);
-            DBModel::factory($this->config['model'])->update($data, '{id} = '.$itemId);
-            die('1');
-        }
-        if ($_POST['delete_list'])
-        {
-            $items = explode(',', $_POST['delete_list']);
-            foreach ($items as $id)
-            {
-                $this->getModel()->deleteToTrash(intval($id));
-            }
-            die('1');
-        }
-        if ($_POST['restore_list'])
-        {
-            $items = explode(',', $_POST['restore_list']);
-            foreach ($items as $id)
-            {
-                $this->getModel()->restoreFromTrash(intval($id));
-            }
-            die('1');
-        }
+				);
+			}
+			$data = array('_order'=>$destOrder);
+			DBModel::factory($this->config['model'])->update($data, '{id} = '.$itemId);
+			die('1');
+		}
+		if ($_POST['delete_list'])
+		{
+			$items = explode(',', $_POST['delete_list']);
+			foreach ($items as $id)
+			{
+				$this->getModel()->deleteToTrash(intval($id));
+			}
+			die('1');
+		}
+		if ($_POST['restore_list'])
+		{
+			$items = explode(',', $_POST['restore_list']);
+			foreach ($items as $id)
+			{
+				$this->getModel()->restoreFromTrash(intval($id));
+			}
+			die('1');
+		}
 
-        $this->load();
+		$this->load();
 
-        $tpl = &Locator::get('tpl');
-        $tpl->set('page_url', RequestInfo::$baseUrl.RequestInfo::$pageUrl);
-        $tpl->set('page_num', intval($_GET[$this->pageVar]));
-        $tpl->set('page_var', $this->pageVar);
-        $tpl->set('per_page', $this->perPage);
-        $tpl->set('group_delete_url', RequestInfo::hrefChange('',array('delete_list'=>'1')));
-        $tpl->set('group_restore_url', RequestInfo::hrefChange('',array('restore_list'=>'1')));
-        $tpl->set('group_operations', $this->config['group_operations']);
-        $tpl->set('drags', $this->config['drags']);
-        $tpl->set('module_name', $this->config['module_name']);
+		$tpl = &Locator::get('tpl');
+		$tpl->set('page_url', RequestInfo::$baseUrl.RequestInfo::$pageUrl);
+		$tpl->set('page_num', intval($_GET[$this->pageVar]));
+		$tpl->set('page_var', $this->pageVar);
+		$tpl->set('per_page', $this->perPage);
+		$tpl->set('group_delete_url', RequestInfo::hrefChange('',array('delete_list'=>'1')));
+		$tpl->set('group_restore_url', RequestInfo::hrefChange('',array('restore_list'=>'1')));
+		$tpl->set('group_operations', $this->config['group_operations']);
+		$tpl->set('drags', $this->config['drags']);
+		$tpl->set('module_name', $this->config['module_name']);
 
-    	$this->renderTrash();
-    	$this->renderAddNew();
+		$this->renderTrash();
+		$this->renderAddNew();
 
-    	//render list
-    	Finder::useClass("ListObject");
-    	$list = new ListObject( $this->items );
-    	$list->ASSIGN_FIELDS = $this->SELECT_FIELDS;
-    	$list->EVOLUTORS = $this->EVOLUTORS; //потомки могут добавить своего
-    	$list->EVOLUTORS["href"] = array( &$this, "_href" );
-    	$list->EVOLUTORS["title"] = array( &$this, "_title" );
-    	$list->issel_function = array( &$this, '_current' );
-    	$list->parse( $this->template_list, '__list' );
+		//render list
+		Finder::useClass("ListObject");
+		$list = new ListObject( $this->items );
+		$list->ASSIGN_FIELDS = $this->SELECT_FIELDS;
+		$list->EVOLUTORS = $this->EVOLUTORS; //потомки могут добавить своего
+		$list->EVOLUTORS["href"] = array( &$this, "_href" );
+		$list->EVOLUTORS["title"] = array( &$this, "_title" );
+		$list->issel_function = array( &$this, '_current' );
+		$list->parse( $this->template_list, '__list' );
 
-    	$this->renderPager();
+		$this->renderPager();
 
-        $this->renderFilters();
+		$this->renderFilters();
 
 	}
 
@@ -214,31 +216,31 @@ class ListSimple implements ModuleInterface
 		return $this->tpl->parse( $this->template);
 	}
 
-        public function getPrefix()
-        {
-            return $this->prefix;
-        }
+	public function getPrefix()
+	{
+		return $this->prefix;
+	}
 
-        public function getFiltersObject($key = null)
-        {
-            if (null === $this->filtersObject)
-            {
-                $this->filtersObject = $this->constructFiltersObject();
-            }
+	public function getFiltersObject($key = null)
+	{
+		if (null === $this->filtersObject)
+		{
+			$this->filtersObject = $this->constructFiltersObject();
+		}
 
-            if ($key)
-            {
-                return $this->filtersObject->getByKey($key);
-            }
-            else
-            {
-                return $this->filtersObject;
-            }
-        }
+		if ($key)
+		{
+			return $this->filtersObject->getByKey($key);
+		}
+		else
+		{
+			return $this->filtersObject;
+		}
+	}
 
 	protected function renderTrash()
 	{
-		//render trash switcher
+	//render trash switcher
 		if (!$this->config['hide_controls']['show_trash'])
 		{
 			$show_trash = $_GET['_show_trash'];
@@ -251,20 +253,20 @@ class ListSimple implements ModuleInterface
 	{
 		if (!$this->config['hide_controls']['add_new'])
 		{
-			//ссылка на новое
+		//ссылка на новое
 			$this->tpl->set( '_add_new_href', RequestInfo::hrefChange('', array($this->idGetVar => '', '_new' => 1)));
 			$this->tpl->set( '_add_new_title', $this->config['add_new_title'] );
 			$this->tpl->Parse( $this->template_new, '__add_new' );
 		}
 	}
 
-        protected function renderFilters()
-        {
-            $html = $this->getFiltersObject()->getHtml();
-            $this->tpl->set('__filter', $html);
-        }
+	protected function renderFilters()
+	{
+		$html = $this->getFiltersObject()->getHtml();
+		$this->tpl->set('__filter', $html);
+	}
 
-        protected function renderPager()
+	protected function renderPager()
 	{
 		if ($this->pager)
 		{
@@ -277,47 +279,47 @@ class ListSimple implements ModuleInterface
 	{
 		if (null === $this->model)
 		{
-                        $this->model = $this->constructModel();
+			$this->model = $this->constructModel();
 			$this->applyFilters($this->model);
 		}
 
 		return $this->model;
 	}
 
-        protected function constructModel()
-        {
-            if (!$this->config['model'])
-            {
-                throw new JSException("You should set `model` param in config");
-            }
+	protected function constructModel()
+	{
+		if (!$this->config['model'])
+		{
+			throw new JSException("You should set `model` param in config");
+		}
 
-            Finder::useModel('DBModel');
-            $model = DBModel::factory($this->config['model']);
-            $model->addFields(array('_order', '_state'));
+		Finder::useModel('DBModel');
+		$model = DBModel::factory($this->config['model']);
+		$model->addFields(array('_order', '_state'));
 
-            $model->where .= ($model->where ? " AND " : "" ).($_GET['_show_trash'] ? '{_state}>=0' : "{_state} <>2 ");
+		$model->where .= ($model->where ? " AND " : "" ).($_GET['_show_trash'] ? '{_state}>=0' : "{_state} <>2 ");
 
-            return $model;
-        }
+		return $model;
+	}
 
-        protected function applyFilters(&$model)
-        {
-            $filter = $this->getFiltersObject();
-            $filter->apply($model);
-        }
+	protected function applyFilters(&$model)
+	{
+		$filter = $this->getFiltersObject();
+		$filter->apply($model);
+	}
 
-        protected function constructFiltersObject()
-        {
-            Finder::useClass('ListFilter');
-            $config = array(
-                'type' => 'wrapper',
-                'filters' => $this->config['filters'],
-            );
+	protected function constructFiltersObject()
+	{
+		Finder::useClass('ListFilter');
+		$config = array(
+			'type' => 'wrapper',
+			'filters' => $this->config['filters'],
+		);
 
-            $filterObj = ListFilter::factory($config, $this);
+		$filterObj = ListFilter::factory($config, $this);
 
-            return $filterObj;
-        }
+		return $filterObj;
+	}
 
 	protected function pager($total)
 	{
@@ -328,14 +330,15 @@ class ListSimple implements ModuleInterface
 
 	public function getAllItems($where = '')
 	{
-                $model = &$this->getModel();
-                $model->where = $where;
+		$model = &$this->getModel();
+		$model->where = $where;
 		$model->load();
 		return $model->getArray();
 	}
-        
-        public function getItems(){
-                return $this->items;
-        }
+
+	public function getItems()
+	{
+		return $this->items;
+	}
 }
 ?>
