@@ -1,0 +1,21 @@
+{{!connect "custom.js"}}
+
+<table class="w100 cms-body" cellspacing="0">
+    <tr>
+	<td>
+	    <form action=''  method='post' name='{{__form_name}}' id='{{__form_name}}' enctype="multipart/form-data">
+		    <input type="hidden" name="MAX_FILE_SIZE" value="{{__max_file_size}}" />
+		    <input type="hidden" name="{{prefix}}update" value="1" />
+		    <input type="hidden" name="{{__form_name}}_url" value="{{ajax_url}}" />
+
+		    {{!for hidden_fields do=@:hidden_field}}
+		    {{:hidden_field}}
+			<input type="hidden" name="{{prefix}}{{for.key}}" value="{{*}}" />
+		    {{/:hidden_field}}
+
+		    
+
+	    </form>
+	</td>
+    </tr>
+</table>
