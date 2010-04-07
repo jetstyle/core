@@ -6,23 +6,30 @@ class DBModelTree extends DBModel
 
 	public function &load($where=NULL, $limit=NULL, $offset=NULL)
 	{
-		$this->treeMinLevel = null;
-		$this->treeRootId = null;
-
-		/**
-		 * we need to aggregate data by primary key
-		 */
-		if (!$this->keyField)
+		if ($limit == 1)
 		{
-			$this->setKeyField($this->getPk());
+			parent::load($where);
 		}
-		$this->registerObserver('row', array($this, 'treePrepareRow'));
-		$this->registerObserver('did_load', array($this, 'treeConstruct'));
+		else
+		{
+			$this->treeMinLevel = null;
+			$this->treeRootId = null;
 
-		parent::load($where);
+			/**
+			 * we need to aggregate data by primary key
+			 */
+			if (!$this->keyField)
+			{
+				$this->setKeyField($this->getPk());
+			}
+			$this->registerObserver('row', array($this, 'treePrepareRow'));
+			$this->registerObserver('did_load', array($this, 'treeConstruct'));
 
-		$this->removeObserver('row', array($this, 'treePrepareRow'));
-		$this->removeObserver('did_load', array($this, 'treeConstruct'));
+			parent::load($where);
+
+			$this->removeObserver('row', array($this, 'treePrepareRow'));
+			$this->removeObserver('did_load', array($this, 'treeConstruct'));
+		}
 
 		return $this;
 	}

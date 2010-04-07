@@ -62,6 +62,8 @@ class CatalogueSync implements ModuleInterface
 				throw new JSException("Can't download file \"".$this->getSourceFilename()."\"");
 			}
 
+			$this->deleteOld();
+
 			foreach ($this->syncData AS $k => $v)
 			{
 				$conf = $this->getFieldConf($k);
@@ -116,8 +118,11 @@ class CatalogueSync implements ModuleInterface
 				$this->syncData[$key]['stack'][$element->getLevel()] = $data;
 			}
 
+			if (!$conf['keep_old'])
+			{
+				$data['usn'] = $this->getUsnForKey($key);
+			}
 			
-
 			$model->loadOne("{".$keyField."} = ".$data[$keyField]);
 			if (!$model[$keyField])
 			{
@@ -188,19 +193,44 @@ class CatalogueSync implements ModuleInterface
 		return $result;
 	}
 
+	protected function deleteOld()
+	{
+		foreach ($this->syncData AS $k => $v)
+		{
+			$conf = $this->getFieldConf($k);
+			if ($conf && !$conf['keep_old'])
+			{
+				$model = $this->getModelForKey($k);
+				$model->delete('{usn} < '.DBModel::quote($this->getUsnForKey($k)));
+			}
+		}
+	}
+
+	protected function getUsnForKey($key)
+	{
+		$conf = &$this->getFieldConf($key);
+
+		if ($conf)
+		{
+			if (!$conf['usn'])
+			{
+				$model = clone $this->getModelForKey($key);
+				$model->setFields(array('usn' => 'MAX({usn})'));
+				$model->loadOne();
+				$conf['usn'] = intval($model['usn']) + 1;
+			}
+
+			return $conf['usn'];
+		}
+		else
+		{
+			return null;
+		}
+	}
+
 	protected function parseFile()
 	{
 		$this->writeToLog('parsing');
-
-	/*
-	$data = $this->db->queryOne("
-                SELECT MAX(update_sequence) AS update_sequence
-                FROM ??".$this->config->table_name."
-        ");
-
-	$this->updateSequence = $data['update_sequence'] + 1;
-	*/
-		//$this->writeToLog('USN = '.$this->updateSequence);
 
 		Finder::useClass('XMLParser');
 		$parser = new XMLParser();
@@ -295,7 +325,7 @@ class CatalogueSync implements ModuleInterface
 	protected function getModelForKey($key)
 	{
 		$model = null;
-		$conf = $this->getFieldConf($key);
+		$conf = &$this->getFieldConf($key);
 		if ($conf)
 		{
 			if (!array_key_exists('cached_model', $conf))

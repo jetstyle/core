@@ -776,7 +776,7 @@ class DBModel extends Model implements IteratorAggregate, ArrayAccess, Countable
 		}
 		else
 		{
-			throw new Exception('Pager object must implement \'PagerInterface\'');
+			throw new JSException('Pager object must implement \'PagerInterface\'');
 		}
 		return $this;
 	}
