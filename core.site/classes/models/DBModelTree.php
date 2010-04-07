@@ -34,6 +34,33 @@ class DBModelTree extends DBModel
 		return $this;
 	}
 
+	public function insertBefore($nodeId, $row)
+	{
+		$db = Locator::get('db');
+		$node = $db->queryOne("
+			SELECT ".$this->getPk().", _order, _level, _parent
+			FROM ".$this->quoteName(($this->autoPrefix ? DBAL::$prefix : "").$this->getTableName())."
+			WHERE ".$this->quoteName($this->getPk())." = ".$this->quoteValue($nodeId)."
+		");
+
+		if (!$node[$this->getPk()])
+		{
+			return false;
+		}
+
+		$row['_order'] = $node['_order'];
+		$row['_parent'] = $node['_parent'];
+		$row['_level'] = $node['_level'];
+
+		$db->query("
+			UPDATE ".$this->quoteName(($this->autoPrefix ? DBAL::$prefix : "").$this->getTableName())."
+			SET _order = _order + 1
+			WHERE _parent = ".self::quote($node['_parent'])." AND _order >= ".self::quote($node['_order'])."
+		");
+
+		return self::insert($row);
+	}
+
 	protected function onBeforeInsert(&$row)
 	{
 		if (!isset($row['_parent']))
@@ -94,6 +121,8 @@ class DBModelTree extends DBModel
 			$row['_supertag'] = $translit->supertag($row['title'], 20);
 		}
 	}
+
+
 
 	protected function onAfterInsert(&$row)
 	{

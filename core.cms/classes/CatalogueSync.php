@@ -111,6 +111,7 @@ class CatalogueSync implements ModuleInterface
 		{
 			if ($conf['tree'])
 			{
+				$data['_level'] = $element->getLevel();
 				if ($element->getLevel() > 1)
 				{
 					$data['_parent'] = $this->syncData[$key]['stack'][$element->getLevel() - 1][$keyField];
