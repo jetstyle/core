@@ -217,7 +217,11 @@ class Form
      }
      while (isset($this->rh->forms) && in_array($this->name, $this->rh->forms));
      $this->rh->forms[] = $this->name;*/
-     if ($this->config['db_table'])
+      if ($this->config['form_name'])
+      {
+         $this->name = $this->config['form_name'];
+      }
+      else if ($this->config['db_table'])
      {
          $this->name = $this->config['db_table'];
      }
@@ -360,7 +364,7 @@ class Form
    function _ParseWrapper( $content )
    {
 	 $tpl = &Locator::get('tpl');
-     $form_name = isset($this->config["form_name"]) ? $this->config["form_name"] : 'form_'.$this->name;
+     $form_name = 'form_' . (isset($this->config["form_name"]) ? $this->config["form_name"] : $this->name);
      $tpl->set(
      	"form",
      	"<form action=\"".$this->action."\" ".
