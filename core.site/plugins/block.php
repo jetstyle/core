@@ -28,6 +28,11 @@ catch(FileNotFoundException $e)
 
 	$tpl->pushContext();
 	$tpl->load($params);
+	
+	$parts = explode(".", $tplName);
+	
+	$tpl->set("_", $tpl->get("images")."../templates/".$parts[0]."/");
+
 	echo $tpl->parse($tplName);
 	$tpl->popContext();
 
