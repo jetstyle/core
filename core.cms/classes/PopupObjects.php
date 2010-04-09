@@ -30,6 +30,15 @@ class PopupObjects
               //  else
                //     $this->rubricId = -1;
 	}
+        
+        public function setAlbum($value)
+	{
+		$this->albumId = $value;
+	}
+        
+        public function setExpand($expand_config){
+                $this->expand_config = $expand_config;
+        }
 	
 	public function setRubricsTypeId($value)
 	{
@@ -84,6 +93,19 @@ class PopupObjects
 			Finder::useModel('DBModel');
 			$this->model = DBModel::factory('FilesModel/cms_list');
 			
+                        if ( $this->albumId )
+			{
+			    $ids = DBModel::factory( $this->expand_config["model_items"] )->load("rubric_id=".DBModel::quote($this->albumId))->getArrayAssoc("id");
+                            $this->model->addField(">files2obj", array("model"=>"Files2RubricsModel/files2objects","fk"=>"file_id", "pk"=>"id", "where"=>" {obj_id} IN (".DBModel::quote( array_keys($ids) ).")"));
+                            /*
+                            $this->model->getForeignModel('files2obj.object')->setModel();
+                            
+                            $sql = "SELECT id FROM ??gallery_items WHERE rubric_id = ".DBModel::quote($this->albumId);
+			    $gallery_ids = $this->db->query($sql);
+                            */
+			 //echo   $this->where = ;
+			}	
+                        
 			$this->model->where = $this->model->where . ($this->where ? ($this->model->where ? ' AND ' : '') . $this->where : '') ;
 			
 			$this->model->enablePager();
@@ -178,11 +200,28 @@ class PopupObjects
 
 	protected function loadRubrics()
 	{
-		$this->rubrics = $this->db->query("
-			SELECT id, title
+		$rubrics = $this->db->query("
+			SELECT id, title, module
 			FROM ??".$this->rubricsTable."
 			WHERE type_id = ".$this->db->quote($this->rubricsTypeId)." AND _state = 0 ORDER by _order
 		", "id");
+
+                //$albums = $this->db->query("select id,title from ??gallery_rubrics WHERE _state=0", "id");
+                $albums = DBModel::factory( $this->expand_config["model_rubrics"] )->load("_state=0")->getArrayAssoc("id");
+		//var_dump($albums);die();
+		if (isset($albums[$this->albumId]))
+		{
+			$albums[$this->albumId]['selected'] = true;
+		}
+		
+		foreach ($rubrics as $i=>$rubric)
+		{
+		    if ( $rubric["module"]=="Gallery" ){
+			$rubric["children"] = $albums;
+		    }
+		    $this->rubrics[ $rubric["id"] ] = $rubric;
+		}
+
 
 		// mark current rubric
 		if (isset($this->rubrics[$this->rubricId]))

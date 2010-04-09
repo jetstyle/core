@@ -559,10 +559,17 @@ class DBModel extends Model implements IteratorAggregate, ArrayAccess, Countable
 		return $result;
 	}
 
-//	public function getTree()
-//	{
-//
-//	}
+	public function getArrayAssoc($field)
+	{
+                if (is_array($this->data))
+		{
+    			foreach ($this->data AS $k => $r)
+    			{
+    				$result[ $r[$field] ] = $r->getArray();
+    			}
+                }
+                return $result;
+	}
 
 	public function getCount($where = NULL)
 	{

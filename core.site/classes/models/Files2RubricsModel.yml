@@ -1,8 +1,20 @@
-table: files2rubrics
-fields:
-    - file_id
-    - rubric_id
-    >rubric:
-       model: FilesRubricsModel
-       pk: rubric_id
-       fk: id
+default:
+    table: files2rubrics
+    fields:
+        - file_id
+        - rubric_id
+        >rubric:
+           model: FilesRubricsModel
+           pk: rubric_id
+           fk: id
+
+files2objects:
+    table: files2objects
+    fields:
+        - file_id
+        - key
+        - obj_id
+#        >object:
+#           model: GalleryItems
+#           pk: obj_id
+#           fk: id
