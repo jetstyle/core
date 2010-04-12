@@ -41,18 +41,23 @@ MultiselectEditable.prototype = {
 		{
 			this.addNewRow(data[i]);
 		}
-
+                var self = this;
+                
                 $(".b-catalogue-field-table").tableDnD({dragHandle: "b-catalogue-field-table_td-move", 
                     onDragClass: "dragging",
+                    /*
                     onDragStart: function(table, row){
-                         dragging = true;
-
-                    },
+  
+                    },*/
                     onDrop: function(table, row){
+                        
+                        self.saveOrder();
+                        /*
                         $.post(document.location.href+ "&"+$.tableDnD.serialize('id'), {"action": "reorder", "ajax": true}, function(){
-                        dragging = false;
+                            
 
                         });
+                        */
                     }
 
                 });
@@ -65,22 +70,9 @@ MultiselectEditable.prototype = {
 		
 		// sortable things
 		var cell = row.insertCell(-1);
-                /*
-		var img = document.createElement('img');
-		img.src = this.images + 'up_arrow.gif';
-		img.setAttribute('title', 'Переместить выше');
-		img.style.cursor = 'pointer';
-		$(img).bind('click', this.moveUp.prototypeBind(this, row));
-		cell.appendChild(img);
-		var img = document.createElement('img');
-		img.src = this.images + 'down_arrow.gif';
-		img.setAttribute('title', 'Переместить ниже');
-		img.style.cursor = 'pointer';
-		$(img).bind('click', this.moveDown.prototypeBind(this, row));
-                */
                 var img = document.createElement('div');
                 cell.setAttribute("class", "b-catalogue-field-table_td-move");
-                
+                cell.style.paddingTop = '3px';
 		cell.appendChild(img);
 
 		// title			
@@ -89,6 +81,9 @@ MultiselectEditable.prototype = {
 		input.type = 'text';
 		input.name = this.cont.attr("id") + '_data['+data.id+']';
 		input.value = data.title;
+                input.style.width = '178px';
+                input.style.marginLeft = '3px';
+                
 		//cell.innerHTML = data.title;
 		cell.appendChild(input);
 		
@@ -130,10 +125,12 @@ MultiselectEditable.prototype = {
 	_addItem: function(data)
 	{
 		this.hideUpdateMsg();
-		if(parseInt(data.id, 10) > 0)
+
+		if(data && data.id && parseInt(data.id, 10) > 0)
 		{
 			this.addNewRow(data);
 		}
+                
 	},
 	
 	delItem: function(id, row)
@@ -162,17 +159,17 @@ MultiselectEditable.prototype = {
 	{
 		this.updateCont.css('display', 'none');
 	},
-	
+	/*
 	moveUp: function(curNode)
 	{
 		var beforeNode = curNode.previousSibling;
-        if(!beforeNode || beforeNode.getAttribute('noswap') == 1) 
-        {
-                return false;
-        }
+                if(!beforeNode || beforeNode.getAttribute('noswap') == 1) 
+                {
+                        return false;
+                }
 
-        this.saveOrder();
-        curNode.parentNode.insertBefore(curNode, beforeNode);
+                this.saveOrder();
+                curNode.parentNode.insertBefore(curNode, beforeNode);
 	},
 	
 	moveDown: function(curNode)
@@ -195,14 +192,16 @@ MultiselectEditable.prototype = {
                 curNode.parentNode.appendChild(curNode);
         }
 	},
-	
+	*/
 	saveOrder : function()
 	{
+        /*
 		if(this.timeout)
 		{
 			clearTimeout(this.timeout);
 		}
-		this.timeout = setTimeout(this._saveOrder.prototypeBind(this), 2000);
+		this.timeout = setTimeout(this._saveOrder.prototypeBind(this), 2000);*/
+                this._saveOrder();
 	},
 	
 	_saveOrder: function()
