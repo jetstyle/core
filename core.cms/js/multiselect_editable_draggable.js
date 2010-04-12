@@ -15,7 +15,7 @@ MultiselectEditable.prototype = {
 		this.cont = $('#' + params.cont);
 		this.updateCont = $('#' + params.updateCont);
 		this.table = document.createElement('table');
-                this.table.className = "b-catalogue-fields-table";
+                this.table.className = "b-catalogue-field-table";
 		this.cont.append(this.table);
 		this.url = params.url;
 		this.images = params.images;
@@ -42,7 +42,7 @@ MultiselectEditable.prototype = {
 			this.addNewRow(data[i]);
 		}
 
-                $(".b-catalogue-fields-table").tableDnD({dragHandle: "b-catalogue-fields-table_td-move", 
+                $(".b-catalogue-field-table").tableDnD({dragHandle: "b-catalogue-field-table_td-move", 
                     onDragClass: "dragging",
                     onDragStart: function(table, row){
                          dragging = true;
@@ -79,7 +79,7 @@ MultiselectEditable.prototype = {
 		$(img).bind('click', this.moveDown.prototypeBind(this, row));
                 */
                 var img = document.createElement('div');
-                cell.setAttribute("class", "b-catalogue-fields-table_td-move");
+                cell.setAttribute("class", "b-catalogue-field-table_td-move");
                 
 		cell.appendChild(img);
 

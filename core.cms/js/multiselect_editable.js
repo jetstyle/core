@@ -1,5 +1,5 @@
 MultiselectEditable = Class.create();
-MultiselectEditable.prototype = {
+MultiselectEditable.prototype = { 
 	url: '',
 	images: '',			// путь до картинок
 	cont: null, 		// контейнер
@@ -15,7 +15,6 @@ MultiselectEditable.prototype = {
 		this.cont = $('#' + params.cont);
 		this.updateCont = $('#' + params.updateCont);
 		this.table = document.createElement('table');
-                this.table.className = "b-catalogue-fields-table";
 		this.cont.append(this.table);
 		this.url = params.url;
 		this.images = params.images;
@@ -41,21 +40,6 @@ MultiselectEditable.prototype = {
 		{
 			this.addNewRow(data[i]);
 		}
-
-                $(".b-catalogue-fields-table").tableDnD({dragHandle: "b-catalogue-fields-table_td-move", 
-                    onDragClass: "dragging",
-                    onDragStart: function(table, row){
-                         dragging = true;
-
-                    },
-                    onDrop: function(table, row){
-                        $.post(document.location.href+ "&"+$.tableDnD.serialize('id'), {"action": "reorder", "ajax": true}, function(){
-                        dragging = false;
-
-                        });
-                    }
-
-                });
 	},
 	
 	addNewRow: function(data)
@@ -65,7 +49,6 @@ MultiselectEditable.prototype = {
 		
 		// sortable things
 		var cell = row.insertCell(-1);
-                /*
 		var img = document.createElement('img');
 		img.src = this.images + 'up_arrow.gif';
 		img.setAttribute('title', 'Переместить выше');
@@ -77,10 +60,6 @@ MultiselectEditable.prototype = {
 		img.setAttribute('title', 'Переместить ниже');
 		img.style.cursor = 'pointer';
 		$(img).bind('click', this.moveDown.prototypeBind(this, row));
-                */
-                var img = document.createElement('div');
-                cell.setAttribute("class", "b-catalogue-fields-table_td-move");
-                
 		cell.appendChild(img);
 
 		// title			
@@ -94,28 +73,9 @@ MultiselectEditable.prototype = {
 		
 		// delete
 		var cell = row.insertCell(-1);
-		/*
-                var span = document.createElement('span');
+		var span = document.createElement('span');
 		span.innerHTML = 'X';
-                */
-                var span = document.createElement('img');
-                span.src = this.images + 'x_small.png';
-                span.className = "delVariant";
-                span.style.position = 'relative';
-                span.style.left = '-10px';
-                span.style.top = '-6px';
-                span.style.visibility = 'hidden';
 		span.style.cursor = 'pointer';
-                $(row).hover(         function(){
-                                        if ( $.tableDnD.currentTable == null )
-                                            $(".delVariant", this).css("visibility", "visible");
-                                        
-                                      }, 
-                                      function(){ 
-                                        
-                                            $(".delVariant", this).css("visibility", "hidden");
-                                      }
-                            );
 		$(span).bind('click', this.delItem.prototypeBind(this, data.id, row));
 		cell.appendChild(span);
 	},
