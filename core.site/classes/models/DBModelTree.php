@@ -8,7 +8,7 @@ class DBModelTree extends DBModel
 	{
 		if ($limit == 1)
 		{
-			parent::load($where);
+			parent::load($where, $limit, $offset);
 		}
 		else
 		{
@@ -32,6 +32,59 @@ class DBModelTree extends DBModel
 		}
 
 		return $this;
+	}
+
+	public function &loadPlain($where=NULL, $limit=NULL, $offset=NULL)
+	{
+		parent::load($where, $limit, $offset);
+		return $this;
+	}
+
+	public function moveNodeBefore($nodeId, $beforeNodeId)
+	{
+		$db = Locator::get('db');
+		
+		$beforeNode = $db->queryOne("
+			SELECT ".$this->getPk().", _parent, _order
+			FROM ".$this->quoteName(($this->autoPrefix ? DBAL::$prefix : "").$this->getTableName())."
+			WHERE ".$this->quoteName($this->getPk())." = ".$this->quoteValue($beforeNodeId)."
+		");
+	
+		if ($beforeNodeId[$this->getPk()])
+		{
+			$db->query("
+				UPDATE ".$this->quoteName(($this->autoPrefix ? DBAL::$prefix : "").$this->getTableName())."
+				SET _order = _order + 1
+				WHERE _order >= " . self::quote($beforeNodeId['_order']) . " AND _parent = " . self::quote($beforeNodeId['_parent']) . "
+			");
+			
+			$db->query("
+				UPDATE ".$this->quoteName(($this->autoPrefix ? DBAL::$prefix : "").$this->getTableName())."
+				SET _order = " . self::quote($beforeNode['_order']) . ", _parent = ".self::quote($beforeNode['_parent'])."
+				WHERE ".$this->getPk()." = " . self::quote($nodeId)  . "
+			");
+			
+			$this->rebuild();
+		}
+	}
+	
+	public function moveNodeInto($nodeId, $targetNodeId)
+	{
+	    $db = Locator::get('db');
+	    
+		$node = $db->queryOne("
+			SELECT (MAX(_order) + 1) AS _order
+			FROM ".$this->quoteName(($this->autoPrefix ? DBAL::$prefix : "").$this->getTableName())."
+			WHERE _parent = ".self::quote($targetNodeId)."
+		");
+		
+		$db->query("
+			UPDATE ".$this->quoteName(($this->autoPrefix ? DBAL::$prefix : "").$this->getTableName())."
+			SET _order = " . self::quote($node['_order']) . ", _parent = ".self::quote($targetNodeId)."
+			WHERE ".$this->getPk()." = " . self::quote($nodeId)  . "
+		");
+		
+		$this->rebuild();
 	}
 
 	public function insertBefore($nodeId, $row)
@@ -60,7 +113,47 @@ class DBModelTree extends DBModel
 
 		return self::insert($row);
 	}
+	
+	public function getParentsIds($nodeId)
+	{
+		$parents = array();
 
+		$db = Locator::get('db');
+		$node = $db->queryOne("
+			SELECT ".$this->getPk().", _order, _level, _parent, _left, _right
+			FROM ".$this->quoteName(($this->autoPrefix ? DBAL::$prefix : "").$this->getTableName())."
+			WHERE ".$this->quoteName($this->getPk())." = ".$this->quoteValue($nodeId)."
+		");
+
+		if ($node[$this->getPk()])
+		{
+			if ($node['_level'] == 1)
+			{
+				$parents[] = 0;
+			}
+			elseif ($node['_level'] == 2)
+			{
+				$parents[] = 0;
+				$parents[] = $node['_parent'];
+			}
+			else
+			{
+				$sqlResult = $db->execute("
+					SELECT _parent
+					FROM ".$this->quoteName(($this->autoPrefix ? DBAL::$prefix : "").$this->getTableName())."
+					WHERE _left <= ".self::quote($node['_left'])." AND _right >= ".self::quote($node['_right'])."
+				");
+
+				while ($r = $db->getRow($sqlResult))
+				{
+					$parents[] = $r['_parent'];
+				}
+			}
+		}
+		
+		return $parents;
+	}
+		
 	protected function onBeforeInsert(&$row)
 	{
 		if (!isset($row['_parent']))
@@ -74,7 +167,7 @@ class DBModelTree extends DBModel
 			$queryResult = $db->queryOne("
 				SELECT ".$this->getPk()."
 				FROM ".$this->quoteName(($this->autoPrefix ? DBAL::$prefix : "").$this->getTableName())."
-				WHERE ".$this->quoteName('_parent')." = ".$this->quoteValue($row['_parent'])."
+				WHERE ".$this->quoteName($this->getPk())." = ".$this->quoteValue($row['_parent'])."
 			");
 
 			if (!$queryResult[$this->getPk()])
@@ -104,7 +197,7 @@ class DBModelTree extends DBModel
 				$queryResult = $db->queryOne("
 					SELECT _level
 					FROM ".$this->quoteName(($this->autoPrefix ? DBAL::$prefix : "").$this->getTableName())."
-					WHERE ".$this->quoteName('_parent')." = ".$this->quoteValue($row['_parent'])."
+					WHERE ".$this->quoteName($this->getPk())." = ".$this->quoteValue($row['_parent'])."
 				");
 				$row['_level'] = intval($row['_level']) + 1;
 			}
@@ -127,6 +220,24 @@ class DBModelTree extends DBModel
 	protected function onAfterInsert(&$row)
 	{
 		$this->rebuild();
+	}
+	
+	public function updateNode($nodeId, &$row)
+	{
+		if (!$nodeId)
+		{
+			return;
+		}
+
+		return $this->update($row, '{'.$this->getPk().'} = '.self::quote($nodeId));
+	}
+	
+	protected function onAfterUpdate(&$row)
+	{
+		if (is_array($row) && in_array(array('_left', '_right', '_parent', '_order', '_level', '_supertag', '_path'), array_keys($row)))
+		{
+			$this->rebuild();
+		}
 	}
 
 	public function delete($where)
@@ -172,6 +283,49 @@ class DBModelTree extends DBModel
 		}
 
 		return $this->delete('{'.$this->getPk().'} = '.self::quote($nodeId));
+	}
+	
+	public function deleteNodeToTrash($nodeId)
+	{
+		if (!$nodeId)
+		{
+			return 0;
+		}
+
+		return $this->deleteToTrash('{'.$this->getPk().'} = '.self::quote($nodeId));
+	}
+	
+	public function deleteToTrash($where)
+	{
+		$affectedRows = 0;
+
+		$db = Locator::get('db');
+
+		$this->usePrefixedTableAsAlias = true;
+
+		if ($where)
+		{
+			$where = 'WHERE '.$this->parse($where);
+		}
+
+		$sqlResult = $db->execute("
+			SELECT id, _left, _right
+			FROM ".$this->quoteName(($this->autoPrefix ? DBAL::$prefix : "").$this->getTableName())."
+			".$where );
+
+		while ($node = $db->getRow($sqlResult))
+		{
+			$db->query("
+				UPDATE ".$this->quoteName(($this->autoPrefix ? DBAL::$prefix : "").$this->getTableName())."
+				SET _state = 2
+				WHERE _left >= ".self::quote($node['_left'])." AND _right <= ".self::quote($node['_right'])."
+			");
+
+			$affectedRows += $db->affectedRows();
+		}
+
+		$this->usePrefixedTableAsAlias = false;
+		return $affectedRows;
 	}
 
 	public function getItems()

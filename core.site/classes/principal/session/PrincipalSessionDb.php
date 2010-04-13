@@ -16,7 +16,10 @@ class PrincipalSessionDb extends DBModel implements PrincipalSessionInterface
 
 	public function initSession()
 	{
-		$this->where = ($this->where ? $this->where." AND " : "")." {last_activity} > ".(time() - $this->expireTime);
+		if ($this->expireTime)
+		{
+			$this->where = ($this->where ? $this->where." AND " : "")." {last_activity} > ".(time() - $this->expireTime);
+		}
 
 		if ($this->getSessionHash())
 		{
@@ -25,8 +28,11 @@ class PrincipalSessionDb extends DBModel implements PrincipalSessionInterface
 
 		if (!$this->offsetGet('session_hash'))
 		{
-			$this->load("{user_id} = 0 AND {id_hash} = ".DBModel::quote($this->getIdHash()));
-
+			if ($this->expireTime)
+			{
+				$this->load("{user_id} = 0 AND {id_hash} = ".DBModel::quote($this->getIdHash()));
+			}
+			
 			if (!$this->offsetGet('session_hash'))
 			{
 				$this->start();
@@ -43,9 +49,12 @@ class PrincipalSessionDb extends DBModel implements PrincipalSessionInterface
 
 	public function setParams($params)
 	{
-		if (isset($params['expireTime']))
+		if (is_array($params))
 		{
-			$this->expireTime = $params['expireTime'];
+			if (array_key_exists('expireTime', $params))
+			{
+				$this->expireTime = $params['expireTime'];
+			}
 		}
 	}
 
@@ -114,7 +123,14 @@ class PrincipalSessionDb extends DBModel implements PrincipalSessionInterface
 
 	public function cleanup()
 	{
-		parent::delete("{last_activity} < ".(time() - $this->expireTime));
+		if ($this->expireTime)
+		{
+			parent::delete("{last_activity} < ".(time() - $this->expireTime));
+		}
+		else
+		{
+			parent::delete("{last_activity} < ".(time() - 3600 * 24 * 5));
+		}
 	}
 
 	public function start(&$storageModel = null)

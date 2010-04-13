@@ -294,6 +294,8 @@ class DBModel extends Model implements IteratorAggregate, ArrayAccess, Countable
 		$this->treeMinLevel = 0;
 		$this->treeRootId = 0;
 		$this->ids = array();
+		
+		$this->setKeyField(null);
 
 		if (is_array($this->foreignModels) && !empty($this->foreignModels))
 		{
