@@ -23,7 +23,7 @@ class ListSelectFilter extends ListFilter
 
     public function apply(&$model)
     {
-        if ($this->getVarValue || $this->getConfig('always_apply'))
+        if (isset($this->getVarValue) || $this->getConfig('always_apply'))
         {
             $depends = $this->getConfig('depends');
             if ($depends)
@@ -35,7 +35,7 @@ class ListSelectFilter extends ListFilter
                     return;
                 }
             }
-
+            
             if ($model instanceof DBModel)
             {
                 $model->where .= ($model->where ? " AND " : "")." {".$this->getConfig('field')."} = ".DBModel::quote($this->getVarValue);
