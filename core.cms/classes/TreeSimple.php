@@ -282,7 +282,7 @@ class TreeSimple extends ListSimple  implements ModuleInterface
 
 		Finder::useModel('DBModelTree');
 		$model = DBModelTree::factory($this->config['model']);
-		$model->addFields(array('_order', '_state'));
+		$model->addFields(array('_order', '_state', 'has_children' => '(({_right} - {_left}) > 1)'));
 
 		$model->where .= ($model->where ? " AND " : "" ).($_GET['_show_trash'] ? '{_state}>=0' : "{_state} <>2 ");
 
