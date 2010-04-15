@@ -135,12 +135,12 @@ MultiselectEditable.prototype = {
 	
 	delItem: function(id, row)
 	{
-        if (confirm('Удалить?'))
-        {
-            this.showUpdateMsg();
-            var params = {'a' : 'del', 'item_id' : id};
-            $.post(this.url, params, this._delItem.prototypeBind(this, row), 'json');
-        }
+            if (confirm('Удалить это значение?'))
+            {
+                this.showUpdateMsg();
+                var params = {'a' : 'del', 'item_id' : id};
+                $.post(this.url, params, this._delItem.prototypeBind(this, row), 'json');
+            }
 	},
 	
 	_delItem: function(row)

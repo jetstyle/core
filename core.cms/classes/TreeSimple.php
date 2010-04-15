@@ -176,7 +176,7 @@ class TreeSimple extends ListSimple  implements ModuleInterface
 		{
 			$model = clone $this->getModel();
 			$model->setOrder(array('_state' => 'ASC', '_order' => 'ASC'));
-			$model->loadOne("{_parent} = 0 AND _state IN (0,1,2)");			
+			$model->loadOne("{_parent} = 0 AND {_state} IN (0,1,2)");			
 						
 			if ($model[$model->getPk()])
 			{
@@ -350,7 +350,7 @@ class TreeSimple extends ListSimple  implements ModuleInterface
 	{
 		$node = clone $this->getModel();
 		// @TODO: dirty hack, i'm not proud of it
-		$node->where = preg_replace('/{_state}\s*(=|>=|>|<=|<|<>)\s*\d+\s*(,)?/', '', $node->where);
+		$node->where = preg_replace('/{_state}\s*(=|>=|>|<=|<|<>)\s*\d+\s*(AND)?/', '', $node->where);
 		$node->loadOne('{'.$node->getPk().'} = '.DBModel::quote($id));
 		
 		return $node;

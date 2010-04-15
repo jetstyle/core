@@ -259,8 +259,12 @@ class DBModel extends Model implements IteratorAggregate, ArrayAccess, Countable
 		{
                         $modelName = (strpos($className, "Tree")!==false ) ? "DBModelTree" : "DBModel";
 
+                        if ( strpos($className,"Catalogue") ){
+                            var_dump($className, strpos($className, "Tree"));die();
+                        }
+
                         //$classFile = Finder::findScript('classes/models', $modelName);
-						Finder::useClass('models/DBModelTree');
+                        Finder::useClass('models/DBModelTree');
 			$model = new $modelName();
 
 
@@ -1357,14 +1361,14 @@ class DBModel extends Model implements IteratorAggregate, ArrayAccess, Countable
                 $pkValue = $_data;
                 
 		$where = $fmodel->quoteField($fieldinfo['fk']) .'='. DBModel::quote($pkValue);
-        if ($fieldinfo['tree'])
-        {
-            $fmodel->loadTree($where);
-        }
-        else
-        {
-            $fmodel->load($where);
-        }
+                if ($fieldinfo['tree'])
+                {
+                    $fmodel->loadTree($where);
+                }
+                else
+                {
+                    $fmodel->load($where);
+                }
 
 		$data[$fieldName] = &$fmodel;
 	}

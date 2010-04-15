@@ -560,7 +560,7 @@ function tree_component () {
 								if(_this.to) clearTimeout(_this.to);
 								if(!_this.appended) {
 									_this.container.append(_this.drag);
-									_this.po = $(_this.drag).offsetParent().offset({scroll : false});
+									_this.po = $(_this.drag).offsetParent().offset(); //{scroll : false}
 									_this.appended = true;
 								}
 								$(_this.drag).css({ "left" : (event.pageX - _this.po.left - (_this.settings.ui.rtl ? $(_this.drag).width() : -5 ) ), "top" : (event.pageY - _this.po.top  + ($.browser.opera ? _this.container.scrollTop() : 0) + 15) });
@@ -581,8 +581,8 @@ function tree_component () {
 
 								if(event.target.tagName == "A" ) {
 									var goTo = {
-										x : ($(event.target).offset({scroll : false}).left - 1),
-										y : (event.pageY - cnt.offset({scroll : false}).top)
+										x : ($(event.target).offset().left - 1),//{scroll : false}
+										y : (event.pageY - cnt.offset().top)    //{scroll : false}6
 									}
 									if(cnt.hasClass("rtl")) {
 										goTo.x += $(event.target).width() - 8;
