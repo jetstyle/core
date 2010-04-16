@@ -86,10 +86,10 @@ class DBAL_mysql
 			$ret = implode (",", $ret);
 			return $ret;
 		}
-		elseif (is_numeric($value))
-			return $value;
 		else
+		{
 			return "'".mysql_real_escape_string($value)."'";
+		}
 	}
 
 	// Прямой вызов SQL
