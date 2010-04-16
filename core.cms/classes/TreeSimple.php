@@ -1,5 +1,6 @@
 <?php
-Finder::useClass('TreeControl');
+Finder::useClass('ListSimple');
+Finder::useModel('DBModelTree');
 
 class TreeSimple extends ListSimple  implements ModuleInterface
 {
@@ -279,8 +280,7 @@ class TreeSimple extends ListSimple  implements ModuleInterface
 		{
 			throw new JSException("You should set `model` param in config");
 		}
-
-		Finder::useModel('DBModelTree');
+		
 		$model = DBModelTree::factory($this->config['model']);
 		$model->addFields(array('_order', '_state', 'has_children' => '(({_right} - {_left}) > 1)'));
 

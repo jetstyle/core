@@ -1,4 +1,5 @@
 <?php
+Finder::useModel('DBModel');
 Finder::useClass('ModuleInterface');
 class CatalogueSync implements ModuleInterface
 {
@@ -27,8 +28,7 @@ class CatalogueSync implements ModuleInterface
 
 		$this->parseConfig();
 
-		// TODO: remove hack
-		if (defined('COMMAND_LINE') && COMMAND_LINE || 1==1)
+		if (defined('COMMAND_LINE') && COMMAND_LINE)
 		{
 			@set_time_limit(0);
 			@ignore_user_abort();
@@ -55,7 +55,14 @@ class CatalogueSync implements ModuleInterface
 
 			if ($downloadResult)
 			{
-				$this->parseFile();
+				if ($this->isFileRemote())
+				{
+					$this->parseFile($this->getLocalFilename());
+				}
+				else
+				{
+					$this->parseFile($this->getSourceFilename());
+				}
 			}
 			else
 			{
@@ -106,37 +113,48 @@ class CatalogueSync implements ModuleInterface
 
 		$data = $this->prepareElement($key, $element);
 
-		$keyField = $conf['key'];
-		if (array_key_exists($keyField, $data) && $data[$keyField])
+		if ($conf['tree'])
 		{
-			if ($conf['tree'])
+			if (!array_key_exists('_level', $data))
 			{
 				$data['_level'] = $element->getLevel();
-				if ($element->getLevel() > 1)
-				{
-					$data['_parent'] = $this->syncData[$key]['stack'][$element->getLevel() - 1][$keyField];
-				}
-				$this->syncData[$key]['stack'][$element->getLevel()] = $data;
 			}
 
-			if (!$conf['keep_old'])
+			if ($element->getLevel() > 1 && !array_key_exists('_parent', $data))
 			{
-				$data['usn'] = $this->getUsnForKey($key);
+				$data['_parent'] = $this->syncData[$key]['stack'][$element->getLevel() - 1][$keyField];
 			}
-			
-			$model->loadOne("{".$keyField."} = ".$data[$keyField]);
-			if (!$model[$keyField])
-			{
-				$model->insert($data);
-			}
-			else
-			{
-				$model->update($data, "{".$keyField."} = ".$data[$keyField]);
-			}
+			$this->syncData[$key]['stack'][$element->getLevel()] = $data;
+		}
+
+		if (!$conf['keep_old'])
+		{
+			$data['usn'] = $this->getUsnForKey($key);
+		}
+
+		if ($conf['custom_model'])
+		{
+			$model->syncItem($this, $data);
 		}
 		else
 		{
-			$this->writeToLog($key.": no key found in dataset");
+			$keyField = $conf['key'];
+			if (array_key_exists($keyField, $data) && $data[$keyField])
+			{
+				$model->loadOne("{".$keyField."} = ".$data[$keyField]);
+				if (!$model[$keyField])
+				{
+					$model->insert($data);
+				}
+				else
+				{
+					$model->update($data, "{".$keyField."} = ".$data[$keyField]);
+				}
+			}
+			else
+			{
+				$this->writeToLog($key.": no key found in dataset");
+			}
 		}
 	}
 
@@ -202,7 +220,15 @@ class CatalogueSync implements ModuleInterface
 			if ($conf && !$conf['keep_old'])
 			{
 				$model = $this->getModelForKey($k);
-				$model->delete('{usn} < '.DBModel::quote($this->getUsnForKey($k)));
+
+				if ($conf['custom_model'])
+				{
+					$model->deleteOutdated($this->getUsnForKey($k));
+				}
+				else
+				{
+					$model->delete('{usn} < '.DBModel::quote($this->getUsnForKey($k)));
+				}
 			}
 		}
 	}
@@ -215,10 +241,17 @@ class CatalogueSync implements ModuleInterface
 		{
 			if (!$conf['usn'])
 			{
-				$model = clone $this->getModelForKey($key);
-				$model->setFields(array('usn' => 'MAX({usn})'));
-				$model->loadOne();
-				$conf['usn'] = intval($model['usn']) + 1;
+				if ($conf['custom_model'])
+				{
+					$conf['usn'] = $this->getModelForKey($key)->getUSN() + 1;
+				}
+				else
+				{
+					$model = clone $this->getModelForKey($key);
+					$model->setFields(array('usn' => 'MAX({usn})'));
+					$model->loadOne();
+					$conf['usn'] = intval($model['usn']) + 1;
+				}
 			}
 
 			return $conf['usn'];
@@ -229,13 +262,13 @@ class CatalogueSync implements ModuleInterface
 		}
 	}
 
-	protected function parseFile()
+	protected function parseFile($filename)
 	{
 		$this->writeToLog('parsing');
 
 		Finder::useClass('XMLParser');
 		$parser = new XMLParser();
-		$parser->setSource($this->getLocalFilename());
+		$parser->setSource($filename);
 
 		foreach ($this->syncData AS $k => $v)
 		{
@@ -269,29 +302,19 @@ class CatalogueSync implements ModuleInterface
 				{
 					if (is_numeric($k))
 					{
-						$arr = $element->$v;
-						if ($arr && $arr[0])
-						{
-							$result[$v] = $arr[0]->getContent();
-						}
+						$k = $v;
+					}
+
+					if ($v == '-')
+					{
+						$result[$k] = iconv('utf-8', 'cp1251', $element->getContent());
 					}
 					else
 					{
-						if (is_array($v) && $v['to'])
+						$arr = $element->$v;
+						if ($arr && $arr[0])
 						{
-							$arr = $element->$k;
-							if ($arr && $arr[0])
-							{
-								$result[$v['to']] = $arr[0]->getContent();
-							}
-						}
-						else
-						{
-							$arr = $element->$k;
-							if ($arr && $arr[0])
-							{
-								$result[$v] = $arr[0]->getContent();
-							}
+							$result[$k] = iconv('utf-8', 'cp1251', $arr[0]->getContent());
 						}
 					}
 				}
@@ -303,19 +326,9 @@ class CatalogueSync implements ModuleInterface
 				{
 					if (is_numeric($k))
 					{
-						$result[$v] = $element[$v];
+						$k = $v;
 					}
-					else
-					{
-						if (is_array($v) && $v['to'])
-						{
-							$result[$v['to']] = $element[$k];
-						}
-						else
-						{
-							$result[$k] = $element[$k];
-						}
-					}
+					$result[$k] = iconv('utf-8', 'cp1251', $element[$v]);
 				}
 			}
 		}
@@ -323,7 +336,7 @@ class CatalogueSync implements ModuleInterface
 		return $result;
 	}
 
-	protected function getModelForKey($key)
+	public function getModelForKey($key)
 	{
 		$model = null;
 		$conf = &$this->getFieldConf($key);
@@ -332,6 +345,14 @@ class CatalogueSync implements ModuleInterface
 			if (!array_key_exists('cached_model', $conf))
 			{
 				$conf['cached_model'] = $this->constructModelForKey($key);
+				if (in_array('SyncModelInterface', class_implements($conf['cached_model'])))
+				{
+					$conf['custom_model'] = true;
+				}
+				elseif (!in_array('DBModel', class_parents($conf['cached_model'])) && get_class($conf['cached_model'] != 'DBModel'))
+				{
+					throw new JSException("Model for key '".$key."' should implement SyncModelInterface or be the instance of DBModel or its children");
+				}
 			}
 			$model = $conf['cached_model'];
 		}
@@ -344,7 +365,23 @@ class CatalogueSync implements ModuleInterface
 		$conf = $this->getFieldConf($key);
 		if ($conf && $conf['model'])
 		{
-			$model = DBModel::factory($conf['model']);
+			try
+			{
+				$model = DBModel::factory($conf['model']);
+			}
+			catch (JSException $e)
+			{
+				$className = $conf['model'];
+				if (Finder::findScript('classes', $className))
+				{
+					Finder::useClass($className);
+					$model = new $className();
+				}
+				else
+				{
+					throw $e;
+				}
+			}
 		}
 		return $model;
 	}
@@ -416,13 +453,19 @@ class CatalogueSync implements ModuleInterface
 
 	protected function closeLogFile()
 	{
-		fclose($this->logFileHandler);
+		if ($this->logFileHandler)
+		{
+			fclose($this->logFileHandler);
+		}
 	}
 
 	protected function writeToLog($string)
 	{
-		$string = date('d.m.Y H:i:s').' '.$string."\n";
-		fwrite($this->logFileHandler, $string);
+		if ($this->logFileHandler)
+		{
+			$string = date('d.m.Y H:i:s').' '.$string."\n";
+			fwrite($this->logFileHandler, $string);
+		}
 	}
 }
 ?>

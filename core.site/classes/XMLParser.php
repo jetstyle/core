@@ -9,6 +9,8 @@ class XMLParser
 	private $source = null;
 	private $pathStack = array();
 
+	private $encoding = "UTF-8";
+
 	private $observersStack = array(
 
 	);
@@ -32,6 +34,16 @@ class XMLParser
 	public function getSource()
 	{
 		return $this->source;
+	}
+
+	public function setEncoding($v)
+	{
+		$this->encoding = $v;
+	}
+
+	public function getEncoding()
+	{
+		return $this->encoding;
 	}
 
 	public function registerObserver($key, $tag, $action, $type = self::ITEM)
@@ -73,7 +85,7 @@ class XMLParser
 
 	public function parse()
 	{
-		$xml_parser = xml_parser_create("UTF-8");
+		$xml_parser = xml_parser_create($this->encoding);
 		xml_set_element_handler($xml_parser, array(&$this, "startElement"), array(&$this, "endElement"));
 		xml_set_character_data_handler($xml_parser, array(&$this, "elementContent"));
 		if (!($fp = fopen($this->getSource(), "r")))
@@ -353,6 +365,11 @@ class XMLParserNode implements ArrayAccess
 		{
 			return null;
 		}
+	}
+
+	public function getArray()
+	{
+		
 	}
 
 	// magic
