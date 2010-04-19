@@ -10,27 +10,6 @@
 
 {{!connect "jstree/tree_component.css"}}
 
-<div class="cms-list-advanced">
-  <!--
-  <div class="toolbar">
-    {{@blocks/help_link.html}}
-	{{__trash_switch}}
-  </div>
-  -->
-  
-	{{?__filter}}
-    <form action="" method="get" class="cms-body_tree_filters">
-      {{__filter}}
-    </form>
-  {{/?}}
-	<!--<a href="#" title="Показать/скрыть элементы управления" onclick="treeToggleControls(); return false;" style="float:right;"><img {{?tree_params.show_controls}}class="toggleEditTreeClass-Sel"{{/?}} src="{{images}}tree/npj_edit.gif" id="toggleEditImg"></a>-->
-
-	{{?tree_params.all_deleted}}
-		<div>Все узлы в дереве удалены. {{__trash_switch}}.</div>
-	{{/?}}
-
-	<div id="treeBox" {{?!tree_params.show_controls}}class="no-controls"{{/?}}></div>
-</div>
 
 <script language="javascript" type="text/javascript">
 	var treeControlsEnabled = {{?tree_params.show_controls}}true{{?:}}false{{/?}};
@@ -62,7 +41,14 @@
 			'source_url':  '{{tree_params.source_url}}',
 			'images_path' : '{{images}}jstree/',
 			'current_id' : '{{tree_params.current_id}}',
-			'ajax_auto_loading' : {{?tree_params.ajax_auto_loading}}true{{?:}}false{{/?}}
+			'ajax_auto_loading' : {{?tree_params.ajax_auto_loading}}true{{?:}}false{{/?}},
+                        {{?tree_params.edit_url}}
+                        'beforerename': function(NODE,LANG,TREE_OBJ){
+                                            var id = NODE.id.substr(5);
+                                            document.location.assign( "{{tree_params.edit_url}}?id="+id );
+                                            return false;
+                                    },
+                        {{/?}}
 		};
 		treeControl = new TreeControl(params);
 		treeControl.process();
@@ -91,3 +77,22 @@
 		//$.hotkeys.add('return', { disableInInput: true }, function() { tree.select_branch(); });
 	});
 </script>
+
+
+<div class="cms-list-advanced">
+        {{?__filter}}
+        <form action="" method="get" class="cms-body_tree_filters">
+          {{__filter}}
+        </form>
+        {{/?}}
+
+	{{?tree_params.all_deleted}}
+		<div>Все узлы в дереве удалены. {{__trash_switch}}.</div>
+	{{/?}}
+
+	<div id="treeBox" {{?!tree_params.show_controls}}class="no-controls"{{/?}}></div>
+</div>
+
+{{:sep}} 
+<br /><hr /><br />
+{{/:sep}}

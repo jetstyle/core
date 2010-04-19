@@ -14,26 +14,27 @@ class TreeSimple extends ListSimple  implements ModuleInterface
 	protected $rootId = 0;
 	protected $toRoot = array();
 
-    public function __construct( &$config )
+        public function __construct( &$config )
 	{
 		if (!$config['hide_buttons']) $config['hide_buttons'] = array();
                 
-        if (!isset($config['level_limit']))
-        {
-            $config['level_limit'] = 3;
-        }
+                if (!isset($config['level_limit']))
+                {
+                    $config['level_limit'] = 3;
+                }
         
-        if (!isset($config['redirectIfEmptyId']))
-        {
-            $config['redirectIfEmptyId'] = false;
-        }
+                if (!isset($config['redirectIfEmptyId']))
+                {
+                    $config['redirectIfEmptyId'] = false;
+                }
         
 		if (!isset($config['hide_buttons']['addChild']))
 		{
 			$config['hide_buttons']['addChild'][$config['level_limit']] = true;
 		}
 
-	    parent::__construct($config);
+                parent::__construct($config);
+               
 	}
 
 	public function handle()
@@ -90,10 +91,12 @@ class TreeSimple extends ListSimple  implements ModuleInterface
 					'source_url' => RequestInfo::hrefChange(RequestInfo::$baseUrl."do/".$this->config['module_path'], array('action' => 'json', $this->idGetVar => '', 'cid' => $this->id)),
 					'update_url' => RequestInfo::hrefChange(RequestInfo::$baseUrl."do/".$this->config['module_path'], array('action' => 'update')),
 					'ajax_auto_loading' => $this->config['ajaxAutoLoading'],
+                                        
 				);
+                                //var_dump($treeParams);
+                                // var_dump($treeParams);
 
-
-				$url = RequestInfo::hrefChange('', array('id' => ''));
+				$url = $this->config["go_url"] ? $this->config["go_url"] : RequestInfo::hrefChange('', array('id' => ''));
 				$pos = strpos($url, '?');
 				if ($pos !== false)
 				{
@@ -107,6 +110,9 @@ class TreeSimple extends ListSimple  implements ModuleInterface
 					$url .= '?';
 				}
 				$treeParams['go_url'] = $url;
+
+                                if ( $this->config['edit_module'] )
+                                    $treeParams['edit_url'] = RequestInfo::$baseUrl."do/".$this->config['edit_module'];// ? $this->config['edit_url'] : $treeParams['go_url'] ;
 
 				Finder::useClass('Json');
 				
@@ -154,13 +160,12 @@ class TreeSimple extends ListSimple  implements ModuleInterface
 					}
 				}
 
-				$this->getItem(2);
-
 				$treeParams['data'] = $this->toJSON();
 				$treeParams['level_limit'] = $this->config['level_limit'];
-
 				$treeParams['disable_drag'] = $this->config['disable_drag'] ? true : false;
-                                
+
+                                //var_dump($treeParams);
+                                //die();
 				$this->tpl->set('tree_params', $treeParams);
 				break;
 		}

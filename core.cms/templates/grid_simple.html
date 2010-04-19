@@ -1,0 +1,170 @@
+{{!connect "jquery.tablednd_0_5.js"}}
+
+<script type="text/javascript">
+$(document).ready(function() {
+    // Initialise the table
+    {{?order_dir}}
+    $(".b-catalogue-items-table").tableDnD({dragHandle: "b-catalogue-items-table_td-move", 
+                                            onDragClass: "dragging",
+                                            onDrop: function(table, row){
+                                                $.post(document.location.href+ "&"+$.tableDnD.serialize('id'), {"action": "reorder", "ajax_update": true}, function(){
+                                                
+                                                });
+                                            }
+    
+    });
+{{/?}}
+});
+</script>
+
+<span id="surface_profiles_order_result"></span>
+
+{{?count(Items)>1}}
+  <form action="" method="get" class="cms-body_tree_filters">
+    {{__filter}}
+  </form>
+{{?:}}
+  <p style="font-size: 80%;">Нет данных</p>
+{{/?}}
+
+<form class="b-catalogue-items-form" action="{{_add_new_href}}" method="post">
+  <input type="hidden" name="{{prefix}}update" value="1" />
+  {{?count(Items)>1}}
+    {{@:delete}}
+    {{@:save}}
+  {{/?}}
+  {{@:add_new}}
+  {{?count(Items)>1}}
+    <table id="orders" class="b-catalogue-items-table" cellspacing="0">
+      {{!for Items do=@:row}}
+    </table>
+  {{/?}}
+</form>
+
+{{:row}}
+  {{?for.i==1}}
+    <tr class="nodrop">
+      {{!for *cols do=@:thcol}}
+      <th class="b-catalogue-items-table_td-edit">&nbsp;</th>
+      <th class="b-catalogue-items-table_td-checkbox">&nbsp;</th>
+      <th class="b-catalogue-items-table_td-move">{{?order_dir}}<a href="{{order_href}}">По порядку<ins class="js-{{order_dir}}"></ins></a>{{?:}}<a href="{{order_href_default}}">По порядку</a>{{/?}}</th>
+    </tr>
+  {{?:}}
+    <tr id="{{*id}}" {{?*class}}class="{{*class}}"{{/?}}>
+      <!--<td><a href="{{*href}}">{{*title|strip_scape}}</a></td>-->        
+      {{!for *cols do=@:col id=*id}}
+      <td class="b-catalogue-items-table_td-edit">{{?for.i!=1}}<a href="{{/}}{{*href}}">редактировать</a>{{/?}}</td>
+      <td class="b-catalogue-items-table_td-checkbox">{{@:item_checkbox}}</td>
+      <td class="b-catalogue-items-table_td-move">{{?order_dir}}<div></div>{{/?}}</td>
+    </tr>
+  {{/?}}
+{{/:row}}
+
+{{:col}}
+<td {{?for.i==1}}class="b-catalogue-items-table_td-image"{{/?}}>{{@:cell}}</td>
+{{/:col}}
+
+{{:thcol}}
+  {{?for.i==1}}
+    <th class="b-catalogue-items-table_td-image">&nbsp;</th>
+  {{?:}}
+    <th>{{@:cell th="1"}}</th>
+  {{/?}}
+{{/:thcol}}
+
+{{:cell th}}
+  <a href="{{*href}}">{{*title}}{{?*dir}}<ins class="js-{{*dir}}"></ins>{{/?}}</a>
+{{/:cell}}
+
+{{:cell}}
+  {{?*href}}
+      <a href="{{/}}{{*href}}">{{*title}}</a>
+  {{?:*editable}}
+     <input class="text-input" value="{{*title}}" name="{{for.key}}[{{id}}]" />
+  {{?:}}
+      {{*title}}
+  {{/?}}
+{{/:cell}}
+
+{{TPL:add_new}}
+  <input class="b-catalogue-items-form_add" type="submit" value="{{_add_new_title}}" />
+{{/TPL:add_new}}
+
+{{TPL:delete}}
+  <input class="b-catalogue-items-form_delete" type="submit" value="{{_delete_title}}"  name="{{prefix}}delete"  onclick="return confirm('Удалить?');" />
+{{/TPL:delete}}
+
+{{TPL:save}}
+  <input class="b-catalogue-items-form_save" type="submit" value="Сохранить{{_save_title}}" />
+{{/TPL:save}}
+
+{{:item_checkbox}}
+  <input  type="checkbox" value="{{*id}}" name="selected_items[]" />
+{{/:item_checkbox}}
+
+
+<!--
+<script>
+  function getItems(action) {
+    var items = '';
+  	$('#left_col li input:checked').each(function() {
+     	items += this.value+',';
+    });
+    return items.substr(0, items.length-1);
+	}
+</script>
+
+{{?group_operations}}
+  {{!connect "jquery.js"}}
+  {{!connect "jquery.ui.js"}}
+  {{!connect "list_drugs.css"}}
+
+  <script language="JavaScript" type="text/javascript">
+      $(document).ready(function(){
+          $('#toggleGroupSelect').click(function(){
+			if ($('#left_col li input:checkbox:visible')[0]) {
+               	$('#left_col li input:checkbox').hide();
+               	$('#groupSelectActions').hide();
+			} else {
+				$('#left_col li input:checkbox').show();
+				$('#groupSelectActions').show();
+			}
+          	return false;
+		});
+		$('#groupSelectAll').click(function(){
+              if ($(this).attr('rel') == 'all') {
+                  $(this).find('img').attr('src', $(this).find('img').attr('src').replace('group_operations_all', 'group_operations_nothing'));
+                  $('#left_col li input:checkbox').attr('checked', 'checked');
+                  $(this).attr('rel', 'nothing');
+              } else {
+                  $(this).find('img').attr('src', $(this).find('img').attr('src').replace('group_operations_nothing', 'group_operations_all'))
+                  $('#left_col li input:checkbox').attr('checked', false);
+                  $(this).attr('rel', 'all');
+              }
+          	return false;
+		});
+		$('#groupDelete').click(function(){
+              if (confirm('Вы уверены что хотите удалить выбранное?')) {
+                  $.post('{{page_url}}', {
+                          'delete_list': getItems()
+                      }, function(data) {
+                          if (data != '1') alert(data); else window.location.reload(true);
+                      },'text'
+                  );
+              }
+              return false;
+		});
+		$('#groupRestore').click(function(){
+              $.post('{{page_url}}', {
+                  	'restore_list': getItems()
+                  }, function(data) {
+					if (data != '1') alert(data); else window.location.reload(true);
+	       		},'text'
+	       	);
+              return false;
+		});
+      });
+  </script>
+{{/?}}
+
+-->

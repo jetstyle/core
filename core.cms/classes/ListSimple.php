@@ -62,7 +62,7 @@ class ListSimple implements ModuleInterface
 	public function insert($postData=array())
 	{
 	}
-	public function update()
+	public function update($updateData = null)
 	{
 	}
 
@@ -105,9 +105,9 @@ class ListSimple implements ModuleInterface
 			else
 			{
 				$db->execute("
-                    UPDATE ??".$this->getModel()->getTableName()."
-                    SET _order = _order - 1
-                    WHERE _order > ".$sourceOrder." AND _order <= ".$destOrder
+                                    UPDATE ??".$this->getModel()->getTableName()."
+                                    SET _order = _order - 1
+                                    WHERE _order > ".$sourceOrder." AND _order <= ".$destOrder
 				);
 			}
 			$data = array('_order'=>$destOrder);

@@ -73,7 +73,7 @@ class FormSimple  implements ModuleInterface
 	public function setId($id)
 	{
 		$this->cleanUp();
-     	$this->id = $id;
+                $this->id = $id;
 	}
 
 	public function handle()

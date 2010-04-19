@@ -7,6 +7,7 @@ function TreeControl(params)
 {
 	this.params = params;
 	this.tree = null;
+
 }
 
 TreeControl.prototype = {
@@ -67,6 +68,9 @@ TreeControl.prototype = {
 		{
 			params['data']['json'] = this.params.data;
 		}
+                
+                if (this.params.beforerename)
+                    params.callback.beforerename = this.params.beforerename;
 
 		tree.init(this.params.cont, params);
 	},
