@@ -1,10 +1,7 @@
 {{!connect "custom.js"}}
 
-<table class="w100 cms-body" cellspacing="0">
-    <tr>
-	<td>
-	    <form action=''  method='post' name='{{__form_name}}' id='{{__form_name}}' enctype="multipart/form-data">
-		    <input type="hidden" name="MAX_FILE_SIZE" value="{{__max_file_size}}" />
+	    <form style="padding-top: 100px;" action=''  method='post' name='{{__form_name}}' id='{{__form_name}}' enctype="multipart/form-data">
+		    <input type="hidden" name="MAX_FILE_SIZE" value="41943040" />
 		    <input type="hidden" name="{{prefix}}update" value="1" />
 		    <input type="hidden" name="{{__form_name}}_url" value="{{ajax_url}}" />
 
@@ -12,10 +9,22 @@
 		    {{:hidden_field}}
 			<input type="hidden" name="{{prefix}}{{for.key}}" value="{{*}}" />
 		    {{/:hidden_field}}
+			
+		    <table cellspacing="0" cellpadding="0" class="quick-simple-form w100">
+				<tr>
+				  <td class="left">Путь до файла:</td>
+				  <td class="desc">
+					<input type="text" id="{{prefix}}source" name="{{prefix}}source" value="" class="w100" />
+					<br />
+					или
+				  </td>
+				</tr>
+				{{@blocks/file.html title="Файл" input="source_file" file=""}}
+			</table>
 
-		    
+			<div class="cms-form-buttons">
+				<input id="update_1" name="update_1" type="hidden">
+			    <input id="update_2" name="update_2" class="cms-save-but hand" type="submit" value="загрузить">
+			</div>
 
 	    </form>
-	</td>
-    </tr>
-</table>

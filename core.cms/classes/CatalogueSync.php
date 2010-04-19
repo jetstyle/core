@@ -24,67 +24,26 @@ class CatalogueSync implements ModuleInterface
 
 	public function handle()
 	{
-		$this->checkConfig();
-
-		$this->parseConfig();
-
 		if (defined('COMMAND_LINE') && COMMAND_LINE)
 		{
-			@set_time_limit(0);
-			@ignore_user_abort();
-
-			$this->openLogFile();
-			$this->writeToLog('start');
-
-			$downloadResult = false;
-
-			if ($this->isFileRemote())
-			{
-				$attempts = 0;
-				do
-				{
-					$downloadResult = $this->downloadFile();
-					$attempts++;
-				}
-				while (!$downloadResult && $attempts < $this->downloadAttempts);
-			}
-			else
-			{
-				$downloadResult = true;
-			}
-
-			if ($downloadResult)
-			{
-				if ($this->isFileRemote())
-				{
-					$this->parseFile($this->getLocalFilename());
-				}
-				else
-				{
-					$this->parseFile($this->getSourceFilename());
-				}
-			}
-			else
-			{
-				throw new JSException("Can't download file \"".$this->getSourceFilename()."\"");
-			}
-
-			$this->deleteOld();
-
-			foreach ($this->syncData AS $k => $v)
-			{
-				$conf = $this->getFieldConf($k);
-				if ($conf['tree'])
-				{
-					$model = $this->getModelForKey($k);
-					$model->rebuild();
-				}
-			}
-
-			$this->cleanup();
-			$this->writeToLog('finish');
-			$this->closeLogFile();
+			$this->startSync();
 			die('0');
+		}
+		else
+		{
+			if ($_POST[$this->prefix.'update'])
+			{
+				if (is_uploaded_file($_FILES[$this->prefix.'source_file']['tmp_name']))
+				{
+					$this->config['source'] = $_FILES[$this->prefix.'source_file']['tmp_name'];
+					$this->startSync();
+				}
+				elseif ($_POST[$this->prefix.'source'])
+				{
+					$this->config['source'] = $_POST[$this->prefix.'source'];
+					$this->startSync();
+				}
+			}
 		}
 	}
 
@@ -174,6 +133,67 @@ class CatalogueSync implements ModuleInterface
 	public function load()
 	{
 
+	}
+
+	protected function startSync()
+	{
+		$this->checkConfig();
+		$this->parseConfig();
+
+		@set_time_limit(0);
+		@ignore_user_abort(true);
+
+		$this->openLogFile();
+		$this->writeToLog('start');
+
+		$downloadResult = false;
+
+		if ($this->isFileRemote())
+		{
+			$attempts = 0;
+			do
+			{
+				$downloadResult = $this->downloadFile();
+				$attempts++;
+			}
+			while (!$downloadResult && $attempts < $this->downloadAttempts);
+		}
+		else
+		{
+			$downloadResult = true;
+		}
+
+		if ($downloadResult)
+		{
+			if ($this->isFileRemote())
+			{
+				$this->parseFile($this->getLocalFilename());
+			}
+			else
+			{
+				$this->parseFile($this->getSourceFilename());
+			}
+		}
+		else
+		{
+			throw new JSException("Can't download file \"".$this->getSourceFilename()."\"");
+		}
+
+		$this->deleteOld();
+
+		foreach ($this->syncData AS $k => $v)
+		{
+			$conf = $this->getFieldConf($k);
+			if ($conf['tree'])
+			{
+				$model = $this->getModelForKey($k);
+				$model->rebuild();
+			}
+		}
+
+		$this->cleanup();
+		$this->writeToLog('finish');
+		$this->closeLogFile();
 	}
 
 	protected function downloadFile()
