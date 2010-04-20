@@ -15,6 +15,11 @@
 
 	    {{?iframe}}
 		<div style="overflow-x: hidden; overflow-y: auto; " id="iframe_div"><!--height: {{iframe.height}}-->
+            {{?:top_buttons}}
+                <div class="cms-form-buttons">
+                    {{_save_button}} {{_delete_button}}
+                </div>
+                <br /><br />
 	    {{/?}}
 
 	    {{!!form_simple}}

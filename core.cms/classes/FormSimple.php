@@ -148,6 +148,7 @@ class FormSimple  implements ModuleInterface
 
 		$tpl->set( 'prefix', $this->prefix );
 		$tpl->set( '__form_name', $this->prefix.'_simple_form' );
+                $tpl->set( 'top_buttons', $this->config["top_buttons"] );
 
 		if ($this->insert_fields)
 		{
