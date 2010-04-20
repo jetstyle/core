@@ -16,5 +16,10 @@ class MenuCmsBlock extends MenuBlock
 		}
 		return false;
 	}	
+        
+        public function markItem(&$model, &$row)
+	{
+                parent::markItem($model, $row);
+        }
 }
 ?>
