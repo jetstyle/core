@@ -497,13 +497,14 @@ class FormSimple  implements ModuleInterface
                                 $data[$r[$conf['fk']]] = ($r['_level'] ? str_repeat("&nbsp;&nbsp;", $r['_level']-1) : ""). $r['title'];
                         }
 
-                         $render = array(
+                        $render = array(
                             'values' => $data,
                             'default' => $conf['default'],
                         );
+
+                        //var_dump( $conf );
                         
                         $this->config['render']['select'][$conf['pk']] = @array_merge( $this->config['render']['select'][$conf['pk']], $render );
-                        //var_dump( $this->config['render']['select'] );
                     }
                 }
 	}
