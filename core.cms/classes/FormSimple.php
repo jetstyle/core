@@ -408,21 +408,24 @@ class FormSimple  implements ModuleInterface
 
     protected function constructModel()
     {
-		if (!$this->config['model'])
+        if (!$this->config['model'])
         {
             throw new JSException("You should set `model` param in config");
         }
 
         Finder::useModel('DBModel');
         $model = DBModel::factory($this->config['model']);
-
-		foreach($model->getForeignFields() AS $field => $conf)
+        $ffields = $model->getForeignFields();
+	foreach($ffields AS $field => $conf)
+	{
+		if ($conf['type'] == 'has_one' && $conf['pk'])
 		{
-			if ($conf['type'] == 'has_one' && $conf['pk'])
-			{
-				$model->addField($conf['pk']);
-			}
+			$model->addField($conf['pk']);
+                       // var_dump("default_".$field);
+                       // if ( $this->config["default_".$field] )
+                       //     $ffields[ $field ]["default"] = 'xxx';
 		}
+	}
 
         return $model;
     }
@@ -494,10 +497,13 @@ class FormSimple  implements ModuleInterface
                                 $data[$r[$conf['fk']]] = ($r['_level'] ? str_repeat("&nbsp;&nbsp;", $r['_level']-1) : ""). $r['title'];
                         }
 
-                        $this->config['render']['select'][$conf['pk']] = array(
+                         $render = array(
                             'values' => $data,
                             'default' => $conf['default'],
                         );
+                        
+                        $this->config['render']['select'][$conf['pk']] = array_merge( $this->config['render']['select'][$conf['pk']], $render );
+                        var_dump( $this->config['render']['select'] );
                     }
                 }
 	}

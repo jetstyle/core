@@ -27,13 +27,13 @@ $(document).ready(function() {
   <p style="font-size: 80%;">Нет данных</p>
 {{/?}}
 
-<form class="b-catalogue-items-form" action="{{_add_new_href}}" method="post">
+<form class="b-catalogue-items-form" action="" method="post">
   <input type="hidden" name="{{prefix}}update" value="1" />
   {{?count(Items)>1}}
     {{@:delete}}
     {{@:save}}
   {{/?}}
-  {{@:add_new}}
+  <a href="{{_add_new_href}}"> {{@:add_new}} </a>
   {{?count(Items)>1}}
     <table id="orders" class="b-catalogue-items-table" cellspacing="0">
       {{!for Items do=@:row}}
