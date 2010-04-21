@@ -19,6 +19,10 @@ $(document).ready(function() {
 
 <span id="surface_profiles_order_result"></span>
 
+<form action="" method="get" class="cms-body_tree_filters">
+    {{__filter}}
+</form>
+<!--
 {{?count(Items)>1}}
   <form action="" method="get" class="cms-body_tree_filters">
     {{__filter}}
@@ -26,6 +30,7 @@ $(document).ready(function() {
 {{?:}}
   <p style="font-size: 80%;">Нет данных</p>
 {{/?}}
+-->
 
 <form class="b-catalogue-items-form" action="" method="post">
   <input type="hidden" name="{{prefix}}update" value="1" />
@@ -39,6 +44,14 @@ $(document).ready(function() {
       {{!for Items do=@:row}}
     </table>
   {{/?}}
+  
+  {{?count(Items)>1}}
+    <br />
+    {{@:delete}}
+    {{@:save}}
+    <a href="{{_add_new_href}}"> {{@:add_new}} </a>
+  {{/?}}
+  
 </form>
 
 {{:row}}

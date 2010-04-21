@@ -530,12 +530,14 @@ class FormSimple  implements ModuleInterface
 
                         $render = array(
                             'values' => $data,
-                            'default' => $conf['default'],
                         );
-
-                        //var_dump( $conf );
+                        
+                        if ( $conf['default'] )
+                            $render['default'] = $conf['default'];
                         
                         $this->config['render']['select'][$conf['pk']] = @array_merge( $this->config['render']['select'][$conf['pk']], $render );
+                        
+                        //var_dump( $this->config['render']['select'][$conf['pk']] );
                     }
                 }
 	}
