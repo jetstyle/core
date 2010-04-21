@@ -24,5 +24,10 @@ interface SyncModelInterface {
 	 * @param int $usn
 	 */
 	public function deleteOutdated($usn);
+
+	/**
+	 *
+	 */
+	public function deleteSyncedItems();
 }
 ?>

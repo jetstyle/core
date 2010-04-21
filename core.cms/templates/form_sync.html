@@ -1,8 +1,14 @@
 {{!connect "custom.js"}}
 
-	    <form style="padding-top: 100px;" action=''  method='post' name='{{__form_name}}' id='{{__form_name}}' enctype="multipart/form-data">
+<div style="padding-top: 100px;">
+
+	<div>
+		Запуск из командной строки: php scripts/cli.php {{cron_line}}
+		<br /><br />
+	</div>
+
+	    <form  action=''  method='post' name='{{__form_name}}' id='{{__form_name}}' enctype="multipart/form-data">
 		    <input type="hidden" name="MAX_FILE_SIZE" value="41943040" />
-		    <input type="hidden" name="{{prefix}}update" value="1" />
 		    <input type="hidden" name="{{__form_name}}_url" value="{{ajax_url}}" />
 
 		    {{!for hidden_fields do=@:hidden_field}}
@@ -14,17 +20,19 @@
 				<tr>
 				  <td class="left">Путь до файла:</td>
 				  <td class="desc">
-					<input type="text" id="{{prefix}}source" name="{{prefix}}source" value="" class="w100" />
+					<input type="text" id="{{prefix}}source" name="{{prefix}}source" value="{{!config_get 'sync_source'}}" class="w100" />
 					<br />
-					или
+					<span>{{?source_filename}}По-умолчанию файл берется из {{source_filename}}{{/?}}</span>
+	
 				  </td>
 				</tr>
 				{{@blocks/file.html title="Файл" input="source_file" file=""}}
 			</table>
 
 			<div class="cms-form-buttons">
-				<input id="update_1" name="update_1" type="hidden">
-			    <input id="update_2" name="update_2" class="cms-save-but hand" type="submit" value="загрузить">
+			    <input id="update_2" name="{{prefix}}update" class="cms-save-but hand" type="submit" value="загрузить">
+				<input type="submit" class="cms-delete-but hand" name="{{prefix}}delete" value="Очистить" onclick="return confirm('Все ранее импортированные данные будут удалены. Продолжить?');">
 			</div>
 
 	    </form>
+</div>

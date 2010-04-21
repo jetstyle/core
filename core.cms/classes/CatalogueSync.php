@@ -26,11 +26,31 @@ class CatalogueSync implements ModuleInterface
 	{
 		if (defined('COMMAND_LINE') && COMMAND_LINE)
 		{
+			if (defined('COMMAND_LINE_PARAMS') && COMMAND_LINE_PARAMS)
+			{
+				$params = unserialize(COMMAND_LINE_PARAMS);
+				if ($params[0])
+				{
+					if ($params[0] == 'cleanup')
+					{
+						$this->delete();
+						die();
+					}
+					else
+					{
+						$this->config['source'] = $params[0];
+					}
+				}
+			}
+
 			$this->startSync();
 			die('0');
 		}
 		else
 		{
+			Locator::get('tpl')->set('source_filename', $this->getSourceFilename());
+			Locator::get('tpl')->set('cron_line', Config::get('app_name').'/Do/'.$this->config['module_path']);
+
 			if ($_POST[$this->prefix.'update'])
 			{
 				if (is_uploaded_file($_FILES[$this->prefix.'source_file']['tmp_name']))
@@ -42,7 +62,16 @@ class CatalogueSync implements ModuleInterface
 				{
 					$this->config['source'] = $_POST[$this->prefix.'source'];
 					$this->startSync();
+					Locator::get('db')->query("UPDATE ??config SET value = ".Locator::get('db')->quote($_POST[$this->prefix.'source'])." WHERE name = 'sync_source'");
 				}
+				elseif ($this->config['source'])
+				{
+					$this->startSync();
+				}
+			}
+			elseif ($_POST[$this->prefix.'delete'])
+			{
+				$this->delete();
 			}
 		}
 	}
@@ -158,7 +187,7 @@ class CatalogueSync implements ModuleInterface
 			}
 			while (!$downloadResult && $attempts < $this->downloadAttempts);
 		}
-		else
+		else if ($this->isFileExists())
 		{
 			$downloadResult = true;
 		}
@@ -176,7 +205,7 @@ class CatalogueSync implements ModuleInterface
 		}
 		else
 		{
-			throw new JSException("Can't download file \"".$this->getSourceFilename()."\"");
+			throw new JSException("Can't get file \"".$this->getSourceFilename()."\"");
 		}
 
 		$this->deleteOld();
@@ -191,7 +220,6 @@ class CatalogueSync implements ModuleInterface
 			}
 		}
 
-		$this->cleanup();
 		$this->writeToLog('finish');
 		$this->closeLogFile();
 	}
@@ -236,7 +264,7 @@ class CatalogueSync implements ModuleInterface
 	{
 		foreach ($this->syncData AS $k => $v)
 		{
-			$conf = $this->getFieldConf($k);
+			$conf = &$this->getFieldConf($k);
 			if ($conf && !$conf['keep_old'])
 			{
 				$model = $this->getModelForKey($k);
@@ -305,9 +333,23 @@ class CatalogueSync implements ModuleInterface
 		$parser->parse();
 	}
 
-	protected function cleanup()
+	protected function delete()
 	{
+		$this->parseConfig();
+		foreach ($this->syncData AS $k => $v)
+		{
+			$model = $this->getModelForKey($k);
+			$conf = &$this->getFieldConf($k);
 
+			if ($conf['custom_model'])
+			{
+				$model->deleteSyncedItems();
+			}
+			else
+			{
+				$model->clean(true);
+			}
+		}
 	}
 
 	protected function prepareElement($key, $element)
@@ -434,6 +476,11 @@ class CatalogueSync implements ModuleInterface
 		}
 
 		return $result;
+	}
+
+	protected function isFileExists()
+	{
+		return file_exists($this->getSourceFilename());
 	}
 
 	protected function checkConfig()
