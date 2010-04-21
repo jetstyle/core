@@ -495,7 +495,8 @@ class FormSimple  implements ModuleInterface
                         foreach ($this->config['render']['select'] as $name => $params)
                         {
                             $str = '';
-                            foreach(@$params['values'] as $id => $val)
+                            if ($params['values'])
+                            foreach($params['values'] as $id => $val)
                             {
                                     $str .= "<option value='".$id."' ".(($item["id"] && $item[$name]==$id) || (!$item["id"] && $id==$params['default']) ? "selected=\"selected\"" : '' ).">".$val;
                             }
