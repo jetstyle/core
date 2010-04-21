@@ -87,84 +87,18 @@ $(document).ready(function() {
 {{/:cell}}
 
 {{TPL:add_new}}
-  <input class="b-catalogue-items-form_add" type="submit" value="{{_add_new_title}}" />
+  <input class="b-catalogue-items-form_add cms-insert-but" type="submit" value="{{_add_new_title}}" />
 {{/TPL:add_new}}
 
 {{TPL:delete}}
-  <input class="b-catalogue-items-form_delete" type="submit" value="{{_delete_title}}"  name="{{prefix}}delete"  onclick="return confirm('Удалить?');" />
+  <input class="b-catalogue-items-form_delete cms-delete-but" type="submit" value="{{_delete_title}}"  name="{{prefix}}delete"  onclick="return confirm('Удалить?');" />
 {{/TPL:delete}}
 
 {{TPL:save}}
-  <input class="b-catalogue-items-form_save" type="submit" value="Сохранить{{_save_title}}" />
+  <input class="b-catalogue-items-form_save cms-save-but" type="submit" value="Сохранить{{_save_title}}" />
 {{/TPL:save}}
 
 {{:item_checkbox}}
   <input  type="checkbox" value="{{*id}}" name="selected_items[]" />
 {{/:item_checkbox}}
 
-
-<!--
-<script>
-  function getItems(action) {
-    var items = '';
-  	$('#left_col li input:checked').each(function() {
-     	items += this.value+',';
-    });
-    return items.substr(0, items.length-1);
-	}
-</script>
-
-{{?group_operations}}
-  {{!connect "jquery.js"}}
-  {{!connect "jquery.ui.js"}}
-  {{!connect "list_drugs.css"}}
-
-  <script language="JavaScript" type="text/javascript">
-      $(document).ready(function(){
-          $('#toggleGroupSelect').click(function(){
-			if ($('#left_col li input:checkbox:visible')[0]) {
-               	$('#left_col li input:checkbox').hide();
-               	$('#groupSelectActions').hide();
-			} else {
-				$('#left_col li input:checkbox').show();
-				$('#groupSelectActions').show();
-			}
-          	return false;
-		});
-		$('#groupSelectAll').click(function(){
-              if ($(this).attr('rel') == 'all') {
-                  $(this).find('img').attr('src', $(this).find('img').attr('src').replace('group_operations_all', 'group_operations_nothing'));
-                  $('#left_col li input:checkbox').attr('checked', 'checked');
-                  $(this).attr('rel', 'nothing');
-              } else {
-                  $(this).find('img').attr('src', $(this).find('img').attr('src').replace('group_operations_nothing', 'group_operations_all'))
-                  $('#left_col li input:checkbox').attr('checked', false);
-                  $(this).attr('rel', 'all');
-              }
-          	return false;
-		});
-		$('#groupDelete').click(function(){
-              if (confirm('Вы уверены что хотите удалить выбранное?')) {
-                  $.post('{{page_url}}', {
-                          'delete_list': getItems()
-                      }, function(data) {
-                          if (data != '1') alert(data); else window.location.reload(true);
-                      },'text'
-                  );
-              }
-              return false;
-		});
-		$('#groupRestore').click(function(){
-              $.post('{{page_url}}', {
-                  	'restore_list': getItems()
-                  }, function(data) {
-					if (data != '1') alert(data); else window.location.reload(true);
-	       		},'text'
-	       	);
-              return false;
-		});
-      });
-  </script>
-{{/?}}
-
--->

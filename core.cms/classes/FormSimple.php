@@ -68,6 +68,10 @@ class FormSimple  implements ModuleInterface
 		}
 
 		$this->id = intval(RequestInfo::get( $this->idGetVar));
+                
+                
+                if (isset($this->config["buttons"]))
+                    $this->config["buttons"] = array_flip($this->config["buttons"]);
 	}
 
 	public function setId($id)
@@ -125,7 +129,18 @@ class FormSimple  implements ModuleInterface
 		if ($redirect)
 		{
 			$this->_redirect = RequestInfo::hrefChange('', array('rnd' => mt_rand(1,255)));
-			
+                        
+                        //go to new form
+                        if ($_POST[$this->prefix."post_action"] == 2)
+                        {
+                            $this->_redirect = $this->getAddNewHref();
+                        }
+                        else if ( $_POST[$this->prefix."post_action"] == 1 )
+                        {
+                            $this->_redirect = $this->getExitHref();
+                        }
+                        
+			//var_dump($_POST[$this->prefix."post_action"], $this->_redirect);die();
 			if ($this->stop_redirect)
 			{
 				$this->redirect = $this->_redirect;
@@ -148,7 +163,6 @@ class FormSimple  implements ModuleInterface
 
 		$tpl->set( 'prefix', $this->prefix );
 		$tpl->set( '__form_name', $this->prefix.'_simple_form' );
-                $tpl->set( 'top_buttons', $this->config["top_buttons"] );
 
 		if ($this->insert_fields)
 		{
@@ -164,6 +178,11 @@ class FormSimple  implements ModuleInterface
 		}
 
 		$tpl->set('___form', $this->getFieldsHtml());
+
+
+
+                Locator::get('tpl')->set( '_add_new_href', $this->getAddNewHref() );
+                
 		$this->renderButtons();
 		$result = $tpl->parse($this->template);
 
@@ -332,10 +351,10 @@ class FormSimple  implements ModuleInterface
 	}
 	
 	public function addNew($data)
-    {
-        $id = $this->insert($data);
-        return $id;
-    }
+        {
+            $id = $this->insert($data);
+            return $id;
+        }
 
 	protected function cleanUp()
 	{
@@ -382,6 +401,16 @@ class FormSimple  implements ModuleInterface
 			{
 				$tpl->parse( $this->template.':save_button'.( $this->config['ajax_save'] ? '_norefresh' : ''), '_save_button' );
 			}
+                        
+                        
+                    
+                        if( isset( $this->config["buttons"]["save_select"] ) )
+                            $tpl->parse( $this->template.':save_select', '_save_button', 1 );
+                            
+                        if( isset( $this->config["buttons"]["insert"] ) )
+                            $tpl->parse( $this->template.':insert_button', '_insert_button', 1 );
+                            
+                        $tpl->set( 'top_buttons', isset( $this->config["buttons"]["top_buttons"] ) );
 		}
 
 		if($this->config['send_button'] && $this->id  && $item['_state'] == 0)
@@ -654,7 +683,7 @@ class FormSimple  implements ModuleInterface
 
 				if ($this->config['supertag_path_check'])
 				{
-                    $item = DBModel::factory($this->config['model'])->setFields(array('_parent'))->loadOne('{id} = '.intval($this->id));
+                                        $item = DBModel::factory($this->config['model'])->setFields(array('_parent'))->loadOne('{id} = '.intval($this->id));
 					$where .= ' AND _parent = '.intval($item['_parent']);
 				}
 
@@ -693,5 +722,23 @@ class FormSimple  implements ModuleInterface
 			return $list->getObj();
 		}
 	}	
+        
+        private function getAddNewHref(){
+                $href_params = array($this->idGetVar => '', '_new' => 1);
+                if ($this->item && $this->item["rubric_id"])
+                    $href_params['rubric_id'] = $this->item["rubric_id"];
+                
+                $ret = RequestInfo::hrefChange( $this->config['add_new_href']  ? RequestInfo::$baseUrl."do/".$this->config['add_new_href'] : "", $href_params);
+                return $ret;
+        }
+        
+        private function getExitHref(){
+                $href_params = array($this->idGetVar => '', '_new' => '');
+                if ($this->item && $this->item["rubric_id"])
+                    $href_params[ $this->idGetVar ] = $this->item["rubric_id"];
+                
+                $ret = RequestInfo::hrefChange( $this->config['exit_module']  ? RequestInfo::$baseUrl."do/".$this->config['exit_module'] : "", $href_params);
+                return $ret;
+        }
 }
 ?>

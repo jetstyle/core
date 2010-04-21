@@ -17,7 +17,7 @@
 		<div style="overflow-x: hidden; overflow-y: auto; " id="iframe_div"><!--height: {{iframe.height}}-->
             {{?:top_buttons}}
                 <div class="cms-form-buttons">
-                    {{_save_button}} {{_delete_button}}
+                    {{_insert_button}} {{_save_button}} {{_delete_button}}
                 </div>
                 <br /><br />
 	    {{/?}}
@@ -38,21 +38,33 @@
 
 		    {{:save_button}}
 			    <input id="update_1" name="update_1" type="hidden">
-			    <input id="update_2" name="update_2" class="cms-save-but hand" type="submit" value="сохранить/обновить">
+			    <input id="update_2" name="update_2" class="cms-save-but hand" type="submit" value="Сохранить">
 		    {{/:save_button}}
+                    
+                    {{:save_select}}
+                            <select name="{{prefix}}post_action">
+                                <option value="0">и продолжить</option>
+                                <option value="1">и выйти</option>
+                                <option value="2">и добавить</option>
+                            </select>
+		    {{/:save_select}}
+
+		    {{:insert_button}}
+			    <a href="{{_add_new_href}}"><input name="{{prefix}}insert" class="cms-insert-but hand" type="submit" value="Добавить"  ></a>
+		    {{/:insert_button}}
 
 		    {{:restore_button}}
-			    <input name="{{prefix}}restore" class="cms-save-but hand" type="submit" value="восстановить">
+			    <input name="{{prefix}}restore" class="cms-save-but hand" type="submit" value="Восстановить">
 		    {{/:restore_button}}
 
-		    {{_save_button}}
+		    
 
 		    {{:send_button}}
-			    <input name="{{prefix}}send" class="cms-save-but hand" type="submit" value="отправить">
+			    <input name="{{prefix}}send" class="cms-save-but hand" type="submit" value="Отправить">
 		    {{/:send_button}}
 
 		    {{:send_button_disabled}}
-			    <input name="{{prefix}}send" class="cms-save-but hand" type="submit" disabled="disabled" value="отправлено">
+			    <input name="{{prefix}}send" class="cms-save-but hand" type="submit" disabled="disabled" value="Отправлено">
 		    {{/:send_button_disabled}}
 
 		    {{_send_button}}
@@ -61,7 +73,7 @@
 			    <input type="submit" class="cms-delete-but hand" name="{{prefix}}delete" value="{{__delete_title}}" onclick="return confirm('{{__delete_title}}?');">
 		    {{/:delete_button}}
 
-		    {{_delete_button}}
+		    {{_insert_button}} {{_save_button}} {{_delete_button}}
 	    </div>
 	    {{?iframe}}
 		</div>
