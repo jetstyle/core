@@ -2,8 +2,12 @@
 	<a href="#" id="gotolink" class='underline-dashed'>На сайт</span></a>
 	<ul class="gotomenu invis" id="gotomenu">
 		{{!for * do=@:goToLiItem}}
+                {{:goToLiItem *separator}}
+		    <li><hr /></li>
+		{{/:goToLiItem}}
+                
 		{{:goToLiItem}}
-		    <li><a target="_blank" title="Откроется в новом окне" href="{{fe_/}}{{*path}}">{{*title}}</a></li>
+		    <li><a target="_blank" title="Откроется в новом окне" href="{{fe_/}}{{*_path}}">{{*title}}</a></li>
 		{{/:goToLiItem}}
 	</ul>	
 	<script language="javascript">
