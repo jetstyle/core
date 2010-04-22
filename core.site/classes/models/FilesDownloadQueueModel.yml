@@ -1,0 +1,12 @@
+default:
+    table: files_download_queue
+    fields:
+        - id
+        - link
+        - item_id
+        - file_config
+        - _state
+        
+    order: 
+        _created: DESC
+
