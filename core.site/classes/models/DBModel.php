@@ -305,6 +305,7 @@ class DBModel extends Model implements IteratorAggregate, ArrayAccess, Countable
 		{
 			foreach ($this->foreignModels AS &$model)
 			{
+                            if( $model )
 				$model->cleanUp();
 			}
 		}

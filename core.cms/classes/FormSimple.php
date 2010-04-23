@@ -514,6 +514,7 @@ class FormSimple  implements ModuleInterface
 
 		foreach($model->getForeignFields() AS $fieldName => $conf)
                 {
+                    
                     if (is_array($conf) && $conf['type'] == 'has_one')
                     {
                         $foreignModel = clone $model->getForeignModel($fieldName);
@@ -541,7 +542,7 @@ class FormSimple  implements ModuleInterface
                             $this->config['render']['select'][$conf['pk']] = array_merge( $this->config['render']['select'][$conf['pk']], $render );
                         else
                             $this->config['render']['select'][$conf['pk']] = $render;
-                        //var_dump( $this->config['render']['select'][$conf['pk']] );
+
                     }
                 }
 	}

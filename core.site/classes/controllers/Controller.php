@@ -341,17 +341,21 @@ abstract class Controller implements ArrayAccess
 		$colors = array();
 		foreach ($config as $name => $value)
 		{
+                /*
 			if (strpos($name, 'colors_') === 0)
 			{
 				$colors[str_replace('colors_', '', $name)] = $value;
 			}
-			else if (strpos($name, 'grid_') === 0)
+                        */
+			if (strpos($name, 'grid_') === 0)
 			{
 				$grid[str_replace('grid_', '', $name)] = $value;
 			}
 		}
+                
+                //var_dump($config["scheme_id"]);
 
-		$view = array("colors"=> $colors,
+		$view = array("colors"=> $config["scheme_id"],
 		              "grid"  => $grid,
                               "header_bg_repeat" => Config::get('header_bg_repeat'));
 

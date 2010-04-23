@@ -128,11 +128,14 @@ final class Config
 	public static function loadFromDb($tableName)
 	{
 		$db = &Locator::get('db');
-		$result = $db->execute("SELECT name, value FROM ".$tableName." WHERE _state = 0");
+		$result = $db->execute("SELECT name, value, value_pre, is_scheme FROM ".$tableName." WHERE _state = 0");
 		
 		while ($r = $db->getRow($result))
 		{
-			self::$data[$r['name']] = $r['value'];
+                        if ($r['is_scheme'])
+                            self::$data[$r['name']] = unserialize($r['value_pre']);
+                        else
+                            self::$data[$r['name']] = $r['value'];
 		}
 		
 		return true;
