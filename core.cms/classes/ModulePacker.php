@@ -8,6 +8,8 @@
  *
  * @author lunatic <lunatic@jetstyle.ru>
  */
+
+Finder::useModel('DBModel');
 class ModulePacker
 {
 	protected $db = null;
