@@ -81,6 +81,8 @@ class DoController extends Controller
 		Finder::useClass("ModulePacker");
 		$modulePacker = new ModulePacker();
 		$modulePacker->pack();
+
+		die('0');
 	}
 
 	public function url_to($cls=NULL, $item=NULL)

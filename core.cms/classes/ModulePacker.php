@@ -15,8 +15,9 @@ class ModulePacker
 
 	public function __construct()
 	{
-		$this->db = &Locator::get('db');
+		$this->db = Locator::get('db');
 		Finder::useClass('ModuleConfig');
+		Finder::useClass('ModuleConstructor');
 		Finder::useClass('sql/SqlDump');
 		$this->sqlDumper = new SqlDump();
 	}
@@ -32,7 +33,7 @@ class ModulePacker
 	{
 		if (null === $moduleName)
 		{
-			$modules = $this->getModulesList();
+			$modules = ModuleConstructor::getModulesList();
 		}
 		else
 		{
@@ -45,9 +46,9 @@ class ModulePacker
 		}
 	}
 
-	protected function packModule($moduleDir)
+	protected function packModule($moduleName)
 	{
-		$moduleDir = Config::get('app_dir').'modules/'.$moduleDir;
+		$moduleDir = Config::get('app_dir').'modules/'.$moduleName;
 
 		if (!file_exists($moduleDir) || !file_exists($moduleDir.'/.meta'))
 		{
@@ -67,7 +68,7 @@ class ModulePacker
 		}
 		else
 		{
-			$tables = $this->getTables($moduleDir);
+			$tables = $this->getTables($moduleName);
 		}
 		
 		if (is_array($tables) && !empty($tables))
@@ -140,44 +141,31 @@ class ModulePacker
 	 *
 	 * @param string $moduleDir
 	 */
-	protected function getTables($moduleDir, $configName = 'defs')
+	protected function getTables($moduleName)
 	{
-		$result = array();
-		
-		$config = new ModuleConfig();
-		$config->read($moduleDir.'/'.$configName.'.php');
-
-		$wrapped = $config->get('WRAPPED');
-
-		if (is_array($wrapped) && !empty($wrapped))
-		{
-			foreach ($wrapped AS $wrap)
-			{
-				$result = array_merge($result, $this->getTables($moduleDir, $wrap));
-			}
-		}
-		elseif ($tableName = $config->get('table_name'))
-		{
-			$result[] = $tableName;
-		}
-
+		$module = ModuleConstructor::factory($moduleName);		
+		$result = $this->getTablesRecursive($module);
 		return array_unique($result);
 	}
 
-	protected function getModulesList()
+	protected function getTablesRecursive($module)
 	{
 		$result = array();
+		$config = $module->getConfig();
 		
-		if ($handle = opendir(Config::get('app_dir').'modules')) 
+		if (is_array($config) && $config['renderable'] && $config['model'])
 		{
-		    while (false !== ($file = readdir($handle))) 
+			$model = DBModel::factory($config['model']);
+			$result[] = $model->getTableName();
+		}
+		
+		$children = $module->getChildren();
+		if (is_array($children))
+		{
+		    foreach ($children AS $child)
 		    {
-		        if ($file != "." && $file != "..") 
-		        {
-		            $result[] = $file;
-		        }
+		        $result = array_merge($result, $this->getTablesRecursive($child));
 		    }
-		    closedir($handle);
 		}
 		
 		return $result;
