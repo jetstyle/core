@@ -230,7 +230,10 @@ class ModuleConstructor
 	{
                 if ($this->moduleTitle)
                     return $this->moduleTitle;
-        
+                
+                if ( $this->config["module_title"] )
+                    return $this->config["module_title"];
+
 		$sql = "SELECT title FROM ??toolbar WHERE href=".Locator::get('db')->quote( $this->modulePath ) ;
 		$current = Locator::get('db')->queryOne($sql);
                 
