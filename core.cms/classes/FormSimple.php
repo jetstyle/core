@@ -405,7 +405,7 @@ class FormSimple  implements ModuleInterface
                         
                     
                         if( isset( $this->config["buttons"]["save_select"] ) )
-                            $tpl->parse( $this->template.':save_select', '_save_button', 1 );
+                            $tpl->parse( $this->template.':save_select', '_save_button' );
                             
                         if( isset( $this->config["buttons"]["insert"] ) )
                             $tpl->parse( $this->template.':insert_button', '_insert_button', 1 );

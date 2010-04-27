@@ -42,10 +42,12 @@
 		    {{/:save_button}}
                     
                     {{:save_select}}
+                            <input id="update_1" name="update_1" type="hidden">
+			    <input id="update_2" name="update_2" class="cms-save-but hand" type="submit" value="Сохранить и">
                             <select name="{{prefix}}post_action">
-                                <option value="0">и продолжить</option>
-                                <option value="1">и выйти</option>
-                                <option value="2">и добавить</option>
+                                <option value="0">продолжить</option>
+                                <option value="1">выйти</option>
+                                <option value="2">добавить</option>
                             </select>
 		    {{/:save_select}}
 
