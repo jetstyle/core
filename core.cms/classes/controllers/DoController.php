@@ -23,6 +23,9 @@ class DoController extends Controller
 
 	function handle()
 	{
+                if ($_GET["hide_toolbar"])
+                    Locator::get("tpl")->set("hide_toolbar", 1);
+        
 		if ((!defined('COMMAND_LINE') || !COMMAND_LINE) && !Locator::get('principal')->security('noguests'))
 		{
 			Controller::deny();
