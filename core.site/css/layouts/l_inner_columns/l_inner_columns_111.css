@@ -2,7 +2,7 @@
   clear: both; width: 100%; overflow: hidden;
   }
   .l-inner-columns-111__col-1, .l-inner-columns-111__col-2, .l-inner-columns-111__col-3 {
-    float: left; width: 33.3333%;
+    float: left; width: 33.3333%; overflow: hidden;
     }
   .l-inner-columns-111__col-1 {
     //margin-right: -100%;

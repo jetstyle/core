@@ -3,7 +3,7 @@
   background: gray;
   }
   .l-inner-columns-31__col-1, .l-inner-columns-31__col-2 {
-    float: left;
+    float: left; overflow: hidden;
     }
   .l-inner-columns-31__col-1 {
     width: 75%; //margin-right: -100%;
