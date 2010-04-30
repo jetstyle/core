@@ -76,8 +76,8 @@ class DBAL_mysql
         $ret = implode (",", $ret);
         return $ret;
      }
-     else if (is_numeric($value))
-        return $value;
+     //else if (is_numeric($value))
+       // return $value;
      else
         return "'".mysql_escape_string($value)."'"; 
     }
