@@ -53,9 +53,9 @@ class Inflector {
      *  @return string  Plural of $word
      */
     function pluralize($word, $count = 0) {
-        if($count == 0 || $count > 1) {          
-            if(!in_array($word, Inflections::$uncountables)) { 
-                $original = $word;   
+        if($count == 0 || $count > 1) {
+            if(!in_array($word, Inflections::$uncountables)) {
+                $original = $word;
                 foreach(Inflections::$plurals as $plural_rule) {
                     $word = preg_replace($plural_rule['rule'], $plural_rule['replacement'], $word);
                     if($original != $word) break;

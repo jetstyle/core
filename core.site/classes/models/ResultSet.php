@@ -17,7 +17,7 @@ class ResultSet implements IteratorAggregate, ArrayAccess, Countable, DataContai
 	{
 		return $this->data;
 	}
-
+    
 	public function getArray()
 	{
 		$result = array();

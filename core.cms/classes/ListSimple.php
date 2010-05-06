@@ -96,7 +96,7 @@ class ListSimple
 		if( !$this->loaded )
 		{
 			$total = $this->getTotal($where);
-
+            
 			if ($total > 0)
 			{
 				$this->pager($total);

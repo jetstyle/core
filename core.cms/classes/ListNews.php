@@ -16,14 +16,13 @@ class ListNews extends ListSimple
 {
 	protected $template = 'list_news.html';
 	protected $template_calendar = 'list_news.html:calendar';
-
+    
 	protected $pages; //объект постраничной рубрикации
-
+    
 	protected $year = 0;
 	protected $month = 0;
 
-	public function __construct( &$config )
-	{
+	public function __construct( &$config ) {
 		//упорядочиваем список
 		if(!$config->order_by)
 		{
@@ -37,8 +36,7 @@ class ListNews extends ListSimple
 		$this->defineDate();
 	}
 
-	public function handle()
-	{
+	public function handle() {
 		$db = &$this->db;
 
 		//assign some
@@ -91,16 +89,20 @@ class ListNews extends ListSimple
 		parent::handle();
 	}
 
-	public function load()
-	{
-		parent::load("year='".$this->year."' AND month='".$this->month."'");
+	public function load($where = null) {
+	    if ($where == null) {
+	        $where = '';
+	    } else {
+	        $where = ' AND '.$where;
+	    }
+		parent::load("year='".$this->year."' AND month='".$this->month."'".$where);
 	}
 
 	protected function defineDate()
 	{
 		$db = &$this->db;
 
-		$this->year = intval(RequestInfo::get('year'));
+		$this->year  = intval(RequestInfo::get('year'));
 		$this->month = intval(RequestInfo::get('month'));
 
 		if (!$this->year || !$this->month)

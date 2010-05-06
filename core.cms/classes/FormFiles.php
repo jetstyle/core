@@ -272,7 +272,7 @@ class FormFiles extends FormSimple
 				'opacity' => $d['opacity'],
 				'mask' => $d['mask'],
 				'blur' => $d['blur'],
-		
+		        
 				'actions' => $d['actions'],
 			);
 	}

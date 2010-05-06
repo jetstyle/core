@@ -176,7 +176,7 @@ class Upload
 			{
 				throw new Exception("Upload: directory ".str_replace(Config::get('project_dir'), '', $dirname)." is not writable");
 			}
-
+            
 			/**
 			 * TODO: document this part 
 			 *
@@ -206,11 +206,11 @@ class Upload
 							case 'mask':
 								$this->applyMaskToImage($image, $value);
 							break;
-
+                            
 							case 'opacity':
 								$this->makeImageOpacity($image, $value);
 							break;
-						
+						    
 							case 'back':
 								$this->createThumb($image, array('x' => $value[0], 'y' => $value[1]), false);
 								$this->drawOnBack($image, array('x' => $value[0], 'y' => $value[1]));
@@ -259,6 +259,12 @@ class Upload
 							$this->unsharpMask($thumbnail, 20);
 						}
 
+                        if ($params['base'])
+                        {
+                            //$this->createThumb($image, array('x' => $value[0], 'y' => $value[1]), false);
+                            $this->drawOnBack($thumbnail, array('x' => $x[1], 'y' => $y[1]));
+                        }
+						
 	//					header('Content-type: image/png');
 	//					imagepng($thumbnail);
 	//					die();

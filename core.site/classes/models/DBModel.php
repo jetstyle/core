@@ -530,7 +530,6 @@ class DBModel extends Model implements IteratorAggregate, ArrayAccess, Countable
 			'.$sqlParts['where'].'
 			'.$sqlParts['group'].'
 		';
-
 		if ($sqlParts['group'])
 		{
 			$total = $this->db->getNumRows($this->db->execute($sql));
@@ -1140,7 +1139,7 @@ class DBModel extends Model implements IteratorAggregate, ArrayAccess, Countable
 		}
 		$this->registerObserver('row', array($this, 'treePrepareRow'));
 		$this->registerObserver('did_load', array($this, 'treeConstruct'));
-				
+        
 		$this->load($where);
 		
 		$this->removeObserver('row', array($this, 'treePrepareRow'));
@@ -1688,7 +1687,7 @@ class DBModel extends Model implements IteratorAggregate, ArrayAccess, Countable
 
 		$fields = implode(',', array_map(array(&$this, 'quoteName'), array_keys($row)));
 		$values = implode(',', array_map(array(&$this, 'quoteValue'), $row));
-
+        
 		$sql = ' INSERT INTO '.$this->quoteName(($this->autoPrefix ? DBAL::$prefix : "").$this->getTableName())
 		.'('.$fields.')'
 		.' VALUES ('.$values.')';
@@ -1720,15 +1719,15 @@ class DBModel extends Model implements IteratorAggregate, ArrayAccess, Countable
 		{
 			$where = ' WHERE '.$this->parse($where);
 		}
-
+        
 		$this->onBeforeUpdate($row);
-
+        
 		$sql = ' UPDATE '.$this->quoteName(($this->autoPrefix ? DBAL::$prefix : "").$this->getTableName())
 		.' SET '.$this->getFieldsValuesSet($row)
 		. $where;
-
+        
 		$this->usePrefixedTableAsAlias = false;
-
+        
 		return $this->db->query($sql);
 	}
 
