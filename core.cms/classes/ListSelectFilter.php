@@ -23,7 +23,7 @@ class ListSelectFilter extends ListFilter
 
     public function apply(&$model)
     {
-        if (isset($this->getVarValue) || $this->getConfig('always_apply'))
+        if ( (isset($this->getVarValue) && $this->getVarValue!="") || $this->getConfig('always_apply'))
         {
             $depends = $this->getConfig('depends');
             if ($depends)
