@@ -34,6 +34,12 @@ $(document).ready(function() {
 
 <form class="b-catalogue-items-form" action="" method="post">
   <input type="hidden" name="{{prefix}}update" value="1" />
+  
+  {{?count(Items)==0}}
+    В данном разделе пока нет позиций <br /><br />
+  {{/?}}
+  
+  
   {{?count(Items)>1}}
     {{@:delete}}
     {{@:save}}
