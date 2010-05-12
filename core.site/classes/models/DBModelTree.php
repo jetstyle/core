@@ -211,7 +211,19 @@ class DBModelTree extends DBModel
 		{
 			Finder::useClass('Translit');
 			$translit = new Translit();
-			$row['_supertag'] = $translit->supertag($row['title'], 20);
+			
+                        $supertag = $translit->supertag($row['title'], 20);
+                        
+                        $queryResult = $db->queryOne("
+					SELECT id
+					FROM ".$this->quoteName(($this->autoPrefix ? DBAL::$prefix : "").$this->getTableName())."
+					WHERE ".$this->quoteName("_supertag")." = ".DBModel::quote( $supertag ) );
+                        
+                        if ( $queryResult["id"] ){
+                            $this->updateSupertagAfterInsert = true;
+                        }
+                        $row["_supertag"] = $supertag;
+                        
 		}
 	}
 
@@ -219,6 +231,12 @@ class DBModelTree extends DBModel
 
 	protected function onAfterInsert(&$row)
 	{
+                if ( $this->updateSupertagAfterInsert )
+                {
+                     $row["_supertag"] = $row["_supertag"]."_".$row["id"];
+                     $this->update($row, '{'.$this->getPk().'} = '.self::quote($row["id"]));
+                    // var_dump($row["_supertag"]);die();
+                }
 		$this->rebuild();
 	}
 	
@@ -236,6 +254,7 @@ class DBModelTree extends DBModel
 	{
 		if (is_array($row) && in_array(array('_left', '_right', '_parent', '_order', '_level', '_supertag', '_path'), array_keys($row)))
 		{
+                
 			$this->rebuild();
 		}
 	}
