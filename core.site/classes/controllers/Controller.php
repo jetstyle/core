@@ -367,6 +367,10 @@ abstract class Controller implements ArrayAccess
 		$view["config_title"] = $config['project_title'];
 
 		Locator::get('tpl')->set('View', $view);
+
+                $userdata = Locator::get('principal')->getUserData()->getArray();
+                unset($userdata["password"]);
+                Locator::get('tpl')->set('prp', $userdata);
 	}
 
 	
