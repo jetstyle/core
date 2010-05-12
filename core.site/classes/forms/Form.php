@@ -321,7 +321,7 @@ class Form
           //или это может быть объект с явно заданным методом
 
           if (is_callable($this->config[$handler][$k])){
-            call_user_func($this->config[$handler][$k], $event, $this);
+            call_user_func($this->config[$handler][$k], $event, &$this);
           }else
           //это может быть объект с методом по умолчанию
           if ( is_callable( array($this->config[$handler][$k],$default_method) ) ){
