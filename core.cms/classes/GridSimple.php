@@ -39,7 +39,7 @@ class GridSimple extends ListSimple implements ModuleInterface
                 Locator::get('tpl')->set('group_restore_url', RequestInfo::hrefChange('',array('restore_list'=>'1')));
                 Locator::get('tpl')->set( '_add_new_title', $this->config['add_new_title'] ? $this->config['add_new_title'] : "Добавить" );
 
-                Locator::get('tpl')->set( '_add_new_href', RequestInfo::hrefChange( $this->config['add_new_href']  ? RequestInfo::$baseUrl."do/".$this->config['add_new_href'] : "", array($this->idGetVar => '', '_new' => 1, 'rubric_id'=>$this->id)) );
+                Locator::get('tpl')->set( '_add_new_href', RequestInfo::hrefChange( $this->config['add_new_href']  ? RequestInfo::$baseUrl."do/".$this->config['add_new_href'] : "", array($this->idGetVar => '', '_new' => 1,  ( $this->config["add_new_rubric_var"] ? $this->config["add_new_rubric_var"] :'rubric_id')=>$this->id)) );
                 
                 Locator::get('tpl')->set( '_delete_title', $this->config['delete_title'] ? $this->config['delete_title'] : "Удалить" );
                 
