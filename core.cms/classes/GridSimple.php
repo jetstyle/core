@@ -18,7 +18,6 @@ class GridSimple extends ListSimple implements ModuleInterface
 			$redirect = $this->update();
 		}
 
-
 		//редирект или выставление флага, что он нужен
 		if ($redirect)
 		{
@@ -34,14 +33,12 @@ class GridSimple extends ListSimple implements ModuleInterface
 				Controller::redirect( $this->_redirect );
 			}
 		}
-
-        
         
                 Locator::get('tpl')->set('group_operations', $this->config['group_operations']);
                 Locator::get('tpl')->set('group_delete_url', RequestInfo::hrefChange('',array('delete_list'=>'1')));
                 Locator::get('tpl')->set('group_restore_url', RequestInfo::hrefChange('',array('restore_list'=>'1')));
                 Locator::get('tpl')->set( '_add_new_title', $this->config['add_new_title'] ? $this->config['add_new_title'] : "Добавить" );
-                
+
                 Locator::get('tpl')->set( '_add_new_href', RequestInfo::hrefChange( $this->config['add_new_href']  ? RequestInfo::$baseUrl."do/".$this->config['add_new_href'] : "", array($this->idGetVar => '', '_new' => 1, 'rubric_id'=>$this->id)) );
                 
                 Locator::get('tpl')->set( '_delete_title', $this->config['delete_title'] ? $this->config['delete_title'] : "Удалить" );
@@ -97,6 +94,11 @@ class GridSimple extends ListSimple implements ModuleInterface
                          Locator::get('tpl')->set('order_href', RequestInfo::hrefChange('',array('order'=>( $this->order_dir=="DESC" ? "_order" : "__order")  )) );
                     }
                     Locator::get('tpl')->set('order_href_default', RequestInfo::hrefChange('',array('order'=>"_order")  )) ;
+
+                    if ($this->id && $this->config["edit_title"]){
+                        Locator::get('tpl')->set('edit_href',  RequestInfo::hrefChange( RequestInfo::$baseUrl."do/".$this->config['edit_href']  ,array('id'=>$this->id)));
+                        Locator::get('tpl')->set('edit_title', $this->config["edit_title"] );
+                    }
 
                     Locator::get('tpl')->set('Items', $data);
                 }
