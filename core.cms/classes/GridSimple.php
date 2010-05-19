@@ -94,13 +94,12 @@ class GridSimple extends ListSimple implements ModuleInterface
                          Locator::get('tpl')->set('order_href', RequestInfo::hrefChange('',array('order'=>( $this->order_dir=="DESC" ? "_order" : "__order")  )) );
                     }
                     Locator::get('tpl')->set('order_href_default', RequestInfo::hrefChange('',array('order'=>"_order")  )) ;
-
-                    if ($this->id && $this->config["edit_title"]){
-                        Locator::get('tpl')->set('edit_href',  RequestInfo::hrefChange( RequestInfo::$baseUrl."do/".$this->config['edit_href']  ,array('id'=>$this->id)));
-                        Locator::get('tpl')->set('edit_title', $this->config["edit_title"] );
-                    }
-
                     Locator::get('tpl')->set('Items', $data);
+                }
+
+                if ($this->id && $this->config["edit_title"]){
+                    Locator::get('tpl')->set('edit_href',  RequestInfo::hrefChange( RequestInfo::$baseUrl."do/".$this->config['edit_href']  ,array('id'=>$this->id)));
+                    Locator::get('tpl')->set('edit_title', $this->config["edit_title"] );
                 }
                 $this->renderFilters();
                 $this->renderPager();
