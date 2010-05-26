@@ -6,83 +6,103 @@
 	<input type="hidden" name="{{prefix}}update" value="1" />
 	<input type="hidden" name="{{__form_name}}_url" value="{{ajax_url}}" />
 
-    {{!for hidden_fields do=@:hidden_field}}
-    {{:hidden_field}}
-        <input type="hidden" name="{{prefix}}{{for.key}}" value="{{*}}" />
-    {{/:hidden_field}}
+  {{!for hidden_fields do=@:hidden_field}}
+  {{:hidden_field}}
+      <input type="hidden" name="{{prefix}}{{for.key}}" value="{{*}}" />
+  {{/:hidden_field}}
 
+  {{?iframe}}
+	<div style="overflow-x: hidden; overflow-y: auto; " id="iframe_div"><!--height: {{iframe.height}}-->
+    {{?:top_buttons}}
+        <div class="cms-form-buttons">
+          {{_insert_button}}
+          {{_save_button}}
+          {{_delete_button}}
+        </div>
+    {{/?}}
 
+    {{!!form_simple}}
+	    {{___form}}
+    {{/!!}}
 
-	    {{?iframe}}
-		<div style="overflow-x: hidden; overflow-y: auto; " id="iframe_div"><!--height: {{iframe.height}}-->
-            {{?:top_buttons}}
-                <div class="cms-form-buttons">
-                    {{_insert_button}} {{_save_button}} {{_delete_button}}
-                </div>
-                <br /><br />
-	    {{/?}}
+    {{?iframe}}
+  </div>
+  <div class="{{iframe.css_buttons_class}}">
+    {{/?}}
 
-	    {{!!form_simple}}
-		    {{___form}}
-	    {{/!!}}
-
-	    {{?iframe}}
-		</div>
-		<div class="{{iframe.css_buttons_class}}">
-	    {{/?}}
-
-	    <div class="cms-form-buttons">
-		    {{:save_button_norefresh}}
-			    <input id="update_1" name="update_1" class="cms-save-but hand" type="button" value="сохранить без перезагрузки" onclick="saveForm('{{__form_name}}'); return false;">
-		    {{/:save_button_norefresh}}
-
-		    {{:save_button}}
-			    <input id="update_1" name="update_1" type="hidden">
-			    <input id="update_2" name="update_2" class="cms-save-but hand" type="submit" value="Сохранить">
-		    {{/:save_button}}
-                    
-                    {{:save_select}}
-                            <input id="update_1" name="update_1" type="hidden">
-			    <input id="update_2" name="update_2" class="cms-save-but hand" type="submit" value="Сохранить и">
-                            <select name="{{prefix}}post_action">
-                                <option value="0">Продолжить</option>
-                                <option value="1">Закрыть</option>
-                                <option value="2">Добавить</option>
-                            </select>
-		    {{/:save_select}}
-
-		    {{:insert_button}}
-			    <a href="{{_add_new_href}}"><input name="{{prefix}}insert" class="cms-insert-but hand" type="submit" value="Добавить"  ></a>
-		    {{/:insert_button}}
-
-		    {{:restore_button}}
-			    <input name="{{prefix}}restore" class="cms-save-but hand" type="submit" value="Восстановить">
-		    {{/:restore_button}}
-
-		    
-
-		    {{:send_button}}
-			    <input name="{{prefix}}send" class="cms-save-but hand" type="submit" value="Отправить">
-		    {{/:send_button}}
-
-		    {{:send_button_disabled}}
-			    <input name="{{prefix}}send" class="cms-save-but hand" type="submit" disabled="disabled" value="Отправлено">
-		    {{/:send_button_disabled}}
-
-		    {{_send_button}}
-
-		    {{:delete_button}}
-			    <input type="submit" class="cms-delete-but hand" name="{{prefix}}delete" value="{{__delete_title}}" onclick="return confirm('{{__delete_title}}?');">
-		    {{/:delete_button}}
-
-		    {{_insert_button}} {{_save_button}} {{_delete_button}}
-	    </div>
-	    {{?iframe}}
-		</div>
-	    {{/?}}
-
-
+    <div class="cms-form-buttons">
+      {{_send_button}}
+      {{_insert_button}}
+      {{_save_button}}
+      {{_delete_button}}
+    </div>
+    {{?iframe}}
+	</div>
+    {{/?}}
 </form>
+
+{{:save_button_norefresh}}
+  <div class="cms-form-button cms-form-button_save">
+    <ins class="cms-form-button_l"></ins><ins class="cms-form-button_r"></ins>
+    <input id="update_1" name="update_1" type="button" value="сохранить без перезагрузки" onclick="saveForm('{{__form_name}}'); return false;" />
+  </div>
+{{/:save_button_norefresh}}
+
+{{:save_button}}
+  <input id="update_1" name="update_1" type="hidden" />
+  <div class="cms-form-button cms-form-button_save">
+    <ins class="cms-form-button_l"></ins><ins class="cms-form-button_r"></ins>
+    <input id="update_2" name="update_2" type="submit" value="Сохранить" />
+  </div>
+{{/:save_button}}
+            
+{{:save_select}}
+  <input id="update_1" name="update_1" type="hidden" />
+  <div class="cms-form-button cms-form-button_save">
+    <ins class="cms-form-button_l"></ins><ins class="cms-form-button_r"></ins>
+    <input id="update_2" name="update_2" type="submit" value="Сохранить и" />
+  </div>
+  <select name="{{prefix}}post_action">
+      <option value="0">Продолжить</option>
+      <option value="1">Закрыть</option>
+      <option value="2">Добавить</option>
+  </select>
+{{/:save_select}}
+
+{{:insert_button}}
+  <div class="cms-form-button cms-form-button_add">
+    <ins class="cms-form-button_l"></ins><ins class="cms-form-button_r"></ins>
+    <a href="{{_add_new_href}}"><input name="{{prefix}}insert" type="submit" value="Добавить" /></a>
+  </div>
+{{/:insert_button}}
+
+{{:restore_button}}
+  <div class="cms-form-button cms-form-button_save">
+    <ins class="cms-form-button_l"></ins><ins class="cms-form-button_r"></ins>
+    <input name="{{prefix}}restore" type="submit" value="Восстановить" />
+  </div>
+{{/:restore_button}}
+
+{{:send_button}}
+  <div class="cms-form-button cms-form-button_save">
+    <ins class="cms-form-button_l"></ins><ins class="cms-form-button_r"></ins>
+    <input name="{{prefix}}send" type="submit" value="Отправить" />
+  </div>
+{{/:send_button}}
+
+{{:send_button_disabled}}
+  <div class="cms-form-button cms-form-button_save">
+    <ins class="cms-form-button_l"></ins><ins class="cms-form-button_r"></ins>
+    <input name="{{prefix}}send" type="submit" disabled="disabled" value="Отправлено" />
+  </div>
+{{/:send_button_disabled}}
+
+{{:delete_button}}
+  <div class="cms-form-button cms-form-button_delete">
+    <ins class="cms-form-button_l"></ins><ins class="cms-form-button_r"></ins>
+    <input type="submit" class="cms-delete-but hand" name="{{prefix}}delete" value="{{__delete_title}}" onclick="return confirm('{{__delete_title}}?');">
+  </div>
+{{/:delete_button}}
 
 
 <script language="javascript">

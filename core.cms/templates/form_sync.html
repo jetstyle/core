@@ -30,8 +30,14 @@
 			</table>
 
 			<div class="cms-form-buttons">
-			    <input id="update_2" name="{{prefix}}update" class="cms-save-but hand" type="submit" value="загрузить">
-				<input type="submit" class="cms-delete-but hand" name="{{prefix}}delete" value="Очистить" onclick="return confirm('Все ранее импортированные данные будут удалены. Продолжить?');">
+        <div class="cms-form-button cms-form-button_save">
+          <ins class="cms-form-button_l"></ins><ins class="cms-form-button_r"></ins>
+          <input id="update_2" name="{{prefix}}update" type="submit" value="загрузить">
+        </div>
+        <div class="cms-form-button cms-form-button_delete">
+          <ins class="cms-form-button_l"></ins><ins class="cms-form-button_r"></ins>
+          <input type="submit" name="{{prefix}}delete" value="Очистить" onclick="return confirm('Все ранее импортированные данные будут удалены. Продолжить?');">
+        </div>
 			</div>
 
 	    </form>

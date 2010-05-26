@@ -8,26 +8,6 @@
         width: 98%;
     }
 
-    .cms-save-but
-    {
-/*
-	-x-system-font:none;
-	background-color:#99FF99;
-*/
-	font-family:Arial,sans-serif;
-	font-size:12px;
-    }
-    .cms-delete-but
-    {
-	color:#880000;
-	font-family:Arial,sans-serif;
-	font-size:12px;
-    }
-.cms-delete-but, .cms-save-but {
-  padding: 6px;
-  margin: -6px 6px 6px -6px !important;
-  margin: 0; }
-
 /* customization params */
 .change-color-bg, .change-color-text {
 	cursor: pointer;
@@ -63,7 +43,7 @@ a.ocelink:link, a.ocelink:visited {
  */
 .iframe-buttons-
 {
-	background-color: #DCDCDC;
+	background: #DCDCDC;
 	margin-top: 0px;
 	padding-top: 12px;
 	padding-bottom: 12px;
@@ -76,11 +56,3 @@ a.ocelink:link, a.ocelink:visited {
 .cms-add-form { padding-left:18px; }
 .cms-add-form input { font-size:12px; }
 .cms-add-form select { font-size:12px; }
-
-
-.cms-save-but { background-color: #99FF99;   }
-.cms-delete-but { background:#ffb8b1; color:#880000;   }
-
-.cms-save-small-but { height:20px; background:#d8fecd; color:#005314; }
-.cms-delete-small-but { height:20px; background:#ffb8b1; color:#880000; }
-
