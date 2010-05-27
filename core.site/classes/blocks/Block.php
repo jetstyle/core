@@ -92,7 +92,17 @@ class Block
 
 	protected function constructData()
 	{
-
+                if ( $this->config["model"] )
+                {
+                        $m = DBModel::factory($this->config["model"]);
+                        $limit = $this->getParam("limit");
+                        if ($limit)
+                            $m->setLimit($limit);
+         
+                              
+                        $data = $m->load()->getArray();
+                        $this->setData($data);
+                }
 	}
 }
 ?>

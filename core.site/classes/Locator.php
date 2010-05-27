@@ -208,7 +208,8 @@ class Locator
 			}
 			else
 			{
-				$className = ucfirst($key).'Block';
+                       
+            			$className = ucfirst($key).'Block';
 				$config = array();
 
 			}

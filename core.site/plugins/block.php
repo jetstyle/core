@@ -21,22 +21,35 @@ unset($params[0]);
 
 try
 {
-	$block = Locator::getBlock($blockName, $params['force_create']);
+	$block = Locator::getBlock($blockName, $params['force_create']);        
 }
+//ClassBlock not found
 catch(FileNotFoundException $e)
 {
+        //if we have model param, we can go easy way
+        if ( $params['model'] )
+        {
+            Debug::trace('Create simple block "'.$key.'"', 'blocks');
+            Finder::useClass('blocks/Block');
+            $block = new Block($params);
+            
+        }
+        //
+        else
+        {
+            $tpl->pushContext();
+            $tpl->load($params);
 
-	$tpl->pushContext();
-	$tpl->load($params);
-	
-	$parts = explode(".", $tplName);
-	
-	$tpl->set("_", $tpl->get("images")."../templates/".$parts[0]."/");
+            $parts = explode(".", $tplName);
 
-	echo $tpl->parse($tplName);
-	$tpl->popContext();
+            //this is HACK for layouts guides under construction
+            $tpl->set("_", $tpl->get("images")."../templates/".$parts[0]."/");
 
-	return;
+            echo $tpl->parse($tplName);
+            $tpl->popContext();
+
+            return;
+        }
 }
 
 $block->setTplParams($params);
