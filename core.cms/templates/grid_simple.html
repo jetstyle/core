@@ -67,7 +67,7 @@ $(document).ready(function() {
       {{!for *cols do=@:col id=*id}}
       <td class="b-catalogue-items-table_td-edit">{{?for.i!=1}}<a href="{{/}}{{*href}}">редактировать</a>{{/?}}</td>
       <td class="b-catalogue-items-table_td-checkbox">{{@:item_checkbox}}</td>
-      <td class="b-catalogue-items-table_td-move">{{?order_dir}}<div></div>{{/?}}</td>
+      <td {{?order_dir}}class="b-catalogue-items-table_td-move"{{/?}}>&nbsp;</td>
     </tr>
   {{/?}}
 {{/:row}}
