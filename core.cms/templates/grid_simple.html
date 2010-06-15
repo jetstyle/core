@@ -4,16 +4,9 @@
 $(document).ready(function() {
     // Initialise the table
     {{?order_dir}}
-    $(".b-catalogue-items-table").tableDnD({dragHandle: "b-catalogue-items-table_td-move", 
-                                            onDragClass: "dragging",
-                                            onDrop: function(table, row){
-                                                $.post(document.location.href+ "&"+$.tableDnD.serialize('id'), {"action": "reorder", "ajax_update": true}, function(){
-                                                
-                                                });
-                                            }
-    
-    });
-{{/?}}
+        $(".b-catalogue-items-table").tableDnD({dragHandle: "b-catalogue-items-table_td-move", onDragClass: "dragging", onDrop: function(table, row){$.post(document.location.href+ "&"+$.tableDnD.serialize('id'), {"action": "reorder", "ajax_update": true}, function(){});}
+        });
+    {{/?}}
 });
 </script>
 
@@ -44,7 +37,7 @@ $(document).ready(function() {
     {{@:delete}}
     {{@:save}}
   {{/?}}
-  <a href="{{_add_new_href}}"> {{@:add_new}} </a>
+  {{@:add_new}}
   {{?count(Items)>1}}
     <table id="orders" class="b-catalogue-items-table" cellspacing="0">
       {{!for Items do=@:row}}
@@ -55,7 +48,7 @@ $(document).ready(function() {
     <br />
     {{@:delete}}
     {{@:save}}
-    <a href="{{_add_new_href}}"> {{@:add_new}} </a>
+    {{@:add_new}}
   {{/?}}
   
 </form>
@@ -106,15 +99,25 @@ $(document).ready(function() {
 {{/:cell}}
 
 {{TPL:add_new}}
-  <input class="b-catalogue-items-form_add cms-insert-but" type="submit" value="{{_add_new_title}}" />
+    <div class="cms-form-button cms-form-button_add">
+        <ins class="cms-form-button_l"></ins><ins class="cms-form-button_r"></ins>
+        <a href="{{_add_new_href}}">{{_add_new_title}}</a>
+    </div>
 {{/TPL:add_new}}
 
 {{TPL:delete}}
-  <input class="b-catalogue-items-form_delete cms-delete-but" type="submit" value="{{_delete_title}}"  name="{{prefix}}delete"  onclick="return confirm('Удалить?');" />
+    <div class="cms-form-button cms-form-button_delete">
+        <ins class="cms-form-button_l"></ins><ins class="cms-form-button_r"></ins>
+        <input type="submit" class="cms-delete-but" name="{{prefix}}delete" value="{{_delete_title}}" onclick="return confirm('{{_delete_title}}?');">
+    </div>
 {{/TPL:delete}}
 
 {{TPL:save}}
-  <input class="b-catalogue-items-form_save cms-save-but" type="submit" value="Сохранить{{_save_title}}" />
+    <input id="update_1" name="update_1" type="hidden" />
+    <div class="cms-form-button cms-form-button_save">
+        <ins class="cms-form-button_l"></ins><ins class="cms-form-button_r"></ins>
+        <input type="submit" value="Сохранить" />
+    </div>
 {{/TPL:save}}
 
 {{:item_checkbox}}
