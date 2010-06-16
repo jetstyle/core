@@ -124,7 +124,7 @@ TreeControl.prototype = {
 
 	onrenameCallback : function(NODE) {
 		var id = NODE.id.replace('node-', '');
-		$.post(this.params.update_url, {'rename' : 1, 'id' : id, 'title' : NODE.childNodes[0].innerHTML});
+		$.post(this.params.update_url, {'rename' : 1, 'id' : id, 'title' : $( NODE.childNodes[0]).text()});
 	},
 
 	oncreateCallback : function(NODE,REF_NODE,TYPE)

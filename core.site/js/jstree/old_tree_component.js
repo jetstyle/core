@@ -149,21 +149,6 @@ function tree_component () {
 			this.hovered = false;
 			this.locked = false;
 
-			str = '';
-			str += '<span class="js-tree-buttons">';
-			str += '<img class="tree-edit" src="'+ this.images_path +'edit.png" ';
-			str += '/>';
-
-			str += '<img class="tree-child-add" src="'+ this.images_path +'addChild.png" width="15" height="13" ';
-			str += '/>';
-
-			str += '<img class="tree-brother-add" src="'+ this.images_path +'add.png" width="15" height="13" ';
-			str += '/>';
-
-			str += '<img class="tree-delete" src="'+ this.images_path +'del.png" ';
-			str += '/>';
-			str += '</span>';
-            this.span_buttons = str;
 
 			// CREATE DUMMY FOR MOVING
 			if(this.settings.rules.draggable != "none" && this.settings.rules.dragrules != "none") {
@@ -286,26 +271,15 @@ function tree_component () {
 				{
 					str += 'style="background-image:url('+this.images_path+data.icon+')"'
 				}
-				str += ">" + data.data;
-                
-                str += '<span class="js-tree-buttons">';
-                
-                str += '<img title="Редактировать" class="tree-edit" src="'+ this.images_path +'edit.png" ';
+				str += ">" + data.data + "</a>";
+
+				str += '<img title="Удалить" class="tree-delete" src="'+ this.images_path +'del.png" ';
 				if (!data.custom_buttons)
 				{
-					if (this.settings['hide_buttons']['edit'] === true || ( this.settings['hide_buttons']['edit'] && this.settings['hide_buttons']['edit'][data.level] === true))
+					if (this.settings['hide_buttons']['del'] === true || (this.settings['hide_buttons']['del'] && this.settings['hide_buttons']['del'][data.level] === true))
 						str += 'hidden="hidden"';
 				}
-				else if (data.hide_buttons && data.hide_buttons.edit) str += 'hidden="hidden"';
-				str += '/>';
-				
-				str += '<img title="Добавить рядом" class="tree-brother-add" src="'+ this.images_path +'add.png" width="15" height="13" ';
-				if (!data.custom_buttons)
-				{
-					if (this.settings['hide_buttons']['addBrother'] === true || (this.settings['hide_buttons']['addBrother'] && this.settings['hide_buttons']['addBrother'][data.level] === true))
-						str += 'hidden="hidden"';
-				}
-				else if (data.hide_buttons && data.hide_buttons.addBrother) str += 'hidden="hidden"';
+				else if (data.hide_buttons && data.hide_buttons.del) str += 'hidden="hidden"';
 				str += '/>';
 
 				str += '<img title="Добавить внутрь" class="tree-child-add" src="'+ this.images_path +'addChild.png" width="15" height="13" ';
@@ -318,18 +292,23 @@ function tree_component () {
 
 				str += '/>';
 
-				str += '<img title="Удалить" class="tree-delete" src="'+ this.images_path +'del.png" ';
+				str += '<img title="Добавить рядом" class="tree-brother-add" src="'+ this.images_path +'add.png" width="15" height="13" ';
 				if (!data.custom_buttons)
 				{
-					if (this.settings['hide_buttons']['del'] === true || (this.settings['hide_buttons']['del'] && this.settings['hide_buttons']['del'][data.level] === true))
+					if (this.settings['hide_buttons']['addBrother'] === true || (this.settings['hide_buttons']['addBrother'] && this.settings['hide_buttons']['addBrother'][data.level] === true))
 						str += 'hidden="hidden"';
 				}
-				else if (data.hide_buttons && data.hide_buttons.del) str += 'hidden="hidden"';
+				else if (data.hide_buttons && data.hide_buttons.addBrother) str += 'hidden="hidden"';
 				str += '/>';
 
-				str += '</span>';
-				
-				str += '</a>';
+				str += '<img title="Редактировать" class="tree-edit" src="'+ this.images_path +'edit.png" ';
+				if (!data.custom_buttons)
+				{
+					if (this.settings['hide_buttons']['edit'] === true || ( this.settings['hide_buttons']['edit'] && this.settings['hide_buttons']['edit'][data.level] === true))
+						str += 'hidden="hidden"';
+				}
+				else if (data.hide_buttons && data.hide_buttons.edit) str += 'hidden="hidden"';
+				str += '/>';
 
 			}
 			if(data.children && data.children.length) {
@@ -498,15 +477,15 @@ function tree_component () {
 				})
 
 				$('#treeBox li').livequery('mouseover',	function(){
-					$(this).find('>a .js-tree-buttons img[hidden!=hidden]').show();
-		           	//$(this).parent().siblings('img[hidden!=hidden]').hide();
+					$(this).find('>img[hidden!=hidden]').show();
+		           	$(this).parent().siblings('img[hidden!=hidden]').hide();
 		           	return false;
 				}).livequery('mouseout', function(){
-		           	$(this).find('>a .js-tree-buttons img[hidden!=hidden]').hide();
+		           	$(this).find('>img[hidden!=hidden]').hide();
 				});
-				//$('#treeBox li > a').livequery('mouseover', function(){
-				//	$(this).siblings('img[hidden!=hidden]').show();
-				//});
+				$('#treeBox li > a').livequery('mouseover', function(){
+					$(this).siblings('img[hidden!=hidden]').show();
+				});
 
 				// ATTACH DRAG & DROP ONLY IF NEEDED
 				if(this.settings.rules.draggable != "none" && this.settings.rules.dragrules != "none") {
@@ -636,15 +615,12 @@ function tree_component () {
 										}
 										_this.moveType	= mov;
 										_this.moveRef	= event.target;
-										//$(_this.drag).children("IMG").remove();
-										$(_this.drag).removeClass('js-drag-forbidden');
+										$(_this.drag).children("IMG").remove();
 										$("#marker").css({ "left" : goTo.x , "top" : goTo.y }).show();
 									}
 									else {
 										if($(_this.drag).children("IMG").size() == 0) {
-										  console.log($(_this.drag));
-											//$(_this.drag).append("<img style='position:absolute; " + (_this.settings.ui.rtl ? "right" : "left" ) + ":4px; top:0px; background:white; padding:2px;' src='" + _this.images_path + "remove.png' />");
-											$(_this.drag).addClass('js-drag-forbidden');
+											$(_this.drag).append("<img style='position:absolute; " + (_this.settings.ui.rtl ? "right" : "left" ) + ":4px; top:0px; background:white; padding:2px;' src='" + _this.images_path + "remove.png' />");
 										}
 										_this.moveType = false;
 										_this.moveRef = false;
@@ -1156,7 +1132,7 @@ function tree_component () {
 				return this.open_branch(this.selected, true, function () { _this.create.apply(_this, [type]); } );
 			}
 
-			$li = $("<li></li>");
+			$li = $("<li />");
 			// NEW NODE IS OF PASSED TYPE OR PARENT'S TYPE
 			if(this.settings.rules.metadata) {
 				$.metadata.setType("attr", this.settings.rules.metadata);
@@ -1184,19 +1160,29 @@ function tree_component () {
 				currentLevel++;
 			}
 
+			str = '';
+			str += '<img class="tree-edit" src="'+ this.images_path +'edit.png" ';
+			str += '/>';
 
-            str = this.span_buttons;
-			//$li.find('>a').append(str);
-			//console.log('create');
+			str += '<img class="tree-child-add" src="'+ this.images_path +'addChild.png" width="15" height="13" ';
+			str += '/>';
+
+			str += '<img class="tree-brother-add" src="'+ this.images_path +'add.png" width="15" height="13" ';
+			str += '/>';
+
+			str += '<img class="tree-delete" src="'+ this.images_path +'del.png" ';
+			str += '/>';
+
+			$li.append(str);
 
 			$li.hover(
 				function(){
-					$(this).find('>a .js-tree-buttons img[hidden!=hidden]').show();
+					$(this).find('>img[hidden!=hidden]').show();
 	             	$(this).parent().siblings('img[hidden!=hidden]').hide();
 	             	return false;
 				},
 				function(){
-	             	$(this).find('>a .js-tree-buttons img[hidden!=hidden]').hide();
+	             	$(this).find('>img[hidden!=hidden]').hide();
 				}
 			);
 
@@ -1227,7 +1213,7 @@ function tree_component () {
 				var obj = this.selected;
 				if(this.current_lang)	obj = obj.find("a." + this.current_lang).get(0);
 				else					obj = obj.find("a:first").get(0);
-				last_value = $(obj).text();
+				last_value = obj.innerHTML;
 
 				/*
 				var w_max = 170;
@@ -1250,10 +1236,8 @@ function tree_component () {
 						});
 				_this.inp.blur(function(event) {
 						if(this.value == "") this.value == last_value;
-						
 						$(obj).html( $(obj).parent().find("input").eq(0).attr("value") ).get(0).style.display = "";
 						$(obj).prevAll("span").remove();
-						$(obj).append($(_this.span_buttons));
 						_this.settings.callback.onrename.call(null, _this.get_node(obj).get(0), _this.current_lang, _this);
 						_this.inp = false;
 					});
@@ -1428,50 +1412,44 @@ function tree_component () {
 			if (this.settings['hide_buttons']['edit'] !== undefined && this.settings['hide_buttons']['edit'] !== true)
 			{
 				if (this.settings['hide_buttons']['edit'][currentLevel]) {
-					$('a .js-tree-buttons img.tree-edit',node).get(0).style.display = 'none';
-					$('a .js-tree-buttons img.tree-edit',node).attr('hidden','hidden');
-					
+					node.children('img.tree-edit').get(0).style.display = 'none';
+					node.children('img.tree-edit').attr('hidden','hidden');
 				} else {
-				    //console.log(node)
-					//$('a .js-tree-buttons img.tree-edit',node).get(0).style.display = '';
-					$('.js-tree-buttons img.tree-edit',node).hide();
-					$('.js-tree-buttons img.tree-edit',node).removeAttr('hidden');
+					node.children('img.tree-edit').get(0).style.display = '';
+					node.children('img.tree-edit').removeAttr('hidden');
 				}
 			}
 
 			if (this.settings['hide_buttons']['addChild'] !== undefined && this.settings['hide_buttons']['addChild'] !== true)
 			{
 				if (this.settings['hide_buttons']['addChild'][currentLevel]) {
-					$('.js-tree-buttons img.tree-child-add',node).get(0).style.display = 'none';
-					$('.js-tree-buttons img.tree-child-add',node).attr('hidden','hidden');
+					node.children('img.tree-child-add').get(0).style.display = 'none';
+					node.children('img.tree-child-add').attr('hidden','hidden');
 				} else {
-					//$('.js-tree-buttons img.tree-child-add',node).get(0).style.display = '';
-					$('.js-tree-buttons img.tree-child-add',node).hide();
-					$('.js-tree-buttons img.tree-child-add',node).removeAttr('hidden');
+					node.children('img.tree-child-add').get(0).style.display = '';
+					node.children('img.tree-child-add').removeAttr('hidden');
 				}
 			}
 
 			if (this.settings['hide_buttons']['addBrother'] !== undefined && this.settings['hide_buttons']['addBrother'] !== true)
 			{
 				if (this.settings['hide_buttons']['addBrother'][currentLevel]) {
-					$('.js-tree-buttons img.tree-brother-add',node).get(0).style.display = 'none';
-					$('.js-tree-buttons img.tree-brother-add',node).attr('hidden','hidden');
+					node.children('img.tree-brother-add').get(0).style.display = 'none';
+					node.children('img.tree-brother-add').attr('hidden','hidden');
 				} else {
-					//$('.js-tree-buttons img.tree-brother-add',node).get(0).style.display = '';
-					$('.js-tree-buttons img.tree-brother-add',node).hide();
-					$('.js-tree-buttons img.tree-brother-add',node).removeAttr('hidden');
+					node.children('img.tree-brother-add').get(0).style.display = '';
+					node.children('img.tree-brother-add').removeAttr('hidden');
 				}
 			}
 
 			if (this.settings['hide_buttons']['del'] !== undefined && this.settings['hide_buttons']['del'] !== true)
 			{
 				if (this.settings['hide_buttons']['del'][currentLevel]) {
-					$('.js-tree-buttons img.tree-delete',node).get(0).style.display = 'none';
-					$('.js-tree-buttons img.tree-delete',node).get(0).style.display = 'none';
+					node.children('img.tree-delete').get(0).style.display = 'none';
+					node.children('img.tree-delete').get(0).style.display = 'none';
 				} else {
-					//$('.js-tree-buttons img.tree-delete',node).get(0).style.display = '';
-					$('.js-tree-buttons img.tree-delete',node).hide();
-					$('.js-tree-buttons img.tree-delete',node).removeAttr('hidden');
+					node.children('img.tree-delete').get(0).style.display = '';
+					node.children('img.tree-delete').removeAttr('hidden');
 				}
 			}
 
