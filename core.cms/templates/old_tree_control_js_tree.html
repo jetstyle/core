@@ -52,16 +52,39 @@
 		};
 		treeControl = new TreeControl(params);
 		treeControl.process();
+
+		/*$('#treeBox li').hover(
+			function(){
+				$(this).find('>img[hidden!=hidden]').show();
+             	$(this).parent().siblings('img[hidden!=hidden]').hide();
+             	return false;
+			},
+			function(){
+             	$(this).find('>img[hidden!=hidden]').hide();
+			}
+		);
+
+		$('#treeBox li a').mouseover(function(){
+			$(this).siblings('img[hidden!=hidden]').show();
+		});*/
+
+		//$.hotkeys.add('f2',     { disableInInput: true }, function() { tree.rename(); });
+		//$.hotkeys.add('r',      { disableInInput: true }, function() { tree.refresh(); });
+		//$.hotkeys.add('up',     { disableInInput: true }, function() { tree.get_prev(); });
+		//$.hotkeys.add('down',   { disableInInput: true }, function() { tree.get_next(); });
+		//$.hotkeys.add('left',   { disableInInput: true }, function() { tree.get_left(); });
+		//$.hotkeys.add('right',  { disableInInput: true }, function() { tree.get_right(); });
+		//$.hotkeys.add('return', { disableInInput: true }, function() { tree.select_branch(); });
 	});
 </script>
 
 
 <div class="cms-list-advanced">
-    {{?__filter}}
-    <form action="" method="get" class="cms-body_tree_filters">
-      {{__filter}}
-    </form>
-    {{/?}}
+        {{?__filter}}
+        <form action="" method="get" class="cms-body_tree_filters">
+          {{__filter}}
+        </form>
+        {{/?}}
 
 	{{?tree_params.all_deleted}}
 		<div>Все узлы в дереве удалены. {{__trash_switch}}.</div>
