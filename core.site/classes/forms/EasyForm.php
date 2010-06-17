@@ -139,6 +139,9 @@ class EasyForm {
 
                 //генерируем конфиг для поля
                 $conf = $this->ConstructConfig( $pack_name, $conf, false, $name );
+                
+                if ($conf === false)
+                    continue;
 
                 //определяем wrapper_tpl
                 if (!isset($conf["wrapper_tpl"]))
@@ -195,17 +198,33 @@ class EasyForm {
 	{
 		//конструируем конфиг
 		$config = array();
+                
+                //если нет имени пакета, поискать в конфиге формы default_packages
+                if ( !$conf_name ){
+                    $conf_name = $this->form->config["default_packages"][$field_name]["extends_from"];
+
+                    if (isset($this->form->config["default_packages"][$field_name]) && !$conf_name)
+                    {
+                        return false;                
+                    }
+                    else
+                        $_config = $this->_MergeConfig($this->form->config["default_packages"][$field_name], $_config);
+                }
+
+                //если все еще нет имени пакета, приравнять его к имени поля
+                if ( !$conf_name )
+                    $conf_name = $field_name;
 
 		if ($filename = Finder::findScript("classes","forms/packages/".$conf_name))
 		{
 			include( $filename );
 		}
-		/*
 		else
 		{
-			include( Finder::findScript("handlers","forms/packages/".$conf_name) );
+                        die('Failed to find form package for: '.$field_name);
+			//include( Finder::findScript("handlers","forms/packages/".$conf_name) );
 		}
-		*/
+		
 
 		if (isset($_config["easyform_override"]))
 			foreach( $_config["easyform_override"] as $v )

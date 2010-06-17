@@ -1,0 +1,36 @@
+
+
+buttons:
+    - insert
+
+auto_datetime:   true
+success_url:     ''
+cancel_url:      ''
+form_class:      'general-form'
+
+
+default_packages:
+    id:     false
+    background: 
+        extends_from:  checkbox_cms
+    border: 
+        extends_from:  checkbox_cms
+    link:
+        extends_from: string_cms
+    title:
+        extends_from: string_cms
+        model: model_filters
+        model_filters:
+            a: typografica
+        model_filtered:
+            a: "*_pre"
+    text:
+        extends_from: textarea_cms
+        model: model_filters
+        model_filters:
+            a: typografica
+        model_filtered:
+            a: "*_pre"
+    _state: 
+        extends_from:  checkbox_cms
+        wrapper_title: Скрыть (конфинг)

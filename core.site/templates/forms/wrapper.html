@@ -1,3 +1,16 @@
+<!-- for cms -->
+{{:CmsStringWrapper}}
+        <tr>
+          <td class="left"><label for="{{field}}">{{wrapper_title}}</label>:</td>
+          <td class="desc">
+            {{content}}
+            {{errors}}
+          </td>
+        </tr>
+{{/:CmsStringWrapper}}
+
+
+<!-- same as core/core.site/templates/forms/wrapper.html -->
 {{:DefaultStringWrapper}}
 	<div>
 		<label for="{{field}}">{{wrapper_title}}</label>
@@ -25,4 +38,5 @@
 {{:Passthru}}
 	{{content}}
   {{errors}}
+  
 {{/:Passthru}}

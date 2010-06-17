@@ -2,7 +2,7 @@
 
 class FormProc extends FormSimple
 {
-
+        
 
 	public function handle()
 	{
@@ -68,67 +68,95 @@ class FormProc extends FormSimple
 
 	public function getHtml()
 	{
-		Finder::pushContext();
-		Finder::prependDir(Config::get('cms_dir').'modules/'.$this->config['module_name'].'/');
+        Finder::pushContext();
+        Finder::prependDir(Config::get('cms_dir').'modules/'.$this->config['module_name'].'/');
 
-		$tpl = &Locator::get('tpl');
-		$tpl->pushContext();
+        $tpl = &Locator::get('tpl');
+        $tpl->pushContext();
+        /*
+        $tpl->set( 'prefix', $this->prefix );
+        $tpl->set( '__form_name', $this->prefix.'_simple_form' );
+        */
+        if ($this->insert_fields)
+        {
+		
+            $tpl->set('hidden_fields', $this->insert_fields);
+        }
 
-		$tpl->set( 'prefix', $this->prefix );
-		$tpl->set( '__form_name', $this->prefix.'_simple_form' );
+        $item = &$this->getItem();
 
-		if ($this->insert_fields)
-		{
-				
-		    $tpl->set('hidden_fields', $this->insert_fields);
-		}
+        if ( $item['id']>0 || RequestInfo::get('_new') )
+        {
+	            $tpl->set( 'ajax_url', RequestInfo::href() );
+        }
 
-		$item = &$this->getItem();
+        Finder::useClass("forms/EasyForm");
 
-		if ( $item['id']>0 || RequestInfo::get('_new') )
-		{
-			    $tpl->set( 'ajax_url', RequestInfo::href() );
-		}
+        //$config['on_after_event'] = array(array(&$this, 'OnAfterEventForm'));
 
-                Finder::useClass("forms/EasyForm");
-		//$config['success_url'] = RequestInfo::$baseUrl.$this->url_to('thank');
-                //$config['on_after_event'] = array(array(&$this, 'OnAfterEventForm'));
-		$form = new EasyForm('cms-form', $config);
-                
-                $this->getFieldsHtml();
+        Locator::get("msg")->load("cms");
+        $config = array();
+        $config["fields"]   = $this->getFieldsConfig();
+        $config["db_model"] = $this->config["model"];
+        //var_dump($this->config["model"]);die();
+        $config['success_url'] = RequestInfo::href();
+
+        //if in edit mode: change button and load model item
+        if ($this->id){
+            $config["id"] = $this->id;
+            $config["buttons"] = array("save");
+        }
+
+        //default form is in core/core.cms/classes/forms/cms-form.yml
+        $form = new EasyForm('cms-form', $config);
 
 		Locator::get('tpl')->set('Form', $form->handle());
 
 //		$tpl->set('___form', );
 //		$this->renderButtons();
-		$result = $tpl->parse($this->template);
+
+		$result = $tpl->parse($this->template_item);
 
 		$tpl->popContext();
 		Finder::popContext();
 
 		return $result;
 	}
-        
-        public function getFieldsHtml()
+    
+    
+    /**
+     * creates fields config for EasyForm
+     */    
+    public function getFieldsConfig()
 	{
                 $item = &$this->getItem();
-                $fields_config = array();
-                foreach ($item as $name => $it)
-                {
-                    $fields_config[ $name ] = $this->createField($name, $it);
-                }
+                $item = $this->getModel()->getTableFields();
                 
-                return $form_config;
+                $fields_config = array();
+                
+                foreach ($item as $name => $row)
+                {
+                    $fields_config[ $name ] = $this->createField($name, $row);
+                }
+                //var_dumP($fields_config);die();
+                return $fields_config;
         }
         
-        function createField($name, $row)
-        {
-            
-            $ret = array("extends_from"=> "string");
-            $ret = array_merge($ret, $this->config["form"]["fields"][$name]);
-            return $ret;
-        }
+    /**
+     * extend model fields with form->config[default_packages] (core/core.cms/classes/forms/cms-form.yml)
+     */
+    function createField($name, $row)
+    {
+        $title = Locator::get("msg")->get( "forms.".$name );
+        
+        $ret = array(//"model_default"=> $this->item[$name],
+                     "wrapper_title"=> $title);
+        if ( is_array($this->config["form"]["fields"][$name] ) )
+            $ret = array_merge($this->config["form"]["fields"][$name], $ret);
 
+        return $ret;
+    }
+/*
 	public function __getFieldsHtml()
 	{
 		Finder::pushContext();
@@ -161,7 +189,7 @@ class FormProc extends FormSimple
 		$this->load();
 		return $this->item;
 	}
-
+*/
 
 	protected function renderButtons()
 	{

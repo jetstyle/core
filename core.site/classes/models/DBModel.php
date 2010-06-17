@@ -276,6 +276,8 @@ class DBModel extends Model implements IteratorAggregate, ArrayAccess, Countable
 
 		}
 
+                $model->className = $className;
+
 		return $model;
 	}
 
@@ -393,10 +395,10 @@ class DBModel extends Model implements IteratorAggregate, ArrayAccess, Countable
 			$this->setAutoPrefix($ymlConfig['autoPrefix']);
 		}
 
-        if ($ymlConfig['key_field'])
-        {
-            $this->setKeyField($ymlConfig['key_field']);
-        }
+                if ($ymlConfig['key_field'])
+                {
+                    $this->setKeyField($ymlConfig['key_field']);
+                }
 
 		if ($ymlConfig['files'])
 		{
@@ -2397,5 +2399,10 @@ class DBModel extends Model implements IteratorAggregate, ArrayAccess, Countable
 
 		return $res;
 	}
+        
+        public function getModelClassName()
+        {
+            return $this->className;
+        }
 }
 ?>
