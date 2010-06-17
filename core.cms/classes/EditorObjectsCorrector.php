@@ -114,8 +114,15 @@ class EditorObjectsCorrector
 					$params['width'] = intval($flashParams[1]);
 					$params['height'] = intval($flashParams[2]);
 					
+					
 					$this->tpl->setRef('*', $params);
-					$result = $this->tpl->parse('content/blocks/flash.html');
+					
+				    $parts = explode(".", $params["src"]); 
+				    
+				    if ($parts[1]=="flv")
+    					$result = $this->tpl->parse('content/blocks/flash_video.html');
+                    else
+    					$result = $this->tpl->parse('content/blocks/flash.html');
 				}
 			}
 		}
