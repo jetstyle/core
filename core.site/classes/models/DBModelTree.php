@@ -50,12 +50,12 @@ class DBModelTree extends DBModel
 			WHERE ".$this->quoteName($this->getPk())." = ".$this->quoteValue($beforeNodeId)."
 		");
 	
-		if ($beforeNodeId[$this->getPk()])
+		if ($beforeNode[$this->getPk()])
 		{
 			$db->query("
 				UPDATE ".$this->quoteName(($this->autoPrefix ? DBAL::$prefix : "").$this->getTableName())."
 				SET _order = _order + 1
-				WHERE _order >= " . self::quote($beforeNodeId['_order']) . " AND _parent = " . self::quote($beforeNodeId['_parent']) . "
+				WHERE _order >= " . self::quote($beforeNode['_order']) . " AND _parent = " . self::quote($beforeNode['_parent']) . "
 			");
 			
 			$db->query("
