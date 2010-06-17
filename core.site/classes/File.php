@@ -10,7 +10,7 @@ class File implements ArrayAccess {
     private static $filesInfoCache = array();
     private static $filesInfoByIdCache = array();
     private static $imageExts = array('jpg', 'jpeg', 'gif', 'png', 'bmp');
-    private static $flashExts = array('swf');
+    private static $flashExts = array('swf', 'flv');
     private static $webFilesDir = null;
 
     const FILE_NEW = 1;
