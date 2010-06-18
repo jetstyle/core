@@ -51,16 +51,25 @@ class GridSimple extends ListSimple implements ModuleInterface
 
                 if ($this->items)
                 {
+                    //цикл по итемам таблицы
                     foreach ($this->items as $k => $r)
                     {
                         //echo($r);die();
                         $row  = array();
                         $cols = array();
                         $href = Router::linkTo( "Do" )."/".$this->config["link_to"]."?id=".$r["id"];
+                        
+                        //цикл по колонкам
                         foreach ( $this->columns as $col=>$col_title )
                         {
-                        
-                            $cols[$col] = array("title"=>$r[$col]);
+                            $parts = explode(".", $col);
+                            if ( count($parts)==2 )
+                            {
+                                //var_dump($r[ $parts[0] ][ $parts[1] ]);echo '<br>';
+                                $cols[$col] = array("title"=>$r[ $parts[0] ][ $parts[1] ]);
+                            }
+                            else
+                                $cols[$col] = array("title"=>$r[$col]);
                         
                             if ($col == "title" || count($cols)==1 )
                                 $cols[$col]["href"] = $href;
@@ -81,7 +90,9 @@ class GridSimple extends ListSimple implements ModuleInterface
                         $row["id"] = $r["id"];
                         $row["cols"] = $cols;
                         $row["href"] = $href;
-                        //var_dump( $row );
+                        //echo '<hr>';
+                        //echo( $r );
+                        //die();
                         //echo '<br>';
                         $data[] = $row;
                     }
@@ -120,61 +131,67 @@ class GridSimple extends ListSimple implements ModuleInterface
             }
         }
 
-	public function load( $where = '' )
-	{
-		if( !$this->loaded )
-		{
-			$total = $this->getTotal($where);
+	    public function load( $where = '' )
+	    {
+		    if( !$this->loaded )
+		    {
+			    $total = $this->getTotal($where);
 
-			if ($total > 0)
-			{
-				$this->pager($total);
+			    if ($total > 0)
+			    {
+				    $this->pager($total);
 
-				$model = &$this->getModel();
-                               
-                                $order = RequestInfo::get("order");
-                                switch( $order ){
-                                    case "price":
-                                        $this->current_order = "price";
-                                        $this->order_dir = "ASC"; break;
-                                    case "_price":
-                                        $this->current_order = "price";
-                                        $this->order_dir = "DESC"; break;
-                                    case "title":
-                                        $this->current_order = "title";
-                                        $this->order_dir = "ASC"; break;
-                                    case "_title":
-                                        $this->current_order = "title";
-                                        $this->order_dir = "DESC"; break;
-                                    case "items_count":
-                                        $this->current_order = "items_count";
-                                        $this->order_dir = "ASC"; break;
-                                    case "_items_count":
-                                        $this->current_order = "items_count";
-                                        $this->order_dir = "DESC"; break;
-                                    case "__order":
-                                        $this->current_order = "_order";
-                                        $this->order_dir = "DESC"; break;
-                                    case "_order":
-                                    default:
-                                        $this->current_order = "_order";
-                                        $this->order_dir = "ASC";
-                                }
+				    $model = &$this->getModel();
+                                   
+                    $this->prepareOrder();
 
-                                $model->setOrder($this->current_order." ".$this->order_dir);
+                    $model->setOrder($this->current_order." ".$this->order_dir);
 
-                                $this->setWhere($model);
+                    $this->setWhere($model);
 
-                                //for complex
-                                //$model->addField('>items2rubrics', array("model"=>"CatalogueComplexItems2Rubrics", "pk"=>"id", "fk"=>"item_id", "where"=>"{rubric_id}=".$this->id ));
-                                
-				$model->load( $where, $this->pager->getLimit(), $this->pager->getOffset());
-				$this->items = &$model->getData();
-			}
+                                    //for complex
+                                    //$model->addField('>items2rubrics', array("model"=>"CatalogueComplexItems2Rubrics", "pk"=>"id", "fk"=>"item_id", "where"=>"{rubric_id}=".$this->id ));
+                                    
+				    $model->load( $where, $this->pager->getLimit(), $this->pager->getOffset());
+				    $this->items = &$model->getData();
+			    }
 
-			$this->loaded = true;
-		}
-	}
+			    $this->loaded = true;
+		    }
+	    }
+        
+        protected function prepareOrder()
+        {
+            $order = RequestInfo::get("order");
+            switch( $order )
+            {
+                case "price":
+                    $this->current_order = "price";
+                    $this->order_dir = "ASC"; break;
+                case "_price":
+                    $this->current_order = "price";
+                    $this->order_dir = "DESC"; break;
+                case "title":
+                    $this->current_order = "title";
+                    $this->order_dir = "ASC"; break;
+                case "_title":
+                    $this->current_order = "title";
+                    $this->order_dir = "DESC"; break;
+                case "items_count":
+                    $this->current_order = "items_count";
+                    $this->order_dir = "ASC"; break;
+                case "_items_count":
+                    $this->current_order = "items_count";
+                    $this->order_dir = "DESC"; break;
+                case "__order":
+                    $this->current_order = "_order";
+                    $this->order_dir = "DESC"; break;
+                case "_order":
+                default:
+                    $this->current_order = "_order";
+                    $this->order_dir = "ASC";
+            }
+        }
         
         //every FormClass should realise it
         public function setWhere(&$model){
@@ -184,27 +201,27 @@ class GridSimple extends ListSimple implements ModuleInterface
         public function update($updateData=null)
         {
                 //ajax update
-		if ($this->needAjaxUpdate())
-		{
-    			
-    			header('Content-Type: text/html; charset=windows-1251');
-                        if ($_POST["action"]=="reorder")
-                        {
-                            $orders = RequestInfo::get("orders");
-                            foreach ($orders as $order=>$id)
-                            {
-        //                        var_dump($order, $id);
-                                if (is_numeric($id)){
-                                    $data = array("_order"=>$order);
-                                    $this->getModel()->loadOne("{id}=".$id)->update($data, "id=".$id);
+		        if ($this->needAjaxUpdate())
+		        {
+            			
+            			header('Content-Type: text/html; charset=windows-1251');
+                                if ($_POST["action"]=="reorder")
+                                {
+                                    $orders = RequestInfo::get("orders");
+                                    foreach ($orders as $order=>$id)
+                                    {
+                //                        var_dump($order, $id);
+                                        if (is_numeric($id)){
+                                            $data = array("_order"=>$order);
+                                            $this->getModel()->loadOne("{id}=".$id)->update($data, "id=".$id);
+                                        }
+                                    }
+                                    die('200 ok');
                                 }
-                            }
-                            die('200 ok');
-                        }
-                        
-                        die('500 unkown action');
-    			//die($postData[ $_POST['ajax_update'] ]);
-		}
+                                
+                                die('500 unkown action');
+            			//die($postData[ $_POST['ajax_update'] ]);
+		        }
                 
                 //common update
                 $updateFields = $this->getUpdateFields();
