@@ -67,17 +67,28 @@ class EditorObjectsCorrector
 	protected function correctFlash($matches)
 	{
 		$result = $matches[0];
-		
+
 		preg_match_all('/(.*?)=(")(|.*?[^\\\])\\2/si', $matches[1]." ".$matches[2], $paramsMatches);
 		
 		if (is_array($paramsMatches[3]) && !empty($paramsMatches[3]))
 		{
+
 			$params = array();
 			foreach ($paramsMatches[1] AS $i => $r)
 			{
 				$params[trim($r)] = trim(str_replace('\"', '"', $paramsMatches[3][$i]));
 			}
 
+            if ($params['rel'])
+            {
+            				
+//				$decoded = "".htmlspecialchars_decode($params["rel"], ENT_QUOTES);
+				$decoded = "".urldecode($params["rel"]);
+				if(substr($decoded,1, 6)=="object")
+				{
+				    $result = $decoded;
+				}
+            }
 			if ($params['id'])
 			{
 				$length = strlen($params['id']);
@@ -85,6 +96,7 @@ class EditorObjectsCorrector
 				$flashParams = array();
 				$previousLetter = '';
 				$letter = '';
+
 				
 				for ($i = 0; $i < $length; $i++)
 				{
@@ -107,23 +119,28 @@ class EditorObjectsCorrector
 					$flashParams[$part] .= $letter;
 					$previousLetter = $letter;
 				}
-								
-				if (count($flashParams) == 3)
-				{
-					$params['src'] = $flashParams[0];
-					$params['width'] = intval($flashParams[1]);
-					$params['height'] = intval($flashParams[2]);
-					
-					
-					$this->tpl->setRef('*', $params);
-					
-				    $parts = explode(".", $params["src"]); 
-				    
-				    if ($parts[1]=="flv")
-    					$result = $this->tpl->parse('content/blocks/flash_video.html');
-                    else
-    					$result = $this->tpl->parse('content/blocks/flash.html');
-				}
+			}
+		
+			if (count($flashParams) == 3)
+			{
+				$params['src'] = $flashParams[0];
+				$params['width'] = intval($flashParams[1]);
+				$params['height'] = intval($flashParams[2]);
+				
+				
+				$this->tpl->setRef('*', $params);
+				
+			    $parts = explode(".", $params["src"]); 
+			    
+			    if ($parts[1]=="flv")
+					$result = $this->tpl->parse('content/blocks/flash_video.html');
+                else
+					$result = $this->tpl->parse('content/blocks/flash.html');
+			}
+			else if (count($flashParams) == 2)
+			{
+			    //var_dump($result);die();
+			    return $result;
 			}
 		}
 		
