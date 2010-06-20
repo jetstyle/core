@@ -93,7 +93,7 @@ class PopupObjects
 			Finder::useModel('DBModel');
 			$this->model = DBModel::factory('FilesModel/cms_list');
 			
-            if ( $this->albumId )
+			if ( $this->albumId )
 			{
 			    $ids = DBModel::factory( $this->expand_config["model_items"] )->load("rubric_id=".DBModel::quote($this->albumId))->getArrayAssoc("id");
                             $this->model->addField(">files2obj", array("model"=>"Files2RubricsModel/files2objects","fk"=>"file_id", "pk"=>"id", "where"=>" {obj_id} IN (".DBModel::quote( array_keys($ids) ).")"));
@@ -134,7 +134,7 @@ class PopupObjects
 	}
 
 	public function handlePost()
-    {										                                
+	{										                                
 
             if ( $_POST['rubric_id']=="create" &&  $_POST['new_rubric'] )
             {
@@ -146,56 +146,62 @@ class PopupObjects
                     echo $rubricId;
                     die();
             }
-		    elseif (is_uploaded_file($_FILES['file']['tmp_name']))
-		    {			
-			    $rubricId = intval($_POST['rubric_id']);
-                            
-                            if ($rubricId==-1)
+	    elseif (is_uploaded_file($_FILES['file']['tmp_name']))
+	    {			
+		    $rubricId = intval($_POST['rubric_id']);
+
+                    if ($rubricId==-1)
+                    {
+                            $r = $this->getModel()->getForeignModel('rubric')->getForeignModel('rubric')->loadOne("is_default=1")->getArray();
+                            $rubricId = $r["id"];
+                    }               
+                    
+                    if (!$rubricId)
+		    {
+			    if ($_POST["ajax"])
                             {
-                                    $r = $this->getModel()->getForeignModel('rubric')->getForeignModel('rubric')->loadOne("is_default=1")->getArray();
-                                    $rubricId = $r["id"];
-                            }
-                            
-                            
-                            if (!$rubricId)
-			    {
-				    Locator::get('tpl')->set('file_err', 'Поле "Рубрика" обязательно для заполнения');
-				    return;
+				$ret = array("error"=>"Не указана рубрика! \r\nPOST: ".var_export($_POST, true));
+				echo Json::encode($ret);
+				die();
 			    }
-                            
-			
-			    $file = FileManager::getFile($this->configKey.':picture');
-
-			    try
-			    {						
-				    $file->upload($_FILES['file']);
-			    }
-			    catch(UploadException $e)
-			    {
-				    Locator::get('tpl')->set('file_err', $e->getMessage());
-			    }
-
-			    if ($file['id'])
-			    {
-				    $file->addToRubric($rubricId);
-
-				    $data = array(
-					    'title' => $_POST['title'],
-					    'title_pre' => Locator::get('tpl')->action('typografica', $_POST['title'])
-				    );
-				
-				    $file->updateData($data);
-                                    
-                                    if ($_POST["ajax"])
-                                    {
-                                        //echo $file["id"]."|".$file["link"];
-                                        $ret = $this->getModel()->loadOne("{id}=". $file["id"] )->getArray();
-                                        //$ret = $file->getArray();
-                                        echo Json::encode($ret);
-                                        die();
-                                    }
-			    }
+		            else
+				Locator::get('tpl')->set('file_err', 'Поле "Рубрика" обязательно для заполнения');
+			    return;
 		    }
+                    
+		
+		    $file = FileManager::getFile($this->configKey.':picture');
+
+		    try
+		    {						
+			    $file->upload($_FILES['file']);
+		    }
+		    catch(UploadException $e)
+		    {
+			    Locator::get('tpl')->set('file_err', $e->getMessage());
+		    }
+
+		    if ($file['id'])
+		    {
+			    $file->addToRubric($rubricId);
+
+			    $data = array(
+				    'title' => $_POST['title'],
+				    'title_pre' => Locator::get('tpl')->action('typografica', $_POST['title'])
+			    );
+			
+			    $file->updateData($data);
+                            
+                            if ($_POST["ajax"])
+                            {
+                                //echo $file["id"]."|".$file["link"];
+                                $ret = $this->getModel()->loadOne("{id}=". $file["id"] )->getArray();
+                                //$ret = $file->getArray();
+                                echo Json::encode($ret);
+                                die();
+                            }
+		    }
+	    }
 
 	}
 
