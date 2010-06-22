@@ -3,7 +3,8 @@ Finder::useClass('blocks/Block');
 class MenuBlock extends Block
 {
 	protected $parents = null;
-	protected $currentNodeId = 0;
+	protected $currentNodeId  = 0;
+	protected $selectedNodeId = 0;
 		
 	public function addItem($item)
 	{
@@ -22,12 +23,11 @@ class MenuBlock extends Block
 	{
 		$parents = $this->getParentNodes();
 
-		if ($parents[$row['id']])
-		{
-                        
-			$row['selected'] = 1;
-		}
-		elseif ($row['id'] == $this->currentNodeId)
+	    if ($parents[$row['id']] || $this->selectedNodeId==$row['id'] )
+	    {
+		    $row['selected'] = 1;
+	    }
+		elseif ($row['id'] == $this->currentNodeId )
 		{
 			$row['current'] = 1;
 		}
@@ -180,6 +180,10 @@ class MenuBlock extends Block
 			$data = array();
 		}
 		return $data;
+	}
+	
+	public function setSelected($value){
+	    $this->selectedNodeId = $value;
 	}
 }
 ?>

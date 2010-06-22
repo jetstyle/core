@@ -10,18 +10,18 @@ class MenuCmsBlock extends MenuBlock
 {	
 	public function getCurrent()
 	{
-                $params = array();
+        $params = array();
  		if (Locator::exists('controller'))
 		{
  			$params = Locator::get('controller')->getParams();
 		}
-                //var_dump($this->config['model']);die();                    
-                $model = DBModel::factory($this->config['model']);
-        
-                //we need this to show siblings of hidden current element
-                if ($this->config["mode"]=="submenu"){
-                    $model->setWhere( "({_state}=0 OR {_state}=1)" );
-                }
+
+        $model = DBModel::factory($this->config['model']);
+
+        //we need this to show siblings of hidden current element
+        if ($this->config["mode"]=="submenu"){
+            $model->setWhere( "({_state}=0 OR {_state}=1)" );
+        }
 
 		$data = $model->load();
                
@@ -36,11 +36,10 @@ class MenuCmsBlock extends MenuBlock
 
 		return false;
 	}
-        
-        public function markItem(&$model, &$row)
-	{
-                parent::markItem($model, $row);
-        }
 
+    public function markItem(&$model, &$row)
+	{
+        parent::markItem($model, $row);
+    }
 }
 ?>

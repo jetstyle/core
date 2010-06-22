@@ -59,7 +59,9 @@ $(document).ready(function() {
       {{!for *cols do=@:thcol}}
       <th class="b-catalogue-items-table_td-edit">&nbsp;</th>
       <th class="b-catalogue-items-table_td-checkbox">&nbsp;</th>
+      {{?!hide_order}}
       <th class="b-catalogue-items-table_td-move">{{?order_dir}}<a href="{{order_href}}">По порядку<ins class="js-{{order_dir}}"></ins></a>{{?:}}<a href="{{order_href_default}}">По порядку</a>{{/?}}</th>
+      {{/?}}
     </tr>
   {{?:}}
     <tr id="{{*id}}" {{?*class}}class="{{*class}}"{{/?}}>
@@ -67,7 +69,9 @@ $(document).ready(function() {
       {{!for *cols do=@:col id=*id}}
       <td class="b-catalogue-items-table_td-edit">{{?for.i!=1}}<a href="{{/}}{{*href}}">редактировать</a>{{/?}}</td>
       <td class="b-catalogue-items-table_td-checkbox">{{@:item_checkbox}}</td>
+      {{?!hide_order}}
       <td {{?order_dir}}class="b-catalogue-items-table_td-move"{{/?}}>&nbsp;</td>
+      {{/?}}
     </tr>
   {{/?}}
 {{/:row}}
