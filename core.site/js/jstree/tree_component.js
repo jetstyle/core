@@ -888,6 +888,7 @@ function tree_component () {
 				var nds = new Array();
 				nds[0] = this.get_type(nodes[0]);
 				nds[1] = nodes[1];
+
 				nds[2] = this.get_type(nodes[2]);
 				for(var i = 0; i < this.settings.rules.dragrules.length; i++) {
 					var tmp = this.settings.rules.dragrules[i].split(" ");
@@ -1442,7 +1443,8 @@ function tree_component () {
 			if (this.settings['hide_buttons']['addChild'] !== undefined && this.settings['hide_buttons']['addChild'] !== true)
 			{
 				if (this.settings['hide_buttons']['addChild'][currentLevel]) {
-					$('.js-tree-buttons img.tree-child-add',node).get(0).style.display = 'none';
+//					$('.js-tree-buttons img.tree-child-add',node).get(0).style.display = 'none';
+                    $('.js-tree-buttons img.tree-child-add',node).hide();
 					$('.js-tree-buttons img.tree-child-add',node).attr('hidden','hidden');
 				} else {
 					//$('.js-tree-buttons img.tree-child-add',node).get(0).style.display = '';

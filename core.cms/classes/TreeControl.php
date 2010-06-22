@@ -1,4 +1,9 @@
 <?php
+/**
+ * This class is deprecated
+ * use TreeSimple instead
+ * nop@jetstyle.ru
+ */
 class TreeControl
 {
     private $filtersObject = null;

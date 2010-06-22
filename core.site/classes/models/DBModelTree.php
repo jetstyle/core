@@ -314,6 +314,13 @@ class DBModelTree extends DBModel
         return $this->deleteToTrash('{'.$this->getPk().'} = '.self::quote($nodeId));
     }
     
+    /**
+     * This declaration differs from parent::deleteToTrash
+     * QUICKSTART-1069
+     * 
+     * just a quick hack was used
+     * nop@jetstyle.ru
+     */ 
     public function deleteToTrash($where)
     {
         $affectedRows = 0;
@@ -322,23 +329,34 @@ class DBModelTree extends DBModel
 
         $this->usePrefixedTableAsAlias = true;
 
-        if ($where)
+        //looks like id (see DBModel::deleteToTrash)
+        if (is_numeric($where))
+        {
+            $where = 'WHERE '. $this->parse( '{'.$this->getPk().'} = '.self::quote($where) );
+        }
+        else if ($where)
         {
             $where = 'WHERE '.$this->parse($where);
         }
 
         $sqlResult = $db->execute("
-            SELECT id, _left, _right
+            SELECT id, _left, _right, _state
             FROM ".$this->quoteName(($this->autoPrefix ? DBAL::$prefix : "").$this->getTableName())."
             ".$where );
 
         while ($node = $db->getRow($sqlResult))
         {
-            $db->query("
-                UPDATE ".$this->quoteName(($this->autoPrefix ? DBAL::$prefix : "").$this->getTableName())."
-                SET _state = 2
-                WHERE _left >= ".self::quote($node['_left'])." AND _right <= ".self::quote($node['_right'])."
-            ");
+            if ( $node["_state"] == 2 )
+                $db->query("
+                    DELETE FROM ".$this->quoteName(($this->autoPrefix ? DBAL::$prefix : "").$this->getTableName())."
+                    WHERE _left >= ".self::quote($node['_left'])." AND _right <= ".self::quote($node['_right'])."
+                ");
+            else
+                $db->query("
+                    UPDATE ".$this->quoteName(($this->autoPrefix ? DBAL::$prefix : "").$this->getTableName())."
+                    SET _state = 2
+                    WHERE _left >= ".self::quote($node['_left'])." AND _right <= ".self::quote($node['_right'])."
+                ");
 
             $affectedRows += $db->affectedRows();
         }

@@ -14,33 +14,33 @@ class TreeSimple extends ListSimple  implements ModuleInterface
 	protected $rootId = 0;
 	protected $toRoot = array();
 
-        public function __construct( &$config )
+    public function __construct( &$config )
 	{
 		if (!$config['hide_buttons']) $config['hide_buttons'] = array();
                 
-                if (!isset($config['level_limit']))
-                {
-                    $config['level_limit'] = 3;
-                }
-        
-                if (!isset($config['redirectIfEmptyId']))
-                {
-                    $config['redirectIfEmptyId'] = false;
-                }
+        if (!isset($config['level_limit']))
+        {
+            $config['level_limit'] = 3;
+        }
+
+        if (!isset($config['redirectIfEmptyId']))
+        {
+            $config['redirectIfEmptyId'] = false;
+        }
         
 		if (!isset($config['hide_buttons']['addChild']))
 		{
 			$config['hide_buttons']['addChild'][$config['level_limit']] = true;
 		}
 
-                parent::__construct($config);
+        parent::__construct($config);
                
 	}
 
 	public function handle()
 	{
 		$action = $_REQUEST['action'];
-		
+
 		switch($action)
 		{
 			case 'update':
@@ -186,9 +186,11 @@ class TreeSimple extends ListSimple  implements ModuleInterface
 						
 			if ($model[$model->getPk()])
 			{
+			
 				$this->rootId = $model[$model->getPk()];
 			}
 		}
+
 		return $this->rootId;
 	}
 

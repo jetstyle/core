@@ -1,4 +1,9 @@
 <?php
+/**
+ * This class is deprecated
+ * use TreeSimple instead
+ * nop@jetstyle.ru
+ */
 Finder::useClass('TreeControl');
 
 class TreeControlJsTree extends TreeControl implements ModuleInterface

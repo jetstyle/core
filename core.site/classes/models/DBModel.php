@@ -561,7 +561,8 @@ class DBModel extends Model implements IteratorAggregate, ArrayAccess, Countable
 			{
 				foreach ($this->data AS $k => $r)
 				{
-					$result[$k] = $r->getArray();
+				    if ( $r )
+    					$result[$k] = $r->getArray();
 				}
 			}
 		}
@@ -1868,33 +1869,33 @@ class DBModel extends Model implements IteratorAggregate, ArrayAccess, Countable
 		return $this->db->query($sql);
 	}
 
-        public function deleteToTrash($id)
+    public function deleteToTrash($id)
 	{
 		if (!$id)
 		{
 			return 0;
 		}
 
-                $where = '{id} = '.self::quote($id);
+        $where = '{id} = '.self::quote($id);
 		$this->setWhere($where)->loadOne();
-                if ($this['_state'] <= 1 )
+        if ($this['_state'] <= 1 )
 		{
-                        $row = array('_state' => 2);
+            $row = array('_state' => 2);
 			$this->update($row, $where);
-                        return 1;
+            return 1;
 		}
 		else
 		{
 			$this->delete($where);
-                        return 2;
+            return 2;
 		}
 	}
 
-        public function restoreFromTrash($id)
+    public function restoreFromTrash($id)
 	{
-                $row = array('_state' => 0);
+        $row = array('_state' => 0);
 		$where = '{id} = '.$id;
-                $this->update($row, $where);
+        $this->update($row, $where);
 	}
 
 	public function clean($truncate=True)

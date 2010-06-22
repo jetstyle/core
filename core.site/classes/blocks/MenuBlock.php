@@ -133,7 +133,7 @@ class MenuBlock extends Block
 
 				$where[] = $menu->quoteField('_left') .' > ' . DBModel::quote($parent['_left']);
 				$where[] = $menu->quoteField('_right') .' < ' . DBModel::quote($parent['_right']);
-
+    
 			break;
 		}
 
