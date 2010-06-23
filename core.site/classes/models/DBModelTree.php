@@ -156,6 +156,8 @@ class DBModelTree extends DBModel
         
     protected function onBeforeInsert(&$row)
     {
+        $db = Locator::get('db');
+
         if (!isset($row['_parent']))
         {
             $row['_parent'] = 0;
@@ -163,7 +165,6 @@ class DBModelTree extends DBModel
 
         if ($row['_parent'])
         {
-            $db = Locator::get('db');
             $queryResult = $db->queryOne("
                 SELECT ".$this->getPk()."
                 FROM ".$this->quoteName(($this->autoPrefix ? DBAL::$prefix : "").$this->getTableName())."
@@ -178,8 +179,6 @@ class DBModelTree extends DBModel
 
         if (!isset($row['_order']))
         {
-            $db = Locator::get('db');
-
             $orderResult = $db->queryOne("
                 SELECT (MAX(".$this->quoteName('_order').") + 1) AS _max
                 FROM ".$this->quoteName(($this->autoPrefix ? DBAL::$prefix : "").$this->getTableName())."
@@ -193,7 +192,6 @@ class DBModelTree extends DBModel
         {
             if ($row['_parent'])
             {
-                $db = Locator::get('db');
                 $queryResult = $db->queryOne("
                     SELECT _level
                     FROM ".$this->quoteName(($this->autoPrefix ? DBAL::$prefix : "").$this->getTableName())."
@@ -212,17 +210,17 @@ class DBModelTree extends DBModel
             Finder::useClass('Translit');
             $translit = new Translit();
             
-                        $supertag = $translit->supertag($row['title'], 20);
+            $supertag = $translit->supertag($row['title'], 20);
                         
-                        $queryResult = $db->queryOne("
+            $queryResult = $db->queryOne("
                     SELECT id
                     FROM ".$this->quoteName(($this->autoPrefix ? DBAL::$prefix : "").$this->getTableName())."
                     WHERE ".$this->quoteName("_supertag")." = ".DBModel::quote( $supertag ) );
                         
-                        if ( $queryResult["id"] ){
-                            $this->updateSupertagAfterInsert = true;
-                        }
-                        $row["_supertag"] = $supertag;
+            if ( $queryResult["id"] ){
+                $this->updateSupertagAfterInsert = true;
+            }
+            $row["_supertag"] = $supertag;
                         
         }
     }
