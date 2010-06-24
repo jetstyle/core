@@ -1,5 +1,13 @@
 <?php
 
+/**
+ * 
+ *
+ * @params $config:
+ *              hide_order: true|false - убрать колонку с сортировкой по _order
+ *              list_filters: {rubric_id} - поле по которому фильтровать таблицу при наличии $this->id
+ */
+
 class GridSimple extends ListSimple implements ModuleInterface
 {
     protected $template = "grid_simple.html";
@@ -7,9 +15,23 @@ class GridSimple extends ListSimple implements ModuleInterface
         
     protected $columns = array("picture_small"=>"", "title"=>array("title"=>"Название"), "price"=>array("title"=>"Цена", "editable"=>1), /*"items_count"=>array("title"=>"В наличии", "editable"=>1)*/);
 
+    public function __construct( $config ){
+        parent::__construct( $config );
+
+        if ($this->id)
+            $this->config['add_new_get_params']["rubric_id"] = $this->id;
+
+        //по какому полю фильтровать модель grid`a при клике в list?id=xxx
+        $this->config["list_filters"] = isset($this->config["list_filters"]) ? $this->config["list_filters"] : "{rubric_id}";
+
+        $this->renderTrash();
+		$this->renderAddNew();
+    
+    }
+
     public function handle()
 	{
-
+        //---- parent
 		if ($this->needDelete())
 		{
 			$redirect = $this->delete();
@@ -18,8 +40,6 @@ class GridSimple extends ListSimple implements ModuleInterface
 		{
 			$redirect = $this->update();
 		}
-
-
 		//редирект или выставление флага, что он нужен
 		if ($redirect)
 		{
@@ -36,16 +56,10 @@ class GridSimple extends ListSimple implements ModuleInterface
 			}
 		}
 
-        Locator::get("tpl")->set("hide_order", 1);
-        
-        Locator::get('tpl')->set('group_operations', $this->config['group_operations']);
-        Locator::get('tpl')->set('group_delete_url', RequestInfo::hrefChange('',array('delete_list'=>'1')));
-        Locator::get('tpl')->set('group_restore_url', RequestInfo::hrefChange('',array('restore_list'=>'1')));
-        Locator::get('tpl')->set( '_add_new_title', $this->config['add_new_title'] ? $this->config['add_new_title'] : "Добавить" );
+//---- VVV construct
+
                 
-        Locator::get('tpl')->set( '_add_new_href', RequestInfo::hrefChange( $this->config['add_new_href']  ? RequestInfo::$baseUrl."do/".$this->config['add_new_href'] : "", array($this->idGetVar => '', '_new' => 1, 'rubric_id'=>$this->id)) );
-                
-        Locator::get('tpl')->set( '_delete_title', $this->config['delete_title'] ? $this->config['delete_title'] : "Удалить" );
+        //----^^ construct
         
         $this->load();
         
@@ -141,9 +155,6 @@ class GridSimple extends ListSimple implements ModuleInterface
                 $model->setOrder($this->current_order." ".$this->order_dir);
 
                 $this->setWhere($model);
-
-                //for complex
-                //$model->addField('>items2rubrics', array("model"=>"CatalogueComplexItems2Rubrics", "pk"=>"id", "fk"=>"item_id", "where"=>"{rubric_id}=".$this->id ));
                                 
 				$model->load( $where, $this->pager->getLimit(), $this->pager->getOffset());
 				$this->items = &$model->getData();
@@ -153,6 +164,13 @@ class GridSimple extends ListSimple implements ModuleInterface
 		}
 	}
 	
+	/**
+	 * @params $_GET["order"]
+	 * 
+	 * @return 
+	 *       $this->current_order   - поле в бд по которому фильтровать
+	 *       $this->order_dir
+	 */
 	public function prepareOrder()
 	{
         $order = RequestInfo::get("order");
@@ -185,18 +203,31 @@ class GridSimple extends ListSimple implements ModuleInterface
         }
 
 	}
-        
-    //every FormClass should realise it
-    public function setWhere(&$model){
-        return;
+
+    /**
+     * Filters for simple case by default $this->id filters {rubric_id}
+     *
+     * for complex use
+     * $model->addField('>items2rubrics', array("model"=>"CatalogueComplexItems2Rubrics", "pk"=>"id", "fk"=>"item_id", "where"=>"{rubric_id}=".$this->id ));
+     */
+    public function setWhere($model)
+    {
+        if ( $this->id && $this->config["list_filters"] )
+            $where[] = $this->config["list_filters"]."=".$this->id;
+
+        if ( $model->where )
+            $where[] = $model->where;
+
+        $imploded = @implode(" AND ", $where);
+
+        $model->setWhere( $imploded );
     }
-        
+
     public function update($updateData=null)
     {
-                //ajax update
+        //ajax update
 		if ($this->needAjaxUpdate())
 		{
-    			
     			header('Content-Type: text/html; charset=windows-1251');
                         if ($_POST["action"]=="reorder")
                         {

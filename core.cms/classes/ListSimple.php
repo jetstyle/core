@@ -36,12 +36,12 @@ class ListSimple implements ModuleInterface
 
 	protected $html;
 
-	public function __construct( &$config )
+	public function __construct( $config )
 	{
-		$this->config =& $config;
+		$this->config = $config;
 
-		$this->db = &Locator::get('db');
-		$this->tpl = &Locator::get('tpl');
+		$this->db  = Locator::get('db');
+		$this->tpl = Locator::get('tpl');
 
 		if ($this->config['perPage'])
 		{
@@ -56,7 +56,13 @@ class ListSimple implements ModuleInterface
 		$this->prefix = @implode('_', $config['module_path_parts']).'_';
 		$this->storeTo = $this->prefix.'tpl';
 
+        //GET параметры для ссылка add_new
+        $this->config['add_new_get_params'] = array($this->idGetVar => '', '_new' => 1, 'order'=>'');
+		
+        Locator::get('tpl')->set( '_delete_title', $this->config['delete_title'] ? $this->config['delete_title'] : "Удалить" );
+        
 		$this->id = intval(RequestInfo::get($this->idGetVar));
+
 	}
 
 	public function insert($postData=array())
@@ -249,13 +255,14 @@ class ListSimple implements ModuleInterface
 		}
 	}
 
+    //ссылка на новое
 	protected function renderAddNew()
 	{
 		if (!$this->config['hide_controls']['add_new'])
 		{
-		    //ссылка на новое
-			$this->tpl->set( '_add_new_href', RequestInfo::hrefChange(( $this->config['add_new_href'] ? RequestInfo::$baseUrl."do/".$this->config['add_new_href'] : ''), array($this->idGetVar => '', '_new' => 1)));
-			$this->tpl->set( '_add_new_title', $this->config['add_new_title'] );
+			$this->tpl->set( '_add_new_href', RequestInfo::hrefChange(( $this->config['add_new_href'] ? RequestInfo::$baseUrl."do/".$this->config['add_new_href'] : ''), $this->config['add_new_get_params']));
+			
+			$this->tpl->set( '_add_new_title', $this->config['add_new_title'] ? $this->config['add_new_title'] : "Добавить" );
 			$this->tpl->Parse( $this->template_new, '__add_new' );
 		}
 	}
