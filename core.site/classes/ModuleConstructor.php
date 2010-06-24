@@ -78,6 +78,10 @@ class ModuleConstructor
 				//$childConfig = $this->mergeConfigs($this->config, $childConfig);
 				$this->children[$childName] = ModuleConstructor::factory($this->modulePath.'/'.$childName);
 			}
+			else if ( $childConfig['renderable'] ==false )
+			{
+			    $this->children[$childName] = "dummy";
+			}
 			/*
 			elseif (is_string($childConfig) && $childConfig[0] == '@')
 			{
@@ -206,9 +210,15 @@ class ModuleConstructor
 			{
 				$result = array();
 
-				while ($nextChild = $this->getNextChild())
+				//while ($nextChild = $this->getNextChild() || $nextChild==NULL)
+				foreach ( $this->children as $key=>$child )
 				{
-					$result[] = $nextChild->getHtml();
+//				    if ( is_object( $nextChild ) )
+    				//$result[] = $nextChild->getHtml();
+    				if ($child!=="dummy")
+        				$result[] = $child->getHtml();
+        			else
+        			    $result[] = "";
 				}
 
 				$tpl->set('wrapped', $result);
