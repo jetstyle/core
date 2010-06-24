@@ -97,7 +97,10 @@ class ExceptionHandler
 
 	private function silent($exceptionObj)
 	{
-		echo $this->silentDieMsg;
+		ob_end_clean();
+		echo $this->getHtml($exceptionObj);		
+
+//		echo $this->silentDieMsg;
 	}
 
 	private function mail($exceptionObj)
