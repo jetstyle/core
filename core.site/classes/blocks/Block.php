@@ -65,6 +65,11 @@ class Block
 		return $this->tplParams[$key];
 	}
 
+	public function setParam($key, $value)
+	{
+		$this->config[ $key ] = $value;
+	}
+
         public function getParam($key)
         {
             if (isset($this->tplParams[$key]))
