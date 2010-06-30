@@ -29,6 +29,8 @@ class DoController extends Controller
 		if ((!defined('COMMAND_LINE') || !COMMAND_LINE) && !Locator::get('principal')->security('noguests'))
 		{
 			Controller::deny();
+		} else {
+		    Locator::get("tpl")->set('loggined_user', Locator::get('principal')->getUserData());
 		}
 
 		parent::handle();
