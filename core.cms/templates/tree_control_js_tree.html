@@ -41,13 +41,13 @@
 			'source_url':  '{{tree_params.source_url}}',
 			'images_path' : '{{images}}jstree/',
 			'current_id' : '{{tree_params.current_id}}',
-			'ajax_auto_loading' : {{?tree_params.ajax_auto_loading}}true{{?:}}false{{/?}},
+			'ajax_auto_loading' : {{?tree_params.ajax_auto_loading}}true{{?:}}false{{/?}}
                         {{?tree_params.edit_url}}
-                        'beforerename': function(NODE,LANG,TREE_OBJ){
+                        ,'beforerename': function(NODE,LANG,TREE_OBJ){
                                             var id = NODE.id.substr(5);
                                             document.location.assign( "{{tree_params.edit_url}}?id="+id );
                                             return false;
-                                    },
+                                    }
                         {{/?}}
 		};
 		treeControl = new TreeControl(params);
