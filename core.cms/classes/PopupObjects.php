@@ -93,7 +93,7 @@ class PopupObjects
 			Finder::useModel('DBModel');
 			$this->model = DBModel::factory('FilesModel/cms_list');
 			
-                        if ( $this->albumId )
+			if ( $this->albumId )
 			{
 			    $ids = DBModel::factory( $this->expand_config["model_items"] )->load("rubric_id=".DBModel::quote($this->albumId))->getArrayAssoc("id");
                             $this->model->addField(">files2obj", array("model"=>"Files2RubricsModel/files2objects","fk"=>"file_id", "pk"=>"id", "where"=>" {obj_id} IN (".DBModel::quote( array_keys($ids) ).")"));
@@ -134,68 +134,75 @@ class PopupObjects
 	}
 
 	public function handlePost()
-        {		
-                if ( $_POST['rubric_id']=="create" &&  $_POST['new_rubric'] )
-                {
-                        $o = $this->getModel()->getForeignModel('rubric')->getForeignModel('rubric')->setOrder("_order desc")->loadOne("_state=0");
+	{										                                
 
-                        $data = array("title"=>iconv("utf-8", "cp1251", $_POST['new_rubric']), "type_id"=>1, "module"=>"Files", "_order"=>($o["_order"]+1) );
+            if ( $_POST['rubric_id']=="create" &&  $_POST['new_rubric'] )
+            {
+                    $o = $this->getModel()->getForeignModel('rubric')->getForeignModel('rubric')->setOrder("_order desc")->loadOne("_state=0");
 
-                        $rubricId = $this->getModel()->getForeignModel('rubric')->getForeignModel('rubric')->insert($data);
-                        echo $rubricId;
-                        die();
-                }
-		elseif (is_uploaded_file($_FILES['file']['tmp_name']))
-		{			
-			$rubricId = intval($_POST['rubric_id']);
-                        
-                        if ($rubricId==-1)
-                        {
-                                $r = $this->getModel()->getForeignModel('rubric')->getForeignModel('rubric')->loadOne("is_default=1")->getArray();
-                                $rubricId = $r["id"];
-                        }
-                        
-                        
-                        if (!$rubricId)
-			{
+                    $data = array("title"=>iconv("utf-8", "cp1251", $_POST['new_rubric']), "type_id"=>1, "module"=>"Files", "_order"=>($o["_order"]+1) );
+
+                    $rubricId = $this->getModel()->getForeignModel('rubric')->getForeignModel('rubric')->insert($data);
+                    echo $rubricId;
+                    die();
+            }
+	    elseif (is_uploaded_file($_FILES['file']['tmp_name']))
+	    {			
+		    $rubricId = intval($_POST['rubric_id']);
+
+                    if ($rubricId==-1)
+                    {
+                            $r = $this->getModel()->getForeignModel('rubric')->getForeignModel('rubric')->loadOne("is_default=1")->getArray();
+                            $rubricId = $r["id"];
+                    }               
+                    
+                    if (!$rubricId)
+		    {
+			    if ($_POST["ajax"])
+                            {
+				$ret = array("error"=>"Не указана рубрика! \r\nPOST: ".var_export($_POST, true));
+				echo Json::encode($ret);
+				die();
+			    }
+		            else
 				Locator::get('tpl')->set('file_err', 'Поле "Рубрика" обязательно для заполнения');
-				return;
-			}
-                        
+			    return;
+		    }
+                    
+		
+		    $file = FileManager::getFile($this->configKey.':picture');
+
+		    try
+		    {						
+			    $file->upload($_FILES['file']);
+		    }
+		    catch(UploadException $e)
+		    {
+			    Locator::get('tpl')->set('file_err', $e->getMessage());
+		    }
+
+		    if ($file['id'])
+		    {
+			    $file->addToRubric($rubricId);
+
+			    $data = array(
+				    'title' => $_POST['title'],
+				    'title_pre' => Locator::get('tpl')->action('typografica', $_POST['title'])
+			    );
 			
-			$file = FileManager::getFile($this->configKey.':picture');
+			    $file->updateData($data);
+                            
+                            if ($_POST["ajax"])
+                            {
+                                //echo $file["id"]."|".$file["link"];
+                                $ret = $this->getModel()->loadOne("{id}=". $file["id"] )->getArray();
+                                //$ret = $file->getArray();
+                                echo Json::encode($ret);
+                                die();
+                            }
+		    }
+	    }
 
-			try
-			{						
-				$file->upload($_FILES['file']);
-			}
-			catch(UploadException $e)
-			{
-				Locator::get('tpl')->set('file_err', $e->getMessage());
-			}
-
-			if ($file['id'])
-			{
-				$file->addToRubric($rubricId);
-
-				$data = array(
-					'title' => $_POST['title'],
-					'title_pre' => Locator::get('tpl')->action('typografica', $_POST['title'])
-				);
-				
-				$file->updateData($data);
-                                
-                                if ($_POST["ajax"])
-                                {
-                                    //echo $file["id"]."|".$file["link"];
-                                    $ret = $this->getModel()->loadOne("{id}=". $file["id"] )->getArray();
-                                    //$ret = $file->getArray();
-                                    echo Json::encode($ret);
-                                    die();
-                                }
-			}
-		}
-                
 	}
 
 	protected function loadRubrics()
@@ -206,8 +213,11 @@ class PopupObjects
 			WHERE type_id = ".$this->db->quote($this->rubricsTypeId)." AND _state = 0 ORDER by _order
 		", "id");
 
-                //$albums = $this->db->query("select id,title from ??gallery_rubrics WHERE _state=0", "id");
+        //$albums = $this->db->query("select id,title from ??gallery_rubrics WHERE _state=0", "id");
+
+        if ($this->expand_config["model_rubrics"])
                 $albums = DBModel::factory( $this->expand_config["model_rubrics"] )->load("_state=0")->getArrayAssoc("id");
+
 		//var_dump($albums);die();
 		if (isset($albums[$this->albumId]))
 		{
