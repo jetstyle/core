@@ -4,18 +4,25 @@ Finder::useClass('FormSimple');
 class FormFiles extends FormSimple {
     const FILES_RUBRIC_TYPE_ID = 0;
     const PICTURES_RUBRIC_TYPE_ID = 1;
-
+    
     protected $upload;
     protected $max_file_size = 55242880; //максимальный размер файла для загрузки
     protected $template_files = 'formfiles.html';
-
+    
     protected $filesConfig = array();
     protected $configKey = '';
-
+    
     protected $filesRubrics = array();
-
+    
     private $uploadedFiles = array();
-
+    
+    protected $upload_errors = array(
+        UPLOAD_ERR_INI_SIZE  => 'Размер принятого файла превысил максимально допустимый размер',
+        UPLOAD_ERR_FORM_SIZE => 'Размер загружаемого файла превысил значение, указанное в HTML-форме',
+        UPLOAD_ERR_PARTIAL   => 'Загружаемый файл был получен только частично',
+        UPLOAD_ERR_NO_FILE   => 'Файл не был загружен'
+    );
+    
     public function __construct( &$config ) {
         Finder::useClass('FileManager');
 
@@ -93,37 +100,51 @@ class FormFiles extends FormSimple {
     public function update() {
         $updateResult = parent :: update();
         if( $updateResult ) {
-            $this->uploadFiles();
+            return $this->uploadFiles();
         }
 
         return $updateResult;
     }
-
+    
     protected function uploadFiles($objId = null, $isId = false) {
+        $result = true;
         if ($objId === null) {
             $objId = $this->id;
         }
-
+        
         //загружаем и удаляем файлы
         foreach ($this->filesConfig AS $inputName => $conf) {
             if ($conf['input']) {
                 $inputName = $conf['input'];
             }
-
+            
             $file = FileManager::getFile($this->configKey.':'.$conf['key'], $objId, $isId);
-
-            if (is_uploaded_file($_FILES[$this->prefix.$inputName]['tmp_name'])) {
+            
+            // проверяем загруженный файл на ошибки
+            if (isset($_FILES[$this->prefix.$inputName]) && $_FILES[$this->prefix.$inputName]['error']) {
+                $err_no = $_FILES[$this->prefix.$inputName]['error'];
+                if ($err_no == UPLOAD_ERR_INI_SIZE) {
+                    $result = false;
+                    $this->tpl->set($inputName.'_err', $this->upload_errors[UPLOAD_ERR_INI_SIZE]);
+                } elseif ($err_no == UPLOAD_ERR_FORM_SIZE) {
+                    $result = false;
+                    $this->tpl->set($inputName.'_err', $this->upload_errors[UPLOAD_ERR_FORM_SIZE]);
+                } elseif ($err_no == UPLOAD_ERR_PARTIAL) {
+                    $result = false;
+                    $this->tpl->set($inputName.'_err', $this->upload_errors[UPLOAD_ERR_PARTIAL]);
+                }
+            } elseif (is_uploaded_file($_FILES[$this->prefix.$inputName]['tmp_name'])) {
                 try {
                     $file->upload($_FILES[$this->prefix.$inputName]);
                     $filesRubric = $this->getFilesRubric($file);
                     $file->addToRubric($filesRubric['id']);
                 } catch( UploadException $e ) {
+                    $result = false;
                     $this->tpl->set($inputName.'_err', $e->getMessage());
                 }
 
                 $this->uploadedFiles[$inputName] = $file;
-            }
-            elseif ($_POST[$this->prefix.$inputName.'_del']) {
+            } elseif ($_POST[$this->prefix.$inputName.'_del']) {
                 if ($isId) {
                     $filesRubric = $this->getFilesRubric($file);
                     $file->removeFromRubric($filesRubric['id']);
@@ -133,6 +154,8 @@ class FormFiles extends FormSimple {
                 }
             }
         }
+        
+        return $result;
     }
 
     public function delete() {
