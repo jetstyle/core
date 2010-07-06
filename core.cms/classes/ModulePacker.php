@@ -28,7 +28,7 @@ class ModulePacker
 	 * Pack.
 	 *
 	 * If module name is empty, than pack all modules.
-	 * 
+	 *
 	 * @param string $moduleName
 	 */
 	public function pack($moduleName = null)
@@ -57,13 +57,13 @@ class ModulePacker
 			return false;
 		}
 		$this->cleanUp($moduleDir);
-		
+
 		$config = array();
 		if (file_exists($moduleDir.'/.meta/config.yml'))
 		{
 			$config = YamlWrapper::load($moduleDir.'/.meta/config.yml');
 		}
-		
+
 		if (is_array($config['tables']))
 		{
 			$tables = $config['tables'];
@@ -72,13 +72,13 @@ class ModulePacker
 		{
 			$tables = $this->getTables($moduleName);
 		}
-		
+
 		if (is_array($tables) && !empty($tables))
 		{
 			foreach ($tables AS $table)
 			{
 				$dumpData = false;
-				
+
 				if (isset($config['no_data']))
 				{
 					if (
@@ -94,9 +94,9 @@ class ModulePacker
 				{
 					$dumpData = true;
 				}
-				
+
 				$this->dumpStructure($table, $moduleDir, $dumpData);
-				
+
 				if ($dumpData)
 				{
 					$this->dumpData($table, $moduleDir);
@@ -145,7 +145,7 @@ class ModulePacker
 	 */
 	protected function getTables($moduleName)
 	{
-		$module = ModuleConstructor::factory($moduleName);		
+		$module = ModuleConstructor::factory($moduleName);
 		$result = $this->getTablesRecursive($module);
 		return array_unique($result);
 	}
@@ -153,14 +153,21 @@ class ModulePacker
 	protected function getTablesRecursive($module)
 	{
 		$result = array();
-		$config = $module->getConfig();
-		
+
+        if($module=="dummy")
+            return $result;
+
+		if (is_array($module))
+		    $config = $module;
+        else
+		    $config = $module->getConfig();
+
 		if (is_array($config) && $config['renderable'] && $config['model'])
 		{
 			$model = DBModel::factory($config['model']);
 			$result[] = $model->getTableName();
 		}
-		
+
 		$children = $module->getChildren();
 		if (is_array($children))
 		{
@@ -169,7 +176,7 @@ class ModulePacker
 		        $result = array_merge($result, $this->getTablesRecursive($child));
 		    }
 		}
-		
+
 		return $result;
 	}
 
@@ -180,3 +187,4 @@ class ModulePacker
 }
 
 ?>
+
