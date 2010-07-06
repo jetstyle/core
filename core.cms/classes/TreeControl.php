@@ -108,7 +108,7 @@ class TreeControl
 						$r['_path'] = ($parentTag ? $parentTag.'/' : '').$r["_supertag"];
 					}
 
-					$db->execute("UPDATE ".DBAL::$prefix.$tableName." SET _supertag='".$r["_supertag"]."',_path='".$r['_path']."' WHERE id='".$r['id']."'");
+					$db->execute("UPDATE ??".$tableName." SET _supertag='".$r["_supertag"]."',_path='".$r['_path']."' WHERE id='".$r['id']."'");
 					$tree['items'][$id] = $r;
 				}
 			}
@@ -551,7 +551,7 @@ class TreeControl
 		}
 
 		$id = $db->insert("
-			INSERT INTO ". DBAL::$prefix.$this->config->table_name ."
+			INSERT INTO ??".$this->config->table_name ."
 			(title, title_pre, _parent, _supertag, _path, _order, _state " . $additionFields . ")
 			VALUES
  			(".$this->db->quote($node['title']).", ".$db->quote($node['title_pre']).", ".$db->quote($node['parent']).", ".$db->quote($node['supertag']).", ".$db->quote($node['_path']).", ".$db->quote($order).", 1 ".$additionValues.")
