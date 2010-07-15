@@ -17,8 +17,17 @@ class FormBlock extends Block
             {
                 $config['action'] = RequestInfo::$baseUrl.Router::linkTo($action);
             }
+			$config['on_after_event'] = array(array(&$this, 'OnAfterEventForm'));
             $form = new EasyForm($formConfigName, $config);
-            $data = $form->handle();
+			if ($_COOKIE[$form->form->name.'_sended'])
+			{
+				setcookie($form->form->name.'_sended', false, time()-3600);
+				$data = Locator::get('tpl')->parse($form->config['text_after_event']);
+			}
+			else
+			{
+				$data = $form->handle();	
+			}
         }
         else
         {
@@ -26,6 +35,14 @@ class FormBlock extends Block
         }
 
 		$this->setData( $data );
+	}
+	
+	public function OnAfterEventForm($event, $form)
+	{
+		if ($form->config['text_after_event'])
+		{
+			setcookie($form->name.'_sended', true, time()+3600);	
+		}
 	}
 
 }
