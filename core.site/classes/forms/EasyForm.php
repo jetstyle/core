@@ -83,6 +83,8 @@ class EasyForm {
 		}
 
 		$this->tpl =& Locator::get('tpl');
+		
+		$this->CreateForm( $this->config );
 	}
 
 	//построение формы, обработка формы
@@ -139,9 +141,6 @@ class EasyForm {
 
                 //генерируем конфиг для поля
                 $conf = $this->ConstructConfig( $pack_name, $conf, false, $name );
-                
-                if ($conf === false)
-                    continue;
 
                 //определяем wrapper_tpl
                 if (!isset($conf["wrapper_tpl"]))

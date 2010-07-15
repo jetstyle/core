@@ -162,6 +162,21 @@ class Form
          $this->config[$v] = array();
          $this->config[$v][] = $form_config[$v];
        }
+       
+      if ($this->config['form_name'])
+      {
+         $this->name = $this->config['form_name'];
+      }
+     else if ($this->config['db_table'])
+     {
+         $this->name = $this->config['db_table'];
+     }
+     else
+     {
+         if (!Config::get('last_form_id')) Config::set('last_form_id', 1);
+         $this->name = 'form'.Config::get('last_form_id');
+         Config::set('last_form_id', Config::get('last_form_id')+1);
+     }
    }
 
 
@@ -217,23 +232,13 @@ class Form
      }
      while (isset($this->rh->forms) && in_array($this->name, $this->rh->forms));
      $this->rh->forms[] = $this->name;*/
-     if ($this->config['db_table'])
-     {
-         $this->name = $this->config['db_table'];
-     }
-     else
-     {
-         if (!Config::get('last_form_id')) Config::set('last_form_id', 1);
-         $this->name = 'form'.Config::get('last_form_id');
-         Config::set('last_form_id', Config::get('last_form_id')+1);
-     }
 
      $postData = null;
-     if (isset($_POST[$this->form_present_var]) && ($_POST[$this->form_present_var] == 'form_'.$this->name))
+     if (isset($_POST[$this->form_present_var]) && ($_POST[$this->form_present_var] == $this->name))
      {
          $postData = &$_POST;
      }
-     elseif (isset($_GET[$this->form_present_var]) && ($_GET[$this->form_present_var] == 'form_'.$this->name))
+     elseif (isset($_GET[$this->form_present_var]) && ($_GET[$this->form_present_var] == $this->name))
      {
          $postData = &$_GET;
      }
@@ -360,7 +365,7 @@ class Form
    function _ParseWrapper( $content )
    {
 	 $tpl = &Locator::get('tpl');
-     $form_name = isset($this->config["form_name"]) ? $this->config["form_name"] : 'form_'.$this->name;
+     $form_name = $this->name;
      $tpl->set(
      	"form",
      	"<form action=\"".$this->action."\" ".
