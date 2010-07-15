@@ -21,7 +21,7 @@ class ListSelectOptionsFilter extends ListSelectFilter
         $this->data = $this->getConfig('options');
         foreach ($this->data as &$item)
         {
-            if ($item['id'] == $this->getVarValue)
+            if (isset($this->getVarValue) && strlen($this->getVarValue) > 0 && $item['id'] == $this->getVarValue)
             {
                 $item['selected'] = true;
             }
