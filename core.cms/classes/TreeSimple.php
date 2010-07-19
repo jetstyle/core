@@ -49,7 +49,7 @@ class TreeSimple extends ListSimple  implements ModuleInterface
 				break;
 
 			case 'json':
-				header("Content-type: text/x-json; charset=".$this->xmlEncoding);
+				header("Content-Type: application/json");
 
 				$nodeId = $_GET['id'];
 				$currentId = intval($_GET['cid']);
@@ -186,11 +186,9 @@ class TreeSimple extends ListSimple  implements ModuleInterface
 						
 			if ($model[$model->getPk()])
 			{
-			
 				$this->rootId = $model[$model->getPk()];
 			}
 		}
-
 		return $this->rootId;
 	}
 
