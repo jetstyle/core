@@ -61,7 +61,15 @@ $(document).ready(function() {
     <br />
     {{@:delete}}
     {{@:save}}
-    <a href="{{_add_new_href}}"> {{@:add_new}} </a>
+    {{@:add_new}}
+    <script>
+        $(function(){
+            $('.b-catalogue-items-form_add').click(function(){
+                location.href = '{{_add_new_href}}';
+                return false;    
+            });
+        });
+    </script>
   {{/?}}
   
 </form>
