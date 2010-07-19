@@ -940,8 +940,8 @@ function tree_component () {
 			this.selected.children("a").removeClass("clicked").addClass("clicked").end().parents("li.closed").each( function () { _this.open_branch(this, true); });
 
 			// SCROLL SELECTED NODE INTO VIEW
-			var off_t = this.selected.offset({ scroll : false }).top;
-			var beg_t = this.container.offset({ scroll : false }).top;
+			var off_t = this.selected.offset().top;
+			var beg_t = this.container.offset().top;
 			var end_t = beg_t + this.container.height();
 			var h_cor = (this.container.get(0).scrollWidth > this.container.width()) ? 40 : 20;
 			if(off_t + 5 < beg_t) this.container.scrollTop(this.container.scrollTop() - (beg_t - off_t + 5) );
