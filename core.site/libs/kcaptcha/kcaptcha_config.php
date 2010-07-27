@@ -17,8 +17,8 @@ $length = mt_rand(3,6); # random 5 or 6
 //$length = 6;
 
 # CAPTCHA image size (you do not need to change it, whis parameters is optimal)
-$width = 120;
-$height = 60;
+$width = 90;
+$height = 50;
 
 # symbol's vertical fluctuation amplitude divided by 2
 $fluctuation_amplitude = 5;
