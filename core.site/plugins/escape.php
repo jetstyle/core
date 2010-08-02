@@ -7,6 +7,10 @@ $esc_type = $params['type'] ? $params['type'] : 'html';
       case 'html':
           $res = htmlspecialchars($string, ENT_QUOTES);
 			 break;
+			
+	  case 'html_decode':
+          $res = html_entity_decode($string);
+			 break;
 
       case 'htmlall':
           $res = htmlentities($string, ENT_QUOTES);
