@@ -641,8 +641,7 @@ function tree_component () {
 										$("#marker").css({ "left" : goTo.x , "top" : goTo.y }).show();
 									}
 									else {
-										if($(_this.drag).children("IMG").size() == 0) {
-										  console.log($(_this.drag));
+										if($(_this.drag).children("IMG").size() == 0) {		
 											//$(_this.drag).append("<img style='position:absolute; " + (_this.settings.ui.rtl ? "right" : "left" ) + ":4px; top:0px; background:white; padding:2px;' src='" + _this.images_path + "remove.png' />");
 											$(_this.drag).addClass('js-drag-forbidden');
 										}
