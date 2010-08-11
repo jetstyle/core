@@ -494,14 +494,21 @@ class FormSimple  implements ModuleInterface
                     {
                         foreach ($this->config['render']['select'] as $name => $params)
                         {
+                            $_options = null;
                             $str = '';
                             if ($params['values'])
-                            foreach($params['values'] as $id => $val)
-                            {
-                                    $str .= "<option value='".$id."' ".(($item["id"] && $item[$name]==$id) || (!$item["id"] && $id==$params['default']) ? "selected=\"selected\"" : '' ).">".$val;
-                            }
+                                foreach($params['values'] as $id => $val)
+                                {
+                                        $selected = ($item["id"] && $item[$name]==$id) || (!$item["id"] && $id==$params['default']);
+                                        $str .= "<option value='".$id."' ".($selected ? "selected=\"selected\"" : '' ).">".$val;
+                                        
+                                        $_options[] = array("id"=>$id, "selected"=>$selected, "title"=>$val );
+                                }
+                            if ($this->item && $_options)
+                                $this->item[$name."_options"] = $_options;
                             $tpl->set( 'options_'.$name, $str );
                         }
+                        
                     }
 		}
 
