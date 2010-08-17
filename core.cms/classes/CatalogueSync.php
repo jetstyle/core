@@ -21,6 +21,11 @@ class CatalogueSync implements ModuleInterface
 		$this->config = $config;
 		$this->prefix = implode('_', $config['module_path_parts']).'_';
 	}
+	
+	public function getConfig()
+	{
+		return $this->config;
+	}
 
 	public function handle()
 	{
