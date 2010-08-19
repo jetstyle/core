@@ -42,7 +42,7 @@ class MenuCmsBlock extends MenuBlock
 	protected function constructData()
 	{
 	    parent::constructData();
-	    $data = $this->getData();
+	    $data = $this->data;
 	    foreach ($data as $i=>$r)
 	    {
 	        if ( $r["is_granted"] ){
