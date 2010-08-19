@@ -1,8 +1,8 @@
 <?php
 class Block
 {
-	private $data = null;
-	private $tplParams = array();
+	protected $data = null;
+	private   $tplParams = array();
 	protected $config = array();
 	protected $alwaysLoad = false;
 
