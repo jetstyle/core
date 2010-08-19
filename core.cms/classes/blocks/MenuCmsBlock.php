@@ -8,6 +8,8 @@
 Finder::useClass('blocks/MenuBlock');
 class MenuCmsBlock extends MenuBlock
 {	
+
+    private $defaultMenuItem;
 	public function getCurrent()
 	{
         $params = array();
@@ -29,7 +31,7 @@ class MenuCmsBlock extends MenuBlock
 		{
 			if ($item['href'] == implode ("/", $params))
 			{
-                           // echo($item);
+                // echo($item);
 			    return $item;
 			}
 		}
@@ -37,9 +39,38 @@ class MenuCmsBlock extends MenuBlock
 		return false;
 	}
 
+	protected function constructData()
+	{
+	    parent::constructData();
+	    $data = $this->getData();
+	    foreach ($data as $i=>$r)
+	    {
+	        if ( $r["is_granted"] ){
+	            if ( ! $this->defaultMenuItem )
+	                $this->defaultMenuItem = $r;
+	            $out[] = $r;
+	        }
+	    }
+	    
+	    $this->setData($out);
+	}
+
+    public function getDefaultMenuItem()
+    {
+        if (!$this->defaultMenuItem )
+            $this->constructData();
+        return $this->defaultMenuItem;
+    }
+
     public function markItem(&$model, &$row)
 	{
         parent::markItem($model, $row);
+        $modulePath = $row["href"];
+        //var_dump( Locator::get('principal')->security('cmsModules', $modulePath) ); die();
+        if ( Locator::get('principal')->security('cmsModules', $modulePath) )
+        {
+            $row["is_granted"] = true;
+        }
     }
 }
 ?>
