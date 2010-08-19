@@ -3,7 +3,6 @@ Finder::useClass('blocks/Block');
 
 class BreadcrumbsBlock extends Block
 {
-    private $data = array();
 
 	public function addItem($path, $title, $hide = 0)
 	{
@@ -33,7 +32,7 @@ class BreadcrumbsBlock extends Block
                                                             ->load('_left <= '.DBModel::quote($current['_left']).' AND _right >= '.DBModel::quote($current['_right']));
 
                     $data = $model->getArray();
-                    $this->data = array_merge($data, $this->data);
+                    $this->data = @array_merge($data, $this->data);
                     $this->setData($this->data);
                 }
 	}
