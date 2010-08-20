@@ -142,26 +142,29 @@ class EasyForm {
                 //генерируем конфиг для поля
                 $conf = $this->ConstructConfig( $pack_name, $conf, false, $name );
 
-                //определяем wrapper_tpl
-                if (!isset($conf["wrapper_tpl"]))
-                    foreach ($this->wrapper_tpl as $k=>$v)
-                    {
-                        if (in_array($pack_name, explode(",",$k)))
-                        {
-                            $conf["wrapper_tpl"] = $v[ $is_field ? 1 : 0 ];
-                            break;
-                        }
-                    }
-
-                //создаём поле
-                if ($is_field)
-                    $field =& $form->model->Model_AddField( $name, $conf );
-                else
-                    $field =& $form->AddField( $name, $conf );
-                //если указан пакет группы, обрабатываем вложение
-                if (in_array($pack_name, $this->groups))
+                if ($conf)
                 {
-                    $this->AddFields($field, $conf['fields'], true);
+                    //определяем wrapper_tpl
+                    if (!isset($conf["wrapper_tpl"]))
+                        foreach ($this->wrapper_tpl as $k=>$v)
+                        {
+                            if (in_array($pack_name, explode(",",$k)))
+                            {
+                                $conf["wrapper_tpl"] = $v[ $is_field ? 1 : 0 ];
+                                break;
+                            }
+                        }
+
+                    //создаём поле
+                    if ($is_field)
+                        $field =& $form->model->Model_AddField( $name, $conf );
+                    else
+                        $field =& $form->AddField( $name, $conf );
+                    //если указан пакет группы, обрабатываем вложение
+                    if (in_array($pack_name, $this->groups))
+                    {
+                        $this->AddFields($field, $conf['fields'], true);
+                    }
                 }
             }
         }
@@ -198,21 +201,22 @@ class EasyForm {
 		//конструируем конфиг
 		$config = array();
                 
-                //если нет имени пакета, поискать в конфиге формы default_packages
-                if ( !$conf_name ){
-                    $conf_name = $this->form->config["default_packages"][$field_name]["extends_from"];
+        //если нет имени пакета, поискать в конфиге формы default_packages
+        if ( !$conf_name )
+        {
+            $conf_name = $this->form->config["default_packages"][$field_name]["extends_from"];
+            if (isset($this->form->config["default_packages"][$field_name]) && !$conf_name)
+            {
+                Debug::trace("PACK $field_name:  ".$conf_name);
+                return false;                
+            }
+            else
+                $_config = $this->_MergeConfig($this->form->config["default_packages"][$field_name], $_config);
+        }
 
-                    if (isset($this->form->config["default_packages"][$field_name]) && !$conf_name)
-                    {
-                        return false;                
-                    }
-                    else
-                        $_config = $this->_MergeConfig($this->form->config["default_packages"][$field_name], $_config);
-                }
-
-                //если все еще нет имени пакета, приравнять его к имени поля
-                if ( !$conf_name )
-                    $conf_name = $field_name;
+        //если все еще нет имени пакета, приравнять его к имени поля
+        if ( !$conf_name )
+            $conf_name = $field_name;
 
 		if ($filename = Finder::findScript("classes","forms/packages/".$conf_name))
 		{

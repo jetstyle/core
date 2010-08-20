@@ -354,6 +354,9 @@ class ExceptionHandler
         }
         $result .= "</td></tr></table>";
 
+        if (Config::get("debug"))
+            $result .= Debug::getHtml();
+
         $result .= $this->htmlEnd;
 		
 		return $result;

@@ -347,8 +347,11 @@ class Form
    function Parse()
    {
      $result = "";
-     foreach($this->fields as $field)
+     foreach($this->fields as $field){
        $result .= $field->Parse();
+       }
+       
+       
      return $this->_ParseWrapper( $result );
    }
 

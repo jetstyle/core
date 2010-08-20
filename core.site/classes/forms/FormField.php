@@ -137,7 +137,11 @@ class FormField {
 
         Debug::trace("FormField: interface parsed");
 
-        return $this->wrapper->Wrapper_Parse( $result );
+        $ret = $this->wrapper->Wrapper_Parse( $result );
+
+        Debug::trace("FormField: wrapper: ".get_class($this->wrapper));
+
+        return $ret;
     }
 
     // распознавание данных из поста

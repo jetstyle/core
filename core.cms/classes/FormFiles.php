@@ -49,6 +49,7 @@ class FormFiles extends FormSimple {
                 $_FILES[$key]['name'] = iconv('utf-8', 'cp1251', $_FILES[$key]['name']);
             }
         }
+
     }
 
     /**
@@ -119,7 +120,7 @@ class FormFiles extends FormSimple {
             }
             
             $file = FileManager::getFile($this->configKey.':'.$conf['key'], $objId, $isId);
-            
+            //var_dump($this->configKey.':'.$conf['key'], $objId, $isId);die();
             // проверяем загруженный файл на ошибки
             if (isset($_FILES[$this->prefix.$inputName]) && $_FILES[$this->prefix.$inputName]['error']) {
                 $err_no = $_FILES[$this->prefix.$inputName]['error'];

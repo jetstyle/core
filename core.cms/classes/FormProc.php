@@ -97,6 +97,7 @@ class FormProc extends FormSimple
         Locator::get("msg")->load("cms");
         $config = array();
         $config["fields"]   = $this->getFieldsConfig();
+        $config["fields"]   += $this->getFilesConfig();
         $config["db_model"] = $this->config["model"];
         //var_dump($this->config["model"]);die();
         $config['success_url'] = RequestInfo::href();
@@ -129,18 +130,18 @@ class FormProc extends FormSimple
      */    
     public function getFieldsConfig()
 	{
-                $item = &$this->getItem();
-                $item = $this->getModel()->getTableFields();
-                
-                $fields_config = array();
-                
-                foreach ($item as $name => $row)
-                {
-                    $fields_config[ $name ] = $this->createField($name, $row);
-                }
-                //var_dumP($fields_config);die();
-                return $fields_config;
+        //$item = &$this->getItem();
+        $item = $this->getModel()->getTableFields();
+        
+        $fields_config = array();
+        
+        foreach ($item as $name => $row)
+        {
+            $fields_config[ $name ] = $this->createField($name, $row);
         }
+        //var_dumP($fields_config);die();
+        return $fields_config;
+    }
         
     /**
      * extend model fields with form->config[default_packages] (core/core.cms/classes/forms/cms-form.yml)
@@ -156,6 +157,27 @@ class FormProc extends FormSimple
 
         return $ret;
     }
+    
+    /**
+     * creates files config from module/config.yml to EasyForm
+     */    
+    public function getFilesConfig()
+	{
+        $fields_config = array();
+
+        foreach ($this->config["files"] as $name => $conf)
+        {
+            $fields_config[ $name ] = $this->createField($name, $row);
+            $fields_config[ $name ]["extends_from"] = "file_cms";
+            $fields_config[ $name ]["file_ext"] = explode(",",Config::get("upload_ext"));
+            $fields_config[ $name ]["file_size"] = 55242880;
+            $fields_config[ $name ]["variants"] = $conf;
+
+            $fields_config[ $name ]["config_key"] = $this->config['module_name'].':'.$name;
+        }
+        //var_dumP($fields_config);die();
+        return $fields_config;
+    }    
 /*
 	public function __getFieldsHtml()
 	{

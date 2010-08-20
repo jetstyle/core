@@ -10,7 +10,7 @@ form_class:      'general-form'
 
 
 default_packages:
-    id:     false
+    id: false
     background: 
         extends_from:  checkbox_cms
     border: 
@@ -34,3 +34,4 @@ default_packages:
     _state: 
         extends_from:  checkbox_cms
         wrapper_title: Скрыть (конфинг)
+
