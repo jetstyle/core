@@ -1,17 +1,25 @@
 {{?*}}
-	<ul class="b-cms-menu">
-		{{!for * do=@:item}}
-		
+    {{!connect "jquery.cookie.js"}}
+    {{!connect "menu.js"}}
+    <div class="b-cms-menu-box">
+        <a class="arrow_left">&laquo;</a>
+        <div class="b-cms-menu-scroll">
+        	<ul class="b-cms-menu">
+        		{{!for * do=@:item}}
+        		
                 {{:item *current}}
-			<li class="b-cms-menu_current">{{*title}}</li>
-		{{/:item}}
-                
-		{{:item *selected}}
-			<li class="b-cms-menu_selected"><a href="{{!href_to 'Do/module' *}}">{{*title}}</a></li>
-		{{/:item}}
-		
-		{{:item}}
-			<li><a href="{{!href_to 'Do/module' *}}">{{*title}}</a></li>
-		{{/:item}}
-	</ul>
+        			<li class="b-cms-menu_current">{{*title}}</li>
+        		{{/:item}}
+                        
+        		{{:item *selected}}
+        			<li class="b-cms-menu_selected"><a href="{{!href_to 'Do/module' *}}">{{*title}}</a></li>
+        		{{/:item}}
+        		
+        		{{:item}}
+        			<li><a href="{{!href_to 'Do/module' *}}">{{*title}}</a></li>
+        		{{/:item}}
+        	</ul>
+        </div>
+        <a class="arrow_right">&raquo;</a>
+    </div>
 {{/?}}
