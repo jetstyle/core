@@ -26,7 +26,6 @@ $(function(){
 		}, $speed);
 		return false;	
 	});
-	
 	$rarr.mouseout(function(e){
 		$scroll.stop();
 		setC($scroll.scrollLeft())
@@ -39,7 +38,6 @@ $(function(){
 		}, $speed);
 		return false;		
 	})
-
 	$larr.mouseout(function(e){
 		$scroll.stop();
 		setC($scroll.scrollLeft())
