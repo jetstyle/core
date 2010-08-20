@@ -10,7 +10,7 @@
     
     "options_mode" => "select", // select, radio
     "options"       => array(),
-    "interface_tpl_params" => array( "class" => "w100" ),
+    "interface_tpl_params" => array( "class" => "" ),
 //    "model_default" => 1,
   );
 ?>
