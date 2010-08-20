@@ -3,16 +3,24 @@ $(function(){
 	var $larr = $(".b-cms-menu-box .arrow_left"),
 		$rarr = $(".b-cms-menu-box .arrow_right"),
 		$scroll = $(".b-cms-menu-scroll"),
+		$ul = $(".b-cms-menu"),
 		
 		$speed = 'slow';
 	
-	c.get();
-	if (c.scroll) {
-		$scroll.scrollLeft(c.scroll);
+	var scroll_width = $scroll.attr('scrollWidth') - $scroll.width();
+	
+	if (scroll_width > 0) {
+		c.get($ul.width());
+		if (c.scroll) {
+			$scroll.scrollLeft(c.scroll);
+		}
+	}
+	else {
+		$larr.hide();
+		$rarr.hide();
 	}
 	
 	$rarr.mouseover(function(e){
-		var scroll_width = $scroll.attr('scrollWidth') - $scroll.width();
 		$scroll.animate({
 			'scrollLeft': scroll_width + 'px'
 		}, $speed);
