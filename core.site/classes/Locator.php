@@ -115,8 +115,6 @@ class Locator
 		{
 			if (isset(self::$relations[$key]))
 			{
-
-
 				Finder::useClass( self::$relations[$key]['path'] );
 				$class = self::$relations[$key]['class'];
 
