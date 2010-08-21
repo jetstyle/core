@@ -10,8 +10,9 @@ $config = array(
                 "file_ext"  => array( "zip", "rar", "ppt", "doc", "xls",
                                       "swf", "gif", "jpg", "png" ),
                 "file_chmod" => "775",
-                "wrapper_tpl"=> "wrapper.html:Passthru"
+                "wrapper_tpl"=> "wrapper.html:CmsStringWrapper"
                 // "file_dir"   => "[always supply this]",
                 // "file_name"   => "file_*",
 );
 ?>
+

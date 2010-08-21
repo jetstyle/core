@@ -5,7 +5,7 @@
     <title>{{!pageTitle}}</title>
     <meta http-equiv="Content-Type" content="text/html; charset=windows-1251" />
 
-    {{!connect "cms.css" unshift="tru"}}
+    {{!connect "cms.css" unshift="true"}}
     {{!connect compile="css"}}
 
     {{!connect "default.js" unshift="true"}}
@@ -16,11 +16,12 @@
     {{html_head}}
 
     <script language="javascript" type="text/javascript">
-		var base_url = "{{/}}";
-	</script>
+		  var base_url = "{{/}}";
+	  </script>
     <script language="javascript" type="text/javascript">
 		$(function(){
 			if ($.fn.colorbox) {
+			  $('a.colorbox').colorbox(window.colorBoxParams);
 			  $('a.colorbox-iframe').colorbox(window.colorBoxIframeParams);
 			}
 		});
@@ -34,3 +35,4 @@
 {{!debug}}
 </body>
 </html>
+

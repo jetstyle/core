@@ -2,7 +2,7 @@
 
 class FormProc extends FormSimple
 {
-        
+
 
 	public function handle()
 	{
@@ -39,21 +39,21 @@ class FormProc extends FormSimple
 		{
 			$redirect = $this->update();
 		}
-		
+
 		if ($this->needAjaxUpdate())
 		{
 				$postData = $this->getPostData();
 				header('Content-Type: text/html; charset=windows-1251');
-				
+
 				die($postData[ $_POST['ajax_update'] ]);
 		}
 
 		//редирект или выставление флага, что он нужен
-		
+
 		if ($redirect)
 		{
 			$this->_redirect = RequestInfo::hrefChange('', array('rnd' => mt_rand(1,255)));
-			
+
 			if ($this->stop_redirect)
 			{
 				$this->redirect = $this->_redirect;
@@ -79,7 +79,7 @@ class FormProc extends FormSimple
         */
         if ($this->insert_fields)
         {
-		
+
             $tpl->set('hidden_fields', $this->insert_fields);
         }
 
@@ -123,18 +123,18 @@ class FormProc extends FormSimple
 
 		return $result;
 	}
-    
-    
+
+
     /**
      * creates fields config for EasyForm
-     */    
+     */
     public function getFieldsConfig()
 	{
         //$item = &$this->getItem();
         $item = $this->getModel()->getTableFields();
-        
+
         $fields_config = array();
-        
+
         foreach ($item as $name => $row)
         {
             $fields_config[ $name ] = $this->createField($name, $row);
@@ -142,14 +142,14 @@ class FormProc extends FormSimple
         //var_dumP($fields_config);die();
         return $fields_config;
     }
-        
+
     /**
      * extend model fields with form->config[default_packages] (core/core.cms/classes/forms/cms-form.yml)
      */
     function createField($name, $row)
     {
         $title = Locator::get("msg")->get( "forms.".$name );
-        
+
         $ret = array(//"model_default"=> $this->item[$name],
                      "wrapper_title"=> $title);
         if ( is_array($this->config["form"]["fields"][$name] ) )
@@ -157,10 +157,10 @@ class FormProc extends FormSimple
 
         return $ret;
     }
-    
+
     /**
      * creates files config from module/config.yml to EasyForm
-     */    
+     */
     public function getFilesConfig()
 	{
         $fields_config = array();
@@ -171,13 +171,13 @@ class FormProc extends FormSimple
             $fields_config[ $name ]["extends_from"] = "file_cms";
             $fields_config[ $name ]["file_ext"] = explode(",",Config::get("upload_ext"));
             $fields_config[ $name ]["file_size"] = 55242880;
-            $fields_config[ $name ]["variants"] = $conf;
+            $fields_config[ $name ]["variants"] = $conf["variants"];
 
             $fields_config[ $name ]["config_key"] = $this->config['module_name'].':'.$name;
         }
         //var_dumP($fields_config);die();
         return $fields_config;
-    }    
+    }
 /*
 	public function __getFieldsHtml()
 	{
@@ -198,7 +198,7 @@ class FormProc extends FormSimple
 		{
 			$this->renderFields();
 		}
-		
+
 		$result = $tpl->parse( $this->template_item);
 		$tpl->popContext();
 		Finder::popContext();
@@ -268,7 +268,7 @@ class FormProc extends FormSimple
 	protected function handleForeignFields()
 	{
 		$model = &$this->getModel();
-
+die();
 		foreach($model->getForeignFields() AS $fieldName => $conf)
                 {
                     if (is_array($conf) && $conf['type'] == 'has_one')
@@ -295,3 +295,4 @@ class FormProc extends FormSimple
 
 }
 ?>
+

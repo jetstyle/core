@@ -1,7 +1,4 @@
 {{:File}}
-<tr>
- <td class="left">{{title}}:</td>
-  <td class="desc">
     <input type="file" name="{{prefix}}{{field}}" />
     <br />
     Нажмите кнопку <dfn>Обзор</dfn> и выберите файл со своего компьютера.
@@ -11,17 +8,18 @@
 	    &nbsp;
 	    <label for="{{prefix}}{{field}}_del" class="warning">удалить иллюстрацию</label>
     	<br />
-    	
+
         {{?file.is_flash}}
             {{!flash file.link transparent=1 fullpath="1" width=file.width height=file.height}}
         {{?:}}
-            {{interface_file}}
+            <a href="{{interface_file.original.link}}" class="colorbox">
+              <img src="{{interface_file.link}}"   title="{{interface_file.width}}x{{interface_file.height}}" />
+            </a>
         {{/?}}
 
     {{/?}}
     {{?error}}
     <p class="warning">{{error}}</p>
     {{/?}}
-  </td>
-</tr>
 {{/:File}}
+
