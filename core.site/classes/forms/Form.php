@@ -162,7 +162,7 @@ class Form
          $this->config[$v] = array();
          $this->config[$v][] = $form_config[$v];
        }
-       
+
       if ($this->config['form_name'])
       {
          $this->name = $this->config['form_name'];
@@ -273,9 +273,9 @@ class Form
 
          // redirect
          // delete
-         if ($this->processed && $this->success && $this->deleted && isset($this->config["delete_url"]) )
+         if ($this->processed && $this->success && $this->deleted )
          {
-            Controller::redirect( $this->config["delete_url"] );
+            Controller::redirect( $this->config["delete_url"] ? $this->config["delete_url"] : $this->config["success_url"] );
          }
          // cancel
          if ($this->processed && !$this->success && isset($this->config["cancel_url"]))
@@ -350,8 +350,8 @@ class Form
      foreach($this->fields as $field){
        $result .= $field->Parse();
        }
-       
-       
+
+
      return $this->_ParseWrapper( $result );
    }
 
@@ -487,7 +487,7 @@ class Form
        else                $_event = FORM_EVENT_INSERT;
      }
 
-     $this->deleted = false;
+     //$this->deleted = false;
      switch( $_event )
      {
        case FORM_EVENT_INSERT:
@@ -506,6 +506,8 @@ class Form
                               $this->processed = true;
                               break;
        case FORM_EVENT_DELETE:
+                              if ($this->deleted)
+                                  break;
                               $this->DbDelete();
                               $this->success   = true;
                               $this->processed = true;
@@ -746,3 +748,4 @@ class Form
 }
 
 ?>
+

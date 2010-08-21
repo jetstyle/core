@@ -77,35 +77,38 @@ class FormProc extends FormSimple
         $tpl->set( 'prefix', $this->prefix );
         $tpl->set( '__form_name', $this->prefix.'_simple_form' );
         */
+        /*
+        * TODO:
         if ($this->insert_fields)
         {
 
             $tpl->set('hidden_fields', $this->insert_fields);
-        }
+        }*/
 
         $item = &$this->getItem();
 
+        /**
+         * TODO: ajax
         if ( $item['id']>0 || RequestInfo::get('_new') )
         {
 	            $tpl->set( 'ajax_url', RequestInfo::href() );
         }
+        */
 
         Finder::useClass("forms/EasyForm");
-
-        //$config['on_after_event'] = array(array(&$this, 'OnAfterEventForm'));
 
         Locator::get("msg")->load("cms");
         $config = array();
         $config["fields"]   = $this->getFieldsConfig();
         $config["fields"]   += $this->getFilesConfig();
         $config["db_model"] = $this->config["model"];
-        //var_dump($this->config["model"]);die();
-        $config['success_url'] = RequestInfo::href();
+        $config["on_before_event"] = $this;
+        echo $config['success_url'] = RequestInfo::href();
 
         //if in edit mode: change button and load model item
         if ($this->id){
             $config["id"] = $this->id;
-            $config["buttons"] = array("save");
+            $config["buttons"] = array("save", "delete");
         }
 
         //default form is in core/core.cms/classes/forms/cms-form.yml
@@ -178,40 +181,6 @@ class FormProc extends FormSimple
         //var_dumP($fields_config);die();
         return $fields_config;
     }
-/*
-	public function __getFieldsHtml()
-	{
-		Finder::pushContext();
-		Finder::prependDir(Config::get('cms_dir').'modules/'.$this->config['module_name'].'/');
-
-		$tpl = &Locator::get('tpl');
-		$tpl->pushContext();
-
-		$item = &$this->getItem();
-
-		$tpl->set( 'prefix', $this->prefix );
-		$tpl->set( '__form_name', $this->prefix.'_simple_form' );
-		$tpl->setRef('*', $item );
-
-		//подготовка нетекстовых полей
-		if( !$this->fieldsRendered )
-		{
-			$this->renderFields();
-		}
-
-		$result = $tpl->parse( $this->template_item);
-		$tpl->popContext();
-		Finder::popContext();
-
-		return $result;
-	}
-
-	public function &getItem()
-	{
-		$this->load();
-		return $this->item;
-	}
-*/
 
 	protected function renderButtons()
 	{
@@ -293,6 +262,16 @@ die();
                 }
 	}
 
+    function OnBeforeEventForm($event, $form)
+    {
+        if ( FORM_EVENT_DELETE==$event["event"] )
+        {
+            $this->delete();
+            $form->success = true;
+            $form->processed = true;
+            $form->deleted = true;
+        }
+    }
 }
 ?>
 

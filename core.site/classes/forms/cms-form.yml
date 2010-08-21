@@ -1,7 +1,8 @@
 
-
+#replaced if $this->id
 buttons:
     - insert
+
 
 auto_datetime:   true
 success_url:     ''
@@ -11,9 +12,9 @@ form_class:      'general-form'
 
 default_packages:
     id: false
-    background: 
+    background:
         extends_from:  checkbox_cms
-    border: 
+    border:
         extends_from:  checkbox_cms
     link:
         extends_from: string_cms
@@ -31,7 +32,7 @@ default_packages:
             a: typografica
         model_filtered:
             a: "*_pre"
-    _state: 
+    _state:
         extends_from:  checkbox_cms
         wrapper_title: Скрыть (конфинг)
 
