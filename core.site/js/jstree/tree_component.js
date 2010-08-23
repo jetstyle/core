@@ -497,14 +497,14 @@ function tree_component () {
 					}
 				})
 
-				$('#treeBox li').livequery('mouseover',	function(){
+				$('#treeBox li').live('mouseover',	function(){
 					$(this).find('>a .js-tree-buttons img[hidden!=hidden]').show();
 		           	//$(this).parent().siblings('img[hidden!=hidden]').hide();
 		           	return false;
-				}).livequery('mouseout', function(){
+				}).live('mouseout', function(){
 		           	$(this).find('>a .js-tree-buttons img[hidden!=hidden]').hide();
 				});
-				//$('#treeBox li > a').livequery('mouseover', function(){
+				//$('#treeBox li > a').live('mouseover', function(){
 				//	$(this).siblings('img[hidden!=hidden]').show();
 				//});
 
