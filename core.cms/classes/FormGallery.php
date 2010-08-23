@@ -251,8 +251,8 @@ class FormGallery extends FormCalendar
 		{
 			$data = array(
 				'rubric_id' => $this->id,
-				'title' => 'Заголовок',
-				'title_pre' => 'Заголовок'
+				'title' => '',
+				'title_pre' => ''
 			);
 
 			$itemId = $filesModel->insert($data);

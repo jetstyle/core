@@ -236,10 +236,14 @@ Gallery.prototype = {
             'title': $('#editImageTitle').attr('value'),
             'id': $('#editImageId').attr('value')
         };
-        $.post(this.baseUrl, values, function(data) {
-            $('#image'+values.id+' div.image-title').text(values.title);
-            if (!data.ok) alert("Ошибка!");
-        },'json');
+        
+        if (values.title!="заголовок"){
+            
+            $.post(this.baseUrl, values, function(data) {
+                $('#image'+values.id+' div.image-title').text(values.title);
+                if (!data.ok) alert("Ошибка!");
+            },'json');
+        }
         $('#editImageForm').hide();
     },
 
