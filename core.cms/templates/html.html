@@ -25,6 +25,17 @@
 			}
 		});
 	</script>
+    
+    {{?yandex_map_api}}
+    <script src="http://api-maps.yandex.ru/1.1/index.xml?key={{yandex_map_api}}"
+    type="text/javascript"></script>
+    <script type="text/javascript">
+        window.onload = function () {
+            var map = new YMaps.Map(document.getElementById("YMapsID"));
+            map.setCenter(new YMaps.GeoPoint(37.64, 55.76), 10);
+        }
+    </script>
+    {{/?}}
   </head>
 
 <body onload="{{html_onload}}" {{body_class}}>
