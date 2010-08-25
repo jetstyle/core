@@ -300,7 +300,7 @@ class DBModel extends Model implements IteratorAggregate, ArrayAccess, Countable
 		$this->treeMinLevel = 0;
 		$this->treeRootId = 0;
 		$this->ids = array();
-		
+
 		$this->setKeyField(null);
 
 		if (is_array($this->foreignModels) && !empty($this->foreignModels))
@@ -932,7 +932,7 @@ class DBModel extends Model implements IteratorAggregate, ArrayAccess, Countable
 				$fieldConfig = $params;
 				$fieldConfig['type'] = 'file';
 				$fieldConfig['conf'] = $configKey.':'.$key;
-                
+
 				$this->addField($key, $fieldConfig);
 
 				// subconfigs
@@ -1363,7 +1363,7 @@ class DBModel extends Model implements IteratorAggregate, ArrayAccess, Countable
                 }
 
                 $pkValue = $_data;
-                
+
 		$where = $fmodel->quoteField($fieldinfo['fk']) .'='. DBModel::quote($pkValue);
                 if ($fieldinfo['tree'])
                 {
@@ -2252,13 +2252,13 @@ class DBModel extends Model implements IteratorAggregate, ArrayAccess, Countable
 					$item['children']->init($this, $childItems);
 				}
 				$result[] = $item;
-                                
-                                
+
+
 			}
 		}
-                
+
                 //$this->items = $items;
-                
+
 		return $result;
 	}
 
@@ -2400,10 +2400,11 @@ class DBModel extends Model implements IteratorAggregate, ArrayAccess, Countable
 
 		return $res;
 	}
-        
+
         public function getModelClassName()
         {
             return $this->className;
         }
 }
 ?>
+

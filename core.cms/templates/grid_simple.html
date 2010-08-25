@@ -27,12 +27,12 @@ $(document).ready(function() {
 
 <form class="b-catalogue-items-form" action="" method="post">
   <input type="hidden" name="{{prefix}}update" value="1" />
-  
+
   {{?count(Items)==0}}
     ¬ данном разделе пока нет позиций <br /><br />
   {{/?}}
-  
-  
+
+
   {{?count(Items)>1}}
     {{@:delete}}
     {{@:save}}
@@ -42,15 +42,18 @@ $(document).ready(function() {
     <table id="orders" class="b-catalogue-items-table" cellspacing="0">
       {{!for Items do=@:row}}
     </table>
+
+
+    {{@blocks/pager.html}}
   {{/?}}
-  
+
   {{?count(Items)>1}}
     <br />
     {{@:delete}}
     {{@:save}}
     {{@:add_new}}
   {{/?}}
-  
+
 </form>
 
 {{:row}}
@@ -65,7 +68,7 @@ $(document).ready(function() {
     </tr>
   {{?:}}
     <tr id="{{*id}}" {{?*class}}class="{{*class}}"{{/?}}>
-      <!--<td><a href="{{*href}}">{{*title|strip_scape}}</a></td>-->        
+      <!--<td><a href="{{*href}}">{{*title|strip_scape}}</a></td>-->
       {{!for *cols do=@:col id=*id}}
       <td class="b-catalogue-items-table_td-edit">{{?for.i!=1}}<a href="{{/}}{{*href}}">редактировать</a>{{/?}}</td>
       <td class="b-catalogue-items-table_td-checkbox">{{@:item_checkbox}}</td>

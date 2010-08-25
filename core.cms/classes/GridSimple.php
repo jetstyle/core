@@ -1,7 +1,7 @@
 <?php
 
 /**
- * 
+ *
  *
  * @params $config:
  *              hide_order: true|false - убрать колонку с сортировкой по _order
@@ -12,12 +12,13 @@ class GridSimple extends ListSimple implements ModuleInterface
 {
     protected $template = "grid_simple.html";
     protected $template_list = "grid_simple.html:list";
-        
+	protected $gridPageVar = 'gp';
+
     protected $columns = array("picture_small"=>"", "title"=>array("title"=>"Название"), "price"=>array("title"=>"Цена", "editable"=>1), /*"items_count"=>array("title"=>"В наличии", "editable"=>1)*/);
 
     public function __construct( $config ){
         parent::__construct( $config );
-
+        $this->pageVar = $this->gridPageVar;
         if ($this->id)
             $this->config['add_new_get_params']["rubric_id"] = $this->id;
 
@@ -26,7 +27,7 @@ class GridSimple extends ListSimple implements ModuleInterface
 
         $this->renderTrash();
 		$this->renderAddNew();
-    
+
     }
 
     public function handle()
@@ -44,7 +45,7 @@ class GridSimple extends ListSimple implements ModuleInterface
 		if ($redirect)
 		{
 			$this->_redirect = RequestInfo::hrefChange('', array('rnd' => mt_rand(1,255)));
-			
+
 			if ($this->stop_redirect)
 			{
 				$this->redirect = $this->_redirect;
@@ -58,13 +59,13 @@ class GridSimple extends ListSimple implements ModuleInterface
 
 //---- VVV construct
 
-                
+
         //----^^ construct
-        
+
         $this->load();
-        
+
         $data = array();
-            
+
         $data[] = array("cols"=>$this->columns);
 
         if ($this->items)
@@ -77,12 +78,12 @@ class GridSimple extends ListSimple implements ModuleInterface
                 $href = Router::linkTo( "Do" )."/".$this->config["link_to"]."?id=".$r["id"];
                 foreach ( $this->columns as $col=>$col_title )
                 {
-                
+
                     $cols[$col] = array("title"=>$r[$col]);
-                
+
                     if ($col == "title" || count($cols)==1 )
                         $cols[$col]["href"] = $href;
-             
+
                     if ( $data[0]['cols'][$col]["editable"] )
                     {
                         $cols[$col]["editable"] = 1;
@@ -90,7 +91,7 @@ class GridSimple extends ListSimple implements ModuleInterface
                     //ссылки сортировки
                     $order = $this->getOrderValueFor($col);
                     $data[0]['cols'][$col]["href"] = RequestInfo::hrefChange('',array('order'=>$order  )) ;
-                
+
                     //стрелочки сортировки
                     if ( $this->current_order == $col || ( $this->columns[$col]["order"] && $this->current_order == $this->columns[$col]["order"]) )
                         $data[0]['cols'][$col]["dir"] = $order[0] == "_" ? "up" : "down";
@@ -104,17 +105,25 @@ class GridSimple extends ListSimple implements ModuleInterface
                 //echo '<br>';
                 $data[] = $row;
             }
-        
+
        	    if ( $this->config["hide_order"] ){
        	         Locator::get('tpl')->set('hide_order', 1);
        	    }
-        
+
             //стрелочки
             if ($this->current_order=="_order")
             {
                  Locator::get('tpl')->set('order_dir', ( $this->order_dir=="DESC" ? "down" : "up") );
                  Locator::get('tpl')->set('order_href', RequestInfo::hrefChange('',array('order'=>( $this->order_dir=="DESC" ? "_order" : "__order")  )) );
             }
+
+            if ($this->id && $this->config["edit_title"])
+            {
+                    Locator::get('tpl')->set('edit_href',  RequestInfo::hrefChange( RequestInfo::$baseUrl."do/".$this->config['edit_href']  ,array('id'=>$this->id)));
+                    Locator::get('tpl')->set('edit_title', $this->config["edit_title"] );
+
+            }
+
             Locator::get('tpl')->set('order_href_default', RequestInfo::hrefChange('',array('order'=>"_order")  )) ;
 
             Locator::get('tpl')->set('Items', $data);
@@ -142,20 +151,22 @@ class GridSimple extends ListSimple implements ModuleInterface
 	{
 		if( !$this->loaded )
 		{
-			$total = $this->getTotal($where);
+		    if ($this->item)
+		        $where .= " rubric_id=".$this->item[ $this->item->getPk() ];
+
+			echo $total = $this->getTotal($where);
 
 			if ($total > 0)
 			{
 				$this->pager($total);
-
 				$model = &$this->getModel();
-                
+
                 $this->prepareOrder();
 
                 $model->setOrder($this->current_order." ".$this->order_dir);
 
                 $this->setWhere($model);
-                                
+//var_dump($where, $this->pager->getLimit(), $this->pager->getOffset());
 				$model->load( $where, $this->pager->getLimit(), $this->pager->getOffset());
 				$this->items = &$model->getData();
 			}
@@ -163,11 +174,11 @@ class GridSimple extends ListSimple implements ModuleInterface
 			$this->loaded = true;
 		}
 	}
-	
+
 	/**
 	 * @params $_GET["order"]
-	 * 
-	 * @return 
+	 *
+	 * @return
 	 *       $this->current_order   - поле в бд по которому фильтровать
 	 *       $this->order_dir
 	 */
@@ -242,29 +253,29 @@ class GridSimple extends ListSimple implements ModuleInterface
                             }
                             die('200 ok');
                         }
-                        
+
                         die('500 unkown action');
     			//die($postData[ $_POST['ajax_update'] ]);
 		}
-                
+
                 //common update
             $updateFields = $this->getUpdateFields();
-            
+
             if ($updateFields){
                 foreach ( $updateFields as $field )
                 {
                     foreach ($_POST[$field] as $f=>$v)
                     {
-                        //echo '<br>update SET '.$field."=".$v." WHERE id=".$f;  
+                        //echo '<br>update SET '.$field."=".$v." WHERE id=".$f;
                         $data = array( $field => $v );
                         $this->getModel()->update( $data, "{id}=".$f);
                     }
                 }
-            
+
             }
             return true;
     }
-        
+
     public function delete(){
         if (!empty($_POST["selected_items"]))
         {
@@ -288,7 +299,7 @@ class GridSimple extends ListSimple implements ModuleInterface
             }
             return $updateFields;
     }
-        
+
     public function needAjaxUpdate()
 	{
 		return $_POST["ajax_update"] ? true : false;
@@ -298,10 +309,11 @@ class GridSimple extends ListSimple implements ModuleInterface
 	{
 		return $_POST[$this->prefix."update"] ? true : false;
 	}
-        
+
         public function needDelete()
 	{
                 return $_POST[($this->needAjaxUpdate() ? '' : $this->prefix)."delete"] ? true : false;
 	}
 }
 ?>
+

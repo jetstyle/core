@@ -58,9 +58,9 @@ class ListSimple implements ModuleInterface
 
         //GET параметры для ссылка add_new
         $this->config['add_new_get_params'] = array($this->idGetVar => '', '_new' => 1, 'order'=>'');
-		
+
         Locator::get('tpl')->set( '_delete_title', $this->config['delete_title'] ? $this->config['delete_title'] : "Удалить" );
-        
+
 		$this->id = intval(RequestInfo::get($this->idGetVar));
 
 	}
@@ -261,7 +261,7 @@ class ListSimple implements ModuleInterface
 		if (!$this->config['hide_controls']['add_new'])
 		{
 			$this->tpl->set( '_add_new_href', RequestInfo::hrefChange(( $this->config['add_new_href'] ? RequestInfo::$baseUrl."do/".$this->config['add_new_href'] : ''), $this->config['add_new_get_params']));
-			
+
 			$this->tpl->set( '_add_new_title', $this->config['add_new_title'] ? $this->config['add_new_title'] : "Добавить" );
 			$this->tpl->Parse( $this->template_new, '__add_new' );
 		}
@@ -332,7 +332,11 @@ class ListSimple implements ModuleInterface
 	{
 		Finder::useClass('Pager');
 		$this->pager = new Pager();
+		$this->pager->setPageVar($this->pageVar);
 		$this->pager->setup(intval(RequestInfo::get($this->pageVar)), $total, $this->perPage, $this->frameSize);
+
+		if ($this->config['keepVars'])
+		        $this->pager->setKeepVars($this->config['keepVars']);
 	}
 
 	public function getAllItems($where = '')
@@ -349,3 +353,4 @@ class ListSimple implements ModuleInterface
 	}
 }
 ?>
+
