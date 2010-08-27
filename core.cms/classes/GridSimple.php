@@ -151,8 +151,9 @@ class GridSimple extends ListSimple implements ModuleInterface
 	{
 		if( !$this->loaded )
 		{
-		    if ($this->item)
-		        $where .= " rubric_id=".$this->item[ $this->item->getPk() ];
+//          should be in setWhere
+//		    if ($this->item && $this->item[ $this->item->getPk() ]>0)
+//		        $where .= " rubric_id=".$this->item[ $this->item->getPk() ];
 
 			echo $total = $this->getTotal($where);
 
