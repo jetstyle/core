@@ -78,8 +78,14 @@ class GridSimple extends ListSimple implements ModuleInterface
                 $href = Router::linkTo( "Do" )."/".$this->config["link_to"]."?id=".$r["id"];
                 foreach ( $this->columns as $col=>$col_title )
                 {
-
-                    $cols[$col] = array("title"=>$r[$col]);
+                    $parts = explode(".", $col);
+                    if ( count($parts)==2 )
+                    {
+                        //var_dump($r[ $parts[0] ][ $parts[1] ]);echo '<br>';
+                        $cols[$col] = array("title"=>$r[ $parts[0] ][ $parts[1] ]);
+                    }
+                    else
+                        $cols[$col] = array("title"=>$r[$col]);
 
                     if ($col == "title" || count($cols)==1 )
                         $cols[$col]["href"] = $href;
