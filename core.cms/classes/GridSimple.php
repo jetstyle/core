@@ -151,11 +151,11 @@ class GridSimple extends ListSimple implements ModuleInterface
 	{
 		if( !$this->loaded )
 		{
-//          should be in setWhere
+//          needed for getTotal, but conflicts with setWhere
 //		    if ($this->item && $this->item[ $this->item->getPk() ]>0)
-//		        $where .= " rubric_id=".$this->item[ $this->item->getPk() ];
+//		        $where .= " {rubric_id}=".$this->item[ $this->item->getPk() ];
 
-			echo $total = $this->getTotal($where);
+			$total = $this->getTotal($where);
 
 			if ($total > 0)
 			{
@@ -166,7 +166,7 @@ class GridSimple extends ListSimple implements ModuleInterface
 
                 $model->setOrder($this->current_order." ".$this->order_dir);
 
-                $this->setWhere($model);
+                //$this->setWhere($model);
 //var_dump($where, $this->pager->getLimit(), $this->pager->getOffset());
 				$model->load( $where, $this->pager->getLimit(), $this->pager->getOffset());
 				$this->items = &$model->getData();
@@ -175,6 +175,16 @@ class GridSimple extends ListSimple implements ModuleInterface
 			$this->loaded = true;
 		}
 	}
+
+    protected function &getModel()
+    {
+        //common apply filters
+        $model = parent::getModel();
+        
+        //grid setWhere
+        $this->setWhere($model);
+        return $model;
+    }
 
 	/**
 	 * @params $_GET["order"]
