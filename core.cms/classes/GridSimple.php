@@ -1,11 +1,13 @@
 <?php
 
 /**
+ * @author nop@jetstyle.ru
  *
+ * @see http://in.jetstyle.ru/quickstart/docs/cms/modules/gridsimple
  *
  * @params $config:
  *              hide_order: true|false - убрать колонку с сортировкой по _order
- *              list_filters: {rubric_id} - поле по которому фильтровать таблицу при наличии $this->id
+ *              list_filters: {rubric_id} - поле по которому фильтровать таблицу при наличии $this->id - возможно DEPRECATED т.к. setWhere переопределяется в Grid модуля
  */
 
 class GridSimple extends ListSimple implements ModuleInterface
