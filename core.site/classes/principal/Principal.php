@@ -81,7 +81,12 @@ class Principal implements PrincipalInterface
 	
 	public function getId()
 	{
-		return $this->storageModel->getId();
+		$id = $this->storageModel->getId();
+		if (!$id) {
+		    $ip = ($_SERVER["HTTP_X_FORWARDED_FOR"]!="") ? $_SERVER["HTTP_X_FORWARDED_FOR"] : $_SERVER["REMOTE_ADDR"];
+		    $id = (int) - preg_replace('/[^0-9]/smi', '', $ip);
+		}
+		return $id;
 	}
 	
 	public function getUserData()
