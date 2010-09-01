@@ -26,6 +26,8 @@ class FormSimple
 	protected $updateSupertagAfterInsert = false;
 
 	protected $html;
+	
+	protected $hide_buttons = false;
 
 	public function __construct( &$config )
 	{
@@ -34,6 +36,9 @@ class FormSimple
 		$this->tpl = &Locator::get('tpl');
 		$this->db = &Locator::get('db');
 
+		if ($this->config->hide_buttons)
+            $this->hide_buttons = $this->config->hide_buttons;
+		
 		if (is_array($this->config->has_one))
 		{
 			foreach($this->config->has_one AS $value)
@@ -140,6 +145,8 @@ class FormSimple
 
 		$tpl =& $this->tpl;
 
+		$tpl->set('__hide_buttons', $this->hide_buttons);
+		
 		//подготовка нетекстовых полей
 		$this->renderFields();
 

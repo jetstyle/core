@@ -143,7 +143,7 @@ class ListSimple
 
 	public function getHtml()
 	{
-		return $this->tpl->parse( $this->template);
+		return $this->tpl->parse( $this->template );
 	}
 
 	protected function renderTrash()
@@ -168,6 +168,28 @@ class ListSimple
 		}
 	}
 
+    public function setModel($model)
+    {
+        if (is_array($model))
+        {
+            $this->model = array();
+
+            foreach ($model AS $key => $row)
+            {
+                $item = new ResultSet();
+                $item->init($this, $row);
+
+                $this->model[$key] = $item;
+                unset($item);
+            }
+        }
+        else
+        {
+            $this->model = null;
+        }
+        return $this;
+    }
+
 	protected function &getModel()
 	{
 		if (!$this->model)
@@ -179,7 +201,6 @@ class ListSimple
 			$this->model->where = ( $_GET['_show_trash'] ? '{_state}>=0' : "{_state} <>2 " ) . ($this->config->where ? ' AND ' . $this->config->where : '') ;
 			$this->model->setOrder($this->config->order_by);
 		}
-
 		return $this->model;
 	}
 
