@@ -204,7 +204,8 @@ class TemplateEngineCompiler
 				$file = file_get_contents($this->sourceFile);
 				$file = htmlentities($file, ENT_COMPAT, 'cp1251');
 				$file = str_replace($fn, "<span class=\"warning\">".$fn."</span>", $file);
-				$out .= "<b>Source:</b><br /><br /><div><tt>".$this->sourceTemplate."</tt><pre class=\"source\">".$file."</pre></div>";
+				$out .= "<b>Source:</b><br /><br /><div><tt>".$this->sourceTemplate." (".$this->sourceFile.") "."</tt><pre class=\"source\">".$file."</pre></div>"."<hr><pre>".var_export($data, true)."</pre>";
+		 
 			}
 
 			throw new TplException('Compiler: '.$e->getMessage(), $out);
