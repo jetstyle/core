@@ -200,7 +200,7 @@ class FormSimple  implements ModuleInterface
 		$tpl = &Locator::get('tpl');
 		$tpl->pushContext();
 
-		$item = &$this->getItem();
+		$item = $this->getItem();
 
 		$tpl->set( 'prefix', $this->prefix );
 		$tpl->set( '__form_name', $this->prefix.'_simple_form' );
