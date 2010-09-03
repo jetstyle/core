@@ -280,6 +280,17 @@ abstract class Controller implements ArrayAccess
 		);
 	}
 
+	public function delFromBread($key)
+	{
+		unset($this->breadItems[$key]);
+		$this->breadItems = array_values($this->breadItems);
+	}
+
+	public function getBreads()
+	{
+		return $this->breadItems;
+	}
+
         
 	private function _match_pattern($name, $pattern, $value)
 	{
