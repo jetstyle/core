@@ -41,6 +41,9 @@
 	</script>
 </head>
 <body id="idBody" {{?fixed}}class="l-fixed-width"{{/?}} onload="preloadImages('{{images}}'); {{!inline compile="onload"}}">
+    <!--#[if IE 6]><div id="ie6"><![endif]-->
+    <!--#[if IE 7]><div id="ie7"><![endif]-->
+    
     <a id='top' name='top'></a>
     {{cms_panel}}
     {{HTML_body}}
@@ -48,5 +51,6 @@
     
     <!--img src="{{!href_to 'HTCron'}}" alt="" /-->
     {{!debug}}
+    <!--#[if lt IE 8]></div><![endif]-->
 </body>
 </html>
