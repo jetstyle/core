@@ -58,7 +58,6 @@ class ContentRouter extends BasicRouter
 	private function getModeByClass($cls)
 	{
 		$res = strtolower(trim(preg_replace('#([A-Z])#', '_\\1', $cls), '_'));
-		if ($res == 'content') $res = 0;
 		return $res;
 	}
 
