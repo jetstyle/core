@@ -278,7 +278,18 @@ class Finder {
 	public static function useScript( $type, $name, $level=0, $dr=1, $ext = 'php', $withSubDirs = false, $hideExc = false, $scope = 'all' ){
 		$method = ($hideExc) ? "findScript" : "findScript_";
 		if ($path = self::$method($type,$name,$level,$dr,$ext,$withSubDirs, $scope))
-		self::_useScript( $path );
+		{
+			if ($type == 'libs')
+			{
+				$libsDirPath = substr($path, 0, strlen($path)-strlen($type)-strlen($name));
+				if (strpos(get_include_path(), $libsDirPath) === false)
+				{
+					set_include_path(get_include_path() . PATH_SEPARATOR . $libsDirPath);	
+				}
+			}
+			self::_useScript( $path );	
+		}
+		
 	}
 
 	// Грузит скрипт в контексте меня
