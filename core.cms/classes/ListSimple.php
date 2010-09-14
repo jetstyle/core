@@ -150,7 +150,6 @@ class ListSimple implements ModuleInterface
 		$tpl->set('group_restore_url', RequestInfo::hrefChange('',array('restore_list'=>'1')));
 		$tpl->set('group_operations', $this->config['group_operations']);
 		$tpl->set('drags', $this->config['drags']);
-		$tpl->set('module_name', $this->config['module_name']);
 
 		$this->renderTrash();
 		$this->renderAddNew();
