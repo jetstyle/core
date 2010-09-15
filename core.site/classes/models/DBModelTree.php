@@ -178,10 +178,10 @@ class DBModelTree extends DBModel
 				$row['_parent'] = 0;
 			}
 		}
-
+        $db = Locator::get('db');
 		if (!isset($row['_order']))
 		{
-			$db = Locator::get('db');
+			
 
 			$orderResult = $db->queryOne("
 				SELECT (MAX(".$this->quoteName('_order').") + 1) AS _max
@@ -215,17 +215,17 @@ class DBModelTree extends DBModel
 			Finder::useClass('Translit');
 			$translit = new Translit();
 			
-                        $supertag = $translit->supertag($row['title'], 20);
+            $supertag = $translit->supertag($row['title'], 20);
                         
-                        $queryResult = $db->queryOne("
-					SELECT id
-					FROM ".$this->quoteName(($this->autoPrefix ? DBAL::$prefix : "").$this->getTableName())."
-					WHERE ".$this->quoteName("_supertag")." = ".DBModel::quote( $supertag ) );
-                        
-                        if ( $queryResult["id"] ){
-                            $this->updateSupertagAfterInsert = true;
-                        }
-                        $row["_supertag"] = $supertag;
+            $queryResult = $db->queryOne("
+		        SELECT id
+		        FROM ".$this->quoteName(($this->autoPrefix ? DBAL::$prefix : "").$this->getTableName())."
+		        WHERE ".$this->quoteName("_supertag")." = ".DBModel::quote( $supertag ) );
+            
+            if ( $queryResult["id"] ){
+                $this->updateSupertagAfterInsert = true;
+            }
+            $row["_supertag"] = $supertag;
                         
 		}
 	}
