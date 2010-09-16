@@ -36,7 +36,7 @@
 			<a href="#" class="control gallery-edit"><img width="24" height="24" src="{{images}}gallery/edit.png"/></a>
 			<a href="#" class="control gallery-delete"><img width="24" height="24" src="{{images}}gallery/delete.png"/></a>
 			<a href="{{*picture.link}}" title="{{*title}}" {{?*picture.is_image}}rel="gallery"{{?/}} class="{{?*picture.is_image}}colorbox {{?/}}control gallery-zoom"><img width="24" height="24" src="{{images}}gallery/zoom.png"/></a>
-			<div class="image-title" style="width: {{thumb_width}}px">{{*title}}</div>
+			<div class="image-title" style="width: {{thumb_width}}px" link="{{*link|escape}}" short="{{*short|escape}}">{{?*title}}{{*title}}{{?:}}Без названия{{/?}}</div>
 		</div>
 	{{/:gallery_item}}
 	
@@ -46,7 +46,7 @@
 			<a href="#" class="control gallery-edit"><img width="24" height="24" src="{{images}}gallery/edit.png"/></a>
 			<a href="#" class="control gallery-delete"><img width="24" height="24" src="{{images}}gallery/delete.png"/></a>
 			<a href="{{*picture.link}}" class="control gallery-zoom"><img width="24" height="24" src="{{images}}gallery/zoom.png"/></a>
-			<div class="image-title" style="width: {{thumb_width}}px">{{*title}}</div>
+			<div class="image-title" style="width: {{thumb_width}}px" link="{{*link|escape}}" short="{{*short|escape}}">{{?*title}}{{*title}}{{?:}}Без названия{{/?}}</div>
 		</div>
 	{{/:gallery_item}}
         
@@ -56,7 +56,7 @@
 			<a href="#" class="control gallery-edit"><img width="24" height="24" src="{{images}}gallery/edit.png"/></a>
 			<a href="#" class="control gallery-delete"><img width="24" height="24" src="{{images}}gallery/delete.png"/></a>
 			
-			<div class="image-title" style="width: {{thumb_width}}px">{{*title}}</div>
+			<div class="image-title" style="width: {{thumb_width}}px" link="{{*link|escape}}" short="{{*short|escape}}">{{?*title}}{{*title}}{{?:}}Без названия{{/?}}</div>
 		</div>
 	{{/:gallery_item}}
 
@@ -73,6 +73,13 @@
 <div id="editImageForm">
 	<p>Введите название:</p>
 	<input type="text" value="" id="editImageTitle"/>
+	{{?is_content}}
+        <p>Ссылка:</p>
+    	<input type="text" value="" id="editImageLink"/>
+    	<p>Цена:</p>
+    	<input type="text" value="" id="editImageShort"/>
+    {{/?}}
+    
 	<input type="hidden" value="" id="editImageId"/>
 	<input type="button" value="OK" id="editImageOK"/>
 </div>

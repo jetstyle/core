@@ -18,7 +18,7 @@ class FormGallery extends FormCalendar
 	public function handle()
 	{
         $post = $_POST;
-               $files= $_FILES;
+                $files = $_FILES;
                 Finder::useLib("UTF8");
                 UTF8::autoconvert_request();
         
@@ -141,11 +141,11 @@ class FormGallery extends FormCalendar
 		return $result;
 	}
 
-	protected function handleAjax()
+	public function handleAjax()
 	{
-		if ($_POST['action'] == 'delete')
+		if ($_REQUEST['action'] == 'delete')
 		{
-			$deleteResult = $this->deleteGalleryFiles(explode(',',$_POST['items']));
+			$deleteResult = $this->deleteGalleryFiles(explode(',',$_REQUEST['items']));
 			$jsonResult = array();
 
 			switch ($deleteResult)
@@ -165,24 +165,32 @@ class FormGallery extends FormCalendar
 			die();
 		}
 
-		if ($_POST['action'] == 'reorder')
+		if ($_REQUEST['action'] == 'reorder')
 		{
-			$this->reorderGallery(explode(',',$_POST['order']));
+			$this->reorderGallery(explode(',',$_REQUEST['order']));
 
 			Finder::useClass('Json');
 			echo Json::encode(array('ok' => true));
 			die();
 		}
 
-		if ($_POST['action'] == 'edit')
+		if ($_REQUEST['action'] == 'edit')
 		{
-			$title = iconv('utf-8', 'cp1251', $_POST['title']);
-			$data = array(
-				'title' => $title,
-				'title_pre' => Locator::get('typografica')->correct($title, '')
-			);
+			$title = iconv('utf-8', 'cp1251', $_REQUEST['title']);
+            $data = array(
+                'title' => $title,
+                'title_pre' => Locator::get('typografica')->correct($title, '')
+            );
+			if (isset($_REQUEST['link'])) {
+			    $link = iconv('utf-8', 'cp1251', $_REQUEST['link']);
+			    $data['link'] = $link;
+			}
+			if (isset($_REQUEST['short'])) {
+			    $short = iconv('utf-8', 'cp1251', $_REQUEST['short']);
+			    $data['short'] = $short;
+			}
 
-			$itemId = $_POST['id'];
+			$itemId = $_REQUEST['id'];
 			$this->editGalleryFileData($itemId, $data);
 
 			Finder::useClass('Json');

@@ -231,15 +231,36 @@ Gallery.prototype = {
     },
 
     editImageTitle: function() {
-        var values = {
-            'action': 'edit',
-            'title': $('#editImageTitle').attr('value'),
-            'id': $('#editImageId').attr('value')
-        };
-        $.post(this.baseUrl, values, function(data) {
+    	if ($('#editImageLink').length) {
+            var values = {
+                'action': 'edit',
+                'title': $('#editImageTitle').attr('value'),
+                'link': $('#editImageLink').attr('value'),
+                'short': $('#editImageShort').attr('value'),
+                'id': $('#editImageId').attr('value')
+            };
+    	}
+    	else {
+	        var values = {
+	            'action': 'edit',
+	            'title': $('#editImageTitle').attr('value'),
+	            'id': $('#editImageId').attr('value')
+	        };
+    	}
+        /*$.post(this.baseUrl, values, function(data) {
             $('#image'+values.id+' div.image-title').text(values.title);
             if (!data.ok) alert("Ошибка!");
-        },'json');
+        },'json');*/
+        $.ajax({
+        	type: 'GET',
+        	url: this.baseUrl,
+        	data: values,
+        	success: function(data) {
+        		$('#image'+values.id+' div.image-title').text(values.title);
+        		//if (!data.ok) alert("Ошибка!");
+        		location.reload(true);
+        	}
+        });
         $('#editImageForm').hide();
     },
 
@@ -247,6 +268,8 @@ Gallery.prototype = {
         $('#editImageForm').css('left',$(title).offset().left-15);
         $('#editImageForm').css('top',$(title).offset().top-35);
         $('#editImageTitle').attr('value',$(title).text());
+        $('#editImageLink').attr('value',$(title).attr('link'));
+        $('#editImageShort').attr('value',$(title).attr('short'));
         $('#editImageId').attr('value',this.getId($(title).parent().get(0)));
         $('#editImageForm').show();
         $('#editImageTitle').focus();
