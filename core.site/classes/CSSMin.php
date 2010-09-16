@@ -99,8 +99,7 @@ class CSSMin {
         
         // apply callback to all valid comments (and strip out surrounding ws
         self::$_inHack = false;
-        $css = preg_replace_callback('/\\s*\\/\\*([\\s\\S]*?)\\*\\/\\s*/'
-            ,array('CSSMin', '_commentCB'), $css);
+        $css = preg_replace_callback('/\\s*\\/\\*([\\s\\S]*?)\\*\\/\\s*/', array('CSSMin', '_commentCB'), $css);
 
         // compress whitespace.
         $css = preg_replace('/\s+/', ' ', $css);
@@ -116,18 +115,19 @@ class CSSMin {
         $css = preg_replace('/\\s*;\\s*/', ';', $css);
         
         // remove ws around urls
-        $css = preg_replace('/url\\([\\s]*([^\\)]+?)[\\s]*\\)/', 'url($1)', $css);
+        // $css = preg_replace('/url\\([\\s]*([^\\)]+?)[\\s]*\\)/', 'url($1)', $css); // original
+        $css = preg_replace('/url\\([\'\"\\s]*([^\\)]+?)[\'\"\\s]*\\)/', 'url($1)', $css); //  added [ fatalerror ]   url( '"zxczxczx"' );
         
         // remove ws between rules and colons
-        $css = preg_replace('/\\s*([{;])\\s*([\\w\\-]+)\\s*:\\s*\\b/', '$1$2:', $css);
+        // $css = preg_replace('/\\s*([{;])\\s*([\\w\\-]+)\\s*:\\s*\\b/', '$1$2:', $css); // original
+        $css = preg_replace('/\\s*([\/_\*{;])\\s*([\\w\\-]+)\\s*:\\s*/', '$1$2:', $css); // added [ fatalerror ]   color: #123   _display: ...  //display: ...
         
         // remove ws in selectors
-        $css = preg_replace_callback('/(?:\\s*[^~>+,\\s]+\\s*[,>+~])+\\s*[^~>+,\\s]+{/'
-            ,array('CSSMin', '_selectorsCB'), $css);
-        
+        // $css = preg_replace_callback('/(?:\\s*[^~>+,\\s]+\\s*[,>+~])+\\s*[^~>+,\\s]+{/', array('CSSMin', '_selectorsCB'), $css); // original
+        $css = preg_replace_callback('/(?:\\s*[^~>+,\\s]+\\s*[,>+~\.])+\\s*[^~>+,\\s]+{/', array('CSSMin', '_selectorsCB'), $css); // added [ fatalerror ]    .zxc, .asd
+
         // minimize hex colors
-        $css = preg_replace('/([^=])#([a-f\\d])\\2([a-f\\d])\\3([a-f\\d])\\4([\\s;\\}])/i'
-            , '$1#$2$3$4$5', $css);
+        $css = preg_replace('/([^=])#([a-f\\d])\\2([a-f\\d])\\3([a-f\\d])\\4([\\s;\\}])/i', '$1#$2$3$4$5', $css);
         
         $rewrite = false;
         if (isset($options['prependRelativePath'])) {
