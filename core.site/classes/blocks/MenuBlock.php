@@ -110,7 +110,7 @@ class MenuBlock extends Block
 
 		$where[] = '('.$menu->quoteField('_level').' >= '.DBModel::quote($this->config['level']). ' AND '.$menu->quoteField('_level').' <'.DBModel::quote($this->config['level'] + $this->config['depth']).')';
 
-		switch ($this->config['mode'])
+		/*switch ($this->config['mode'])
 		{
 			case 'submenu' :
 
@@ -135,17 +135,42 @@ class MenuBlock extends Block
 				$where[] = $menu->quoteField('_right') .' < ' . DBModel::quote($parent['_right']);
 
 			break;
-		}
+		}*/
+		
+		//
+        $parent = $this->getParentNodeByLevel($this->config['level'] - 1);
+        if (!$parent['id'])
+        {
+            $this->data = array();
+            return;
+        }
+        $pid = $parent['id'];
+        while ($p = $parents[$pid])
+        {
+            if ($p['hide_from_menu'])
+            {
+                $this->data = array();
+                return;
+            }
+            $pid = $p['_parent'];
+        }
 
+        $where[] = $menu->quoteField('_left') .' > ' . DBModel::quote($parent['_left']);
+        $where[] = $menu->quoteField('_right') .' < ' . DBModel::quote($parent['_right']);
+        //
+        
 		$current = $this->getCurrent();
+		
 		if ($current)
 		{
 			$this->currentNodeId = $current['id'];
 		}
 		
 		$menu->registerObserver('row', array(&$this, 'markItem'));
-		$menu->loadTree(implode(' AND ', $where));
-		
+		//$menu->loadTree(implode(' AND ', $where));
+		$menu->loadTree(implode(' OR ', $where));
+		//echo '<pre>'; print_r( $menu->getArray() ); echo '</pre>'; die();
+		Locator::get('tpl')->set('main_menu', $menu->getArray());
 		$this->setData($menu->getArray());
 	}
 
