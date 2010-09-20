@@ -103,7 +103,7 @@ class FormProc extends FormSimple
         $config["fields"]   += $this->getFilesConfig();
         $config["db_model"] = $this->config["model"];
         $config["on_before_event"] = $this;
-        echo $config['success_url'] = RequestInfo::href();
+        $config['success_url'] = RequestInfo::href();
 
         //if in edit mode: change button and load model item
         if ($this->id){
