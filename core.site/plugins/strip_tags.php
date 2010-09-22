@@ -1,7 +1,9 @@
 <?php
 	if (is_array($params))
-		$params = $params['_'];
+		$input = $params['_'];
+	else
+	    $input = $params;
 	
-  $ret = strip_tags($params);
+  $ret = strip_tags($input);
   return $ret;
 ?>
