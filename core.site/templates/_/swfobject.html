@@ -17,6 +17,9 @@
    {{?#f.transparent}}
      so.addParam("wmode", "transparent");
    {{/?}}
+   {{?#f.opaque}}
+     so.addParam("wmode", "opaque");
+   {{/?}}
 
    so.addParam("scale",  "{{#f.scale}}");
    so.addParam("salign", "{{#f.salign}}");

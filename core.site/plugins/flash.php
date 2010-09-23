@@ -63,6 +63,7 @@ $defaults = array (
 	'redirectUrl' => "",
 	'detectKey' => "",
 	'transparent' => "",
+    'opaque' => ""
 );
 
 $ignores = array (
