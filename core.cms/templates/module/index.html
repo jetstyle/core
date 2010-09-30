@@ -1,8 +1,12 @@
-{{?!hide_toolbar}}
-    <!-- core/core.cms/classes/blocks/MenuCmsBlock.php -->
-    {{@layouts/l_header/l_cms_header.html logo=@:logo info=@:info navigation=@blocks/menu.html navigation2=@blocks/b_submenu.html}} 
-{{/?}}
-{{module_body}}
+{{!connect "layout.css"}}
+<table cellspacing="0" class="w100 h100">
+    <!--{{?!hide_toolbar}}
+        <!-- core/core.cms/classes/blocks/MenuCmsBlock.php -->
+        <!--{{@layouts/l_header/l_cms_header.html logo=@:logo info=@:info navigation=@blocks/menu.html navigation2=@blocks/b_submenu.html}} 
+    {{/?}}-->
+    {{@layouts/l_cms_header.html logo=@:logo info=@:info navigation=@blocks/menu.html navigation2=@blocks/b_submenu.html}}
+    {{module_body}}<!-- core/core.cms/templates/tree_form.html -->
+</table>
 
 {{:logo}}
   <div>{{@blocks/logo.html}}</div>  
