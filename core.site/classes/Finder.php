@@ -258,6 +258,7 @@ class Finder {
 		$n = count(self::$DIRS['all']);
 //		$level = $n - 1;
 //		$i = $level>=0 ? $level : $n - $level;
+$i = $n - 1;
 
 		//ищем
 		for( ; $i>=0 && $i<$n; $i-=1 )
