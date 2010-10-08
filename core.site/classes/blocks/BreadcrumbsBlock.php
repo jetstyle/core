@@ -35,10 +35,15 @@ class BreadcrumbsBlock extends Block
                                                             ->setOrder(array('_left' => 'ASC'))
                                                             ->load('_left <= '.DBModel::quote($current['_left']).' AND _right >= '.DBModel::quote($current['_right']));
                     $data = $model->getArray();
-                    
-                    var_dump( $this->breadItems );
-                    
-                    $this->data = @array_merge($data, $this->data);
+					
+					if ($this->data)
+					{
+						$this->data = @array_merge($data, $this->data);	
+					}
+					else
+					{
+						$this->data = $data;
+					}
                     
                     $this->setData($this->data);
                 }
