@@ -154,15 +154,17 @@ class MenuBlock extends Block
 		if(is_array($data))
 		{
 			foreach($data AS &$d)
-			if($d['id'] == $id)
 			{
-				return $d;
-			}
-			elseif(is_array($d['childs']))
-			{
-				if($item = &$this->findElementById($d['childs'], $id))
+				if($d['id'] == $id)
 				{
-					return $item;
+					return $d;
+				}
+				elseif(is_array($d['children']))
+				{
+					if($item = &$this->findElementById($d['children'], $id))
+					{
+						return $item;
+					}
 				}
 			}
 		}
