@@ -7,7 +7,7 @@ $config = array(
                 "interface_tpl"   => "file.html:File",
 
                 "file_size" => "100",
-                "file_ext"  => array( "zip", "rar", "ppt", "doc", "xls",
+                "file_ext"  => array( "zip", "rar", "ppt", "doc", "docx", "xls", "xlsx", "pdf",
                                       "swf", "gif", "jpg", "png" ),
                 "file_chmod" => "775",
 

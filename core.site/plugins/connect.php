@@ -76,21 +76,17 @@ if ( $compile )
 				
 				if ('js' == $compile)
 				{
-                                    if (Config::get('minify_js'))
-                                    {
-					Finder::useClass('JSMin');
-					$result = JSMin::minify($result);
-                                    }
+          if (Config::get('minify_js'))
+          { Finder::useClass('JSMin'); $result = JSMin::minify($result); }
 				}
-				elseif ('css' == $compile)
-				{
-                                    $result = str_replace('../images/', $tpl->get('images'), $result);
 
-                                    if (Config::get('minify_css'))
-                                    {
-                                        Finder::useClass('CSSMin');
-					$result = CSSMin::minify($result);
-                                    }
+        if ('css' == $compile)
+				{
+          // $result = str_replace('../images/', $tpl->get('images'), $result); // original
+          $result = eregi_replace('[^(\'\"\=][\.\/\s]+images/', $tpl->get('images'), $result);
+
+          if (Config::get('minify_css'))
+            { Finder::useClass('CSSMin'); $result = CSSMin::minify($result); }
 				}
 								
 				if (!is_dir(Config::get('cache_dir').'/'.$compile))
@@ -118,12 +114,15 @@ if ( $compile )
 					file_put_contents(Config::get('cache_dir').'/'.$compile.'/.htaccess', $htaccess);
 				}
 				
+				// file_put_contents(Config::get('cache_dir').'/'.$compile.'/'.$compressedName.'.'.$compile, $result);
+        print Config::get('cache_dir').'/'.$compile.'/'.$compressedName.'.'.$compile;
 				file_put_contents(Config::get('cache_dir').'/'.$compile.'/'.$compressedName.'.'.$compile, $result);
 				file_put_contents(Config::get('cache_dir').'/'.$compile.'/'.$compressedName.'.'.$compile.'.gz', gzencode($result, 9));
 			}
-			
+
 			//$fname = array('path' => RequestInfo::$baseUrl.'cache/'.Config::get('app_name').'/'.$compile, 'file' => $compressedName);
-                        $fname = RequestInfo::$baseUrl.'cache/'.Config::get('app_name').'/'.$compile.'/'.$compressedName.'.'.$compile;
+      $fname = RequestInfo::$baseUrl.'cache/'.Config::get('app_name').'/'.$compile.'/'.$compressedName.'.'.$compile;
+      print $fname;
 			$tpl->set("_",$fname);
 			$str = $tpl->parse($template."_path");
 		}

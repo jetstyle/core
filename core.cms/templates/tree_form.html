@@ -1,38 +1,30 @@
-<!--<h1 class="cms-content-title-">Разделы сайта</h1>-->
 {{!connect 'colorbox.js'}}
 {{!connect 'colorbox.css'}}
 
-<table cellspacing="0" class="w100 cms-body">
-  <thead>
-    <tr class="cms-body_top-padding"><td colspan="3">&nbsp;</td></tr>
+<tbody class="l-cms-body">
     <tr>
-      <td class="cms-body_tools">
-        {{@blocks/help_link.html}}
-        {{__trash_switch}}
-        {{__add_new}}
-      </td>
-      <td class="cms-body_sep"></td>
-      <td>{{module_title}}</td>
+        <td class="l-cms-body_tools">
+            {{@blocks/help_link.html}}
+            {{__trash_switch}}
+            {{__add_new}}
+        </td>
+        <td class="l-cms-body_sep"></td>
+        <td class="l-cms-body_title">{{module_title}}</td>
     </tr>
-  </thead>
-  <tbody><tr>
-    <td class="cms-body_tree" id="left">
-      <div class="carpet" style="position: absolute; display: none; background: transparent;"></div>
-      
-      <!-- список/дерево модуля слева -->
-      {{wrapped.0}}
-      
-    </td>
-    <td id="separator" class="cms-body_sep"></td>
-    <td class="cms-body_content" id="right">
-      <div class="carpet" style="position: absolute; display: none; background: transparent;"></div>
-      
-      <!-- форма модуля справа -->
-      {{wrapped.1}}
-      
-    </td>
-  </tr></tbody>
-</table>
+    <tr>
+        <td class="l-cms-body_tree" id="left">
+            <div class="carpet" style="position: absolute; display: none; background: transparent;"></div>
+            <!-- список/дерево модуля слева -->
+            {{wrapped.0}}
+        </td>
+        <td id="separator" class="l-cms-body_sep"></td>
+        <td class="l-cms-body_content" id="right">
+            <div class="carpet" style="position: absolute; display: none; background: transparent;"></div>
+            <!-- форма модуля справа -->
+            {{wrapped.1}}
+        </td>
+    </tr>
+</tbody>
 
 <script type="text/javascript">
   var startpos, diffpos=0;

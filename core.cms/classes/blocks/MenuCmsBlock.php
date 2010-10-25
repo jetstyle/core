@@ -12,6 +12,11 @@ class MenuCmsBlock extends MenuBlock
     private $defaultMenuItem;
 	public function getCurrent()
 	{
+		if ($this->current)
+		{
+			return $this->current;
+		}
+		
         $params = array();
  		if (Locator::exists('controller'))
 		{
@@ -32,7 +37,8 @@ class MenuCmsBlock extends MenuBlock
 			if ($item['href'] == implode ("/", $params))
 			{
                 // echo($item);
-			    return $item;
+				$this->current = $item;
+			    return $this->current;
 			}
 		}
 
@@ -66,11 +72,22 @@ class MenuCmsBlock extends MenuBlock
 	{
         parent::markItem($model, $row);
         $modulePath = $row["href"];
-        //var_dump( Locator::get('principal')->security('cmsModules', $modulePath) ); die();
         if ( Locator::get('principal')->security('cmsModules', $modulePath) )
         {
             $row["is_granted"] = true;
         }
+		
+		if ($this->config["mode"] == "submenu") {
+			$item = $this->getCurrent();
+			$module = ModuleConstructor::factory($row['href']);
+			$moduleConfig = $module->getConfig();
+			$moduleForm = $module->getForm();
+			$moduleFormConfig = $moduleForm->getConfig();
+			if ($moduleConfig['link_to'] == $item['href'] || $moduleFormConfig['link_to'] == $item['href'])
+			{
+				$row['selected'] = true;
+			}
+		}
     }
 }
 ?>
