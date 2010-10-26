@@ -16,6 +16,8 @@
    so.useExpressInstall('{{images}}flash/expressinstall.swf');
    {{?#f.transparent}}
      so.addParam("wmode", "transparent");
+     {{?:}}
+     so.addParam("wmode", "opaque");
    {{/?}}
 
    so.addParam("scale",  "{{#f.scale}}");
