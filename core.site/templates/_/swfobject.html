@@ -2,7 +2,13 @@
 {{!connect "swfobject.js"}}
 
 {{?#f.generate_container}}
-  <div id="{{#f.container}}">
+  <div id="{{#f.container}}_wrap" style="position: relative;">
+      <div style="position: absolute; top: 0; left: 0; z-index: 1;"><div id="{{#f.container}}"></div></div>
+      {{?#f.link}}
+      <a href="{{#f.link}}" style="display: block; width: {{#f.width}}px; height: {{#f.height}}px; position: absolute; top: 0; left: 0; z-index: 1000;">
+        asdasd
+      </a>
+      {{/?}}
   </div>
 {{/?}}
 <script type="text/javascript">
