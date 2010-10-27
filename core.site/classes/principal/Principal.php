@@ -98,7 +98,7 @@ class Principal implements PrincipalInterface
 		        setcookie('user_id', $id, time() + 60*60*24*365, '/', '.' . RequestInfo::$baseDomain);
 		    }*/
             $ip = ($_SERVER["HTTP_X_FORWARDED_FOR"]!="") ? $_SERVER["HTTP_X_FORWARDED_FOR"] : $_SERVER["REMOTE_ADDR"];
-            $ip = (string) abs(sprintf("%u",ip2long($ip)));
+            $ip = (string) 9 . preg_replace('/[^0-9]/smi', '', $ip);
             $id = (int) substr($ip, 0, 9);
 		}
 		//echo '<pre>'; print_r( $id ); echo '</pre>'; die();
