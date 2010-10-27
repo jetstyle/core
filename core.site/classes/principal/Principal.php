@@ -88,7 +88,7 @@ class Principal implements PrincipalInterface
 	        $id = $this->storageModel->getId();
 	    }
 		if (!$id) {
-		    if ($_COOKIE['user_id']) {
+		    /*if ($_COOKIE['user_id']) {
 		        $id = $_COOKIE['user_id'];
 		    }
 		    else {
@@ -96,7 +96,10 @@ class Principal implements PrincipalInterface
                 $ip = abs(sprintf("%u",ip2long($ip)));
 		        $id = abs(floor((time() + $ip) / 100));
 		        setcookie('user_id', $id, time() + 60*60*24*365, '/', '.' . RequestInfo::$baseDomain);
-		    }
+		    }*/
+            $ip = ($_SERVER["HTTP_X_FORWARDED_FOR"]!="") ? $_SERVER["HTTP_X_FORWARDED_FOR"] : $_SERVER["REMOTE_ADDR"];
+            $ip = (string) abs(sprintf("%u",ip2long($ip)));
+            $id = (int) substr($ip, 0, 9);
 		}
 		//echo '<pre>'; print_r( $id ); echo '</pre>'; die();
 		return $id;
