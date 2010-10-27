@@ -99,7 +99,7 @@ class Principal implements PrincipalInterface
 		        setcookie('user_id', $id, time() + 60*60*24*365, '/', '.' . RequestInfo::$baseDomain);
 		    }
 		}
-		echo '<pre>'; print_r( $id ); echo '</pre>'; die();
+		//echo '<pre>'; print_r( $id ); echo '</pre>'; die();
 		return $id;
 	}
 	
