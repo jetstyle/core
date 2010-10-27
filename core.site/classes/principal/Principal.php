@@ -82,8 +82,9 @@ class Principal implements PrincipalInterface
 	public function getId()
 	{
 	    $contest = ContestsModel::getCurrentContest();
+	    
 	    $id = false;
-	    if (!$contest['may_all_users']) {
+	    if (!$contest['may_all_users'] || !strstr($_SERVER['REQUEST_URI'], 'konkursy_ot_fei')) {
 	        $id = $this->storageModel->getId();
 	    }
 		if (!$id) {
