@@ -93,7 +93,7 @@ class Principal implements PrincipalInterface
 		    else {
                 $ip = ($_SERVER["HTTP_X_FORWARDED_FOR"]!="") ? $_SERVER["HTTP_X_FORWARDED_FOR"] : $_SERVER["REMOTE_ADDR"];
                 $ip = abs(sprintf("%u",ip2long($ip)));
-		        $id = time() + $ip;
+		        $id = abs((time() + $ip) / 100);
 		        setcookie('user_id', $id, time() + 60*60*24*365, '/', '.' . RequestInfo::$baseDomain);
 		    }
 		}
