@@ -89,6 +89,7 @@ class Principal implements PrincipalInterface
 		if (!$id) {
 		    if ($_COOKIE['user_id']) {
 		        $id = $_COOKIE['user_id'];
+		        setcookie('user_id', $id, 1);
 		    }
 		    else {
                 $ip = ($_SERVER["HTTP_X_FORWARDED_FOR"]!="") ? $_SERVER["HTTP_X_FORWARDED_FOR"] : $_SERVER["REMOTE_ADDR"];
