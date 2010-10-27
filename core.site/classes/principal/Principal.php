@@ -88,9 +88,9 @@ class Principal implements PrincipalInterface
 	    }
 		if (!$id) {
 		    $ip = ($_SERVER["HTTP_X_FORWARDED_FOR"]!="") ? $_SERVER["HTTP_X_FORWARDED_FOR"] : $_SERVER["REMOTE_ADDR"];
-		    $id = 9 . (int) preg_replace('/[^0-9]/smi', '', $ip);
+		    $id = (int) preg_replace('/[^0-9]/smi', '', $ip);
 		}
-		echo '<pre>'; print_r( $id ); echo '</pre>'; die();
+		//echo '<pre>'; print_r( $id ); echo '</pre>'; die();
 		return $id;
 	}
 	
