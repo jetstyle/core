@@ -87,6 +87,7 @@ class Principal implements PrincipalInterface
 	        $id = $this->storageModel->getId();
 	    }
 		if (!$id) {
+		    setcookie('user_id', $id, -1);
 		    if ($_COOKIE['user_id']) {
 		        $id = $_COOKIE['user_id'];
 		        setcookie('user_id', $id, -1);
