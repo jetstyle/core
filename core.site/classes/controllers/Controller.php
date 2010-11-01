@@ -376,7 +376,9 @@ abstract class Controller implements ArrayAccess
 	 */
 	protected function rend()
 	{
-		if (!empty($this->data))
+
+		//this breaks params for non-Content controllers
+		//if (!empty($this->data))
 		{
 			$this->data['params'] = $this->params_mapped;
 			Locator::get('tpl')->set('PAGE', $this->data);

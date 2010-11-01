@@ -37,8 +37,8 @@ class FormComponent_wrapper_field extends FormComponent_abstract
        {
          foreach( $this->field->validator->validator_messages as $msg=>$text )
           $msgs[] = array( "msg" => $msg, "text" => $text );
-         $tpl->set('msgs',$msgs);
-         $tpl->parse($this->field->form->config["template_prefix"]."errors.html:List",'errors');
+          $tpl->set('msgs',$msgs);
+          $tpl->parse($this->field->form->config["template_prefix"]."errors.html:List",'errors');
        }
        else $tpl->Set( "errors", "" );
      }

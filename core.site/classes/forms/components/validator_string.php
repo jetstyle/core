@@ -42,9 +42,10 @@ class FormComponent_validator_string extends FormComponent_validator_base
      $value = $this->field->model->Model_GetDataValue();
 
      if (isset($this->validator_params["min"]))
+     {
        if (strlen($value) < $this->validator_params["min"])
          $this->_Invalidate( "string_short", "Слишком короткое значение" );
-
+     }
      if (isset($this->validator_params["max"]))
        if (strlen($value) > $this->validator_params["max"])
          $this->_Invalidate( "string_long", "Слишком длинное значение" );

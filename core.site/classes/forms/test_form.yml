@@ -1,0 +1,70 @@
+fields:
+    group_1:
+        extends_from: group
+        wrapper_title: 'Обязательные поля'
+        wrapper_desc: ''
+
+        fields:
+            email:
+                extends_from:     user_email
+                wrapper_title:    Ваш E-mail
+                wrapper_tpl:      'wrapper.html:DefaultStringWrapper'
+                validator_params:
+                    not_empty:    1
+                    not_exists:   1
+                    is_email: 1
+                interface_tpl: 	 'string.html:Plain'
+            login:
+                extends_from:     login
+                wrapper_title:    Ваш логин
+                interface_tpl: 	  'string.html:Plain'
+                wrapper_tpl:      'wrapper.html:DefaultStringWrapper'
+                validator_params:
+                    not_empty:    1
+                    not_exists:   1
+                    min:          3
+                    is_regexp:    /^[A-Za-z\-\_0-9]+$/
+
+            password:
+                extends_from:     password
+                wrapper_title:    Ваш пароль
+                wrapper_tpl:      'wrapper.html:Passthru'
+                validator_params:
+                    not_empty:    1
+
+    group_2:
+        extends_from: group
+        wrapper_title: 'Необязательные поля'
+        wrapper_desc: ''
+        fields:
+            name:
+                extends_from:     string
+                wrapper_title:    Ваше имя
+                model:            model_filters
+                model_filters:
+                  - strip_tags
+                model_filtered:
+                  0: *
+
+            about:
+                extends_from:     string
+                db_ignore:        true
+                wrapper_title:    О себе
+                model:            model_filters
+                model_filters:
+                  - strip_tags
+                model_filtered:
+                  0: *
+
+    realm:
+        extends_from:     system
+        model_default:    'site'
+
+
+buttons:
+    - insert
+db_table:        test_form
+db_ignore:       false
+success_url:     ''
+cancel_url:      ''
+form_class:      'general-form reg-form'

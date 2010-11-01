@@ -1,17 +1,18 @@
 <?php
-Finder::useClass("forms/components/validator_base");
+Finder::useClass("forms/components/validator_string");
 
-class FormComponent_login extends FormComponent_validator_base
+class FormComponent_login extends FormComponent_validator_string
 {
 	// VALIDATOR ==============================================================================
 	function Validate()
 	{
-		FormComponent_validator_base::Validate();
+		FormComponent_validator_string::Validate();
 
 		if (!$this->valid) return $this->valid;
 
 		if($this->field->config['validator_params']['not_exists'])
-		{        	$value = $this->field->model->Model_GetDataValue();
+		{
+        	$value = $this->field->model->Model_GetDataValue();
 
 			$model = clone Locator::get('principal')->getStorageModel();
 			$model->loadByLogin($value);
