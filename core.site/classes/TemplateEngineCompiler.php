@@ -451,14 +451,14 @@ class TemplateEngineCompiler
 		$contents );
 
 		// 1. strip comments
-		/*$contents = preg_replace( "/(\s*)<!--(".
+		$contents = preg_replace( "/(\s*)<!--(".
                                     "( )".
                                     "|".
                                     "( [^".$this->constructComment."].*?)".
                                     "|".
                                     "([^ ".$this->constructComment."].*?)".
                                     ")-->(\s*)/msi",
-                              "", $contents );*/
+                              "", $contents );
 
 		// and then strip "contstructness" from comments
 		$contents = preg_replace( "/(\s*)<!--( )?#(.*?)-->/msi",
