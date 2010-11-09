@@ -39,7 +39,7 @@ class DoController extends Controller
 		unset($params[0]);
 
 		Finder::useClass("ModuleConstructor");
-		$moduleConstructor =& new ModuleConstructor();
+		$moduleConstructor = new ModuleConstructor();
 		$moduleConstructor->initialize($config['module'], $params);
 
 		Locator::get('tpl')->set('module_body', $moduleConstructor->proceed());

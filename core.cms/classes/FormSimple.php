@@ -511,7 +511,7 @@ class FormSimple
 			}
 
 			Finder::useClass('Translit');
-			$translit =& new Translit();
+			$translit = new Translit();
 			$this->postData['_supertag'] = $translit->supertag( $this->postData[$field], TR_NO_SLASHES, $limit );
 			if ($this->config->supertag_check)
 			{

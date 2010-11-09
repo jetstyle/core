@@ -296,7 +296,7 @@ class TreeControlJsTree extends TreeControl
 			if (!$node['_supertag'])
 			{
 				Finder::useClass('Translit');
-				$translit =& new Translit();
+				$translit = new Translit();
 				$supertag = $translit->supertag($title, 20);
 				$sql .= ", _supertag = ".$db->quote($supertag);
 			}

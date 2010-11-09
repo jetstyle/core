@@ -484,7 +484,7 @@ class TreeControl
 		$db =& $this->db;
 
 		Finder::useClass('Translit');
-		$translit =& new Translit();
+		$translit = new Translit();
 
 		$node = array();
 
