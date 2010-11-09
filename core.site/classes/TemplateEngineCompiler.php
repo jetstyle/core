@@ -81,7 +81,7 @@ class TemplateEngineCompiler
 	protected $constructObject = "#.";   // {{#obj.property}}
 	protected $constructTplt = "TPL:"; // {{TPL:Name}}...{{/TPL:Name}}
 	protected $constructTplt2 = ":"; // {{:Name}}...{{/:Name}}   -- ru@jetstyle бесят буквы TPL в капсе
-	protected $constructComment = "#";    // <!-- # persistent comment -->
+	protected $constructComment = "";    // <!-- # persistent comment -->
 
 	// lucky+ru: аргументы внутри шаблона {{!for do=[[pages]]
 	protected $argPrefix = "";
