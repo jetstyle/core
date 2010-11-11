@@ -315,6 +315,7 @@ class ExceptionHandler
         else
         {
             echo $this->getHtml($exceptionObj);
+            exit 1;
         }
 		
 	}
