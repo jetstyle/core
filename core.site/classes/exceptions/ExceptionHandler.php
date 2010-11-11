@@ -311,11 +311,11 @@ class ExceptionHandler
         if (defined('COMMAND_LINE') && COMMAND_LINE)
         {
             echo $this->getPlain($exceptionObj);
+            exit(1);
         }
         else
         {
             echo $this->getHtml($exceptionObj);
-            exit(1);
         }
 		
 	}
@@ -433,7 +433,7 @@ class ExceptionHandler
 			}
 			$res .= '</ol>';
 		}
-		
+
 		return $res;
 	}
 }
