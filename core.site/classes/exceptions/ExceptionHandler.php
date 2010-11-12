@@ -308,11 +308,14 @@ class ExceptionHandler
 	private function show($exceptionObj)
 	{
 		ob_end_clean();
+		
         if (defined('COMMAND_LINE') && COMMAND_LINE)
         {
             echo $this->getPlain($exceptionObj);
+ 
+            // need for console piping and check codes            
             exit(1);
-        }
+       }
         else
         {
             echo $this->getHtml($exceptionObj);
