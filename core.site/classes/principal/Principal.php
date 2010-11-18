@@ -65,7 +65,7 @@ class Principal implements PrincipalInterface
 	}
 
 	public function getStorageModel()
-	{
+	{ 
 		return $this->storageModel;	
 	}
 	
