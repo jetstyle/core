@@ -678,7 +678,7 @@ class FormSimple  implements ModuleInterface
 				$limit = $this->supertagLimit;
 			}
 
-			if ($_POST[$this->prefix . '_supertag'] === '')
+			if (!$_POST[$this->prefix . '_supertag'])
 			{
 				Finder::useClass('Translit');
 				$translit = new Translit();

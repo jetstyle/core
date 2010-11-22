@@ -102,7 +102,7 @@ class GridSimple extends ListSimple implements ModuleInterface
 
                     //стрелочки сортировки
                     if ( $this->current_order == $col || ( $this->columns[$col]["order"] && $this->current_order == $this->columns[$col]["order"]) )
-                        $data[0]['cols'][$col]["dir"] = $order[0] == "_" ? "up" : "down";
+                        $data[0]['cols'][$col]["dir"] = ($order[0] == "_" || $this->order_dir == 'ASC') ? "up" : "down";
                 }
                 if ( $r["_state"]!=0 )
                     $row["class"] = "deleted";
@@ -144,6 +144,7 @@ class GridSimple extends ListSimple implements ModuleInterface
     private function getOrderValueFor($col)
     {
         $order = RequestInfo::get("order");
+        if (!$order) $order = $this->current_order;
         if ($order==$col)
         {
             $this->dir = "DESC";

@@ -118,11 +118,18 @@ class FormFiles extends FormSimple {
             if ($conf['input']) {
                 $inputName = $conf['input'];
             }
-            
             $file = FileManager::getFile($this->configKey.':'.$conf['key'], $objId, $isId);
             //var_dump($this->configKey.':'.$conf['key'], $objId, $isId);die();
             // проверяем загруженный файл на ошибки
-            if (isset($_FILES[$this->prefix.$inputName]) && $_FILES[$this->prefix.$inputName]['error']) {
+            if ($_POST[$this->prefix.$inputName.'_del']) {
+                if ($isId) {
+                    $filesRubric = $this->getFilesRubric($file);
+                    $file->removeFromRubric($filesRubric['id']);
+                }
+                else {
+                    $file->deleteLink();
+                }
+            } elseif (isset($_FILES[$this->prefix.$inputName]) && $_FILES[$this->prefix.$inputName]['error']) {
                 $err_no = $_FILES[$this->prefix.$inputName]['error'];
                 if ($err_no == UPLOAD_ERR_INI_SIZE) {
                     $result = false;
@@ -145,14 +152,6 @@ class FormFiles extends FormSimple {
                 }
 
                 $this->uploadedFiles[$inputName] = $file;
-            } elseif ($_POST[$this->prefix.$inputName.'_del']) {
-                if ($isId) {
-                    $filesRubric = $this->getFilesRubric($file);
-                    $file->removeFromRubric($filesRubric['id']);
-                }
-                else {
-                    $file->deleteLink();
-                }
             }
         }
         
