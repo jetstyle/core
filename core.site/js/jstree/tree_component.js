@@ -262,7 +262,10 @@ function tree_component () {
 			var str = "";
 			str += "<li ";
 			var cls = false;
+			var dt;
 			for(i in data.attributes) {
+			    //console.log(i);
+			    
 				if(i == "class") {
 					str += " class='" + data.attributes[i] + " ";
 					if(data.state == "closed" || data.state == "open") str += " " + data.state + " ";
@@ -270,6 +273,13 @@ function tree_component () {
 					cls = true;
 				}
 				else str += " " + i + "='" + data.attributes[i] + "' ";
+				
+				if (i == "data" )
+				{
+				    dt = eval( "("+data.attributes[i]+")") ;
+				    
+				    str += " rel='" + dt["path"] + "' ";
+				}
 			}
 			if(!cls && (data.state == "closed" || data.state == "open")) str += " class='" + data.state + "' ";
 			str += ">";
