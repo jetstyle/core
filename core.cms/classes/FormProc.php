@@ -96,7 +96,7 @@ class FormProc extends FormSimple
         */
 
         Finder::useClass("forms/EasyForm");
-
+        
         Locator::get("msg")->load("cms");
         $config = array();
         $config["fields"]   = $this->getFieldsConfig();
@@ -128,21 +128,79 @@ class FormProc extends FormSimple
 	}
 
 
+    private function getGroup($group)
+    {
+        $fields_config = array();  
+        $model_fields = $this->getModel()->getForeignFields();
+        $model = $this->getModel();
+        //var_dump($model_fields);
+        foreach ($group as $name=>$group_field)
+        {
+            //у поля есть дочерние поля (группа)
+            if ( $group_field["fields"] ){
+               //var_dump($name, $group_field["fields"]);
+
+                $fields_config[ $name ] = $group_field;
+                $fields_config[ $name ]["fields"] = array_merge($fields_config[ $name ]["fields"], $this->getGroup($group_field["fields"]));
+            }
+            //поле - это поле
+            else
+            {
+/*
+                if ($group_field["extends_from"]=="fk_select" && $model[$name])
+                {
+                    $group_field["fk_model"] = $model[$name];
+                    //var_dump($group_field["fk_model"]);
+                }
+*/
+                //FIXME: $item[$name] always empty?
+                $fields_config[ $name ] = array_merge($group_field, $this->createField($name, $item[$name]));
+                
+
+                /*
+                if ($fields_config[ $name ]["extends_from"]=="fk_select" && $model_fields[$name])
+                {
+                    $model = $this->getModel();
+                    echo $opts = DBModel::factory($model[$name])->load(); //$model_fields[$name]['className']
+                    var_dumP($opts);
+                    $fields_config[ $name ]["options"] = $opts;
+                }
+                */
+               // echo '<hr>';
+               
+            }
+        }
+        
+        return $fields_config;
+    }
+
     /**
      * creates fields config for EasyForm
      */
     public function getFieldsConfig()
 	{
-        //$item = &$this->getItem();
-        $item = $this->getModel()->getTableFields();
-
         $fields_config = array();
 
-        foreach ($item as $name => $row)
+        //model table fields
+        $item = $this->getModel()->getTableFields();
+
+        if ($this->config["fields"])
         {
-            $fields_config[ $name ] = $this->createField($name, $row);
+        
+            $fields_config = $this->getGroup( $this->config["fields"] );
+
         }
-        //var_dumP($fields_config);die();
+        else
+        {
+            foreach ($item as $name => $row)
+            {
+                $fields_config[ $name ] = $this->createField($name, $row);
+            }
+        }
+        //var_dumP($fields_config["controller"]);
+        //echo '<hr><hr><hr>';
+       //die();
+
         return $fields_config;
     }
 
@@ -153,10 +211,13 @@ class FormProc extends FormSimple
     {
         $title = Locator::get("msg")->get( "forms.".$name );
 
-        $ret = array(//"model_default"=> $this->item[$name],
-                     "wrapper_title"=> $title);
-        if ( is_array($this->config["form"]["fields"][$name] ) )
+        $ret = array( "wrapper_title"=> $title ); //"model_default"=> $this->item[$name],
+
+        //FIXME: looks like deprecated
+        if ( is_array($this->config["form"]["fields"][$name] ) ){
+            //die('111');//var_dump($this->config["form"]["fields"]);
             $ret = array_merge($this->config["form"]["fields"][$name], $ret);
+        }
 
         return $ret;
     }
@@ -167,16 +228,18 @@ class FormProc extends FormSimple
     public function getFilesConfig()
 	{
         $fields_config = array();
-
-        foreach ($this->config["files"] as $name => $conf)
+        if ( $this->config["files"] )
         {
-            $fields_config[ $name ] = $this->createField($name, $row);
-            $fields_config[ $name ]["extends_from"] = "file_cms";
-            $fields_config[ $name ]["file_ext"] = explode(",",Config::get("upload_ext"));
-            $fields_config[ $name ]["file_size"] = 55242880;
-            $fields_config[ $name ]["variants"] = $conf["variants"];
+            foreach ($this->config["files"] as $name => $conf)
+            {
+                $fields_config[ $name ] = $this->createField($name, $row);
+                $fields_config[ $name ]["extends_from"] = "file_cms";
+                $fields_config[ $name ]["file_ext"] = explode(",",Config::get("upload_ext"));
+                $fields_config[ $name ]["file_size"] = 55242880;
+                $fields_config[ $name ]["variants"] = $conf["variants"];
 
-            $fields_config[ $name ]["config_key"] = $this->config['module_name'].':'.$name;
+                $fields_config[ $name ]["config_key"] = $this->config['module_name'].':'.$name;
+            }
         }
         //var_dumP($fields_config);die();
         return $fields_config;
@@ -189,6 +252,7 @@ class FormProc extends FormSimple
 
 	protected function renderFields()
 	{
+	die();
 		$this->fieldsRendered = true;
 
 		$this->handleForeignFields();

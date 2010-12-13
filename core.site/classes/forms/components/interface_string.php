@@ -40,9 +40,19 @@ class FormComponent_interface_string extends FormComponent_abstract
 
      $result = FormComponent_abstract::Interface_Parse();
 
-     return Locator::get('tpl')->parse( $this->field->form->config["template_prefix_interface"].
-                                      $this->field->config["interface_tpl"] );
+     $interface_template = $this->field->form->config["template_prefix_interface"].$this->field->config["interface_tpl"];
+     try { 
+            $ret = Locator::get('tpl')->parse( $interface_template );
+     }
+     catch (Exception $e ){
+            $msg  = '<h2>interface_string</h2><br>';
+            $msg .= 'Can`t parse interface_tpl: "'.$interface_template.'" from field:';
+            echo $msg."<hr>";
+            var_dump($this->field->config);
+            die();
+     }
 
+     return $ret;
    }
    // преобразование из поста в массив для загрузки моделью
    function Interface_PostToArray( $post_data )

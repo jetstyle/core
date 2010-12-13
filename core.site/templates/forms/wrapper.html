@@ -9,6 +9,29 @@
         </tr>
 {{/:CmsStringWrapper}}
 
+<!-- for cms -->
+{{:CmsWYSIWYGStringWrapper}}
+        <tr>
+          <td class="left" colspan="2">
+            {{content}}
+            {{errors}}
+          </td>
+        </tr>
+{{/:CmsWYSIWYGStringWrapper}}
+
+{{:CmsDefaultGroupWrapper}}
+<tr>
+  <td class="left" colspan="2">
+  {{content}}
+  {{errors}}
+  </td>
+</tr>
+{{/:CmsDefaultGroupWrapper}}
+
+{{:DefaultGroupWrapper}}
+  {{content}}
+  {{errors}}
+{{/:DefaultGroupWrapper}}
 
 <!-- same as core/core.site/templates/forms/wrapper.html -->
 {{:DefaultStringWrapper}}
@@ -36,7 +59,6 @@
 {{:None}}{{/:None}}
 
 {{:Passthru}}
-	{{content}}
+  {{content}}
   {{errors}}
-  
 {{/:Passthru}}

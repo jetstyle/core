@@ -11,7 +11,8 @@ form_class:      'general-form'
 
 
 default_packages:
-    id: false
+##Announces
+    id: false  
     background:
         extends_from:  checkbox_cms
     border:
@@ -25,6 +26,9 @@ default_packages:
             a: typografica
         model_filtered:
             a: "*_pre"
+    title_short:
+        extends_from: string_cms
+
     text:
         extends_from: textarea_cms
         model: model_filters
@@ -36,3 +40,36 @@ default_packages:
         extends_from:  checkbox_cms
         wrapper_title: Скрыть (конфинг)
 
+##Content
+    controller:
+        extends_from: select
+        #interface_tpl: "options.html:Select",
+        wrapper_tpl: "wrapper.html:CmsStringWrapper"
+
+    border:
+        extends_from:  checkbox_cms
+    hide_from_menu:
+        extends_from:  checkbox_cms
+    meta_title:
+        extends_from: string_cms
+    meta_keywords:
+        extends_from: string_cms
+    meta_description:
+        extends_from: string_cms
+    _supertag:
+        extends_from: string_cms
+    map_html:
+        extends_from: textarea_cms
+
+
+    
+    survey_id:  false   #TODO foreign
+
+    _path: false
+    _parent: false
+    _level: false
+    _left: false
+    _right: false
+    link_direct: false  #TODO
+    link_popup: false   #TODO
+    

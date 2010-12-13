@@ -41,14 +41,15 @@ class FormComponent_group extends FormComponent_abstract
     function FormComponent_group( &$config )
     {
         $result = FormComponent_abstract::FormComponent_abstract( $config );
-
         /*
+       
         if (isset($config["fields"]) && is_array($config["fields"]))
         {
             foreach($config["fields"] as $name=>$_config)
             {
                 if (is_array($_config))
                 {
+                   // var_dump( $name, $_config );
                     $this->Model_AddField( $name, $_config );
                 }
                 else
@@ -57,8 +58,10 @@ class FormComponent_group extends FormComponent_abstract
                 }
             }
         }
-         */
-
+        */
+        // die();
+        //var_dumP($this->childs);
+        
         return $result;
     }
 
@@ -218,6 +221,7 @@ class FormComponent_group extends FormComponent_abstract
         $result = array();
         foreach($this->childs as $child)
         {
+            
             $result[] = array(
                   "child" => $child->name,
                   "field" => $child->Parse( $readonly ) 
@@ -227,6 +231,7 @@ class FormComponent_group extends FormComponent_abstract
         $tpl = &Locator::get('tpl');
         $tpl->set( "parent", $this->field->name );
         $tpl->set( "fields", $result);
+        $tpl->set( "group_title", $this->field->config["group_title"]);
         
         return $tpl->parse($this->field->form->config["template_prefix_group"].$this->field->config["group_tpl"]);
     }

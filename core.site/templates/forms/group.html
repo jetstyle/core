@@ -1,5 +1,34 @@
 <!-- forms/group.html : Шаблоны списка "полей" внутри группы -->
 
+{{TPL:CmsList}}
+    <div class="cms-wrapper">
+      <!-- Развёрнутый модуль -->
+        <a href="#" onclick="$(this).toggleClass('b-module-title_opened').toggleClass('b-module-title_closed').next('table').toggle();"  class="b-module-title b-module-title_opened">{{group_title}}</a>
+
+        <table cellspacing="0" cellpadding="0" class="w100 content-">
+          <tr>
+            <td><img class="block" src="{{images}}z.gif" width="5" height="1" align="top" alt="" /></td>
+            <td class="w100">
+              <img class="block" src="{{images}}z.gif" width="1" height="5" align="top" alt="" />
+              <table>
+              {{!for fields do=@:List_Item}}
+              </table>
+              <img class="block" src="{{images}}z.gif" width="200" height="1" align="top" alt="" />
+              <img class="block" src="{{images}}z.gif" width="1" height="4" align="top" alt="" />
+            </td>
+            <td><img class="block" src="{{images}}z.gif" width="5" height="1" align="top" alt="" /></td>
+          </tr>
+        </table>
+
+      <!-- Свёрнутый модуль 
+      <div id="module_div_closed_{{_id}}" class="{{_class_name_2}}">
+        <a href="#" onclick="WrapperSwitch('{{_id}}',true); return true;" id="module_name_closed_{{_id}}" class="b-module-title b-module-title_closed">{{group_title}}</a>
+      </div>
+      -->
+    </div>
+
+
+{{/TPL:CmsList}}
 <!-- == Обычный такой список, для полей врапперы вида Row* == -->
 {{TPL:List}}
  <div>
@@ -7,7 +36,9 @@
  </div>
 {{/TPL:List}}
 
-{{TPL:List_Item}}{{*field}}{{/TPL:List_Item}}
+{{TPL:List_Item}}
+    {{*field}}
+{{/TPL:List_Item}}
 
 
 <!-- == Список для "Табсов" (внутри него -- группы) == -->

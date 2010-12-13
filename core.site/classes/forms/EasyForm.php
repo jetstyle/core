@@ -119,10 +119,12 @@ class EasyForm {
 	//добавляем поля к форме или группе
 	protected function addFields(&$form, $config, $is_field=false) {
 		//тут добавляем поля
+
         if ($config)
         {
             foreach ($config AS $name => $rec)
             {
+                //var_dump($rec);
                 //формируем конфиг для поля
                 if ( is_array($rec) )
                 {
@@ -132,16 +134,29 @@ class EasyForm {
                         if (is_array($rec[1])) $conf = $rec[1];
                             else $conf = array( "model_default" => $rec[1] );
                     else $conf = array();*/
+
                 }
                 else
                 {
                     $pack_name = $rec;
                     $conf = array();
                 }
-
+/*
                 //генерируем конфиг для поля
+                if ($name=="controller"){
+                        var_dump($conf);
+                        echo '<hr>';
+                }
+                */
+                
                 $conf = $this->ConstructConfig( $pack_name, $conf, false, $name );
-
+                
+                /*
+                if ($name=="controller"){
+                        var_dump($conf);
+                        echo '<hr>';
+                }*/
+                
                 if ($conf)
                 {
                     //определяем wrapper_tpl
@@ -160,13 +175,26 @@ class EasyForm {
                         $field =& $form->model->Model_AddField( $name, $conf );
                     else
                         $field =& $form->AddField( $name, $conf );
+
+                    //if ($name=="controller")
+                    //    var_dump($conf);
+
                     //если указан пакет группы, обрабатываем вложение
                     if (in_array($pack_name, $this->groups))
                     {
+                        //echo 'Diving to group package:'.$pack_name;
+                        //var_dump($conf['fields']);
+                        
+                        $this->in_group = true;
                         $this->AddFields($field, $conf['fields'], true);
+                        $this->in_group = false;
+                        //echo '<hr>';
+                    
                     }
                 }
             }
+            //var_dump(get_class($form->model));
+            //die();
         }
 	}
 
@@ -200,19 +228,25 @@ class EasyForm {
 	{
 		//конструируем конфиг
 		$config = array();
-                
+
         //если нет имени пакета, поискать в конфиге формы default_packages
         if ( !$conf_name )
         {
             $conf_name = $this->form->config["default_packages"][$field_name]["extends_from"];
+
             if (isset($this->form->config["default_packages"][$field_name]) && !$conf_name)
             {
                 Debug::trace("PACK $field_name:  ".$conf_name);
                 return false;                
             }
-            else
+            else{
                 $_config = $this->_MergeConfig($this->form->config["default_packages"][$field_name], $_config);
+            }
         }
+                
+       // if($conf_name, $field_name=="controller"){ //, $this->form->config["default_packages"][$field_name]
+      //     var_dump( $this->form->config["default_packages"][$field_name], $_config );
+       // }
 
         //если все еще нет имени пакета, приравнять его к имени поля
         if ( !$conf_name )
@@ -224,7 +258,7 @@ class EasyForm {
 		}
 		else
 		{
-                        die('Failed to find form package for: '.$field_name);
+            die('Failed to find form package for: '.$field_name);
 			//include( Finder::findScript("handlers","forms/packages/".$conf_name) );
 		}
 		

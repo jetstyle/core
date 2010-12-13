@@ -28,3 +28,11 @@
 <input type="hidden" name="{{field}}" value="{{interface_data}}" />
 {{/TPL:Hidden}}
 
+<!-- CMS specific -->
+{{TPL:WYSIWYG}}
+    {{!!tinymce input_name="_text" tpl_prefix=prefix init="1"}}{{interface_data}}{{/!!}}
+{{/TPL:WYSIWYG}}
+
+{{TPL:CmsPlain}}
+<input id="{{field}}"  size="50" type="text" name="{{field}}" value="{{interface_data}}" />
+{{/TPL:CmsPlain}}

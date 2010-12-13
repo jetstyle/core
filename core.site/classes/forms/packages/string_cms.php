@@ -1,6 +1,6 @@
 <?php
   $config = array(
-    "interface_tpl" => "string.html:Plain",
+    "interface_tpl" => "string.html:CmsPlain",
     "wrapper_tpl"   => "wrapper.html:CmsStringWrapper",
 //    "wrapper_title" => "[string title]",
 //    "wrapper_desc"  => "[string desc]",
