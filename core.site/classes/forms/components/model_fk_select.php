@@ -46,11 +46,12 @@ class FormComponent_model_fk_select extends FormComponent_abstract
    // возврат значения в виде "шифра" или "ключа"
    function Model_GetDataValue()
    {
-   var_dump($this->field->config["fk_model"]);
-     if (!$this->field->config["options"] && $this->field->config["fk_model"])
+
+     if ( empty($this->field->config["options"]) )
      {
-echo        $model = $this->field->config["fk_model"];
-        $model->cleanUp();
+
+        $model = DBModel::factory( $this->field->config["fk_model"] );
+        ///$model->cleanUp();
 
         $opts = $model->load()->getArray();
         $options = array(0=>"выбрать");
@@ -62,7 +63,7 @@ echo        $model = $this->field->config["fk_model"];
         
         $this->field->config["options"] = $options;
      }
-     //var_dump($this->model_data["id"]);
+
      return $this->model_data["id"];
    }
    // изменение значения в виде "шифра" или "ключа"
