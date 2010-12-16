@@ -310,7 +310,7 @@ class TreeControl
 			$result = $db->execute("
 				SELECT ".implode(", ", $this->config->SELECT_FIELDS)."
 				FROM ??".$this->config->table_name."
-				WHERE ".( $_GET['_show_trash'] ? '_state>=0' : "_state <>2 " ) . ($where ? ' AND ' . $where : '') . ($this->config->where ? ' AND ' . $this->config->where : '')." ".($this->level_limit ? " AND _level <= ".$this->level_limit : "")."
+				WHERE ".( $_GET['_show_trash'] ? '_state>=0' : "_state <> 2 " ) . ($where ? ' AND ' . $where : '') . ($this->config->where ? ' AND ' . $this->config->where : '')." ".($this->level_limit ? " AND _level <= ".$this->level_limit : "")."
 				ORDER BY _order ASC
 			");
 
