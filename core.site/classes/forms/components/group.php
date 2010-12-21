@@ -232,6 +232,7 @@ class FormComponent_group extends FormComponent_abstract
         $tpl->set( "parent", $this->field->name );
         $tpl->set( "fields", $result);
         $tpl->set( "group_title", $this->field->config["group_title"]);
+        $tpl->set( "interface_tpl_params", $this->field->config["interface_tpl_params"]);
         
         return $tpl->parse($this->field->form->config["template_prefix_group"].$this->field->config["group_tpl"]);
     }

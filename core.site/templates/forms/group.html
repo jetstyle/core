@@ -3,9 +3,9 @@
 {{TPL:CmsList}}
     <div class="cms-wrapper">
       <!-- Развёрнутый модуль -->
-        <a href="#" onclick="$(this).toggleClass('b-module-title_opened').toggleClass('b-module-title_closed').next('table').toggle();"  class="b-module-title b-module-title_opened">{{group_title}}</a>
+        <a href="#" onclick="$(this).toggleClass('b-module-title_opened').toggleClass('b-module-title_closed').next('table').toggle();"  class="b-module-title {{?interface_tpl_params.closed}}b-module-title_closed{{?:}}b-module-title_opened{{/?}}">{{group_title}}</a>
 
-        <table cellspacing="0" cellpadding="0" class="w100 content-">
+        <table cellspacing="0" cellpadding="0" class="w100 content-" {{?interface_tpl_params.closed}}style="display:none"{{/?}}>
           <tr>
             <td><img class="block" src="{{images}}z.gif" width="5" height="1" align="top" alt="" /></td>
             <td class="w100">
