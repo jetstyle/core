@@ -1,7 +1,9 @@
 {{!connect 'colorbox.js'}}
 {{!connect 'colorbox.css'}}
 
+
 <tbody class="l-cms-body">
+    {{?!hide_modulebar}}
     <tr>
         <td class="l-cms-body_tools">
             {{@blocks/help_link.html}}
@@ -11,18 +13,21 @@
         <td class="l-cms-body_sep"></td>
         <td class="l-cms-body_title">{{module_title}}</td>
     </tr>
+    {{/?}}
     <tr>
         <td class="l-cms-body_tree" id="left">
             <div class="carpet" style="position: absolute; display: none; background: transparent;"></div>
             <!-- список/дерево модуля слева -->
             {{wrapped.0}}
         </td>
+        {{?wrapped.1}}
         <td id="separator" class="l-cms-body_sep"></td>
         <td class="l-cms-body_content" id="right">
             <div class="carpet" style="position: absolute; display: none; background: transparent;"></div>
             <!-- форма модуля справа -->
             {{wrapped.1}}
         </td>
+        {{/?}}
     </tr>
 </tbody>
 

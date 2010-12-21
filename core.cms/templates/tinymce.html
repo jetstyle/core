@@ -29,13 +29,13 @@
 			button_tile_map : true,
 			relative_urls : false,
 			plugins : "table,contextmenu,paste,advlink,advhr,jetimages,jetfiles,jetcontent,jetbuttons,jetflash,jetgmap,quote,note,preview",
-			valid_elements : "+a[name|href|target|title|onclick|mode|fileparams|class|rel],-strong/-b/,-em/-i,-strike,-u,#p[id|style],-ol,-ul[class],-li,br,img[id|class|src|alt|title|bigwidth|bigheight|bigsrc|mode|width|height|title|style|rel],small,-sub,-sup,-blockquote,-table[class|align],-tr[rowspan|align],tbody,thead,tfoot,#td[colspan|rowspan|align|style],-th[colspan|rowspan|align],caption,-pre,address,-h1,-h2,-h3,-h4,-h5,-h6,hr,dd,dl,dt,cite,abbr,acronym,del,ins,big,object[width|height],param[name|value],embed[src|type|allowscriptaccess|allowfullscreen|width|height],script[src,type],div[id|style]",
+			valid_elements : "+a[name|href|target|title|onclick|mode|fileparams|class|rel],-strong/-b/,-em/-i,-strike,-u,#p[id|style],-ol,-ul[class],-li,br,img[id|class|src|alt|title|bigwidth|bigheight|bigsrc|mode|width|height|title|style|rel],small,-sub,-sup,-blockquote,-table[class|align],-tr[rowspan|align],tbody,thead,tfoot,#td[colspan|rowspan|align|style],-th[colspan|rowspan|align],caption,-pre,address,-h1,-h2,-h3,-h4,-h5,-h6,hr,dd,dl,dt,cite,abbr,acronym,del,ins,big,object[width|height],param[name|value],embed[src|type|allowscriptaccess|allowfullscreen|width|height],script[src,type],div[id|style|class]",
 			theme_advanced_toolbar_location : "top",
 			theme_advanced_resizing : true,
 			theme_advanced_statusbar_location : "bottom",
 			theme_advanced_resize_horizontal : false,
 			theme_advanced_toolbar_align : "left",
-			theme_advanced_buttons1 : "cut,pastetext,pasteword,separator,undo,redo,separator,outdent,indent,charmap,removeformat,advhr,separator,link,jetcontent,unlink,anchor,separator,justifyleft,justifycenter,justifyright,justifyfull,separator,jetimages,jetfiles,jetflash,note,quote", /* jetbuttons,jetgmap,*/
+			theme_advanced_buttons1 : "cut,pastetext,pasteword,separator,undo,redo,separator,outdent,indent,charmap,removeformat,advhr,separator,link,jetcontent,unlink,anchor,separator,justifyleft,justifycenter,justifyright,justifyfull,separator,jetimages,jetfiles,jetflash,jetgmap,note,quote", /* jetbuttons,jetgmap,*/
 			theme_advanced_buttons2 : "formatselect,bold,italic,strikethrough,sub,sup,separator,bullist,numlist,separator,tablecontrols,help,code",
 			theme_advanced_buttons3 : "",
 			theme_advanced_blockformats : "p,h2,h3,address",
@@ -52,5 +52,6 @@
 		tinyMCE.jetflash = "{{/}}do/Files/jetflash";
 		//tinyMCE.jetbuttons = "{{/}}do/Content/jetbuttons";
 		//tinyMCE.jetgmap = "{{/}}do/Content/jetgmap";
+		tinyMCE.jetgmap = "{{/}}do/Maps/popup";
 	</script>
 {{/TPL:init}}

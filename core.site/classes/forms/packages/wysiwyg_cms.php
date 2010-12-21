@@ -6,8 +6,12 @@
     "interface_tpl" => "string.html:WYSIWYG",
     "model"=> "model_filters",
     "model_filters"=>array(
-          "a"=> "typografica"),
+          "a"=> "typografica",
+          "b"=> "editor_objects"
+          ),
     "model_filtered"=>array(
-          "a"=> "*_pre")
+          "a"=> "*_pre", 
+          "b"=>"*_pre"
+          )
   );
 ?>

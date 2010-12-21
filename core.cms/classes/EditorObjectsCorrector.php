@@ -28,13 +28,14 @@ class EditorObjectsCorrector
 		$data = preg_replace_callback("/<blockquote>(.*?)?<\/blockquote>/si", array($this, "correctQuotes"), $data);
 		$data = preg_replace_callback("/<ins>(.*?)?<\/ins>/si", array($this, "correctMarks"), $data);
 		$data = preg_replace_callback("/<big>(.*?)?<\/big>/si", array($this, "correctNotes"), $data);
-		
 		$data = preg_replace_callback("/<img([^>]*?)class=\"flash\"([^>]*?)[\/]{0,1}>/si", array($this, "correctFlash"), $data);
 
-                $data = preg_replace("/<p>(<img([^>]*?)mode=\"\d+\"([^>]*?)[\/]{0,1}>)<\/p>/si", '$1', $data);
+		$data = preg_replace_callback("/<img([^>]*?)class=\"map\"([^>]*?)[\/]{0,1}>/si", array($this, "correctMap"), $data);
+
+        $data = preg_replace("/<p>(<img([^>]*?)mode=\"\d+\"([^>]*?)[\/]{0,1}>)<\/p>/si", '$1', $data);
 		$data = preg_replace_callback("/<img(([^>]*?)mode=\"\d+\"([^>]*?))[\/]{0,1}>/si", array($this, "correctImages"), $data);
                 
-                $data = preg_replace_callback("/<a(([^>]*?)mode=\"file\"([^>]*?))>(.*?)?<\/a>/si", array($this, "correctFiles"), $data);
+        $data = preg_replace_callback("/<a(([^>]*?)mode=\"file\"([^>]*?))>(.*?)?<\/a>/si", array($this, "correctFiles"), $data);
 		$data = preg_replace_callback("/<table([^>]*?class=\"[\w\s]+\"[^>]*?)>(.*?)?<\/table>/si", array($this, "correctTables"), $data);
 
 		return $data;
@@ -62,6 +63,29 @@ class EditorObjectsCorrector
 		$this->tpl->setRef('*', $r);
 
 		return $this->tpl->parse('content/blocks/note.html');
+	}
+	
+	protected function correctMap($matches)
+	{
+	    $result = $matches[0];
+
+	    preg_match_all('/(.*?)=(")(|.*?[^\\\])\\2/si', $matches[1]." ".$matches[2], $paramsMatches);
+	    if (is_array($paramsMatches[3]) && !empty($paramsMatches[3]))
+		{
+		    $params = array();
+			foreach ($paramsMatches[1] AS $i => $r)
+			{
+				$params[trim($r)] = trim(str_replace('\"', '"', $paramsMatches[3][$i]));
+			}
+			$map_id = $params["rel"];
+			if ($map_id>0)
+			{
+			    $map = DBModel::factory("Maps/cms")->loadOne("{id}=".$map_id);
+			    $this->tpl->setRef('*', $map);
+			    $result = $this->tpl->parse('content/blocks/map.html');
+			}
+		}
+	    return $result;
 	}
 	
 	protected function correctFlash($matches)

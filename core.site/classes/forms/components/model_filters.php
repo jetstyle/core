@@ -60,9 +60,9 @@ class FormComponent_model_filters extends FormComponent_model_plain
        else
        $params["_"] = $data;
 
+
        $filtered[$k] = $data = Locator::get("tpl")->Action( $v, $params );
      }
-
      $result = array();
      FormComponent_model_plain::Model_ToArray( &$result );
      foreach( $this->field->config["model_filtered"] as $k=>$v )

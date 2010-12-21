@@ -9,10 +9,15 @@ class GotoMenuBlock extends Block
         if ( $mod_config["module_name"] == "Content" ){
             
             $form = Locator::get('controller')->moduleConstructor->getForm();
-            $item = $form->getObj()->getItem();
-            if ($item){
-                $pre_data[] = $item->getArray();
-                $pre_data[] = array("separator"=>true);
+            if ($form){
+                $obj = $form->getObj();
+                if ($obj){
+                    $item = $obj->getItem();
+                    if ($item){
+                        $pre_data[] = $item->getArray();
+                        $pre_data[] = array("separator"=>true);
+                    }
+                }
             }
         }
 
