@@ -53,11 +53,8 @@ if ( $compile )
 			$compressedName = '';
 			foreach ($tpl->CONNECT[$compile] AS $fileName)
 			{
-                            $_fileName = Finder::findScript($compile, $fileName, 0, 1, $compile);
-                            if ($_fileName)
-                            {
-                                $compressedName .= '|'.filemtime($_fileName).'/'.$compile.'/'.$_fileName.'|';
-                            }
+        $_fileName = Finder::findScript($compile, $fileName, 0, 1, $compile);
+        if ($_fileName) $compressedName .= '|'.filemtime($_fileName).'/'.$compile.'/'.$_fileName.'|';
 			}
 			$compressedName = md5($compressedName);
 			
@@ -67,18 +64,13 @@ if ( $compile )
 				$skinDir = $tpl->getSkinDir();
 				foreach ($tpl->CONNECT[$compile] AS $fileName)
 				{
-                                    $_fileName = Finder::findScript($compile, $fileName, 0, 1, $compile);
-                                    if ($_fileName)
-                                    {
-                                        $result .= file_get_contents($_fileName);
-                                    }
+          $_fileName = Finder::findScript($compile, $fileName, 0, 1, $compile);
+          if ($_fileName) $result .= file_get_contents($_fileName);
 				}
-				
+
 				if ('js' == $compile)
-				{
           if (Config::get('minify_js'))
-          { Finder::useClass('JSMin'); $result = JSMin::minify($result); }
-				}
+            { Finder::useClass('JSMin'); $result = JSMin::minify($result); }
 
         if ('css' == $compile)
 				{
@@ -88,41 +80,42 @@ if ( $compile )
           if (Config::get('minify_css'))
             { Finder::useClass('CSSMin'); $result = CSSMin::minify($result); }
 				}
-								
+
 				if (!is_dir(Config::get('cache_dir').'/'.$compile))
 				{
 					mkdir(Config::get('cache_dir').'/'.$compile, 0775, true);
-					$htaccess = "RewriteEngine on\r\nRewriteBase ".RequestInfo::$baseUrl.'cache/'.Config::get('app_name').'/'.$compile."\r\n";
-					if ('js' == $compile)
-					{
-						$htaccess .= "AddType application/x-javascript .gz\r\n";
-						$htaccess .= "AddType application/x-javascript .js\r\n";
-					}
-					elseif ('css' == $compile)
-					{
-						$htaccess .= "AddType text/css .gz\r\n";
-						$htaccess .= "AddType text/css .css\r\n";
-					}
-					$htaccess .= "RewriteRule ^(.*\.gz)$ $1 [L]\r\n";
-					$htaccess .= "RewriteCond %{HTTP:Accept-Encoding} gzip\r\n";
-					$htaccess .= "RewriteCond %{HTTP_USER_AGENT} !Safari\r\n";
-					$htaccess .= "RewriteCond %{HTTP_USER_AGENT} !Konqueror\r\n";
-					$htaccess .= "RewriteRule ^(.*\.".$compile.")$ $1.gz\r\n";
-					$htaccess .= "AddEncoding gzip .gz\r\n";
-					$htaccess .= "Header set ExpiresActive On\r\n";
-					$htaccess .= "Header set ExpiresDefault \"access plus 10 years\"\r\n";
-					file_put_contents(Config::get('cache_dir').'/'.$compile.'/.htaccess', $htaccess);
+          if ( preg_match("/^\/var.*/", Config::get('cache_dir') ) )
+          {
+            $htaccess = "RewriteEngine on\r\nRewriteBase ".RequestInfo::$baseUrl.'cache/'.Config::get('app_name').'/'.$compile."\r\n";
+            if ('js' == $compile)
+            {
+              $htaccess .= "AddType application/x-javascript .gz\r\n";
+              $htaccess .= "AddType application/x-javascript .js\r\n";
+            }
+            elseif ('css' == $compile)
+            {
+              $htaccess .= "AddType text/css .gz\r\n";
+              $htaccess .= "AddType text/css .css\r\n";
+            }
+            $htaccess .= "RewriteRule ^(.*\.gz)$ $1 [L]\r\n";
+            $htaccess .= "RewriteCond %{HTTP:Accept-Encoding} gzip\r\n";
+            $htaccess .= "RewriteCond %{HTTP_USER_AGENT} !Safari\r\n";
+            $htaccess .= "RewriteCond %{HTTP_USER_AGENT} !Konqueror\r\n";
+            $htaccess .= "RewriteRule ^(.*\.".$compile.")$ $1.gz\r\n";
+            $htaccess .= "AddEncoding gzip .gz\r\n";
+            $htaccess .= "Header set ExpiresActive On\r\n";
+            $htaccess .= "Header set ExpiresDefault \"access plus 10 years\"\r\n";
+          }
+          else
+            $htaccess = "RewriteEngine off\r\n";
+
+          file_put_contents(Config::get('cache_dir').'/'.$compile.'/.htaccess', $htaccess);
 				}
-				
-				// file_put_contents(Config::get('cache_dir').'/'.$compile.'/'.$compressedName.'.'.$compile, $result);
-        print Config::get('cache_dir').'/'.$compile.'/'.$compressedName.'.'.$compile;
+
 				file_put_contents(Config::get('cache_dir').'/'.$compile.'/'.$compressedName.'.'.$compile, $result);
 				file_put_contents(Config::get('cache_dir').'/'.$compile.'/'.$compressedName.'.'.$compile.'.gz', gzencode($result, 9));
 			}
-
-			//$fname = array('path' => RequestInfo::$baseUrl.'cache/'.Config::get('app_name').'/'.$compile, 'file' => $compressedName);
       $fname = RequestInfo::$baseUrl.'cache/'.Config::get('app_name').'/'.$compile.'/'.$compressedName.'.'.$compile;
-      print $fname;
 			$tpl->set("_",$fname);
 			$str = $tpl->parse($template."_path");
 		}
@@ -130,11 +123,11 @@ if ( $compile )
 		{
 			$projDir = Config::get('project_dir');
 			$projDir = rtrim($projDir, '/\\');
-			
+
       foreach( $tpl->CONNECT[$compile] as $fname )
 			{
 				$tplAdd = '';
-				
+
 		    $_fname = Finder::findScript($compile, $fname, 0, 1, $compile);
 		    		    
 		    if ($_fname)
@@ -145,7 +138,7 @@ if ( $compile )
 		    	$fname = $_fname;
 		    	$tplAdd = '_path';
 		    }
-				
+
 				$tpl->set("_", $fname);
 				$str .= $tpl->parse($template.$tplAdd);
 			}

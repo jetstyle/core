@@ -176,6 +176,12 @@ class CSSMin {
         $m = $m[1]; 
         // $m is everything after the opening tokens and before the closing 
         // tokens but return will replace the entire comment.
+
+        /* added.start fatal error */
+          if ( $m[0] =='.' )
+            return '/*'.$m.'*/    ';
+        /* added.end fatal error */
+
         if ($m === 'keep') {
             return '/*keep*/';
         }
