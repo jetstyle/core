@@ -52,6 +52,7 @@ class FormProc extends FormSimple
 
 		if ($redirect)
 		{
+		    //var_dump($redirect);die();
 			$this->_redirect = RequestInfo::hrefChange('', array('rnd' => mt_rand(1,255)));
 
 			if ($this->stop_redirect)
@@ -64,6 +65,13 @@ class FormProc extends FormSimple
 				Controller::redirect( $this->_redirect );
 			}
 		}
+	}
+	
+	//вызывать ли $this->update() 
+	//для этого у неас есть onFormAfterEvent
+	public function needUpdate()
+	{
+		return false;
 	}
 
 	public function getHtml()
@@ -103,6 +111,7 @@ class FormProc extends FormSimple
         $config["fields"]   += $this->getFilesConfig();
         $config["db_model"] = $this->config["model"];
         $config["on_before_event"] = $this;
+        $config["on_after_event"] = $this;
         $config['success_url'] = RequestInfo::href();
 
         //if in edit mode: change button and load model item
