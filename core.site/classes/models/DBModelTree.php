@@ -40,6 +40,9 @@ class DBModelTree extends DBModel
         return $this;
     }
 
+    /**
+     * @return true if updates were done and rebuild
+     */
     public function moveNodeBefore($nodeId, $beforeNodeId)
     {
         $db = Locator::get('db');
@@ -58,14 +61,19 @@ class DBModelTree extends DBModel
                 WHERE _order >= " . self::quote($beforeNode['_order']) . " AND _parent = " . self::quote($beforeNode['_parent']) . "
             ");
             
-            $db->query("
+            $sql = "
                 UPDATE ".$this->quoteName(($this->autoPrefix ? DBAL::$prefix : "").$this->getTableName())."
                 SET _order = " . self::quote($beforeNode['_order']) . ", _parent = ".self::quote($beforeNode['_parent'])."
                 WHERE ".$this->getPk()." = " . self::quote($nodeId)  . "
-            ");
+            ";
+            $db->query($sql);
             
             $this->rebuild();
+            
+            return true;
         }
+        else
+            return false;
     }
     
     public function moveNodeInto($nodeId, $targetNodeId)
@@ -85,6 +93,8 @@ class DBModelTree extends DBModel
         ");
         
         $this->rebuild();
+        
+        return true;
     }
 
     public function insertBefore($nodeId, $row)

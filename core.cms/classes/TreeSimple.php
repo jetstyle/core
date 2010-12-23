@@ -93,8 +93,8 @@ class TreeSimple extends ListSimple  implements ModuleInterface
 					'ajax_auto_loading' => $this->config['ajaxAutoLoading'],
                                         
 				);
-                                //var_dump($treeParams);
-                                // var_dump($treeParams);
+                // var_dump($treeParams);
+                // var_dump($treeParams);
 
 				$url = $this->config["go_url"] ? $this->config["go_url"] : RequestInfo::hrefChange('', array('id' => ''));
 				$pos = strpos($url, '?');
@@ -181,7 +181,9 @@ class TreeSimple extends ListSimple  implements ModuleInterface
 		if (!$this->rootId)
 		{
 			$model = clone $this->getModel();
-			$model->setOrder(array('_state' => 'ASC', '_order' => 'ASC'));
+			//echo $model->getOrderSql();
+			//$model->cleanUp();
+			//$model->setOrder(array('_state' => 'ASC', '_order' => 'ASC'));
 			$model->loadOne("{_parent} = 0 AND {_state} IN (0,1,2)");			
 						
 			if ($model[$model->getPk()])
@@ -274,7 +276,6 @@ class TreeSimple extends ListSimple  implements ModuleInterface
 
 				$this->loaded = true;
 			}
-
 		}
 	}
 
@@ -337,17 +338,17 @@ class TreeSimple extends ListSimple  implements ModuleInterface
 			$beforeId = intval($_REQUEST['before']);
 
 			$db = &$this->db;
-			
+
 			if($beforeId)
 			{
-				$this->getModel()->moveNodeBefore($itemId, $beforeId);
+				$ret = $this->getModel()->moveNodeBefore($itemId, $beforeId);
 			}
 			else
 			{
-				$this->getModel()->moveNodeInto($itemId, $targetId);
+				$ret = $this->getModel()->moveNodeInto($itemId, $targetId);
 			}
 
-			return '1';
+			return $ret;
 		}
 		return '0';
 	}
