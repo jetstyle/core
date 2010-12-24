@@ -37,7 +37,6 @@ class FormCalendar extends FormIframe
 	protected function renderFields()
 	{
 		$renderResult = parent::renderFields();
-
 		if ($renderResult && is_array($this->config['calendar']['fields']))
 		{
 			$item = &$this->getItem();
@@ -45,10 +44,16 @@ class FormCalendar extends FormIframe
 			{
 				foreach($this->config['calendar']['fields'] AS $field)
 				{
-					$this->tpl->set('_'.$field, date($this->date_format));
+				    $timestamp = time();
+				    if (isset($this->config['calendar']['add_date'])) {
+				        if (in_array($field, array_keys($this->config['calendar']['add_date']))) {
+				            $timestamp = strtotime($this->config['calendar']['add_date'][$field]);
+				        }
+				    }
+					$this->tpl->set('_'.$field, date($this->date_format, $timestamp));
 					if($this->config['calendar']['use_time'] !== false)
 					{
-						$this->tpl->set('_'.$field.'_time', date('H:i'));
+						$this->tpl->set('_'.$field.'_time', date('H:i', $timestamp));
 					}
 				}
 			}
