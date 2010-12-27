@@ -2406,5 +2406,6 @@ class DBModel extends Model implements IteratorAggregate, ArrayAccess, Countable
             return $this->className;
         }
 }
-?>
+
+
 
