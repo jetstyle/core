@@ -191,6 +191,7 @@
 		$(document).ready(function(){
 			var lastOvered = null;
 			$('#left_col').sortable({
+                axis: 'y',
 	        	stop: function(e, ui) {
                     var data = {
 		       			'item_id': ui.item.attr('id'),
@@ -205,6 +206,11 @@
                         data['index'] = $('#left_col li').index(ui.item);
                         data['{{page_var}}'] = '{{page_num}}';
 	       			}
+                    data['orders'] = {};
+                    $.each($('#left_col li'), function(i, el) {
+                        var id = $(el).attr('id');
+                    	data['orders'][id] = i;
+                    });
                     $.post('{{page_url}}', data, function(data) {
                         ui.item.css({'opacity': '1', 'cursor': 'default'});
 						if (data != '1') {
@@ -215,7 +221,7 @@
 		       		},'text');
 	        	},
 	        	start: function(e, ui) {
-	      			ui.helper.css({'opacity': '0.3', 'cursor': 'pointer'});
+	      			ui.helper.css({'opacity': '0.4', 'cursor': 'pointer'});
 	        	},
 	        	sort: function(e, ui) {
                 	if ($('.cms-arrow')[0]) {

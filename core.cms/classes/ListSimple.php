@@ -70,48 +70,15 @@ class ListSimple implements ModuleInterface
 	{
 		if ($_POST['order_list'])
 		{
-			$itemId = intval($_POST['item_id']);
 			$page = intval($_POST[$this->pageVar]);
-			if (!$page)
-			{
-				$page = 1;
-			}
-			$destIndex = intval($_POST['index']) + ($page - 1) * $this->perPage;
-
-			$destItem = DBModel::factory($this->config['model'])->addField('_order')->setOrder('{_order} ASC')->load(null, 1, $destIndex);
-
-			if (!$destItem[0]['_order'])
-			{
-				$destItem = DBModel::factory($this->config['model'])->addField('_order')->setOrder('{_order} DESC')->loadOne();
-			}
-			else
-			{
-				$destItem = $destItem[0];
-			}
-
-			$destOrder = intval($destItem['_order']);
-			$sourceItem = DBModel::factory($this->config['model'])->loadOne('{id} = '.$itemId);
-			$sourceOrder = intval($sourceItem['_order']);
-
-			$db = Locator::get('db');
-			if ($sourceOrder > $destOrder)
-			{
-				$db->execute("
-                    UPDATE ??".$this->getModel()->getTableName()."
-                    SET _order = _order + 1
-                    WHERE _order < ".$sourceOrder." AND _order >= ".$destOrder
-				);
-			}
-			else
-			{
-				$db->execute("
-                                    UPDATE ??".$this->getModel()->getTableName()."
-                                    SET _order = _order - 1
-                                    WHERE _order > ".$sourceOrder." AND _order <= ".$destOrder
-				);
-			}
-			$data = array('_order'=>$destOrder);
-			DBModel::factory($this->config['model'])->update($data, '{id} = '.$itemId);
+			if (!$page) $page = 1;
+			$model = DBModel::factory($this->config['model']);
+            if (sizeof($_POST['orders'])) {
+                foreach ($_POST['orders'] as $id => $order) {
+                    $data = array('_order' => $order + ($page - 1) * $this->perPage);
+                    $model->update($data, '{id} = '.$id);
+                }
+            }
 			die('1');
 		}
 		if ($_POST['delete_list'])
