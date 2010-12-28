@@ -222,10 +222,9 @@ class FormProc extends FormSimple
         $title = Locator::get("msg")->get( "forms.".$name );
         $ret = array( "wrapper_title"=> $field_cfg["wrapper_title"] ? $field_cfg["wrapper_title"] : $title ); 
 
-        //FIXME: looks like deprecated
         if ( is_array($this->config["fields"][$name] ) ){
             $ret = array_merge($this->config["fields"][$name], $ret);
-            //var_dump($ret);
+          
         }
 
         return $ret;
