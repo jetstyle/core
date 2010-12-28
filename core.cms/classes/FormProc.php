@@ -155,15 +155,16 @@ class FormProc extends FormSimple
             //поле - это поле
             else
             {
-/*
+/*              FIXME: clean after fk_select
+
                 if ($group_field["extends_from"]=="fk_select" && $model[$name])
                 {
                     $group_field["fk_model"] = $model[$name];
                     //var_dump($group_field["fk_model"]);
                 }
 */
-                //FIXME: $item[$name] always empty?
-                $fields_config[ $name ] = array_merge($group_field, $this->createField($name, $item[$name]));
+
+                $fields_config[ $name ] = array_merge($group_field, $this->createField($name, $group_field));
                 
 
                 /*
@@ -216,16 +217,15 @@ class FormProc extends FormSimple
     /**
      * extend model fields with form->config[default_packages] (core/core.cms/classes/forms/cms-form.yml)
      */
-    function createField($name, $row)
+    function createField($name, $field_cfg)
     {
         $title = Locator::get("msg")->get( "forms.".$name );
-
-        $ret = array( "wrapper_title"=> $title ); //"model_default"=> $this->item[$name],
+        $ret = array( "wrapper_title"=> $field_cfg["wrapper_title"] ? $field_cfg["wrapper_title"] : $title ); 
 
         //FIXME: looks like deprecated
-        if ( is_array($this->config["form"]["fields"][$name] ) ){
-            //die('111');//var_dump($this->config["form"]["fields"]);
-            $ret = array_merge($this->config["form"]["fields"][$name], $ret);
+        if ( is_array($this->config["fields"][$name] ) ){
+            $ret = array_merge($this->config["fields"][$name], $ret);
+            //var_dump($ret);
         }
 
         return $ret;
