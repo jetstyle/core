@@ -57,14 +57,28 @@ if ( $compile )
         if ($_fileName) $compressedName .= '|'.filemtime($_fileName).'/'.$compile.'/'.$_fileName.'|';
 			}
 			$compressedName = md5($compressedName);
-			
-			if (!file_exists(Config::get('cache_dir').'/'.$compile.'/'.$compressedName.'.'.$compile))
+
+			if ( (!file_exists(Config::get('cache_dir').'/'.$compile.'/'.$compressedName.'.'.$compile)) || Config::get('css_debug') )
 			{
 				$result = '';
 				$skinDir = $tpl->getSkinDir();
 				foreach ($tpl->CONNECT[$compile] AS $fileName)
 				{
           $_fileName = Finder::findScript($compile, $fileName, 0, 1, $compile);
+          //print file_get_contents($_fileName).'<br />';
+          //print $_fileName.'<br />';
+          if ( preg_match_all('/templates[\/]blocks([\/\w\d\.\-]+)/i', $_fileName, $_g) ){
+            print_r($_g);
+            print '<br />'.$_fileName.'<br />';
+            // print $tpl->get('skin').'templates/blocks'.'<br />';
+          }
+          // $tpl->get('skin').'templates/blocks';
+          
+          /*
+            Если путь к файлу содержит templates/blocks
+            то нужно рыть ксс и сразу заменять на пути
+          */
+
           if ($_fileName) $result .= file_get_contents($_fileName);
 				}
 
@@ -74,8 +88,12 @@ if ( $compile )
 
         if ('css' == $compile)
 				{
-          // $result = str_replace('../images/', $tpl->get('images'), $result); // original
-          $result = eregi_replace('[^(\'\"\=][\.\/\s]+images/', $tpl->get('images'), $result);
+        /* work !1!111 \/ */
+          //$_tmp_res_simple = 'url(im_ag-e.jpg15)';
+          //print preg_replace('/url[\(\'\"\=\s]+([\w\.\-]+)[\)\'\"\=\s]*+/i', 'url('.$tpl->get('images').'\\1)', $_tmp_res_simple );
+        /* work !1!111 /\ */
+
+          $result = eregi_replace('[^(\'\"\=][\.\/\s]+images/', $tpl->get('images'), $result); // <-- work ver.
 
           if (Config::get('minify_css'))
             { Finder::useClass('CSSMin'); $result = CSSMin::minify($result); }
