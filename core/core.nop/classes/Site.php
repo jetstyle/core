@@ -7,7 +7,7 @@ define ('_JS_SITE_METHOD_FREE', 3);
 define ('_JS_SITE_METHOD_IS_SET', 4);
 
 require_once 'Config.php';
-require_once 'Configurable.php';
+require_once 'Configurable.php'; 
 require_once 'Context.php';
 
 class Site
