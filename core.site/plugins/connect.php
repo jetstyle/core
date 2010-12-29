@@ -65,21 +65,13 @@ if ( $compile )
 				foreach ($tpl->CONNECT[$compile] AS $fileName)
 				{
           $_fileName = Finder::findScript($compile, $fileName, 0, 1, $compile);
-          //print file_get_contents($_fileName).'<br />';
-          //print $_fileName.'<br />';
-          if ( preg_match_all('/templates[\/]blocks([\/\w\d\.\-]+)/i', $_fileName, $_g) ){
-            print_r($_g);
-            print '<br />'.$_fileName.'<br />';
-            // print $tpl->get('skin').'templates/blocks'.'<br />';
-          }
-          // $tpl->get('skin').'templates/blocks';
-          
-          /*
-            Если путь к файлу содержит templates/blocks
-            то нужно рыть ксс и сразу заменять на пути
-          */
 
-          if ($_fileName) $result .= file_get_contents($_fileName);
+          if ( preg_match_all('/(templates[\/]blocks[\/\w\d\-]+[\/]).+/i', $_fileName, $_g) ){
+            $path_to_img_in_b = ( preg_replace('/images[\/]/', '', $tpl->get('images')) ).$_g[1][0];
+            $tmp_res = file_get_contents($_fileName);
+            $result .= preg_replace('/url[\(\'\"\=\s]+([\w\.\-]+)[\)\'\"\=\s]*+/i', 'url('.$path_to_img_in_b.'\\1)', $tmp_res );
+          }
+          else if ($_fileName) $result .= file_get_contents($_fileName);
 				}
 
 				if ('js' == $compile)
@@ -88,12 +80,7 @@ if ( $compile )
 
         if ('css' == $compile)
 				{
-        /* work !1!111 \/ */
-          //$_tmp_res_simple = 'url(im_ag-e.jpg15)';
-          //print preg_replace('/url[\(\'\"\=\s]+([\w\.\-]+)[\)\'\"\=\s]*+/i', 'url('.$tpl->get('images').'\\1)', $_tmp_res_simple );
-        /* work !1!111 /\ */
-
-          $result = eregi_replace('[^(\'\"\=][\.\/\s]+images/', $tpl->get('images'), $result); // <-- work ver.
+          $result = eregi_replace('[^(\'\"\=][\.\/\s]+images/', $tpl->get('images'), $result);
 
           if (Config::get('minify_css'))
             { Finder::useClass('CSSMin'); $result = CSSMin::minify($result); }
