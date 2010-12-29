@@ -134,6 +134,7 @@ class UsersController extends Controller
 	// Form Events
 	public function loginAfterEvent($event, $form)
 	{
+	    $openIdLogin = $form->getFieldByName('openid_login')->model->model_data;
 		$login = $form->getFieldByName('login')->model->model_data;
 		$password = $form->getFieldByName('password')->model->model_data;
 		$isPermanent = $form->getFieldByName('permanent')->model->model_data;
@@ -141,7 +142,11 @@ class UsersController extends Controller
 
 		$prp = &Locator::get('principal');
 
-		if ($prp->login($login, $password, $isPermanent) === PrincipalInterface::AUTH)
+		if ( $openIdLogin && $prp->loginOpenidStart( $openIdLogin ) )
+		{
+			$form->fields[0]->validator->_Invalidate("bad_openid", "OpenId not found there");
+		}
+		else if ($prp->login($login, $password, $isPermanent) === PrincipalInterface::AUTH)
 		{
 			if ($this->ajaxLogin)
 			{
@@ -212,7 +217,18 @@ class UsersController extends Controller
 	protected function handle_login($params)
 	{
 		$prp = &Locator::get('principal');
-
+		
+		// Perform HTTP Request to OpenID server to validate key
+		if($_GET['openid_mode'] == 'id_res')
+		{
+		    $prp->loginOpenidProceed();
+		}
+		// User Canceled your Request
+		else if ($_GET['openid_mode'] == 'cancel')
+		{ 
+		    Controller::redirect(RequestInfo::$baseUrl.$this->url_to('login')."?cancel");
+		}
+		
 		if ($prp->security('noguests'))
 		{
 			Controller::redirect(RequestInfo::$baseUrl.$this->url_to('logout'));
@@ -227,7 +243,7 @@ class UsersController extends Controller
 		}
 
 		Finder::useClass("forms/EasyForm");
-		$config['on_after_event'] = array(array(&$this, 'loginAfterEvent'));;
+		$config['on_after_event'] = array(array(&$this, 'loginAfterEvent'));
 		$form = new EasyForm('login', $config);
 		Locator::get('tpl')->set('Form', $form->handle());
 	}

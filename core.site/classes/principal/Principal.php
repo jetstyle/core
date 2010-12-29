@@ -278,5 +278,98 @@ class Principal implements PrincipalInterface
 		
 		return $this->securityModels[$model];
 	}
+	
+	public function loginOpenidStart($login)
+	{
+	    if (!$login )
+	    {
+		    return self::WRONG_LOGIN;
+	    }
+	    	
+	    $r = Finder::useLib("SimpleOpenID");
+	    $openid = new SimpleOpenID();
+	    $openid->SetIdentity($login);
+	    $openid->SetTrustRoot(  RequestInfo::$baseFull );
+	    $openid->SetRequiredFields(array("email"));//'fullname'
+	    //$openid->SetOptionalFields(array('dob','gender','postcode','country','language','timezone'));
+	    if ($openid->GetOpenIDServer())
+	    {
+		    $redirectTo = RequestInfo::get('retpath') ?
+					      RequestInfo::get('retpath') :
+					      RequestInfo::$baseFull.Router::linkTo("Users/login");
+					      
+		    $openid->SetApprovedURL( $redirectTo );      // Send Response from OpenID server to this script
+		    $openid->Redirect();     // This will redirect user to OpenID Server
+	    }
+	    else
+	    {
+		    #$error = $openid->GetError();
+		    #echo "ERROR CODE: " . $error['code'] . "<br>";
+		    #echo "ERROR DESCRIPTION: " . $error['description'] . "<br>";
+		    return self::NO_CREDENTIALS;
+	    }
+	    exit;
+	}
+	
+	public function loginOpenidProceed()
+	{
+		Finder::useLib("SimpleOpenID");
+	    
+		$openid = new SimpleOpenID;
+		$openid->SetIdentity($_GET['openid_identity']);
+		
+		$openid_validation_result = $openid->ValidateWithServer();
+
+		//var_dump( $openid->OpenID_Standarize($_GET['openid_identity']));die();
+		// OK HERE KEY IS VALID
+		if ($openid_validation_result == true)
+		{         
+
+		    $normalized_login = $openid->OpenID_Standarize( $_GET['openid_identity'] );
+		    //var_dump($normalizied_login);
+		
+		    //[ ] check user in db
+		   // $this->storageModel->loadByOpenidUrl( $normalized_login );
+		    $this->storageModel->loadByLogin( $normalized_login );
+		    if(! $this->storageModel->getId() )
+		    {
+    			//[ ] new User
+			    $newPass = md5(time().$normalized_login);
+			    $newUser = array(
+				    'group_id'=>0,
+				    'login'=>$normalized_login,
+				    'password'=>$newPass,
+				    'realm'=>'site'
+				    //'openid_url'=> $normalized_login, 
+
+			    );
+    			$userId = $this->storageModel->insert($newUser);
+			    $state = $this->login($normalized_login, $newPass, true);
+		    } 
+		    else 
+		    {
+			    $this->setLoginAndPassToCookies();
+			    $state = self::AUTH;
+			    $this->sessionModel->start($this->storageModel);
+		    }
+		    return $state;
+		}
+		else if($openid->IsError() == true)
+		{
+		   // ON THE WAY, WE GOT SOME ERROR
+		    #$error = $openid->GetError();
+		    #echo "ERROR CODE: " . $error['code'] . "<br>";
+		    #echo "ERROR DESCRIPTION: " . $error['description'] . "<br>";
+		    return self::NO_CREDENTIALS;
+		}
+		else
+		{                                            // Signature Verification Failed
+		    #echo "INVALID AUTHORIZATION";
+		   return self::NO_CREDENTIALS;
+		}
+    
+		die();
+	}
+	
 }
 ?>
