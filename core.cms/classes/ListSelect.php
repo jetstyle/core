@@ -70,7 +70,7 @@ class ListSelect extends ListSimple
 			$this->tpl->parse("select_topic.html", '__select');
 		}
 
-		if((isset($_GET[$this->topic_field]) && $_GET[$this->topic_field]) || $this->config['passthru'])
+		if((isset($_GET[$this->topic_field]) && $_GET[$this->topic_field]) || $this->config['passthru'] || $_POST['order_list'])
 		{
 			parent::Handle();
 		}
