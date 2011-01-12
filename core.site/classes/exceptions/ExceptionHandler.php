@@ -354,7 +354,7 @@ class ExceptionHandler
 
         if ("Exception" != get_class($exceptionObj))
         {
-            $result .= $exceptionObj->getText();
+            $result .= method_exists($exceptionObj, "getText") ? $exceptionObj->getText() : $exceptionObj->getMessage();
         }
         $result .= "</td></tr></table>";
 
