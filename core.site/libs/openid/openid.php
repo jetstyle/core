@@ -346,10 +346,11 @@ class LightOpenID
                         $url = $this->build_url(parse_url($url), parse_url(trim($headers['x-xrds-location'])));
                         $next = true;
                     }
-
+                    
                     if (isset($headers['content-type'])
-                        && strpos($headers['content-type'], 'application/xrds+xml') !== false
+                        && strpos($headers['content-type'], /*'application/xrds+xml'*/'xml') !== false
                     ) {
+                        
                         # Found an XRDS document, now let's find the server, and optionally delegate.
                         $content = $this->request($url, 'GET');
 
@@ -443,7 +444,7 @@ class LightOpenID
                 return $server;
             }
 
-            throw new ErrorException('No servers found!');
+            throw new ErrorException('No servers found!<br>'.$content);
         }
         throw new ErrorException('Endless redirection!');
     }
