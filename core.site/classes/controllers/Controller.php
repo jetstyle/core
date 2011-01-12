@@ -72,7 +72,7 @@ abstract class Controller implements ArrayAccess
 		if (empty($url))
 		    $url = RequestInfo::$baseFull . RequestInfo::$pageUrl;
 
-		if (strpos($url, "http://") !== 0)
+		if (strpos($url, "http://") !== 0 && strpos($url, "https://") !== 0)
 			$url = RequestInfo::$hostProt . $url;
 
 		header("Location: $url");
