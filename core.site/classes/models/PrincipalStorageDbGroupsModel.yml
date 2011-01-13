@@ -5,6 +5,8 @@ default:
         - title
         - god
         - custom
+    order:
+        _order: ASC
 
 cms:
     table: users_groups
@@ -14,3 +16,5 @@ cms:
         - god
         - custom
         - _state
+    order:
+        _order: ASC
