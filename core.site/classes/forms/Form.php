@@ -673,10 +673,7 @@ class Form
         }
         else
         {
-            if (is_string($this->config["db_model"]))
-                $model = DBModel::factory($this->config["db_model"]);
-            else
-                $model = $this->config["db_model"];
+            $model = $this->getModel();
             $data = $model->loadOne('{'.$this->config["id_field"].'} = '.Locator::get('db')->quote($dataId))->getArray();
         }
 
@@ -688,6 +685,20 @@ class Form
         foreach($this->fields as $k=>$v)
             $this->fields[$k]->DbLoad( $data );
     }
+
+   function getModel(){
+        if (!$this->db_model)
+        {
+            if (is_string($this->config["db_model"]))
+                $model = DBModel::factory($this->config["db_model"]);
+            else
+                $model = $this->config["db_model"];
+
+            $this->db_model = $model;
+        }
+        
+        return $this->db_model;
+   }
 
    // удаление из БД
    function DbDelete( $data_id = NULL )

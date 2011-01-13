@@ -1,4 +1,20 @@
 <!-- forms/interface/checkbox.html : Вывод поля интерфейса "Чекбокс" -->
 {{:Checkbox}}
-	<input id="{{field}}" class="checkbox-" type="checkbox" name="{{field}}" value="{{interface_data}}" {{?checked}}checked="checked" {{/?}}/>
+<input id="{{field}}" class="checkbox-" type="checkbox" name="{{field}}" value="{{interface_data}}" {{?checked}}checked="checked" {{/?}}/>
 {{/:Checkbox}}
+
+
+
+
+{{:MultiCheckbox}}
+<ul>
+    {{!for * do=@:mCheckbox field=field}}
+</ul>
+{{/:MultiCheckbox}}
+
+
+{{:mCheckbox}}
+<li>
+	<label><input class="checkbox-" type="checkbox" name="{{field}}[]" value="{{*id}}" {{?*checked}}checked="checked"{{/?}} /> {{*title}}</label>
+</li>
+{{/:mCheckbox}}

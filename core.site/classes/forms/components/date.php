@@ -123,7 +123,23 @@ class FormComponent_date extends FormComponent_view_plain
        $fields[] = $this->field->name."_active";
        $values[] = $this->model_data_active;
      }
+     $parts = explode(" ", $this->model_data);
+     $dates = explode("-", $parts[0]);
+
+     if (@in_array("year", $this->field->config["update_fields"] )){
+         $fields[] = "year";
+         $values[] = $dates[0];
+     }
+     if (@in_array("month", $this->field->config["update_fields"] )){
+         $fields[] = "month";
+         $values[] = $dates[1];
+     }
+     if (@in_array("day", $this->field->config["update_fields"] )){
+         $fields[] = "day";
+         $values[] = $dates[2];
+     }
    }
+
    function Model_DbUpdate( $data_id, &$fields, &$values )
    {
      return $this->Model_DbInsert( $fields, $values );
@@ -146,13 +162,16 @@ class FormComponent_date extends FormComponent_view_plain
    {
      if ($plain_data == NULL)
      {
+
        $plain_data = "&mdash;";
+
        if ($this->model_data_active)
          //if (isset( $this->field->config["view_date_format"] ) )
            $plain_data = date( $this->field->config["view_date_format"], strtotime( $this->model_data ) );
          //else
          //  $plain_data = $this->field->rh->msg->ConvertDate( $this->model_data );
      }
+    
 
      return parent::View_Parse( $plain_data );
    }
@@ -177,11 +196,12 @@ class FormComponent_date extends FormComponent_view_plain
        $chk  = $this->model_data_active;
      }
 
-     $this->field->tpl->Set( "interface_date", $date );
-     $this->field->tpl->Set( "interface_checkbox", $chk);
+     Locator::get("tpl")->Set( "interface_data", $date );
+     Locator::get("tpl")->Set( "interface_checkbox", $chk);
 
-     return $this->field->tpl->Parse($this->field->form->config["template_prefix_interface"].
+     $ret = Locator::get("tpl")->Parse($this->field->form->config["template_prefix_interface"].
                                      $this->field->config["interface_tpl"]);
+     return $ret;
    }
    // преобразование из поста в массив для загрузки моделью
    function Interface_PostToArray( $post_data )

@@ -45,7 +45,7 @@ class EasyForm {
 
 	var $form; //объект класса Form
 	var $id_var_name = "_id"; //из какой переменной запроса брать ID  к записи в БД
-	var $groups = array("group","tab_list","tab_child"); //список пакетов, которые считаются группами
+	var $groups = array("group","tab_list","tab_child", "group_seo"); //список пакетов, которые считаются группами
 
 	/*
 	  Вариация врапперов в зависимости от того, в группе эелемент или нет.

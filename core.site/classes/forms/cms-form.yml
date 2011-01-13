@@ -9,7 +9,11 @@ success_url:     ''
 cancel_url:      ''
 form_class:      'general-form'
 
-
+#
+# used only if "fields" part of form config is empty or
+# fields:
+#     field_name: []    -  no "extends_from"
+#
 default_packages:
 ##Announces
     id: false  
@@ -28,7 +32,13 @@ default_packages:
             a: "*_pre"
     title_short:
         extends_from: string_cms
-
+    lead:
+        extends_from: textarea_cms
+        model: model_filters
+        model_filters:
+            a: typografica
+        model_filtered:
+            a: "*_pre"
     text:
         extends_from: textarea_cms
         model: model_filters
@@ -61,8 +71,9 @@ default_packages:
     map_html:
         extends_from: textarea_cms
 
+    inserted:
+        extends_from: string_inserted
 
-    
     survey_id:  false   #TODO foreign
 
     _path: false
