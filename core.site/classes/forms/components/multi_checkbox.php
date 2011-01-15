@@ -49,14 +49,15 @@ class FormComponent_multi_checkbox extends FormComponent_abstract
    // ---- работа с БД ----
    function Model_DbLoad( $db_row )
    {
-     $model = $this->field->form->getModel();
-     $foreignFields = $model->getForeignFields();
-     //var_dump($foreignFields);
-     //echo '<hr>';
-     //var_dump($db_row);
+
      if(isset($db_row[ $this->field->name ]))
      {
-       
+       /*
+       $model = $this->field->form->getModel();
+       $foreignFields = $model->getForeignFields();
+       //var_dump($foreignFields);
+       //echo '<hr>';
+       //var_dump($db_row);
        //var_dump( $foreignFields[$this->field->name] );
        foreach ( $db_row[ $this->field->name ] as $rubric )
        {       
@@ -66,14 +67,37 @@ class FormComponent_multi_checkbox extends FormComponent_abstract
        $this->current_rubrics = $rubric_ids;
        
        $rubrics = DBModel::factory( $this->field->config[ "model_rubrics" ] )->registerObserver("row", array($this,"onRubricsRow"))->load()->getArray();
+       */
+       /**
+        * model_rubrics should be linked to items and contain virtual field "checked"
+        */
+        $rubricsModel = $this->getModelRubrics();
+        $foreignConf = $rubricsModel->getForeignFieldConf("items");
+        $rubricsModel->removeField("items");        	
 
-//       $this->model_data        = $db_row[ $this->field->name ];
-//       $this->model_data        = $rubrics;
+        	$rubricsModel->addField('>items', array(
+			'model' => $foreignConf["className"],
+			'pk' => $foreignConf["pk"],
+			'fk' => $foreignConf["fk"],
+			'join_where' => '{items.item_id} = '.DBModel::quote($this->field->form->data_id),
+		));
+
+        echo $rubrics = $rubricsModel->load();
+
        $this->Model_SetDataValue($rubrics);
      }
      else
       $this->Model_SetDefault();
    }
+   
+   protected function getModelRubrics(){
+      if (! $this->modelRubrics )
+        $this->modelRubrics = DBModel::factory( $this->field->config[ "model_rubrics" ] );
+
+      return $this->modelRubrics;
+   } 
+
+
    // возврат значения 
    function Model_GetDataValue()
    {
@@ -91,10 +115,18 @@ class FormComponent_multi_checkbox extends FormComponent_abstract
    }
    
    function Model_DbAfterInsert( $data_id ){
-        DBModel::factory( $this->field->config[ "model_links" ] )->delete("item_id=".$data_id);
-        foreach ($this->model_data as $rubric_id)
+       
+
+        $rubricsModel = $this->getModelRubrics();
+        $foreignModel = $rubricsModel->getForeignModel("items");
+        $foreignConf  = $rubricsModel->getForeignFieldConf("items");
+      var_dump( $foreignModel->getAllFields() );
+die();
+        $foreignModel->delete("item_id=". $data_id);
+        ##DBModel::factory( $this->field->config[ "model_links" ] )->;
+        foreach ( $this->model_data as $rubric_id )
         {
-            $data = array("rubric_id"=>$rubric_id, "item_id"=>$data_id);
+            $data = array( $foreignConf["fk"] =>$rubric_id, "item_id"=>$data_id);
             DBModel::factory( $this->field->config[ "model_links" ]  )->insert( $data );
         }
    }
@@ -102,18 +134,7 @@ class FormComponent_multi_checkbox extends FormComponent_abstract
    function Model_DbAfterUpdate( $data_id ){
         $this->Model_DbAfterInsert($data_id);
    }
-   /*
-   function Model_DbInsert( &$fields, &$values )
-   {
-     $fields[] = $this->field->name;
-     $values[] = $this->model_data;
-   }
 
-   function Model_DbUpdate( $data_id, &$fields, &$values )
-   {
-     return $this->Model_DbInsert( $fields, $values );
-   }
-   */
    
    //Observer for marks selected
    public function onRubricsRow($model, $row){
