@@ -8,6 +8,8 @@ class RequestInfo
 {
 	public static $host = '';
 	public static $hostProt = '';
+	
+	protected static $ip;
 
 	const STATE_USE = 0;
 	const STATE_IGNORE = 1;
@@ -232,5 +234,35 @@ class RequestInfo
 				else
 					$v = stripslashes($v);
 	}
+	
+	public static function getIp() {
+        if (!self::$ip) {
+            if ($_SERVER['HTTP_CLIENT_IP']) {
+                self::$ip = $_SERVER['HTTP_CLIENT_IP'];
+            }
+            else if ($_SERVER['HTTP_X_FORWARDED_FOR'] && preg_match_all('#\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}#s', $_SERVER['HTTP_X_FORWARDED_FOR'], $matches))
+            {
+                // make sure we dont pick up an internal IP defined by RFC1918
+                foreach ($matches[0] AS $ip)
+                {
+                    if (!preg_match("#^(10|172\.16|192\.168)\.#", $ip))
+                    {
+                        self::$ip = $ip;
+                        break;
+                    }
+                }
+            }
+            else if ($_SERVER['HTTP_FROM'])
+            {
+                self::$ip = $_SERVER['HTTP_FROM'];
+            }
+            else
+            {
+                self::$ip = $_SERVER['REMOTE_ADDR'];
+            }
+        }
+
+        return self::$ip;
+    }
 }
 ?>
