@@ -52,34 +52,22 @@ class FormComponent_multi_checkbox extends FormComponent_abstract
 
      if(isset($db_row[ $this->field->name ]))
      {
-       /*
-       $model = $this->field->form->getModel();
-       $foreignFields = $model->getForeignFields();
-       //var_dump($foreignFields);
-       //echo '<hr>';
-       //var_dump($db_row);
-       //var_dump( $foreignFields[$this->field->name] );
-       foreach ( $db_row[ $this->field->name ] as $rubric )
-       {       
-          $rubric_ids[] = $rubric["rubric_id"];
-          
-       }
-       $this->current_rubrics = $rubric_ids;
-       
-       $rubrics = DBModel::factory( $this->field->config[ "model_rubrics" ] )->registerObserver("row", array($this,"onRubricsRow"))->load()->getArray();
-       */
        /**
         * model_rubrics should be linked to items and contain virtual field "checked"
         */
         $rubricsModel = $this->getModelRubrics();
-        $foreignConf = $rubricsModel->getForeignFieldConf("items");
-        $rubricsModel->removeField("items");        	
+        
+        $foreignModelName = $this->getForeignModelName(); //items
+        $foreignModelPK   = $this->getForeignModelPK();   //item_id
+        
+        $foreignConf = $rubricsModel->getForeignFieldConf($foreignModelName);
+        $rubricsModel->removeField($foreignModelName);        	
 
-        	$rubricsModel->addField('>items', array(
+        	$rubricsModel->addField('>'.$foreignModelName, array(
 			'model' => $foreignConf["className"],
 			'pk' => $foreignConf["pk"],
 			'fk' => $foreignConf["fk"],
-			'join_where' => '{items.item_id} = '.DBModel::quote($this->field->form->data_id),
+			'join_where' => '{'.$foreignModelName.'.'.$foreignModelPK.'} = '.DBModel::quote($this->field->form->data_id),
 		));
 
         echo $rubrics = $rubricsModel->load();
@@ -114,20 +102,64 @@ class FormComponent_multi_checkbox extends FormComponent_abstract
      $this->model_data        = $a[ $this->field->name ];
    }
    
-   function Model_DbAfterInsert( $data_id ){
-       
-
+   //autodetect foreign model with links
+   function getForeignModelName()
+   {
         $rubricsModel = $this->getModelRubrics();
-        $foreignModel = $rubricsModel->getForeignModel("items");
-        $foreignConf  = $rubricsModel->getForeignFieldConf("items");
-      var_dump( $foreignModel->getAllFields() );
-die();
-        $foreignModel->delete("item_id=". $data_id);
-        ##DBModel::factory( $this->field->config[ "model_links" ] )->;
+        $foreignFields = $rubricsModel->getForeignFields();
+        
+        if ( count($foreignFields) ==1 )
+        {
+            $foreignModelName = array_pop( array_keys($foreignFields) );
+        }
+        if (!$foreignModelName)
+            throw new JsException("Can`t autodetect foreign model for ".$rubricsModel->className." in ".__FILE__);
+            
+        return $foreignModelName;
+   }
+   
+   function getForeignModelPK()
+   {
+        $rubricsModel = $this->getModelRubrics();
+        $foreignModelName = $this->getForeignModelName();
+        $foreignModel = $rubricsModel->getForeignModel($foreignModelName);
+        $foreignConf  = $rubricsModel->getForeignFieldConf($foreignModelName);
+        
+        $links_fields = $foreignModel->getAllFields();
+        $links_fields_assoc = array_flip($links_fields);
+        unset($links_fields[ array_search($foreignConf["fk"], $links_fields) ] );
+        $pk = array_pop($links_fields);
+        
+        if (empty($pk))
+            $pk = "item_id";
+            
+        return $pk;
+   }
+   
+   function Model_DbAfterInsert( $data_id ){
+        $rubricsModel = $this->getModelRubrics();
+        $foreignModelName = $this->getForeignModelName();
+        $foreignModel = $rubricsModel->getForeignModel($foreignModelName);
+        $foreignConf  = $rubricsModel->getForeignFieldConf($foreignModelName);
+
+        /**
+         * next code looks like shit, but all it does - extracts links_table.pk, which is not fk
+         * item_id(pk) not rubric_id(fk)
+         */    
+        if (!empty($foreignConf["fk"]))
+        {
+            $pk = $this->getForeignModelPK();
+        }
+        else
+            $foreignConf["fk"] = "rubric_id";
+
+        //delete all links to this $data_id (item_id)
+        $foreignModel->delete($pk."=". $data_id);
+
         foreach ( $this->model_data as $rubric_id )
         {
-            $data = array( $foreignConf["fk"] =>$rubric_id, "item_id"=>$data_id);
-            DBModel::factory( $this->field->config[ "model_links" ]  )->insert( $data );
+            $data = array( $foreignConf["fk"] =>$rubric_id, $pk=>$data_id);
+            $foreignModel->insert( $data );
         }
    }
    
