@@ -63,14 +63,14 @@ class FormComponent_multi_checkbox extends FormComponent_abstract
         $foreignConf = $rubricsModel->getForeignFieldConf($foreignModelName);
         $rubricsModel->removeField($foreignModelName);        	
 
-        	$rubricsModel->addField('>'.$foreignModelName, array(
+        $rubricsModel->addField('>'.$foreignModelName, array(
 			'model' => $foreignConf["className"],
 			'pk' => $foreignConf["pk"],
 			'fk' => $foreignConf["fk"],
 			'join_where' => '{'.$foreignModelName.'.'.$foreignModelPK.'} = '.DBModel::quote($this->field->form->data_id),
 		));
 
-        echo $rubrics = $rubricsModel->load();
+       $rubrics = $rubricsModel->load();
 
        $this->Model_SetDataValue($rubrics);
      }
