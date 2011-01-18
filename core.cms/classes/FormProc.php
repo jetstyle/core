@@ -238,18 +238,21 @@ class FormProc extends FormSimple
         $fields_config = array();
         if ( $this->config["files"] )
         {
+            $model  = $this->getModel();
+
             foreach ($this->config["files"] as $name => $conf)
             {
                 $fields_config[ $name ] = $this->createField($name, $row);
                 $fields_config[ $name ]["extends_from"] = "file_cms";
                 $fields_config[ $name ]["file_ext"] = explode(",",Config::get("upload_ext"));
                 $fields_config[ $name ]["file_size"] = 55242880;
+                
+                //TODO: just assign file field from model
                 $fields_config[ $name ]["variants"] = $conf["variants"];
 
-                $fields_config[ $name ]["config_key"] = $this->config['module_name'].':'.$name;
+                $fields_config[ $name ]["config_key"] = $model->getFilesConfigKey().':'.$name;
             }
         }
-        //var_dumP($fields_config);die();
         return $fields_config;
     }
 

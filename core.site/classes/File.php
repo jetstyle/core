@@ -666,5 +666,12 @@ class File implements ArrayAccess {
         'actions' => $this->config['actions'],
         );
     }
+    
+    /**
+     * @return key from Model.yml "files": config (ex: News/items)
+     */
+    public function getConfigKey(){
+        return $this->config["conf"];
+    }
 }
 ?>

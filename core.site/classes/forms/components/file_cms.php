@@ -160,9 +160,12 @@ class FormComponent_file_cms extends FormComponent_model_plain
         {
             foreach ($this->field->config['variants'] AS $variant_name=>$variant)
             {
+                
                 if ($variant['show'] || count($this->field->config['variants'])==1 )
                 {
+                    
                     $ret = FileManager::getFile($this->field->config["config_key"]."/".$variant_name, $id);
+                    //var_dump($this->field->config["config_key"]."/".$variant_name, $id, $ret);
                     $ret['original'] = $result;
                     return $ret;
                 }
@@ -197,6 +200,7 @@ class FormComponent_file_cms extends FormComponent_model_plain
         //$file = FileManager::getFile($this->configKey.':'.$conf['key'], $objId, $isId);
         // News/items:picture , 43, false
         $upload = Locator::get('upload');
+
         $file = FileManager::getFile($this->field->config['config_key'], $data_id);
 
         if ($this->field->config['variants'])

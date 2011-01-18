@@ -395,10 +395,10 @@ class DBModel extends Model implements IteratorAggregate, ArrayAccess, Countable
 			$this->setAutoPrefix($ymlConfig['autoPrefix']);
 		}
 
-                if ($ymlConfig['key_field'])
-                {
-                    $this->setKeyField($ymlConfig['key_field']);
-                }
+        if ($ymlConfig['key_field'])
+        {
+            $this->setKeyField($ymlConfig['key_field']);
+        }
 
 		if ($ymlConfig['files'])
 		{
@@ -406,10 +406,10 @@ class DBModel extends Model implements IteratorAggregate, ArrayAccess, Countable
 			$this->files = null;
 		}
 
-                if (array_key_exists('distinct', $ymlConfig))
-                {
-                    $this->setDistinct($ymlConfig['distinct']);
-                }
+        if (array_key_exists('distinct', $ymlConfig))
+        {
+            $this->setDistinct($ymlConfig['distinct']);
+        }
 	}
 
 	// ######## GETTERS ############## //
@@ -924,6 +924,8 @@ class DBModel extends Model implements IteratorAggregate, ArrayAccess, Countable
 		}
 
 		$config = FileManager::getConfig($configKey);
+		
+		$this->filesConfigKey = $configKey;
 
 		if (is_array($config))
 		{
@@ -2401,10 +2403,14 @@ class DBModel extends Model implements IteratorAggregate, ArrayAccess, Countable
 		return $res;
 	}
 
-        public function getModelClassName()
-        {
-            return $this->className;
-        }
+    public function getModelClassName()
+    {
+        return $this->className;
+    }
+    
+    public function getFilesConfigKey(){
+        return $this->filesConfigKey;
+    }
 }
 
 
