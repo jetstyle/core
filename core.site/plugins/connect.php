@@ -69,7 +69,7 @@ if ( $compile )
           if ( preg_match_all('/(templates[\/]blocks[\/\w\d\-]+[\/]).+/i', $_fileName, $_g) ){
             $path_to_img_in_b = ( preg_replace('/images[\/]/', '', $tpl->get('images')) ).$_g[1][0];
             $tmp_res = file_get_contents($_fileName);
-            $result .= preg_replace('/url[\(\'\"\=\s]+([\w\.\-]+)[\)\'\"\=\s]*+/i', 'url('.$path_to_img_in_b.'\\1)', $tmp_res );
+            $result .= preg_replace('/url[\(\'\"\=\s]*([\w\.\-]+)[\)\'\"\=\s]*+/i', 'url('.$path_to_img_in_b.'\\1)', $tmp_res );
           }
           else if ($_fileName) $result .= file_get_contents($_fileName);
 				}
