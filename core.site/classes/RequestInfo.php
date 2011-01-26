@@ -125,13 +125,23 @@ class RequestInfo
     /**
      * Добавление / изменение / удаление переменных из УРЛа
      *
-     * @param string $url
+     * @param string $url 
      * @param array $key
      * @return string
+     *
+     * OR
+     *
+     * @param array $keys - to add to current url
      */
     public static function hrefChange($url, $key)
     {
-        if (!$url)    $url = self::$baseUrl.self::$pageUrl;
+        if (is_array($url))
+        {
+            $key = $url;
+            unset($url);
+        }
+        
+        if(!$url)    $url = self::$baseUrl.self::$pageUrl;
         if (!is_array($key)) $key = array();
 
         $d = self::$data;
