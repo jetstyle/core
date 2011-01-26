@@ -183,21 +183,29 @@ class FormComponent_date extends FormComponent_view_plain
      parent::Interface_Parse();
 
      $format = "d.m.Y";
+     $format_time = "H:i";
      if (isset($this->field->config["view_interface_format"])) $format = $this->field->config["view_interface_format"];
 
      if ($this->model_data == $this->zero_data)
      {
        $date = "";
+       $time = "";
        $chk  = 0;
+       
      }
      else
      {
        $date = date( $format, strtotime($this->model_data));
+       $time = date( $format_time, strtotime($this->model_data));
        $chk  = $this->model_data_active;
      }
+     
+     //var_dump($this->model_data, $date);
 
      Locator::get("tpl")->Set( "interface_data", $date );
      Locator::get("tpl")->Set( "interface_checkbox", $chk);
+     if ( $this->field->config["use_time"] )
+         Locator::get("tpl")->Set( "interface_time", $time );
 
      $ret = Locator::get("tpl")->Parse($this->field->form->config["template_prefix_interface"].
                                      $this->field->config["interface_tpl"]);
@@ -209,9 +217,33 @@ class FormComponent_date extends FormComponent_view_plain
      $a = array(
           $this->field->name           => @trim($post_data['_'.$this->field->name]),
           $this->field->name."_active" => ($post_data['_'.$this->field->name."_active"]?1:0),
+          $this->field->name."_time" => ($post_data['_'.$this->field->name."_time"]? $post_data['_'.$this->field->name."_time"]:0)
                   );
      if (preg_match( "/([0-9]{1,2})\.([0-9]{1,2})\.([0-9]{4})/", $a[$this->field->name], $m ))
-       $a[$this->field->name] = date("Y-m-d 00:00:00", mktime(0,0,0,ltrim($m[2],"0"),ltrim($m[1],"0"),$m[3]));
+     {
+       if ( $a[$this->field->name."_time"] ){
+          $parts = explode(":", $a[$this->field->name."_time"]);
+          $hour = $parts[0];
+          $minute = $parts[1];
+          if ($hour > 23)
+            $hour = 23;
+          else if ($hour < 0 )
+            $hour = 0;
+
+          if ($minute < 0 )
+            $minute = 0;
+          else if ($minute >59 )
+            $minute = 59;
+          
+       }
+       else
+       {
+           
+            $hour = $minute = 0;
+       }
+       $a[$this->field->name] = date("Y-m-d ".$hour.":".$minute.":00", mktime($hour,$minute,0,ltrim($m[2],"0"),ltrim($m[1],"0"),$m[3]));
+       
+     }
      else
        $a[$this->field->name] = $this->zero_data;
 

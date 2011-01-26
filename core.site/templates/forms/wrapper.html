@@ -9,8 +9,11 @@
     {{errors}}
     <a href="#" onclick="return showCalendar('{{field}}', '%d.%m.%Y');" >
     <img src="{{images}}calendar/icon.gif" title="календарь" alt="календарь" style="vertical-align:bottom" /></a>
-    <!--    &nbsp;&nbsp;&nbsp; <input type="text" name="{{prefix}}inserted_time" value="{{*inserted_time|escape}}{{_inserted_time}}" size="11" maxlength='20'>
-    <br />-->
+
+    {{?interface_time}}
+        &nbsp;&nbsp;&nbsp; <input type="text" name="{{field}}_time" value="{{interface_time}}" size="11" maxlength='20'>
+    <br />
+    {{/?}}
     &nbsp;&nbsp;&nbsp;Дата (в формате <samp>дд.мм.гггг</samp>)
     <!-- и время (в формате <samp>чч:мм</samp>), которое будет указано при показе новости на сайте.-->
   </td>
