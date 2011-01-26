@@ -186,10 +186,11 @@ class FormComponent_date extends FormComponent_view_plain
      $format_time = "H:i";
      if (isset($this->field->config["view_interface_format"])) $format = $this->field->config["view_interface_format"];
 
-     if ($this->model_data == $this->zero_data)
+     if ($this->model_data == $this->zero_data || $this->model_data=="")
      {
-       $date = "";
-       $time = "";
+     
+       $date = date($format);//"";
+       $time = $this->field->config["use_time"] ? date($format_time) : "00:00";
        $chk  = 0;
        
      }

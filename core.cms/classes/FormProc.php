@@ -112,7 +112,8 @@ class FormProc extends FormSimple
         $config["db_model"] = $this->config["model"];
         $config["on_before_event"] = $this;
         $config["on_after_event"] = $this;
-        $config['success_url'] = RequestInfo::href();
+        $config['success_url'] =  RequestInfo::href();
+
 
         //if in edit mode: change button and load model item
         if ($this->id){
@@ -336,6 +337,20 @@ die();
                     }
                 }
 	}
+	
+	
+    public function onAfterEventForm($event, $form){
+        if ($event["event"]=="insert"){
+            
+            if ($form->data_id)
+		    {
+		        $form->config["success_url"] = RequestInfo::hrefChange(array("id"=>$form->data_id));
+		        
+		    }
+        }
+
+    }
+
 
     function OnBeforeEventForm($event, $form)
     {
