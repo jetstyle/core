@@ -38,7 +38,7 @@ class IcalView
 
         $out = "BEGIN:VCALENDAR\r\n";
         $out.= "VERSION:2.0\r\n";
-        $out.= "PRODID:-//JetStyle//".Config::get("project_name")."//EN\r\n";
+        $out.= "PRODID:-//".Config::get("project_name")."//EN\r\n";
         $out.= "METHOD:PUBLISH\r\n";
         $out.= implode("",$vevents);
         $out.= "END:VCALENDAR\r\n";
@@ -46,25 +46,38 @@ class IcalView
         return $out;
     }
 
+    /**
+     * * $row["inserted_unixtime"] - дата+время начала события в unixtime
+     * $row["inserted_end_unixtime"] - дата+время конца события в unixtime
+     * $row["duration"] - продолжительность событя в часах (по-умолчанию 1)
+     */
 
     protected function writeEvent(  $row ) {
             
             $dtstart =  gmdate('Ymd', $row["inserted_unixtime"])."T".gmdate('His', $row["inserted_unixtime"])."Z";//;
-           
-           
-//            $dtend =  gmdate('Ymd', $row["inserted_unixtime"])."T".gmdate('His', $row["inserted_unixtime"]+60*60);
-            
+
+
+            if ( ! $row["duration"] )
+                $duration = "PT1H";
+            else
+                $duration = "PT".$row["duration"]."H";
+
             $uid = md5($dtstart.$summary.$row["id"] )."@".Config::get("project_name");
             $event = array(
                     "BEGIN"=>"VEVENT",
                     "UID"=>$uid,
                     //"DTSTAMP"=>gmdate('Ymd')."T".gmdate('His')."Z",
                     "DTSTART"=>$dtstart,
-                    "DURATION"=>"PT1H", //1h
-                    //"DTEND"=>$dtend,
+                    "DURATION"=>$duration, //1h
+//                    "DTEND"=>$dtend,
                     "SUMMARY"=> iconv("cp1251", "utf-8", $row["title"]),
                     "END"=>"VEVENT"
             );
+
+            if ( $row["inserted_end_unixtime"] )
+                $event["DTEND"] =  gmdate('Ymd', $row["inserted_end_unixtime"])."T".gmdate('His', $row["inserted_end_unixtime"])."Z";
+            //
+
             $vevent = "";
             foreach ($event as $k=>$v)
                 $vevent .= $k.":".$v."\r\n";
@@ -74,11 +87,6 @@ class IcalView
             return $vevent;
     }
 
-
-	protected function getGmtDate($date)
-	{
-		return gmdate('D, d M Y H:i:s ', strtotime($date)).'GMT';
-	}
 }
 
 
