@@ -8,6 +8,7 @@ interface PrincipalInterface
 	const WRONG_PWD = 2;
 	const ALREADY_AUTH = 3;
 	const NO_CREDENTIALS = 4;
+	const OK_OPENID_NO_LOCAL = 5;   //open authorised ok, but no local user exists
 	const NOT_IDENTIFIED = 100;
 	
 //	public function setRealm($realm);

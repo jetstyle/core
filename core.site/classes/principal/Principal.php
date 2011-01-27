@@ -279,6 +279,9 @@ class Principal implements PrincipalInterface
 		return $this->securityModels[$model];
 	}
 	
+	/**
+	 * Вызывается из контроллера перед  обычным login()
+	 */
 	public function loginOpenidStart($login)
 	{
 	    if (!$login )
@@ -294,15 +297,17 @@ class Principal implements PrincipalInterface
 	    //$openid->SetOptionalFields(array('dob','gender','postcode','country','language','timezone'));
 	    if ($openid->GetOpenIDServer())
 	    {
+	    
 		    $redirectTo = RequestInfo::get('retpath') ?
 					      RequestInfo::get('retpath') :
 					      RequestInfo::$baseFull.Router::linkTo("Users/login");
-					      
+
 		    $openid->SetApprovedURL( $redirectTo );      // Send Response from OpenID server to this script
 		    $openid->Redirect();     // This will redirect user to OpenID Server
 	    }
 	    else
 	    {
+
 		    #$error = $openid->GetError();
 		    #echo "ERROR CODE: " . $error['code'] . "<br>";
 		    #echo "ERROR DESCRIPTION: " . $error['description'] . "<br>";
@@ -311,6 +316,9 @@ class Principal implements PrincipalInterface
 	    exit;
 	}
 	
+	/**
+	 * Сюда попадаем после вовзвращения из OpenID провйдера
+	 */
 	public function loginOpenidProceed()
 	{
 		Finder::useLib("SimpleOpenID");
@@ -320,8 +328,9 @@ class Principal implements PrincipalInterface
 		
 		$openid_validation_result = $openid->ValidateWithServer();
 
-		//var_dump( $openid->OpenID_Standarize($_GET['openid_identity']));die();
+//		var_dump($openid_validation_result, $openid->OpenID_Standarize($_GET['openid_identity']));die();
 		// OK HERE KEY IS VALID
+
 		if ($openid_validation_result == true)
 		{         
 
@@ -329,7 +338,16 @@ class Principal implements PrincipalInterface
 		    //var_dump($normalizied_login);
 		
 		    //[ ] check user in db
-		   // $this->storageModel->loadByOpenidUrl( $normalized_login );
+		    $this->storageModel->loadByOpenid( $normalized_login );
+
+		    //авторизован в OpenID, но его нет в нашей базе
+		    if(! $this->storageModel->getId() )
+		    {
+		        return self::NO_CREDENTIALS; //self::OK_OPENID_NO_LOCAL;
+		    }
+		    /*
+		    авторизован в OpenID, но его нет в нашей базе - тогда зарегаем его
+		    
 		    $this->storageModel->loadByLogin( $normalized_login );
 		    if(! $this->storageModel->getId() )
 		    {
@@ -346,6 +364,7 @@ class Principal implements PrincipalInterface
     			$userId = $this->storageModel->insert($newUser);
 			    $state = $this->login($normalized_login, $newPass, true);
 		    } 
+		    */
 		    else 
 		    {
 			    $this->setLoginAndPassToCookies();
