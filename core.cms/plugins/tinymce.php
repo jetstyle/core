@@ -2,6 +2,10 @@
 
   if(!$params['template']) $params['template'] = 'tinymce.html';
 
+  //for form processor fields: string.html:WYSIWYG
+  if (!$params['input_name'])
+	    $params['input_name'] = Locator::get('tpl')->get('field');
+
   if ($params['input_name']) 
   {
   	$r = array(

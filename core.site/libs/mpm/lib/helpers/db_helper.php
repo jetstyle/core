@@ -129,8 +129,20 @@ class MpmDbHelper
         }
         catch (Exception $e)
         {
-            echo "\n\nError: ", $e->getMessage(), "\n\n";
-            exit;
+            $msg =  $e->getMessage();
+            if (strpos($msg, "mpm_migrations' doesn't exist")!==false ){
+               
+                if (file_exists(MPM_DB_PATH."mpm_schema.sql")){
+                    $mpm_schema_sql = file_get_contents( MPM_DB_PATH."mpm_schema.sql" );
+                    $db->query($mpm_schema_sql);
+                    return self::doSingleRowSelect($sql);
+                }
+                
+            }
+
+            echo "\n\nError: ", $msg, "\n\n";
+            exit (1);
+
         }
     }
     
