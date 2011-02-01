@@ -6,9 +6,9 @@ $text = $params["_"]?$params["_"]:$params[0];
 
 */
 
-if ( is_array($params) && $params["_"] ) 
+if ( is_array($params) && isset( $params["_"] ) ) 
     $text = $params["_"];
-else if ( is_array($params) && $params[0] ) 
+else if ( is_array($params) && isset( $params[0] ) ) 
     $text = $params[0];
 else
     $text = $params;
