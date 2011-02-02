@@ -87,13 +87,13 @@ class TreeSimple extends ListSimple  implements ModuleInterface
 				$show_trash = $_GET['_show_trash'];
 
 				$treeParams = array(
-					'current_id' => ($_GET['full_id'] ? $_GET['full_id'] : 'node-'.$this->id),
+					'current_id' => $this->getCurrentId(),
 					'source_url' => RequestInfo::hrefChange(RequestInfo::$baseUrl."do/".$this->config['module_path'], array('action' => 'json', $this->idGetVar => '', 'cid' => $this->id)),
 					'update_url' => RequestInfo::hrefChange(RequestInfo::$baseUrl."do/".$this->config['module_path'], array('action' => 'update')),
 					'ajax_auto_loading' => $this->config['ajaxAutoLoading'],
                                         
 				);
-                // var_dump($treeParams);
+
                 // var_dump($treeParams);
 
 				$url = $this->config["go_url"] ? $this->config["go_url"] : RequestInfo::hrefChange('', array('id' => ''));
@@ -141,6 +141,7 @@ class TreeSimple extends ListSimple  implements ModuleInterface
 				if ($checkTree)
 				{
 					$result = $this->getNodesCountForRoot();
+					
 					if (!$result['total'])
 					{
 						$this->createRootNode();
@@ -151,6 +152,7 @@ class TreeSimple extends ListSimple  implements ModuleInterface
 							$this->items = array();
 							$this->children = array();
 							$this->load();
+							
 						}
 					}
 					// all nodes are deleted
@@ -259,7 +261,7 @@ class TreeSimple extends ListSimple  implements ModuleInterface
 			$model->load($where);
 
 			$data  = $model->getData();
-			//var_dump($data);
+			var_dump($where);
 			if ( !empty($data) )
 			{
 				$this->items = $model->getItems();
@@ -540,6 +542,9 @@ class TreeSimple extends ListSimple  implements ModuleInterface
 			}	
 		}
 	}
-
+    
+    public function getCurrentId(){
+        return ($_GET['full_id'] ? $_GET['full_id'] : 'node-'.$this->id);
+    }
 }
 ?>
