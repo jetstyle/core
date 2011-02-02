@@ -261,7 +261,7 @@ class TreeSimple extends ListSimple  implements ModuleInterface
 			$model->load($where);
 
 			$data  = $model->getData();
-			var_dump($where);
+
 			if ( !empty($data) )
 			{
 				$this->items = $model->getItems();
