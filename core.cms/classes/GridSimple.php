@@ -228,8 +228,19 @@ class GridSimple extends ListSimple implements ModuleInterface
                 $this->order_dir = "DESC"; break;
             case "_order":
             default:
-                $this->current_order = "_order";
-                $this->order_dir = "ASC";
+                if ( !$this->config["default_order"] ){
+                    $this->config["default_order"] = "_order ASC";
+                }
+                $parts = explode(" ", $this->config["default_order"]);
+                if ( count($parts)>1 )
+                {
+                    $this->current_order = $parts[0];
+                    $this->order_dir = $parts[1];
+                }
+                else {
+                    $this->current_order = $this->config["default_order"];
+                    $this->order_dir = "ASC";
+                }
         }
 
 	}
