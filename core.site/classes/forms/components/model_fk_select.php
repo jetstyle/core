@@ -54,7 +54,7 @@ class FormComponent_model_fk_select extends FormComponent_abstract
         ///$model->cleanUp();
 
         $opts = $model->load()->getArray();
-        $options = array(0=>"выбрать");
+        $options = $this->field->config["empty"] ? array() : array(0=>"выбрать");
         foreach ($opts as $opt){
             $options[$opt['id']] = $opt['title'];
         }
