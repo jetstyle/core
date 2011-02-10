@@ -58,13 +58,13 @@ class FormComponent_multi_checkbox extends FormComponent_abstract
         $rubricsModel = $this->getModelRubrics();
         
         $foreignModelName = $this->getForeignModelName(); //items
-        $foreignModelPK   = $this->getForeignModelPK();   //item_id
+        $foreignModelPK   = $this->getForeignModelPK();   //item_id - should be always item_id, if you want to override with "model_links"
         
         $foreignConf = $rubricsModel->getForeignFieldConf($foreignModelName);
         $rubricsModel->removeField($foreignModelName);        	
 
         $rubricsModel->addField('>'.$foreignModelName, array(
-			'model' => $foreignConf["className"],
+			'model' => $this->field->config["model_links"] ? $this->field->config["model_links"] : $foreignConf["className"],
 			'pk' => $foreignConf["pk"],
 			'fk' => $foreignConf["fk"],
 			'join_where' => '{'.$foreignModelName.'.'.$foreignModelPK.'} = '.DBModel::quote($this->field->form->data_id),

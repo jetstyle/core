@@ -14,7 +14,7 @@
             "wrapper_tpl"   => "wrapper.html:CmsDefaultGroupWrapper",
             "wrapper_title" => "",
             "wrapper_desc"  => "",
-            "group_title"   => "seo",
+            "group_title"   => "SEO",
 /*
   doesn`t work now, feature request: http://in.jetstyle.ru/quickstart/formstories
             "fields"=>array(
