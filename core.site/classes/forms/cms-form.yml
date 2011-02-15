@@ -84,3 +84,18 @@ default_packages:
     link_direct: false  #TODO
     link_popup: false   #TODO
     
+    announce_id1:
+        extends_from: fk_select
+        wrapper_tpl: "wrapper.html:CmsStringWrapper"
+        fk_model: Announces/cms
+        
+    announce_id2:
+        extends_from: fk_select
+        wrapper_tpl: "wrapper.html:CmsStringWrapper"
+        fk_model: Announces/cms
+
+    announce_id3:
+        extends_from: fk_select
+        wrapper_tpl: "wrapper.html:CmsStringWrapper"
+        fk_model: Announces/cms
+
