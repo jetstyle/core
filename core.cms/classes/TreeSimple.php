@@ -2,6 +2,12 @@
 Finder::useClass('ListSimple');
 Finder::useModel('DBModelTree');
 
+/**
+ * 
+ * @param $config["hide_buttons"] - array [addChild:true, addBrother: true, edit: true, del: true] - спрятать кнопки 
+ * @param $config["redirectIfEmptyId"]
+ * @param $config["level_limit"] - глубина дерева
+ */ 
 class TreeSimple extends ListSimple  implements ModuleInterface
 {
 	protected $children;
