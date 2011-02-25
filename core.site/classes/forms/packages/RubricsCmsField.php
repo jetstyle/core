@@ -1,6 +1,6 @@
 <?php
 $config = array(
-                "interface"       => "multi_checkbox",
+                "extends_from"       => "MultiCheckboxField",
                 "interface_tpl"   => "checkbox.html:MultiCheckbox",
                 "checkbox_value"  => 1,
                 "wrapper_tpl"     => "wrapper.html:CmsStringWrapper",

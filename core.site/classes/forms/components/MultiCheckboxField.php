@@ -12,7 +12,7 @@ class MultiCheckboxField extends FormField
     
     Locator::get('tpl')->Set('*', $data);
 
-    $result = FormComponent_abstract::Interface_Parse();
+    $result = parent::Interface_Parse();
 
     $ret = Locator::get('tpl')->Parse($this->form->config['template_prefix_interface'].
                                     $this->config['interface_tpl']);
@@ -113,6 +113,14 @@ class MultiCheckboxField extends FormField
             $pk = "item_id";
             
         return $pk;
+   }
+   
+   function dbUpdate() {
+	
+   }
+   
+   function dbInsert() {
+	
    }
    
    function Model_DbAfterInsert( $data_id ){
