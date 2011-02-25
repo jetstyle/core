@@ -88,98 +88,95 @@ define( "FORM_EVENT_AUTO",   "auto");   // insert/update based on $data_id
 
 class Form
 {
-   var $name; // имя формы
-   var $form_present_var = "__form_present";
-   var $data_id_var = "__form_data_id";
-   var $data_id=0;      // строка, ассоциированная с формой. 0 -- значит нет такой
-   var $hash=array();   // очень удобный способ доступа к полям
-   var $fields=array(); // очень неудобный способ доступа к полям
-   var $buttons=array();// хранилище "кнопок"
-   var $action; // куда уходить по посту формы
+    var $name; // имя формы
+    var $form_present_var = "__form_present";
+    var $data_id_var      = "__form_data_id";
+    var $data_id          = 0;      // строка, ассоциированная с формой. 0 -- значит нет такой
+    var $hash             = array();   // очень удобный способ доступа к полям
+    var $fields           = array(); // очень неудобный способ доступа к полям
+    var $buttons          = array();// хранилище "кнопок"
+    var $action; // куда уходить по посту формы
+ 
+    var $valid = true; // флаг валидности формы
 
-   var $valid = true; // флаг валидности формы
+    public function __construct()
+    {
+        Finder::UseClass("forms/FormField"); // он нам стопудово понадобится
 
-   var $default_config = array(
-           "template_prefix"           =>"forms/",
-           "template_prefix_button"    =>"forms/buttons.html:",
-           "template_prefix_views"     =>"forms/views.html:",
-           "template_prefix_wrappers"  =>"forms/",
-           "template_prefix_interface" =>"forms/",
-           "template_prefix_group"     =>"forms/",
-           "template_form"                  =>"form.html:Form",
-           "template_buttonlist"            =>"form.html:Buttons",
-           "multipart"    =>  1,
-           "auto_datetime"=>  1,
-           "auto_user_id" =>  false,
-           "id_field"     =>  "id",
-           "active_field" =>  "active",
-           "event_handlers_type" => "handlers/formevents", //IVAN
-           "default_event" => FORM_EVENT_AUTO,
-           "db_ignore" => false,
-           "db_table"  => false,
-           "fieldname_created_user_id"  => "_created_user_id",
-           "fieldname_edited_user_id"   => "_edited_user_id",
-           "fieldname_created_datetime" => "_created",
-           "fieldname_edited_datetime"  => "_modified",
-           // [optional] "success_url" =>
-           // [optional] "cancel_url" =>
-           // [optional] "on_before_event", "on_after_event"
-                              );
+        $args = func_get_args();
+        array_unshift($args, 'default');
+        $formConfig = array();
+        foreach ($args as $arg)
+        {
+            if (is_string($arg))
+            {
+                $ymlFile  = Finder::findScript('classes/forms', $arg, 0, 1, 'yml');
+                if ( $ymlFile )
+                {
+                    $arg = YamlWrapper::load($ymlFile);
+                }
+                else
+                {
+                    throw new FileNotFoundException('classes/forms/'.$arg.'.yml');
+                }
+            }
+            $formConfig = self::mergeConfigs($formConfig, $arg);
+        }
 
-   public function Form($form_config = NULL)
-   {
+        if ($formConfig['template_form'])
+        {
+            $parts = explode(":", $formConfig['template_form']);
+            if (count($parts) == 1)
+            {
+                $formConfig['template_form'] = "form.html:".$formConfig['template_form'];
+            }
+        }
 
-     Finder::UseClass("forms/FormField"); // он нам стопудово понадобится
+        $this->config = $formConfig;
 
-     if ($form_config['action'])
-     {
-     	$this->action = $form_config['action'];
-     }
-     else
-     {
-     	$this->action = '';
-     }
+        $a = array( "on_before_event", "on_after_event" );
+        foreach($a as $v)
+        {
+            if (isset($formConfig[$v]) && !is_array($formConfig[$v]))
+            {
+                $this->config[$v] = array();
+                $this->config[$v][] = $formConfig[$v];
+            }
+        }
+        
+        if ($this->config['form_name'])
+        {
+            $this->name = $this->config['form_name'];
+        }
+        else if ($this->config['db_table'])
+        {
+            $this->name = $this->config['db_table'];
+        }
+        else
+        {
+            if (!Config::get('last_form_id'))
+            {
+                Config::set('last_form_id', 1);
+            }
+            $this->name = 'form'.Config::get('last_form_id');
+            Config::set('last_form_id', Config::get('last_form_id')+1);
+        }
+        
+		if( $id = isset($this->config["id"]) ? $this->config["id"] : false )
+        {
+			$this->AssignId( $id );
+        }
+		else
+        {
+			if( $id = isset($_REQUEST[ '_id' ]) ? $_REQUEST[ '_id' ] : false )
+            {
+				$this->form->AssignId( $id );
+            }
+        }
 
-     if (!$form_config) $form_config = $this->default_config;
-     else               Form::StaticDefaults($this->default_config, $form_config);
-
-     if ($form_config['template_form'])
-     {
-	$parts = explode(":", $form_config['template_form']);
-	if (count($parts)==1)
-	{
-	    $form_config['template_form'] = "form.html:".$form_config['template_form'];
-	}
-     }
-
-     $this->config = $form_config;
-
-     // eventhandl.
-     $a = array( "on_before_event", "on_after_event" );
-     foreach($a as $v)
-       if (isset($form_config[$v]) && !is_array($form_config[$v]))
-       {
-         $this->config[$v] = array();
-         $this->config[$v][] = $form_config[$v];
-       }
-
-      if ($this->config['form_name'])
-      {
-         $this->name = $this->config['form_name'];
-      }
-     else if ($this->config['db_table'])
-     {
-         $this->name = $this->config['db_table'];
-     }
-     else
-     {
-         if (!Config::get('last_form_id')) Config::set('last_form_id', 1);
-         $this->name = 'form'.Config::get('last_form_id');
-         Config::set('last_form_id', Config::get('last_form_id')+1);
-     }
-   }
-
-
+		$this->AddFields( $this, $this->config["fields"] );
+		$this->AddButtons( $this, $this->config["buttons"] );
+    }
 
    // автоматизатор "конфигов по-умолчанию"
    function StaticDefaults( $default_config, &$supplied_config )
@@ -188,12 +185,31 @@ class Form
        if (!isset($supplied_config[$k])) $supplied_config[$k] = $v;
    }
 
-   // Добавить поле
-   function &AddField( $field_name = NULL, $config )
-   {
-     $f = new FormField( $this, $field_name, $config );
-     return $this->_AddField($f);
-   }
+    // Добавить поле
+    function &AddField( $field_name = NULL, $config )
+    {
+        if ($config['extends_from'])
+        {
+            $className = $config['extends_from'];
+
+            if (Finder::findScript('classes/forms/components/', $className))
+            {
+                Finder::useClass('forms/components/'.$className);
+                $className = $className;
+            }
+            else
+            {
+                $className = 'FormField';
+            }
+        }
+        else
+        {
+            $className = 'FormField';
+        }
+        $f = new $className( $this, $field_name, $config );
+        return $this->_AddField($f);
+    }
+    
    function &_AddField( &$field_object )
    {
      $this->fields[] = &$field_object;
@@ -219,19 +235,6 @@ class Form
      if ($this->data_id && !$ignore_load) $this->Load();  // пробуем загрузить
      if (!$this->data_id || $ignore_load) $this->Reset(); // устанавливаем default-значения
      if (!$ignore_session) $this->FromSession();
-
-     // присваиваем идетификатор форме
-     /*$uid = 0;
-     do
-     {
-        //zharik@gmail.com: $_name should be initilazed before usage
-        $_name = $this->config['db_table']? $this->config['db_table'] : 'form';
-        if (!$uid) $this->name = $_name;
-        else $this->name = $_name.'_'.$uid;
-			 $uid++;
-     }
-     while (isset($this->rh->forms) && in_array($this->name, $this->rh->forms));
-     $this->rh->forms[] = $this->name;*/
 
      $postData = null;
      if (isset($_POST[$this->form_present_var]) && ($_POST[$this->form_present_var] == $this->name))
@@ -340,7 +343,7 @@ class Form
    function Reset()
    {
      foreach($this->fields as $field)
-       $field->model->Model_SetDefault();
+       $field->Model_SetDefault();
    }
 
    // парсинг формы в своём обычном состоянии
@@ -371,7 +374,7 @@ class Form
      $form_name = $this->name;
      $tpl->set(
      	"form",
-     	"<form action=\"".$this->action."\" ".
+     	"<form action=\"".$this->config['action']."\" ".
      		"method=\"".( $this->config["form_method"] ? $this->config["form_method"] : RequestInfo::METHOD_POST )."\" ".
      		"id=\"".$form_name."\"".
      		"name=\"".$form_name.'" '.
@@ -592,8 +595,9 @@ class Form
 
         $fields = array();
         $values = array();
-        foreach($this->fields as $k=>$v)
+        foreach($this->fields as $k=>$v) {
             $this->fields[$k]->dbUpdate( $dataId, $fields, $values );
+        }
 
         $this->_dbAuto( $fields, $values );
 
@@ -608,6 +612,7 @@ class Form
             else
                 $model = $this->config["db_model"];
             $data = array_combine($fields, $values);
+
             $model->update($data, '{'.$this->config["id_field"].'} = '.Locator::get('db')->quote($dataId));
         }
 
@@ -755,7 +760,169 @@ class Form
      return "__inner_".$this->_inner_name_counter;
    }
 
-// EOC{ Form }
+    //code from EasyForm
+    public static function mergeConfigs($configBase, $configNew)
+    {
+        foreach( $configNew as $k => $v )
+        {
+            if (is_array($v) && isset($configBase[$k]))
+            {
+                $configBase[$k] = self::mergeConfigs($configBase[$k], $v);
+            }
+            else if ($k !== 'extends_from')
+            {
+                $configBase[$k] = $v;      
+            }
+          
+        }
+        return $configBase;
+    }
+    
+    var $wrapper_tpl = array(
+		"label,number,radio,select,string,password,checkbox" => array( "wrapper.html:Div", "wrapper.html:Row" ),
+		"file,image"             => array( "wrapper.html:Div", "wrapper.html:Row" ),
+		"date,date_optional"     => array( "wrapper.html:Div", "wrapper.html:Row" ),
+		"textarea,htmlarea"      => array( "wrapper.html:Div", "wrapper.html:RowSpan" ),
+	);
+    
+    //добавляем поля к форме или группе
+	protected function addFields(&$form, $config, $is_field=false) {
+		//тут добавляем поля
+        if ($config)
+        {
+            foreach ($config AS $name => $rec)
+            {
+                //формируем конфиг для поля
+                if ( is_array($rec) )
+                {
+                    $pack_name = $rec['extends_from'];
+                    $conf = $rec;
+                    /*if (isset($rec[1]))
+                        if (is_array($rec[1])) $conf = $rec[1];
+                            else $conf = array( "model_default" => $rec[1] );
+                    else $conf = array();*/
+                }
+                else
+                {
+                    $pack_name = $rec;
+                    $conf = array();
+                }
+                    
+                //генерируем конфиг для поля
+                $conf = $this->ConstructConfig( $pack_name, $conf, false, $name );
+
+                if ($conf)
+                {
+                    //определяем wrapper_tpl
+                    if (!isset($conf["wrapper_tpl"]))
+                        foreach ($this->wrapper_tpl as $k=>$v)
+                        {
+                            if (in_array($pack_name, explode(",",$k)))
+                            {
+                                $conf["wrapper_tpl"] = $v[ $is_field ? 1 : 0 ];
+                                break;
+                            }
+                        }
+
+                    //создаём поле
+                    if (method_exists($form, 'Model_AddField'))
+                    {
+                        $field =& $form->Model_AddField( $name, $conf );
+                    }
+                    else
+                    {
+                        $field =& $form->AddField( $name, $conf );
+                    }
+                    //если указан пакет группы, обрабатываем вложение
+                    if ($conf['fields'])
+                    {
+                        $this->AddFields($field, $conf['fields'], true);
+                    }
+                }
+            }
+        }
+	}
+
+    //добавляем кнопки к форме
+    function AddButtons( &$form, $config )
+    {
+        //тут добавляем кнопки
+        foreach($config as $btn => $rec)
+        {
+            //формируем конфиг для кнопки
+            $rec_cfg = false;
+            if( is_array($rec) && isset($rec[1]) && isset($rec[0]) )
+            {
+                $rec_cfg = $rec[1];
+                $rec = $rec[0];
+            }
+            else if ( is_array($rec) )
+            {
+                $rec_cfg = $rec;
+                $rec = $btn; 
+            }
+      
+            $conf = $this->ConstructConfig( "button_".$rec, $rec_cfg, $rec );
+      
+            //создаём кнопку
+            $field =& $form->AddButton( $conf );
+        }
+    }
+
+	//формирует конфиг на основе пакета
+	function constructConfig($conf_name, $_config=false, $is_btn=false, $field_name="")
+	{
+		//конструируем конфиг
+		$config = array();
+                
+        //если нет имени пакета, поискать в конфиге формы default_packages
+        if ( !$conf_name )
+        {
+            $conf_name = $this->config["default_packages"][$field_name]["extends_from"];
+            if (isset($this->config["default_packages"][$field_name]) && !$conf_name)
+            {
+                Debug::trace("PACK $field_name:  ".$conf_name);
+                return false;                
+            }
+            else
+                $_config = self::mergeConfigs($this->config["default_packages"][$field_name], $_config);
+        }
+
+        //если все еще нет имени пакета, приравнять его к имени поля
+        if ( !$conf_name )
+            $conf_name = $field_name;
+
+        //merging packages
+        while ($filename = Finder::findScript("classes","forms/packages/".$conf_name))
+        {
+            $currentConfig = $config;
+            include( $filename );
+            $currentConfig['extends_from'] = $config['extends_from'];
+            $config = array_merge($config, $currentConfig);
+            if ($conf_name == $config['extends_from'])
+            {
+                break;   
+            }
+            else
+            {
+                $conf_name = $config['extends_from'];
+            }
+        }
+        if ($conf_name && !Finder::findScript("classes","forms/components/".$conf_name))
+        {
+            throw new JSException('Failed to find form package "'.$conf_name.'" for field "'.$field_name.'"');
+        }
+
+		if (isset($_config["easyform_override"]))
+			foreach( $_config["easyform_override"] as $v )
+				unset($config[$v]);
+
+		//возвращаем смесь из пакета и твиков
+		if (is_array($_config))
+			$config = self::mergeConfigs($config, $_config);
+
+		return $config;
+	}
 }
 
 ?>

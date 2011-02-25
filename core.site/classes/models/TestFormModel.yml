@@ -1,0 +1,17 @@
+default:
+    table: test_form
+    fields: 
+        - id
+        - about
+        - email
+        - login
+        - password
+        - name
+        - salt
+        - key
+        - is_subscribed
+        - birthdate
+        - sex
+        - city
+        - vacancy_id
+    files: Files/pictures

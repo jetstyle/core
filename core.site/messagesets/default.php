@@ -25,22 +25,28 @@ $this->MSGS[] = array(
   //  Месяцы
       "Months"  => array("января", "февраля", "марта", "апреля", "мая",  "июня", 
                       "июля", "августа", "сентября", "октября", "ноября", "декабря"),
-      "Months1" => array("Январь", "Февраль", "Март", "Апрель", "Май",  "Июнь", 
+    "Months1" => array("Январь", "Февраль", "Март", "Апрель", "Май",  "Июнь", 
                        "Июль", "Август", "Сентябрь", "Октябрь", "Ноябрь", "Декабрь"),
-  // --------------------------------------------------------------------------
-  //  Форм-процессор
-      "Form.invalid"         => "Ошибки при заполнении поля:",
-      "Form.invalid_group"   => "При заполнении полей допущены ошибки",
-      "Form.not_empty"       => "*",
-  // --------------------------------------------------------------------------
-  //  Для HtmlMimeMail
-      "Encodings" => array(
-                "html_encoding" => "quoted-printable",
-                "text_encoding" => "quoted-printable",
-                "text_wrap" => "60",
-                "html_charset" => "Windows-1251",
-                "text_charset" => "Windows-1251",
-                "head_charset" => "Windows-1251",
-                ),
-                     );
+    // --------------------------------------------------------------------------
+    //  Форм-процессор
+    "Form.invalid"         => "Ошибки при заполнении поля:",
+    "Form.invalid_group"   => "При заполнении полей допущены ошибки",
+    "Form.not_empty"       => "*",
+    // --------------------------------------------------------------------------
+    //  Для HtmlMimeMail
+    "Encodings" => array(
+        "html_encoding" => "quoted-printable",
+        "text_encoding" => "quoted-printable",
+        "text_wrap" => "60",
+        "html_charset" => "Windows-1251",
+        "text_charset" => "Windows-1251",
+        "head_charset" => "Windows-1251",
+    ),
+      
+    "validator_error_not_empty" => "Поле не может быть пустым",
+    "validator_error_is_email" => "Значение не является адресом Email",
+    "validator_error_min_length" => "Значение слишком короткое",
+    "validator_error_is_regexp" => "Значение не удовлетворяет формату",
+    'validator_error_not_exists' => "Выбранный email уже использовался для регистрации",
+);
 ?>

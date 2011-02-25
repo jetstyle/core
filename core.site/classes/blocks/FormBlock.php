@@ -10,7 +10,7 @@ class FormBlock extends Block
 
         if ($formConfigName)
         {
-            Finder::useClass("forms/EasyForm");
+            Finder::useClass("forms/Form");
             $config = array();
             $action = $this->getParam('action');
             if ($action)
@@ -18,7 +18,7 @@ class FormBlock extends Block
                 $config['action'] = RequestInfo::$baseUrl.Router::linkTo($action);
             }
 			$config['on_after_event'] = array(array(&$this, 'OnAfterEventForm'));
-            $form = new EasyForm($formConfigName, $config);
+            $form = new Form($formConfigName, $config);
 			if ($_COOKIE[$form->form->name.'_sended'])
 			{
 				setcookie($form->form->name.'_sended', false, time()-3600);

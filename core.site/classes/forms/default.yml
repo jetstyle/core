@@ -1,0 +1,25 @@
+template_prefix:            forms/
+template_prefix_button:     'forms/buttons.html:'
+template_prefix_views:      'forms/views.html:'
+template_prefix_wrappers:   forms/
+template_prefix_interface:  forms/
+template_prefix_group:      forms/
+template_form:              'form.html:Form'
+template_buttonlist:        'form.html:Buttons'
+multipart:                  1
+auto_datetime:              1
+auto_user_id:               false
+id_field:                   id
+active_field:               active
+event_handlers_type:        handlers/formevents
+default_event:              FORM_EVENT_AUTO
+db_ignore:                  false
+db_model:                   false
+fieldname_created_user_id:  _created_user_id
+fieldname_edited_user_id:   _edited_user_id
+fieldname_created_datetime: _created
+fieldname_edited_datetime:  _modified
+#success_url:
+#cancel_url:
+#on_before_event:
+#on_after_event:

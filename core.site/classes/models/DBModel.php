@@ -167,6 +167,13 @@ class DBModel extends Model implements IteratorAggregate, ArrayAccess, Countable
 	 * @var int
 	 **/
 	protected $limit = NULL;
+	
+	/**
+	 * Фильтры
+	 *
+	 * @var int
+	 **/
+	protected $filters = NULL;
 
 	/**
 	 * параметр offcet запроса
@@ -378,6 +385,7 @@ class DBModel extends Model implements IteratorAggregate, ArrayAccess, Countable
 		$this->setGroupBy($ymlConfig['group']);
 		$this->setHaving($ymlConfig['having']);
 		$this->setLimit($ymlConfig['limit']);
+		$this->setFilters($ymlConfig['filters']);
 
 		$this->storeTo = $storeTo;
 
@@ -728,6 +736,18 @@ class DBModel extends Model implements IteratorAggregate, ArrayAccess, Countable
 		if (is_numeric($v))
 			$this->limit = $v;
 
+		return $this;
+	}
+	
+	/**
+	 * Set query limit
+	 *
+	 * @param int $v
+	 * @return self
+	 */
+	public function setFilters($v)
+	{
+		$this->filters = $v;
 		return $this;
 	}
 
@@ -1766,6 +1786,7 @@ class DBModel extends Model implements IteratorAggregate, ArrayAccess, Countable
 		{
 			$row['_created'] = date('Y-m-d H:i:s');
 		}
+		$this->applyFilters($row);
 	}
 
 	protected function onAfterInsert(&$row)
@@ -1779,11 +1800,48 @@ class DBModel extends Model implements IteratorAggregate, ArrayAccess, Countable
 		{
 			$row['_modified'] = date('Y-m-d H:i:s');
 		}
+		$this->applyFilters($row);
 	}
 
 	protected function onAfterUpdate(&$row)
 	{
 		//
+	}
+	
+	private function applyFilters(&$row)
+	{
+		$tpl = Locator::get('tpl');
+		foreach ($this->filters as $filterName => $fields)
+		{
+			foreach ($fields as $targetField => $sourceField)
+			{
+				if (is_array($sourceField)) {
+					$options = $sourceField;
+					$sourceField = $sourceField['source'];
+				}
+				if ($options['apply_if_empty'] && $row[$targetField] !== '')
+				{
+					continue;
+				}
+				if (isset($row[$sourceField]))
+				{
+					if (strlen($row[$sourceField]) > 0)
+					{
+						$params = array('_' => $row[$targetField] ? $row[$targetField] : $row[$sourceField]);
+						$params = $tpl->action($filterName, $params);
+						if (!is_array($params))
+						{
+							$params = array('_' => $params);
+						}
+						$row[$targetField] = $params['_'];
+					}
+					else
+					{
+						$row[$targetField] = '';
+					}
+				}
+			}
+		}
 	}
 
 	/**
@@ -1849,7 +1907,7 @@ class DBModel extends Model implements IteratorAggregate, ArrayAccess, Countable
 		$this->usePrefixedTableAsAlias = false;
 
 		$queryResult = $this->db->query($sql);
-
+		
 		$this->onAfterUpdate($row);
 
 		return $queryResult;

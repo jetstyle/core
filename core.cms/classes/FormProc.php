@@ -103,7 +103,7 @@ class FormProc extends FormSimple
         }
         */
 
-        Finder::useClass("forms/EasyForm");
+        Finder::useClass("forms/Form");
         
         Locator::get("msg")->load("cms");
         $config = array();
@@ -122,7 +122,7 @@ class FormProc extends FormSimple
         }
 
         //default form is in core/core.cms/classes/forms/cms-form.yml
-        $form = new EasyForm('cms-form', $config);
+        $form = new Form('cms-form', $config);
 
 		Locator::get('tpl')->set('Form', $form->handle());
 
@@ -186,7 +186,7 @@ class FormProc extends FormSimple
     }
 
     /**
-     * creates fields config for EasyForm
+     * creates fields config for Form
      */
     public function getFieldsConfig()
 	{
@@ -205,7 +205,10 @@ class FormProc extends FormSimple
         {
             foreach ($item as $name => $row)
             {
-                $fields_config[ $name ] = $this->createField($name, $row);
+				$field = $this->createField($name, $row);
+				if ($field) {
+					$fields_config[ $name ] = $field;
+				}
             }
         }
         //var_dumP($fields_config["controller"]);
@@ -232,7 +235,7 @@ class FormProc extends FormSimple
     }
 
     /**
-     * creates files config from module/config.yml to EasyForm
+     * creates files config from module/config.yml to Form
      */
     public function getFilesConfig()
 	{
@@ -244,13 +247,9 @@ class FormProc extends FormSimple
             foreach ($this->config["files"] as $name => $conf)
             {
                 $fields_config[ $name ] = $this->createField($name, $row);
-                $fields_config[ $name ]["extends_from"] = "file_cms";
+                $fields_config[ $name ]["extends_from"] = "FileCmsField";
                 $fields_config[ $name ]["file_ext"] = explode(",",Config::get("upload_ext"));
                 $fields_config[ $name ]["file_size"] = 55242880;
-                
-                //TODO: just assign file field from model
-                $fields_config[ $name ]["variants"] = $conf["variants"];
-
                 $fields_config[ $name ]["config_key"] = $model->getFilesConfigKey().':'.$name;
             }
         }
@@ -264,7 +263,7 @@ class FormProc extends FormSimple
 
 	protected function renderFields()
 	{
-	die();
+		die();
 		$this->fieldsRendered = true;
 
 		$this->handleForeignFields();
@@ -313,7 +312,7 @@ class FormProc extends FormSimple
 	protected function handleForeignFields()
 	{
 		$model = &$this->getModel();
-die();
+//die();
 		foreach($model->getForeignFields() AS $fieldName => $conf)
                 {
                     if (is_array($conf) && $conf['type'] == 'has_one')

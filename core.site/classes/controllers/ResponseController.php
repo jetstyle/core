@@ -30,11 +30,11 @@ class ResponseController extends Controller {
             $retPath .= $_SERVER['SERVER_NAME'].$_SERVER['REQUEST_URI'];
             $retPath = urlencode($retPath);
 
-            Finder::useClass("forms/EasyForm");
+            Finder::useClass("forms/Form");
 
             $formConfig = array();
             $formConfig['action'] = RequestInfo::$baseUrl.Router::linkTo('Users::login').'?retpath='.$retPath;
-            $form = new EasyForm('login', $formConfig);
+            $form = new Form('login', $formConfig);
 
             Locator::get('tpl')->set('Form', $form->handle());
         }

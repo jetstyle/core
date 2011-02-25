@@ -1,4 +1,4 @@
-<!-- forms/interface/file.html : Р’С‹РІРѕРґ РїРѕР»СЏ РёРЅС‚РµСЂС„РµР№СЃР° "Р·Р°РіСЂСѓР·РєР° С„Р°Р№Р»Р°" -->
+<!-- forms/interface/file.html : Вывод поля интерфейса "загрузка файла" -->
 {{:CatalogueItemImage}}
       <table class="one-foto" {{?last_file_num}} id="last_file_{{last_file_num}}" {{/?}} >
         <tr>
@@ -8,10 +8,10 @@
                        <div class="photo-small-">
                        {{?interface_file}}
                         <a href="{{interface_path}}{{interface_file_orig}}" onclick="popup_image('{{interface_path}}{{interface_file_orig}}?popup=1', '{{interface_w}}', '{{interface_h}}'); return false;"><img src="{{interface_path}}{{interface_file}}" alt="" /></a>
-                        <small>РЈРІРµР»РёС‡РёС‚СЊ</small>
+                        <small>Увеличить</small>
                        {{?:}}                         
                          <div class="no-photo-">
-                           <i>Р”РѕР±Р°РІРёС‚СЊ С„РѕС‚Рѕ</i>
+                           <i>Добавить фото</i>
                          </div>
                        {{/?}}
                         </div>
@@ -27,12 +27,12 @@
     		  	<div class="r-">
                         <!--input type="text" name="{{field}}_title[]" /-->
                         {{?interface_file}}
-                            <input type="checkbox" name="{{field}}_delete[]" id="ch_{{interface_file_num}}" value="{{interface_file_num}}" > <label for="ch_{{interface_file_num}}">РЈРґР°Р»РёС‚СЊ</label> 
+                            <input type="checkbox" name="{{field}}_delete[]" id="ch_{{interface_file_num}}" value="{{interface_file_num}}" > <label for="ch_{{interface_file_num}}">Удалить</label> 
                         {{?:}}
                             <div><input type="file" name="{{field}}[]" /></div>
                             
-                            <div class="img-load-button-"><input type="submit" name="_event2" value="Р—Р°РіСЂСѓР·РёС‚СЊ" /></div>
-                            <div class="img-load-button-"><input type="submit" name="_add" value="Р”РѕР±Р°РІРёС‚СЊ" onclick="addImage(); return false;" /></div>
+                            <div class="img-load-button-"><input type="submit" name="_event2" value="Загрузить" /></div>
+                            <div class="img-load-button-"><input type="submit" name="_add" value="Добавить" onclick="addImage(); return false;" /></div>
                         {{/?}}
     		  	</div>
     			</div>
@@ -44,10 +44,12 @@
 
 {{TPL:File}}
 <input type="file" name="{{field}}" />
+<a href="{{interface_file.link}}">скачать</a>
 {{/TPL:File}}
 
 {{TPL:Image}}
 <input type="file" name="{{field}}" />
+<img class="test-image" src="{{interface_file.link}}" title="{{interface_file.width}}x{{interface_file.height}}" />
 {{/TPL:Image}}
 
 {{TPL:multiply}}
@@ -58,13 +60,13 @@
 		
 		{{?item.files.count>"0"}}
 			 <div class="files-">
-				<h4>РџСЂРёР»РѕР¶РµРЅРЅС‹Рµ Рє РІРѕРїСЂРѕСЃСѓ С„Р°Р№Р»С‹:</h4>
+				<h4>Приложенные к вопросу файлы:</h4>
 				<ul>
 					{{!for item.files do=@:multiply_file}}
 				</ul>
 			
 				{{:multiply_file}}
-					<li class="file- file-{{*ext}}-"><a href="{{/}}{{*link}}">{{*name}}</a> <small>{{*ext}}, {{*size}}&nbsp;РљР±</small> <input type="checkbox" name="{{field}}_del[]" value="{{*filename | escape}}" /> - СѓРґР°Р»РёС‚СЊ</li>
+					<li class="file- file-{{*ext}}-"><a href="{{/}}{{*link}}">{{*name}}</a> <small>{{*ext}}, {{*size}}&nbsp;Кб</small> <input type="checkbox" name="{{field}}_del[]" value="{{*filename | escape}}" /> - удалить</li>
 				{{/:multiply_file}}
 			
 		{{/?}}
@@ -72,7 +74,7 @@
 		<div id="{{field}}_cont"></div>
 			
 		<div class="morefile-">
-		  <a href="#" onclick="{{field}}.add(); if(this.getAttribute('first') == '1') {this.innerHTML = 'РџСЂРёР»РѕР¶РёС‚СЊ РµС‰Рµ С„Р°Р№Р»'; this.setAttribute('first', '0');}; return false;" first="1">РџСЂРёР»РѕР¶РёС‚СЊ С„Р°Р№Р»</a>
+		  <a href="#" onclick="{{field}}.add(); if(this.getAttribute('first') == '1') {this.innerHTML = 'Приложить еще файл'; this.setAttribute('first', '0');}; return false;" first="1">Приложить файл</a>
 		</div>
 
 		<script language="javascript">

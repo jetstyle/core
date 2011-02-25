@@ -18,61 +18,61 @@ default_packages:
 ##Announces
     id: false  
     background:
-        extends_from:  checkbox_cms
+        extends_from:  CheckboxField
     border:
-        extends_from:  checkbox_cms
+        extends_from:  CheckboxField
     link:
-        extends_from: string_cms
+        extends_from: StringField
     title:
-        extends_from: string_cms
+        extends_from: StringField
         model: model_filters
         model_filters:
             a: typografica
         model_filtered:
             a: "*_pre"
     title_short:
-        extends_from: string_cms
+        extends_from: StringField
     lead:
-        extends_from: textarea_cms
+        extends_from: TextareaField
         model: model_filters
         model_filters:
             a: typografica
         model_filtered:
             a: "*_pre"
     text:
-        extends_from: textarea_cms
+        extends_from: TextareaField
         model: model_filters
         model_filters:
             a: typografica
         model_filtered:
             a: "*_pre"
     _state:
-        extends_from:  checkbox_cms
+        extends_from:  CheckboxField
         wrapper_title: Скрыть (конфинг)
 
 ##Content
     controller:
-        extends_from: select
+        extends_from: SelectField
         #interface_tpl: "options.html:Select",
         wrapper_tpl: "wrapper.html:CmsStringWrapper"
 
     border:
-        extends_from:  checkbox_cms
+        extends_from:  CheckboxField
     hide_from_menu:
-        extends_from:  checkbox_cms
+        extends_from:  CheckboxField
     meta_title:
-        extends_from: string_cms
+        extends_from: StringField
     meta_keywords:
-        extends_from: string_cms
+        extends_from: StringField
     meta_description:
-        extends_from: string_cms
+        extends_from: StringField
     _supertag:
-        extends_from: string_cms
+        extends_from: StringField
     map_html:
-        extends_from: textarea_cms
+        extends_from: TextareaField
 
     inserted:
-        extends_from: string_inserted
+        extends_from: StringInserted
 
     survey_id:  false   #TODO foreign
 
@@ -85,17 +85,17 @@ default_packages:
     link_popup: false   #TODO
     
     announce_id1:
-        extends_from: fk_select
+        extends_from: FkSelect
         wrapper_tpl: "wrapper.html:CmsStringWrapper"
         fk_model: Announces/cms
         
     announce_id2:
-        extends_from: fk_select
+        extends_from: FkSelect
         wrapper_tpl: "wrapper.html:CmsStringWrapper"
         fk_model: Announces/cms
 
     announce_id3:
-        extends_from: fk_select
+        extends_from: FkSelect
         wrapper_tpl: "wrapper.html:CmsStringWrapper"
         fk_model: Announces/cms
 

@@ -1,70 +1,84 @@
 fields:
     group_1:
-        extends_from: group
+        extends_from: GroupField
         wrapper_title: 'Обязательные поля'
         wrapper_desc: ''
 
         fields:
             email:
-                extends_from:     user_email
+                extends_from:     UserEmailField
                 wrapper_title:    Ваш E-mail
                 wrapper_tpl:      'wrapper.html:DefaultStringWrapper'
                 validator_params:
-                    not_empty:    1
-                    not_exists:   1
-                    is_email: 1
+                    - not_empty
+                    - is_email
+                own_validator_params:
+                    not_exists: true
                 interface_tpl: 	 'string.html:Plain'
             login:
-                extends_from:     login
+                extends_from:     LoginField
                 wrapper_title:    Ваш логин
                 interface_tpl: 	  'string.html:Plain'
                 wrapper_tpl:      'wrapper.html:DefaultStringWrapper'
                 validator_params:
-                    not_empty:    1
-                    not_exists:   1
-                    min:          3
+                    - not_empty
+                    min_length:   3
                     is_regexp:    /^[A-Za-z\-\_0-9]+$/
+                own_validator_params:
+                    not_exists: true
 
             password:
-                extends_from:     password
+                extends_from:     PasswordField
                 wrapper_title:    Ваш пароль
                 wrapper_tpl:      'wrapper.html:Passthru'
                 validator_params:
-                    not_empty:    1
+                    - not_empty
 
     group_2:
-        extends_from: group
+        extends_from: GroupField
         wrapper_title: 'Необязательные поля'
         wrapper_desc: ''
         fields:
             name:
-                extends_from:     string
+                extends_from:     StringField
                 wrapper_title:    Ваше имя
-                model:            model_filters
-                model_filters:
-                  - strip_tags
-                model_filtered:
-                  0: *
-
             about:
-                extends_from:     string
-                db_ignore:        true
+                extends_from:     StringField
                 wrapper_title:    О себе
-                model:            model_filters
-                model_filters:
-                  - strip_tags
-                model_filtered:
-                  0: *
+            is_subscribed:
+                extends_from:     CheckboxField
+                wrapper_title:    Подписаться на новости
+            #birthdate:
+            #    extends_from:     DateField
+            #    wrapper_title:    Дата рождения
+            avatar:
+                wrapper_title:    Аватар
+                extends_from:     ImageField
+                config_key:       Files/pictures:picture
+            resume:
+                wrapper_title:    Резюме
+                extends_from:     FileField
+                config_key:       Files/files:picture
+            sex:
+                extends_from:     RadioField
+                wrapper_title:    Пол
+                options:
+                    - Male
+                    - Female
+            city:
+                extends_from:     SelectField
+                wrapper_title:    Город
+                options:          Cities
 
     realm:
-        extends_from:     system
+        extends_from:     SystemField
         model_default:    'site'
 
 
 buttons:
-    - insert
-db_table:        test_form
-db_ignore:       false
+    - auto
+db_model:        TestFormModel
 success_url:     ''
 cancel_url:      ''
 form_class:      'general-form reg-form'
+form_name:            test_form

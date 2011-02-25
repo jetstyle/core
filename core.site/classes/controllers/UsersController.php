@@ -134,10 +134,10 @@ class UsersController extends Controller
 	// Form Events
 	public function loginAfterEvent($event, $form)
 	{
-	    $openIdLogin = $form->getFieldByName('openid_login')->model->model_data;
-		$login = $form->getFieldByName('login')->model->model_data;
-		$password = $form->getFieldByName('password')->model->model_data;
-		$isPermanent = $form->getFieldByName('permanent')->model->model_data;
+	    $openIdLogin = $form->getFieldByName('openid_login')->model_data;
+		$login = $form->getFieldByName('login')->model_data;
+		$password = $form->getFieldByName('password')->model_data;
+		$isPermanent = $form->getFieldByName('permanent')->model_data;
 
 
 		$prp = &Locator::get('principal');
@@ -165,7 +165,7 @@ class UsersController extends Controller
 			{
 			    die("Неверный логин/пароль");
 			}
-			$form->getFieldByName('password')->validator->_Invalidate("bad_pass", "Неверный логин и/или пароль", false);
+			$form->getFieldByName('password')->_Invalidate("bad_pass", "Неверный логин и/или пароль", false);
 		}
 	}
 
@@ -242,9 +242,9 @@ class UsersController extends Controller
 			$this->ajaxLogin = true;
 		}
 
-		Finder::useClass("forms/EasyForm");
+		Finder::useClass("forms/Form");
 		$config['on_after_event'] = array(array(&$this, 'loginAfterEvent'));
-		$form = new EasyForm('login', $config);
+		$form = new Form('login', $config);
 		Locator::get('tpl')->set('Form', $form->handle());
 	}
 
@@ -289,8 +289,8 @@ class UsersController extends Controller
 			$config['success_url'] = RequestInfo::$baseUrl.$this->url_to('register').'/thanks';
 			$config['on_after_event'] = array(array(&$this, 'registerAfterEvent'));
 
-			Finder::useClass("forms/EasyForm");
-			$form = new EasyForm('user_register', $config);
+			Finder::useClass("forms/Form");
+			$form = new Form('user_register', $config);
 			Locator::get('tpl')->set('Form', $form->handle());
 		}
 
@@ -319,7 +319,7 @@ class UsersController extends Controller
 			$config['id'] = $prp->get('id');
 			$config['on_before_event'] = array(array(&$this, 'profileBeforeEvent'));
 
-			$form = new EasyForm('user_edit', $config);
+			$form = new Form('user_edit', $config);
 			Locator::get('tpl')->set('Form', $form->handle());
 		}
 
@@ -373,7 +373,7 @@ class UsersController extends Controller
 			$user->loadOne('{key} = '.$db->quote($params['key']));
 			if ($user->getId())
 			{
-				Finder::useClass("forms/EasyForm");
+				Finder::useClass("forms/Form");
 				$user->removeField('key');
 				$config = array(
 					'id' => $user->getId(),
@@ -387,7 +387,7 @@ class UsersController extends Controller
 						)
 					)
 				);
-				$form = new EasyForm('password_change', $config);
+				$form = new Form('password_change', $config);
 				Locator::get('tpl')->set('Form', $form->handle());
 			}
 			else
@@ -400,12 +400,12 @@ class UsersController extends Controller
 		}
 		else
 		{
-			Finder::useClass("forms/EasyForm");
+			Finder::useClass("forms/Form");
 
 			$config = array();
 			$config['success_url'] = RequestInfo::$baseUrl.$this->url_to('restore').'/thanks';
 			$config['on_after_event'] = array(array(&$this, 'restoreAfterEvent'));
-			$form =  new EasyForm('password_restore', $config);
+			$form =  new Form('password_restore', $config);
 			Locator::get('tpl')->set('Form', $form->handle());
 		}
 
