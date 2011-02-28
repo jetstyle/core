@@ -475,6 +475,13 @@ class DBModel extends Model implements IteratorAggregate, ArrayAccess, Countable
         return $fields;
     }
 
+    public function hasField($fieldName)
+    {
+        $fields = $this->getAllFields();
+        $ret = in_array($fieldName, $fields);
+        return $ret;
+    }
+
 	/**
 	 * Return table name with alias
 	 *
@@ -741,6 +748,11 @@ class DBModel extends Model implements IteratorAggregate, ArrayAccess, Countable
 	{
 		$this->order = $v;
 		return $this;
+	}
+
+	public function getOrder()
+	{
+		return $this->order;
 	}
 
 	/**
