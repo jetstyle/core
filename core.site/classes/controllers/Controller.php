@@ -383,6 +383,7 @@ abstract class Controller implements ArrayAccess
 			$this->data['params'] = $this->params_mapped;
 			Locator::get('tpl')->set('PAGE', $this->data);
 		}
+        Locator::get('tpl')->set('prp', Locator::get('principal')->getUserData() );
 	}
 
 	protected function updateMeta($meta)
