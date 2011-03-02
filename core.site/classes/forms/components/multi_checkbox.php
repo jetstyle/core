@@ -27,6 +27,10 @@ class FormComponent_multi_checkbox extends FormComponent_abstract
   function Interface_Parse()
   {
     $data = $this->field->model->Model_GetDataValue();
+    if (! $data )
+    {
+         $data = $this->loadOptions();
+    }
 
     Locator::get('tpl')->Set('interface_data', $this->field->config['checkbox_value']);
     Locator::get('tpl')->Set('checked', $data);
@@ -52,11 +56,43 @@ class FormComponent_multi_checkbox extends FormComponent_abstract
 
      if(isset($db_row[ $this->field->name ]))
      {
+       $options = $this->loadOptions();
+
+       $this->Model_SetDataValue($options);
+     }
+     //else {
+     // $this->Model_SetDefault();
+        
+     //   }
+   }
+
+   protected function loadOptions()
+   {
        /**
         * model_rubrics should be linked to items and contain virtual field "checked"
         */
+       $rubricsModel = $this->getModelRubrics();
+       $this->setModelLinks();
+
+       $rubrics = $rubricsModel->load();
+       return $rubrics;
+   }
+   
+   /**
+    * Берет модель [model_rubrics] и заменяет в ней связи >items.model на [model_links]
+    *
+    */
+   protected function getModelRubrics(){
+      if (! $this->modelRubrics )
+      {
+        $this->modelRubrics = DBModel::factory( $this->field->config[ "model_rubrics" ] );
+      }
+      return $this->modelRubrics;
+   } 
+
+   protected function setModelLinks()
+   { 
         $rubricsModel = $this->getModelRubrics();
-        
         $foreignModelName = $this->getForeignModelName(); //items
         $foreignModelPK   = $this->getForeignModelPK();   //item_id - should be always item_id, if you want to override with "model_links"
         
@@ -69,22 +105,7 @@ class FormComponent_multi_checkbox extends FormComponent_abstract
 			'fk' => $foreignConf["fk"],
 			'join_where' => '{'.$foreignModelName.'.'.$foreignModelPK.'} = '.DBModel::quote($this->field->form->data_id),
 		));
-
-       $rubrics = $rubricsModel->load();
-
-       $this->Model_SetDataValue($rubrics);
-     }
-     else
-      $this->Model_SetDefault();
    }
-   
-   protected function getModelRubrics(){
-      if (! $this->modelRubrics )
-        $this->modelRubrics = DBModel::factory( $this->field->config[ "model_rubrics" ] );
-
-      return $this->modelRubrics;
-   } 
-
 
    // возврат значения 
    function Model_GetDataValue()
@@ -137,10 +158,13 @@ class FormComponent_multi_checkbox extends FormComponent_abstract
    }
    
    function Model_DbAfterInsert( $data_id ){
+
         $rubricsModel = $this->getModelRubrics();
+        $this->setModelLinks();
         $foreignModelName = $this->getForeignModelName();
         $foreignModel = $rubricsModel->getForeignModel($foreignModelName);
         $foreignConf  = $rubricsModel->getForeignFieldConf($foreignModelName);
+
 
         /**
          * next code looks like shit, but all it does - extracts links_table.pk, which is not fk
@@ -158,13 +182,19 @@ class FormComponent_multi_checkbox extends FormComponent_abstract
 
         foreach ( $this->model_data as $rubric_id )
         {
+            $data = array();
             $data = array( $foreignConf["fk"] =>$rubric_id, $pk=>$data_id);
-            $foreignModel->insert( $data );
+            //var_dump($data);
+            $foreignModel->insert( $data, false );
+           // var_dump( $data );
+           // echo '<hr>';
         }
+        //        die();
    }
    
    function Model_DbAfterUpdate( $data_id ){
         $this->Model_DbAfterInsert($data_id);
+
    }
 
    
