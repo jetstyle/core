@@ -114,6 +114,12 @@ class FormProc extends FormSimple
         $config["on_after_event"] = $this;
         $config['success_url'] =  RequestInfo::href();
 
+        if ($this->config["auto_user_id"] )
+        {   
+            $config["fields"]["user_id"] = array("extends_from"=>"system", "model_default"=>Locator::get("principal")->getId());
+            ///$config["auto_user_id"] = $this->config["auto_user_id"];
+            //$config["fieldname_created_user_id"] = "user_id";
+        }
 
         //if in edit mode: change button and load model item
         if ($this->id){
