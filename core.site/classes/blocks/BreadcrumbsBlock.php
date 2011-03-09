@@ -17,24 +17,24 @@ class BreadcrumbsBlock extends Block
 			$current = &Locator::get('controller');
 		}
                 
-                if ($this->getParam("cms"))
-                {   
-                    $this->setData($this->data);
-                }
-                else
-                {
-                    $model = DBModel::factory('Content')
-                                                            ->clearFields()
-                                                            ->addFields(array('id','_left', '_right', '_level', '_path', '_parent'))
-                                                            ->addField('title_short', 'IF(LENGTH(title_short) > 0, title_short, title_pre)')
-                                                            ->addField('href', '_path')
-                                                            ->setOrder(array('_left' => 'ASC'))
-                                                            ->load('_left <= '.DBModel::quote($current['_left']).' AND _right >= '.DBModel::quote($current['_right']));
+		if ($this->getParam("cms"))
+		{   
+			$this->setData($this->data);
+		}
+		else
+		{
+			$model = DBModel::factory('Content')
+						->clearFields()
+						->addFields(array('id','_left', '_right', '_level', '_path', '_parent'))
+						->addField('title_short', 'IF(LENGTH(title_short) > 0, title_short, title_pre)')
+						->addField('href', '_path')
+						->setOrder(array('_left' => 'ASC'))
+						->load('_left <= '.DBModel::quote($current['_left']).' AND _right >= '.DBModel::quote($current['_right']));
 
-                    $data = $model->getArray();
-                    $this->data = @array_merge($data, $this->data);
-                    $this->setData($this->data);
-                }
+			$data = $model->getArray();
+			$this->data = array_merge((array)$data, (array)$this->data);
+			$this->setData($this->data);
+		}
 	}
 }
 ?>

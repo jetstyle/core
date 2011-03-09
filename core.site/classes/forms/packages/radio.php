@@ -2,6 +2,7 @@
   $config = array(
 //    "wrapper_tpl"   => "wrapper.html:Row",
     "wrapper_title" => "[radio title]",
+    "wrapper_tpl"   => "wrapper.html:DefaultStringWrapper",
     
     "view"          => "options",
     
