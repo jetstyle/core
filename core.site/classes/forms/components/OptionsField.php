@@ -17,12 +17,24 @@ class OptionsField extends FormField
 
         if (!is_array($options))
         {
-            $optionsModel = DBModel::factory($options)->load()->getArray();
+            $optionsModel = DBModel::factory($options)->load();
             $options = array();
-            foreach ($optionsModel as $option)
+
+            if ( strpos($options, "Tree")!==false )
+            {
+                $optionsModelArray = $optionsModel->getItems();
+            }
+            else
+            {
+                $optionsModelArray = $optionsModel->getArray();
+            }
+
+            foreach ($optionsModelArray as $option)
             {
                 $options[$option['id']] = $option['title'];
             }
+            
+//            var_dump($optionsModel);
         }
         $values = array();
         if (isset($this->config['default_value'])) {

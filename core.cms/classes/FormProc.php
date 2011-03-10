@@ -4,78 +4,78 @@ class FormProc extends FormSimple
 {
 
 
-	public function handle()
-	{
-		$valid = array('text', 'title', 'lead');
+    public function handle()
+    {
+        $valid = array('text', 'title', 'lead');
 
-		//form in iframe colorbox
-		if ( $_GET["popup"] )
-		{
-			$iframe = array("css_buttons_class"=>"iframe-buttons-");
-			Locator::get("tpl")->set( "iframe", $iframe );
-		}
-		$item = &$this->getItem();
-		if ($_GET['ret'] && in_array($_GET['ret'], $valid) )
-		{
-			header('Content-Type: text/html; charset=windows-1251');
-			die( $item[ $_GET['ret'] ] );
-		}/*
-		elseif ($this->needAjaxUpdate())
-		{
-			$this->ajax_update = true;
-			$this->prefix = "";
-		}
-		*/
-		//update data
-		if ($this->needDelete())
-		{
-			$redirect = $this->delete();
-		}
-		elseif ($this->needRestore())
-		{
-			$redirect = $this->restore();
-		}
-		elseif ($this->needUpdate() || $this->needAjaxUpdate())
-		{
-			$redirect = $this->update();
-		}
+        //form in iframe colorbox
+        if ( $_GET["popup"] )
+        {
+            $iframe = array("css_buttons_class"=>"iframe-buttons-");
+            Locator::get("tpl")->set( "iframe", $iframe );
+        }
+        $item = &$this->getItem();
+        if ($_GET['ret'] && in_array($_GET['ret'], $valid) )
+        {
+            header('Content-Type: text/html; charset=windows-1251');
+            die( $item[ $_GET['ret'] ] );
+        }/*
+        elseif ($this->needAjaxUpdate())
+        {
+            $this->ajax_update = true;
+            $this->prefix = "";
+        }
+        */
+        //update data
+        if ($this->needDelete())
+        {
+            $redirect = $this->delete();
+        }
+        elseif ($this->needRestore())
+        {
+            $redirect = $this->restore();
+        }
+        elseif ($this->needUpdate() || $this->needAjaxUpdate())
+        {
+            $redirect = $this->update();
+        }
 
-		if ($this->needAjaxUpdate())
-		{
-				$postData = $this->getPostData();
-				header('Content-Type: text/html; charset=windows-1251');
+        if ($this->needAjaxUpdate())
+        {
+                $postData = $this->getPostData();
+                header('Content-Type: text/html; charset=windows-1251');
 
-				die($postData[ $_POST['ajax_update'] ]);
-		}
+                die($postData[ $_POST['ajax_update'] ]);
+        }
 
-		//редирект или выставление флага, что он нужен
+        //редирект или выставление флага, что он нужен
 
-		if ($redirect)
-		{
-		    //var_dump($redirect);die();
-			$this->_redirect = RequestInfo::hrefChange('', array('rnd' => mt_rand(1,255)));
+        if ($redirect)
+        {
+            //var_dump($redirect);die();
+            $this->_redirect = RequestInfo::hrefChange('', array('rnd' => mt_rand(1,255)));
 
-			if ($this->stop_redirect)
-			{
-				$this->redirect = $this->_redirect;
-				return;
-			}
-			else
-			{
-				Controller::redirect( $this->_redirect );
-			}
-		}
-	}
-	
-	//вызывать ли $this->update() 
-	//для этого у неас есть onFormAfterEvent
-	public function needUpdate()
-	{
-		return false;
-	}
+            if ($this->stop_redirect)
+            {
+                $this->redirect = $this->_redirect;
+                return;
+            }
+            else
+            {
+                Controller::redirect( $this->_redirect );
+            }
+        }
+    }
+    
+    //вызывать ли $this->update() 
+    //для этого у неас есть onFormAfterEvent
+    public function needUpdate()
+    {
+        return false;
+    }
 
-	public function getHtml()
-	{
+    public function getHtml()
+    {
         Finder::pushContext();
         Finder::prependDir(Config::get('cms_dir').'modules/'.$this->config['module_name'].'/');
 
@@ -99,7 +99,7 @@ class FormProc extends FormSimple
          * TODO: ajax
         if ( $item['id']>0 || RequestInfo::get('_new') )
         {
-	            $tpl->set( 'ajax_url', RequestInfo::href() );
+                $tpl->set( 'ajax_url', RequestInfo::href() );
         }
         */
 
@@ -124,18 +124,18 @@ class FormProc extends FormSimple
         //default form is in core/core.cms/classes/forms/cms-form.yml
         $form = new Form('cms-form', $config);
 
-		Locator::get('tpl')->set('Form', $form->handle());
+        Locator::get('tpl')->set('Form', $form->handle());
 
-//		$tpl->set('___form', );
-//		$this->renderButtons();
+//        $tpl->set('___form', );
+//        $this->renderButtons();
 
-		$result = $tpl->parse($this->template_item);
+        $result = $tpl->parse($this->template_item);
 
-		$tpl->popContext();
-		Finder::popContext();
+        $tpl->popContext();
+        Finder::popContext();
 
-		return $result;
-	}
+        return $result;
+    }
 
 
     private function getGroup($group)
@@ -166,7 +166,7 @@ class FormProc extends FormSimple
 */
 
                 $fields_config[ $name ] = array_merge($group_field, $this->createField($name, $group_field));
-                
+
 
                 /*
                 if ($fields_config[ $name ]["extends_from"]=="fk_select" && $model_fields[$name])
@@ -189,7 +189,7 @@ class FormProc extends FormSimple
      * creates fields config for Form
      */
     public function getFieldsConfig()
-	{
+    {
         $fields_config = array();
 
         //model table fields
@@ -197,18 +197,16 @@ class FormProc extends FormSimple
 
         if ($this->config["fields"])
         {
-        
             $fields_config = $this->getGroup( $this->config["fields"] );
-
         }
         else
         {
             foreach ($item as $name => $row)
             {
-				$field = $this->createField($name, $row);
-				if ($field) {
-					$fields_config[ $name ] = $field;
-				}
+                $field = $this->createField($name, $row);
+                if ($field) {
+                    $fields_config[ $name ] = $field;
+                }
             }
         }
         //var_dumP($fields_config["controller"]);
@@ -238,7 +236,7 @@ class FormProc extends FormSimple
      * creates files config from module/config.yml to Form
      */
     public function getFilesConfig()
-	{
+    {
         $fields_config = array();
         if ( $this->config["files"] )
         {
@@ -256,98 +254,103 @@ class FormProc extends FormSimple
         return $fields_config;
     }
 
-	protected function renderButtons()
-	{
-	}
+    protected function renderButtons()
+    {
+    }
 
 
-	protected function renderFields()
-	{
-		die();
-		$this->fieldsRendered = true;
+    protected function renderFields()
+    {
+        die();
+        $this->fieldsRendered = true;
 
-		$this->handleForeignFields();
+        $this->handleForeignFields();
 
-		$tpl =& $this->tpl;
-		$item = &$this->getItem();
+        $tpl =& $this->tpl;
+        $item = &$this->getItem();
 
-		if ($item['_state']>0)
-		{
-			$this->tpl->set("body_class", "class='state1'");
-		}
-
-		/*
-			 $this->config->RENDER - каждая запись в нём:
-			 0 - имя поля
-			 1 - тип поля - checkbox | select | radiobutton
-			 2 - хэш значений - array( id => value )
-		 */
-
-		if( is_array($this->config['render']) )
-		{
-                    if (!empty($this->config['render']['checkbox']))
-                    {
-                        foreach ($this->config['render']['checkbox'] as $checkbox)
-                        {
-                            $tpl->set( 'checkbox_'.$checkbox, $item[$checkbox] ? "checked=\"checked\"" : '' );
-                        }
-                    }
-                    if (!empty($this->config['render']['select']))
-                    {
-                        foreach ($this->config['render']['select'] as $name => $params)
-                        {
-                            $str = '';
-                            foreach($params['values'] as $id => $val)
-                            {
-                                    $str .= "<option value='".$id."' ".(($item["id"] && $item[$name]==$id) || (!$item["id"] && $id==$params['default']) ? "selected=\"selected\"" : '' ).">".$val;
-                            }
-                            $tpl->set( 'options_'.$name, $str );
-                        }
-                    }
-		}
-
-		return true;
-	}
-
-	protected function handleForeignFields()
-	{
-		$model = &$this->getModel();
-//die();
-		foreach($model->getForeignFields() AS $fieldName => $conf)
-                {
-                    if (is_array($conf) && $conf['type'] == 'has_one')
-                    {
-                        $foreignModel = clone $model->getForeignModel($fieldName);
-
-                        $conf = $model->getForeignFieldConf($fieldName);
-                        $model->addField($conf['pk']);
-                        $foreignModel->load();
-                        $data = array();
-                        foreach($foreignModel AS $r)
-                        {
-                            if (!isset($r["_state"]) || $r["_state"]==0)
-                                $data[$r[$conf['fk']]] = ($r['_level'] ? str_repeat("&nbsp;&nbsp;", $r['_level']-1) : ""). $r['title'];
-                        }
-
-                        $this->config['render']['select'][$conf['pk']] = array(
-                            'values' => $data,
-                            'default' => $conf['default'],
-                        );
-                    }
-                }
-	}
-	
-	
-    public function onAfterEventForm($event, $form){
-        if ($event["event"]=="insert"){
-            
-            if ($form->data_id)
-		    {
-		        $form->config["success_url"] = RequestInfo::hrefChange(array("id"=>$form->data_id));
-		        
-		    }
+        if ($item['_state']>0)
+        {
+            $this->tpl->set("body_class", "class='state1'");
         }
 
+        /*
+             $this->config->RENDER - каждая запись в нём:
+             0 - имя поля
+             1 - тип поля - checkbox | select | radiobutton
+             2 - хэш значений - array( id => value )
+         */
+
+        if( is_array($this->config['render']) )
+        {
+            if (!empty($this->config['render']['checkbox']))
+            {
+                foreach ($this->config['render']['checkbox'] as $checkbox)
+                {
+                    $tpl->set( 'checkbox_'.$checkbox, $item[$checkbox] ? "checked=\"checked\"" : '' );
+                }
+            }
+            if (!empty($this->config['render']['select']))
+            {
+                foreach ($this->config['render']['select'] as $name => $params)
+                {
+                    $str = '';
+                    foreach($params['values'] as $id => $val)
+                    {
+                            $str .= "<option value='".$id."' ".(($item["id"] && $item[$name]==$id) || (!$item["id"] && $id==$params['default']) ? "selected=\"selected\"" : '' ).">".$val;
+                    }
+                    $tpl->set( 'options_'.$name, $str );
+                }
+            }
+        }
+
+        return true;
+    }
+
+    protected function handleForeignFields()
+    {
+        $model = &$this->getModel();
+//die();
+        foreach($model->getForeignFields() AS $fieldName => $conf)
+        {
+            if (is_array($conf) && $conf['type'] == 'has_one')
+            {
+                $foreignModel = clone $model->getForeignModel($fieldName);
+
+                $conf = $model->getForeignFieldConf($fieldName);
+                $model->addField($conf['pk']);
+                $foreignModel->load();
+                $data = array();
+                foreach($foreignModel AS $r)
+                {
+                    if (!isset($r["_state"]) || $r["_state"]==0)
+                        $data[$r[$conf['fk']]] = ($r['_level'] ? str_repeat("&nbsp;&nbsp;", $r['_level']-1) : ""). $r['title'];
+                }
+
+                $this->config['render']['select'][$conf['pk']] = array(
+                    'values' => $data,
+                    'default' => $conf['default'],
+                );
+            }
+        }
+    }
+    
+    
+    public function onAfterEventForm($event, $form){
+        if ($event["event"]=="insert")
+        {
+            if ($form->data_id)
+            {
+                $form->config["success_url"] = RequestInfo::hrefChange(array("id"=>$form->data_id));
+                
+            }
+        }
+        /*
+        else if ($event["event"]=="update")
+        {
+            $this->update();
+        }
+        */
     }
 
 
