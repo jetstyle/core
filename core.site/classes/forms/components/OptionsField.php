@@ -12,15 +12,15 @@ class OptionsField extends FormField
         $selected_mark = $this->config["options_mode"]=="radio" ? "checked=\"checked\"" : "selected=\"selected\"";
      
         //формируем опции для отображения
-        $options = $this->config["options"];
+        $optionsConfig = $this->config["options"];
         $optionsHash = array();
 
-        if (!is_array($options))
+        if (!is_array($optionsConfig))
         {
-            $optionsModel = DBModel::factory($options)->load();
+            $optionsModel = DBModel::factory($optionsConfig)->load();
             $options = array();
 
-            if ( strpos($options, "Tree")!==false )
+            if ( strpos($optionsConfig, "Tree")!==false  )
             {
                 $optionsModelArray = $optionsModel->getItems();
             }
