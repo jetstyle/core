@@ -326,7 +326,24 @@ abstract class Controller implements ArrayAccess
 
 	protected function preHandle($config)
 	{
+    $agent = $_SERVER['HTTP_USER_AGENT'];
+    if ( preg_match_all('/.*firefox.*/i', $agent, $r) )
+      Locator::get('tpl')->set('is_firefox', true);
+    else if ( preg_match_all('/.*opera.*/i',$agent,$r) )
+      Locator::get('tpl')->set('is_opera', true);
+    else if ( preg_match_all('/.*chrome.*/i',$agent,$r) )
+      Locator::get('tpl')->set('is_chrome', true);
+    else if ( preg_match_all('/.*safari.*/i',$agent,$r) )
+      Locator::get('tpl')->set('is_safari', true);
+    else if ( preg_match_all('/.*MSIE\s*([\d]+)/',$agent,$r) ){
+      Locator::get('tpl')->set('is_ie', true);
+      Locator::get('tpl')->set('is_ie'.$r[1][0], true);
+    }
 
+    Locator::get('tpl')->set( "is_iphone", strpos($agent, "iPhone") );
+
+    unset($r);
+    unset($agent);
 	}
 
 	/**
@@ -367,6 +384,25 @@ abstract class Controller implements ArrayAccess
 		$view["config_title"] = $config['project_title'];
 
 		Locator::get('tpl')->set('View', $view);
+
+        if ($_GET["ajax"])
+        {
+            if ($this["controller"]=="content")
+            {
+                $params = array("b_submenu", "ret"=>true, "parent"=>$_GET["parent"], "mode"=>"submenu" );
+                Locator::get("tpl")->set("PAGE", $this);
+                $ret = Locator::get("tpl")->action("block", $params);
+            }
+            else
+            {
+                Locator::get("tpl")->parseSiteMap($this->getSiteMap());
+                $ret = Locator::get("tpl")->get('HTML_body');
+            }
+
+            echo $ret;
+   //         var_dump( $this->data );
+            die();
+        }
 	}
 
 	
