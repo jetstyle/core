@@ -81,7 +81,11 @@ class GridSimple extends ListSimple implements ModuleInterface
                 foreach ( $this->columns as $col=>$col_title )
                 {
                     $parts = explode(".", $col);
-                    if ( count($parts)==2 )
+					if ( count($parts)==3 )
+					{
+						$cols[$col] = array("title"=>$r[ $parts[0] ][ $parts[1] ][ $parts[2] ]);
+					}
+                    else if ( count($parts)==2 )
                     {
                         //var_dump($r[ $parts[0] ][ $parts[1] ]);echo '<br>';
                         $cols[$col] = array("title"=>$r[ $parts[0] ][ $parts[1] ]);
