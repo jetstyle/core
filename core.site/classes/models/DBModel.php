@@ -276,7 +276,8 @@ class DBModel extends Model implements IteratorAggregate, ArrayAccess, Countable
 
 		}
 
-                $model->className = $className;
+        $model->className = $className;
+        $model->fieldSet  = $fieldSet;
 
 		return $model;
 	}
@@ -1892,6 +1893,10 @@ class DBModel extends Model implements IteratorAggregate, ArrayAccess, Countable
 
         $where = '{id} = '.self::quote($id);
 		$this->setWhere($where)->loadOne();
+
+        if ( $this['_state']===null )
+            throw new JSException("Your model ".$this->className.($this->fieldSet ? "/".$this->fieldSet : "" )." doesn`t have _state field" );
+
         if ($this['_state'] <= 1 )
 		{
             $row = array('_state' => 2);

@@ -281,15 +281,17 @@ class FormSimple  implements ModuleInterface
 
 	public function delete()
 	{
+
 		if ($this->id)
 		{
 			$model = &$this->getModel();
-			return $model->deleteToTrash($this->id);
+			$ret = $model->deleteToTrash($this->id);
 		}
 		else
 		{
-			return false;
+			$ret = false;
 		}
+        return $ret;
 	}
 
 	public function restore()
@@ -740,7 +742,7 @@ class FormSimple  implements ModuleInterface
                 return $ret;
         }
         
-        private function getExitHref(){
+        protected function getExitHref(){
                 $href_params = array($this->idGetVar => '', '_new' => '');
                 if ($this->item && $this->item["rubric_id"])
                     $href_params[ $this->idGetVar ] = $this->item["rubric_id"];

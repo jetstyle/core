@@ -275,6 +275,7 @@ class Form
          // delete
          if ($this->processed && $this->success && $this->deleted )
          {
+
             Controller::redirect( $this->config["delete_url"] ? $this->config["delete_url"] : $this->config["success_url"] );
          }
          // cancel
