@@ -30,6 +30,16 @@ class FormComponent_multi_checkbox extends FormComponent_abstract
     if (! $data )
     {
          $data = $this->loadOptions();
+         if ( $this->field->config["default"] && !empty($data) )
+         {
+            foreach($data as $i=>$r)
+            {
+                if ($r['id']== $_GET[ $this->field->config["default"] ] )
+                {
+                    $data[ $i ]["checked"]="checked";
+                }
+            }
+         }
     }
 
     Locator::get('tpl')->Set('interface_data', $this->field->config['checkbox_value']);
