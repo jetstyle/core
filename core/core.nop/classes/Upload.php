@@ -617,6 +617,10 @@ class Upload {
 	  
   function drawWatermark($filename)
   {
+	if (!file_exists($this->dir.'watermark.png'))
+	{
+		return;
+	}
 	ini_set('max_execution_time', 0);
   	$size = GetImageSize($filename);
   	if ($size[2]==2)
