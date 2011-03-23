@@ -13,7 +13,6 @@ class OptionsField extends FormField
      
         //формируем опции для отображения
         $optionsConfig = $this->config["options"];
-        $optionsHash = array();
 
         if (!is_array($optionsConfig))
         {
@@ -36,6 +35,9 @@ class OptionsField extends FormField
             
 //            var_dump($optionsModel);
         }
+        else
+            $options = $optionsConfig;
+
         $values = array();
         if (isset($this->config['default_value'])) {
             $values[] = array(
@@ -43,6 +45,7 @@ class OptionsField extends FormField
                 "title" => $this->config['default_title'],
             );
         }
+
         foreach($options as $v => $t)
         {
             $r["value"] = $v;

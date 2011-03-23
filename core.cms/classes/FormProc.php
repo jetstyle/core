@@ -42,10 +42,10 @@ class FormProc extends FormSimple
 
         if ($this->needAjaxUpdate())
         {
-                $postData = $this->getPostData();
-                header('Content-Type: text/html; charset=windows-1251');
+            $postData = $this->getPostData();
+            header('Content-Type: text/html; charset=windows-1251');
 
-                die($postData[ $_POST['ajax_update'] ]);
+            die($postData[ $_POST['ajax_update'] ]);
         }
 
         //редирект или выставление флага, что он нужен
@@ -93,6 +93,7 @@ class FormProc extends FormSimple
             $tpl->set('hidden_fields', $this->insert_fields);
         }*/
 
+        //это место откуда вызовется this->load()
         $item = &$this->getItem();
 
         /**
@@ -126,9 +127,6 @@ class FormProc extends FormSimple
 
         Locator::get('tpl')->set('Form', $form->handle());
 
-//        $tpl->set('___form', );
-//        $this->renderButtons();
-
         $result = $tpl->parse($this->template_item);
 
         $tpl->popContext();
@@ -138,6 +136,9 @@ class FormProc extends FormSimple
     }
 
 
+    /**
+     * Получить конфиг поля или группы
+     */
     private function getGroup($group)
     {
         $fields_config = array();  
@@ -153,32 +154,10 @@ class FormProc extends FormSimple
                 $fields_config[ $name ] = $group_field;
                 $fields_config[ $name ]["fields"] = array_merge($fields_config[ $name ]["fields"], $this->getGroup($group_field["fields"]));
             }
-            //поле - это поле
+            //поле - это поле, а не группа
             else
             {
-/*              FIXME: clean after fk_select
-
-                if ($group_field["extends_from"]=="fk_select" && $model[$name])
-                {
-                    $group_field["fk_model"] = $model[$name];
-                    //var_dump($group_field["fk_model"]);
-                }
-*/
-
                 $fields_config[ $name ] = array_merge($group_field, $this->createField($name, $group_field));
-
-
-                /*
-                if ($fields_config[ $name ]["extends_from"]=="fk_select" && $model_fields[$name])
-                {
-                    $model = $this->getModel();
-                    echo $opts = DBModel::factory($model[$name])->load(); //$model_fields[$name]['className']
-                    var_dumP($opts);
-                    $fields_config[ $name ]["options"] = $opts;
-                }
-                */
-               // echo '<hr>';
-               
             }
         }
         
@@ -209,9 +188,6 @@ class FormProc extends FormSimple
                 }
             }
         }
-        //var_dumP($fields_config["controller"]);
-        //echo '<hr><hr><hr>';
-       //die();
 
         return $fields_config;
     }
@@ -226,7 +202,6 @@ class FormProc extends FormSimple
 
         if ( is_array($this->config["fields"][$name] ) ){
             $ret = array_merge($this->config["fields"][$name], $ret);
-          
         }
 
         return $ret;
@@ -259,81 +234,6 @@ class FormProc extends FormSimple
     }
 
 
-    protected function renderFields()
-    {
-        die();
-        $this->fieldsRendered = true;
-
-        $this->handleForeignFields();
-
-        $tpl =& $this->tpl;
-        $item = &$this->getItem();
-
-        if ($item['_state']>0)
-        {
-            $this->tpl->set("body_class", "class='state1'");
-        }
-
-        /*
-             $this->config->RENDER - каждая запись в нём:
-             0 - имя поля
-             1 - тип поля - checkbox | select | radiobutton
-             2 - хэш значений - array( id => value )
-         */
-
-        if( is_array($this->config['render']) )
-        {
-            if (!empty($this->config['render']['checkbox']))
-            {
-                foreach ($this->config['render']['checkbox'] as $checkbox)
-                {
-                    $tpl->set( 'checkbox_'.$checkbox, $item[$checkbox] ? "checked=\"checked\"" : '' );
-                }
-            }
-            if (!empty($this->config['render']['select']))
-            {
-                foreach ($this->config['render']['select'] as $name => $params)
-                {
-                    $str = '';
-                    foreach($params['values'] as $id => $val)
-                    {
-                            $str .= "<option value='".$id."' ".(($item["id"] && $item[$name]==$id) || (!$item["id"] && $id==$params['default']) ? "selected=\"selected\"" : '' ).">".$val;
-                    }
-                    $tpl->set( 'options_'.$name, $str );
-                }
-            }
-        }
-
-        return true;
-    }
-
-    protected function handleForeignFields()
-    {
-        $model = &$this->getModel();
-//die();
-        foreach($model->getForeignFields() AS $fieldName => $conf)
-        {
-            if (is_array($conf) && $conf['type'] == 'has_one')
-            {
-                $foreignModel = clone $model->getForeignModel($fieldName);
-
-                $conf = $model->getForeignFieldConf($fieldName);
-                $model->addField($conf['pk']);
-                $foreignModel->load();
-                $data = array();
-                foreach($foreignModel AS $r)
-                {
-                    if (!isset($r["_state"]) || $r["_state"]==0)
-                        $data[$r[$conf['fk']]] = ($r['_level'] ? str_repeat("&nbsp;&nbsp;", $r['_level']-1) : ""). $r['title'];
-                }
-
-                $this->config['render']['select'][$conf['pk']] = array(
-                    'values' => $data,
-                    'default' => $conf['default'],
-                );
-            }
-        }
-    }
     
     
     public function onAfterEventForm($event, $form){
