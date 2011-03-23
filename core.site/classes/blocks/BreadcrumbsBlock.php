@@ -6,7 +6,7 @@ class BreadcrumbsBlock extends Block
 
 	public function addItem($path, $title, $hide = 0)
 	{
-		$this->data[] = array('href' => $path, 'title_short' => $title, 'hide' => $hide);
+		$this->items[] = array('href' => $path, 'title_short' => $title, 'hide' => $hide);
 	}
 
 	protected function constructData()
@@ -16,10 +16,13 @@ class BreadcrumbsBlock extends Block
 		{
 			$current = &Locator::get('controller');
 		}
-                
+        if (!$this->items)
+		{
+			$this->items = array();
+		}
 		if ($this->getParam("cms"))
 		{   
-			$this->setData($this->data);
+			$this->setData($this->items);
 		}
 		else
 		{
@@ -30,10 +33,12 @@ class BreadcrumbsBlock extends Block
 						->addField('href', '_path')
 						->setOrder(array('_left' => 'ASC'))
 						->load('_left <= '.DBModel::quote($current['_left']).' AND _right >= '.DBModel::quote($current['_right']));
-
 			$data = $model->getArray();
-			$this->data = array_merge((array)$data, (array)$this->data);
-			$this->setData($this->data);
+			foreach ($data as $item)
+			{
+				array_unshift($this->items, $item);	
+			}
+			$this->setData($this->items);
 		}
 	}
 }
