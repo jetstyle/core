@@ -34,11 +34,11 @@ class BreadcrumbsBlock extends Block
 						->setOrder(array('_left' => 'ASC'))
 						->load('_left <= '.DBModel::quote($current['_left']).' AND _right >= '.DBModel::quote($current['_right']));
 			$data = $model->getArray();
-			foreach ($data as $item)
+			foreach ($this->items as $item)
 			{
-				array_unshift($this->items, $item);	
+				$data[] = $item;	
 			}
-			$this->setData($this->items);
+			$this->setData($data);
 		}
 	}
 }
