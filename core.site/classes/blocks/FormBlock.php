@@ -3,6 +3,8 @@
 Finder::useClass('blocks/Block');
 class FormBlock extends Block
 {
+    //конфиг ФОРМ (ключ - имя формы)
+    protected $config = array();
 
 	protected function constructData()
 	{
@@ -18,6 +20,11 @@ class FormBlock extends Block
                 $config['action'] = RequestInfo::$baseUrl.Router::linkTo($action);
             }
 			$config['on_after_event'] = array(array(&$this, 'OnAfterEventForm'));
+
+
+            if (!empty($this->config[ $this->getParam("form") ]))
+                $config = array_merge($this->config[$this->getParam("form")]);
+
             $form = new Form($formConfigName, $config);
 			if ($_COOKIE[$form->form->name.'_sended'])
 			{
@@ -45,5 +52,10 @@ class FormBlock extends Block
 		}
 	}
 
+    public function setConfig($config)
+    {
+        $this->config = $config;
+
+    }
 }
 ?>
