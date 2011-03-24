@@ -1,71 +1,19 @@
 <?php
-
+/**
+ *
+ * @param $this->config["fields"] - ìàññèâ ïîëåé äëÿ ôîğìïğîöåññîğà
+ * @param $this->config["auto_user_id"] - äîáàâëåíèå system ïîëÿ user_id ñî çíà÷åíèåì Locator::get("principal")->getId()
+ * @param $this->config["files"] - êîíôèã ôàéëîâ. ïîëÿ äîáàâÿòñÿ â êîíåö 
+ *
+ * TODO: 
+ *   - Events workflow for cmsapi
+ *   - AJAX
+ *   - INSERT_FIELDS íóæíû?
+ *   - Files â ëşáîå ìåñòî ôîğìû
+ */
 class FormProc extends FormSimple
 {
 
-
-    public function handle()
-    {
-        $valid = array('text', 'title', 'lead');
-
-        //form in iframe colorbox
-        if ( $_GET["popup"] )
-        {
-            $iframe = array("css_buttons_class"=>"iframe-buttons-");
-            Locator::get("tpl")->set( "iframe", $iframe );
-        }
-        $item = &$this->getItem();
-        if ($_GET['ret'] && in_array($_GET['ret'], $valid) )
-        {
-            header('Content-Type: text/html; charset=windows-1251');
-            die( $item[ $_GET['ret'] ] );
-        }/*
-        elseif ($this->needAjaxUpdate())
-        {
-            $this->ajax_update = true;
-            $this->prefix = "";
-        }
-        */
-        //update data
-        if ($this->needDelete())
-        {
-            $redirect = $this->delete();
-        }
-        elseif ($this->needRestore())
-        {
-            $redirect = $this->restore();
-        }
-        elseif ($this->needUpdate() || $this->needAjaxUpdate())
-        {
-            $redirect = $this->update();
-        }
-
-        if ($this->needAjaxUpdate())
-        {
-            $postData = $this->getPostData();
-            header('Content-Type: text/html; charset=windows-1251');
-
-            die($postData[ $_POST['ajax_update'] ]);
-        }
-
-        //ğåäèğåêò èëè âûñòàâëåíèå ôëàãà, ÷òî îí íóæåí
-
-        if ($redirect)
-        {
-            //var_dump($redirect);die();
-            $this->_redirect = RequestInfo::hrefChange('', array('rnd' => mt_rand(1,255)));
-
-            if ($this->stop_redirect)
-            {
-                $this->redirect = $this->_redirect;
-                return;
-            }
-            else
-            {
-                Controller::redirect( $this->_redirect );
-            }
-        }
-    }
     
     //âûçûâàòü ëè $this->update() 
     //äëÿ ıòîãî ó íåàñ åñòü onFormAfterEvent
@@ -81,17 +29,6 @@ class FormProc extends FormSimple
 
         $tpl = &Locator::get('tpl');
         $tpl->pushContext();
-        /*
-        $tpl->set( 'prefix', $this->prefix );
-        $tpl->set( '__form_name', $this->prefix.'_simple_form' );
-        */
-        /*
-        * TODO:
-        if ($this->insert_fields)
-        {
-
-            $tpl->set('hidden_fields', $this->insert_fields);
-        }*/
 
         //ıòî ìåñòî îòêóäà âûçîâåòñÿ this->load()
         $item = &$this->getItem();
@@ -115,6 +52,12 @@ class FormProc extends FormSimple
         $config["on_after_event"] = $this;
         $config['success_url'] =  RequestInfo::href();
 
+        if ($this->config["auto_user_id"] )
+        {   
+            $config["fields"]["user_id"] = array("extends_from"=>"system", "model_default"=>Locator::get("principal")->getId());
+            ///$config["auto_user_id"] = $this->config["auto_user_id"];
+            //$config["fieldname_created_user_id"] = "user_id";
+        }
 
         //if in edit mode: change button and load model item
         if ($this->id){
