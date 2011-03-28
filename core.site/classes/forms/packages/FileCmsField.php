@@ -9,6 +9,9 @@ $config = array(
                                       "swf", "gif", "jpg", "png" ),
                 "file_chmod" => "775",
                 "wrapper_tpl"=> "wrapper.html:CmsStringWrapper",
+
+                //adds file to files rubric defined in $config['config_key_module']
+                "add_to_rubric"=>true
 );
 ?>
 

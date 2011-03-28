@@ -167,6 +167,7 @@ class FormProc extends FormSimple
                 $fields_config[ $name ]["file_ext"] = explode(",",Config::get("upload_ext"));
                 $fields_config[ $name ]["file_size"] = 55242880;
                 $fields_config[ $name ]["config_key"] = $model->getFilesConfigKey().':'.$name;
+                $fields_config[ $name ]["config_key_module"] = $model->getFilesConfigKey();
             }
         }
         return $fields_config;

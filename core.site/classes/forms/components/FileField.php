@@ -41,6 +41,9 @@ Finder::UseClass( "forms/FormField" );
 
 class FileField extends FormField
 {
+    const FILES_RUBRIC_TYPE_ID = 0;
+    const PICTURES_RUBRIC_TYPE_ID = 1;
+
     // MODEL ==============================================================================
     function Model_DbInsert( &$fields, &$values )
     {
@@ -228,11 +231,58 @@ class FileField extends FormField
             //var_dumP($this->field->config['config_key'], $data_id);die();
 
             $file->upload($_FILES['_'.$this->name]);
+            if ($this->config["add_to_rubric"])
+            {
+                $filesRubric = $this->getFilesRubric($file);
+                //var_dump($filesRubric['id']); die();
+                $file->addToRubric($filesRubric['id']);
+            }
         }
 
         return $result;
     }
 
+    /**
+     * Rubric for files
+     * c&p from FormFiles
+     */
+    protected function getFilesRubric($file = null) {
+        if ($file && $file->isImage()) {
+            $rubricTypeId = self::PICTURES_RUBRIC_TYPE_ID;
+        }
+        else {
+            $rubricTypeId = self::FILES_RUBRIC_TYPE_ID;
+        }
+
+        if ( !array_key_exists($rubricTypeId, $this->filesRubrics) ) {
+            //$parts = explode('/', $this->config['module_path']);
+            //$moduleName = array_shift($parts);
+
+            $rubric = DBModel::factory('FilesRubrics');
+            $rubric->loadOne('{type_id} = '.DBModel::quote($rubricTypeId).' AND {module} = '.DBModel::quote($this->config["config_key_module"]));
+
+            if (!$rubric['id']) {
+
+                $data = array(
+                    'module' => $this->config["config_key_module"],
+                    'title' => ModuleConstructor::factory($this->config["config_key_module"])->getTitle(),
+                    'type_id' => $rubricTypeId,
+                    '_state' => 0,
+                    '_created' => date('Y-m-d H:i:s'),
+                );
+                $id = $rubric->insert($data);
+
+                $data = array(
+                    '_order' => $id,
+                );
+                $rubric->update($data, '{id} = '.DBModel::quote($id));
+                $rubric->loadOne('{id} = '.DBModel::quote($id));
+            }
+            $this->filesRubrics[$rubricTypeId] = $rubric;
+        }
+
+        return $this->filesRubrics[$rubricTypeId];
+    }
 
 }
 
