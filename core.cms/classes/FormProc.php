@@ -230,6 +230,7 @@ class FormProc extends FormSimple
                 $fields_config[ $name ]["variants"] = $conf["variants"];
 
                 $fields_config[ $name ]["config_key"] = $model->getFilesConfigKey().':'.$name;
+                $fields_config[ $name ]["config_key_module"] = $model->getFilesConfigKey();
             }
         }
         return $fields_config;
