@@ -67,7 +67,7 @@ default_packages:
     meta_description:
         extends_from: string_cms
     _supertag:
-        extends_from: string_cms
+        extends_from: supertag_cms
     map_html:
         extends_from: textarea_cms
 
