@@ -394,7 +394,7 @@ class TreeSimple extends ListSimple  implements ModuleInterface
 		}
 	}
 	
-	protected function toJSON($fromNode = null)
+	public function toJSON($fromNode = null)
 	{
 		$this->toRoot = array();
 		$c = $this->items[ $this->id ];
