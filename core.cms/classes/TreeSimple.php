@@ -16,6 +16,9 @@ class TreeSimple extends ListSimple  implements ModuleInterface
 
     public function __construct( &$config )
 	{
+        if ( strpos($config["model"], "Tree")===false )
+            throw new JSException("Model [".$config["model"]."] should extend from DBModelTree");
+
 		if (!$config['hide_buttons']) $config['hide_buttons'] = array();
                 
         if (!isset($config['level_limit']))
