@@ -79,14 +79,22 @@ class MenuCmsBlock extends MenuBlock
 		
 		if ($this->config["mode"] == "submenu") {
 			$item = $this->getCurrent();
-			$module = ModuleConstructor::factory($row['href']);
-			$moduleConfig = $module->getConfig();
-			$moduleForm = $module->getForm();
-			$moduleFormConfig = $moduleForm->getConfig();
-			if ($moduleConfig['link_to'] == $item['href'] || $moduleFormConfig['link_to'] == $item['href'])
-			{
-				$row['selected'] = true;
-			}
+            //try to find module and construct it
+            try {
+			    $module = ModuleConstructor::factory($row['href']);
+			    $moduleConfig = $module->getConfig();
+			    $moduleForm = $module->getForm();
+			    $moduleFormConfig = $moduleForm->getConfig();
+			    if ($moduleConfig['link_to'] == $item['href'] || $moduleFormConfig['link_to'] == $item['href'])
+			    {
+				    $row['selected'] = true;
+			    }
+            }
+            //not found, just skip it 
+            catch (FileNotFoundException $e)
+            {
+
+            }
 		}
     }
 }
