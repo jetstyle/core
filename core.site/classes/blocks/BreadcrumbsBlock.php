@@ -6,7 +6,7 @@ class BreadcrumbsBlock extends Block
 
 	public function addItem($path, $title, $hide = 0)
 	{
-		$this->data[] = array('href' => $path, 'title_short' => $title, 'hide' => $hide);
+		$this->items[] = array('href' => $path, 'title_short' => $title, 'hide' => $hide);
 	}
 
 	protected function constructData()
@@ -16,25 +16,30 @@ class BreadcrumbsBlock extends Block
 		{
 			$current = &Locator::get('controller');
 		}
-                
-                if ($this->getParam("cms"))
-                {   
-                    $this->setData($this->data);
-                }
-                else
-                {
-                    $model = DBModel::factory('Content')
-                                                            ->clearFields()
-                                                            ->addFields(array('id','_left', '_right', '_level', '_path', '_parent'))
-                                                            ->addField('title_short', 'IF(LENGTH(title_short) > 0, title_short, title_pre)')
-                                                            ->addField('href', '_path')
-                                                            ->setOrder(array('_left' => 'ASC'))
-                                                            ->load('_left <= '.DBModel::quote($current['_left']).' AND _right >= '.DBModel::quote($current['_right']));
-
-                    $data = $model->getArray();
-                    $this->data = @array_merge($data, $this->data);
-                    $this->setData($this->data);
-                }
+        if (!$this->items)
+		{
+			$this->items = array();
+		}
+		if ($this->getParam("cms"))
+		{   
+			$this->setData($this->items);
+		}
+		else
+		{
+			$model = DBModel::factory('Content')
+						->clearFields()
+						->addFields(array('id','_left', '_right', '_level', '_path', '_parent'))
+						->addField('title_short', 'IF(LENGTH(title_short) > 0, title_short, title_pre)')
+						->addField('href', '_path')
+						->setOrder(array('_left' => 'ASC'))
+						->load('_left <= '.DBModel::quote($current['_left']).' AND _right >= '.DBModel::quote($current['_right']));
+			$data = $model->getArray();
+			foreach ($this->items as $item)
+			{
+				$data[] = $item;	
+			}
+			$this->setData($data);
+		}
 	}
 }
 ?>
