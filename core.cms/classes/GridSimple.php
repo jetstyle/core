@@ -100,6 +100,10 @@ class GridSimple extends ListSimple implements ModuleInterface
                     {
                         $cols[$col]["editable"] = 1;
                     }
+                    if ( $data[0]['cols'][$col]["type"] )
+                    {
+                        $cols[$col]["type"] = $data[0]['cols'][$col]["type"];
+                    }
                     //ссылки сортировки
                     $order = $this->getOrderValueFor($col);
                     $data[0]['cols'][$col]["href"] = RequestInfo::hrefChange('',array('order'=>$order  )) ;
