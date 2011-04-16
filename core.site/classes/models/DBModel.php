@@ -1178,13 +1178,16 @@ class DBModel extends Model implements IteratorAggregate, ArrayAccess, Countable
 
 	public function &load($where=NULL, $limit=NULL, $offset=NULL)
 	{
-                if (!empty($this->sqlParts))
+        if (!empty($this->sqlParts))
 		{
 			$this->cleanUp();
 		}
 
-                $this->bannedTableAliases = array($this->getTableAlias());
-                $this->updateForeignModelAliases();
+        if (is_array($where))
+            $where = implode(" AND ", $where);
+
+        $this->bannedTableAliases = array($this->getTableAlias());
+        $this->updateForeignModelAliases();
 
 		$this->notify('will_load', array(&$this));
 
@@ -1204,7 +1207,7 @@ class DBModel extends Model implements IteratorAggregate, ArrayAccess, Countable
 			$offset = $pager->getOffset();
 		}
 
-                $data = $this->select($where, $limit, $offset);
+        $data = $this->select($where, $limit, $offset);
 		$this->setData( $data );
 
 		$this->notify('did_load', array(&$this, &$this->data));
