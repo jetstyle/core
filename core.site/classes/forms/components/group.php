@@ -246,6 +246,28 @@ class FormComponent_group extends FormComponent_abstract
     }
 
     // EOC{ FormComponent_group }
+
+    function Interface_ParseEmail(  )
+    {
+        foreach ($this->field->model->childs as $field_in_group)
+        {
+            $title = $field_in_group->config["wrapper_title"];
+            $value = $field_in_group->model->Model_GetDataValue();
+
+            if ($field_in_group->name=="phone")
+            {
+                $value=preg_replace("/^\+7(.*)$/", "8$1", $value);
+                $value=preg_replace("/\D/", "", $value);
+            }
+
+            if ($title && $value)
+                $emailData[] = array("title"=>$title, "value"=>$value);
+        }
+
+        Locator::get("tpl")->set('emailData', $emailData);
+		$emailText = Locator::get("tpl")->parse($this->field->config["email"]);
+        return $emailText;
+    }
 }  
 
 
