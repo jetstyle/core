@@ -256,13 +256,18 @@ class FormComponent_group extends FormComponent_abstract
 
             if ($field_in_group->name=="phone")
             {
-                $value=preg_replace("/^\+7(.*)$/", "8$1", $value);
-                $value=preg_replace("/\D/", "", $value);
+//                $value=preg_replace("/^\+7(.*)$/", "8$1", $value);
+//                $value=preg_replace("/\D/", "", $value);
+                 $value= $field_in_group->model->Model_GetDataValuePlain();
             }
             else if ($field_in_group->config["model"]=="multi_checkbox")
             {
 
                 $value = $field_in_group->model->Model_GetDataValuePlain();
+            }
+            else if ($field_in_group->config["options_mode"]=="select")
+            {
+                $value = $field_in_group->config["options"][ $value ];
             }
 
             if ($title && $value)
