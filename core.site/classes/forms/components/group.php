@@ -259,13 +259,25 @@ class FormComponent_group extends FormComponent_abstract
                 $value=preg_replace("/^\+7(.*)$/", "8$1", $value);
                 $value=preg_replace("/\D/", "", $value);
             }
+            else if ($field_in_group->config["model"]=="multi_checkbox")
+            {
+
+                $value = $field_in_group->model->Model_GetDataValuePlain();
+            }
 
             if ($title && $value)
                 $emailData[] = array("title"=>$title, "value"=>$value);
         }
 
         Locator::get("tpl")->set('emailData', $emailData);
-		$emailText = Locator::get("tpl")->parse($this->field->config["email"]);
+        try {
+    		$emailText = Locator::get("tpl")->parse($this->field->config["email"]);
+        }
+        catch (Exception $e)
+        {
+            echo "Email template not defined<br>";
+            var_dump($this->field->name, $this->field->config["extends_from"]);die();
+        }
         return $emailText;
     }
 }  
