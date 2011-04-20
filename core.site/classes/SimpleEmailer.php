@@ -46,6 +46,11 @@ class SimpleEmailer
                     $recipients = array('<'.$to.'>');
                 return $mail->send( $recipients, 'mail');
 	}
+
+    public function setEncodings($encodings)
+    {
+        $this->encodings = $encodings;
+    }
 }
 
 ?>
