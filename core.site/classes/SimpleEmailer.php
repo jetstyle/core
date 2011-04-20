@@ -25,12 +25,16 @@ class SimpleEmailer
      * @param string $subject    subject of the email
      * @param string $text       text of the email
      */
-	public function sendEmail($to, $from, $subject, $text) {
+	public function sendEmail($to, $from, $subject, $text, $plaintext=false) {
 		Finder::useLib("HtmlMimeMail2");
 		$mail  = new HtmlMimeMail2();
 		$mail->setFrom($from);
 		$mail->setHeader('X-Mailer', "HtmlMimeMail2");
-		$mail->setHtml($text, strip_tags($text));
+
+        if ($plaintext)
+            $mail->setText($text);
+        else
+    		$mail->setHtml($text, strip_tags($text));
 		$mail->setSubject($subject);
 		$mail->buildMessage($this->encodings,'mail');
                 if (is_array($to))
