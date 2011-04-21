@@ -249,7 +249,8 @@ class FormComponent_group extends FormComponent_abstract
 
     function Interface_ParseEmail(  )
     {
-        $emailData[] = array("title"=>"<b>".$this->field->config["wrapper_title"]."</b>");
+        if (!empty($this->field->config["wrapper_title"]))
+            $emailData[] = array("title"=>"<b>".$this->field->config["wrapper_title"]."</b>");
         foreach ($this->field->model->childs as $field_in_group)
         {
             $title = $field_in_group->config["wrapper_title"];
