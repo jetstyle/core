@@ -77,7 +77,7 @@ class GridSimple extends ListSimple implements ModuleInterface
                 //echo($r);die();
                 $row  = array();
                 $cols = array();
-                $href = Router::linkTo( "Do" )."/".$this->config["link_to"]."?id=".$r["id"];
+                $href = $this->getRowHref($r);
                 foreach ( $this->columns as $col=>$col_title )
                 {
                     $parts = explode(".", $col);
@@ -161,6 +161,18 @@ class GridSimple extends ListSimple implements ModuleInterface
             $this->dir = "ASC";
             return $col;
         }
+    }
+
+    function getRowHref($row)
+    {
+        $ret = Router::linkTo( "Do" )."/".$this->config["link_to"]."?id=".$row["id"];
+
+        foreach ($this->config["keepVars"] as $var)
+            $vars[] = $var."=".$_GET[$var];
+
+        if (!empty($vars))
+            $ret .= "&".implode("&",$vars);
+        return $ret;
     }
 
 	public function load( $where = '' )
