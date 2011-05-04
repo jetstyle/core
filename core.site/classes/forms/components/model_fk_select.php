@@ -42,6 +42,7 @@ class FormComponent_model_fk_select extends FormComponent_abstract
    function Model_SetDefault()
    {
      $this->model_data = isset($this->field->config["model_default"]) ? $this->field->config["model_default"] : "";
+
    }
    // возврат значения в виде "шифра" или "ключа"
    function Model_GetDataValue()
@@ -58,13 +59,11 @@ class FormComponent_model_fk_select extends FormComponent_abstract
         foreach ($opts as $opt){
             $options[$opt['id']] = $opt['title'];
         }
-        
-        //$fields_config[ $name ]["options"] = $opts;
-        
+
         $this->field->config["options"] = $options;
      }
 
-     return $this->model_data["id"];
+     return $this->model_data;
    }
    // изменение значения в виде "шифра" или "ключа"
    function Model_SetDataValue($model_value)
@@ -90,10 +89,12 @@ class FormComponent_model_fk_select extends FormComponent_abstract
    {
 
      $this->model_data = $a[ $this->field->name ];
+
      // получаем из другого поля в конфиге (должно быть "выше" по форме)
      if (isset($this->field->config["model_empty_from"]) && $this->model_data == "")
        $this->model_data = $this->field->form->hash[$this->field->config["model_empty_from"]]->
                                          model->Model_GetDataValue();
+
    }
    function Model_ToArray( &$a )
    {
@@ -102,10 +103,13 @@ class FormComponent_model_fk_select extends FormComponent_abstract
    // ---- работа с БД ----
    function Model_DbLoad( $db_row )
    { 
+
      if(isset($db_row[ $this->field->name ]))
        $this->model_data = $db_row[ $this->field->name ];
      else
       $this->Model_SetDefault();
+
+//var_dump($this->model_data  );die();
    }
    function Model_DbInsert( &$fields, &$values )
    {
