@@ -37,7 +37,7 @@ class IcalView
 	    }
 
         $out = "BEGIN:VCALENDAR\r\n";
-        $out.= "VERSION:2.0\r\n";
+        $out.= "VERSION:1.0\r\n";
         $out.= "PRODID:-//".Config::get("project_name")."//EN\r\n";
         $out.= "METHOD:PUBLISH\r\n";
         $out.= implode("",$vevents);
