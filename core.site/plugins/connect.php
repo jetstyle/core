@@ -51,19 +51,16 @@ if ( $compile )
 		if (("js" == $compile && Config::get('compress_js')) || ("css" == $compile && Config::get('compress_css')))
 		{
 			$compressedName = '';
-			foreach ($tpl->CONNECT[$compile] AS $fileName)
-			{
+			foreach ($tpl->CONNECT[$compile] AS $fileName){
         $_fileName = Finder::findScript($compile, $fileName, 0, 1, $compile);
         if ($_fileName) $compressedName .= '|'.filemtime($_fileName).'/'.$compile.'/'.$_fileName.'|';
 			}
 			$compressedName = md5($compressedName);
 
-			if ( (!file_exists(Config::get('cache_dir').'/'.$compile.'/'.$compressedName.'.'.$compile)) || Config::get('css_debug') )
-			{
+			if ( (!file_exists(Config::get('cache_dir').'/'.$compile.'/'.$compressedName.'.'.$compile)) || Config::get('css_debug') ){
 				$result = '';
 				$skinDir = $tpl->getSkinDir();
-				foreach ($tpl->CONNECT[$compile] AS $fileName)
-				{
+				foreach ($tpl->CONNECT[$compile] as $fileName) {
           $_fileName = Finder::findScript($compile, $fileName, 0, 1, $compile);
 
           if ( preg_match_all('/(templates[\/]blocks[\/\w\d\-]+[\/]).+/i', $_fileName, $_g) ){
@@ -80,8 +77,7 @@ if ( $compile )
           if (Config::get('minify_js'))
             { Finder::useClass('JSMin'); $result = JSMin::minify($result); }
 
-        if ('css' == $compile)
-				{
+        if ('css' == $compile) {
           $result = eregi_replace('[^(\'\"\=][\.\/\s]+images/', $tpl->get('images'), $result);
 
           if (Config::get('minify_css'))
