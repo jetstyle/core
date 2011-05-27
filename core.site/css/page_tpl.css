@@ -1,0 +1,24 @@
+.content {
+  width:40%;
+  margin:0 auto;
+}
+ .content h1 {
+  font-size:2.4em; font-weight:400;
+  color:#333;
+
+  padding:15px 0 20px;
+ }
+ .content li {
+  margin:0 0 10px;
+ }
+ .content li a {
+  font-size:1.3em;
+  color:#069;
+ }
+  .content li a:hover {text-decoration:none;}
+  .content li a:active {color:red;}
+  .content li a:visited {color:#7676bf;}
+
+  .content ul ul {
+    margin-left:20px;
+  }
