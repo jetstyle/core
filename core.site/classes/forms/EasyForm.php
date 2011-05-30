@@ -153,8 +153,8 @@ class EasyForm {
 			else
 				$field =& $form->AddField( $name, $conf );
 			//если указан пакет группы, обрабатываем вложение
-			if(in_array($rec[0],$this->groups))
-				$this->AddFields($field, $rec[2], true);
+			if(in_array($pack_name,$this->groups))
+				$this->AddFields($field, $conf['fields'], true);
 		}
 	}
 
