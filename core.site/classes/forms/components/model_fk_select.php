@@ -63,7 +63,7 @@ class FormComponent_model_fk_select extends FormComponent_abstract
         $this->field->config["options"] = $options;
      }
 
-     return $this->model_data;
+     return isset($this->model_data["id"]) ? $this->model_data["id"] : $this->model_data;
    }
    // изменение значения в виде "шифра" или "ключа"
    function Model_SetDataValue($model_value)

@@ -32,7 +32,7 @@ class FormComponent_options extends FormComponent_view_plain
    function Interface_Parse()
    {
      $data = $this->field->model->Model_GetDataValue();
-     
+
      //пометка выбранного - в зависимости от типа
      $selected_mark = $this->field->config["options_mode"]=="radio" ? "checked=\"checked\"" : "selected=\"selected\"";
      
@@ -42,7 +42,7 @@ class FormComponent_options extends FormComponent_view_plain
      foreach($A1 as $v=>$t){
         $r["value"] = $v;
         $r["title"] = $t;
-        $r["selected"] = $data==$v ? $selected_mark : "";
+        $r["selected"] = ( $data==$v || (is_array($data) && $data["id"]==$v) ) ? $selected_mark : "";
         $A2[] = $r;
      }
      
