@@ -255,12 +255,14 @@ class FormComponent_group extends FormComponent_abstract
         {
             $title = $field_in_group->config["wrapper_title"];
             $value = $field_in_group->model->Model_GetDataValue();
-
+            $value_suffix  = "";
             if ($field_in_group->name=="phone")
             {
 //                $value=preg_replace("/^\+7(.*)$/", "8$1", $value);
 //                $value=preg_replace("/\D/", "", $value);
-                 $value= $field_in_group->model->Model_GetDataValuePlain();
+                $value= $field_in_group->model->Model_GetDataValuePlain();
+                if (! empty($_POST["_phone_suffix"]) )
+                    $value_suffix = " доб. ".$_POST["_phone_suffix"];
             }
             else if ($field_in_group->config["model"]=="multi_checkbox")
             {
@@ -273,7 +275,7 @@ class FormComponent_group extends FormComponent_abstract
             }
 
             if ($title && $value)
-                $emailData[] = array("title"=>$title, "value"=>$value);
+                $emailData[] = array("title"=>$title, "value"=>$value, "value_suffix"=>$value_suffix );
         }
 
         Locator::get("tpl")->set('emailData', $emailData);
