@@ -42,7 +42,6 @@ class FormComponent_model_fk_select extends FormComponent_abstract
    function Model_SetDefault()
    {
      $this->model_data = isset($this->field->config["model_default"]) ? $this->field->config["model_default"] : "";
-
    }
    // возврат значения в виде "шифра" или "ключа"
    function Model_GetDataValue()
@@ -59,11 +58,10 @@ class FormComponent_model_fk_select extends FormComponent_abstract
         foreach ($opts as $opt){
             $options[$opt['id']] = $opt['title'];
         }
-
         $this->field->config["options"] = $options;
      }
 
-     return isset($this->model_data["id"]) ? $this->model_data["id"] : $this->model_data;
+     return (is_array($this->model_data) &&  isset($this->model_data["id"])) ? $this->model_data["id"] : $this->model_data;
    }
    // изменение значения в виде "шифра" или "ключа"
    function Model_SetDataValue($model_value)
