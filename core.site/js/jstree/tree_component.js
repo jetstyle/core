@@ -325,7 +325,8 @@ function tree_component () {
 						str += 'hidden="hidden"';
 				}
 				else if (data.hide_buttons && data.hide_buttons.addChild) str += 'hidden="hidden"';
-
+				
+				
 				str += '/>';
 
 				str += '<img title="Удалить" class="tree-delete" src="'+ this.images_path +'del.png" ';
@@ -508,7 +509,7 @@ function tree_component () {
 				})
 
 				$('#treeBox li').live('mouseover',	function(){
-					$(this).find('>a .js-tree-buttons img[hidden!=hidden]').show();
+					$(this).find('>a .js-tree-buttons img:not([hidden])').show();
 		           	//$(this).parent().siblings('img[hidden!=hidden]').hide();
 		           	return false;
 				}).live('mouseout', function(){

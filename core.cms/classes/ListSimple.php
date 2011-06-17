@@ -146,8 +146,7 @@ class ListSimple implements ModuleInterface
 	{
 		if( !$this->loaded )
 		{
-			$total = $this->getTotal($where);
-
+			$total = $this->getTotal($where);			
 			if ($total > 0)
 			{
 				$this->pager($total);
@@ -155,6 +154,8 @@ class ListSimple implements ModuleInterface
 				$model = &$this->getModel();
 				$model->load( $where, $this->pager->getLimit(), $this->pager->getOffset());
 				$this->items = &$model->getData();
+				
+				
 			}
 
 			$this->loaded = true;
