@@ -89,7 +89,7 @@ class ResultSet implements IteratorAggregate, ArrayAccess, Countable, DataContai
 				$res .= $item->__toString();
 			else
 			{
-				if (strlen($item) > 255)
+				if (@strlen($item) > 255)
 					$item = substr(htmlentities($item), 0, 255) . "<font color='green'>&hellip;</font>";
 				$res .=  $item;
 			}
