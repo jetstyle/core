@@ -219,7 +219,7 @@ class FormGallery extends FormCalendar
 				}
 
 				$tpl = Locator::get('tpl');
-                                $item["title"] = iconv("cp1251","utf8", $item["title"]);
+                $item["title"] = iconv("cp1251","utf-8", $item["title"]);
 				$tpl->set('*', $item);
 
 				$thumbSizes = $this->getThumbSize();
@@ -232,10 +232,10 @@ class FormGallery extends FormCalendar
 
 				$result = array(
 					'ok' => true,
-					'html' => $tpl->parse('gallery.html:gallery_item')
+					'html' => iconv('cp1251', 'utf-8', $tpl->parse('gallery.html:gallery_item'))
 				);
 
-                                //header("Content-Type: text/html; charset=utf-8");
+                //header("Content-Type: text/html; charset=utf-8");
 				Finder::useClass('Json');
 				echo Json::encode($result);
 				die();
