@@ -1,6 +1,6 @@
 <?php
 
-class ListSimple implements ModuleInterface
+class ListSimple
 {
 	protected $tpl;
 
