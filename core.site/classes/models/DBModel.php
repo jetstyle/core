@@ -259,9 +259,9 @@ class DBModel extends Model implements IteratorAggregate, ArrayAccess, Countable
 		{
                         $modelName = (strpos($className, "Tree")!==false ) ? "DBModelTree" : "DBModel";
 
-                        if ( strpos($className,"Catalogue") ){
-                            var_dump($className, strpos($className, "Tree"));die();
-                        }
+                        //if ( strpos($className,"Catalogue") ){
+                        //    var_dump($className, strpos($className, "Tree"));die();
+                        //}
 
                         //$classFile = Finder::findScript('classes/models', $modelName);
                         Finder::useClass('models/DBModelTree');
