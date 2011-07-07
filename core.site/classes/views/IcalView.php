@@ -66,7 +66,7 @@ class IcalView
             $event = array(
                     "BEGIN"=>"VEVENT",
                     "UID"=>$uid,
-                    //"DTSTAMP"=>gmdate('Ymd')."T".gmdate('His')."Z",
+                    "DTSTAMP"=>gmdate('Ymd')."T".gmdate('His')."Z",
                     "DTSTART"=>$dtstart,
                     "DURATION"=>$duration, //1h
 //                    "DTEND"=>$dtend,
