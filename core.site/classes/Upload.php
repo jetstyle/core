@@ -329,7 +329,7 @@ class Upload
 
 	protected function isAllowed($ext)
 	{
-		if( (count($this->ALLOW) && !in_array($ext,$this->ALLOW))	|| (count($this->DENY) && in_array($ext,$this->DENY)) )
+		if( (count($this->ALLOW) && !in_array($ext,$this->ALLOW))	|| (count($this->DENY) && in_array(strtolower($ext),$this->DENY)) )
 		{
 			return false;
 		}

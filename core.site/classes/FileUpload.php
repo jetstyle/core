@@ -177,7 +177,7 @@ class FileUpload {
     }
 
     protected function isAllowed($ext) {
-        if( (!empty($this->allow) && !in_array($ext, $this->allow)) ) {
+        if( (!empty($this->allow) && !in_array(strtolower($ext), $this->allow)) ) {
             return false;
         }
         return true;
