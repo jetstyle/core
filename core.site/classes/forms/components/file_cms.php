@@ -96,7 +96,7 @@ class FormComponent_file_cms extends FormComponent_model_plain
 
         if ($this->file_ext)
             if (isset( $this->field->config["file_ext"]))
-                if (!in_array($this->file_ext,$this->field->config["file_ext"]))
+                if (!in_array(strtolower($this->file_ext),$this->field->config["file_ext"]))
                     $this->_Invalidate( "file_ext", "Недопустимый тип файла" );
 
         if ($this->file_size)
