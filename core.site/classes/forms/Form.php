@@ -609,7 +609,27 @@ class Form
             else
                 $model = $this->config["db_model"];
             $data = array_combine($fields, $values);
-            $model->update($data, '{'.$this->config["id_field"].'} = '.Locator::get('db')->quote($dataId));
+            try{
+                $model->update($data, '{'.$this->config["id_field"].'} = '.Locator::get('db')->quote($dataId));
+            }
+            catch (DbException $e)
+            {
+                $mysql_error = mysql_error();
+                if ( strpos( $mysql_error, "Unknown column" )!==false )
+                {
+                    $parts = explode("'", $mysql_error);
+                    $field_parts = explode(".",$parts[1]);
+                    
+                    $schema = YamlWrapper::load(Config::get("app_dir")."../db/modeles_schema.yml");
+                    $packageName = $this->getFieldByName( $field_parts[1] )->config["extends_from"];
+                    $field_type_schema = $packageName;
+
+                    $message = "ALTER TABLE `".DBAL::$prefix.$model->getTableName()."` ADD ".str_replace( "%field_name%" , $field_parts[1], $schema["form"][  $packageName ] );
+                    $e->setHintMessage($message);
+
+                }
+                ExceptionHandler::getInstance()->process($e);
+            }
         }
 
         foreach($this->fields as $k=>$v)
