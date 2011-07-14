@@ -77,6 +77,17 @@ class IcalView
             if ( $row["inserted_end_unixtime"] )
                 $event["DTEND"] =  gmdate('Ymd', $row["inserted_end_unixtime"])."T".gmdate('His', $row["inserted_end_unixtime"])."Z";
             //
+             $location = array();
+             if  ( $row["city"]["title"] )
+                $location[] = $row["city"]["title"];
+             if ( $row["location"] )
+                $location[] = $row["location"];
+
+            if (!empty($location))
+            {
+                $event["LOCATION"] = iconv("cp1251", "utf-8", implode(", ",$location));
+            }
+
 
             $vevent = "";
             foreach ($event as $k=>$v)
