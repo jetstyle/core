@@ -31,6 +31,18 @@
         </tr>
 {{/:CmsStringWrapper}}
 
+{{:LinkWrapper}}
+{{!connect "field.link.js"}}
+        <tr>
+          <td class="left"><label for="{{field}}">{{wrapper_title}}</label>:</td>
+          <td class="desc">
+            {{content}}
+            {{errors}}
+            <span><a href="#" onclick="selectLink('{{field}}'); return false;"><img src="/cms/libs/tinymce/plugins/jetcontent/img/icon.gif" /></a></span>
+          </td>
+        </tr>
+{{/:LinkWrapper}}
+
 <!-- for cms -->
 {{:CmsWYSIWYGStringWrapper}}
         <tr>
