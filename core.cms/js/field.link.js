@@ -2,7 +2,7 @@ var linkField;
 function selectLink(field)
 {
     linkField = field;
-    popup_href = base_url+"do/Content/jetcontent?cm=1";
+    popup_href = base_url+"do/Content/jetcontent?cm=1&replace=solutions";
     var d = getWindowSize(640, 480);
     var preview = window.open(popup_href, '_blank', 'width='+d.width+',height='+d.height+',top='+d.top+',left='+d.left+',resizable=1,toolbar=0,directories=0,location=0,menubar=0,personalbar=0,scrollbars=yes,status=1');
     preview.focus(); 
