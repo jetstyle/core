@@ -3,11 +3,12 @@
 Finder::useClass('blocks/Block');
 class FormBlock extends Block
 {
+    private $on_after_event = array();
 
 	protected function constructData()
 	{
         $formConfigName = $this->getParam('form');
-
+        $this->on_after_event[] = array(&$this, 'OnAfterEventForm');
         if ($formConfigName)
         {
             Finder::useClass("forms/EasyForm");
@@ -17,7 +18,9 @@ class FormBlock extends Block
             {
                 $config['action'] = RequestInfo::$baseUrl.Router::linkTo($action);
             }
-			$config['on_after_event'] = array(array(&$this, 'OnAfterEventForm'));
+//			$config['on_after_event'] = array(array(&$this, 'OnAfterEventForm'));
+            $config['on_after_event'] = $this->on_after_event;
+
             $form = new EasyForm($formConfigName, $config);
 			if ($_COOKIE[$form->form->name.'_sended'])
 			{
@@ -45,5 +48,9 @@ class FormBlock extends Block
 		}
 	}
 
+    public function addAfterEvent($event_handler)
+    {
+        $this->on_after_event[] = $event_handler;
+    }
 }
 ?>
