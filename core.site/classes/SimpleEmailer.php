@@ -36,6 +36,8 @@ class SimpleEmailer
         else
     		$mail->setHtml($text, strip_tags($text));
 		$mail->setSubject($subject);
+        if ($attachment)
+            $mail->addAttachment($attachment);
 		$mail->buildMessage($this->encodings,'mail');
         if (is_array($to))
         {
@@ -49,8 +51,7 @@ class SimpleEmailer
         else
             $recipients = array('<'.$to.'>');
 
-        if ($attachment)
-            $mail->addAttachment($attachment);
+
         return $mail->send( $recipients, 'mail');
 	}
 
