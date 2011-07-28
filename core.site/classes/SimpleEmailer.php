@@ -25,7 +25,7 @@ class SimpleEmailer
      * @param string $subject    subject of the email
      * @param string $text       text of the email
      */
-	public function sendEmail($to, $from, $subject, $text, $plaintext=false) {
+	public function sendEmail($to, $from, $subject, $text, $plaintext=false, $attachment="") {
 		Finder::useLib("HtmlMimeMail2");
 		$mail  = new HtmlMimeMail2();
 		$mail->setFrom($from);
@@ -37,18 +37,21 @@ class SimpleEmailer
     		$mail->setHtml($text, strip_tags($text));
 		$mail->setSubject($subject);
 		$mail->buildMessage($this->encodings,'mail');
-                if (is_array($to))
-                {
-                    $recipients = array();
-                    foreach ($to as $t)
-                    {
-                        $em = trim($t);
-                        $recipients[] = "<".$em.">";
-                    }
-                }
-                else
-                    $recipients = array('<'.$to.'>');
-                return $mail->send( $recipients, 'mail');
+        if (is_array($to))
+        {
+            $recipients = array();
+            foreach ($to as $t)
+            {
+                $em = trim($t);
+                $recipients[] = "<".$em.">";
+            }
+        }
+        else
+            $recipients = array('<'.$to.'>');
+
+        if ($attachment)
+            $mail->addAttachment($attachment);
+        return $mail->send( $recipients, 'mail');
 	}
 
     public function setEncodings($encodings)
