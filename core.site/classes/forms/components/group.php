@@ -272,9 +272,10 @@ class FormComponent_group extends FormComponent_abstract
             else if ($field_in_group->config["options_mode"]=="select")
             {
                 $value = $field_in_group->config["options"][ $value ];
+var_dump($field_in_group->name, $value, $title);
             }
 
-            if ( ($title || $field_in_group->config["model"]=="multi_checkbox" ) && $value )
+            if ( /*($title || $field_in_group->config["model"]=="multi_checkbox" ) &&*/ $value )
                 $emailData[] = array("title"=>$title, "value"=>$value, "value_suffix"=>$value_suffix );
 
                     
