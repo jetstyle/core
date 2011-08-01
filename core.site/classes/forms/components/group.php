@@ -282,7 +282,7 @@ class FormComponent_group extends FormComponent_abstract
 
         Locator::get("tpl")->set('emailData', $emailData);
         try {
-            var_dump($this->field->config["email"]);
+            
     		$emailText = Locator::get("tpl")->parse($this->field->config["email"]);
         }
         catch (Exception $e)
