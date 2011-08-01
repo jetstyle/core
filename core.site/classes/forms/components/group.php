@@ -266,20 +266,23 @@ class FormComponent_group extends FormComponent_abstract
             }
             else if ($field_in_group->config["model"]=="multi_checkbox")
             {
-
                 $value = $field_in_group->model->Model_GetDataValuePlain();
+
             }
             else if ($field_in_group->config["options_mode"]=="select")
             {
                 $value = $field_in_group->config["options"][ $value ];
             }
 
-            if ($title && $value)
+            if ( ($title || $field_in_group->config["model"]=="multi_checkbox" ) && $value )
                 $emailData[] = array("title"=>$title, "value"=>$value, "value_suffix"=>$value_suffix );
+
+                    
         }
 
         Locator::get("tpl")->set('emailData', $emailData);
         try {
+            var_dump($this->field->config["email"]);
     		$emailText = Locator::get("tpl")->parse($this->field->config["email"]);
         }
         catch (Exception $e)
