@@ -76,7 +76,7 @@ Gallery.prototype = {
         //refresh page on forbidden
         $.ajaxSetup({
             'error': function(XMLHttpRequest, textStatus, errorThrown) {
-                alert('Ошибка!');
+                alert('Ошибка! '+textStatus);
                 location.reload(true);
             }
         });
@@ -241,7 +241,7 @@ Gallery.prototype = {
             
             $.post(this.baseUrl, values, function(data) {
                 $('#image'+values.id+' div.image-title').text(values.title);
-                if (!data.ok) alert("Ошибка!");
+                if (!data.ok) alert("Ошибка! "+data);
             },'json');
         }
         $('#editImageForm').hide();
@@ -344,7 +344,7 @@ var imagesUploadSettings = {
             );
     },
     upload_error_handler: function(file, errorCode, message) {
-        alert('Ошибка!');
+        alert('Ошибка! '+errorCode+" m:"+message);
         location.reload(true);
     },
     upload_success_handler: function(file, data) {
@@ -435,7 +435,7 @@ var imageOneUploadSettings = {
             );
     },
     upload_error_handler: function(file, errorCode, message) {
-        alert('Ошибка!');
+        alert('Ошибка! '+errorCode+" m:"+message);
         location.reload(true);
     },
     upload_success_handler: function(file, data) {
