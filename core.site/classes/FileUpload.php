@@ -99,7 +99,13 @@ class FileUpload {
 
         Finder::useClass('Translit');
         $translit = new Translit();
-        $fileName = $translit->supertag($fileName);
+        
+        if ($_POST["from_flash"])
+        {
+                $fileName = iconv('utf-8', 'windows-1251', $fileName);
+        }
+        $fileName = $translit->supertag( $fileName );
+
 
         // create directory, if needed
         $this->createDir();
