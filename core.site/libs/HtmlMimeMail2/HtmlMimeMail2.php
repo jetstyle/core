@@ -795,7 +795,7 @@ class HtmlMimeMail2
         } else {
           $send_params['from'] = 'postmaster@' . $this->smtp_params['helo'];
         }
-echo '<pre>'; print_r($send_params); echo '</pre>'; die();
+echo '<pre>'; print_r($smtp->send($send_params)); echo '</pre>'; die();
         // Send it
         if (!$smtp->send($send_params)) {
           $this->errors = $smtp->errors;
