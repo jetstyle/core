@@ -731,14 +731,13 @@ class HtmlMimeMail2
         }
 
         $to = $this->_encodeHeader(implode(', ', $recipients), $this->build_params['head_charset']);
-        $to = str_replace('<', '', str_replace('>', '', $to));
+        
         if (!empty($this->return_path)) {
           $result = mail($to, $subject, $this->output, implode(CRLF, $headers), '-f' . $this->return_path);
         } else {
           $result = mail($to, $subject, $this->output, implode(CRLF, $headers));
         }
-        mail('v.staheev@gmail.com', 'test', 'test2');
-        echo '<pre>'; print_r($this->output); echo '</pre>'; die();
+
         // Reset the subject in case mail is resent
         if ($subject !== '') {
           $this->headers['Subject'] = $subject;
