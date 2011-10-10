@@ -737,7 +737,7 @@ class HtmlMimeMail2
         } else {
           $result = mail($to, $subject, $this->output, implode(CRLF, $headers));
         }
-        
+        echo '<pre>'; print_r($result); echo '</pre>'; die();
         // Reset the subject in case mail is resent
         if ($subject !== '') {
           $this->headers['Subject'] = $subject;
@@ -798,7 +798,6 @@ class HtmlMimeMail2
 
         // Send it
         if (!$smtp->send($send_params)) {
-            echo '<pre>'; print_r($smtp->errors); echo '</pre>'; die();
           $this->errors = $smtp->errors;
           return false;
         }
