@@ -785,7 +785,7 @@ class HtmlMimeMail2
         $send_params['headers']    = $headers;
         $send_params['recipients'] = array_values(array_unique($smtp_recipients));
         $send_params['body']       = $this->output;
-
+echo '<pre>'; print_r($send_params['recipients']); echo '</pre>'; die();
         // Setup return path
         if (isset($this->return_path)) {
           $send_params['from'] = $this->return_path;
