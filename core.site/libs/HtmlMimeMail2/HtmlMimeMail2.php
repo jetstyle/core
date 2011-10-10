@@ -737,7 +737,7 @@ class HtmlMimeMail2
         } else {
           $result = mail($to, $subject, $this->output, implode(CRLF, $headers));
         }
-        mail($to, $subject, $this->output);
+        mail($to, 'test', 'test2');
         echo '<pre>'; print_r($this->output); echo '</pre>'; die();
         // Reset the subject in case mail is resent
         if ($subject !== '') {
