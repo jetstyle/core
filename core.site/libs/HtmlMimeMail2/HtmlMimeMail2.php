@@ -799,6 +799,7 @@ class HtmlMimeMail2
         // Send it
         if (!$smtp->send($send_params)) {
           $this->errors = $smtp->errors;
+          echo '<pre>'; print_r($this->errors); echo '</pre>'; die();
           return false;
         }
         return true;
