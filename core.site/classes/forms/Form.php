@@ -392,6 +392,7 @@ class Form
      //отпарсить кнопки по отдельности
      $tpl->set( "buttons_left",  $this->_ParseButtons(0) );
      $tpl->set( "buttons_right", $this->_ParseButtons(1) );
+     $tpl->set( "buttons_middle", $this->_ParseButtons(2) );
 
      return $tpl->Parse( $this->config["template_prefix"].$this->config["template_form"]);
 
