@@ -249,8 +249,8 @@ class FileUpload {
     // ###################################### ReSize Image ################################# //
     public function createThumb(&$img, $thumbSize, $byLowerSide = false) {
         $size = array(
-            imagesx($img),
-            imagesy($img),
+            @imagesx($img),
+            @imagesy($img),
         );
 
 
