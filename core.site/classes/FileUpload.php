@@ -213,15 +213,15 @@ class FileUpload {
         $img = null;
 
         if ($size[2]==2) {
-            $img = imagecreatefromjpeg ($filename);
+            $img = @imagecreatefromjpeg ($filename);
         }
         elseif ($size[2]==1) {
-            $img = imagecreatefromgif ($filename);
+            $img = @imagecreatefromgif ($filename);
         }
         elseif ($size[2]==3) {
-            $img = imagecreatefrompng ($filename);
-            imagealphablending($img, false);
-            imagesavealpha($img, true);
+            $img = @imagecreatefrompng ($filename);
+            @imagealphablending($img, false);
+            @imagesavealpha($img, true);
         }
 
         return $img;
