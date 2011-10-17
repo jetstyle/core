@@ -162,7 +162,6 @@ class FileUpload {
 
         // this should never happen
         if (!file_exists($fileNameFull)) {
-            return false;
             throw new UploadException("Upload failed due to unexpected error");
         }
 
@@ -213,15 +212,15 @@ class FileUpload {
         $img = null;
 
         if ($size[2]==2) {
-            $img = @imagecreatefromjpeg ($filename);
+            $img = imagecreatefromjpeg ($filename);
         }
         elseif ($size[2]==1) {
-            $img = @imagecreatefromgif ($filename);
+            $img = imagecreatefromgif ($filename);
         }
         elseif ($size[2]==3) {
-            $img = @imagecreatefrompng ($filename);
-            @imagealphablending($img, false);
-            @imagesavealpha($img, true);
+            $img = imagecreatefrompng ($filename);
+            imagealphablending($img, false);
+            imagesavealpha($img, true);
         }
 
         return $img;
@@ -249,8 +248,8 @@ class FileUpload {
     // ###################################### ReSize Image ################################# //
     public function createThumb(&$img, $thumbSize, $byLowerSide = false) {
         $size = array(
-            @imagesx($img),
-            @imagesy($img),
+            imagesx($img),
+            imagesy($img),
         );
 
 
