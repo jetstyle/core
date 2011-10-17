@@ -63,7 +63,7 @@ class PopupObjects
 	public function getItems()
 	{
 		$model = &$this->getModel();
-		
+		echo '<pre>'; print_r( $model ); echo '</pre>'; die();
 		$total = $model->getCount();		
 		if (0 == $total)
 		{
