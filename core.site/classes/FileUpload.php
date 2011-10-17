@@ -162,7 +162,7 @@ class FileUpload {
 
         // this should never happen
         if (!file_exists($fileNameFull)) {
-            //throw new UploadException("Upload failed due to unexpected error");
+            throw new UploadException("Upload failed due to unexpected error");
         }
 
         @chmod($fileNameFull, $this->chmod);
