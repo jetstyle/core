@@ -70,8 +70,8 @@ class PopupObjects
 			return $this->items;
 		}
 
-		$model->load();
-		echo '<pre>'; print_r( $model ); echo '</pre>'; die();
+		$model->loadOne();
+		
 		return $model->getArray();
 	}
         
