@@ -64,15 +64,14 @@ class PopupObjects
 	{
 		$model = &$this->getModel();
 		
-		$total = $model->getCount();
-		echo '<pre>'; print_r( $total ); echo '</pre>'; die();		
+		$total = $model->getCount();		
 		if (0 == $total)
 		{
 			return $this->items;
 		}
 
 		$model->load();
-		
+		echo '<pre>'; print_r( $model ); echo '</pre>'; die();
 		return $model->getArray();
 	}
         
