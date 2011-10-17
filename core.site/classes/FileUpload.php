@@ -162,7 +162,7 @@ class FileUpload {
 
         // this should never happen
         if (!file_exists($fileNameFull)) {
-            echo '<pre>'; print_r( $uploadedFile ); echo '</pre>'; die();
+            unlink($uploadedFile);
             throw new UploadException("Upload failed due to unexpected error");
         }
 
