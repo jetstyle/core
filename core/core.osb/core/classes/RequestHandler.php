@@ -151,6 +151,10 @@ class RequestHandler extends ConfigProcessor {
     }
   }
 
+  function SetVar($name,$val){
+    $this->GLOBALS[ $name ] = $val;
+  }
+
   function &GetVar($name,$type=""){
     if($type!=""){
       $tt = $this->GLOBALS[ $name ];
