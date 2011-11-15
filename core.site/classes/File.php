@@ -647,7 +647,7 @@ class File implements ArrayAccess {
 
                 $sourceFile = FileManager::getFile($this->config['conf'].':'.$this->config['key'], $id, $isFileId);
 
-                if ($sourceFile->isLoaded()) {
+                if ($sourceFile->isLoaded() && $sourceFile->isImage()) {
                     $this->upload($sourceFile['name_full']);
                     // we stop here, because init method is called again from upload
                     return;
