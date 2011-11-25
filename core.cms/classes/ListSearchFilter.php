@@ -11,6 +11,8 @@ class ListSearchFilter extends ListFilter
     const TYPE_LIKE = 'like';
     const TYPE_LT = 'lt';
     const TYPE_GT = 'gt';
+    const TYPE_LTE = 'lte';
+    const TYPE_GTE = 'gte';
     const TYPE_EQUAL = 'eq';
 
     protected $getVar = '';
@@ -35,6 +37,8 @@ class ListSearchFilter extends ListFilter
             case self::TYPE_EQUAL:
             case self::TYPE_GT:
             case self::TYPE_LT:
+            case self::TYPE_GTE:
+            case self::TYPE_LTE:
             default:
                 return $this->getVarValue;
                 break;
@@ -71,6 +75,13 @@ class ListSearchFilter extends ListFilter
 
                 case self::TYPE_LT:
                     $where= '{'.$this->getConfig('field').'} < '.DBModel::quote($value);
+
+                case self::TYPE_GTE:
+                    $where= '{'.$this->getConfig('field').'} >= '.DBModel::quote($value);
+                    break;
+
+                case self::TYPE_LTE:
+                    $where= '{'.$this->getConfig('field').'} <= '.DBModel::quote($value);
                     break;
             }
 
