@@ -269,11 +269,6 @@ class FormComponent_group extends FormComponent_abstract
                 $value = $field_in_group->model->Model_GetDataValuePlain();
 
             }
-            else if ($field_in_group->config["model"]=="multi_checkbox_weight")
-            {
-                $value = $field_in_group->model->Model_GetDataValuePlain();
-
-            }
             else if ($field_in_group->config["options_mode"]=="select")
             {
                 $value = $field_in_group->config["options"][ $value ];
