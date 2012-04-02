@@ -1067,7 +1067,7 @@ class DBModel extends Model implements IteratorAggregate, ArrayAccess, Countable
 	public function addForeignModel($fieldName, &$model)
 	{
 		$this->foreignModels[$fieldName] = &$model;
-        $this->foreignModels[$fieldName]->setBannedTableAliases(&$this->bannedTableAliases);
+        $this->foreignModels[$fieldName]->setBannedTableAliases($this->bannedTableAliases);
 
 		return $this;
 	}
@@ -1652,7 +1652,7 @@ class DBModel extends Model implements IteratorAggregate, ArrayAccess, Countable
 
 			foreach ($tmpData AS $r)
 			{
-				$this->onRow($this, &$r);
+				$this->onRow($this, $r);
 				$this->notify("row", array(&$this, &$r));
 				if (null !== $this->keyField)
 					$data[$r[$this->keyField]] = $r;
@@ -1664,7 +1664,7 @@ class DBModel extends Model implements IteratorAggregate, ArrayAccess, Countable
 		{
 			while ($r = $db->getRow($result))
 			{
-				$this->onRow($this, &$r);
+				$this->onRow($this, $r);
 				$this->notify("row", array(&$this, &$r));
 				if (null !== $this->keyField)
 					$data[$r[$this->keyField]] = $r;
@@ -2150,7 +2150,7 @@ class DBModel extends Model implements IteratorAggregate, ArrayAccess, Countable
 
 		$field = &$this->foreignFields[$fieldName];
 		$this->foreignModels[$fieldName] = DBModel::factory($field['className']);
-        $this->foreignModels[$fieldName]->setBannedTableAliases(&$this->bannedTableAliases);
+        $this->foreignModels[$fieldName]->setBannedTableAliases($this->bannedTableAliases);
 		$this->initForeignModelConfig($fieldName);
 	}
 
@@ -2229,7 +2229,7 @@ class DBModel extends Model implements IteratorAggregate, ArrayAccess, Countable
                 $conf = $this->getForeignFieldConf($fieldName);
                 if ($conf['type'] == 'has_one')
                 {
-                    $model->setBannedTableAliases(&$this->bannedTableAliases);
+                    $model->setBannedTableAliases($this->bannedTableAliases);
                 }
 			}
 		}

@@ -189,7 +189,7 @@ abstract class Controller implements ArrayAccess
 				{
 					foreach ($v AS $pattern)
 					{
-						if (True === $this->_match_url($this->params, $pattern, &$matches))
+						if (True === $this->_match_url($this->params, $pattern, $matches))
 						{
 							if (isset($pattern[0]) && $pattern[0] === null )
 							{
@@ -287,7 +287,7 @@ abstract class Controller implements ArrayAccess
 		return False;
 	}
 
-	private function _match_url($params, $pattern, $matches = array())
+	private function _match_url($params, $pattern, &$matches = array())
 	{
 
 		$i = 0;
