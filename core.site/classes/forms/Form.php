@@ -372,6 +372,7 @@ class Form
      		' enctype="multipart/form-data"> '/*. RequestInfo::pack(RequestInfo::METHOD_POST)*/
      );
 
+     $tpl->set( "form_title", $this->config["form_title"] );
      $tpl->set( "form_name", $form_name );
      $tpl->set( "form_present", $this->form_present_var );
      $tpl->set( "form_data_id", $this->data_id_var );
