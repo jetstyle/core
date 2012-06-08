@@ -356,6 +356,7 @@ class Upload {
 		elseif ($size[2]==3)
 		{
 			$im = imagecreatefrompng ($filename);
+			$is_png = true;
 		}
 
 		if (!$im)
@@ -382,6 +383,10 @@ class Upload {
 				}
 
 				$thumbnail = imagecreatetruecolor ($new_width, $new_height);
+				if ($is_png) {
+    				imageAlphaBlending($thumbnail, false);
+    				imageSaveAlpha($thumbnail, true);
+				}
 				imagecopyresampled ($thumbnail, $im, 0,0,0,0, $new_width, $new_height, $size[0], $size[1]);
 			}
 			else
@@ -437,7 +442,7 @@ class Upload {
 		}
 
 
-		if ($blur)
+		if ($blur && !$is_png)
 		{
 			$this->UnsharpMask($thumbnail);
 		}
@@ -454,10 +459,11 @@ class Upload {
 		}
 		elseif ($size[2]==3)
 		{
-			imagepng($thumbnail, null, 0);
+			imagepng($thumbnail);
 		}
 
 		imagedestroy($thumbnail);
+		
 		$thumb['data'] = ob_get_contents();
 
 		ob_end_clean();
