@@ -122,7 +122,7 @@ class Locator
 
 				if (self::$relations[$key]['singleton'])
 				{
-					eval('self::$objs[$key] = & '.$class.'::getInstance();');
+					eval('self::$objs[$key] = '.$class.'::getInstance();');
 				}
 				else
 				{

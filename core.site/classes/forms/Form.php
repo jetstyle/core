@@ -167,7 +167,7 @@ class Form
 
 
    // автоматизатор "конфигов по-умолчанию"
-   function StaticDefaults( $default_config, &$supplied_config )
+   public static function StaticDefaults( $default_config, &$supplied_config )
    {
      foreach( $default_config as $k=>$v )
        if (!isset($supplied_config[$k])) $supplied_config[$k] = $v;

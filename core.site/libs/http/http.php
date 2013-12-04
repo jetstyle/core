@@ -21,7 +21,7 @@ class Http
 		header($str);
 	}
 
-	function status($num)
+	public static function status($num)
 	{
 		 static $http = array (
 		100 => "100 Continue",

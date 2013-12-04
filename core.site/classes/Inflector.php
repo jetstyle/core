@@ -52,7 +52,7 @@ class Inflector {
      *  @param  int $count How many of these $words are there
      *  @return string  Plural of $word
      */
-    function pluralize($word, $count = 0) {
+    public static function pluralize($word, $count = 0) {
         if($count == 0 || $count > 1) {          
             if(!in_array($word, Inflections::$uncountables)) { 
                 $original = $word;   
@@ -71,7 +71,7 @@ class Inflector {
      *  @param  string $word  Word to be singularized
      *  @return string  Singular of $word
      */
-    function singularize($word) {
+    public static function singularize($word) {
         if(!in_array($word, Inflections::$uncountables)) { 
             $original = $word;   
             foreach(Inflections::$singulars as $singular_rule) {
@@ -82,7 +82,7 @@ class Inflector {
         return $word;
     }
 
-	function many_singularize_for_underscope($lower_case_and_underscored_word)
+	public static function many_singularize_for_underscope($lower_case_and_underscored_word)
 	{
 		$words = explode("_", $lower_case_and_underscored_word);
 		$res = array();
@@ -97,7 +97,7 @@ class Inflector {
      *  @param  string $word  Word to be capitalized
      *  @return string Capitalized $word
      */
-    function capitalize($word) {
+    public static function capitalize($word) {
         return ucfirst(strtolower($word));     
     }
 
@@ -109,7 +109,7 @@ class Inflector {
      *                                                  convert
      *  @return string  Camel case form of the phrase
      */
-    function camelize($lower_case_and_underscored_word) {
+    public static function camelize($lower_case_and_underscored_word) {
         return str_replace(" ","",ucwords(str_replace("_"," ",$lower_case_and_underscored_word)));
     }
 
@@ -120,7 +120,7 @@ class Inflector {
      *  @param string $camel_cased_word  Phrase to convert
      *  @return string Lower case and underscored form of the phrase
      */
-    function underscore($camel_cased_word) {
+    public static function underscore($camel_cased_word) {
         $camel_cased_word = preg_replace('/([A-Z]+)([A-Z])/','\1_\2',$camel_cased_word);
         return strtolower(preg_replace('/([a-z])([A-Z])/','\1_\2',$camel_cased_word));
     }
@@ -133,7 +133,7 @@ class Inflector {
      *  @return string The input value with underscores replaced by
      *  blanks and the first letter of each word capitalized
      */
-    function humanize($lower_case_and_underscored_word) {
+    public static function humanize($lower_case_and_underscored_word) {
         return ucwords(str_replace("_"," ",$lower_case_and_underscored_word));
     }
     
@@ -143,7 +143,7 @@ class Inflector {
      *  @param string $word  A word or phrase
      *  @return string A string that has all words capitalized and splits on existing caps.
      */    
-    function titleize($word) {
+    public static function titleize($word) {
         return preg_replace('/\b([a-z])/', self::capitalize('$1'), self::humanize(self::underscore($word)));
     }
 
@@ -153,7 +153,7 @@ class Inflector {
      *  @param string $underscored_word  Word to convert
      *  @return string All underscores converted to dashes
      */    
-    function dasherize($underscored_word) {
+    public static function dasherize($underscored_word) {
         return str_replace('_', '-', self::underscore($underscored_word));
     }
 
@@ -166,7 +166,7 @@ class Inflector {
      *  @param string $class_name  Name of {@link ActiveRecord} sub-class
      *  @return string Pluralized lower_case_underscore form of name
      */
-    function tableize($class_name) {
+    public static function tableize($class_name) {
         return self::pluralize(self::underscore($class_name));
     }
 
@@ -176,7 +176,7 @@ class Inflector {
      *  @param string $table_name Name of table in the database
      *  @return string Singular CamelCase form of $table_name
      */
-    function classify($table_name) {
+    public static function classify($table_name) {
         return self::camelize(self::singularize($table_name));
     }
 
@@ -187,7 +187,7 @@ class Inflector {
      *    key
      *  @return string Column name of the foreign key column
      */
-    function foreign_key($class_name) {
+    public static function foreign_key($class_name) {
         return self::underscore($class_name) . "_id";
     }
 
@@ -199,7 +199,7 @@ class Inflector {
      *    key
      *  @return string Number formatted with correct st, nd, rd, or th
      */    
-    function ordinalize($number) {
+    public static function ordinalize($number) {
         $test = (intval($number) % 100);
         if($test >= 11 && $test <= 13) {
             $number = "{$number}th";

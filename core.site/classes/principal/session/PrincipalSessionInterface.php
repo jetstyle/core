@@ -23,7 +23,7 @@ interface PrincipalSessionInterface
 	 * Delete current session
 	 *
 	 */
-	public function delete();
+	public function delete($where = null);
 	
 	/**
 	 * Cleanup (delete old sessions)

@@ -88,7 +88,7 @@ class PrincipalSessionDb extends DBModel implements PrincipalSessionInterface
 		return $this->offsetGet('user_id');
 	}
 
-	public function &load($where=NULL, $limit=NULL, $offset=NULL)
+	public function &load($where=NULL, $limit=NULL, $offset=NULL, $cache = NULL)
 	{
 		parent::load($where, $limit, $offset);
 
@@ -101,7 +101,7 @@ class PrincipalSessionDb extends DBModel implements PrincipalSessionInterface
 		}
 	}
 
-	public function delete()
+	public function delete($where = NULL)
 	{
 		if ($this->getSessionHash())
 		{

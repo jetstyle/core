@@ -57,7 +57,7 @@ class MessageSet
 		}
 	}
 
-	public function &getInstance()
+	public static function &getInstance()
 	{
 		if (null === self::$instance)
 		{

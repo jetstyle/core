@@ -5,7 +5,9 @@ class ModuleConfig
 		
 	public function read($configFile)
 	{
-		include($configFile);
+        if ($configFile) {
+            include($configFile);
+        } 
 	}
 	
 	public function get($name)
