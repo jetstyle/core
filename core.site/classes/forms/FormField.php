@@ -84,7 +84,7 @@ class FormField
          Finder::useClass( "forms/components/abstract" );
          Finder::useClass( "forms/components/".$c_name );
          $class_name = 'FormComponent_'.$c_name;
-         $c_instance =& new $class_name( $this->config );
+         $c_instance = new $class_name( $this->config );
          $c_instance->LinkToField( $this );
          $this->components_hash[ $c_name ] = &$c_instance;
        }

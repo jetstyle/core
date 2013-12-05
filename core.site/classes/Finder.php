@@ -101,7 +101,7 @@ class Finder {
 			throw new Exception("FindScript: <b>*name* пусто</b>, type=<b>$type</b>, name=<b>$name</b>, level=<b>$level</b>, dr=<b>$dr</b>, ext=<b>$ext</b>");
 		}
 
-		if (self::$searchCache[$type][$name.'.'.$ext])
+		if ( isset(self::$searchCache[$type][$name.'.'.$ext]) )
 		{
 			//echo '<hr>'.self::$searchCache[$type][$name.'.'.$ext];
 			return self::$searchCache[$type][$name.'.'.$ext];
@@ -229,7 +229,7 @@ class Finder {
 		for( ; $i>=0 && $i<$n; $i-=1 )
 		{
 			//разбор каждого уровня тут
-			$dir = self::$DIRS['all'][$i];
+			$dir = isset(self::$DIRS['all'][$i]) ? self::$DIRS['all'][$i] : null;
 	  		if (is_dir($dir . $name))
 	  		{
 	  			return true;

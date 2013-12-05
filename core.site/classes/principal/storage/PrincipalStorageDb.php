@@ -99,7 +99,7 @@ class PrincipalStorageDb extends DBModel implements PrincipalStorageInterface
 		$row['password'] = md5(md5($row['password']).$salt);
 
 		Finder::useClass('Translit');
-		$translit =& new Translit();
+		$translit = new Translit();
 		$supertag = $translit->supertag( $row['login'], TR_NO_SLASHES, 100);
 
 		// check supertag

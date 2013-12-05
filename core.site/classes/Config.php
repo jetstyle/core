@@ -33,7 +33,7 @@ final class Config
 	 */
 	public static function get($key)
 	{
-		return self::$data[$key];
+		return isset(self::$data[$key]) ? self::$data[$key] : null;
 	}
 	
 	/**

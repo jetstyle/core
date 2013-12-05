@@ -98,7 +98,7 @@ class EasyForm {
 		//инициализируем форму
 		$class_name = isset($config["class"]) ? $config["class"] : "Form";
 		Finder::useClass( 'forms/'.$class_name );
-		$form =& new $class_name($config);
+		$form = new $class_name($config);
 		$this->form =& $form;
 
 		//привязываем строку к БД

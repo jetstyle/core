@@ -93,6 +93,9 @@ class Locator
 				    {
 					    $s['singleton'] = true;
 				    }
+                    if ( !isset($s['params']) ) {
+                        $s['params'] = null;
+                    }
 				    Locator::bind($k, $s['path'], $s['singleton'], $s['params']);
 			    }
 			    else
