@@ -67,7 +67,7 @@
 
  */
 
-function __autoload($className)
+spl_autoload_register(function ($className)
 {
 	$dirName = Finder::getPluralizeDir($className);
 	if (Finder::findDir("classes/" . $dirName))
@@ -78,7 +78,7 @@ function __autoload($className)
 	{
 		Finder::useClass($className);
 	}
-}
+});
 
 class Finder {
 
