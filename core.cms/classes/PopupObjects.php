@@ -83,7 +83,7 @@ class PopupObjects
 			$files2rubricsModel = &$this->model->getForeignModel('rubric');
 			$files2rubricsModel->where = $files2rubricsModel->where.( $files2rubricsModel->where ? " AND " : "" ). "{rubric.type_id} = ".DBModel::quote($this->rubricsTypeId);
 			
-			$this->model->setOrder('{rubric._order} ASC');
+            $this->model->setOrder('{rubric._order} DESC');
 			
 			if ($this->rubricId)
 			{
